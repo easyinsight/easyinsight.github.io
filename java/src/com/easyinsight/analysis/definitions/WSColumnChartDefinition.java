@@ -168,6 +168,7 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportNumericProperty("gradientColor", gradientColor));
         properties.add(new ReportBooleanProperty("useChartColor", useChartColor));
         properties.add(new ReportStringProperty("columnSort", columnSort));
+        properties.add(new ReportStringProperty("axisType", axisType));
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
         properties.add(new ReportNumericProperty("labelFontSize", labelFontSize));
         properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));
@@ -180,52 +181,8 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     }
 
     @Override
-    public List<String> javaScriptIncludes() {
-        List<String> includes = super.javaScriptIncludes();
-//        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-//        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
-//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.pointLabels.js");
-//        includes.add("/js/visualizations/chart.js");
-//        includes.add("/js/visualizations/util.js");
-        return includes;
-    }
-
-    @Override
     public String rootHTML() {
         return "<div id=\"chartpseudotooltip\"></div>";
-    }
-
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        JSONObject fullObject = getJsonObject(htmlReportMetadata);
-
-
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        /*AnalysisItem xAxis = getXaxis();
-        DrillThrough drillThrough = null;
-        if (xAxis.getLinks() != null) {
-            for (Link link : xAxis.getLinks()) {
-                if (link instanceof DrillThrough && link.isDefaultLink()) {
-                    drillThrough = (DrillThrough) link;
-                }
-            }
-        }
-
-        String drillString = "";
-        if (drillThrough != null) {
-            StringBuilder paramBuilder = new StringBuilder();
-            paramBuilder.append("reportID=").append(getUrlKey()).append("&drillthroughID=").append(drillThrough.getLinkID()).append("&").append("sourceField=").append(xAxis.getAnalysisItemID());
-            drillString = paramBuilder.toString();
-        }*/
-        String styleProps = htmlReportMetadata.createStyleProperties().toString();
-
-        String xyz = "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getColumnChartCallback('" + targetDiv + "', " + argh + "," + styleProps + "))";
-        return xyz;
     }
 
     public void renderConfig(ApplicationSkin applicationSkin) {
@@ -253,108 +210,8 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         areaChart.put("type", "column");
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/columnChart");
-        areaChart.put("parameters", getJsonObject(htmlReportMetadata));
         areaChart.put("styles", htmlReportMetadata.createStyleProperties());
         return areaChart;
-    }
-
-    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
-        String color;
-        String color2;
-        if (useChartColor) {
-            color = String.format("'#%06X'", (0xFFFFFF & chartColor));
-            color2 = getMeasures().size() > 1 ? color : String.format("'#%06X'", (0xFFFFFF & gradientColor));
-        } else {
-            color = "'#FF0000'";
-            color2 = "'#990000'";
-        }
-
-        JSONObject params;
-        JSONObject fullObject = new JSONObject();
-        try {
-            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-            JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
-            JSONArray colorObj = new JSONArray();
-
-            JSONObject colorStop = new JSONObject();
-            colorStop.put("point", 0);
-            colorStop.put("color", color);
-            colorObj.put(colorStop);
-
-            colorStop = new JSONObject();
-            colorStop.put("point", .15);
-            colorStop.put("color", color2);
-            colorObj.put(colorStop);
-
-            colorStop = new JSONObject();
-            colorStop.put("point", .5);
-            colorStop.put("color", color);
-            colorObj.put(colorStop);
-
-            colorStop = new JSONObject();
-            colorStop.put("point", .9);
-            colorStop.put("color", color);
-            colorObj.put(colorStop);
-
-            colorStop = new JSONObject();
-            colorStop.put("point", 1);
-            colorStop.put("color", color2);
-            colorObj.put(colorStop);
-
-//                colorObj.put("first", "'" + color + "'");
-//                colorObj.put("second", "'" + color2 + "'");
-            jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
-
-
-
-            JSONObject rendererOptions = new JSONObject();
-            rendererOptions.put("fillToZero", "true");
-            rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("shadowDepth", 2);
-            rendererOptions.put("barMargin", 10);
-            rendererOptions.put("barPadding", 0);
-            seriesDefaults.put("rendererOptions", rendererOptions);
-            /*seriesDefaults.put("shadow", true);
-            seriesDefaults.put("shadowOffset", 1537573);
-            seriesDefaults.put("shadowDepth", 1);*/
-            jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = getGrid();
-            /*grid.put("borderColor", "'#000000'");
-            grid.put("borderWidth", 1);*/
-            grid.put("drawGridLines", false);
-            jsonParams.put("grid", grid);
-
-            jsonParams.put("axes", getAxes());
-            params = new JSONObject(jsonParams);
-            fullObject.put("jqplotOptions", params);
-            JSONObject drillthroughOptions = new JSONObject();
-            drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
-            fullObject.put("drillthrough", drillthroughOptions);
-
-            if ("auto".equals(getLabelPosition())) {
-                JSONObject labels = new JSONObject();
-                labels.put("location", "'n'");
-                labels.put("show", "true");
-                labels.put("edgetolerance", -15);
-                labels.put("fontFamily", fontName());
-                seriesDefaults.put("pointLabels", labels);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return fullObject;
-    }
-
-    @Override
-    public JSONObject getAxes() throws JSONException {
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = getGroupingAxis(getXaxis());
-        axes.put("xaxis", xAxis);
-
-        axes.put("yaxis", getMeasureAxis(getMeasures().get(0)));
-        axisConfigure((JSONObject) axes.get("yaxis"), getyAxisMininum(), isyAxisMinimumDefined(), getyAxisMaximum(), isyAxisMaximumDefined());
-        return axes;
     }
 
     @Override
