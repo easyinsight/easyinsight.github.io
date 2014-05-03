@@ -33,17 +33,22 @@
             response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp?error=true"));
         } else {
             request.getSession().removeAttribute("errorString");
-            new UserService().updatePassword(password);
-            request.getSession().removeAttribute("resetPassword");
-            String redirectUrl = RedirectUtil.getURL(request, "/app/");
-            String urlHash = request.getParameter("urlhash");
-            if(session.getAttribute("loginRedirect") != null) {
-                redirectUrl = ((String) session.getAttribute("loginRedirect"));
-                session.removeAttribute("loginRedirect");
+            String validation = new UserService().updatePassword(password);
+            if (validation != null) {
+                request.getSession().setAttribute("errorString", validation);
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp?error=true"));
+            } else {
+                request.getSession().removeAttribute("resetPassword");
+                String redirectUrl = RedirectUtil.getURL(request, "/app/");
+                String urlHash = request.getParameter("urlhash");
+                if(session.getAttribute("loginRedirect") != null) {
+                    redirectUrl = ((String) session.getAttribute("loginRedirect"));
+                    session.removeAttribute("loginRedirect");
+                }
+                if(urlHash != null)
+                    redirectUrl = redirectUrl + urlHash;
+                response.sendRedirect(redirectUrl);
             }
-            if(urlHash != null)
-                redirectUrl = redirectUrl + urlHash;
-            response.sendRedirect(redirectUrl);
         }
     } finally {
         SecurityUtil.clearThreadLocal();
