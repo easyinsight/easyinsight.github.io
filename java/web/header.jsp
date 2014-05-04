@@ -33,9 +33,6 @@
                     href="/app/html/connections.jsp">Connections</a></li>
             <li <%= headerActive == HtmlConstants.SCHEDULING ? "class=\"active\"" : ""%>><a
                     href="/app/embeddedScheduleManagement.jsp">Scheduling</a></li>
-            <li <%= headerActive == HtmlConstants.ACCOUNT ? "class=\"active\"" : ""%>><a
-                    href="/app/billing/account.jsp">Account</a></li>
-
         </ul>
         <% } %>
         <ul class="nav navbar-nav navbar-right">
@@ -51,19 +48,18 @@
                     href="/app/whatsnew.jsp">What's New</a></li>
             <li <%= headerActive == HtmlConstants.HELP ? "class=\"active\"" : ""%>><a
                     href="/app/docs">Help</a></li>
-            <li>
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><!--<button class="btn btn-sm btn-default">-->
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                     <i class="icon-user"></i> <%= StringEscapeUtils.escapeHtml(userName) %>
-                    <span class="caret"></span>
-                <!--</button>-->
+                    <b class="caret"></b>
                 </a>
-                <ul class="dropdown dropdown-menu">
+                <ul class="dropdown-menu">
+                    <li><a href="/app/billing/account.jsp">Account Settings</a></li>
+                    <li class="divider"></li>
                     <% if(!phone) { %>
                     <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>
-                    <% } %>
-
-
                     <li class="divider"></li>
+                    <% } %>
                     <li><a href="/app/logoutAction.jsp">Sign Out</a></li>
                 </ul>
             </li>
