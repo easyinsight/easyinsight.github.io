@@ -19,7 +19,7 @@
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
+
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -32,14 +32,17 @@
 
         public var startJoins:ArrayCollection;
 
+        public var report:AnalysisDefinition;
+
         private function onCreation():void {
+
             controlsFactory = new ClassFactory(ConnectionControls);
             ClassFactory(controlsFactory).properties = { fields:fields };
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_TOP, onMoveToTop);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, onMoveToBottom);
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
-            analysisService.determineOverrides.send(dataSourceID, fields);
+            analysisService.determineOverrides.send(dataSourceID, fields, report);
             /*if (startJoins == null || startJoins.length == 0) {
 
              } else {
@@ -61,6 +64,7 @@
             dsAddonReports = results.dataSourceAddonReports;
             configurableDataSources = results.configurableDataSources;
             if (startJoins != null && startJoins.length > 0) {
+                usingCustomized = "This report is using previously customized joins instead of data source defaults.";
                 for each (var joinOverride:JoinOverride in startJoins) {
                     if (joinOverride.dataSourceID == 0) {
                         joinOverride.dataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
@@ -81,6 +85,14 @@
                 selectedDataSource = configurableDataSources.getItemAt(0) as DataSourceDescriptor;
             }
             populateJoins(selectedDataSource);
+            addEventListener(JoinChangeEvent.JOIN_CHANGE, onJoinChange);
+        }
+
+        private function onJoinChange(event:JoinChangeEvent):void {
+            if (!changed) {
+                usingCustomized = "This report is using previously customized joins instead of data source defaults.";
+            }
+            changed = true;
         }
 
         private function onMoveToTop(event:ConnectionDeleteEvent):void {
@@ -94,14 +106,17 @@
             if (connections.length > 1) {
                 connections.removeItemAt(connections.getItemIndex(event.connection));
                 connections.addItemAt(event.connection, connections.length);
+                dispatchEvent(new JoinChangeEvent());
             }
         }
 
         private function onConnectionDelete(event:ConnectionDeleteEvent):void {
+            dispatchEvent(new JoinChangeEvent());
             connections.removeItemAt(connections.getItemIndex(event.connection));
         }
 
         private function joinsSelected(event:JoinSelectionEvent):void {
+            dispatchEvent(new JoinChangeEvent());
             var edges:ArrayCollection = event.addedJoins;
             for each (var compositeFeedConnection:CompositeFeedConnection in edges) {
                 connections.addItem(compositeFeedConnection);
@@ -120,55 +135,61 @@
             }
 
             customConnectionMap[String(selectedDataSource.id)] = null;
+            usingCustomized = "This report is using data source default joins.";
+            changed = false;
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
-            analysisService.determineOverrides.send(dataSourceID, fields);
+            analysisService.determineOverrides.send(dataSourceID, fields, report);
         }
 
         private var customConnectionMap:Object = new Object();
 
         private function save():void {
-            var joins:ArrayCollection = new ArrayCollection();
-            var saveJoins:ArrayCollection = new ArrayCollection();
-            for each (var connection:CompositeFeedConnection in connections) {
-                if (connection is CompositeFeedCompositeConnection) {
-                    var compConnection:CompositeFeedCompositeConnection = connection as CompositeFeedCompositeConnection;
-                    var compJoin:JoinOverride = new JoinOverride();
-                    compJoin.joinType = JoinOverride.COMPOSITE;
-                    var sourceItems:ArrayCollection = new ArrayCollection();
-                    var targetItems:ArrayCollection = new ArrayCollection();
-                    for each (var pair:CompositeConnectionPair in compConnection.pairs) {
-                        sourceItems.addItem(pair.sourceField);
-                        targetItems.addItem(pair.targetField);
+            if (changed) {
+                var joins:ArrayCollection = new ArrayCollection();
+                var saveJoins:ArrayCollection = new ArrayCollection();
+                for each (var connection:CompositeFeedConnection in connections) {
+                    if (connection is CompositeFeedCompositeConnection) {
+                        var compConnection:CompositeFeedCompositeConnection = connection as CompositeFeedCompositeConnection;
+                        var compJoin:JoinOverride = new JoinOverride();
+                        compJoin.joinType = JoinOverride.COMPOSITE;
+                        var sourceItems:ArrayCollection = new ArrayCollection();
+                        var targetItems:ArrayCollection = new ArrayCollection();
+                        for each (var pair:CompositeConnectionPair in compConnection.pairs) {
+                            sourceItems.addItem(pair.sourceField);
+                            targetItems.addItem(pair.targetField);
+                        }
+                        compJoin.sourceItems = sourceItems;
+                        compJoin.targetItems = targetItems;
+                        compJoin.dataSourceID = selectedDataSource.id;
+                        saveJoins.addItem(compJoin);
+                    } else {
+                        var saveJoin:JoinOverride = new JoinOverride();
+                        saveJoin.sourceCardinality = connection.sourceCardinality;
+                        saveJoin.targetCardinality = connection.targetCardinality;
+                        saveJoin.forceOuterJoin = connection.forceOuterJoin;
+                        saveJoin.sourceItem = connection.sourceItem;
+                        saveJoin.targetItem = connection.targetItem;
+                        saveJoin.sourceName = connection.sourceFeedName;
+                        saveJoin.targetName = connection.targetFeedName;
+                        saveJoin.dataSourceID = selectedDataSource.id;
+                        saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
+                        saveJoin.targetOuterJoin = connection.targetOuterJoin;
+                        saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
+                        saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
+                        saveJoin.marmotScript = connection.marmotScript;
+                        saveJoins.addItem(saveJoin);
                     }
-                    compJoin.sourceItems = sourceItems;
-                    compJoin.targetItems = targetItems;
-                    compJoin.dataSourceID = selectedDataSource.id;
-                    saveJoins.addItem(compJoin);
-                } else {
-                    var saveJoin:JoinOverride = new JoinOverride();
-                    saveJoin.sourceCardinality = connection.sourceCardinality;
-                    saveJoin.targetCardinality = connection.targetCardinality;
-                    saveJoin.forceOuterJoin = connection.forceOuterJoin;
-                    saveJoin.sourceItem = connection.sourceItem;
-                    saveJoin.targetItem = connection.targetItem;
-                    saveJoin.sourceName = connection.sourceFeedName;
-                    saveJoin.targetName = connection.targetFeedName;
-                    saveJoin.dataSourceID = selectedDataSource.id;
-                    saveJoin.sourceOuterJoin = connection.sourceOuterJoin;
-                    saveJoin.targetOuterJoin = connection.targetOuterJoin;
-                    saveJoin.sourceJoinOriginal = connection.sourceJoinOnOriginal;
-                    saveJoin.targetJoinOriginal = connection.targetJoinOnOriginal;
-                    saveJoin.marmotScript = connection.marmotScript;
-                    saveJoins.addItem(saveJoin);
                 }
-            }
-            customConnectionMap[String(selectedDataSource.id)] = saveJoins;
-            for each (var coll:ArrayCollection in customConnectionMap) {
-                for each (var join:JoinOverride in coll) {
-                    joins.addItem(join);
+                customConnectionMap[String(selectedDataSource.id)] = saveJoins;
+                for each (var coll:ArrayCollection in customConnectionMap) {
+                    for each (var join:JoinOverride in coll) {
+                        joins.addItem(join);
+                    }
                 }
+                dispatchEvent(new JoinOverrideEvent(JoinOverrideEvent.JOIN_OVERRIDE_SET, joins));
+            } else {
+                dispatchEvent(new JoinOverrideEvent(JoinOverrideEvent.JOIN_OVERRIDE_SET, new ArrayCollection()));
             }
-            dispatchEvent(new JoinOverrideEvent(JoinOverrideEvent.JOIN_OVERRIDE_SET, joins));
             PopUpManager.removePopUp(this);
         }
 
@@ -413,10 +434,17 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        [Bindable]
+        private var changed:Boolean = false;
+
+        [Bindable]
+        private var usingCustomized:String = "This report is using data source default joins.";
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="determineOverrides" result="gotOverrides()"/>
     </mx:RemoteObject>
+    <mx:Label text="{usingCustomized}"/>
     <mx:ComboBox dataProvider="{configurableDataSources}" labelField="name" id="dataSourceBox" change="onDataSourceChange()"/>
 
     <mx:HBox width="100%">
