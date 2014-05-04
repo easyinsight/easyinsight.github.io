@@ -412,12 +412,12 @@ public class AnalysisService {
     }
 
     public List<JoinOverride> generateForAddons(List<JoinOverride> existingOverrides, long dataSourceID, List<AnalysisItem> items,
-                                                List<AddonReport> newAddonReports, List<AddonReport> removedAddonReports) {
+                                                List<AddonReport> newAddonReports, List<AddonReport> removedAddonReports, WSAnalysisDefinition report) {
         List<JoinOverride> toReturn;
         if (existingOverrides == null || existingOverrides.size() == 0) {
             existingOverrides = new ArrayList<JoinOverride>();
             toReturn = existingOverrides;
-            ReportJoins reportJoins = determineOverrides(dataSourceID, items);
+            ReportJoins reportJoins = determineOverrides(dataSourceID, items, report);
             for (List<JoinOverride> overrides : reportJoins.getJoinOverrideMap().values()) {
                 existingOverrides.addAll(overrides);
             }
@@ -468,18 +468,33 @@ public class AnalysisService {
         }
     }
 
-    public ReportJoins determineOverrides(long dataSourceID, List<AnalysisItem> items) {
+    public ReportJoins determineOverrides(long dataSourceID, List<AnalysisItem> items, WSAnalysisDefinition report) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         ReportJoins reportJoins = new ReportJoins();
         EIConnection conn = Database.instance().getConnection();
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             if (dataSource instanceof CompositeFeedDefinition) {
+
                 CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                PreparedStatement findReportStmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
+                long ignoreID = 0;
+                for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
+                    if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                        long sourceID = node.getDataFeedID();
+                        findReportStmt.setLong(1, sourceID);
+                        ResultSet reportRS = findReportStmt.executeQuery();
+                        reportRS.next();
+                        long reportID = reportRS.getLong(1);
+                        if (reportID == report.getAnalysisID()) {
+                            ignoreID = node.getDataFeedID();
+                        }
+                    }
+                }
                 Map<String, List<JoinOverride>> map = new HashMap<String, List<JoinOverride>>();
                 Map<String, List<DataSourceDescriptor>> dataSourceMap = new HashMap<String, List<DataSourceDescriptor>>();
                 List<DataSourceDescriptor> configurableDataSources = new ArrayList<DataSourceDescriptor>();
-                populateMap(map, dataSourceMap, configurableDataSources, compositeFeedDefinition, items, conn);
+                populateMap(map, dataSourceMap, configurableDataSources, compositeFeedDefinition, items, conn, ignoreID, report);
                 reportJoins.setJoinOverrideMap(map);
                 reportJoins.setDataSourceMap(dataSourceMap);
                 reportJoins.setConfigurableDataSources(configurableDataSources);
@@ -525,7 +540,7 @@ public class AnalysisService {
     }
 
     private void populateMap(Map<String, List<JoinOverride>> map, Map<String, List<DataSourceDescriptor>> dataSourceMap, List<DataSourceDescriptor> configurableDataSources,
-                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn) throws SQLException, CloneNotSupportedException {
+                             CompositeFeedDefinition compositeFeedDefinition, List<AnalysisItem> items, EIConnection conn, long pSourceID, WSAnalysisDefinition report) throws SQLException, CloneNotSupportedException {
         List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
 
         Map<Long, AnalysisItem> sourceMap = new HashMap<Long, AnalysisItem>();
@@ -543,7 +558,12 @@ public class AnalysisService {
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
             AnalysisItem sourceItem = connection.getSourceItem();
             AnalysisItem targetItem = connection.getTargetItem();
-
+            if (connection.getSourceFeedID() == pSourceID) {
+                continue;
+            }
+            if (connection.getTargetFeedID() == pSourceID) {
+                continue;
+            }
             AnalysisItem sourceResult;
             if (connection.getSourceItem() == null) {
                 sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
@@ -627,7 +647,7 @@ public class AnalysisService {
             dataSources.add(new DataSourceDescriptor(childDataSource.getFeedName(), childDataSource.getDataFeedID(), childDataSource.getFeedType().getType(), false,
                     childDataSource.getDataSourceBehavior()));
             if (childDataSource instanceof CompositeFeedDefinition) {
-                populateMap(map, dataSourceMap, configurableDataSources, (CompositeFeedDefinition) childDataSource, null, conn);
+                populateMap(map, dataSourceMap, configurableDataSources, (CompositeFeedDefinition) childDataSource, null, conn, pSourceID, report);
             }
         }
         dataSourceMap.put(String.valueOf(compositeFeedDefinition.getDataFeedID()), dataSources);
@@ -1109,6 +1129,8 @@ public class AnalysisService {
             } finally {
                 dataStorage.closeConnection();
             }
+            LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " added row.");
+            CachedAddonDataSource.triggerUpdates(dataSourceID);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1134,6 +1156,8 @@ public class AnalysisService {
             } finally {
                 dataStorage.closeConnection();
             }
+            LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " deleted row.");
+            CachedAddonDataSource.triggerUpdates(dataSourceID);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1168,6 +1192,8 @@ public class AnalysisService {
             } finally {
                 dataStorage.closeConnection();
             }
+            LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " updated row.");
+            CachedAddonDataSource.triggerUpdates(dataSourceID);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1506,6 +1532,9 @@ public class AnalysisService {
                         }
                         {
                             Object object = data.get(stackedColumnChartDefinition.getXaxis().qualifiedName() + "_ORIGINAL");
+                            if (object == null) {
+                                object = data.get(stackedColumnChartDefinition.getXaxis().qualifiedName());
+                            }
                             Value val;
                             if (object instanceof Value) {
                                 val = (Value) object;

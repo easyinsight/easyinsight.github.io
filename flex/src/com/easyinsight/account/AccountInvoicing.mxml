@@ -30,6 +30,7 @@
         private function onClick(event:ListEvent):void {
             var info:InvoiceInfo = invoices.getItemAt(event.rowIndex) as InvoiceInfo;
             invoiceText = info.invoiceText;
+            invoiceID = info.invoiceID;
             selectedIndex = 1;
         }
 
@@ -42,6 +43,13 @@
 
         [Bindable]
         private var coreIndex:int;
+
+        [Bindable]
+        private var invoiceID:int;
+
+        private function invoicePDF():void {
+            ExternalInterface.call("loadPage", "/app/invoice?invoiceID=" + invoiceID);
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="accountService" destination="accountAdmin">
         <mx:method name="retrieveInvoices" result="gotInvoices()"/>
@@ -57,13 +65,11 @@
                     <mx:List dataProvider="{invoices}" width="150" height="400" itemClick="onClick(event)" labelField="invoiceDate"/>
                 </mx:VBox>
 
-                <mx:ViewStack width="470" height="430" selectedIndex="{selectedIndex}">
+                <mx:ViewStack selectedIndex="{selectedIndex}" resizeToContent="true">
                     <mx:Box/>
                     <mx:VBox>
-                        <mx:HBox>
-                            <mx:Button icon="{copyIcon}" click="copy()" toolTip="Copy Invoice to Clipboard"/>
-                        </mx:HBox>
-                        <mx:TextArea text="{invoiceText}" width="460" height="400" editable="false" selectable="true"/>
+                        <util:SaveButton label="Download Invoice PDF" click="invoicePDF()"/>
+                        <mx:Text text="{invoiceText}" width="460" selectable="true"/>
                     </mx:VBox>
                 </mx:ViewStack>
             </mx:HBox>

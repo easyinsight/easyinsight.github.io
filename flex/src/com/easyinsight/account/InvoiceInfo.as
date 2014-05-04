@@ -7,6 +7,7 @@ public class InvoiceInfo {
 
     public var date:Date;
     public var invoiceText:String;
+    public var invoiceID:int;
     
     public function InvoiceInfo() {
     }

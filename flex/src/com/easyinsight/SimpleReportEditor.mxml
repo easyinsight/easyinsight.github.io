@@ -420,6 +420,7 @@
 
         public function joinWindow():void {
             var joinWindow:ReportJoinWindow = new ReportJoinWindow();
+            joinWindow.report = analysisDefinition;
             joinWindow.addonReports = _analysisDefinition.addonReports;
             var items:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in getWrappers()) {
@@ -619,6 +620,8 @@
                         var origin:FieldDataSourceOrigin = listItem.origin;
                         if (origin != null) {
                             if (origin.report == analysisDefinition.analysisID) {
+                                continue;
+                            } else if (origin.additionalReports != null && origin.additionalReports.contains(analysisDefinition.analysisID)) {
                                 continue;
                             }
                         }
@@ -1213,6 +1216,11 @@
         }
 
         private function reportNavigation(event:ReportNavigationEvent):void {
+            /*if (event.updatesCurrentReport) {
+                for each (var filter:FilterDefinition in event.filters) {
+                    // apply this filter to the
+                }
+            }*/
             if (analysisChanged) {
                 if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
                     createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {

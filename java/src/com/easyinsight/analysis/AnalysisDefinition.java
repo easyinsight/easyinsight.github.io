@@ -661,6 +661,19 @@ public class AnalysisDefinition implements Cloneable {
 
     }
 
+    private static boolean originValid(AnalysisItem dataSourceItem, AnalysisDefinition analysisDefinition) {
+        boolean valid = true;
+        if (dataSourceItem.getOrigin() != null) {
+            if (dataSourceItem.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+                valid = false;
+            }
+        } else if (dataSourceItem.getOrigin().getAdditionalReports() != null &&
+                dataSourceItem.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
+            valid = false;
+        }
+        return valid;
+    }
+
     public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
                                           AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> added) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
@@ -724,7 +737,7 @@ public class AnalysisDefinition implements Cloneable {
                         throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay());
                     }
 
-                    if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                    if (dataSourceItem != null && originValid(dataSourceItem, analysisDefinition)) {
                         System.out.println("\t\tFound key for " + analysisItem.toDisplay() + " via display name of " + analysisItem.toDisplay());
                         key = dataSourceItem.getKey();
                     } else {
@@ -738,7 +751,7 @@ public class AnalysisDefinition implements Cloneable {
                             LogClass.error("Ambiguous reference to " + analysisItem.toDisplay() + " by original display name of " + analysisItem.toOriginalDisplayName());
                         }
 
-                        if (dataSourceItem != null && (dataSourceItem.getOrigin() == null || dataSourceItem.getOrigin().getReport() != analysisDefinition.getAnalysisID())) {
+                        if (dataSourceItem != null && originValid(dataSourceItem, analysisDefinition)) {
                             System.out.println("\t\tFound key for " + analysisItem.toDisplay() + " via original display name of " + analysisItem.toOriginalDisplayName());
                             key = dataSourceItem.getKey();
                         } else {

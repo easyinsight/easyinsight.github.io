@@ -423,7 +423,7 @@ public class UserAccountAdminService {
             @SuppressWarnings({"unchecked"}) List<AccountCreditCardBillingInfo> results = session.createQuery("from AccountCreditCardBillingInfo where accountId = ? and amount > ?").setLong(0, SecurityUtil.getAccountID()).setDouble(1, 20.).list();
             for (AccountCreditCardBillingInfo info : results) {
                 if ("100".equals(info.getResponseCode()) || info.isSuccessful()) {
-                    invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText(account)));
+                    invoices.add(new InvoiceInfo(info.getTransactionTime(), info.toInvoiceText(account), info.getId()));
                 }
             }
         } catch (Exception e) {
