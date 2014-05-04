@@ -905,7 +905,28 @@ public class DataStorage implements IDataStorage {
         }
         //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
-        System.out.println(queryBuilder.toString());
+        try {
+            if (insightRequestMetadata.isLogReport()) {
+                for (FilterDefinition filter : filters) {
+                    if (filter instanceof FilterValueDefinition) {
+                        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                        StringBuilder sb = new StringBuilder();
+                        for (Object obj : filterValueDefinition.getFilteredValues()) {
+                            sb.append(obj.getClass().getName()).append(",");
+                        }
+                        System.out.println("types = " + sb.toString());
+                        StringBuilder vb = new StringBuilder();
+                        for (Object obj : filterValueDefinition.getFilteredValues()) {
+                            vb.append(obj.toString());
+                        }
+                        System.out.println("values = " + vb.toString());
+                    }
+                }
+                System.out.println(queryBuilder.toString());
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
         DataSet dataSet = new DataSet();
 
 
