@@ -490,7 +490,7 @@ public class DataStorage implements IDataStorage {
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
             } finally {
-                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("AKIAI5YYYFRMWFLLEC2A", "NmonY27/vE03AeGNWhLBmkR41kJrvbWSYhLzh5pE"));
                 ObjectListing objectListing = s3.listObjects(bucketName);
                 List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
                 for (S3ObjectSummary summary : summaries) {
@@ -926,7 +926,7 @@ public class DataStorage implements IDataStorage {
         }
         dataRS.close();
         queryStmt.close();
-        System.out.println("got " + dataSet.getRows().size() + " rows");
+        System.out.println("got " + dataSet.getRows().size() + " rows for " + getTableName());
         insightRequestMetadata.addDatabaseTime(System.currentTimeMillis() - startTime);
         dataSet.setLastTime(metadata.getLastData());
         if (insightRequestMetadata.isLogReport()) {

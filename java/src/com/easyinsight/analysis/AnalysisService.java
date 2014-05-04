@@ -479,7 +479,7 @@ public class AnalysisService {
                 CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
                 PreparedStatement findReportStmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
                 long ignoreID = 0;
-                for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
+                /*for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
                     if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
                         long sourceID = node.getDataFeedID();
                         findReportStmt.setLong(1, sourceID);
@@ -490,7 +490,7 @@ public class AnalysisService {
                             ignoreID = node.getDataFeedID();
                         }
                     }
-                }
+                }*/
                 Map<String, List<JoinOverride>> map = new HashMap<String, List<JoinOverride>>();
                 Map<String, List<DataSourceDescriptor>> dataSourceMap = new HashMap<String, List<DataSourceDescriptor>>();
                 List<DataSourceDescriptor> configurableDataSources = new ArrayList<DataSourceDescriptor>();
@@ -558,12 +558,12 @@ public class AnalysisService {
         for (CompositeFeedConnection connection : compositeFeedDefinition.obtainChildConnections()) {
             AnalysisItem sourceItem = connection.getSourceItem();
             AnalysisItem targetItem = connection.getTargetItem();
-            if (connection.getSourceFeedID() == pSourceID) {
+            /*if (connection.getSourceFeedID() == pSourceID) {
                 continue;
             }
             if (connection.getTargetFeedID() == pSourceID) {
                 continue;
-            }
+            }*/
             AnalysisItem sourceResult;
             if (connection.getSourceItem() == null) {
                 sourceResult = sourceMap.get(connection.getSourceJoin().getKeyID());
