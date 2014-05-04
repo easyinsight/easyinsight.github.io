@@ -21,24 +21,12 @@ import java.sql.ResultSet;
 public class PDFServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Long imageID = (Long) req.getSession().getAttribute("imageID");
-        Long userID = (Long) req.getSession().getAttribute("userID");
-        String anonID = (String) req.getSession().getAttribute("anonID");
-        if (imageID != null && (userID != null || anonID != null)) {
+        String urlKey = req.getParameter("urlKey");
+        if (urlKey != null) {
             EIConnection conn = Database.instance().getConnection();
             try {
-                PreparedStatement queryStmt;
-                if (userID != null) {
-                    queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
-                            "USER_ID = ?");
-                    queryStmt.setLong(1, imageID);
-                    queryStmt.setLong(2, userID);
-                } else {
-                    queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
-                            "anonymous_id = ?");
-                    queryStmt.setLong(1, imageID);
-                    queryStmt.setString(2, anonID);
-                }
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE URL_KEY = ?");
+                queryStmt.setString(1, urlKey);
                 ResultSet rs = queryStmt.executeQuery();
                 if (rs.next()) {
                     byte[] bytes = rs.getBytes(1);
@@ -65,7 +53,52 @@ public class PDFServlet extends HttpServlet {
                 Database.closeConnection(conn);
             }
         } else {
-            
+            Long imageID = (Long) req.getSession().getAttribute("imageID");
+            Long userID = (Long) req.getSession().getAttribute("userID");
+            String anonID = (String) req.getSession().getAttribute("anonID");
+            if (imageID != null && (userID != null || anonID != null)) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement queryStmt;
+                    if (userID != null) {
+                        queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
+                                "USER_ID = ?");
+                        queryStmt.setLong(1, imageID);
+                        queryStmt.setLong(2, userID);
+                    } else {
+                        queryStmt = conn.prepareStatement("SELECT PNG_IMAGE, REPORT_NAME FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ? AND " +
+                                "anonymous_id = ?");
+                        queryStmt.setLong(1, imageID);
+                        queryStmt.setString(2, anonID);
+                    }
+                    ResultSet rs = queryStmt.executeQuery();
+                    if (rs.next()) {
+                        byte[] bytes = rs.getBytes(1);
+                        String reportName = rs.getString(2);
+                        resp.setContentType("application/x-download");
+                        resp.setContentLength(bytes.length);
+                        reportName = URLEncoder.encode(reportName, "UTF-8");
+                        resp.setHeader("Content-Disposition","attachment; filename=" + reportName+".pdf" );
+                        String userAgent = req.getHeader("User-Agent");
+                        if (userAgent != null && userAgent.contains("MSIE 8.0")) {
+                            resp.setHeader("Cache-Control","private"); //HTTP 1.1
+                            resp.setHeader("Pragma","token"); //HTTP 1.0
+                        } else {
+                            resp.setHeader("Cache-Control","no-cache"); //HTTP 1.1
+                            resp.setHeader("Pragma","no-cache"); //HTTP 1.0
+                        }
+                        resp.setDateHeader ("Expires", 0); //prevents caching at the proxy server
+                        resp.getOutputStream().write(bytes);
+                        resp.getOutputStream().flush();
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+            } else {
+
+            }
         }
     }
 }

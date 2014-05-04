@@ -35,8 +35,10 @@
 </jsp:include>
 <div class="container corePageWell" style="margin-top: 20px;">
     <div class="row">
+        <div class="col-md-12">
+    <%--<div class="row">--%>
         <% for (Solution solution : validSolutions) { %>
-        <div class="col-md-2" style="height:150px;text-align:center;border-style: solid; border-radius: 8px;margin: 5px;border-color: #AAAAAA;border-width: 2px;width: 200px">
+        <div style="float:left;height:150px;text-align:center;border-style: solid; border-radius: 8px;margin: 5px;border-color: #AAAAAA;border-width: 2px;width: 180px">
             <div style="">
                 <div style="margin-bottom: 10px">
             <a href="/app/html/connections/<%= solution.getDataSourceType() %>"><%=solution.getName()%></a>
@@ -47,6 +49,8 @@
             </div>
         </div>
         <% } %>
+    <%--</div>--%>
+        </div>
     </div>
 </div>
 </body>

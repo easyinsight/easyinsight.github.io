@@ -27,3 +27,7 @@
 <link rel="stylesheet" type="text/css" href="/css/jquery.jqplot.css" />
 <link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css" />
 <link href="/css/report.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/js/rgbcolor.js"></script>
+<script type="text/javascript" src="/js/StackBlur.js"></script>
+<script type="text/javascript" src="/js/canvg.js"></script>
