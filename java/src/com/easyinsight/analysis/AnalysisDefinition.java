@@ -667,7 +667,7 @@ public class AnalysisDefinition implements Cloneable {
             if (dataSourceItem.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
                 valid = false;
             }
-        } else if (dataSourceItem.getOrigin().getAdditionalReports() != null &&
+        } else if (dataSourceItem.getOrigin() != null && dataSourceItem.getOrigin().getAdditionalReports() != null &&
                 dataSourceItem.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
             valid = false;
         }
