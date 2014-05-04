@@ -91,7 +91,7 @@
             lfItems.addItem(new ColorReportFormItem("Report Title Background Color", "dashboardReportHeaderBackgroundColor", skin.dashboardReportHeaderBackgroundColor, skin));
             lfItems.addItem(new ColorReportFormItem("Report Title Text Color", "dashboardReportHeaderTextColor", skin.dashboardReportHeaderTextColor, skin));
             lfItems.addItem(new MultiColorReportFormItem("Primary Multi Color Report", "multiColors", skin.multiColors, skin));
-            lfItems.addItem(new MultiColorReportFormItem("Secondary Multi Color Report", "multiColors", skin.secondaryMultiColors, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Secondary Multi Color Report", "secondaryMultiColors", skin.secondaryMultiColors, skin));
 
             reportBackgroundColor = skin.reportBackgroundColor;
             reportTextColor = skin.reportTextColor;
