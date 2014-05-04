@@ -285,6 +285,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>UploadExportImage</servlet-name>
+        <display-name>UploadExportImage</display-name>
+        <servlet-class>com.easyinsight.scheduler.UploadExportImageServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>HtmlImage</servlet-name>
         <display-name>HtmlImage</display-name>
         <servlet-class>com.easyinsight.export.HTMLImageServlet</servlet-class>
@@ -360,6 +366,18 @@
         <servlet-name>EIAdmin</servlet-name>
         <display-name>EIAdmin</display-name>
         <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>HTMLExcel</servlet-name>
+        <display-name>HTMLExcel</display-name>
+        <servlet-class>com.easyinsight.html.HTMLExcelServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>HTMLPDF</servlet-name>
+        <display-name>HTMLPDF</display-name>
+        <servlet-class>com.easyinsight.html.HTMLPDFServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -535,12 +553,6 @@
         <servlet-name>SendGridEmailEvent</servlet-name>
         <display-name>SendGridEmailEvent</display-name>
         <servlet-class>com.easyinsight.email.SendGridEmailEventServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>DashboardPiece</servlet-name>
-        <display-name>DashboardPiece</display-name>
-        <servlet-class>com.easyinsight.html.DashboardPieceServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -920,6 +932,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>UploadExportImage</servlet-name>
+        <url-pattern>/uploadExportImage</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>EmailReport</servlet-name>
         <url-pattern>/emailReport</url-pattern>
     </servlet-mapping>
@@ -962,6 +979,16 @@
     <servlet-mapping>
         <servlet-name>PlotChart</servlet-name>
         <url-pattern>/plotChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HTMLExcel</servlet-name>
+        <url-pattern>/htmlExcel</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HTMLPDF</servlet-name>
+        <url-pattern>/htmlPDF</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -1077,11 +1104,6 @@
     <servlet-mapping>
         <servlet-name>AddUsers</servlet-name>
         <url-pattern>/json/addUsers</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>DashboardPiece</servlet-name>
-        <url-pattern>/dashboardPiece</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
