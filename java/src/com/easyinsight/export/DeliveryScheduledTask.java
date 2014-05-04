@@ -206,8 +206,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
             String senderName = null;
             String senderEmail = null;
-            /*
-            TODO: fix
+
+
             PreparedStatement getSernderStmt = conn.prepareStatement("SELECT EMAIL, FIRST_NAME, NAME FROM USER, GENERAL_DELIVERY WHERE GENERAL_DELIVERY.sender_user_id = user.user_id and " +
                     "GENERAL_DELIVERY.scheduled_account_activity_id = ?");
             getSernderStmt.setLong(1, activityID);
@@ -219,7 +219,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 senderName = userFirstName + " " + userLastName;
                 senderEmail = email;
             }
-            getSernderStmt.close();*/
+            getSernderStmt.close();
 
             Collections.sort(infos, new Comparator<DeliveryInfo>() {
 
