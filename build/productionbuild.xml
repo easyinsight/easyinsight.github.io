@@ -8,6 +8,11 @@
     <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
 
+    <taskdef name="StopJava8Instances" classname="com.easyinsight.watchdog.updatetask.ShutdownJava8Task" />
+    <taskdef name="DownloadJava8Instances" classname="com.easyinsight.watchdog.updatetask.DownloadJava8Task" />
+    <taskdef name="StartJava8Instances" classname="com.easyinsight.watchdog.updatetask.StartJava8Task" />
+    <taskdef name="UpdateJava8Instances" classname="com.easyinsight.watchdog.updatetask.UpdateJava8Task" />
+
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
 
     <taskdef name="StartStaging" classname="com.easyinsight.watchdog.updatetask.StartStagingTask" />
@@ -98,6 +103,19 @@
 
     <target name="startInstances">
         <StartInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target name="startJava8Instances">
+        <StartJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
+    </target>
+    <target name="stopJava8Instances">
+        <StopJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
+    </target>
+    <target name="updateJava8Instances">
+        <UpdateJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
+    </target>
+    <target name="downloadJava8Instances">
+        <DownloadJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
     </target>
 
     <target name="updateDatabase">
