@@ -18,6 +18,8 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.pipeline.StandardReportPipeline;
 import com.easyinsight.tag.Tag;
+import com.easyinsight.userupload.DataSourceThreadPool;
+import com.easyinsight.util.ServiceUtil;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -1988,6 +1990,95 @@ public class DataService {
         }
     }
 
+    public AsyncReportResponse asyncEndUser(final long reportID, final long dataSourceID, final List<FilterDefinition> customFilters,
+                                            final InsightRequestMetadata insightRequestMetadata, final @Nullable List<FilterDefinition> drillThroughFilters,
+                                            final boolean ignoreCache) {
+
+
+        final String callID = ServiceUtil.instance().longRunningCall(reportID);
+        final String userName = SecurityUtil.getUserName();
+        final long userID = SecurityUtil.getUserID();
+        final long accountID = SecurityUtil.getAccountID();
+        final int accountType = SecurityUtil.getAccountTier();
+        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+        final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+        final String personaName = SecurityUtil.getPersonaName();
+        DataSourceThreadPool.instance().addActivity(new Runnable() {
+
+            public void run() {
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                try {
+                    EmbeddedResults results;
+                    WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID);
+                    if (analysisDefinition instanceof WSCrosstabDefinition) {
+                        results = getEmbeddedCrosstabResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters);
+                    } else if (analysisDefinition instanceof WSTreeDefinition) {
+                        results = getEmbeddedTreeResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters);
+                    } else if (analysisDefinition instanceof WSYTDDefinition) {
+                        results = getEmbeddedYTDResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters);
+                    } else if (analysisDefinition instanceof WSCompareYearsDefinition) {
+                        results = getEmbeddedCompareYearsResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters);
+                    } else if (analysisDefinition instanceof WSKPIDefinition) {
+                        results = getEmbeddedTrendDataResults(reportID, dataSourceID, customFilters, insightRequestMetadata);
+                    } else {
+                        results = getEmbeddedResults(reportID, dataSourceID, customFilters, insightRequestMetadata, drillThroughFilters, ignoreCache);
+                    }
+                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, results);
+                } finally {
+                    SecurityUtil.clearThreadLocal();
+                }
+            }
+        });
+
+        AsyncReportResponse asyncReportResponse = new AsyncReportResponse();
+        asyncReportResponse.setCallDataID(callID);
+        return asyncReportResponse;
+
+    }
+
+    public AsyncReportResponse asyncList(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata, final boolean ignoreCache) {
+
+
+        final String callID = ServiceUtil.instance().longRunningCall(analysisDefinition.getDataFeedID());
+        final String userName = SecurityUtil.getUserName();
+        final long userID = SecurityUtil.getUserID();
+        final long accountID = SecurityUtil.getAccountID();
+        final int accountType = SecurityUtil.getAccountTier();
+        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+        final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+        final String personaName = SecurityUtil.getPersonaName();
+        DataSourceThreadPool.instance().addActivity(new Runnable() {
+
+            public void run() {
+                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                try {
+                    DataResults results;
+                    if (analysisDefinition instanceof WSCrosstabDefinition) {
+                        results = getCrosstabDataResults((WSCrosstabDefinition) analysisDefinition, insightRequestMetadata);
+                    } else if (analysisDefinition instanceof WSKPIDefinition) {
+                        results = getTrendDataResults((WSKPIDefinition) analysisDefinition, insightRequestMetadata);
+                    } else if (analysisDefinition instanceof WSTreeDefinition) {
+                        results = getTreeDataResults((WSTreeDefinition) analysisDefinition, insightRequestMetadata);
+                    } else if (analysisDefinition instanceof WSYTDDefinition) {
+                        results = getYTDResults(analysisDefinition, insightRequestMetadata);
+                    } else if (analysisDefinition instanceof WSCompareYearsDefinition) {
+                        results = getCompareYearsResults(analysisDefinition, insightRequestMetadata);
+                    } else {
+                        results = list(analysisDefinition, insightRequestMetadata, ignoreCache);
+                    }
+                    ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, results);
+                } finally {
+                    SecurityUtil.clearThreadLocal();
+                }
+            }
+        });
+
+        AsyncReportResponse asyncReportResponse = new AsyncReportResponse();
+        asyncReportResponse.setCallDataID(callID);
+        return asyncReportResponse;
+
+    }
+
     private void reportEditorBenchmark(WSAnalysisDefinition analysisDefinition, long processingTime, long databaseTime, EIConnection conn) {
         if (analysisDefinition.getAnalysisID() == 0) {
             BenchmarkManager.recordBenchmarkForDataSource("ReportEditorProcessingTime", processingTime, SecurityUtil.getUserID(false), analysisDefinition.getDataFeedID(), conn);
@@ -2243,6 +2334,8 @@ public class DataService {
                 AnalysisItem item = iter.next();
                 if (item.getOrigin() != null) {
                     if (item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
+                        iter.remove();
+                    } else if (item.getOrigin().getAdditionalReports() != null && item.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
                         iter.remove();
                     }
                 }
@@ -2502,9 +2595,9 @@ public class DataService {
             String currency = "USD";
             if ("$".equals(symbol)) {
                 currency = "USD";
-            } else if ("�".equals(symbol)) {
+            } else if ("\u20AC".equals(symbol)) {
                 currency = "EUR";
-            } else if ("�".equals(symbol) || "?".equals(symbol)) {
+            } else if ("\u00A3".equals(symbol)) {
                 currency = "GBP";
             }
             insightRequestMetadata.setTargetCurrency(currency);
