@@ -12,6 +12,7 @@ public class SmartsheetTableSource extends ServerDataSourceDefinition {
     public var accessToken:String;
     public var refreshToken:String;
     public var table:String;
+    public var rebuildFields:Boolean;
 
     public function SmartsheetTableSource() {
         super();
@@ -23,6 +24,9 @@ public class SmartsheetTableSource extends ServerDataSourceDefinition {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
+        /*var config:SmartsheetConfiguration = new SmartsheetConfiguration();
+        config.label = "Smartsheet Server Configuration";
+        pages.addItem(config);*/
         return pages;
     }
 

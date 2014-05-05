@@ -328,93 +328,13 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     }
 
     @Override
-    public List<String> javaScriptIncludes() {
-        List<String> includes = super.javaScriptIncludes();
-//        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-//        includes.add("/js/plugins/jqplot.barRenderer.js");
-//        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
-//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.pointLabels.js");
-//        includes.add("/js/visualizations/chart.js");
-//        includes.add("/js/visualizations/util.js");
-        return includes;
-    }
-
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-
-        JSONObject fullObject = getJsonObject(htmlReportMetadata);
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        String xyz = "$.getJSON('/app/stackedChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getStackedBarChart('" + targetDiv + "', " + argh + "," + customHeight + "))";
-        /*return "$.getJSON('/app/stackedChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, function(data) {\n" +
-                "                var s1 = data[\"values\"];\n" +
-                "                var plot1 = $.jqplot('"+targetDiv+"', s1, " + argh + ");afterRefresh();\n})";*/
-        return xyz;
-    }
-
-    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
-        JSONObject params;
-        JSONObject fullObject = new JSONObject();
-        try {
-            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-            jsonParams.put("legend", getLegend());
-            jsonParams.put("stackSeries", "true");
-            JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
-            JSONObject rendererOptions = new JSONObject();
-            rendererOptions.put("barDirection", "'horizontal'");
-            rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("shadowDepth", 1);
-            rendererOptions.put("barMargin", 5);
-            seriesDefaults.put("rendererOptions", rendererOptions);
-            jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = getGrid();
-            jsonParams.put("grid", grid);
-
-            jsonParams.put("axes", getAxes());
-            JSONArray seriesColors = getSeriesColors();
-            jsonParams.put("seriesColors", seriesColors);
-            params = new JSONObject(jsonParams);
-            fullObject.put("jqplotOptions", params);
-            JSONObject drillthroughOptions = new JSONObject();
-            drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
-            fullObject.put("drillthrough", drillthroughOptions);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return fullObject;
-    }
-
-    @Override
-    public JSONObject getAxes() throws JSONException {
-        JSONObject axes = new JSONObject();
-        axes.put("xaxis", getMeasureAxis(getMeasures().get(0)));
-        axisConfigure((JSONObject) axes.get("xaxis"), getxAxisMinimum(), isxAxisMinimumDefined(), getxAxisMaximum(), isxAxisMaximumDefined());
-        axes.put("yaxis", getGroupingAxis(getYaxis()));
-        return axes;
-    }
-
-    @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
-        pie.put("parameters", getJsonObject(htmlReportMetadata));
         pie.put("key", getUrlKey());
         pie.put("type", "stacked_bar");
         pie.put("styles", htmlReportMetadata.createStyleProperties());
         pie.put("url", "/app/stackedChart");
         return pie;
-    }
-
-    @Override
-    protected JSONObject getLegend() throws JSONException {
-        JSONObject o = super.getLegend();
-        o.put("renderer", "$.jqplot.GradientTableLegendRenderer");
-        return o;
     }
 
     protected JSONArray getSeriesColors() {

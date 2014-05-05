@@ -244,69 +244,6 @@ public class DashboardReport extends DashboardElement {
         return reportJSON;
     }
 
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-
-        // recurse back up to the top level...
-
-        StringBuilder sb = new StringBuilder();
-        WSAnalysisDefinition reportDefinition = new AnalysisService().openAnalysisDefinition(report.getId());
-        String div = "reportTarget" + report.getId();
-        sb.append("<script type=\"text/javascript\">\n").append("function renderReport").append(report.getId()).append("() {");
-
-        // not only do we need the report's filters, we need all filters in the chain above this report
-
-        sb.append("var strParams = \"\";\n");
-        if (filterHTMLMetadata.getDrillthroughKey() == null) {
-            sb.append("strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&';\n");
-        } else {
-            sb.append("strParams += 'dashboardID="+filterHTMLMetadata.getDashboard().getId() + "&drillThroughKey="+filterHTMLMetadata.getDrillthroughKey()+"&';\n");
-        }
-        sb.append("            for (var key in filterBase) {\n" +
-                "                var keyedFilter = filterBase[key];\n" +
-                "                for (var filterValue in keyedFilter) {\n" +
-                "                    var value = keyedFilter[filterValue];\n" +
-                "                    strParams += filterValue + \"=\" + value + \"&\";\n" +
-                "                }\n");
-        sb.append("}\n");
-
-        HTMLReportMetadata htmlReportMetadata = new HTMLReportMetadata();
-        htmlReportMetadata.setEmbedded(filterHTMLMetadata.isEmbedded());
-        if (getPreferredHeight() > 0) {
-            htmlReportMetadata.setCustomHeight(getPreferredHeight());
-        } else {
-            htmlReportMetadata.setCustomHeight(300);
-        }
-        htmlReportMetadata.setFullScreenHeight(false);
-        sb.append(reportDefinition.toHTML(div, htmlReportMetadata));
-        sb.append("}");
-        // $(document).ready(refreshReport('reportTarget517'))
-        // refreshReport('div,
-        System.out.println("\t\t" + report.getName() + " = renderReport" + report.getId());
-        sb.append("updateInitCount(renderReport"+report.getId()+")");
-        //sb.append("renderReport").append(report.getId()).append("();");
-        sb.append("</script>\n");
-        sb.append("<div style=\"font-size:12px;margin-right:10px\">");
-        if (isShowLabel()) {
-            sb.append("<div class=\"dashboardReportHeader\"><strong>").append(report.getName()).append("</strong></div>");
-        }
-        for (FilterDefinition filterDefinition : reportDefinition.getFilterDefinitions()) {
-            if (filterDefinition.isShowOnReportView()) {
-                System.out.println("\t\t" + filterDefinition.label(false) + " on report");
-                sb.append(filterDefinition.toHTML(new FilterHTMLMetadata(filterHTMLMetadata.getDashboard(), reportDefinition)));
-            }
-        }
-        sb.append("</div>");
-        if (getPreferredHeight() != 0) {
-            sb.append("<div style=\"height:"+(getPreferredHeight()+20)+"px\">");
-        }
-        sb.append("<div class=\"dashboardReportDiv\"  id=\"").append(div).append("\"><div class=\"reportArea\" id=\"").append(div).append("ReportArea\"></div><div class=\"noData\"> Loading the report... </div></div>");
-        if (getPreferredHeight() != 0) {
-            sb.append("</div>");
-        }
-        sb.append(reportDefinition.rootHTML());
-        return sb.toString();
-    }
-
     public int requiredInitCount() {
         return 1;
     }

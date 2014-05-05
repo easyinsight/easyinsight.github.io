@@ -149,7 +149,7 @@ label {
 .navbar-inverse .navbar-nav > li > a:focus {
     font-weight: normal;
     font-size: 16px;
-    color: #E6E6E6;
+    color: #F2F2F2;
 }
 
 .navbar-inverse .navbar-nav > .active > a,
@@ -196,6 +196,35 @@ a {
     color: #1c5c76;
 }
 
+.reportControlBtnGroup > a,
+.reportControlBtnGroup > a:hover {
+}
+
+.reportControlToolbar > a,
+.reportControlToolbar > a:hover {
+}
+
+.reportControlToolbar {
+    margin-top: 7px;
+    margin-bottom: 10px;
+}
+
+.reportBlah {
+    margin-top: 7px;
+}
+
+.reportControlBtnGroup {
+    margin-right: 20px;
+}
+
+.loading {
+    font-weight: bold;
+}
+
+.loadingText {
+    margin-bottom: 10px;
+}
+
 @media (max-width: 768px) {
     .col-md-1,
     .col-md-2,
@@ -216,4 +245,25 @@ a {
 
 .tag-list {
     padding-bottom: 10px;
+}
+
+.browse-by-tag {
+    float:left;
+    font-weight:500;
+    line-height: 32px;
+    vertical-align: middle;
+    padding-left: 20px;
+}
+
+.header-tr {
+    font-weight:500;
+}
+
+.no-data-sources {
+    font-size: 20px;
+}
+
+.no-data-sources-container {
+    margin-top: 40px;
+    margin-bottom: 30px;
 }

@@ -3,18 +3,12 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.intention.Intention;
-import com.easyinsight.intention.IntentionSuggestion;
-import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LineChartComponent;
 import com.easyinsight.preferences.ApplicationSkin;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -436,94 +430,12 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     }
 
     @Override
-    public List<String> javaScriptIncludes() {
-        List<String> includes = super.javaScriptIncludes();
-//        includes.add("/js/plugins/jqplot.dateAxisRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.enhancedLegendRenderer.min.js");
-//        includes.add("/js/visualizations/chart.js");
-//        includes.add("/js/visualizations/util.js");
-        return includes;
-    }
-
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-
-        JSONObject object = getJsonObject();
-        String argh = object.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        argh = "$.getJSON('/app/twoAxisChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getCallback('" + targetDiv + "', " + argh + ", true," + customHeight + "))";
-        return argh;
-    }
-
-    @Override
-    protected JSONObject getGroupingAxis(AnalysisItem analysisItem) throws JSONException {
-        JSONObject groupingAxis = super.getGroupingAxis(analysisItem);
-        groupingAxis.put("renderer", "$.jqplot.DateAxisRenderer");
-
-        JSONObject xAxisTickOptions = groupingAxis.getJSONObject("tickOptions");
-        AnalysisDateDimension date = (AnalysisDateDimension) this.getXaxis();
-        if (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-            xAxisTickOptions.put("formatString", "'%b %#d'");
-        } else if (date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-            xAxisTickOptions.put("formatString", "'%b'");
-        } else if (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
-            xAxisTickOptions.put("formatString", "'%b'");
-        } else {
-            xAxisTickOptions.put("formatString", "'%b %#d'");
-        }
-
-        groupingAxis.put("tickOptions", xAxisTickOptions);
-        return groupingAxis;
-    }
-
-    private JSONObject getJsonObject() {
-        JSONObject params;
-        JSONObject object = new JSONObject();
-        try {
-            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-
-            JSONObject grid = getGrid();
-            jsonParams.put("grid", grid);
-            JSONObject axes = getAxes();
-            jsonParams.put("axes", axes);
-            JSONObject cursorObject = new JSONObject();
-            cursorObject.put("show", "true");
-            cursorObject.put("zoom", "true");
-            jsonParams.put("cursor", cursorObject);
-
-            JSONObject legend = getLegend();
-            jsonParams.put("legend", legend);
-            JSONObject highlighter = new JSONObject();
-            highlighter.put("show", true);
-            highlighter.put("sizeAdjust", 7.5);
-            highlighter.put("useAxesFormatters", "true");
-            jsonParams.put("highlighter", highlighter);
-            JSONObject cursor = new JSONObject();
-            cursor.put("show", false);
-            jsonParams.put("cursor", cursor);
-            JSONArray seriesColors = getSeriesColors();
-            jsonParams.put("seriesColors", seriesColors);
-            params = new JSONObject(jsonParams);
-            object.put("jqplotOptions", params);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return object;
-    }
-
-    @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
-        pie.put("parameters", getJsonObject());
         pie.put("key", getUrlKey());
         pie.put("type", "line");
         pie.put("styles", htmlReportMetadata.createStyleProperties());
-        pie.put("url", "/app/twoAxisChart");
+        pie.put("url", "/app/lineChartD3");
         return pie;
     }
 

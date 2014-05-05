@@ -175,25 +175,24 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="/app/exportExcel?reportID=<%= report.getUrlKey() %>">
-                                    <button class="btn btn-inverse" type="button"
-                                            style="padding:5px;margin:5px;width:150px">Export to Excel
-                                    </button>
-                                </a>
+                                <button class="btn btn-inverse export_excel" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Export to Excel
+                                </button>
                             </li>
                             <li>
-                                <a href="#" class="report-emailReportButton">
-                                    <button class="btn btn-inverse" type="button"
-                                            style="padding:5px;margin:5px;width:150px">Email the Report
-                                    </button>
-                                </a>
+                                <button class="btn btn-inverse export_pdf" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Export to PDF
+                                </button>
                             </li>
                             <li>
-                                <a href="/app/html/embeddedReport/<%= report.getUrlKey() %>" target="_blank">
-                                    <button class="btn btn-inverse" type="button"
-                                            style="padding:5px;margin:5px;width:150px">Printable View
-                                    </button>
-                                </a>
+                                <button class="btn btn-inverse report-emailReportButton" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Email the Report
+                                </button>
+                            </li>
+                            <li>
+                                <button class="btn btn-inverse" type="button" onclick="window.location.href = '/app/html/embeddedReport/<%= report.getUrlKey() %>'"
+                                        style="padding:5px;margin:5px;width:150px">Printable View
+                                </button>
                             </li>
                         </ul>
                     </div>

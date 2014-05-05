@@ -51,6 +51,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.io.*;
 
@@ -502,8 +503,12 @@ public class ExportService {
         }
     }
 
-    public void toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
-        toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn);
+    public String toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
+        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn);
+    }
+
+    public String toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, HttpServletRequest request) throws SQLException, DocumentException {
+        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn, request);
     }
 
     public ReportFault emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
@@ -516,12 +521,12 @@ public class ExportService {
         try {
             analysisDefinition.updateMetadata();
             if (format == ReportDelivery.EXCEL) {
-                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, false);
-                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
+                ExportResponse exportResponse = toExcel(analysisDefinition, insightRequestMetadata, true, false);
+                new SendGridEmail().sendAttachmentEmail(email, subject, body, exportResponse.getBytes(), name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                         "application/excel");
             } else if (format == ReportDelivery.EXCEL_2007) {
-                byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, true);
-                new SendGridEmail().sendAttachmentEmail(email, subject, body, bytes, name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
+                ExportResponse exportResponse = toExcel(analysisDefinition, insightRequestMetadata, true, true);
+                new SendGridEmail().sendAttachmentEmail(email, subject, body, exportResponse.getBytes(), name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                         "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
                 String html;
@@ -1119,6 +1124,10 @@ public class ExportService {
         toDatabase(analysisDefinition.getName(), toImagePDF(bytes, width, height), conn);
     }
 
+    public String toImagePDFDatabase(InsightDescriptor insightDescriptor, byte[] bytes, int width, int height, EIConnection conn, HttpServletRequest request) throws IOException, DocumentException, SQLException {
+        return toDatabase(insightDescriptor.getName(), toImagePDF(bytes, width, height), conn, request);
+    }
+
     public byte[] toImagePDF(List<Page> pages, boolean landscapeOrientation) throws DocumentException, IOException, SQLException {
         Document document;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1404,9 +1413,9 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         try {
             analysisDefinition.updateMetadata();
-            byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, false);
+            ExportResponse exportResponse = toExcel(analysisDefinition, insightRequestMetadata, true, false);
             ExcelResponse response = new ExcelResponse();
-            response.setBytes(bytes);
+            response.setBytes(exportResponse.getBytes());
             return response;
         } catch (ReportException re) {
             ExcelResponse excelResponse = new ExcelResponse();
@@ -1426,9 +1435,9 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         try {
             analysisDefinition.updateMetadata();
-            byte[] bytes = toExcel(analysisDefinition, insightRequestMetadata, true, true);
+            ExportResponse exportResponse = toExcel(analysisDefinition, insightRequestMetadata, true, true);
             ExcelResponse response = new ExcelResponse();
-            response.setBytes(bytes);
+            response.setBytes(exportResponse.getBytes());
             return response;
         } catch (ReportException re) {
             ExcelResponse excelResponse = new ExcelResponse();
@@ -1454,8 +1463,13 @@ public class ExportService {
         }
     }
 
-    private void toDatabase(String reportName, byte[] bytes, EIConnection conn) throws SQLException {
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID) VALUES (?, ?, ?, ?)",
+    private String toDatabase(String reportName, byte[] bytes, EIConnection conn) throws SQLException {
+        return toDatabase(reportName, bytes, conn, null);
+    }
+
+    private String toDatabase(String reportName, byte[] bytes, EIConnection conn, HttpServletRequest request) throws SQLException {
+        String urlKey = RandomTextGenerator.generateText(25);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (USER_ID, PNG_IMAGE, REPORT_NAME, ANONYMOUS_ID, URL_KEY) VALUES (?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
@@ -1469,13 +1483,19 @@ public class ExportService {
         insertStmt.setString(3, reportName == null ? "export" : reportName);
         String anonID = RandomTextGenerator.generateText(20);
         insertStmt.setString(4, anonID);
+        insertStmt.setString(5, urlKey);
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
-        FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
-        FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
+        if (request == null) {
+            FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
+            FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
+        } else {
+
+        }
+        return urlKey;
     }
 
-    public byte[] toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean onNoData, boolean format2007) throws IOException, SQLException {
+    public ExportResponse toExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean onNoData, boolean format2007) throws IOException, SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
             ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
@@ -1485,8 +1505,8 @@ public class ExportService {
             workbook.write(baos);
             byte[] bytes = baos.toByteArray();
             baos.close();
-
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID, EXCEL_FORMAT) VALUES (?, ?, ?, ?, ?)",
+            String key = RandomTextGenerator.generateText(25);
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (USER_ID, EXCEL_FILE, REPORT_NAME, ANONYMOUS_ID, EXCEL_FORMAT, URL_KEY) VALUES (?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
@@ -1501,13 +1521,14 @@ public class ExportService {
             insertStmt.setString(3, (analysisDefinition.getName() == null || "".equals(analysisDefinition.getName())) ? "export" : analysisDefinition.getName());
             insertStmt.setString(4, anonID);
             insertStmt.setInt(5, format2007 ? 1 : 0);
+            insertStmt.setString(6, key);
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
             if (FlexContext.getHttpRequest() != null) {
                 FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
                 FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
             }
-            return bytes;
+            return new ExportResponse(bytes, key);
         } catch (IllegalArgumentException iae) {
             if (iae.getMessage().contains("Invalid row number (65536) outside allowable range (0..65535)")) {
                 throw new ReportException(new GenericReportFault("We can only export reports with less than 65,536 rows."));

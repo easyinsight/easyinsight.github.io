@@ -23,7 +23,10 @@ public class AnalysisItemWrapper extends EventDispatcher
             }
             _children = new ArrayCollection();
             for each (var child:FeedNode in feedNode.children) {
-                if (reportID > 0 && child is AnalysisItemNode && AnalysisItemNode(child).analysisItem.origin != null && AnalysisItemNode(child).analysisItem.origin.report == reportID) {
+                if (reportID > 0 && child is AnalysisItemNode && AnalysisItemNode(child).analysisItem.origin != null &&
+                        (AnalysisItemNode(child).analysisItem.origin.report == reportID ||
+                        (AnalysisItemNode(child).analysisItem.origin.additionalReports != null &&
+                                AnalysisItemNode(child).analysisItem.origin.additionalReports.contains(reportID)))) {
                     continue;
                 }
                 _children.addItem(new AnalysisItemWrapper(child));

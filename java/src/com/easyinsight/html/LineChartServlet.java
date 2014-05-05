@@ -1,7 +1,6 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSLineChartDefinition;
 import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
@@ -30,9 +29,6 @@ public class LineChartServlet extends HtmlServlet {
 
         JSONObject object = new JSONObject();
 
-        JSONObject params = new JSONObject();
-        JSONObject axes = ((WSChartDefinition) report).getAxes();
-        params.put("axes", axes);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         // need series, need ticks
         WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
@@ -124,7 +120,6 @@ public class LineChartServlet extends HtmlServlet {
 
         object.put("values", blahArray);
         object.put("labels", labelArray);
-        object.put("params", params);
 
         response.setContentType("application/json");
         String argh = object.toString();

@@ -171,10 +171,6 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         this.parentElement = parentElement;
     }
 
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        return "";
-    }
-
     public int getPreferredWidth() {
         return preferredWidth;
     }

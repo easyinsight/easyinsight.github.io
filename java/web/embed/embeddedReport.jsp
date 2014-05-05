@@ -133,9 +133,13 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse" type="button"
-                                        onclick="window.location.href='/app/exportExcel?reportID=<%= report.getUrlKey() %>'"
+                                <button class="btn btn-inverse export_excel" type="button"
                                         style="padding:5px;margin:5px;width:150px">Export to Excel
+                                </button>
+                            </li>
+                            <li>
+                                <button class="btn btn-inverse export_pdf" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Export to PDF
                                 </button>
                             </li>
                             <li>

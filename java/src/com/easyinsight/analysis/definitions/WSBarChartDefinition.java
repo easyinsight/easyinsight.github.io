@@ -2,7 +2,6 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.preferences.ApplicationSkin;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -178,145 +177,6 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         return properties;
     }
 
-    @Override
-    public List<String> javaScriptIncludes() {
-        List<String> includes = super.javaScriptIncludes();
-//        includes.add("/js/plugins/jqplot.gradientBarRenderer.js");
-//        includes.add("/js/plugins/jqplot.categoryAxisRenderer.js");
-//        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisLabelRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.canvasAxisTickRenderer.min.js");
-//        includes.add("/js/plugins/jqplot.pointLabels.js");
-//        includes.add("/js/visualizations/chart.js");
-//        includes.add("/js/visualizations/util.js");
-        return includes;
-    }
-
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        JSONObject fullObject = getJsonObject(htmlReportMetadata);
-
-
-        String argh = fullObject.toString();
-        argh = argh.replaceAll("\"", "");
-
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        return "$.getJSON('/app/columnChart?reportID=" + getUrlKey() + timezoneOffset + "&'+ strParams, Chart.getBarChartCallback('" + targetDiv + "', " + argh + ",false," + customHeight + "))";
-    }
-
-    private JSONObject getJsonObject(HTMLReportMetadata htmlReportMetadata) {
-        String color;
-        String color2;
-        JSONArray colorObj = new JSONArray();
-        try {
-            if (useChartColor) {
-                color = String.format("'#%06X'", (0xFFFFFF & chartColor));
-                color2 = String.format("'#%06X'", (0xFFFFFF & gradientColor));
-                JSONObject colorStop = new JSONObject();
-                colorStop.put("point", 0);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
-
-                colorStop = new JSONObject();
-                colorStop.put("point", 1);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
-            } else {
-
-                color = "'#FF0000'";
-                color2 = "'#990000'";
-
-
-                JSONObject colorStop = new JSONObject();
-                colorStop.put("point", 0);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
-
-                colorStop = new JSONObject();
-                colorStop.put("point", .15);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
-
-                colorStop = new JSONObject();
-                colorStop.put("point", .5);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
-
-                colorStop = new JSONObject();
-                colorStop.put("point", .9);
-                colorStop.put("color", color);
-                colorObj.put(colorStop);
-
-                colorStop = new JSONObject();
-                colorStop.put("point", 1);
-                colorStop.put("color", color2);
-                colorObj.put(colorStop);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
-        JSONObject params;
-        JSONObject fullObject = new JSONObject();
-        try {
-            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-            if (getMeasures().size() == 1) {
-
-
-                jsonParams.put("seriesColors", new JSONArray(Arrays.asList(colorObj)));
-
-            } else {
-                JSONArray seriesColors = getSeriesColors();
-                jsonParams.put("seriesColors", seriesColors);
-                jsonParams.put("legend", getLegend());
-            }
-            JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.GradientBarRenderer");
-            JSONObject rendererOptions = new JSONObject();
-            rendererOptions.put("fillToZero", "true");
-            rendererOptions.put("barDirection", "'horizontal'");
-            rendererOptions.put("varyBarColor", "true");
-            rendererOptions.put("shadowDepth", 2);
-            rendererOptions.put("barMargin", 3);
-            rendererOptions.put("barPadding", 0);
-            seriesDefaults.put("rendererOptions", rendererOptions);
-            jsonParams.put("seriesDefaults", seriesDefaults);
-            JSONObject grid = getGrid();
-            jsonParams.put("grid", grid);
-            jsonParams.put("axes", getAxes());
-            params = new JSONObject(jsonParams);
-            fullObject.put("jqplotOptions", params);
-            JSONObject drillthroughOptions = new JSONObject();
-            drillthroughOptions.put("embedded", htmlReportMetadata.isEmbedded());
-            fullObject.put("drillthrough", drillthroughOptions);
-
-            if ("auto".equals(getLabelPosition())) {
-                JSONObject labels = new JSONObject();
-                labels.put("location", "'e'");
-                labels.put("show", "true");
-                labels.put("edgetolerance", -15);
-                labels.put("escapeHTML", false);
-                seriesDefaults.put("pointLabels", labels);
-            }
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return fullObject;
-    }
-
-    @Override
-    public JSONObject getAxes() throws JSONException {
-        JSONObject axes = new JSONObject();
-        JSONObject xAxis = getMeasureAxis(getMeasures().get(0));
-        axisConfigure(xAxis, getxAxisMinimum(), isxAxisMinimumDefined(), getxAxisMaximum(), isxAxisMaximumDefined());
-        axes.put("xaxis", xAxis);
-        xAxis.put("renderer", "$.jqplot.MeasureAxisRenderer");
-        JSONObject yAxis = getGroupingAxis(getYaxis());
-        axes.put("yaxis", yAxis);
-        return axes;
-    }
-
     public void renderConfig(ApplicationSkin applicationSkin) {
         if (getMeasures().size() == 1 && "Primary".equals(getColorScheme()) && applicationSkin.isCustomChartColorEnabled()) {
             setChartColor(applicationSkin.getCustomChartColor());
@@ -341,7 +201,6 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         areaChart.put("type", "bar");
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/columnChart");
-        areaChart.put("parameters", getJsonObject(htmlReportMetadata));
         areaChart.put("styles", htmlReportMetadata.createStyleProperties());
         return areaChart;
     }

@@ -1,7 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,63 +69,18 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     @Override
     public List<String> javaScriptIncludes() {
         List<String> includes = super.javaScriptIncludes();
-        includes.add("/js/plugins/jqplot.gradientPieRenderer.js");
-        includes.add("/js/plugins/jqplot.highlighter.min.js");
-        includes.add("/js/plugins/jqplot.cursor.min.js");
-        includes.add("/js/plugins/jqplot.pointLabels.min.js");
-        includes.add("/js/plugins/jqplot.canvasTextRenderer.min.js");
         includes.add("/js/visualizations/chart.js");
         includes.add("/js/visualizations/util.js");
         return includes;
     }
 
     @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-
-        JSONObject data = getParameters(htmlReportMetadata);
-        String argh = data.toString();
-        argh = argh.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String customHeight = htmlReportMetadata.createStyleProperties().toString();
-        String xyz = "$.getJSON('/app/columnChart?reportID="+getUrlKey()+timezoneOffset+"&'+ strParams, Chart.getPieChartCallback('" + targetDiv + "', " + argh + ","+customHeight+"))";
-        return xyz;
-    }
-
-    private JSONObject getParameters(HTMLReportMetadata htmlReportMetadata) {
-        JSONObject params;
-        JSONObject data = new JSONObject();
-        try {
-            Map<String, Object> jsonParams = new LinkedHashMap<String, Object>();
-            JSONObject seriesDefaults = new JSONObject();
-            seriesDefaults.put("renderer", "$.jqplot.PieRenderer");
-            JSONObject rendererOptions = new JSONObject();
-            rendererOptions.put("showDataLabels", "true");
-            seriesDefaults.put("rendererOptions", rendererOptions);
-            jsonParams.put("seriesDefaults", seriesDefaults);
-            jsonParams.put("legend", getLegend());
-            JSONObject grid = getGrid();
-            jsonParams.put("grid", grid);
-            JSONArray seriesColors = getSeriesColors();
-            jsonParams.put("seriesColors", seriesColors);
-            params = new JSONObject(jsonParams);
-            data.put("jqplotOptions", params);
-            JSONObject drillthrough = new JSONObject();
-            drillthrough.put("embedded", htmlReportMetadata.isEmbedded());
-            data.put("drillthrough", drillthrough);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        return data;
-    }
-
-    @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
-        pie.put("parameters", getParameters(htmlReportMetadata));
         pie.put("key", getUrlKey());
         pie.put("type", "pie");
         pie.put("styles", htmlReportMetadata.createStyleProperties());
-        pie.put("url", "/app/columnChart");
+        pie.put("url", "/app/pieChart");
         return pie;
     }
 }

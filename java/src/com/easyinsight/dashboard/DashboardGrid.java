@@ -282,55 +282,6 @@ public class DashboardGrid extends DashboardElement {
         return grid;
     }
 
-
-
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n<script type=\"text/javascript\">\n");
-        sb.append("function updateGrid").append(getElementID()).append("() {\n");
-        for (DashboardGridItem e : gridItems) {
-            DashboardElement element = e.getDashboardElement();
-            if (element != null) {
-                sb.append("\t").append(element.refreshFunction()).append(";\n");
-            }
-        }
-        sb.append("}\n");
-        sb.append("</script>\n");
-        sb.append("<div class=\"container-fluid\">\n");
-        for (int i = 0; i < rows; i++) {
-            if (i < (rows - 1)) {
-                sb.append("<div class=\"row-fluid\" style=\"margin-bottom:20px\">\n");
-            } else {
-                sb.append("<div class=\"row-fluid\">\n");
-            }
-
-            for (int j = 0; j < columns; j++) {
-                int span;
-                if (columns == 1) {
-                    span = 12;
-                } else if (columns == 2) {
-                    span = 6;
-                } else if (columns == 3) {
-                    span = 4;
-                } else if (columns == 4) {
-                    span = 3;
-                } else {
-                    span = 2;
-                }
-                sb.append("<div class=\"span").append(span).append("\" style=\"background-color:#FFFFFF\">");
-                DashboardGridItem item = findItem(i, j);
-                DashboardElement element = item.getDashboardElement();
-                if (element != null) {
-                    sb.append(element.toHTML(filterHTMLMetadata));
-                }
-                sb.append("</div>\r\n");
-            }
-            sb.append("</div>\r\n");
-        }
-        sb.append("</div>\n");
-        return sb.toString();
-    }
-
     private DashboardGridItem findItem(int x, int y) {
         for (DashboardGridItem e : gridItems) {
             if (e.getRowIndex() == x && e.getColumnIndex() == y) {
