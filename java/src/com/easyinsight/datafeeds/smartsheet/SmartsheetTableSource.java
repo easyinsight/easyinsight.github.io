@@ -2,31 +2,26 @@ package com.easyinsight.datafeeds.smartsheet;
 
 import com.braintreegateway.org.apache.commons.codec.binary.Hex;
 import com.easyinsight.analysis.*;
-import com.easyinsight.config.ConfigLoader;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
+import com.easyinsight.userupload.DataTypeGuesser;
 import net.minidev.json.parser.JSONParser;
-import org.apache.amber.oauth2.client.OAuthClient;
-import org.apache.amber.oauth2.client.URLConnectionClient;
-import org.apache.amber.oauth2.client.request.OAuthClientRequest;
-import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
-import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -48,6 +43,15 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
     private String refreshToken;
     private String accessToken;
     private String table;
+    private boolean rebuildFields = true;
+
+    public boolean isRebuildFields() {
+        return rebuildFields;
+    }
+
+    public void setRebuildFields(boolean rebuildFields) {
+        this.rebuildFields = rebuildFields;
+    }
 
     @Override
     protected void beforeRefresh(EIConnection conn) {
@@ -61,34 +65,87 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                 throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
             }
         }
+        if (rebuildFields) {
+            if (getDataFeedID() != 0) {
+                List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+                Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+                for (AnalysisItem analysisItem : getFields()) {
+                    fields.add(analysisItem);
+                    map.put(analysisItem.getKey().toKeyString(), analysisItem);
+                }
+                boolean discoveryRequired = false;
+                Map<String, AnalysisItem> newFields = new HashMap<String, AnalysisItem>();
+                List columns = (List) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table + "/columns");
+                for (Object o : columns) {
+                    Map column = (Map) o;
+                    String id = column.get("id").toString();
+                    AnalysisItem analysisItem = map.get(id);
+                    if (analysisItem == null) {
+                        String title = column.get("title").toString();
+                        String type = column.get("type").toString();
+                        if ("DATE".equals(type)) {
+                            AnalysisDateDimension date = new AnalysisDateDimension(new NamedKey(id), title, AnalysisDateDimension.DAY_LEVEL);
+                            date.setDateOnlyField(true);
+                            newFields.put(id, date);
+                        } else if ("DATETIME".equals(type)) {
+                            AnalysisDateDimension date = new AnalysisDateDimension(new NamedKey(id), title, AnalysisDateDimension.DAY_LEVEL);
+                            date.setDateOnlyField(false);
+                            newFields.put(id, date);
+                        } else {
+                            discoveryRequired = true;
+                            newFields.put(id, new AnalysisDimension(new NamedKey(id), title));
+                        }
+                    }
+                }
+                if (discoveryRequired) {
+                    Map results = (Map) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table);
+                    List rows = (List) results.get("rows");
+                    DataTypeGuesser guesser = new DataTypeGuesser();
+                    for (int i = 0; i < rows.size(); i++ ){
+                        Object obj = rows.get(i);
+
+                        Map rowMap = (Map) obj;
+                        List cells = (List) rowMap.get("cells");
+                        for (Object cellObj : cells) {
+                            Map cell = (Map) cellObj;
+                            String columnID = cell.get("columnId").toString();
+                            AnalysisItem testing = newFields.get(columnID);
+                            if (testing != null) {
+                                Object valueObj = cell.get("value");
+                                if (valueObj != null) {
+                                    String string = valueObj.toString();
+                                    guesser.addValue(testing.getKey(), new StringValue(string));
+                                }
+                            }
+                        }
+                        //for (AnalysisItem item : newFields.values()) {
+                        List<AnalysisItem> generatedFields = guesser.createFeedItems();
+                        for (AnalysisItem item : generatedFields) {
+                            AnalysisItem existing = newFields.get(item.getKey().toKeyString());
+                            item.setDisplayName(existing.getDisplayName());
+                        }
+                        fields.addAll(generatedFields);
+                        //}
+                    }
+                } else if (newFields.size() > 0) {
+                    fields.addAll(newFields.values());
+                }
+                rebuildFields = discoveryRequired;
+                cacheFields = fields;
+            }
+        }
     }
 
-    @Override
+    private List<AnalysisItem> cacheFields = new ArrayList<AnalysisItem>();
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        List columns = (List) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table + "/columns");
-        for (Object o : columns) {
-            Map column = (Map) o;
-            String id = column.get("id").toString();
-            String title = column.get("title").toString();
-            String type = column.get("type").toString();
-            Key key = keys.get(id);
-            if (key == null) {
-                key = new NamedKey(id);
-            }
-            AnalysisDimension dimension = new AnalysisDimension(key, title);
-            fields.add(dimension);
-            /*if ("TEXT_NUMBER".equals(type)) {
 
-            } else if ("PICKLIST".equals(type)) {
-
-            } else if ("DATE".equals(type)) {
-
-            } else if ("CHECKBOX".equals(type)) {
-
-            }*/
+        if (getDataFeedID() == 0) {
+            return fields;
         }
-        return fields;
+
+        return cacheFields;
     }
 
     @Override
@@ -98,7 +155,8 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
 
         DataSet dataSet = new DataSet();
 
-        for (Object obj : rows) {
+        for (int i = 0; i < rows.size(); i++ ){
+            Object obj = rows.get(i);
             IRow row = dataSet.createRow();
             Map rowMap = (Map) obj;
             List cells = (List) rowMap.get("cells");
@@ -143,11 +201,12 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SMARTSHEET (DATA_SOURCE_ID, ACCESS_TOKEN, REFRESH_TOKEN, sheet_id) VALUES (?, ?, ?, ?)");
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SMARTSHEET (DATA_SOURCE_ID, ACCESS_TOKEN, REFRESH_TOKEN, sheet_id, rebuild_fields) VALUES (?, ?, ?, ?, ?)");
         saveStmt.setLong(1, getDataFeedID());
         saveStmt.setString(2, accessToken);
         saveStmt.setString(3, refreshToken);
         saveStmt.setString(4, table);
+        saveStmt.setBoolean(5, rebuildFields);
         saveStmt.execute();
         saveStmt.close();
     }
@@ -155,14 +214,16 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCESS_TOKEN, REFRESH_TOKEN, sheet_id FROM SMARTSHEET WHERE data_source_id = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCESS_TOKEN, REFRESH_TOKEN, sheet_id, rebuild_fields FROM SMARTSHEET WHERE data_source_id = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             accessToken = rs.getString(1);
             refreshToken = rs.getString(2);
             table = rs.getString(3);
+            rebuildFields = rs.getBoolean(4);
         }
+        queryStmt.close();
     }
 
     public void refreshTokenInfo() throws OAuthSystemException, OAuthProblemException {
@@ -181,7 +242,6 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
             postMethod.setParameter("redirect_uri", "https://www.easy-insight.com/app/oauth");
             httpClient.executeMethod(postMethod);
             Map result = (Map) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(postMethod.getResponseBodyAsStream());
-            System.out.println("blah");
             if (result.containsKey("error")) {
                 throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize access to Smartsheet.", this));
             }
@@ -316,5 +376,32 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
             throw new RuntimeException("Smartsheet could not be reached due to a large number of current users, please try again in a bit.");
         }
         return jsonObject;
+    }
+
+    public void beforeSave(EIConnection conn) throws Exception {
+        super.beforeSave(conn);
+        //setRebuildFields(false);
+    }
+
+    public boolean rebuildFieldWindow() {
+        return true;
+    }
+
+    protected boolean otherwiseChanged() {
+        boolean blah = rebuildFields;
+        rebuildFields = false;
+        return blah;
+    }
+
+    public String postOAuthSetup(HttpServletRequest request) {
+        if (table == null || "".equals(table)) {
+            return RedirectUtil.getURL(request, "/app/html/dataSources/" + getApiKey() + "/smartsheetAccountSelection");
+        } else {
+            return null;
+        }
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
     }
 }
