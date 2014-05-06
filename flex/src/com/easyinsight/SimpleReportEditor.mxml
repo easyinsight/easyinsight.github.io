@@ -550,7 +550,7 @@
                     items.addItem(wrapper1.analysisItem);
                 }
                 analysisService.generateForAddons.send(analysisDefinition.joinOverrides, analysisDefinition.dataFeedID,
-                        items, newAddonReports, removedAddonReports);
+                        items, newAddonReports, removedAddonReports, analysisDefinition);
                 newAddonReports = null;
                 removedAddonReports = null;
                 neededAddonCount = 0;
