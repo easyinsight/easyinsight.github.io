@@ -1,11 +1,9 @@
 package com.easyinsight.datafeeds.composite;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataSourceInfo;
-import com.easyinsight.analysis.ReplacementMap;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -25,6 +23,15 @@ import java.util.*;
 public class FederatedDataSource extends FeedDefinition {
     private List<FederationSource> sources = new ArrayList<FederationSource>();
     private AnalysisItem analysisItem;
+    private String classifierName;
+
+    public String getClassifierName() {
+        return classifierName;
+    }
+
+    public void setClassifierName(String classifierName) {
+        this.classifierName = classifierName;
+    }
 
     @Override
     public int getDataSourceType() {
@@ -115,7 +122,7 @@ public class FederatedDataSource extends FeedDefinition {
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
         deleteStmt.close();
-        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO FEDERATED_DATA_SOURCE (DATA_SOURCE_ID, ANALYSIS_ITEM_ID) VALUES (?, ?)",
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO FEDERATED_DATA_SOURCE (DATA_SOURCE_ID, ANALYSIS_ITEM_ID, classifier_name) VALUES (?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         saveStmt.setLong(1, getDataFeedID());
         if (analysisItem == null) {
@@ -123,6 +130,7 @@ public class FederatedDataSource extends FeedDefinition {
         } else {
 
         }
+        saveStmt.setString(3, classifierName);
         saveStmt.execute();
         long id = Database.instance().getAutoGenKey(saveStmt);
         saveStmt.close();
@@ -130,11 +138,12 @@ public class FederatedDataSource extends FeedDefinition {
         clearMappingsStmt.setLong(1, getDataFeedID());
         clearMappingsStmt.executeUpdate();
         clearMappingsStmt.close();
-        PreparedStatement saveJoinStmt = conn.prepareStatement("INSERT INTO FEDERATED_DATA_SOURCE_TO_DATA_SOURCE (FEDERATED_DATA_SOURCE_ID, DATA_SOURCE_ID) VALUES (?, ?)");
+        PreparedStatement saveJoinStmt = conn.prepareStatement("INSERT INTO FEDERATED_DATA_SOURCE_TO_DATA_SOURCE (FEDERATED_DATA_SOURCE_ID, DATA_SOURCE_ID, analysis_item_value) VALUES (?, ?, ?)");
         PreparedStatement saveMappingsStmt = conn.prepareStatement("INSERT INTO FEDERATED_FIELD_MAPPING (federated_key, SOURCE_KEY, federated_data_source_id, data_source_id) VALUES (?, ?, ?, ?)");
         for (FederationSource source : sources) {
             saveJoinStmt.setLong(1, id);
             saveJoinStmt.setLong(2, source.getDataSourceID());
+            saveJoinStmt.setString(3, source.getValue());
             saveJoinStmt.execute();
             for (FieldMapping fieldMapping : source.getFieldMappings()) {
                 saveMappingsStmt.setString(1, fieldMapping.getFederatedKey());
@@ -150,7 +159,7 @@ public class FederatedDataSource extends FeedDefinition {
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        return new FederatedFeed(sources);
+        return new FederatedFeed(sources, classifierName);
     }
 
     @Override
@@ -161,13 +170,14 @@ public class FederatedDataSource extends FeedDefinition {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement getStmt = conn.prepareStatement("SELECT FEDERATED_DATA_SOURCE_ID FROM FEDERATED_DATA_SOURCE WHERE data_source_id = ?");
+        PreparedStatement getStmt = conn.prepareStatement("SELECT FEDERATED_DATA_SOURCE_ID, classifier_name FROM FEDERATED_DATA_SOURCE WHERE data_source_id = ?");
         getStmt.setLong(1, getDataFeedID());
         ResultSet rs = getStmt.executeQuery();
         List<FederationSource> sources = new ArrayList<FederationSource>();
         if (rs.next()) {
             long id = rs.getLong(1);
-            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, FEED_NAME, FEED_TYPE FROM FEDERATED_DATA_SOURCE_TO_DATA_SOURCE, DATA_FEED WHERE FEDERATED_DATA_SOURCE_ID = ? AND " +
+            this.classifierName = rs.getString(2);
+            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, FEED_NAME, FEED_TYPE, analysis_item_value FROM FEDERATED_DATA_SOURCE_TO_DATA_SOURCE, DATA_FEED WHERE FEDERATED_DATA_SOURCE_ID = ? AND " +
                     "DATA_SOURCE_ID = DATA_FEED_ID");
             PreparedStatement mappingStmt = conn.prepareStatement("SELECT FEDERATED_KEY, SOURCE_KEY FROM federated_field_mapping WHERE federated_data_source_id = ? AND data_source_id = ?");
             stmt.setLong(1, id);
@@ -177,6 +187,7 @@ public class FederatedDataSource extends FeedDefinition {
                 federationSource.setDataSourceID(fedRS.getLong(1));
                 federationSource.setName(fedRS.getString(2));
                 federationSource.setDataSourceType(fedRS.getInt(3));
+                federationSource.setValue(fedRS.getString(4));
                 sources.add(federationSource);
                 mappingStmt.setLong(1, getDataFeedID());
                 mappingStmt.setLong(2, federationSource.getDataSourceID());
@@ -223,6 +234,12 @@ public class FederatedDataSource extends FeedDefinition {
             }
         }
         setFolders(clonedFolders);
+        if (classifierName != null && !"".equals(classifierName)) {
+            AnalysisDimension classifier = new AnalysisDimension();
+            NamedKey namedKey = new NamedKey(classifierName);
+            classifier.setKey(namedKey);
+            getFields().add(classifier);
+        }
     }
 
     public void lookForNewFields(EIConnection conn) throws SQLException {

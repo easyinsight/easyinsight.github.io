@@ -19,15 +19,28 @@ import java.util.*;
 public class FederatedFeed extends Feed {
 
     private List<FederationSource> sources;
+    private String classifier;
 
-    public FederatedFeed(List<FederationSource> sources) {
+    public FederatedFeed(List<FederationSource> sources, String classifier) {
         this.sources = sources;
+        this.classifier = classifier;
     }
 
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             DataSet dataSet = new DataSet();
+
+            AnalysisItem classifierItem = null;
+            if (classifier != null && !"".equals(classifier)) {
+                for (AnalysisItem field : getFields()) {
+                    if (classifier.equals(field.toDisplay()) || classifier.equals(field.toOriginalDisplayName())) {
+                        classifierItem = field;
+                        break;
+                    }
+                }
+            }
+
             for (FederationSource source : sources) {
                 Feed feed = FeedRegistry.instance().getFeed(source.getDataSourceID(), conn);
 
@@ -106,7 +119,7 @@ public class FederatedFeed extends Feed {
                     }
                     if (!matched) {
                         for (FieldMapping fieldMapping : source.getFieldMappings()) {
-                            if (fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
+                            if (filter.getField() != null && fieldMapping.getFederatedKey().equals(filter.getField().toDisplay())) {
                                 for (AnalysisItem field : feed.getDataSource().getFields()) {
                                     if (field.toDisplay().equals(fieldMapping.getSourceKey())) {
                                         matched = true;
@@ -119,7 +132,7 @@ public class FederatedFeed extends Feed {
                     }
                     if (!matched) {
                         for (AnalysisItem field : feed.getDataSource().getFields()) {
-                            if (field.toDisplay().equals(filter.getField().toDisplay())) {
+                            if (filter.getField() != null && field.toDisplay().equals(filter.getField().toDisplay())) {
                                 backMap.put(filter, filter.getField());
                                 filter.setField(field);
                             }
@@ -137,6 +150,9 @@ public class FederatedFeed extends Feed {
 
                 for (IRow row : childSet.getRows()) {
                     IRow newRow = dataSet.createRow();
+                    if (classifierItem != null) {
+                        newRow.addValue(classifierItem.createAggregateKey(), source.getValue());
+                    }
                     for (Map.Entry<AnalysisItem, List<AnalysisItem>> entry : map.entrySet()) {
                         Value value = row.getValue(entry.getKey());
                         for (AnalysisItem valItem : entry.getValue()) {
