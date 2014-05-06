@@ -3366,6 +3366,24 @@ public class ExportService {
             sb.append(row.toHTML(tree, exportMetadata));
         }
 
+        if (tree.isSummaryTotal()) {
+            String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px";
+            sb.append("<tr>");
+            sb.append("<td style=\"" + tdStyle + "\"></td>");
+            Map<AnalysisItem, Aggregation> grandTotals = treeData.getGrandTotalTotals();
+            for (AnalysisItem reportItem : tree.getItems()) {
+                sb.append("<td style=\"" + tdStyle + "\">");
+                if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    Aggregation aggregation = grandTotals.get(reportItem);
+                    Value value = aggregation.getValue();
+
+                    sb.append(ExportService.createValue(exportMetadata, reportItem, value, false));
+                }
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+        }
+
         sb.append("</table>");
 
         return sb.toString();

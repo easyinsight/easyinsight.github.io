@@ -442,7 +442,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 } else {
                     deliveryName = deliveryInfo.getName();
                 }
-                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".xls", "application/xls"));
+                String ending;
+                if (deliveryInfo.getFormat() == ReportDelivery.EXCEL_2007) {
+                    ending = "xlsx";
+                } else {
+                    ending = "xls";
+                }
+                return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + "." + ending, "application/xls"));
             }
         } else if (deliveryInfo.getFormat() == ReportDelivery.HTML_TABLE) {
             if (deliveryInfo.getType() == DeliveryInfo.REPORT) {

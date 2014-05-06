@@ -53,6 +53,19 @@ public class TreeData {
             }
 
         }
+
+        if (treeDefinition.isSummaryTotal()) {
+            for (AnalysisItem reportItem : treeDefinition.getItems()) {
+                if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    Aggregation aggregation = new AggregationFactory((AnalysisMeasure) reportItem, false).getAggregation();
+                    grandTotalTotals.put(reportItem, aggregation);
+                }
+            }
+        }
+    }
+
+    public Map<AnalysisItem, Aggregation> getGrandTotalTotals() {
+        return grandTotalTotals;
     }
 
     private int getComparison(AnalysisItem field, Value value1, Value value2) {
@@ -113,6 +126,8 @@ public class TreeData {
     }
 
     private Map<Value, Argh> map = new LinkedHashMap<Value, Argh>();
+
+    private Map<AnalysisItem, Aggregation> grandTotalTotals = new HashMap<AnalysisItem, Aggregation>();
 
     public void addRow(IRow row) {
         AnalysisItem analysisItem = hierarchy.getHierarchyLevels().get(0).getAnalysisItem();
@@ -233,6 +248,8 @@ public class TreeData {
                 }
             });
 
+
+
             boolean addSummaryRow = (treeDefinition instanceof WSSummaryDefinition) && treeDefinition.isHeaderMode();
             if (addSummaryRow) {
                 TreeRow summaryRow = new TreeRow();
@@ -277,6 +294,16 @@ public class TreeData {
                                 treeRow.getValues().put(analysisItem.qualifiedName(), aggregateLevel.getValue(analysisItem.createAggregateKey()));
                             }
                         }
+                    }
+                }
+            }
+
+            if (treeDefinition.isSummaryTotal()) {
+                for (AnalysisItem reportItem : treeDefinition.getItems()) {
+                    if (reportItem.hasType(AnalysisItemTypes.MEASURE) && aggregateLevel != null) {
+                        Value aggregateValue = aggregateLevel.getValue(reportItem);
+                        Aggregation aggregation = grandTotalTotals.get(reportItem);
+                        aggregation.addValue(aggregateValue);
                     }
                 }
             }
