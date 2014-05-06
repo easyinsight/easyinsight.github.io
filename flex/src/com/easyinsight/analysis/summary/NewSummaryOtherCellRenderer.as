@@ -181,10 +181,13 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
 
         _valText = text;
 
-        var rext:TextReportFieldExtension = treeRow.groupingField.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
-        if (rext != null && rext.align != null) {
-            align = rext.align.toLowerCase();
+        if (treeRow.groupingField != null) {
+            var rext:TextReportFieldExtension = treeRow.groupingField.reportFieldExtension as TextReportFieldExtension;
+
+            if (rext != null && rext.align != null) {
+                align = rext.align.toLowerCase();
+            }
         }
         var fontName:String = _report.getFont();
         if (_report.getFont() == "Open Sans" && !bold) {
