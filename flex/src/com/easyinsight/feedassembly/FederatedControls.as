@@ -7,16 +7,19 @@
  */
 package com.easyinsight.feedassembly {
 import com.easyinsight.skin.ImageConstants;
+import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
 import mx.controls.Button;
+import mx.managers.PopUpManager;
 
 public class FederatedControls extends HBox {
 
 
 
+    private var editButton:Button;
     private var deleteButton:Button;
 
     private var source:FederationSource;
@@ -27,7 +30,19 @@ public class FederatedControls extends HBox {
         deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         deleteButton.toolTip = "Delete";
+
+        editButton = new Button();
+        editButton.setStyle("icon", ImageConstants.EDIT_ICON);
+        editButton.addEventListener(MouseEvent.CLICK, onEdit);
+        editButton.toolTip = "Edit";
         setStyle("horizontalAlign", "center");
+    }
+
+    private function onEdit(event:MouseEvent):void {
+        var window:FedEditWindow = new FedEditWindow();
+        window.fedSource = source;
+        PopUpManager.addPopUp(window,  this, true);
+        PopUpUtil.centerPopUp(window);
     }
 
     private function onDelete(event:MouseEvent):void {
@@ -36,6 +51,7 @@ public class FederatedControls extends HBox {
 
     override protected function createChildren():void {
         super.createChildren();
+        addChild(editButton);
         addChild(deleteButton);
     }
 
