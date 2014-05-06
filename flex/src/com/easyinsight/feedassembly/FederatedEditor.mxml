@@ -26,6 +26,15 @@
             }
             if (_federatedSource != null) {
                 initialSetup(_federatedSource);
+
+                if (_federatedSource.classifierName != null && _federatedSource.classifierName != "") {
+                    var columns:ArrayCollection = new ArrayCollection(dataSourceGrid.columns);
+                    var column:EIDataGridColumn = new EIDataGridColumn();
+                    column.headerText = "Classifier";
+                    column.dataField = "value";
+                    columns.addItemAt(column, 1);
+                    dataSourceGrid.columns = columns.toArray();
+                }
                 feedService.getDataSourcesForFederated.send(_federatedSource.dataFeedID);
             }
         }
@@ -240,10 +249,10 @@
         <mx:method name="getDataSourcesForFederated" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:Button label="Add Data Source..." click="addDataSource()" styleName="grayButton"/>
-    <mx:DataGrid dataProvider="{dataSources}" rowHeight="28">
+    <mx:DataGrid dataProvider="{dataSources}" rowHeight="28" id="dataSourceGrid">
         <mx:columns>
             <util:EIDataGridColumn headerText="Data Source" dataField="name" width="400"/>
-            <util:EIDataGridColumn width="50" sortable="false" dataField="name" headerText="" itemRenderer="com.easyinsight.feedassembly.FederatedControls"/>
+            <util:EIDataGridColumn width="120" sortable="false" dataField="name" headerText="" itemRenderer="com.easyinsight.feedassembly.FederatedControls"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:ComboBox id="dataSourceChoice" dataProvider="{dataSources}" labelField="name" change="createColumns()"/>

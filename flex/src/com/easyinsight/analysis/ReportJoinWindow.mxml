@@ -65,6 +65,7 @@
             configurableDataSources = results.configurableDataSources;
             if (startJoins != null && startJoins.length > 0) {
                 usingCustomized = "This report is using previously customized joins instead of data source defaults.";
+                changed = true;
                 for each (var joinOverride:JoinOverride in startJoins) {
                     if (joinOverride.dataSourceID == 0) {
                         joinOverride.dataSourceID = DataSourceDescriptor(configurableDataSources.getItemAt(0)).id;
