@@ -1183,10 +1183,11 @@ public class FeedService {
         }
     }
 
-    public FederatedDataSource createFederatedDataSource(List<FederationSource> sources, String name) {
+    public FederatedDataSource createFederatedDataSource(List<FederationSource> sources, String name, String classifier) {
         EIConnection conn = Database.instance().getConnection();
         try {
             FederatedDataSource federatedDataSource = new FederatedDataSource();
+            federatedDataSource.setClassifierName(classifier);
             federatedDataSource.setFeedName(name);
             federatedDataSource.setAccountVisible(true);
             federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
@@ -1640,6 +1641,8 @@ public class FeedService {
                     updateStmt.executeUpdate();
                 }
             }
+            insertStmt.close();
+            updateStmt.close();
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO LOOKUP_PAIR (LOOKUP_TABLE_ID," +
                     "SOURCE_VALUE, TARGET_MEASURE) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -1676,6 +1679,8 @@ public class FeedService {
                     updateStmt.executeUpdate();
                 }
             }
+            insertStmt.close();
+            updateStmt.close();
         }
     }
 
