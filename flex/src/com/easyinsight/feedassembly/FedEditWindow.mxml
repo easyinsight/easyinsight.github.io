@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        public var fedSource:FederationSource;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            classifierValue = fedSource.value;
+        }
+
+        [Bindable]
+        private var classifierValue:String;
+
+        private function save():void {
+            fedSource.value = classifierInput.text;
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Classifier:">
+            <mx:TextInput id="classifierInput" text="{classifierValue}"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

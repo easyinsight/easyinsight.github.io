@@ -18,7 +18,7 @@
             var results:Array = Validator.validateAll(validators);
             if (results.length == 0) {
                 ProgressAlert.alert(this, "Saving...", "Saved!", feedService.createFederatedDataSource);
-                feedService.createFederatedDataSource(sources, dataSourceName.text);
+                feedService.createFederatedDataSource(sources, dataSourceName.text, classifierCheckbox.selected ? classifierNameInput.text : null);
             } else {
                 Alert.show("You must enter a name of at least three characters for the data source.");
             }
@@ -44,6 +44,12 @@
     <mx:Form>
         <mx:FormItem label="Data Source Name:" direction="horizontal">
             <mx:TextInput id="dataSourceName"/>
+        </mx:FormItem>
+        <mx:FormItem label="Do you want a field to distinguish between the different federated sources?">
+            <mx:CheckBox id="classifierCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="What should the field be named?" enabled="{classifierCheckbox.selected}">
+            <mx:TextInput id="classifierNameInput"/>
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
             <util:SaveButton label="Save" click="save()"/>

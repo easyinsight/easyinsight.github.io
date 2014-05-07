@@ -19,6 +19,7 @@ public class FederatedDataSource extends FeedDefinitionData {
 
     public var sources:ArrayCollection;
     public var analysisItem:AnalysisItem;
+    public var classifierName:String;
 
     public function FederatedDataSource() {
     }
