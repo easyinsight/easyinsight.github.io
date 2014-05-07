@@ -2335,9 +2335,9 @@ public class DataService {
                 if (item.getOrigin() != null) {
                     if (item.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
                         iter.remove();
-                    } else if (item.getOrigin().getAdditionalReports() != null && item.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
+                    } /*else if (item.getOrigin().getAdditionalReports() != null && item.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
                         iter.remove();
-                    }
+                    }*/
                 }
             }
 
