@@ -91,5 +91,5 @@
                 }
             }
         }]]></mx:Script>
-    <mx:Label text="{sourceText}" width="300" id="sourceInput"/>
+    <mx:Text text="{sourceText}" width="450" id="sourceInput"/>
 </mx:HBox>
