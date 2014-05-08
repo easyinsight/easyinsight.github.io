@@ -97,7 +97,7 @@
                                     <%
                                         if (accountReport.getType() == EIDescriptor.REPORT) {
                                     %>
-                                    <a href="reports/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getName())%>
+                                    <a href="report/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getName())%>
                                     </a>
                                     <%
                                     } else if (accountReport.getType() == EIDescriptor.DASHBOARD) {
@@ -112,7 +112,7 @@
                                     <%
                                         if (accountReport.getType() == EIDescriptor.REPORT) {
                                     %>
-                                    <a href="reports/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getDescription())%>
+                                    <a href="report/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getDescription())%>
                                     </a>
                                     <%
                                     } else if (accountReport.getType() == EIDescriptor.DASHBOARD) {
