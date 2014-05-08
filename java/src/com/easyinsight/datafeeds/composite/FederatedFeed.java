@@ -33,12 +33,21 @@ public class FederatedFeed extends Feed {
 
             AnalysisItem classifierItem = null;
             if (classifier != null && !"".equals(classifier)) {
-                for (AnalysisItem field : getFields()) {
+                for (AnalysisItem field : analysisItems) {
                     if (classifier.equals(field.toDisplay()) || classifier.equals(field.toOriginalDisplayName())) {
                         classifierItem = field;
                         break;
                     }
                 }
+            }
+
+            if (analysisItems.size() == 1 && classifierItem != null) {
+
+                for (FederationSource source : sources) {
+                    IRow row = dataSet.createRow();
+                    row.addValue(classifierItem.createAggregateKey(), source.getValue());
+                }
+                return dataSet;
             }
 
             for (FederationSource source : sources) {
