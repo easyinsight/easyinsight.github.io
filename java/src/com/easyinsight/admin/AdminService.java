@@ -44,7 +44,7 @@ public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
-    public void copyUserPasswords() {
+    public void testUserPasswords() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -73,6 +73,47 @@ public class AdminService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void copyUserPasswords() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("SELECT EMAIL, USERNAME, USER_ID FROM USER WHERE ACCOUNT_ID = ?");
+            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_ID, PASSWORD, EMAIL FROM USER WHERE EMAIL = ?");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE USER SET PASSWORD = ? WHERE USER_ID = ?");
+            stmt.setLong(1, 6378);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String email = rs.getString(1);
+                long userID = rs.getLong(2);
+                if (email.endsWith("copy")) {
+                    String searchEmail = email.substring(0, email.length() - "copy".length());
+                    userStmt.setString(1, searchEmail);
+                    ResultSet searchRS = userStmt.executeQuery();
+                    if (searchRS.next()) {
+                        long sourceUserID = searchRS.getLong(1);
+                        String password = searchRS.getString(2);
+                        String sourceEmail = searchRS.getString(3);
+
+                        System.out.println("Copying the password of " + sourceEmail + " with user ID " + userID + " to " +
+                                email + " with user ID " + sourceUserID + ", rename source user, update username and email of target user.");
+                        updateStmt.setString(1, password);
+                        updateStmt.setLong(2, userID);
+                        updateStmt.executeUpdate();
+                    }
+                }
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
