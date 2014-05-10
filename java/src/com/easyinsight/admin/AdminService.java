@@ -52,20 +52,26 @@ public class AdminService {
             PreparedStatement userStmt = conn.prepareStatement("SELECT USER_ID, PASSWORD, EMAIL FROM USER WHERE EMAIL = ?");
             //PreparedStatement updateStmt = conn.prepareStatement("UPDATE USER SET PASSWORD = ? WHERE USER_ID = ?");
             stmt.setLong(1, 6378);
+
+            // for each user in account 6378, find the email, username, ID
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                String email = rs.getString(1);
-                long userID = rs.getLong(2);
-                if (email.endsWith("copy")) {
-                    String searchEmail = email.substring(0, email.length() - "copy".length());
+                String targetEmail = rs.getString(1);
+                String targetUserName = rs.getString(2);
+                long targetUserID = rs.getLong(3);
+                if (targetEmail.endsWith("copy")) {
+                    String searchEmail = targetEmail.substring(0, targetEmail.length() - "copy".length());
+                    targetUserName = targetUserName.substring(0, targetUserName.length() - "copy".length());
+
                     userStmt.setString(1, searchEmail);
                     ResultSet searchRS = userStmt.executeQuery();
                     if (searchRS.next()) {
                         long sourceUserID = searchRS.getLong(1);
                         String password = searchRS.getString(2);
                         String sourceEmail = searchRS.getString(3);
-                        System.out.println("Will copy the password of " + sourceEmail + " with user ID " + userID + " to " +
-                                email + " with user ID " + sourceUserID + ", rename source user, update username and email of target user.");
+                        System.out.println("Will copy the password of " + sourceEmail + " with user ID " + sourceUserID + " to " +
+                                targetEmail + " with user ID " + targetUserID + ", rename source user, update username and email of target user.");
                     }
                 }
             }
@@ -83,26 +89,41 @@ public class AdminService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement stmt = conn.prepareStatement("SELECT EMAIL, USERNAME, USER_ID FROM USER WHERE ACCOUNT_ID = ?");
-            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_ID, PASSWORD, EMAIL FROM USER WHERE EMAIL = ?");
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE USER SET PASSWORD = ? WHERE USER_ID = ?");
+            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_ID, PASSWORD, EMAIL, USERNAME FROM USER WHERE EMAIL = ?");
+            PreparedStatement updateNameStmt = conn.prepareStatement("UPDATE USER SET EMAIL = ?, USERNAME = ? WHERE USER_ID = ?");
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE USER SET PASSWORD = ?, EMAIL = ?, USERNAME = ? WHERE USER_ID = ?");
             stmt.setLong(1, 6378);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                String email = rs.getString(1);
-                long userID = rs.getLong(2);
-                if (email.endsWith("copy")) {
-                    String searchEmail = email.substring(0, email.length() - "copy".length());
+                String targetEmail = rs.getString(1);
+                String targetUserName = rs.getString(2);
+                long targetUserID = rs.getLong(3);
+                if (targetEmail.endsWith("copy")) {
+                    String searchEmail = targetEmail.substring(0, targetEmail.length() - "copy".length());
+                    targetUserName = targetUserName.substring(0, targetUserName.length() - "copy".length());
+
                     userStmt.setString(1, searchEmail);
                     ResultSet searchRS = userStmt.executeQuery();
                     if (searchRS.next()) {
                         long sourceUserID = searchRS.getLong(1);
                         String password = searchRS.getString(2);
                         String sourceEmail = searchRS.getString(3);
+                        String userName = searchRS.getString(4);
+                        System.out.println("Will copy the password of " + sourceEmail + " with user ID " + sourceUserID + " to " +
+                                targetEmail + " with user ID " + targetUserID + ", rename source user, update username and email of target user.");
 
-                        System.out.println("Copying the password of " + sourceEmail + " with user ID " + userID + " to " +
-                                email + " with user ID " + sourceUserID + ", rename source user, update username and email of target user.");
+                        String copiedEmail = sourceEmail + "copied";
+                        String copiedUserName = userName + "copied";
+
+                        updateNameStmt.setString(1, copiedEmail);
+                        updateNameStmt.setString(2, copiedUserName);
+                        updateNameStmt.setLong(3, sourceUserID);
+                        updateNameStmt.executeUpdate();
+
                         updateStmt.setString(1, password);
-                        updateStmt.setLong(2, userID);
+                        updateStmt.setString(2, searchEmail);
+                        updateStmt.setString(3, targetUserName);
+                        updateStmt.setLong(4, sourceUserID);
                         updateStmt.executeUpdate();
                     }
                 }
