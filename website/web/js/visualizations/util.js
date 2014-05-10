@@ -17,6 +17,25 @@ Utils = {
                 afterRefresh();
             }
         }
+    },
+
+    noDataD3:function (data, f, cleanup, target) {
+
+        if ((data instanceof Array && data.length > 0)) {
+            $("#" + target + " .reportArea").show();
+            $("#" + target + " .noData").hide();
+            f();
+        } else {
+            $("#" + target + " .reportArea").hide();
+            $("#" + target + " .noData").show();
+        }
+        if(typeof(afterRefresh) != "undefined") {
+            if(afterRefresh.length > 0) {
+                afterRefresh($("#" + target + " .loading"))();
+            } else {
+                afterRefresh();
+            }
+        }
     }
 };
 
