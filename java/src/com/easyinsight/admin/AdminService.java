@@ -109,7 +109,7 @@ public class AdminService {
                         String password = searchRS.getString(2);
                         String sourceEmail = searchRS.getString(3);
                         String userName = searchRS.getString(4);
-                        System.out.println("Will copy the password of " + sourceEmail + " with user ID " + sourceUserID + " to " +
+                        System.out.println("Copying the password of " + sourceEmail + " with user ID " + sourceUserID + " to " +
                                 targetEmail + " with user ID " + targetUserID + ", rename source user, update username and email of target user.");
 
                         String copiedEmail = sourceEmail + "copied";
@@ -118,13 +118,15 @@ public class AdminService {
                         updateNameStmt.setString(1, copiedEmail);
                         updateNameStmt.setString(2, copiedUserName);
                         updateNameStmt.setLong(3, sourceUserID);
-                        updateNameStmt.executeUpdate();
+                        int rows = updateNameStmt.executeUpdate();
+                        System.out.println("rows = " + rows);
 
                         updateStmt.setString(1, password);
                         updateStmt.setString(2, searchEmail);
                         updateStmt.setString(3, targetUserName);
-                        updateStmt.setLong(4, sourceUserID);
-                        updateStmt.executeUpdate();
+                        updateStmt.setLong(4, targetUserID);
+                        int rows2 = updateStmt.executeUpdate();
+                        System.out.println("rows2 = " + rows2);
                     }
                 }
             }
