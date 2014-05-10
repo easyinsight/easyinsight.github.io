@@ -13,7 +13,8 @@
                         <mx:HBox>
                             <mx:Button label="Thread Dump" click="dumpThreads()"/>
                             <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
-                            <mx:Button label="Nuke" click="nuke()"/>
+                            <mx:Button label="ACS Test" click="acstest()"/>
+                            <mx:Button label="ACS Copy" click="acscopy()"/>
                         </mx:HBox>
                         <mx:HBox>
                             <mx:Button label="Apply Days" click="applyDays()"/>
@@ -95,6 +96,16 @@
         private function argh():void {
             ProgressAlert.alert(this, "Forcing trials to expire...", null, adminService.argh);
             adminService.argh.send();
+        }
+
+        private function acstest():void {
+            ProgressAlert.alert(this, "Testing...", null, adminService.testUserPasswords);
+            adminService.testUserPasswords.send();
+        }
+
+        private function acscopy():void {
+            ProgressAlert.alert(this, "Copying...", null, adminService.copyUserPasswords);
+            adminService.copyUserPasswords.send();
         }
 
         private function syncInvoices():void {
