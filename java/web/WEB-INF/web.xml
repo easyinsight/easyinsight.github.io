@@ -446,6 +446,12 @@
         <servlet-class>com.easyinsight.api.v3.DefineCompositeDataSourceServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>TriggerCache</servlet-name>
+        <display-name>TriggerCache</display-name>
+        <servlet-class>com.easyinsight.datafeeds.CacheServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DeleteDataSource</servlet-name>
         <display-name>DeleteDataSource</display-name>
@@ -481,6 +487,12 @@
         <servlet-name>DrillThrough</servlet-name>
         <display-name>DrillThrough</display-name>
         <servlet-class>com.easyinsight.html.DrillthroughServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>HeatMap</servlet-name>
+        <display-name>HeatMap</display-name>
+        <servlet-class>com.easyinsight.html.HeatMapServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -912,6 +924,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>TriggerCache</servlet-name>
+        <url-pattern>/triggerCache</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>AddRows</servlet-name>
         <url-pattern>/xml/addRows</url-pattern>
     </servlet-mapping>
@@ -979,6 +996,11 @@
     <servlet-mapping>
         <servlet-name>PlotChart</servlet-name>
         <url-pattern>/plotChart</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HeatMap</servlet-name>
+        <url-pattern>/heatMap</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
