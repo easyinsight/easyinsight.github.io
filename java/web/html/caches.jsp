@@ -44,6 +44,7 @@
                 <thead>
                     <tr>
                         <th>Report Name</th>
+                        <th></th>
                         <th>Last Run</th>
                         <th>Scheduled to Run</th>
                         <th>Used In</th>
@@ -62,10 +63,10 @@
 
                     PreparedStatement ps;
                     if (accountTier == Account.ADMINISTRATOR) {
-                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, ANALYSIS.TITLE FROM DATA_FEED, cached_addon_report_source, analysis WHERE " +
+                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, ANALYSIS.TITLE, DATA_FEED.API_KEY FROM DATA_FEED, cached_addon_report_source, analysis WHERE " +
                                 "cached_addon_report_source.data_source_id = data_feed.data_feed_id AND cached_addon_report_source.report_id = analysis.analysis_id");
                     } else {
-                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, ANALYSIS.TITLE FROM DATA_FEED, cached_addon_report_source, analysis, upload_policy_users, user WHERE " +
+                        ps = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, LAST_REFRESH_START, ANALYSIS_ID, ANALYSIS.TITLE, DATA_FEED.API_KEY FROM DATA_FEED, cached_addon_report_source, analysis, upload_policy_users, user WHERE " +
                                 "cached_addon_report_source.data_source_id = data_feed.data_feed_id AND data_feed.data_feed_id = upload_policy_users.feed_id and " +
                                 "upload_policy_users.user_id = user.user_id and user.account_id = ? AND cached_addon_report_source.report_id = analysis.analysis_id");
                         ps.setLong(1, SecurityUtil.getAccountID());
@@ -83,6 +84,7 @@
                         Date lastRefreshStart = rs.getTimestamp(3);
                         long baseReportID = rs.getLong(4);
                         String baseReportName = rs.getString(5);
+                        String dsURLKey = rs.getString(6);
                         findStmt.setLong(1, id);
                         ResultSet cacheRS = findStmt.executeQuery();
                         Date cacheTime = null;
@@ -105,6 +107,9 @@
                 <tr>
                     <td>
                         <%= baseReportName %>
+                    </td>
+                    <td>
+                        <a href="/app/triggerCache?dataSourceID=<%= dsURLKey %>">Trigger Cache Rebuild</a>
                     </td>
                     <td>
                         <%= lastRefreshStart == null ? "" : dateFormat.format(lastRefreshStart) %>
