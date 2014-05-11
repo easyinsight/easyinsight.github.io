@@ -105,13 +105,16 @@ public class AdminService {
 
                     userStmt.setString(1, searchEmail);
                     userStmt.setLong(2, 6378);
-                    System.out.println("looking for email " + searchEmail);
+                    //System.out.println("looking for email " + searchEmail);
                     ResultSet searchRS = userStmt.executeQuery();
                     if (searchRS.next()) {
                         long sourceUserID = searchRS.getLong(1);
                         //String password = searchRS.getString(2);
                         //String sourceEmail = searchRS.getString(3);
                         String userName = searchRS.getString(2);
+                        if (userName.equals(targetUserName)) {
+                            continue;
+                        }
                         System.out.println("Will copy the username of " + targetUserName + " from user ID " + targetUserID + " to " +
                                 sourceUserID + " with email  " + searchEmail + " who has username as is of " + userName);
 
@@ -155,13 +158,16 @@ public class AdminService {
 
                     userStmt.setString(1, searchEmail);
                     userStmt.setLong(2, 6378);
-                    System.out.println("looking for email " + searchEmail);
+                    //System.out.println("looking for email " + searchEmail);
                     ResultSet searchRS = userStmt.executeQuery();
                     if (searchRS.next()) {
                         long sourceUserID = searchRS.getLong(1);
                         //String password = searchRS.getString(2);
                         //String sourceEmail = searchRS.getString(3);
                         String userName = searchRS.getString(2);
+                        if (userName.equals(targetUserName)) {
+                            continue;
+                        }
                         System.out.println("Will copy the username of " + targetUserName + " from user ID " + targetUserID + " to " +
                                 sourceUserID + " with email  " + searchEmail + " who has username as is of " + userName);
 
