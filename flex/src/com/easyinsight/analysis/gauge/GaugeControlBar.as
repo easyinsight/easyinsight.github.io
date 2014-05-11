@@ -16,14 +16,15 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Button;
+import mx.containers.VBox;
+
 import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.controls.TextInput;
 public class GaugeControlBar extends ReportControlBar implements IReportControlBar {
 
     private var measureGrouping:ListDropAreaGrouping;
-    private var benchmarkGrouping:ListDropAreaGrouping;
+    private var maxValueGrouping:ListDropAreaGrouping;
     private var maxValueInput:TextInput;
     private var gaugeTypeBox:ComboBox;
     private var gaugeDefinition:GaugeDefinition;
@@ -33,10 +34,15 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
         measureGrouping.maxElements = 1;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
-        benchmarkGrouping = new ListDropAreaGrouping();
-        benchmarkGrouping.maxElements = 1;
-        benchmarkGrouping.dropAreaType = MeasureDropArea;
-        benchmarkGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+
+
+        maxValueGrouping = new ListDropAreaGrouping();
+        maxValueGrouping.maxElements = 1;
+        maxValueGrouping.dropAreaType = MeasureDropArea;
+        maxValueGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+
+
+
         maxValueInput = new TextInput();
         gaugeTypeBox = new ComboBox();
         gaugeTypeBox.dataProvider = new ArrayCollection( [{label: "Circular Gauge", type: GaugeDefinition.CIRCULAR_GAUGE},
@@ -54,34 +60,38 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
 
     override protected function createChildren():void {
         super.createChildren();
-        /*var gaugeLabel:Label = new Label();
-        gaugeLabel.text = "Gauge Type: ";
-        addChild(gaugeLabel);
-        addChild(gaugeTypeBox);*/
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure: ";
         addChild(measureLabel);
         addDropAreaGrouping(measureGrouping);
 
-        var benchmarkLabel:Label = new Label();
-        benchmarkLabel.text = "Benchmark: ";
-        addChild(benchmarkLabel);
-        addDropAreaGrouping(benchmarkGrouping);
+
+        var valueBox:VBox = new VBox();
+
+
+        var maxValueGroupingLabel:Label = new Label();
+        maxValueGroupingLabel.text = "Max Value Measure: ";
+        var hb1:HBox = new HBox();
+        hb1.addChild(maxValueGroupingLabel);
+        addDropAreaGrouping(maxValueGrouping, hb1);
+
+        valueBox.addChild(hb1);
 
         var maxValueLabel:Label = new Label();
         maxValueLabel.text = "Max Value: ";
-        addChild(maxValueLabel);
-        addChild(maxValueInput);
-        var applyButton:Button = new Button();
-        applyButton.label = "Apply Changes";
-        applyButton.addEventListener(MouseEvent.CLICK, onApplyClick);
-        addChild(applyButton);
-        //maxValueInput.addEventListener(Event.CHANGE, onMaxValueChange);
+        var hb2:HBox = new HBox();
+        hb2.addChild(maxValueLabel);
+        hb2.addChild(maxValueInput);
+
+        valueBox.addChild(hb2);
+
+        addChild(valueBox);
+
         if (gaugeDefinition.measure != null) {
             measureGrouping.addAnalysisItem(gaugeDefinition.measure);
         }
-        if (gaugeDefinition.benchmarkMeasure != null) {
-            benchmarkGrouping.addAnalysisItem(gaugeDefinition.benchmarkMeasure);
+        if (gaugeDefinition.maxValueMeasure != null) {
+            maxValueGrouping.addAnalysisItem(gaugeDefinition.maxValueMeasure);
         }
         maxValueInput.text = String(gaugeDefinition.maxValue);
     }
@@ -104,19 +114,20 @@ public class GaugeControlBar extends ReportControlBar implements IReportControlB
 
     public function createAnalysisDefinition():AnalysisDefinition {
         gaugeDefinition.measure = measureGrouping.getListColumns()[0];
-        if (benchmarkGrouping.getListColumns().length > 0) {
-            gaugeDefinition.benchmarkMeasure = benchmarkGrouping.getListColumns()[0];
+
+        if (maxValueGrouping.getListColumns().length > 0) {
+            gaugeDefinition.maxValueMeasure = maxValueGrouping.getListColumns()[0];
         } else {
-            gaugeDefinition.benchmarkMeasure = null;
+            gaugeDefinition.maxValueMeasure = null;
         }
-        gaugeDefinition.gaugeType = GaugeDefinition.CIRCULAR_GAUGE;
+
         gaugeDefinition.maxValue = int(maxValueInput.text);
         return gaugeDefinition;
     }
 
     public function isDataValid():Boolean {
         var value:int = int(maxValueInput.text);
-        return (measureGrouping.getListColumns().length > 0 && value > 0);
+        return (measureGrouping.getListColumns().length > 0 && (value > 0 || maxValueGrouping.getListColumns().length > 0));
     }
 
     public function addItem(analysisItem:AnalysisItem):void {

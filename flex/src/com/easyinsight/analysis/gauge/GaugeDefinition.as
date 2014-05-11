@@ -12,8 +12,11 @@ public class GaugeDefinition extends AnalysisDefinition {
 
     public var measure:AnalysisItem;
     public var benchmarkMeasure:AnalysisItem;
-    public var gaugeType:int = CIRCULAR_GAUGE;
+    public var gaugeModel:String = "Gauge";
     public var gaugeDefinitionID:int;
+    public var alert2Measure:AnalysisItem;
+    public var alert1Measure:AnalysisItem;
+    public var maxValueMeasure:AnalysisItem;
     public var maxValue:int;
     public var alertPoint1:Number = 0;
     public var alertPoint2:Number = 0;

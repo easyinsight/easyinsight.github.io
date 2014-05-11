@@ -50,10 +50,26 @@
             gaugeDefinition = analysisDefinition as GaugeDefinition;
             if (dataSet.length > 0) {
                 var row:Object = dataSet.getItemAt(0);
-                maxValue = gaugeDefinition.maxValue;
+                if (gaugeDefinition.maxValueMeasure != null) {
+                    maxValue = row[gaugeDefinition.maxValueMeasure.qualifiedName()];
+                } else {
+                    maxValue = gaugeDefinition.maxValue;
+                }
                 var reportVal:Number = Number(row[gaugeDefinition.measure.qualifiedName()]);
                 value = Math.min(maxValue, reportVal);
-                gauge.alertRatios = [ gaugeDefinition.alertPoint1, gaugeDefinition.alertPoint2 ];
+                var alert1:Number;
+                var alert2:Number;
+                if (gaugeDefinition.alert1Measure != null) {
+                    alert1 = row[gaugeDefinition.alert1Measure.qualifiedName()];
+                } else {
+                    alert1 = gaugeDefinition.alertPoint1;
+                }
+                if (gaugeDefinition.alert2Measure != null) {
+                    alert2 = row[gaugeDefinition.alert2Measure.qualifiedName()];
+                } else {
+                    alert2 = gaugeDefinition.alertPoint2;
+                }
+                gauge.alertRatios = [ alert1, alert2 ];
                 gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2, gaugeDefinition.color3 ];
                 numFormatter = gaugeDefinition.measure.getFormatter();
                 if (gaugeDefinition.benchmarkMeasure != null) {
