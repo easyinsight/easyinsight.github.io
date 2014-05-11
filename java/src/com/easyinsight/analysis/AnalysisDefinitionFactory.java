@@ -53,7 +53,6 @@ public class AnalysisDefinitionFactory {
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.GAUGE)) {
             WSGaugeDefinition wsGauge = (WSGaugeDefinition) wsAnalysisDefinition;
             GaugeDefinitionState gaugeDefinition = new GaugeDefinitionState();
-            gaugeDefinition.setGaugeType(wsGauge.getGaugeType());
             gaugeDefinition.setMaxValue(wsGauge.getMaxValue());
             gaugeDefinition.setGaugeDefinitionID(wsGauge.getGaugeDefinitionID());
             analysisDefinitionState = gaugeDefinition;

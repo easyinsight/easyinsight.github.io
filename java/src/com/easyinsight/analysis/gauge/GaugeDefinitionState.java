@@ -72,7 +72,6 @@ public class GaugeDefinitionState extends AnalysisDefinitionState {
 
     public WSAnalysisDefinition createWSDefinition() {
         WSGaugeDefinition wsGaugeDefinition = new WSGaugeDefinition();
-        wsGaugeDefinition.setGaugeType(gaugeType);
         wsGaugeDefinition.setGaugeDefinitionID(gaugeDefinitionID);
         wsGaugeDefinition.setMaxValue(maxValue);
         return wsGaugeDefinition;
