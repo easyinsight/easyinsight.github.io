@@ -29,12 +29,21 @@ public class TreeRow {
     private AnalysisItem groupingField;
     private Integer backgroundColor;
     private Integer textColor;
+    private int depth;
 
     public Value sortValue() {
         if (sortColumn != null) {
             return sortColumn;
         }
         return groupingColumn;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
     public Value getSortColumn() {
@@ -111,7 +120,7 @@ public class TreeRow {
             } else {
                 Font font = new Font(Font.FontFamily.HELVETICA, treeDefinition.getFontSize());
                 font.setColor(new BaseColor(textColor));
-                Phrase phrase = new Phrase(groupingColumn.toString(), font);
+                Phrase phrase = new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), font);
                 PdfPCell valueCell = new PdfPCell(phrase);
                 valueCell.setMinimumHeight(20f);
                 table.addCell(valueCell);
@@ -143,12 +152,62 @@ public class TreeRow {
         } else {
             Font font = new Font(Font.FontFamily.HELVETICA, treeDefinition.getFontSize());
             font.setColor(new BaseColor(textColor));
-            Phrase phrase = new Phrase(groupingColumn.toString(), font);
+            Phrase phrase = new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), font);
             PdfPCell valueCell = new PdfPCell(phrase);
-            valueCell.setColspan(treeDefinition.getItems().size() + 1);
+            //valueCell.setColspan(treeDefinition.getItems().size() + 1);
             valueCell.setBackgroundColor(new BaseColor(backgroundColor));
             valueCell.setMinimumHeight(20f);
             table.addCell(valueCell);
+
+            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                StringBuilder styleString = new StringBuilder(TreeData.tdStyle);
+                String align = "left";
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (textReportFieldExtension.getAlign() != null) {
+                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                            align = "left";
+                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                            align = "center";
+                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                            align = "right";
+                        }
+                    }
+                    styleString.append(align);
+                    if (textReportFieldExtension.getFixedWidth() > 0) {
+                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                    }
+                } else {
+                    styleString.append(align);
+                }
+                com.easyinsight.core.Value value =  (Value) values.get(analysisItem.qualifiedName());
+                if (value == null) {
+                    valueCell = new PdfPCell(new Phrase(""));
+                    valueCell.setBackgroundColor(new BaseColor(backgroundColor));
+                    valueCell.setMinimumHeight(20f);
+                    table.addCell(valueCell);
+                } else {
+                    /*if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() != 0) {
+                            String hexString = ExportService.createHexString(textValueExtension.getColor());
+                            styleString.append(";color:").append(hexString);
+                        }
+                    }*/
+                    /*if (backgroundColor != null) {
+                        styleString.append(";background-color:").append(ExportService.createHexString(backgroundColor));
+                    }
+                    if (textColor != null) {
+                        styleString.append(";color:").append(ExportService.createHexString(textColor));
+                    }*/
+                    font = new Font(Font.FontFamily.HELVETICA, treeDefinition.getFontSize());
+                    font.setColor(new BaseColor(textColor));
+                    valueCell = new PdfPCell(new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), font));
+                    valueCell.setBackgroundColor(new BaseColor(backgroundColor));
+                    valueCell.setMinimumHeight(20f);
+                    table.addCell(valueCell);
+                }
+            }
 
             for (TreeRow child : getChildren()) {
                 child.toPDF(treeDefinition, exportMetadata, table);
@@ -163,7 +222,9 @@ public class TreeRow {
             if (groupingField == null) {
                 sb.append("<td style=\"background-color:").append(ExportService.createHexString(backgroundColor)).append("\"></td>");
             } else {
-                sb.append("<td style=\"background-color:").append(ExportService.createHexString(backgroundColor)).append(";").append(TreeData.tdStyle).append("left\">").append(groupingColumn.toHTMLString()).append("</td>");
+                String style = "border-color:#000000;padding-left:"+((depth + 1) * 6)+"px;border-style:solid;border-width:1px;text-align:";
+                String string = com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+                sb.append("<td style=\"background-color:").append(ExportService.createHexString(backgroundColor)).append(";").append(style).append("left\">").append(string).append("</td>");
             }
             for (AnalysisItem analysisItem : treeDefinition.getItems()) {
                 StringBuilder styleString = new StringBuilder(TreeData.tdStyle);
@@ -219,16 +280,20 @@ public class TreeRow {
                 sb.append("<tr style=\"").append(TreeData.trStyle).append("\">");
                 String tableStyle = "color:" + textColor + ";background-color:" + ExportService.createHexString(backgroundColor) + ";" + TreeData.tdStyle;
                 sb.append("<td style=\"").append(tableStyle).append("left\" colspan=\"").append(treeDefinition.getItems().size() + 1).append("\">");
-                sb.append(groupingColumn.toHTMLString());
+                String string = com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+                sb.append(string);
                 sb.append("</td>");
                 sb.append("</tr>");
                 for (TreeRow child : getChildren()) {
                     sb.append(child.toHTML(treeDefinition, exportMetadata));
                 }
             } else {
-
                 sb.append("<tr style=\"background-color:").append(ExportService.createHexString(backgroundColor)).append(";color:").append(ExportService.createHexString(textColor)).append(";").append(TreeData.trStyle).append("\">");
-                sb.append("<td style=\"").append(TreeData.tdStyle).append("left\">").append(groupingColumn.toHTMLString()).append("</td>");
+                String style = "border-color:#000000;padding-left:"+((depth + 1) * 6)+"px;border-style:solid;border-width:1px;text-align:left";
+                sb.append("<td style=\"").append(style).append("\">");
+                String string = com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+                sb.append(string);
+                sb.append("</td>");
                 for (AnalysisItem analysisItem : treeDefinition.getItems()) {
                     StringBuilder styleString = new StringBuilder(TreeData.tdStyle);
                     String align = "left";

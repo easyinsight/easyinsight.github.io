@@ -3919,13 +3919,14 @@ public class ExportService {
     }
 
     public static String createHexString(int color) {
-        String hexString = Integer.toHexString(color);
+        return String.format("#%06X", (0xFFFFFF & color));
+        /*String hexString = Integer.toHexString(color);
         if (hexString.length() == 4) {
             hexString = "00" + hexString;
         } else if (hexString.length() == 2) {
             hexString = "0000" + hexString;
         }
-        return "#" + hexString;
+        return "#" + hexString;*/
     }
 
     public void exportScorecardToXLS(long scorecardID, InsightRequestMetadata insightRequestMetadata) throws Exception {

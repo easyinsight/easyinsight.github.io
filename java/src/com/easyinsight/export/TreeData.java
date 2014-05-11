@@ -225,6 +225,7 @@ public class TreeData {
         public TreeRow toTreeRow(PipelineData pipelineData) {
 
             TreeRow treeRow = new TreeRow();
+            treeRow.setDepth(index);
             treeRow.setSortColumn(sortValue);
             treeRow.setBackgroundColor(backgroundColor);
             treeRow.setTextColor(textColor);
@@ -463,6 +464,7 @@ public class TreeData {
         @Override
         public TreeRow toTreeRow(PipelineData pipelineData) {
             TreeRow treeRow = new TreeRow();
+            treeRow.setDepth(hierarchy.getHierarchyLevels().size());
             treeRow.setGroupingField(analysisItem);
             treeRow.setBackgroundColor(0xFFFFFF);
             treeRow.setTextColor(0x0);

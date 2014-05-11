@@ -16,14 +16,49 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
 
     private AnalysisItem measure;
     private AnalysisItem benchmarkMeasure;
-    private int gaugeType;
+    private AnalysisItem maxValueMeasure;
+    private AnalysisItem alert1Measure;
+    private AnalysisItem alert2Measure;
     private long gaugeDefinitionID;
     private double maxValue;
+    private String gaugeModel = "Gauge";
     private double alertPoint1;
     private double alertPoint2;
     private int color1 = 16711680;
     private int color2 = 16776960;
     private int color3 = 47889;
+
+    public String getGaugeModel() {
+        return gaugeModel;
+    }
+
+    public void setGaugeModel(String gaugeModel) {
+        this.gaugeModel = gaugeModel;
+    }
+
+    public AnalysisItem getMaxValueMeasure() {
+        return maxValueMeasure;
+    }
+
+    public void setMaxValueMeasure(AnalysisItem maxValueMeasure) {
+        this.maxValueMeasure = maxValueMeasure;
+    }
+
+    public AnalysisItem getAlert1Measure() {
+        return alert1Measure;
+    }
+
+    public void setAlert1Measure(AnalysisItem alert1Measure) {
+        this.alert1Measure = alert1Measure;
+    }
+
+    public AnalysisItem getAlert2Measure() {
+        return alert2Measure;
+    }
+
+    public void setAlert2Measure(AnalysisItem alert2Measure) {
+        this.alert2Measure = alert2Measure;
+    }
 
     public int getColor1() {
         return color1;
@@ -89,14 +124,6 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         this.gaugeDefinitionID = gaugeDefinitionID;
     }
 
-    public int getGaugeType() {
-        return gaugeType;
-    }
-
-    public void setGaugeType(int gaugeType) {
-        this.gaugeType = gaugeType;
-    }
-
     public AnalysisItem getMeasure() {
         return measure;
     }
@@ -115,6 +142,15 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         if (benchmarkMeasure != null) {
             columnList.add(benchmarkMeasure);
         }
+        if (maxValueMeasure != null) {
+            columnList.add(maxValueMeasure);
+        }
+        if (alert1Measure != null) {
+            columnList.add(alert1Measure);
+        }
+        if (alert2Measure != null) {
+            columnList.add(alert2Measure);
+        }
         return columnList;
     }
 
@@ -123,10 +159,22 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         if (benchmarkMeasure != null) {
             addItems("benchmark", Arrays.asList(benchmarkMeasure), structure);
         }
+        if (maxValueMeasure != null) {
+            addItems("maxValueMeasure", Arrays.asList(maxValueMeasure), structure);
+        }
+        if (alert1Measure != null) {
+            addItems("alert1Measure", Arrays.asList(alert1Measure), structure);
+        }
+        if (alert2Measure != null) {
+            addItems("alert2Measure", Arrays.asList(alert2Measure), structure);
+        }
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         measure = firstItem("measure", structure);
+        maxValueMeasure = firstItem("maxValueMeasure", structure);
+        alert1Measure = firstItem("alert1Measure", structure);
+        alert2Measure = firstItem("alert2Measure", structure);
         benchmarkMeasure = firstItem("benchmark", structure);
     }
 
@@ -137,17 +185,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         color1 = (int) findNumberProperty(properties, "color1", 16711680);
         color2 = (int) findNumberProperty(properties, "color2", 16776960);
         color3 = (int) findNumberProperty(properties, "color3", 47889);
-    }
-
-    public static void main(String[] args) {
-        /*
-        public var color1:uint = 0xFF0000;
-    public var color2:uint = 0xFFFF00;
-    public var color3:uint = 0x00BB11;
-         */
-        System.out.println(Integer.parseInt("FF0000", 16));
-        System.out.println(Integer.parseInt("FFFF00", 16));
-        System.out.println(Integer.parseInt("00BB11", 16));
+        gaugeModel = findStringProperty(properties, "gaugeModel", "Gauge");
     }
 
     public List<ReportProperty> createProperties() {
@@ -157,6 +195,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("color1", color1));
         properties.add(new ReportNumericProperty("color2", color2));
         properties.add(new ReportNumericProperty("color3", color3));
+        properties.add(new ReportStringProperty("gaugeModel", gaugeModel));
         return properties;
     }
 
@@ -190,39 +229,22 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         return root;
     }
 
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        StringBuilder sb = new StringBuilder();
-        String gaugePropertiesString;
-        try {
-            JSONArray bands = getJsonArray();
-            gaugePropertiesString = bands.toString();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-        gaugePropertiesString = gaugePropertiesString.replaceAll("\"", "");
-        String timezoneOffset = "&timezoneOffset='+new Date().getTimezoneOffset()+'";
-
-        String sss = "$.getJSON('/app/gauge?reportID=" + getUrlKey() + timezoneOffset + "&' + strParams, Gauge.getCallback('" + targetDiv + "', '" + getUrlKey() + "', " + gaugePropertiesString + ", " + maxValue + "))";
-        return sss;
-    }
-
-    private JSONArray getJsonArray() throws JSONException {
+    public JSONArray createColorBands(double alertPoint1, double alertPoint2, double maxValue) throws JSONException {
         JSONArray bands = new JSONArray();
         JSONObject band1 = new JSONObject();
-        band1.put("color", "'" + String.format("#%06X", (0xFFFFFF & color1)) + "'");
+        band1.put("color", String.format("#%06X", (0xFFFFFF & color1)));
         band1.put("start", 0);
         band1.put("end", alertPoint1);
         bands.put(band1);
         JSONObject band2 = new JSONObject();
-        band2.put("color", "'" + String.format("#%06X", (0xFFFFFF & color2)) + "'");
+        band2.put("color", String.format("#%06X", (0xFFFFFF & color2)));
         band2.put("start", alertPoint1);
         band2.put("end", alertPoint2);
         bands.put(band2);
         JSONObject band3 = new JSONObject();
-        band3.put("color", "'" + String.format("#%06X", (0xFFFFFF & color3)) + "'");
+        band3.put("color", String.format("#%06X", (0xFFFFFF & color3)));
         band3.put("start", alertPoint2);
-        band3.put("end", getMaxValue());
+        band3.put("end", maxValue);
         bands.put(band3);
         return bands;
     }
@@ -240,10 +262,13 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
-        list.put("type", "gauge");
+        if ("Bullet".equals(gaugeModel)) {
+            list.put("type", "bullet");
+        } else {
+            list.put("type", "gauge");
+        }
         list.put("key", getUrlKey());
         list.put("url", "/app/gauge");
-        list.put("properties", getJsonArray());
         list.put("max", maxValue);
         return list;
     }
