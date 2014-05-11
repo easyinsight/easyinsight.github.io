@@ -109,6 +109,25 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         }
     }
 
+    public static void runUpdateFor(String urlKey) throws Exception {
+        FeedResponse feedResponse = new FeedService().openFeedIfPossible(urlKey);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            long dataSourceID = feedResponse.getFeedDescriptor().getId();
+            runReport(conn, dataSourceID);
+            conn.commit();
+        } catch (Exception e) {
+            if (!conn.getAutoCommit()) {
+                conn.rollback();
+            }
+            LogClass.error(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
     public static void runUpdates() throws Exception {
         Set<Long> sources = new HashSet<Long>();
         EIConnection conn = Database.instance().getConnection();
