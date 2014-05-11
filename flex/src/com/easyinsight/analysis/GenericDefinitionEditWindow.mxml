@@ -77,14 +77,37 @@
                 }
                 tabNavigator.addChild(formBox);
             }
-            addEventListener("refreshNecessary", function(event:Event):void {
+            reportSpecificItems = StyleConfiguration.createReportPage(_definition, _allFields);
+            if (reportSpecificItems.length > 0) {
+                var repBox:Box = new Box();
+                repBox.verticalScrollPolicy = "on";
+                repBox.percentWidth = 100;
+                repBox.percentHeight = 100;
+                repBox.setStyle("borderThickness", 1);
+                repBox.setStyle("borderStyle", "solid");
+                repBox.setStyle("borderColor", 0xCCCCCC);
+                repBox.setStyle("paddingLeft", 5);
+                repBox.setStyle("paddingTop", 5);
+                repBox.setStyle("paddingBottom", 5);
+                repBox.setStyle("horizontalAlign", "center");
+                repBox.label = "Report Specific Items";
+                var repForm:Form = new Form();
+                repBox.addChild(repForm);
+                for each (var repItem:ReportFormItem in reportSpecificItems) {
+                    repForm.addChild(repItem);
+                }
+                tabNavigator.addChild(repBox);
+            }
+
+            /*addEventListener("refreshNecessary", function(event:Event):void {
                 refreshNecessary = true;
-            });
+            });*/
         }
 
         private var refreshNecessary:Boolean = false;
 
         private var limitItems:ArrayCollection;
+        private var reportSpecificItems:ArrayCollection;
 
         private var reportItems:ArrayCollection;
         private var cacheItems:ArrayCollection;
@@ -113,6 +136,9 @@
             }
             for each (var limitItem:ReportFormItem in limitItems) {
                 limitItem.save();
+            }
+            for each (var repItem:ReportFormItem in reportSpecificItems) {
+                repItem.save();
             }
             _definition.name = reportNameInput.text;
             _definition.description = reportDescriptionInput.text;
