@@ -150,6 +150,18 @@ public class StyleConfiguration {
         return items;
     }
 
+    public static function createReportPage(report:AnalysisDefinition, allFields:ArrayCollection = null):ArrayCollection {
+
+        var items:ArrayCollection = new ArrayCollection();
+        if (report is GaugeDefinition) {
+            items.addItem(new FieldFormItem("Alert Measure 1", "alert1Measure", GaugeDefinition(report).alert1Measure, report, allFields, AnalysisItemTypes.MEASURE));
+            items.addItem(new FieldFormItem("Alert Measure 2", "alert2Measure", GaugeDefinition(report).alert2Measure, report, allFields, AnalysisItemTypes.MEASURE));
+            items.addItem(new FieldFormItem("Benchmark Measure", "benchmarkMeasure", GaugeDefinition(report).benchmarkMeasure, report, allFields, AnalysisItemTypes.MEASURE));
+            items.addItem(new ComboBoxReportFormItem("Gauge Model", "gaugeModel", GaugeDefinition(report).gaugeModel, report, ["Gauge", "Bullet"]));
+        }
+        return items;
+    }
+
     public static function getLimitItems(report:AnalysisDefinition, allFields:ArrayCollection = null):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         if (report is ListDefinition) {
