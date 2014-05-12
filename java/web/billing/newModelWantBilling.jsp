@@ -13,9 +13,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Account Management</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.8.20.custom.min.js"></script>
-    <jsp:include page="../html/bootstrapHeader.jsp"/>
+    <jsp:include page="/html/bootstrapHeader.jsp"></jsp:include>
+
 </head>
 <body>
 <%
