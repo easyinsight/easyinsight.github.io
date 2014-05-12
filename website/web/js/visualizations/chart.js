@@ -1,5 +1,7 @@
 Chart = {
 
+
+
     getD3StackedColumnChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
@@ -21,9 +23,6 @@ Chart = {
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
-                            if (dtOptions["id"]) {
-
-                            }
                             chart.multibar.dispatch.on("elementClick", function(e) {
                                 var drillthrough = data["drillthrough"];
                                 var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
@@ -44,6 +43,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -90,6 +92,44 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
+                        nv.utils.windowResize(function() { chart.update() });
+                        return chart;
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    getBulletChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+
+                        //var height = Chart.chartHeight(target, styleProps);
+
+                        var s1 = data["values"][0];
+
+                        var chart = nv.models.bulletChart()
+                            //.width(width)
+                            //.height(height)
+                            .margin({top: 20, right: 20, bottom: 20, left: 40});
+
+
+
+
+                        d3.select('#d3Div' + target)
+                            //.attr('width', width)
+                            //.attr('height', height)
+                            .datum(s1)
+                            .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -149,6 +189,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -248,6 +291,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -298,6 +344,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -307,10 +356,17 @@ Chart = {
         };
     },
 
+    canvasHeights:function (target) {
+        var h = $("#d3Div"+ target).height();
+        var w = $("#d3Div"+ target).width();
+        $("#d3Canvas"+target).attr('height', h);
+        $("#d3Canvas"+target).attr('width', w);
+    },
+
     chartHeight:function (target, styleProps) {
         var height;
         //alert("target height =  " + $('#'+target+"").height());
-        var customHeight = styleProps["customHeight"];
+        var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
         if (customHeight > -1) {
 
             if (customHeight > 0) {
@@ -324,7 +380,12 @@ Chart = {
             }
 
         } else {
-            height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - 250;
+            var raHeight = $('#'+target+'ReportArea').height();
+            if (typeof(raHeight) != "undefined" && raHeight > 150) {
+                height = raHeight;
+            } else {
+                height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - 250;
+            }
         }
         return height;
     },
@@ -374,6 +435,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -510,6 +574,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -551,6 +618,9 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        Chart.canvasHeights(target);
+
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }

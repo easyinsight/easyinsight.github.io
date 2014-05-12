@@ -136,27 +136,38 @@ label {
 }
 
 .navbar-inverse {
-    background-image: -webkit-gradient(linear, left 0%, left 100%, from(#770000), to(#330000));
-    background-image: -webkit-linear-gradient(top, #770000, 0%, #330000, 100%);
-    background-image: -moz-linear-gradient(top, #770000 0%, #330000 100%);
-    background-image: linear-gradient(to bottom, #770000 0%, #330000 100%);
+    background-color: #FFFFFF;
+    background-image: -webkit-gradient(linear, left 0%, left 100%, from(#FFFFFF), to(#FFFFFF));
+    background-image: -webkit-linear-gradient(top, #FFFFFF, 0%, #FFFFFF, 100%);
+    background-image: -moz-linear-gradient(top, #FFFFFF 0%, #FFFFFF 100%);
+    background-image: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 100%);
     background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff3c3c3c', endColorstr='#ff330000', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffffffff', GradientType=0);
 }
+
 
 .navbar-inverse .navbar-nav > li > a,
 .navbar-inverse .navbar-nav > li > a:hover,
 .navbar-inverse .navbar-nav > li > a:focus {
     font-weight: normal;
     font-size: 16px;
-    color: #F2F2F2;
+    color: #777777;
+    padding-top:10px;
+    padding-bottom: 10px;
+}
+
+.navbar {
+    min-height:36px;
+    margin-bottom:20px;
+    border: 1px solid transparent;
+    border-bottom: 4px solid #0084b4;
 }
 
 .navbar-inverse .navbar-nav > .active > a,
 .navbar-inverse .navbar-nav > .active > a:hover,
 .navbar-inverse .navbar-nav > .active > a:focus {
-    color: #ffffff;
-    background-color: #770000;
+    color: #333333;
+    background-color: #FFFFFF;
 }
 
 .navbar-inverse .navbar-nav > .disabled > a,
@@ -164,6 +175,18 @@ label {
 .navbar-inverse .navbar-nav > .disabled > a:focus {
     color: #444444;
     background-color: transparent;
+}
+
+.navbar-inverse .navbar-toggle {
+    border-color: #333;
+}
+.navbar-inverse .navbar-toggle:hover,
+.navbar-inverse .navbar-toggle:focus {
+    background-color: #333;
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+    background-color: #666;
+    color:#333;
 }
 
 .contentBoxOverride {
@@ -266,4 +289,11 @@ a {
 .no-data-sources-container {
     margin-top: 40px;
     margin-bottom: 30px;
+}
+
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+    color: #fff;
+    background-color: #0084b4;
 }
