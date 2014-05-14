@@ -20,13 +20,6 @@ import java.util.List;
 public class LastRecord extends Function {
 
     public Value evaluate() {
-        // categorizing step, cycle time,
-
-        // process()
-
-        // next([Round ID], "", "")
-
-        // next([Round ID], [Round Date], "filter1") )
         String instanceIDName = minusBrackets(getParameterName(0));
         String targetName = minusBrackets(getParameterName(3));
         String sortName = minusBrackets(getParameterName(2));
@@ -37,10 +30,10 @@ public class LastRecord extends Function {
             if (instanceIDField == null && instanceIDName.equals(analysisItem.getKey().toKeyString())) {
                 instanceIDField = analysisItem;
             }
-            if (targetField != null && targetName.equals(analysisItem.getKey().toKeyString())) {
+            if (targetField == null && targetName.equals(analysisItem.getKey().toKeyString())) {
                 targetField = analysisItem;
             }
-            if (sortField != null && sortName.equals(analysisItem.getKey().toKeyString())) {
+            if (sortField == null && sortName.equals(analysisItem.getKey().toKeyString())) {
                 sortField = analysisItem;
             }
         }
