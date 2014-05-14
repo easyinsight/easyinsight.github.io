@@ -80,7 +80,7 @@
             %>
 
                 <div class="row">
-                    <div class="col-md-9">
+                    <div class="col-md-12">
                         <table class="table table-striped table-bordered table-condensed"
                                style="margin-bottom: 0;padding-bottom: 0">
                             <thead>

@@ -8,6 +8,10 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.Timestamp" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html lang="en">
 <head>
@@ -44,6 +48,18 @@
     </div>
     <div class="row">
         <%
+            if (userName != null) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement uStmt = conn.prepareStatement("UPDATE USER SET NEWS_DISMISS_DATE = ? WHERE USER_ID = ?");
+                    uStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+                    uStmt.setLong(2, SecurityUtil.getUserID());
+                    uStmt.executeUpdate();
+                    uStmt.close();
+                } finally {
+                    Database.closeConnection(conn);
+                }
+            }
             List<NewsEntry> newsEntryList = new AdminService().getNews();
             Set<String> tags = new HashSet<String>();
             for (NewsEntry newsEntry : newsEntryList) {

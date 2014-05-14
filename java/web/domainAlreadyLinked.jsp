@@ -7,16 +7,15 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Sign In</title>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+
 
     <style type="text/css">
         .center_stuff {
             text-align:center;
         }
     </style>
-    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <jsp:include page="/html/bootstrapHeader.jsp"></jsp:include>
 </head>
 <%
 

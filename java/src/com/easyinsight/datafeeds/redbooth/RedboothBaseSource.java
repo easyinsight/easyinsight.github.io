@@ -119,14 +119,14 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
                 throw re;
             } catch (Exception e) {
                 LogClass.error(e);
-                retryCount++;
                 try {
                     Thread.sleep(60000);
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
-        } while (!successful && retryCount < 10);
+            retryCount++;
+        } while (!successful && retryCount < 3);
         if (!successful) {
             throw new RuntimeException("Redbooth could not be reached due to a large number of current users, please try again in a bit.");
         }

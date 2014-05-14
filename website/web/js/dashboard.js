@@ -25,6 +25,24 @@ var multi_field_value_results;
 
 var saveConfiguration;
 
+function capture(id) {
+    var svg = $("#d3Div" + id);
+    var h = svg.height();
+    var w = svg.width();
+    canvg("d3Canvas"+id, svg.html());
+    var canvas = document.getElementById("d3Canvas"+id);
+    var img = canvas.toDataURL("image/png");
+    $.ajax ( {
+        url: '/app/uploadExportImage?report=' + id + "&height=" + h + "&width=" + w,
+        data: {imgBase64: img},
+        success: function(data) {
+            window.location.href = "/app/pdf?urlKey="+data["urlKey"];
+        },
+        type: "POST"
+    });
+    //document.write('<img src="'+img+'"/>');
+}
+
 function drillThrough(params) {
     if(typeof(userJSON.embedKey) != "undefined")
         params["embedKey"] = userJSON.embedKey;
@@ -229,6 +247,70 @@ var confirmRender = function (o, f) {
 
 }
 
+var toPDF = function (o, dashboardID, drillthroughID) {
+    var obj = o.report.report;
+    var id = o.report.id;
+    if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree") {
+        var i;
+        if ($("#" + id + " :visible").size() == 0) {
+            o.rendered = false;
+            return;
+        }
+        var curFilters = $.map(o.filters, function (e, i) {
+            return toFilterString(e, false);
+        });
+        var fullFilters = {};
+        for (i = 0; i < curFilters.length; i++) {
+            fullFilters[curFilters[i].id] = curFilters[i];
+        }
+        //beforeRefresh($("#" + id + " .loading"))();
+        $.ajax({
+            url: "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(),
+            contentType: "application/json; charset=UTF-8",
+            data: JSON.stringify(fullFilters),
+            error: function() {
+                alert("Something went wrong in trying to export to PDF.");
+            },
+            success: function(data) {
+                window.location.href = "/app/pdf?urlKey="+data["urlKey"];
+            },
+            type: "POST"
+        });
+    } else {
+        capture(id);
+    }
+}
+
+var toExcel = function (o, dashboardID, drillthroughID) {
+    var obj = o.report.report;
+    var id = o.report.id;
+    var i;
+    if ($("#" + id + " :visible").size() == 0) {
+        o.rendered = false;
+        return;
+    }
+    var curFilters = $.map(o.filters, function (e, i) {
+        return toFilterString(e, false);
+    });
+    var fullFilters = {};
+    for (i = 0; i < curFilters.length; i++) {
+        fullFilters[curFilters[i].id] = curFilters[i];
+    }
+    //beforeRefresh($("#" + id + " .loading"))();
+    $.ajax({
+        url: "/app/htmlExcel" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(),
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify(fullFilters),
+        error: function() {
+            alert("Something went wrong in trying to export to Excel.");
+        },
+        success: function(data) {
+            window.location.href = "/app/excel?urlKey="+data["urlKey"];
+        },
+        type: "POST"
+    });
+}
+
 var renderReport = function (o, dashboardID, drillthroughID, reload) {
     var obj = o.report.report;
     var id = o.report.id;
@@ -293,17 +375,21 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "area") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3AreaCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+    } else if (obj.metadata.type == "heatmap") {
+        //$("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "stacked_bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedBarChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "stacked_column") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedColumnChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+    } else if (obj.metadata.type == "bullet") {
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBulletChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }));
-        var v = JSON.stringify(obj.metadata.properties).replace(/\"/g, "");
-        eval("var w = " + v);
-        $.ajax($.extend(postData, {success: confirmRender(o, Gauge.getCallback(id + "ReportArea", id, w, obj.metadata.max))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Gauge.getCallback(id + "ReportArea", id))}));
     } else {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             Utils.noData(data, function () {
@@ -430,6 +516,18 @@ var renderReports = function (obj, dashboardID, drillthroughID, force) {
         for (var i = 0; i < obj.children.length; i++) {
             renderReports(obj.children[i], dashboardID, drillthroughID, force);
         }
+    }
+}
+
+var renderExcel = function (obj, dashboardID, drillthroughID, force) {
+    if (obj.type == "report") {
+        toExcel(obj, dashboardID, drillthroughID);
+    }
+}
+
+var renderPDF = function (obj, dashboardID, drillthroughID, force) {
+    if (obj.type == "report") {
+        toPDF(obj, dashboardID, drillthroughID);
     }
 }
 
@@ -671,10 +769,23 @@ $(function () {
                 }
             }
 
+            // todo: blah
             var choiceAllCheck = function (e) {
+
                 var checked = $(e.target).is(":checked");
                 selectionMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
-                if (checked && _.all(selectionMap, function(e, i, l) { return (i == "All") || e; })) {
+                if (checked) {
+                    var allSelected = _.all(selectionMap, function(e, i, l) {
+                        return (i == "All") || e;
+                    });
+                    if (allSelected) {
+                        alert("all selected");
+                    } else {
+
+                    }
+                }
+                if (checked && _.all(selectionMap, function(e, i, l) {
+                    return (i == "All") || e; })) {
                     $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
                     selectionMap["All"] = true;
                 } else {
@@ -705,7 +816,14 @@ $(function () {
                             m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
                             return m;
                         }, {});
-                        selectionMap = $.extend({}, m, f.selected);
+                        for (var mo in m) {
+                            var selected = f.selected[mo];
+                            if (selected) {
+                                selectionMap[mo] = true;
+                            } else {
+                                selectionMap[mo] = false;
+                            }
+                        }
                         if(d.values.length > 100) {
                             d.error = "Too many values, please refine your search."
                         }
@@ -717,7 +835,14 @@ $(function () {
                                     m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
                                     return m;
                                 }, {});
-                    selectionMap = $.extend({}, m, f.selected);
+                    for (var mo in m) {
+                        var selected = f.selected[mo];
+                        if (selected) {
+                            selectionMap[mo] = true;
+                        } else {
+                            selectionMap[mo] = false;
+                        }
+                    }
                 }
             });
 
@@ -1099,6 +1224,14 @@ $(function () {
 
         $(".full_refresh").click(function(e) {
             renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+        })
+
+        $(".export_excel").click(function(e) {
+            renderExcel(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+        })
+
+        $(".export_pdf").click(function(e) {
+            renderPDF(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
         })
 
         saveConfiguration = function (name, key) {

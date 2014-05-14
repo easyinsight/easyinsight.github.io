@@ -49,7 +49,7 @@ public class PreviousRecord extends Function {
             for (int i = 0; i < rows.size(); i++) {
                 IRow row = rows.get(i);
                 if (row == getRow()) {
-                    if ((i - 1) > 0) {
+                    if ((i - 1) >= 0) {
                         IRow nextRow = rows.get(i - 1);
                         return nextRow.getValue(targetField);
                     } else {
