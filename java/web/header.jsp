@@ -84,23 +84,28 @@
             %>
             <%
                 EIConnection conn = Database.instance().getConnection();
-                PreparedStatement newsStmt = conn.prepareStatement("SELECT news_dismiss_date FROM USER WHERE user_id = ?");
-                newsStmt.setLong(1, SecurityUtil.getUserID());
-                ResultSet newsRS = newsStmt.executeQuery();
-                newsRS.next();
-                Timestamp dismissDate = newsRS.getTimestamp(1);
-                int count = 0;
-                if (dismissDate != null) {
-                    PreparedStatement dateStmt = conn.prepareStatement("SELECT COUNT(NEWS_ENTRY_ID) FROM NEWS_ENTRY WHERE NEWS_ENTRY.entry_time > ?");
-                    dateStmt.setTimestamp(1, dismissDate);
-                    ResultSet rs = dateStmt.executeQuery();
-                    rs.next();
-                    count = rs.getInt(1);
-                    dateStmt.close();
-                } else {
+                int count;
+                try {
+                    PreparedStatement newsStmt = conn.prepareStatement("SELECT news_dismiss_date FROM USER WHERE user_id = ?");
+                    newsStmt.setLong(1, SecurityUtil.getUserID());
+                    ResultSet newsRS = newsStmt.executeQuery();
+                    newsRS.next();
+                    Timestamp dismissDate = newsRS.getTimestamp(1);
+                    count = 0;
+                    if (dismissDate != null) {
+                        PreparedStatement dateStmt = conn.prepareStatement("SELECT COUNT(NEWS_ENTRY_ID) FROM NEWS_ENTRY WHERE NEWS_ENTRY.entry_time > ?");
+                        dateStmt.setTimestamp(1, dismissDate);
+                        ResultSet rs = dateStmt.executeQuery();
+                        rs.next();
+                        count = rs.getInt(1);
+                        dateStmt.close();
+                    } else {
 
+                    }
+                    newsStmt.close();
+                } finally {
+                    Database.closeConnection(conn);
                 }
-                newsStmt.close();
 
             %>
             <li <%= headerActive == HtmlConstants.WHATS_NEW ? "class=\"active\"" : ""%>><a
