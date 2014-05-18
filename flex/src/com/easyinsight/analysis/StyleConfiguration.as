@@ -80,6 +80,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Should the data source default to optimized?", "defaultToOptimized", dataSource.defaultToOptimized, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source look up field levels?", "fieldLookupEnabled", dataSource.fieldLookupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should reports in the editor on this data source run manually?", "manualReportRun", dataSource.manualReportRun, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should calculations on this data source avoid key/display collisions?", "avoidKeyDisplayCollisions", dataSource.avoidKeyDisplayCollisions, dataSource));
         var dashboardService:RemoteObject = new RemoteObject();
         dashboardService.destination = "analysisDefinition";
         items.addItem(new ServerLoadComboBoxReportFormItem("Should the field list default to showing only fields matching a certain tag?", "defaultFieldTag", dataSource.defaultFieldTag, dataSource, dashboardService.getFieldTags));

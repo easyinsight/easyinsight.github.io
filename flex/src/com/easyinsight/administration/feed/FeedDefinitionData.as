@@ -51,6 +51,7 @@ import mx.collections.ArrayCollection;
         public var visibleWithinParentConfiguration:Boolean;
         public var defaultToFullJoins:Boolean;
         public var defaultToOptimized:Boolean;
+        public var avoidKeyDisplayCollisions:Boolean;
 
 		public function FeedDefinitionData()
 		{
