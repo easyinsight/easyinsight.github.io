@@ -122,7 +122,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return null;
     }
 
-    public Key getUpdateKey() { return null; }
+    /*public Key getUpdateKey() { return null; }*/
 
     public boolean isShowTags() {
         return showTags;
