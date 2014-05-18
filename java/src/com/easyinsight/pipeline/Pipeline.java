@@ -190,7 +190,7 @@ public abstract class Pipeline {
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());
-        KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
+        KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields, insightRequestMetadata.isAvoidKeyDisplayCollisions());
         Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
         Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
         Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getDisplayMap();
