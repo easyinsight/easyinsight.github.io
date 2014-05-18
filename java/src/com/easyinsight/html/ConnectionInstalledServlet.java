@@ -5,6 +5,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.solutions.PostInstallSteps;
 import com.easyinsight.solutions.SolutionKPIData;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.userupload.CredentialsResponse;
@@ -37,9 +38,12 @@ public class ConnectionInstalledServlet extends HttpServlet {
             } else {
                 SolutionKPIData solutionKPIData = new SolutionKPIData();
                 solutionKPIData.setDataSourceID(dataSourceID);
-                new SolutionService().addKPIData(solutionKPIData);
-
-                endURL = RedirectUtil.getURL(req, "/app/html/reports/" + dataSource.getApiKey());
+                PostInstallSteps steps = new SolutionService().addKPIData(solutionKPIData);
+                if (steps.getResult() != null) {
+                    endURL = RedirectUtil.getURL(req, "/app/html/dashboard/" + steps.getResult().getUrlKey());
+                } else {
+                    endURL = RedirectUtil.getURL(req, "/app/html/reports/" + dataSource.getApiKey());
+                }
             }
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("url", endURL);
