@@ -84,7 +84,13 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
             tree = CalculationHelper.createTree(derivationCode, false);
 
             if (allItems != null) {
-                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+                boolean avoidNamespaceCollisions = false;
+                if (structure != null) {
+                    if (structure.getInsightRequestMetadata() != null) {
+                        avoidNamespaceCollisions = structure.getInsightRequestMetadata().isAvoidKeyDisplayCollisions();
+                    }
+                }
+                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems, avoidNamespaceCollisions);
                 keyMap = mapper.getKeyMap();
                 displayMap = mapper.getDisplayMap();
                 unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();

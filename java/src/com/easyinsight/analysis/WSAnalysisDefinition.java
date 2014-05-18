@@ -129,6 +129,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean useCustomFontFamily;
     private String baseDate;
     private String exportString;
+    private boolean noAggregation;
     private int generalSizeLimit;
     private boolean passThroughFilters;
     private boolean enableLocalStorage;
@@ -253,6 +254,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setFiltersForDrillthrough(List<FilterDefinition> filtersForDrillthrough) {
         this.filtersForDrillthrough = filtersForDrillthrough;
+    }
+
+    public boolean isNoAggregation() {
+        return noAggregation;
+    }
+
+    public void setNoAggregation(boolean noAggregation) {
+        this.noAggregation = noAggregation;
     }
 
     public boolean isPassThroughFilters() {
@@ -1038,6 +1047,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         dataSourceFields = findBooleanProperty(properties, "dataSourceFields", false);
         persistedCache = findBooleanProperty(properties, "persistedCache", false);
         logReport = findBooleanProperty(properties, "logReport", false);
+        noAggregation = findBooleanProperty(properties, "noAggregation", false);
         headerImage = findImage(properties, "headerImage", null);
         lookupTableOptimization = findBooleanProperty(properties, "lookupTableOptimization", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
@@ -1073,6 +1083,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
+        properties.add(new ReportBooleanProperty("noAggregation", noAggregation));
         properties.add(new ReportStringProperty("exportString", exportString));
         properties.add(new ReportStringProperty("baseDate", baseDate));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));

@@ -108,7 +108,13 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
 
         try {
             if (allItems != null) {
-                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+                boolean avoidNamespaceCollisions = false;
+                if (structure != null) {
+                    if (structure.getInsightRequestMetadata() != null) {
+                        avoidNamespaceCollisions = structure.getInsightRequestMetadata().isAvoidKeyDisplayCollisions();
+                    }
+                }
+                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems, avoidNamespaceCollisions);
                 keyMap = mapper.getKeyMap();
                 displayMap = mapper.getDisplayMap();
                 unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();

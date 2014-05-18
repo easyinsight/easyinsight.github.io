@@ -102,8 +102,8 @@ public class FeedStorage {
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, INHERIT_ACCOUNT_API_SETTINGS," +
                 "CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION, ACCOUNT_VISIBLE, last_refresh_start, marmotscript, " +
                 "concrete_fields_editable, refresh_marmot_script, refresh_behavior, kpi_source, field_cleanup_enabled, field_lookup_enabled," +
-                "manual_report_run, default_tag_id, visible_within_parent_configuration, default_to_full_joins, default_to_optimized) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "manual_report_run, default_tag_id, visible_within_parent_configuration, default_to_full_joins, default_to_optimized, avoid_key_display_collisions) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         int i = 1;
         insertDataFeedStmt.setString(i++, feedDefinition.getFeedName());
@@ -155,7 +155,8 @@ public class FeedStorage {
         }
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isVisibleWithinParentConfiguration());
         insertDataFeedStmt.setBoolean(i++, feedDefinition.isDefaultToFullJoins());
-        insertDataFeedStmt.setBoolean(i, feedDefinition.isDefaultToOptimized());
+        insertDataFeedStmt.setBoolean(i++, feedDefinition.isDefaultToOptimized());
+        insertDataFeedStmt.setBoolean(i, feedDefinition.isAvoidKeyDisplayCollisions());
 
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
@@ -728,7 +729,7 @@ public class FeedStorage {
                 "API_KEY = ?, unchecked_api_enabled = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ?," +
                 "CREATE_DATE = ?, UPDATE_DATE = ?, ACCOUNT_VISIBLE = ?, LAST_REFRESH_START = ?, MARMOTSCRIPT = ?, CONCRETE_FIELDS_EDITABLE = ?, REFRESH_MARMOT_SCRIPT = ?," +
                 "REFRESH_BEHAVIOR = ?, KPI_SOURCE = ?, field_cleanup_enabled = ?, field_lookup_enabled = ?, manual_report_run = ?, default_tag_id = ?," +
-                "visible_within_parent_configuration = ?, default_to_full_joins = ?, default_to_optimized = ? " +
+                "visible_within_parent_configuration = ?, default_to_full_joins = ?, default_to_optimized = ?, avoid_key_display_collisions = ? " +
                 "WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         int i = 1;
@@ -777,6 +778,7 @@ public class FeedStorage {
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isVisibleWithinParentConfiguration());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isDefaultToFullJoins());
         updateDataFeedStmt.setBoolean(i++, feedDefinition.isDefaultToOptimized());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isAvoidKeyDisplayCollisions());
         updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
@@ -835,7 +837,7 @@ public class FeedStorage {
                 "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, API_KEY, unchecked_api_enabled, " +
                 "VISIBLE, PARENT_SOURCE_ID, ACCOUNT_VISIBLE, LAST_REFRESH_START, MARMOTSCRIPT, CONCRETE_FIELDS_EDITABLE, refresh_marmot_script, kpi_source, " +
                 "field_cleanup_enabled, field_lookup_enabled, manual_report_run, default_tag_id, visible_within_parent_configuration, default_to_full_joins, " +
-                "default_to_optimized FROM DATA_FEED WHERE " +
+                "default_to_optimized, avoid_key_display_collisions FROM DATA_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         queryFeedStmt.setLong(1, identifier);
         ResultSet rs = queryFeedStmt.executeQuery();
@@ -888,7 +890,8 @@ public class FeedStorage {
             feedDefinition.setDefaultFieldTag(rs.getLong(i++));
             feedDefinition.setVisibleWithinParentConfiguration(rs.getBoolean(i++));
             feedDefinition.setDefaultToFullJoins(rs.getBoolean(i++));
-            feedDefinition.setDefaultToOptimized(rs.getBoolean(i));
+            feedDefinition.setDefaultToOptimized(rs.getBoolean(i++));
+            feedDefinition.setAvoidKeyDisplayCollisions(rs.getBoolean(i));
             feedDefinition.customLoad(conn);
         } else {
             throw new RuntimeException("Could not find data source " + identifier);

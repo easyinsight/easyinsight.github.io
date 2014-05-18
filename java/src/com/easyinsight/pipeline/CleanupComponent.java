@@ -56,7 +56,7 @@ public class CleanupComponent implements IComponent {
                 allNeededAnalysisItems.addAll(linkItems);
             }
         }
-        KeyDisplayMapper mapper = KeyDisplayMapper.create(pipelineData.getAllItems());
+        KeyDisplayMapper mapper = KeyDisplayMapper.create(pipelineData.getAllItems(), pipelineData.getInsightRequestMetadata().isAvoidKeyDisplayCollisions());
         Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
         Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
         Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
