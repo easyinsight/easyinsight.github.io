@@ -3,6 +3,7 @@ package com.easyinsight.billing;
 import com.braintreegateway.*;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.email.SendGridEmail;
+import com.easyinsight.export.InvoiceUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountActivityStorage;
@@ -240,7 +241,9 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                                     if (user.isInvoiceRecipient()) {
                                         System.out.println("Sending out invoice email to " + user.getEmail());
                                         try {
-                                            new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, "support@easy-insight.com", false, "Easy Insight");
+                                            byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
+                                            new SendGridEmail().sendAttachmentEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, bytes, "invoice.pdf", false, "support@easy-insight.com", "Easy Insight",
+                                                    "application/pdf");
                                         } catch (Exception e) {
                                             LogClass.error(e);
                                         }
@@ -286,7 +289,21 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             info.setAmount(t.getAmount().toString());
                             account.getBillingInfo().add(info);
                             transactions.add(t.getId());
-                            // TODO: email out the invoice here
+                            String invoiceBody = info.toInvoiceText(account);
+                            if (account.isNewPricingModelInvoice()) {
+                                for (User user : account.getUsers()) {
+                                    if (user.isInvoiceRecipient()) {
+                                        System.out.println("Sending out invoice email to " + user.getEmail());
+                                        try {
+                                            byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
+                                            new SendGridEmail().sendAttachmentEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, bytes, "invoice.pdf", false, "support@easy-insight.com", "Easy Insight",
+                                                    "application/pdf");
+                                        } catch (Exception e) {
+                                            LogClass.error(e);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     account.setNextBillAmount(ss.getNextBillingPeriodAmount().doubleValue());
@@ -294,7 +311,10 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                     if (ss.getStatus() == Subscription.Status.ACTIVE) {
                         account.setAccountState(Account.ACTIVE);
                     } else if (ss.getStatus() == Subscription.Status.PAST_DUE) {
-                        account.setAccountState(Account.BILLING_FAILED);
+                        //account.setAccountState(Account.BILLING_FAILED);
+
+                        // don't update to billing failed just yet, but do send error email
+
                     } else if (ss.getStatus() == Subscription.Status.EXPIRED) {
                         account.setAccountState(Account.BILLING_FAILED);
                     } else if (ss.getStatus() == Subscription.Status.CANCELED) {
