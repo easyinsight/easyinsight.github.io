@@ -19,6 +19,7 @@ public class InsightRequestMetadata implements Serializable {
     private int utcOffset;
     private int version;
     private boolean refreshAllSources;
+    private transient boolean avoidKeyDisplayCollisions;
     private boolean noCache;
     private List<AnalysisItemOverride> hierarchyOverrides = new ArrayList<AnalysisItemOverride>();
     private boolean aggregateQuery = true;
@@ -55,6 +56,8 @@ public class InsightRequestMetadata implements Serializable {
 
     private transient boolean aggregationRowChanged;
 
+    private transient boolean noAggregation;
+
     private transient List<AnalysisItem> allItems;
     private transient AnalysisItemRetrievalStructure structure;
 
@@ -64,6 +67,22 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setAggregationRowChanged(boolean aggregationRowChanged) {
         this.aggregationRowChanged = aggregationRowChanged;
+    }
+
+    public boolean isAvoidKeyDisplayCollisions() {
+        return avoidKeyDisplayCollisions;
+    }
+
+    public void setAvoidKeyDisplayCollisions(boolean avoidKeyDisplayCollisions) {
+        this.avoidKeyDisplayCollisions = avoidKeyDisplayCollisions;
+    }
+
+    public boolean isNoAggregation() {
+        return noAggregation;
+    }
+
+    public void setNoAggregation(boolean noAggregation) {
+        this.noAggregation = noAggregation;
     }
 
     public int getDepth() {

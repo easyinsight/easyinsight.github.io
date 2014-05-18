@@ -45,6 +45,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private String feedName;
     private List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
     private UploadPolicy uploadPolicy = new UploadPolicy();
+    private boolean avoidKeyDisplayCollisions;
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
     private boolean accountVisible = true;
@@ -81,6 +82,14 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean defaultToFullJoins;
     private boolean defaultToOptimized;
 
+    public boolean isAvoidKeyDisplayCollisions() {
+        return avoidKeyDisplayCollisions;
+    }
+
+    public void setAvoidKeyDisplayCollisions(boolean avoidKeyDisplayCollisions) {
+        this.avoidKeyDisplayCollisions = avoidKeyDisplayCollisions;
+    }
+
     public void configureFactory(HTMLConnectionFactory factory) {
         throw new UnsupportedOperationException();
     }
@@ -112,6 +121,8 @@ public class FeedDefinition implements Cloneable, Serializable {
     public List<CustomFieldTag> customFieldTags() {
         return null;
     }
+
+    public Key getUpdateKey() { return null; }
 
     public boolean isShowTags() {
         return showTags;
