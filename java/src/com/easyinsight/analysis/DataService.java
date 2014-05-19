@@ -618,7 +618,12 @@ public class DataService {
             } else if (dashboardID > 0) {
                 SecurityUtil.authorizeDashboard(dashboardID);
             } else {
-                SecurityUtil.authorizeFeedAccess(feedID);
+                try {
+                    SecurityUtil.authorizeFeedAccess(feedID);
+                } catch (com.easyinsight.security.SecurityException e) {
+                    LogClass.error("On retrieving " + feedID, e);
+                    throw e;
+                }
             }
             if (analysisItem == null) {
                 LogClass.error("Received null analysis item from feed " + feedID);
