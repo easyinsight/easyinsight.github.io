@@ -272,6 +272,12 @@ public class FeedType implements Serializable {
     public static final FeedType INSIGHTLY_OPPORTUNITY_TO_CONTACT = new FeedType(243);
     public static final FeedType LINKEDIN_COMPOSITE = new FeedType(244);
     public static final FeedType LINKEDIN_PEOPLE = new FeedType(245);
+    public static final FeedType PIVOTAL_V5_STORY_TO_OWNER = new FeedType(246);
+    public static final FeedType FRESHDESK_TIME = new FeedType(247);
+    public static final FeedType CC_EVENT = new FeedType(248);
+    public static final FeedType CC_EVENT_FEES = new FeedType(249);
+    public static final FeedType CC_EVENT_REGISTRANTS = new FeedType(250);
+    public static final FeedType CC_EVENT_ITEMS = new FeedType(251);
 
     public FeedType() {
     }

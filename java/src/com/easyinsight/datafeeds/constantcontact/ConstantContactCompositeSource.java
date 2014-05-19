@@ -5,6 +5,7 @@ import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.UserMessageException;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -48,6 +49,16 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
 
     private String accessToken;
     private String refreshToken;
+
+    private Set<String> eventIDs;
+
+    public Set<String> getEventIDs() {
+        return eventIDs;
+    }
+
+    public void setEventIDs(Set<String> eventIDs) {
+        this.eventIDs = eventIDs;
+    }
 
     public ConstantContactCompositeSource() {
         setFeedName("Constant Contact");
@@ -111,6 +122,23 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
 
     private ContactListCache contactListCache;
     private CampaignCache campaignCache;
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.CC_EVENT.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
+    }
 
     public ContactListCache getOrCreateContactListCache() {
         if (contactListCache == null) {
@@ -178,6 +206,7 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM CONSTANT_CONTACT WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO CONSTANT_CONTACT (TOKEN_KEY, TOKEN_SECRET_KEY, DATA_SOURCE_ID, USERNAME, BRIEF_MODE, " +
                 "REFRESH_TOKEN, ACCESS_TOKEN) VALUES (?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, tokenKey);
@@ -188,6 +217,7 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
         insertStmt.setString(6, accessToken);
         insertStmt.setString(7, refreshToken);
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override
@@ -236,6 +266,8 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.CONSTANT_CONTACT_CAMPAIGN);
         types.add(FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS);
         types.add(FeedType.CONSTANT_CONTACT_LINKS);
+        types.add(FeedType.CC_EVENT);
+        types.add(FeedType.CC_EVENT_REGISTRANTS);
         return types;
     }
 
@@ -255,6 +287,10 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.CONSTANT_CONTACT_CONTACTS, FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS,
                     CCContactSource.CONTACT_ID, CCCampaignResultsSource.CONTACT_ID),
                 new ChildConnection(FeedType.CONSTANT_CONTACT_CAMPAIGN_RESULTS, FeedType.CONSTANT_CONTACT_LINKS,
-                        CCCampaignResultsSource.LINK_ID, CCCampaignLinkSource.LINK_ID));
+                        CCCampaignResultsSource.LINK_ID, CCCampaignLinkSource.LINK_ID),
+                new ChildConnection(FeedType.CONSTANT_CONTACT_CONTACTS, FeedType.CC_EVENT_REGISTRANTS,
+                        CCContactSource.CONTACT_EMAIL, CCEventRegistrantSource.REGISTRANT_EMAIL),
+                new ChildConnection(FeedType.CC_EVENT, FeedType.CC_EVENT_REGISTRANTS,
+                        CCEventSource.EVENT_ID, CCEventRegistrantSource.REGISTRANT_EVENT_ID));
     }
 }
