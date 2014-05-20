@@ -42,7 +42,7 @@ public class PivotalTrackerV5StoryOwnerService extends PivotalTrackerV5BaseSourc
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
-        PivotalTrackerV5CompositeSource p = (PivotalTrackerV5CompositeSource) parentDefinition;
+        /*PivotalTrackerV5CompositeSource p = (PivotalTrackerV5CompositeSource) parentDefinition;
         for (Map.Entry<String, List<String>> entry : p.getStoryIDToUserMap().entrySet()) {
             for (String val : entry.getValue()) {
                 IRow row = dataSet.createRow();
@@ -50,7 +50,7 @@ public class PivotalTrackerV5StoryOwnerService extends PivotalTrackerV5BaseSourc
                 String userName = p.getUserMap().get(val);
                 row.addValue(keys.get(NAME), userName);
             }
-        }
+        }*/
         return dataSet;
     }
 }
