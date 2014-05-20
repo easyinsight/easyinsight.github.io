@@ -39,7 +39,7 @@ public class ContactListCache extends ConstantContactBaseSource {
                     String name = node.get("name").toString();
                     ContactList contactList = new ContactList(id, name, name);
                     contactLists.add(contactList);
-                    Map result = query("https://api.constantcontact.com/v2/lists/" + id + "/contacts?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                    Map result = query("https://api.constantcontact.com/v2/lists/" + id + "/contacts?limit=500&api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
                     Map meta = (Map) result.get("meta");
                     String nextLink = null;
                     if (meta != null) {

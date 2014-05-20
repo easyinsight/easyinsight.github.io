@@ -151,6 +151,11 @@ public class YTDUtil {
             headers.add(sortablePercentChangeItemList.get(0).label);
         }
 
+        if (rows.size() == 1) {
+            if (rows.get(0).getResults().isEmpty()) {
+                rows = new ArrayList<CompareYearsRow>();
+            }
+        }
         return new YearStuff(headers, rows);
     }
 
@@ -338,6 +343,9 @@ public class YTDUtil {
                 return value.toSortValue().compareTo(value1.toSortValue());
             }
         });
+        if (values.size() == 1 && values.get(0) == null) {
+            values = new ArrayList<YTDValue>();
+        }
         return new YTDStuff(intervals, values);
     }
 }
