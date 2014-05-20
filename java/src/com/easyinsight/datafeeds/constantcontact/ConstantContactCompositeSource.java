@@ -158,6 +158,8 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         contactListCache = null;
+        campaignCache = null;
+        eventIDs = null;
     }
 
     @Override
