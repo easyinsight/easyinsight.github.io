@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -35,7 +36,10 @@ public abstract class YouTrackBaseSource extends ServerDataSourceDefinition {
             if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Invalid user name or password.", parentSource));
             }
-            return new Builder().build(restMethod.getResponseBodyAsStream());
+            String string = restMethod.getResponseBodyAsString();
+            string = string.replaceAll("[\\000]*", "");
+            ByteArrayInputStream bais = new ByteArrayInputStream(string.getBytes());
+            return new Builder().build(bais);
         } catch (IllegalArgumentException e) {
             throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), parentSource));
         }

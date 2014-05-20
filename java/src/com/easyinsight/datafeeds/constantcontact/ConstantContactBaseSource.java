@@ -16,6 +16,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,20 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
         }
     }
 
+    protected Date queryDate(Map n, String xpath) {
+        Object result = n.get(xpath);
+        if (result == null) {
+            return null;
+        } else {
+            String string = result.toString();
+            try {
+                return DATE_FORMAT.parse(string);
+            } catch (java.text.ParseException e) {
+                return null;
+            }
+        }
+    }
+
     protected String queryField(Node n, String xpath) {
         Nodes results = n.query(xpath);
         if(results.size() > 0) {
@@ -53,7 +68,7 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
 
     protected Map query(String queryString, FeedDefinition parentSource, HttpClient client) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
         try {
-            //System.out.println(queryString);
+            System.out.println(queryString);
             ConstantContactCompositeSource parentDefinition = (ConstantContactCompositeSource) parentSource;
             HttpMethod restMethod = new GetMethod(queryString);
             restMethod.setRequestHeader("Authorization", "Bearer " + parentDefinition.getAccessToken());

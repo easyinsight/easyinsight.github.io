@@ -26,7 +26,7 @@ public class MarmotHerderComponent implements IComponent {
             if (namespaceMap == null) {
                 namespaceMap = new HashMap<String, UniqueKey>();
             }
-            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems, pipelineData.getInsightRequestMetadata().isAvoidKeyDisplayCollisions());
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
             Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
@@ -44,6 +44,7 @@ public class MarmotHerderComponent implements IComponent {
                 }
             }
         }
+
         return dataSet;
     }
 

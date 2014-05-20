@@ -18,6 +18,7 @@ import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
 import com.easyinsight.datafeeds.freshdesk.FreshdeskCompositeSource;
 import com.easyinsight.datafeeds.freshdesk.FreshdeskTicketSource;
+import com.easyinsight.datafeeds.freshdesk.FreshdeskTimeEntrySource;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.github.GithubCompositeSource;
 import com.easyinsight.datafeeds.github.GithubRepositorySource;
@@ -406,6 +407,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INSIGHTLY_OPPORTUNITY_TO_ORGANIZATION, InsightlyOpportunityToOrganizationSource.class);
         registerType(FeedType.LINKEDIN_COMPOSITE, LinkedInCompositeSource.class);
         registerType(FeedType.LINKEDIN_PEOPLE, LinkedInPeopleSource.class);
+        registerType(FeedType.PIVOTAL_V5_STORY_TO_OWNER, PivotalTrackerV5StoryOwnerService.class);
+        registerType(FeedType.FRESHDESK_TIME, FreshdeskTimeEntrySource.class);
+        registerType(FeedType.CC_EVENT, CCEventSource.class);
+        registerType(FeedType.CC_EVENT_REGISTRANTS, CCEventRegistrantSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

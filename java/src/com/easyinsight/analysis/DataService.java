@@ -618,7 +618,12 @@ public class DataService {
             } else if (dashboardID > 0) {
                 SecurityUtil.authorizeDashboard(dashboardID);
             } else {
-                SecurityUtil.authorizeFeedAccess(feedID);
+                try {
+                    SecurityUtil.authorizeFeedAccess(feedID);
+                } catch (com.easyinsight.security.SecurityException e) {
+                    LogClass.error("On retrieving " + feedID, e);
+                    throw e;
+                }
             }
             if (analysisItem == null) {
                 LogClass.error("Received null analysis item from feed " + feedID);
@@ -2195,6 +2200,7 @@ public class DataService {
             insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
+            insightRequestMetadata.setAvoidKeyDisplayCollisions(feed.getDataSource().isAvoidKeyDisplayCollisions());
 
             if (analysisDefinition.getBaseDate() != null && !"".equals(analysisDefinition.getBaseDate())) {
                 AnalysisItem targetItem = null;
@@ -2345,7 +2351,7 @@ public class DataService {
 
 
 
-            KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields);
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allFields, insightRequestMetadata.isAvoidKeyDisplayCollisions());
             Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
             Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
             Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
