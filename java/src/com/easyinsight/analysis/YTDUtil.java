@@ -151,10 +151,14 @@ public class YTDUtil {
             headers.add(sortablePercentChangeItemList.get(0).label);
         }
 
-        if (rows.size() == 1) {
-            if (rows.get(0).getResults().isEmpty()) {
-                rows = new ArrayList<CompareYearsRow>();
+        boolean atLeastOneValue = false;
+        for (CompareYearsRow row : rows) {
+            if (row.getResults().size() > 0) {
+                atLeastOneValue = true;
             }
+        }
+        if (!atLeastOneValue) {
+            rows = new ArrayList<CompareYearsRow>();
         }
         return new YearStuff(headers, rows);
     }
@@ -343,7 +347,14 @@ public class YTDUtil {
                 return value.toSortValue().compareTo(value1.toSortValue());
             }
         });
-        if (values.size() == 1 && values.get(0) == null) {
+        boolean atLeastOneValue = false;
+        for (int i = 0; i < values.size(); i++) {
+            YTDValue ytdValue = values.get(i);
+            if (ytdValue != null) {
+                atLeastOneValue = true;
+            }
+        }
+        if (!atLeastOneValue) {
             values = new ArrayList<YTDValue>();
         }
         return new YTDStuff(intervals, values);
