@@ -71,15 +71,84 @@
                 new MultiColor(0xB57C99, true),
                 new MultiColor(0xB57C99, true)
             ]},
-            {label:"Other", colors:[
-                new MultiColor(0xB22222, true),
-                new MultiColor(0xDC143C, true),
-                new MultiColor(0xCD5C5C, true),
-                new MultiColor(0xF08080, true),
-                new MultiColor(0xE9967A, true),
-                new MultiColor(0xFA8072, true)
+            {label:"D3 1", colors:[
+                new MultiColor(0x1f77b4, true),
+                new MultiColor(0xaec7e8, true),
+                new MultiColor(0xff7f0e, true),
+                new MultiColor(0xffbb78, true),
+                new MultiColor(0x2ca02c, true),
+                new MultiColor(0x98df8a, true),
+                new MultiColor(0xd62728, true),
+                new MultiColor(0xff9896, true),
+                new MultiColor(0x9467bd, true),
+                new MultiColor(0xc5b0d5, true),
+                new MultiColor(0x8c564b, true),
+                new MultiColor(0xc49c94, true),
+                new MultiColor(0xe377c2, true),
+                new MultiColor(0xf7b6d2, true),
+                new MultiColor(0x7f7f7f, true),
+                new MultiColor(0xc7c7c7, true),
+                new MultiColor(0xbcbd22, true),
+                new MultiColor(0xdbdb8d, true),
+                new MultiColor(0x17becf, true),
+                new MultiColor(0x9edae5, true)
+            ]},
+            {label:"D3 2", colors:[
+                new MultiColor(0x393b79, true),
+                new MultiColor(0x5254a3, true),
+                new MultiColor(0x6b6ecf, true),
+                new MultiColor(0x9c9ede, true),
+                new MultiColor(0x637939, true),
+                new MultiColor(0x8ca252, true),
+                new MultiColor(0xb5cf6b, true),
+                new MultiColor(0xcedb9c, true),
+                new MultiColor(0x8c6d31, true),
+                new MultiColor(0xe7ba52, true),
+                new MultiColor(0xe7cb94, true),
+                new MultiColor(0x843c39, true),
+                new MultiColor(0xad494a, true),
+                new MultiColor(0xd6616b, true),
+                new MultiColor(0xe7969c, true),
+                new MultiColor(0x7b4173, true),
+                new MultiColor(0xa55194, true),
+                new MultiColor(0xce6dbd, true),
+                new MultiColor(0xde9ed6, true)
+            ]},
+            {label:"D3 3", colors:[
+                new MultiColor(0x3182bd, true),
+                new MultiColor(0x6baed6, true),
+                new MultiColor(0x9ecae1, true),
+                new MultiColor(0xc6dbef, true),
+                new MultiColor(0xe6550d, true),
+                new MultiColor(0xfd8d3c, true),
+                new MultiColor(0xfdae6b, true),
+                new MultiColor(0xfdd0a2, true),
+                new MultiColor(0x31a354, true),
+                new MultiColor(0x74c476, true),
+                new MultiColor(0xa1d99b, true),
+                new MultiColor(0xc7e9c0, true),
+                new MultiColor(0x756bb1, true),
+                new MultiColor(0x9e9ac8, true),
+                new MultiColor(0xbcbddc, true),
+                new MultiColor(0xdadaeb, true),
+                new MultiColor(0x636363, true),
+                new MultiColor(0x969696, true),
+                new MultiColor(0xbdbdbd, true),
+                new MultiColor(0xd9d9d9, true)
             ]}
         ]);
+
+        /*
+         var d3_category10 = [ "0x1f77b4", "0xff7f0e", "0x2ca02c", "0xd62728", "0x9467bd", "0x8c564b", "0xe377c2", "0x7f7f7f", "0xbcbd22", "0x17becf" ];
+         var d3_category20 = [ "0x1f77b4", "0xaec7e8", "0xff7f0e", "0xffbb78", "0x2ca02c", "0x98df8a", "0xd62728", "0xff9896", "0x9467bd", "0xc5b0d5",
+         "0x8c564b", "0xc49c94", "0xe377c2", "0xf7b6d2", "0x7f7f7f", "0xc7c7c7", "0xbcbd22", "0xdbdb8d", "0x17becf", "0x9edae5" ];
+
+         var d3_category20b = [ "0x393b79", "0x5254a3", "0x6b6ecf", "0x9c9ede", "0x637939", "0x8ca252", "0xb5cf6b", "0xcedb9c", "0x8c6d31", "0xbd9e39",
+         "0xe7ba52", "0xe7cb94", "0x843c39", "0xad494a", "0xd6616b", "0xe7969c", "0x7b4173", "0xa55194", "0xce6dbd", "0xde9ed6" ];
+
+         var d3_category20c = [ "0x3182bd", "0x6baed6", "0x9ecae1", "0xc6dbef", "0xe6550d", "0xfd8d3c", "0xfdae6b", "0xfdd0a2", "0x31a354", "0x74c476",
+         "0xa1d99b", "0xc7e9c0", "0x756bb1", "0x9e9ac8", "0xbcbddc", "0xdadaeb", "0x636363", "0x969696", "0xbdbdbd", "0xd9d9d9" ];
+         */
 
         //return [new SolidColor(0xB22222), new SolidColor(0xDC143C), new SolidColor(0xCD5C5C), new SolidColor(0xF08080), new SolidColor(0xE9967A), new SolidColor(0xFA8072), new SolidColor(0xFFA07A)];
 
