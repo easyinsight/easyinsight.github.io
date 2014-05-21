@@ -1130,7 +1130,9 @@ public class AnalysisService {
                 dataStorage.closeConnection();
             }
             LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " added row.");
-            CachedAddonDataSource.triggerUpdates(dataSourceID);
+            if (dataSource.getParentSourceID() > 0) {
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+            }
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1157,7 +1159,9 @@ public class AnalysisService {
                 dataStorage.closeConnection();
             }
             LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " deleted row.");
-            CachedAddonDataSource.triggerUpdates(dataSourceID);
+            if (dataSource.getParentSourceID() > 0) {
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+            }
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1193,7 +1197,9 @@ public class AnalysisService {
                 dataStorage.closeConnection();
             }
             LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " updated row.");
-            CachedAddonDataSource.triggerUpdates(dataSourceID);
+            if (dataSource.getParentSourceID() > 0) {
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+            }
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
