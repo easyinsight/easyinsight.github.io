@@ -493,6 +493,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             transformContainer.setStyle("paddingTop", 10);
             transformContainer.setStyle("paddingBottom", 10);
             transformContainer.dashboard = dashboardEditorMetadata.dashboard;
+            transformContainer.dashboardID = dashboardEditorMetadata.dashboard.id;
             transformContainer.reportView = true;
             transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
             transformContainer.role = dashboardEditorMetadata.role;
