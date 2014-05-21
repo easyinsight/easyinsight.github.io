@@ -60,8 +60,8 @@ public class InfusionsoftLeadSourceSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(STATUS), "Status"));
         analysisitems.add(new AnalysisDimension(keys.get(DESCRIPTION), "Description"));
         analysisitems.add(new AnalysisDimension(keys.get(LEAD_SOURCE_CATEGORY_ID), "Lead Source Category ID"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(START_DATE), "Start Date", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "End Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(START_DATE), "Start Date", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "End Date", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

@@ -50,7 +50,7 @@ public class InfusionsoftStageMoveSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID), "Opportunity ID"));
         analysisitems.add(new AnalysisDimension(keys.get(MOVE_TO_STAGE), "Move to Stage"));
         analysisitems.add(new AnalysisDimension(keys.get(MOVE_FROM_STAGE), "Move from Stage"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(MOVE_DATE), "Move Date", AnalysisDateDimension.MINUTE_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(MOVE_DATE), "Move Date", AnalysisDateDimension.MINUTE_LEVEL, true));
         return analysisitems;
     }
 

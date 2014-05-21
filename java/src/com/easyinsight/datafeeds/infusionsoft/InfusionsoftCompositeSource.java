@@ -181,6 +181,11 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_ITEM, InfusionsoftInvoiceSource.ID, InfusionsoftInvoiceItemSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICE_ITEM, FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftInvoiceItemSource.ORDER_ITEM_ID, InfusionsoftOrderItemSource.ORDER_ITEM_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_JOBS, InfusionsoftInvoiceSource.JOB_ID, InfusionsoftJobSource.JOB_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_JOBS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftJobSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_ORDER_ITEM, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftOrderItemSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCT_INTEREST, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftProductInterestSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_SUBSCRIPTIONS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftSubscriptionSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_RECURRING_ORDERS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftRecurringOrderSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftInvoiceSource.ID, InfusionsoftInvoicePaymentSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PAYMENT, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftPaymentSource.PAYMENT_ID, InfusionsoftInvoicePaymentSource.PAYMENT_ID, IJoin.ONE, IJoin.ONE));
 

@@ -64,7 +64,7 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(STAGE_ID), "Lead Stage ID"));
         analysisitems.add(new AnalysisDimension(keys.get(STATUS_ID), "Lead Status ID"));
         analysisitems.add(new AnalysisDimension(keys.get(LEAD_SOURCE), "Lead Source"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Lead Created At", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Lead Created At", AnalysisDateDimension.DAY_LEVEL, true));
         analysisitems.add(new AnalysisMeasure(keys.get(PROJECTED_REVENUE_HIGH), "Project Revenue High", AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         analysisitems.add(new AnalysisMeasure(keys.get(PROJECTED_REVENUE_LOW), "Project Revenue Low", AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
         Key stageNameKey = keys.get(STAGE_NAME);

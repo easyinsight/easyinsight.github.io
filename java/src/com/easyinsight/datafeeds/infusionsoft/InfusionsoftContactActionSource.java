@@ -54,10 +54,10 @@ public class InfusionsoftContactActionSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID), "Action Opportunity ID"));
         analysisitems.add(new AnalysisDimension(keys.get(ACTION_TYPE), "Action Type"));
         analysisitems.add(new AnalysisDimension(keys.get(ACTION_DESCRIPTION), "Action Description"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(CREATION_DATE), "Action Creation Date", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(COMPLETION_DATE), "Action Completion Date", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(ACTION_DATE), "Action Date", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "Action End Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(CREATION_DATE), "Action Creation Date", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(COMPLETION_DATE), "Action Completion Date", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(ACTION_DATE), "Action Date", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "Action End Date", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 
