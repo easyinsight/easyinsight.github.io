@@ -52,7 +52,7 @@ public class InfusionsoftInvoicePaymentSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(PAY_STATUS), "Pay Status"));
         analysisitems.add(new AnalysisDimension(keys.get(SKIP_COMMISSION), "Skip Commission"));
         analysisitems.add(new AnalysisMeasure(keys.get(AMT), "Invoice Amount", AggregationTypes.SUM));
-        analysisitems.add(new AnalysisDateDimension(keys.get(PAY_DATE), "Pay Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(PAY_DATE), "Pay Date", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

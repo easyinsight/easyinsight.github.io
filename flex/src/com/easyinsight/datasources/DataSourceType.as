@@ -67,6 +67,7 @@ public class DataSourceType {
     public static const SOLVE360:int = 122;
     public static const PIVOTAL_TRACKER_V5:int = 219;
     public static const LINKEDIN_COMPOSITE:int = 244;
+    public static const NETSUITE:int = 252;
     public static const OWNER:int = 1;
     public static const EDITOR:int = 2;
 

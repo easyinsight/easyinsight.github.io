@@ -1,0 +1,1 @@
+alter table data_feed add avoid_key_display_collisions tinyint(4) not null default 0;

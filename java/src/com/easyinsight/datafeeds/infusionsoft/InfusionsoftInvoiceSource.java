@@ -60,7 +60,7 @@ public class InfusionsoftInvoiceSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Contact ID"));
         analysisitems.add(new AnalysisDimension(keys.get(ID), "Invoice ID"));
         analysisitems.add(new AnalysisDimension(keys.get(JOB_ID), "Job ID"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL, true));
         analysisitems.add(new AnalysisMeasure(keys.get(INVOICE_TOTAL), "Invoice Total", AggregationTypes.SUM));
         analysisitems.add(new AnalysisMeasure(keys.get(TOTAL_PAID), "Total Paid", AggregationTypes.SUM));
         analysisitems.add(new AnalysisMeasure(keys.get(TOTAL_DUE), "Total Due", AggregationTypes.SUM));

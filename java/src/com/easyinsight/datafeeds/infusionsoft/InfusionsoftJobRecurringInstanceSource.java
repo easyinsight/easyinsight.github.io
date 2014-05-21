@@ -54,9 +54,9 @@ public class InfusionsoftJobRecurringInstanceSource extends InfusionsoftTableSou
         analysisitems.add(new AnalysisDimension(keys.get(STATUS), "Status"));
         analysisitems.add(new AnalysisDimension(keys.get(AUTO_CHARGE), "Auto Charge"));
         analysisitems.add(new AnalysisDimension(keys.get(DESCRIPTION), "Description"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "End Date", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(START_DATE), "Start Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "End Date", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(START_DATE), "Start Date", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

@@ -51,12 +51,12 @@ public class InfusionsoftReferralSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Contact ID"));
         analysisitems.add(new AnalysisDimension(keys.get(ID), "Referral ID"));
         analysisitems.add(new AnalysisDimension(keys.get(AFFILIATE_ID), "Affiliate ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(IP_ADDRESS), "Affiliate ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(SOURCE), "Affiliate ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(INFO), "Affiliate ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(TYPE), "Affiliate ID"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_SET), "Date Set", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_EXPIRES), "Date Expires", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDimension(keys.get(IP_ADDRESS), "IP Address"));
+        analysisitems.add(new AnalysisDimension(keys.get(SOURCE), "Referral Source"));
+        analysisitems.add(new AnalysisDimension(keys.get(INFO), "Referral Info"));
+        analysisitems.add(new AnalysisDimension(keys.get(TYPE), "Referral Type"));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_SET), "Date Set", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_EXPIRES), "Date Expires", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

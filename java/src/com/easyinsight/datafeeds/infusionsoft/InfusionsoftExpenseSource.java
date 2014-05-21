@@ -51,7 +51,7 @@ public class InfusionsoftExpenseSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(EXPENSE_TYPE), "Expense Type"));
         analysisitems.add(new AnalysisDimension(keys.get(TYPE_ID), "Type ID"));
         analysisitems.add(new AnalysisMeasure(keys.get(EXPENSE_AMT), "Expense Amount", AggregationTypes.SUM));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_INCURRED), "Date Incurred", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_INCURRED), "Date Incurred", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

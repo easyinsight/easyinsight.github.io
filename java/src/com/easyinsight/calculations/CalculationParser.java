@@ -29,7 +29,6 @@ public class CalculationParser extends CalculationsParser {
 
     @Override
     protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-        LogClass.calculationError("Mismatched tokens in calculation: " + fullString);
         if(throwing) {
             throw new RecognitionException();
         }

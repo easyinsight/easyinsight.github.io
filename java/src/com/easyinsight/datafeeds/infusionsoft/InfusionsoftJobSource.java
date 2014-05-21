@@ -57,7 +57,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Job Contact ID"));
         analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Job Product ID"));
         analysisitems.add(new AnalysisDimension(keys.get(JOB_STATUS), "Job Status"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

@@ -187,7 +187,7 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
         else {
             int parameters = node.getFunction().getParameterCount();
             if (parameters != -1 && parameters != node.getChildCount() - 1) {
-                throw new FunctionException(node.getChild(0).toString() + " requires " + parameters + " parameters.");
+                throw new FunctionException(node.getChild(0).getChild(0).toString() + " requires " + parameters + " parameters.");
             }
             for(int i = 1;i < node.getChildCount();i++) {
                 ResolverVisitor rv;

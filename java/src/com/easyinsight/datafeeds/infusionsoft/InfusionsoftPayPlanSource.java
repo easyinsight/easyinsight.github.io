@@ -52,9 +52,9 @@ public class InfusionsoftPayPlanSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(TYPE), "Type"));
         analysisitems.add(new AnalysisMeasure(keys.get(AMT_DUE), "Amount Due", AggregationTypes.SUM));
         analysisitems.add(new AnalysisMeasure(keys.get(FIRST_PAY_AMT), "First Payment Amount", AggregationTypes.SUM));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_DUE), "Date Due", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(INIT_DATE), "Init Date", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(START_DATE), "Start Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_DUE), "Date Due", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(INIT_DATE), "Init Date", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(START_DATE), "Start Date", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

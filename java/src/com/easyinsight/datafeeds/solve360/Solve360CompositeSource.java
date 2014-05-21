@@ -77,12 +77,30 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
     private List<AnalysisItem> customCompanyFields;
     private List<AnalysisItem> customContactFields;
 
+    private Map<String, String> categories;
+
     public List<AnalysisItem> getCustomContactFields() {
         return customContactFields;
     }
 
     public List<AnalysisItem> getCustomCompanyFields() {
         return customCompanyFields;
+    }
+
+    private void populateCategories() throws ParsingException {
+        if (categories == null) {
+            categories = new HashMap<String, String>();
+            HttpClient client = Solve360BaseSource.getHttpClient(userEmail, authKey);
+            Document doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/contacts/categories/", client, new Builder(), this);
+            Nodes responseNode = doc.query("/response/categories/category");
+
+            for (int i = 0; i < responseNode.size(); i++) {
+                Element customFieldNode = (Element) responseNode.get(i);
+                String id = Solve360BaseSource.queryField(customFieldNode, "id/text()");
+                String name = Solve360BaseSource.queryField(customFieldNode, "name/text()");
+                categories.put(id, name);
+            }
+        }
     }
 
     public List<AnalysisItem> createCustomCompanyFields(Map<String, Key> keyMap) {
@@ -168,9 +186,11 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
 
     public Map<Integer, Company> getOrCreateCompanyCache(Map<String, Key> keyMap) {
         if (companyMap == null) {
+
             createCustomCompanyFields(keyMap);
             companyMap = new HashMap<Integer, Company>();
             try {
+                populateCategories();
                 HttpClient client = Solve360BaseSource.getHttpClient(userEmail, authKey);
                 int page = 0;
                 int count;
@@ -178,9 +198,9 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     count = 0;
                     Document doc;
                     if (page == 0) {
-                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&limit=1000&start=1", client, new Builder(), this);
+                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&categories=1&limit=1000&start=1", client, new Builder(), this);
                     } else {
-                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&limit=1000&start=" + (page * 1000), client, new Builder(), this);
+                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&categories=1&limit=1000&start=" + (page * 1000), client, new Builder(), this);
                     }
 
                     Nodes responseNode = doc.query("/response");
@@ -191,6 +211,18 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                         if (!"count".equals(companyNode.getLocalName()) && !"status".equals(companyNode.getLocalName())) {
                             count++;
                             Company c = new Company();
+                            String categories = Solve360BaseSource.queryField(companyNode, "categories/text()");
+
+                            if (categories != null && !"".equals(categories)) {
+                                StringBuilder sb = new StringBuilder();
+                                String[] tokens = categories.split(",");
+                                for (String categoryID : tokens) {
+                                    String categoryName = this.categories.get(categoryID);
+                                    sb.append(categoryName).append(",");
+                                }
+                                sb.deleteCharAt(sb.length() - 1);
+                                c.setCategories(sb.toString());
+                            }
                             c.setCompanyId(Integer.parseInt(Solve360BaseSource.queryField(companyNode, "id/text()")));
                             c.setName(Solve360BaseSource.queryField(companyNode, "name/text()"));
                             c.setShippingAddress(Solve360BaseSource.queryField(companyNode, "shippingaddress/text()"));
@@ -232,9 +264,11 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
 
     public Map<Integer, Contact> getOrCreateContactCache(Map<String, Key> keyMap) {
         if (contactMap == null) {
+
             createCustomContactFields(keyMap);
             contactMap = new HashMap<Integer, Contact>();
             try {
+                populateCategories();
                 HttpClient client = Solve360BaseSource.getHttpClient(userEmail, authKey);
                 Builder builder = new Builder();
                 int count;
@@ -243,20 +277,33 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     count = 0;
                     Document doc;
                     if (page == 0) {
-                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/contacts?layout=1&limit=1000", client, builder, this);
+                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/contacts?layout=1&categories=1&limit=1000", client, builder, this);
                     } else {
-                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/contacts?layout=1&limit=1000&start=" + (page * 1000), client, builder, this);
+                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/contacts?layout=1&categories=1&limit=1000&start=" + (page * 1000), client, builder, this);
                     }
                     Nodes responseNode = doc.query("/response");
                     Node response = responseNode.get(0);
                     DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
                     for (int i = 0; i < response.getChildCount(); i++) {
                         Element contactNode = (Element) response.getChild(i);
+                        System.out.println(contactNode.toXML());
                         if (!"count".equals(contactNode.getLocalName()) && !"status".equals(contactNode.getLocalName())) {
                             count++;
                             Contact c = new Contact();
                             String s = Solve360BaseSource.queryField(contactNode, "id/text()");
                             c.setId(Integer.parseInt(s));
+                            String categories = Solve360BaseSource.queryField(contactNode, "categories/text()");
+
+                            if (categories != null && !"".equals(categories)) {
+                                StringBuilder sb = new StringBuilder();
+                                String[] tokens = categories.split(",");
+                                for (String categoryID : tokens) {
+                                    String categoryName = this.categories.get(categoryID);
+                                    sb.append(categoryName).append(",");
+                                }
+                                sb.deleteCharAt(sb.length() - 1);
+                                c.setCategories(sb.toString());
+                            }
                             c.setName(Solve360BaseSource.queryField(contactNode, "name/text()"));
                             c.setTitle(Solve360BaseSource.queryField(contactNode, "jobtitle/text()"));
                             c.setBusinessAddress(Solve360BaseSource.queryField(contactNode, "businessaddress/text()"));

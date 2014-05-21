@@ -31,6 +31,15 @@ public class Contact {
     private String cellphone;
     private String businessEmail;
     private String company;
+    private String categories;
+
+    public String getCategories() {
+        return categories;
+    }
+
+    public void setCategories(String categories) {
+        this.categories = categories;
+    }
 
     private Map<Key, Object> customFieldValues;
 
