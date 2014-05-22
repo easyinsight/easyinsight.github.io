@@ -195,8 +195,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public MigrationResult migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         boolean changed = false;
+        conn.commit();
+        conn.setAutoCommit(true);
         Map<String, Key> keys = newDataSourceFields(parentDefinition);
         List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
+        conn.setAutoCommit(false);
         List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
         boolean renamed = false;
         for (AnalysisItem field : fields) {
@@ -241,7 +244,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         } else {
             sql = tempStorage.defineTempUpdateTable();
         }
-        tempStorage.createTable(sql);
+        tempStorage.createTable(sql, insertTemp);
         System.out.println("Refreshing " + getDataFeedID() + " - " + getFeedName() + " at " + new Date());
         DataSet dataSet;
         if (refreshProperties == null) {
@@ -257,7 +260,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         return tempStorage.getTableName();
     }
 
-    protected Key getUpdateKey() {
+    public Key getUpdateKey() {
+        if (getUpdateKeyName() == null) {
+            return null;
+        }
         return findAnalysisItem(getUpdateKeyName()).getKey();
     }
 
@@ -266,7 +272,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     }
     
     protected void clearData(DataStorage dataStorage) throws SQLException {
-        dataStorage.truncate();
+        dataStorage.truncate(getUpdateKey());
     }
 
     protected void clearData(DataStorage dataStorage, Map<String, Object> refreshProperties) throws SQLException {
