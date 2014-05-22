@@ -10,7 +10,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.text.DateFormat;
@@ -48,30 +47,51 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
         return FeedType.SOLVE360_OPPORTUNITIES;
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(OPPORTUNITY_ID, DESCRIPTION, DOLLARS, STATUS, RELATED_TO, CLOSING_DATE, PROBABILITY,
-                CREATED, UPDATED, COUNT, RESPONSIBLE, STAGE, RELATED_COMPANY, RELATED_CONTACT);
-    }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID)));
-        analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION)));
-        analysisItems.add(new AnalysisDimension(keys.get(STAGE)));
-        analysisItems.add(new AnalysisDimension(keys.get(STATUS)));
-        analysisItems.add(new AnalysisDimension(keys.get(RELATED_TO)));
-        analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE)));
-        analysisItems.add(new AnalysisDateDimension(keys.get(CREATED), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(CLOSING_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisMeasure(keys.get(DOLLARS), DOLLARS, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        analysisItems.add(new AnalysisMeasure(keys.get(PROBABILITY), PROBABILITY, AggregationTypes.SUM, true, FormattingConfiguration.PERCENTAGE));
-        analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
-        analysisItems.add(new AnalysisDimension(keys.get(RELATED_COMPANY)));
-        analysisItems.add(new AnalysisDimension(keys.get(RELATED_CONTACT)));
-        return analysisItems;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        Solve360CompositeSource solve360CompositeSource = (Solve360CompositeSource) parentDefinition;
+        try {
+            HttpClient client = getHttpClient(solve360CompositeSource.getUserEmail(), solve360CompositeSource.getAuthKey());
+            Document doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/fields/opportunity", client, new Builder(), this);
+            Nodes responseNode = doc.query("/response/fields");
+
+            for (int i = 0; i < responseNode.size(); i++) {
+                Element screwYou = (Element) responseNode.get(i);
+                for (int j = 0 ; j < screwYou.getChildCount(); j++) {
+                    Element customFieldNode = (Element) screwYou.getChild(j);
+                    String customFieldID = Solve360BaseSource.queryField(customFieldNode, "name/text()");
+                    if (customFieldID.startsWith("custom")) {
+                        String customFieldName = Solve360BaseSource.queryField(customFieldNode, "label/text()");
+                        String type = Solve360BaseSource.queryField(customFieldNode, "type/text()");
+
+                        if ("date".equals(type)) {
+                            fieldBuilder.addField(customFieldID, new AnalysisDateDimension(customFieldName));
+                        } else if ("number".equals(type)) {
+                            fieldBuilder.addField(customFieldID, new AnalysisMeasure(customFieldName));
+                        } else {
+                            fieldBuilder.addField(customFieldID, new AnalysisDimension(customFieldName));
+                        }
+                    }
+                }
+
+            }
+            fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
+            fieldBuilder.addField(DESCRIPTION, new AnalysisDimension());
+            fieldBuilder.addField(STAGE, new AnalysisDimension());
+            fieldBuilder.addField(STATUS, new AnalysisDimension());
+            fieldBuilder.addField(RELATED_TO, new AnalysisDimension());
+            fieldBuilder.addField(RESPONSIBLE, new AnalysisDimension());
+            fieldBuilder.addField(RELATED_COMPANY, new AnalysisDimension());
+            fieldBuilder.addField(RELATED_CONTACT, new AnalysisDimension());
+            fieldBuilder.addField(CREATED, new AnalysisDateDimension());
+            fieldBuilder.addField(UPDATED, new AnalysisDateDimension());
+            fieldBuilder.addField(CLOSING_DATE, new AnalysisDateDimension());
+            fieldBuilder.addField(DOLLARS, new AnalysisMeasure());
+            fieldBuilder.addField(PROBABILITY, new AnalysisMeasure());
+            fieldBuilder.addField(COUNT, new AnalysisMeasure());
+        } catch (Exception e) {
+            throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), parentDefinition));
+        }
     }
 
     @Override
@@ -108,6 +128,11 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
                     row.addValue(keys.get(RELATED_CONTACT), queryField(dealNode, "itemid/text()"));
                 }
                 row.addValue(keys.get(COUNT), 1);
+                for (Key key : keys.values()) {
+                    if (key.toKeyString().startsWith("custom")) {
+                        row.addValue(key, queryField(dealNode, key.toKeyString() + "/text()"));
+                    }
+                }
             }
 
             return dataSet;

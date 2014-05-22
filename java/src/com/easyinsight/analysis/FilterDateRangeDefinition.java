@@ -248,7 +248,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         return items;
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
 

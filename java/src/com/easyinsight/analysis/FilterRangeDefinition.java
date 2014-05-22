@@ -2,7 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
-import com.easyinsight.logging.LogClass;
+import com.easyinsight.database.Database;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
@@ -230,7 +230,7 @@ public class FilterRangeDefinition extends FilterDefinition {
         }
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         String lowerOperator = (getLowerOperator() == LESS_THAN) ? ">" : ">=";
         String upperOperator = (getUpperOperator() == LESS_THAN) ? "<" : "<=";
         StringBuilder queryBuilder = new StringBuilder();

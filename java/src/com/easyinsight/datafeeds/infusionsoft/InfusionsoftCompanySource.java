@@ -67,8 +67,8 @@ public class InfusionsoftCompanySource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(STATE), "State"));
         analysisitems.add(new AnalysisDimension(keys.get(CITY), "City"));
         analysisitems.add(new AnalysisDimension(keys.get(POSTAL_CODE), "Postal Code"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL));
-        analysisitems.add(new AnalysisDateDimension(keys.get(LAST_UPDATED), "Date Updated", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL, true));
+        analysisitems.add(new AnalysisDateDimension(keys.get(LAST_UPDATED), "Date Updated", AnalysisDateDimension.DAY_LEVEL, true));
         InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
         List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-6);
         if (customFields != null) {

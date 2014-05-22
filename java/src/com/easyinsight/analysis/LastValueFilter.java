@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.LastValueComponent;
 import nu.xom.Element;
@@ -63,7 +64,7 @@ public class LastValueFilter extends FilterDefinition {
         return new MaterializedLastValueFilter(getField());
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         return null;
     }
 

@@ -2,7 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
-import nu.xom.Attribute;
+import com.easyinsight.database.Database;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
@@ -106,7 +106,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         /*return "year(" + getField().toKeySQL() + ") = ?";*/
         return null;
     }

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import com.easyinsight.pipeline.FirstValueComponent;
 import com.easyinsight.pipeline.IComponent;
 import nu.xom.Element;
@@ -58,7 +59,7 @@ public class FirstValueFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         return null;
     }
 

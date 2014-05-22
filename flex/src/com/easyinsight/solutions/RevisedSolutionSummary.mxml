@@ -128,6 +128,7 @@
                     event.solution.dataSourceType == DataSourceType.INFUSIONSOFT ||
                     event.solution.dataSourceType == DataSourceType.SAMPLE ||
                     event.solution.dataSourceType == DataSourceType.LINKEDIN_COMPOSITE ||
+                    event.solution.dataSourceType == DataSourceType.NETSUITE ||
                     event.solution.dataSourceType == DataSourceType.REDBOOTH ||
                     event.solution.dataSourceType == DataSourceType.ZENDESK ||
                     event.solution.dataSourceType == DataSourceType.KASHOO ||

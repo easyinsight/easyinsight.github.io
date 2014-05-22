@@ -23,9 +23,14 @@ public class JSONParse extends Function {
             int base = jsonString.indexOf("{");
             if (base > -1) {
                 String string = jsonString.substring(base).trim();
-                List coreArray = JsonPath.read(string, pattern);
-                if (coreArray.size() > 0) {
-                    return new StringValue(coreArray.get(0).toString());
+                Object obj = JsonPath.read(string, pattern);
+                if (obj instanceof List) {
+                    List coreArray = (List) obj;
+                    if (coreArray.size() > 0) {
+                        return new StringValue(coreArray.get(0).toString());
+                    }
+                } else if (obj instanceof String) {
+                    return new StringValue(obj.toString());
                 }
             }
             return new EmptyValue();

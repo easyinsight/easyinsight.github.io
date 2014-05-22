@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class Company {
     private Integer companyId;
+    private String categories;
     private String name;
     private String shippingAddress;
     private String billingAddress;
@@ -23,6 +24,14 @@ public class Company {
     private String responsibleParty;
     private String company;
     private Map<Key, Object> customFieldValues;
+
+    public String getCategories() {
+        return categories;
+    }
+
+    public void setCategories(String categories) {
+        this.categories = categories;
+    }
 
     public Map<Key, Object> getCustomFieldValues() {
         return customFieldValues;

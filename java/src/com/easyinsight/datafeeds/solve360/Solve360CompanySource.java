@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.solve360;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -30,6 +31,7 @@ public class Solve360CompanySource extends Solve360BaseSource {
     private static final String SHIPPING_ADDRESS = "Shipping Address";
     private static final String RESPONSIBLE_PARTY = "Responsible Party";
     private static final String WEBSITE = "Website";
+    private static final String CATEGORIES = "Company Categories";
 
     public Solve360CompanySource() {
         setFeedName("Companies");
@@ -43,7 +45,7 @@ public class Solve360CompanySource extends Solve360BaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(COMPANY_ID, NAME, RELATED_COMPANIES, BILLING_ADDRESS, PHONE, FAX, MAIN_ADDRESS, SHIPPING_ADDRESS, RESPONSIBLE_PARTY, WEBSITE);
+        return Arrays.asList(COMPANY_ID, NAME, RELATED_COMPANIES, BILLING_ADDRESS, PHONE, FAX, MAIN_ADDRESS, SHIPPING_ADDRESS, RESPONSIBLE_PARTY, WEBSITE, CATEGORIES);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -59,6 +61,7 @@ public class Solve360CompanySource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(SHIPPING_ADDRESS)));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_PARTY)));
         analysisItems.add(new AnalysisDimension(keys.get(WEBSITE)));
+        analysisItems.add(new AnalysisList(keys.get(CATEGORIES), false, ","));
         List<AnalysisItem> customFields = solve360CompositeSource.createCustomCompanyFields(keys);
         analysisItems.addAll(customFields);
         return analysisItems;
@@ -81,6 +84,11 @@ public class Solve360CompanySource extends Solve360BaseSource {
                 row.addValue(keys.get(MAIN_ADDRESS), c.getMainAddress());
                 row.addValue(keys.get(SHIPPING_ADDRESS), c.getShippingAddress());
                 row.addValue(keys.get(RESPONSIBLE_PARTY), c.getResponsibleParty());
+                Key categoryKey = keys.get(CATEGORIES);
+                if (categoryKey == null) {
+                    categoryKey = new NamedKey(CATEGORIES);
+                }
+                row.addValue(categoryKey, c.getCategories());
                 row.addValue(keys.get(WEBSITE), c.getWebsite());
                 for (Map.Entry<Key, Object> entry : c.getCustomFieldValues().entrySet()) {
                     if (entry.getValue() instanceof Date) {

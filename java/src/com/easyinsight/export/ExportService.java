@@ -182,7 +182,7 @@ public class ExportService {
 
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID);
-            DataStorage dataStorage = DataStorage.readConnection(dataSource.getFields(), dataSource.getDataFeedID());
+            DataStorage dataStorage = DataStorage.readConnection(dataSource.getFields(), dataSource.getDataFeedID(), dataSource.getFeedType());
             try {
                 File file = dataStorage.archive(dataSource.getFields(), new InsightRequestMetadata());
 

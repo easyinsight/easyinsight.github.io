@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.solve360;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -37,6 +38,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
     public static final String PERSONAL_EMAIL = "Personal Email";
     public static final String RESPONSIBLE_USER = "Responsible User";
     public static final String WEBSITE = "Website";
+    public static final String CATEGORIES = "Contact Categories";
 
     public Solve360ContactsSource() {
         setFeedName("Contacts");
@@ -51,7 +53,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CONTACT_ID, CONTACT_NAME, TITLE, BUSINESS_ADDRESS, BUSINESS_EMAIL, BUSINESS_FAX, BUSINESS_PHONE_DIRECT, BUSINESS_PHONE_EXT,
-                BUSINESS_PHONE_MAIN, CELLPHONE, COMPANY, HOME_ADDRESS, HOME_PHONE, OTHER_EMAIL, PERSONAL_EMAIL, RESPONSIBLE_USER, WEBSITE);
+                BUSINESS_PHONE_MAIN, CELLPHONE, COMPANY, HOME_ADDRESS, HOME_PHONE, OTHER_EMAIL, PERSONAL_EMAIL, RESPONSIBLE_USER, WEBSITE, CATEGORIES);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -74,6 +76,11 @@ public class Solve360ContactsSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(PERSONAL_EMAIL)));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLE_USER)));
         analysisItems.add(new AnalysisDimension(keys.get(WEBSITE)));
+        Key categoryKey = keys.get(CATEGORIES);
+        if (categoryKey == null) {
+            categoryKey = new NamedKey(CATEGORIES);
+        }
+        analysisItems.add(new AnalysisList(categoryKey, false, ","));
         List<AnalysisItem> customFields = solve360CompositeSource.createCustomContactFields(keys);
         analysisItems.addAll(customFields);
         return analysisItems;
@@ -99,6 +106,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
                 row.addValue(keys.get(COMPANY), c.getCompany());
                 row.addValue(keys.get(HOME_ADDRESS), c.getHomeAddress());
                 row.addValue(keys.get(HOME_PHONE), c.getHomePhone());
+                row.addValue(keys.get(CATEGORIES), c.getCategories());
                 row.addValue(keys.get(OTHER_EMAIL), c.getOtherEmail());
                 row.addValue(keys.get(PERSONAL_EMAIL), c.getPersonalEmail());
                 row.addValue(keys.get(RESPONSIBLE_USER), c.getResponsibleUser());

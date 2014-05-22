@@ -349,7 +349,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         throw new UnsupportedOperationException();
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         throw new UnsupportedOperationException();
     }
 

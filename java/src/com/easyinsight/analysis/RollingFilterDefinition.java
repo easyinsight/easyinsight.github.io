@@ -4,6 +4,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import nu.xom.Attribute;
@@ -309,7 +310,7 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         StringBuilder queryBuilder = new StringBuilder();
         if (interval == MaterializedRollingFilterDefinition.LAST_DAY) {
             queryBuilder.append("date(").append(getField().toKeySQL()).append(") = (select max(date(").append(getField().toKeySQL()).append(")) from ").append(tableName).append(")");

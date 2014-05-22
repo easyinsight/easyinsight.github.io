@@ -59,7 +59,7 @@ public class InfusionsoftPaymentSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(REFUND_ID), "Refund Id"));
         analysisitems.add(new AnalysisDimension(keys.get(PAY_TYPE), "Payment Type"));
         analysisitems.add(new AnalysisDimension(keys.get(SYNCED), "Payment Synced"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(PAY_DATE), "Pay Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(PAY_DATE), "Pay Date", AnalysisDateDimension.DAY_LEVEL, true));
         analysisitems.add(new AnalysisMeasure(keys.get(PAY_AMT), "Pay Amount", AggregationTypes.SUM));
         analysisitems.add(new AnalysisMeasure(keys.get(COMMISSION), "Commission", AggregationTypes.SUM));
         return analysisitems;

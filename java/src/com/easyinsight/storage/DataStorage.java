@@ -72,7 +72,7 @@ public class DataStorage implements IDataStorage {
      * @return a DataStorage object for making read calls
      */
 
-    public static DataStorage readConnection(List<AnalysisItem> fields, long feedID) {
+    public static DataStorage readConnection(List<AnalysisItem> fields, long feedID, FeedType feedType) {
         DataStorage dataStorage = new DataStorage();
         Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : fields) {
@@ -94,7 +94,7 @@ public class DataStorage implements IDataStorage {
         try {
             dataStorage.metadata = getMetadata(feedID, conn);
             if (dataStorage.metadata == null) {
-                dataStorage.metadata = createDefaultMetadata(conn);
+                dataStorage.metadata = createDefaultMetadata(conn, feedType);
             }
         } finally {
             Database.closeConnection(conn);
@@ -112,11 +112,11 @@ public class DataStorage implements IDataStorage {
         return dataStorage;
     }
 
-    private IStorageDialect getStorageDialect(String tableName) {
+    private IStorageDialect getStorageDialect(String tableName, Key distKey) {
         if (database.getDialect() == Database.MYSQL) {
             return new MySQLStorageDialect(tableName, keys);
         } else if (database.getDialect() == Database.POSTGRES) {
-            return new PostgresStorageDialect(tableName, keys);
+            return new AltPostgresStorageDialect(tableName, keys, distKey);
         } else {
             throw new RuntimeException();
         }
@@ -193,7 +193,7 @@ public class DataStorage implements IDataStorage {
             transforms.add(new CachedCalculationTransform(feedDefinition));
         }
         Database database = DatabaseManager.instance().getDatabase(getMetadata(feedDefinition.getDataFeedID(), conn).getDatabase());
-        return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database, cachedCalculations, transforms, conn);
+        return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database, cachedCalculations, transforms, conn, feedDefinition.getUpdateKey());
     }
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID, boolean systemUpdate) throws SQLException {
@@ -229,11 +229,11 @@ public class DataStorage implements IDataStorage {
         dataStorage.metadata = getMetadata(feedDefinition.getDataFeedID(), conn);
         dataStorage.tableDefined = dataStorage.metadata != null;
         if (dataStorage.metadata == null) {
-            dataStorage.metadata = createDefaultMetadata(conn);
+            dataStorage.metadata = createDefaultMetadata(conn, feedDefinition.getFeedType());
         }
         dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
         if (dataStorage.database == null) {
-            dataStorage.metadata = createDefaultMetadata(conn);
+            dataStorage.metadata = createDefaultMetadata(conn, feedDefinition.getFeedType());
             dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
             if (dataStorage.database == null) {
                 throw new DatabaseShardException();
@@ -351,7 +351,7 @@ public class DataStorage implements IDataStorage {
                     PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
                     dropTableStmt.execute();
                 } catch (SQLException se) {
-                    if (se.getMessage().contains("Unknown table")) {
+                    if (se.getMessage().contains("Unknown table") || se.getMessage().contains("does not exist")) {
                         LogClass.error("Data source " + feedID + " did not have a storage table. Continuing with delete, screwed up data.");
                     } else {
                         throw se;
@@ -384,21 +384,25 @@ public class DataStorage implements IDataStorage {
         }
     }
 
-    public void createTable() throws SQLException {
+    public void createTable(@Nullable Key updateKey) throws SQLException {
         ResultSet existsRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
         if (existsRS.next()) {
             storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
         }
         try {
-            String sql = defineTableSQL(false);
+            String sql = defineTableSQL(false, updateKey);
+            System.out.println(sql);
             PreparedStatement createSQL = storageConn.prepareStatement(sql);
             createSQL.execute();
         } catch (SQLException e) {
             LogClass.error(e);
             if (e.getMessage().contains("Row size too large")) {
-                String sql = defineTableSQL(true);
+                String sql = defineTableSQL(true, updateKey);
+                System.out.println(sql);
                 PreparedStatement createSQL = storageConn.prepareStatement(sql);
                 createSQL.execute();
+            } else {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -447,14 +451,6 @@ public class DataStorage implements IDataStorage {
         storageConn = null;
     }
 
-    // product eligilbiyt, partner eligilbiyt, price bookk, list price, lp *qty
-    // solution rewards workbook, changes every month
-    // part # to partner ID to get competency from spreadsheet
-
-    // filter down to various
-    // if hierachy, search on PRM ID by category based on
-
-
     public void insertFromSelect(String tempTable) throws SQLException {
         if (database.getDialect() == Database.MYSQL) {
             StringBuilder columnBuilder = new StringBuilder();
@@ -485,7 +481,7 @@ public class DataStorage implements IDataStorage {
                     sb.append("k").append(key.getKeyID()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + getTableName() + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
@@ -504,34 +500,116 @@ public class DataStorage implements IDataStorage {
     }
 
     public void updateFromTemp(String tempTable, Key updateKey) throws SQLException {
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder selectBuilder = new StringBuilder();
-        Iterator<KeyMetadata> keyIter = keys.values().iterator();
-        while (keyIter.hasNext()) {
-            KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append(keyMetadata.createInsertClause());
-            selectBuilder.append(keyMetadata.createInsertClause());
-            if (keyIter.hasNext()) {
-                columnBuilder.append(",");
-                selectBuilder.append(",");
+
+        // todo: building this
+
+        if (database.getDialect() == Database.MYSQL) {
+            StringBuilder columnBuilder = new StringBuilder();
+            StringBuilder selectBuilder = new StringBuilder();
+            Iterator<KeyMetadata> keyIter = keys.values().iterator();
+            while (keyIter.hasNext()) {
+                KeyMetadata keyMetadata = keyIter.next();
+                columnBuilder.append(keyMetadata.createInsertClause());
+                selectBuilder.append(keyMetadata.createInsertClause());
+                if (keyIter.hasNext()) {
+                    columnBuilder.append(",");
+                    selectBuilder.append(",");
+                }
             }
-        }
-        String columns = columnBuilder.toString();
-        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable + " WHERE update_key_field = ?";
-        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-        PreparedStatement getKeysStmt = storageConn.prepareStatement("SELECT DISTINCT UPDATE_KEY_FIELD FROM " + tempTable);
-        ResultSet keyRS = getKeysStmt.executeQuery();
-        String updateSQL = "DELETE FROM " + getTableName() + " WHERE " + updateKey.toSQL() + " = ?";
-        PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
-        while (keyRS.next()) {
-            String key = keyRS.getString(1);
-            updateStmt.setString(1, key);
-            updateStmt.executeUpdate();
-            insertStmt.setString(1, key);
+            String columns = columnBuilder.toString();
+            String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") SELECT " + selectBuilder.toString() + " FROM " + tempTable + " WHERE update_key_field = ?";
+            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
+            PreparedStatement getKeysStmt = storageConn.prepareStatement("SELECT DISTINCT UPDATE_KEY_FIELD FROM " + tempTable);
+            ResultSet keyRS = getKeysStmt.executeQuery();
+            String updateSQL = "DELETE FROM " + getTableName() + " WHERE " + updateKey.toSQL() + " = ?";
+            PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
+            while (keyRS.next()) {
+                String key = keyRS.getString(1);
+                updateStmt.setString(1, key);
+                updateStmt.executeUpdate();
+
+                insertStmt.setString(1, key);
+                insertStmt.execute();
+
+            }
+            updateStmt.close();
+            insertStmt.close();
+            PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
+            dropStmt.execute();
+            dropStmt.close();
+        } else {
+
+            // copy the data into the load table
+
+            String loadTable = "load" + tempTable;
+            String bucketName = "refresh" + tempTable;
+            try {
+                StringBuilder sb = new StringBuilder();
+                for (Key key : keys.keySet()) {
+                    sb.append("k").append(key.getKeyID()).append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                System.out.println(string);
+                PreparedStatement stmt = storageConn.prepareStatement(string);
+                stmt.execute();
+            } finally {
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("AKIAI5YYYFRMWFLLEC2A", "NmonY27/vE03AeGNWhLBmkR41kJrvbWSYhLzh5pE"));
+                ObjectListing objectListing = s3.listObjects(bucketName);
+                List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+                for (S3ObjectSummary summary : summaries) {
+                    System.out.println("\t" + summary.getKey());
+                    s3.deleteObject(bucketName, summary.getKey());
+                }
+                s3.deleteBucket(bucketName);
+            }
+
+            String tempTableSQL = "CREATE TEMP TABLE " + tempTable + " AS SELECT * FROM " + loadTable;
+
+            System.out.println("temp table = " + tempTableSQL);
+
+            PreparedStatement createTempTableStmt = storageConn.prepareStatement(tempTableSQL);
+            createTempTableStmt.execute();
+            createTempTableStmt.close();
+
+            String deleteSQL = "DELETE FROM " + getTableName() + " USING " + tempTable + " WHERE " + getTableName() + "." + updateKey.toSQL() + " = " +
+                    tempTable + "." + updateKey.toSQL();
+
+            System.out.println("delete sql = " + deleteSQL);
+
+
+            StringBuilder columnBuilder = new StringBuilder();
+            Iterator<KeyMetadata> keyIter = keys.values().iterator();
+            while (keyIter.hasNext()) {
+                KeyMetadata keyMetadata = keyIter.next();
+                columnBuilder.append(keyMetadata.createInsertClause());
+                if (keyIter.hasNext()) {
+                    columnBuilder.append(",");
+                }
+            }
+
+
+            PreparedStatement deleteStmt = storageConn.prepareStatement(deleteSQL);
+            int rows = deleteStmt.executeUpdate();
+            System.out.println("rows deleted = " + rows);
+            deleteStmt.close();
+
+            String insertSQL = "INSERT INTO " + getTableName() + " SELECT " + columnBuilder.toString() + " FROM " + tempTable;
+
+            System.out.println("insert sql = " + insertSQL);
+
+            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
             insertStmt.execute();
+            insertStmt.close();
+
+            PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
+            dropStmt.execute();
+            dropStmt.close();
+
+            PreparedStatement dropLoadStmt = storageConn.prepareStatement("DROP TABLE " + loadTable);
+            dropLoadStmt.execute();
+            dropLoadStmt.close();
         }
-        PreparedStatement dropStmt = storageConn.prepareStatement("DROP TABLE " + tempTable);
-        dropStmt.execute();
     }
 
     public void alter(Key key) throws SQLException {
@@ -566,7 +644,15 @@ public class DataStorage implements IDataStorage {
     }
 
     public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems) throws Exception {
-        return migrate(previousItems, newItems, true);
+        return migrate(previousItems, newItems, true, null);
+    }
+
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, boolean migrateData) throws Exception {
+        return migrate(previousItems, newItems, migrateData, null);
+    }
+
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, Key updateKey) throws Exception {
+        return migrate(previousItems, newItems, true, updateKey);
     }
 
     public boolean calcCompare(AnalysisItem newItem, AnalysisItem previousItem) {
@@ -596,7 +682,7 @@ public class DataStorage implements IDataStorage {
         insertStmt.execute();
     }
 
-    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, final boolean migrateData) throws Exception {
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, final boolean migrateData, Key updateKey) throws Exception {
         // did any items change in a way that requires us to migrate...
         List<FieldMigration> fieldMigrations = new ArrayList<FieldMigration>();
         boolean newFieldsFound = false;
@@ -637,13 +723,13 @@ public class DataStorage implements IDataStorage {
             }
 
             try {
-                String sql = defineTableSQL(false);
+                String sql = defineTableSQL(false, updateKey);
                 LogClass.info("Creating new storage table in migration with sql " + sql);
                 PreparedStatement createSQL = storageConn.prepareStatement(sql);
                 createSQL.execute();
             } catch (SQLException e) {
                 if (e.getMessage().contains("Row size too large")) {
-                    String sql = defineTableSQL(true);
+                    String sql = defineTableSQL(true, updateKey);
                     PreparedStatement createSQL = storageConn.prepareStatement(sql);
                     createSQL.execute();
                 }
@@ -763,18 +849,22 @@ public class DataStorage implements IDataStorage {
      */
 
     public void truncate() throws SQLException {
+        truncate(null);
+    }
+
+    public void truncate(Key updateKey) throws SQLException {
         try {
             ResultSet tableRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
             if (tableRS.next()) {
                 PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
                 truncateStmt.execute();
             } else {
-                createTable();
+                createTable(updateKey);
             }
         } catch (SQLException e) {
             LogClass.error(e);
             if (e.getMessage().contains("doesn't exist")) {
-                createTable();
+                createTable(updateKey);
             }
         }
     }
@@ -903,7 +993,7 @@ public class DataStorage implements IDataStorage {
         } else {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
-        //System.out.println(queryBuilder.toString());
+        System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
 
@@ -982,8 +1072,7 @@ public class DataStorage implements IDataStorage {
                     if (keyMetadata.getType() == Value.DATE) {
                         AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                         if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
-                                date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) &&
-                                database.getDialect() == Database.MYSQL) {
+                                date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT)) {
                             int month = dataRS.getInt(i++);
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
@@ -991,7 +1080,7 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, month - 1);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
-                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
+                        } else if (optimized && aggregateQuery && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
                             int year = dataRS.getInt(i++);
                             Calendar cal = Calendar.getInstance();
                             cal.set(Calendar.DAY_OF_MONTH, 2);
@@ -1104,7 +1193,7 @@ public class DataStorage implements IDataStorage {
                 if (advancedFilterProperties != null) {
                     whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), advancedFilterProperties.getTable(), advancedFilterProperties.getKey()));
                 } else {
-                    whereBuilder.append(filterDefinition.toQuerySQL(getTableName()));
+                    whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
                 }
                 if (filterIter.hasNext()) {
                     whereBuilder.append(" AND ");
@@ -1175,11 +1264,26 @@ public class DataStorage implements IDataStorage {
                 selectBuilder.append(",");
             } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && aggregateQuery) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) && database.getDialect() == Database.MYSQL) {
-                    selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                if (optimized && (date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT || date.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL)) {
+                    if (database.getDialect() == Database.MYSQL) {
+                        selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                    } else if (database.getDialect() == Database.POSTGRES) {
+                        selectBuilder.append("extract(month from " + columnName + ") as month" + columnName + ", extract(year from " + columnName + ") as year" + columnName + ",");
+                    } else {
+                        throw new RuntimeException();
+                    }
+
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
                 } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
-                    selectBuilder.append("year(" + columnName + ") as year" + columnName + ",");
+                    if (database.getDialect() == Database.MYSQL) {
+                        selectBuilder.append("year(" + columnName + ") as year" + columnName + ",");
+                    } else if (database.getDialect() == Database.POSTGRES) {
+                        selectBuilder.append("extract(year from " + columnName + ") as year" + columnName + ",");
+                    } else {
+                        throw new RuntimeException();
+                    }
+                    //  "EXTRACT(year FROM " + getField().toKeySQL() + ")
+
                     groupByBuilder.append("year" + columnName + ",");
                 } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
                     selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
@@ -1567,8 +1671,8 @@ public class DataStorage implements IDataStorage {
         deleteStmt.executeUpdate();
     }
 
-    public String defineTableSQL(boolean hugeTable) {
-        return getStorageDialect(getTableName()).defineTableSQL(hugeTable);
+    public String defineTableSQL(boolean hugeTable, Key distKey) {
+        return getStorageDialect(getTableName(), distKey).defineTableSQL(hugeTable);
     }
 
     String getTableName() {
@@ -1646,12 +1750,12 @@ public class DataStorage implements IDataStorage {
         addOrUpdateMetadata(dataSourceID, metadata, conn, dataSourceType);
     }
 
-    private static FeedPersistenceMetadata createDefaultMetadata(Connection conn) {
+    private static FeedPersistenceMetadata createDefaultMetadata(Connection conn, FeedType feedType) {
         try {
             FeedPersistenceMetadata metadata = new FeedPersistenceMetadata();
             metadata.setVersion(1);
             metadata.setLastData(new Date());
-            metadata.setDatabase(DatabaseManager.instance().chooseDatabase(conn));
+            metadata.setDatabase(DatabaseManager.instance().chooseDatabase(conn, feedType));
             return metadata;
         } catch (SQLException e) {
             LogClass.error(e);
@@ -1959,7 +2063,7 @@ public class DataStorage implements IDataStorage {
         if (filters.size() > 0) {
             sqlBuilder.append(" WHERE ");
             for (FilterDefinition filterDefinition : filters) {
-                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName()));
+                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
                 sqlBuilder.append(",");
             }
             sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);

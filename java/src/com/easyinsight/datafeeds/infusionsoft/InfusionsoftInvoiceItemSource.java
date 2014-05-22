@@ -54,7 +54,7 @@ public class InfusionsoftInvoiceItemSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisMeasure(keys.get(DISCOUNT), "Discount", AggregationTypes.SUM));
         analysisitems.add(new AnalysisDimension(keys.get(DESCRIPTION), "Description"));
         analysisitems.add(new AnalysisDimension(keys.get(COMMISSION_STATUS), "Commission Status"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL, true));
         return analysisitems;
     }
 

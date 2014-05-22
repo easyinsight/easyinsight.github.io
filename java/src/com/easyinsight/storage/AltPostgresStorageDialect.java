@@ -3,7 +3,8 @@ package com.easyinsight.storage;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.DateValue;
@@ -16,6 +17,7 @@ import com.easyinsight.logging.LogClass;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,15 +30,24 @@ import java.util.zip.GZIPOutputStream;
  * Date: 4/10/14
  * Time: 1:56 PM
  */
-public class PostgresStorageDialect implements IStorageDialect {
+public class AltPostgresStorageDialect implements IStorageDialect {
 
     private String tableName;
     private Map<Key, KeyMetadata> keys;
+    private Key distKey;
 
-    public PostgresStorageDialect(String tableName, Map<Key, KeyMetadata> keys) {
+    public AltPostgresStorageDialect(String tableName, Map<Key, KeyMetadata> keys) {
         this.tableName = tableName;
         this.keys = keys;
     }
+
+    public AltPostgresStorageDialect(String tableName, Map<Key, KeyMetadata> keys, Key distKey) {
+        this.tableName = tableName;
+        this.keys = keys;
+        this.distKey = distKey;
+    }
+
+
 
     private String fileName;
 
@@ -45,6 +56,10 @@ public class PostgresStorageDialect implements IStorageDialect {
     private File file;
     private FileOutputStream fos;
     private int rows = 0;
+
+    public void updateData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
+        insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
+    }
 
     public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -56,8 +71,16 @@ public class PostgresStorageDialect implements IStorageDialect {
                 Value value = row.getValue(key);
                 if (value.type() == Value.DATE) {
                     rowValues[j++] = sdf.format(((DateValue) value).getDate());
+                } else if (value.type() == Value.EMPTY) {
+                    rowValues[j++] = "";
+                } else if (value.type() == Value.STRING) {
+                    String string = String.valueOf(value.toString());
+                    if (string.length() > 253) {
+                        string = string.substring(0, 253);
+                    }
+                    rowValues[j++] = string;
                 } else {
-                    rowValues[j++] = String.valueOf(value.toString());
+                    rowValues[j++] = value.toString();
                 }
             }
             csvWriter.writeRecord(rowValues);
@@ -130,6 +153,10 @@ public class PostgresStorageDialect implements IStorageDialect {
     }
 
     public String defineTableSQL(boolean hugeTable) {
+        return defineTableSQL(tableName, false);
+    }
+
+    private String defineTableSQL(String tableName, boolean hugeTable) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("CREATE TABLE ");
         sqlBuilder.append(tableName);
@@ -142,7 +169,12 @@ public class PostgresStorageDialect implements IStorageDialect {
         sqlBuilder.append(primaryKey);
         sqlBuilder.append(" int identity,");
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" )");
+        if (distKey == null) {
+            sqlBuilder.append(" )");
+        } else {
+            sqlBuilder.append(" ) DISTSTYLE KEY DISTKEY(");
+            sqlBuilder.append("k").append(distKey.getKeyID() + ")");
+        }
         //sqlBuilder.append(" ) CHARSET=utf8");
         return sqlBuilder.toString();
     }
@@ -167,6 +199,19 @@ public class PostgresStorageDialect implements IStorageDialect {
 
     public void createTempTable(String sql, Database database, boolean insert) throws SQLException {
         try {
+            if (!insert) {
+                // create a load table
+                EIConnection storageConn = database.getConnection();
+                try {
+                    String tableSQL = defineTableSQL("load" + tableName, true);
+                    PreparedStatement createSQL = storageConn.prepareStatement(tableSQL);
+                    createSQL.execute();
+                    createSQL.close();
+                } finally {
+                    Database.closeConnection(storageConn);
+                }
+            }
+
             fileName = tableName + ".csv";
 
             file = new File(fileName);
@@ -180,9 +225,7 @@ public class PostgresStorageDialect implements IStorageDialect {
 
 
 
-    public String defineTempInsertTable() {
-        return "";
-    }
+    public String defineTempInsertTable() { return ""; }
 
     public String defineTempUpdateTable() {
         return "";

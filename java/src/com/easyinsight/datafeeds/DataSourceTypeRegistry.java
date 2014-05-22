@@ -38,6 +38,7 @@ import com.easyinsight.datafeeds.linkedin.LinkedInCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
+import com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.pivotaltrackerv5.*;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
@@ -146,6 +147,7 @@ public class DataSourceTypeRegistry {
         connectionBillingInfoMap.put(FeedType.SERVER_ORACLE, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.STATIC, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.TREASURE_DATA, ConnectionBillingType.CUSTOM_DATA);
+        connectionBillingInfoMap.put(FeedType.NETSUITE, ConnectionBillingType.CUSTOM_DATA);
     }
 
     public int billingInfoForType(FeedType feedType) {
@@ -411,6 +413,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHDESK_TIME, FreshdeskTimeEntrySource.class);
         registerType(FeedType.CC_EVENT, CCEventSource.class);
         registerType(FeedType.CC_EVENT_REGISTRANTS, CCEventRegistrantSource.class);
+        registerType(FeedType.NETSUITE, NetsuiteQueryConnection.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

@@ -52,7 +52,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         analysisitems.add(new AnalysisDimension(keys.get(COMPANY_ID), "Contact Company ID"));
         analysisitems.add(new AnalysisDimension(keys.get(FIRST_NAME), "First Name"));
         analysisitems.add(new AnalysisDimension(keys.get(LAST_NAME), "Last Name"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Contact Creation Date", AnalysisDateDimension.DAY_LEVEL));
+        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Contact Creation Date", AnalysisDateDimension.DAY_LEVEL, true));
         Key nameKey = keys.get(NAME);
         if (nameKey == null) {
             nameKey = new NamedKey(NAME);

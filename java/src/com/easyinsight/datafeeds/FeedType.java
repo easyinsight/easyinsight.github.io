@@ -278,6 +278,7 @@ public class FeedType implements Serializable {
     public static final FeedType CC_EVENT_FEES = new FeedType(249);
     public static final FeedType CC_EVENT_REGISTRANTS = new FeedType(250);
     public static final FeedType CC_EVENT_ITEMS = new FeedType(251);
+    public static final FeedType NETSUITE = new FeedType(252);
 
     public FeedType() {
     }

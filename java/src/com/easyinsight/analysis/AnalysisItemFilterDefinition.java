@@ -238,7 +238,7 @@ public class AnalysisItemFilterDefinition extends FilterDefinition implements IF
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         return null;
     }
 
