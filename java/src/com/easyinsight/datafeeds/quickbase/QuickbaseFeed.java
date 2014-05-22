@@ -63,7 +63,7 @@ public class QuickbaseFeed extends Feed {
             }
 
             if (indexed) {
-                DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
+                DataStorage source = DataStorage.readConnection(getFields(), getFeedID(), getFeedType());
                 try {
                     insightRequestMetadata.setGmtData(getDataSource().gmtTime());
                     dataSet = source.retrieveData(analysisItems, filters, null, insightRequestMetadata);
