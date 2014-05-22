@@ -37,7 +37,7 @@ public class FeedCreation {
         DataStorage tableDef = null;
         if (dataSet != null && (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL)) {
             tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
-            tableDef.createTable();
+            tableDef.createTable(feedDefinition.getUpdateKey());
             tableDef.insertData(dataSet);
         } else {
             DataStorage.liveDataSource(feedID, conn, feedDefinition.getFeedType().getType());
