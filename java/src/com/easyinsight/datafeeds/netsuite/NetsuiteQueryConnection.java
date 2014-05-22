@@ -297,20 +297,34 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                 ResultSet rs = statement.executeQuery(query);
                 int ct = 0;
                 System.out.println("running the query...");
+                Map<Integer, String> columnMap = new HashMap<Integer, String>();
+                Map<Integer, Integer> columnTypeMap = new HashMap<Integer, Integer>();
+                int cachedColumnCount = 0;
                 while (rs.next()) {
                     System.out.println("okay, so we got a row...");
                     IRow row = dataSet.createRow();
-                    int columnCount = rs.getMetaData().getColumnCount();
-                    for (int i = 1; i <= columnCount; i++) {
-                        String columnName = rs.getMetaData().getColumnName(i);
+                    if (cachedColumnCount == 0) {
+                        cachedColumnCount = rs.getMetaData().getColumnCount();
+                    }
+                    for (int i = 1; i <= cachedColumnCount; i++) {
+                        String columnName = columnMap.get(i);
+                        if (columnName == null) {
+                            columnName = rs.getMetaData().getColumnName(i);
+                            columnMap.put(i, columnName);
+                        }
                         System.out.println("getting query by column name " + columnName);
                         AnalysisItem analysisItem = map.get(columnName);
                         if (analysisItem == null) {
                             System.out.println("no item by name " + columnName);
                             continue;
                         }
-                        System.out.println("type = " + rs.getMetaData().getColumnType(i));
-                        switch (rs.getMetaData().getColumnType(i)) {
+                        Integer type = columnTypeMap.get(i);
+                        if (type == null) {
+                            type = rs.getMetaData().getColumnType(i);
+                            columnTypeMap.put(i, type);
+                        }
+                        System.out.println("type = " + type);
+                        switch (type) {
                             case Types.BIGINT:
                             case Types.TINYINT:
                             case Types.SMALLINT:
@@ -336,6 +350,7 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                             case Types.VARCHAR:
                             case Types.LONGVARCHAR:
                                 String string = rs.getString(i);
+                                System.out.println("value for " + columnName + " = " + string);
                                 row.addValue(analysisItem.getKey(), string);
                                 break;
 
@@ -371,7 +386,7 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                                 }
                                 break;
                             default:
-                                throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                                throw new RuntimeException("This data type (" + type + ") is not supported in Easy Insight. Type value: " + type);
                         }
                     }
                     ct++;
