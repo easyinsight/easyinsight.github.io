@@ -29,15 +29,17 @@ public class TempStorage implements IDataStorage {
     private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
 
     private String tableName;
+    private Key distKey;
 
     public TempStorage(long feedID, Map<Key, KeyMetadata> keys, Database storageDatabase, List<AnalysisItem> cachedCalculations, List<IDataTransform> transforms,
-                       EIConnection conn) {
+                       EIConnection conn, Key distKey) {
         this.keys = keys;
         this.tableName = "dt" + feedID + System.currentTimeMillis();
         this.storageDatabase = storageDatabase;
         this.cachedCalculations = cachedCalculations;
         this.transforms = transforms;
         this.coreDBConn = conn;
+        this.distKey = distKey;
     }
 
     public TempStorage(Map<Key, KeyMetadata> keys, Database storageDatabase, String tableName) {
@@ -68,8 +70,8 @@ public class TempStorage implements IDataStorage {
 
     private int maxLen = 255;
 
-    public void createTable(String sql) throws SQLException {
-        getStorageDialect(getTableName()).createTempTable(sql, storageDatabase);
+    public void createTable(String sql, boolean insert) throws SQLException {
+        getStorageDialect(getTableName()).createTempTable(sql, storageDatabase, insert);
     }
 
     private IStorageDialect dialect;
@@ -79,7 +81,7 @@ public class TempStorage implements IDataStorage {
             if (storageDatabase.getDialect() == Database.MYSQL) {
                 dialect = new MySQLStorageDialect(tableName, keys);
             } else if (storageDatabase.getDialect() == Database.POSTGRES) {
-                dialect = new PostgresStorageDialect(tableName, keys);
+                dialect = new AltPostgresStorageDialect(tableName, keys, distKey);
             } else {
                 throw new RuntimeException();
             }
@@ -97,155 +99,47 @@ public class TempStorage implements IDataStorage {
 
     public void commit() throws SQLException {
         getStorageDialect(getTableName()).commit();
-        if (tempConnection != null) {
-            Database.closeConnection(tempConnection);
-        }
     }
-
-    private EIConnection tempConnection;
 
     public void insertData(DataSet dataSet) throws Exception {
         getStorageDialect(getTableName()).insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
     }
 
-    public void newInsertData(DataSet dataSet) throws Exception {
-        if (tempConnection == null) {
-            tempConnection = storageDatabase.getConnection();
-            tempConnection.setAutoCommit(false);
-        }
-        for (IRow row : dataSet.getRows()) {
-            for (IDataTransform transform : transforms) {
-                transform.handle(coreDBConn, row);
-            }
-        }
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder paramBuilder = new StringBuilder();
-        Iterator<KeyMetadata> keyIter = keys.values().iterator();
-        while (keyIter.hasNext()) {
-            KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append(keyMetadata.createInsertClause());
-            //columnBuilder.append("k").append(keyMetadata.key.getKeyID());
-            //paramBuilder.append("?");
-            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
-            if (keyIter.hasNext()) {
+    public void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception {
+        IStorageDialect dialect = getStorageDialect(getTableName());
+        if (dialect instanceof AltPostgresStorageDialect) {
+            dialect.insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
+        } else {
+            StringWhere where = (StringWhere) wheres.get(0);
+            StringBuilder columnBuilder = new StringBuilder();
+            StringBuilder paramBuilder = new StringBuilder();
+            for (KeyMetadata keyMetadata : keys.values()) {
+                columnBuilder.append(keyMetadata.createInsertClause());
+                paramBuilder.append(keyMetadata.createInsertQuestionMarks());
                 columnBuilder.append(",");
                 paramBuilder.append(",");
             }
-        }
-        String columns = columnBuilder.toString();
-        String parameters = paramBuilder.toString();
-        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
+            columnBuilder.append("update_key_field");
+            paramBuilder.append("?");
+            String columns = columnBuilder.toString();
+            String parameters = paramBuilder.toString();
+            String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
+            EIConnection storageConn = storageDatabase.getConnection();
 
-        try {
-            PreparedStatement insertStmt = tempConnection.prepareStatement(insertSQL);
-            int counter = 0;
-            for (IRow row : dataSet.getRows()) {
-                int i = 1;
-                for (KeyMetadata keyMetadata : keys.values()) {
-                    i = setValue(insertStmt, row, i, keyMetadata, tempConnection);
-                }
-                insertStmt.execute();
-                counter++;
-                /*if (counter == 1000) {
-                    counter = 0;
-                    insertStmt.exe();
-                    insertStmt.clearBatch();
-                }*/
-            }
-            /*if (counter > 0) {
-                insertStmt.execute();
-                //insertStmt.clearBatch();
-            }*/
-            insertStmt.close();
-            tempConnection.commit();
-        } catch (Exception e) {
-            tempConnection.rollback();
-            if (e.getMessage() != null && e.getMessage().contains("Data truncated")) {
-                PreparedStatement insertStmt = tempConnection.prepareStatement(insertSQL);
+            try {
+                PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
                 for (IRow row : dataSet.getRows()) {
                     int i = 1;
                     for (KeyMetadata keyMetadata : keys.values()) {
-                        i = setValue(insertStmt, row, i, keyMetadata, tempConnection);
+                        i = setValue(insertStmt, row, i, keyMetadata, storageConn);
                     }
-                    try {
-                        insertStmt.execute();
-                    } catch (SQLException e1) {
-                        if (e1.getMessage() != null && e.getMessage().contains("Data truncated")) {
-                            LogClass.info(e1.getMessage());
-                        } else {
-                            throw e1;
-                        }
-                    }
+                    insertStmt.setString(i, where.getValue());
+                    insertStmt.execute();
                 }
                 insertStmt.close();
-                tempConnection.commit();
+            } finally {
+                Database.closeConnection(storageConn);
             }
-        }
-    }
-
-    public void updateData(IRow row, List<IWhere> wheres) throws Exception {
-        StringWhere where = (StringWhere) wheres.get(0);
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder paramBuilder = new StringBuilder();
-        for (KeyMetadata keyMetadata : keys.values()) {
-            columnBuilder.append(keyMetadata.createInsertClause());
-            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
-            columnBuilder.append(",");
-            paramBuilder.append(",");
-        }
-        columnBuilder.append("update_key_field");
-        paramBuilder.append("?");
-        String columns = columnBuilder.toString();
-        String parameters = paramBuilder.toString();
-        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
-        EIConnection storageConn = storageDatabase.getConnection();
-
-        try {
-            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-
-            int i = 1;
-            for (KeyMetadata keyMetadata : keys.values()) {
-                i = setValue(insertStmt, row, i, keyMetadata, storageConn);
-            }
-            insertStmt.setString(i, where.getValue());
-            insertStmt.execute();
-
-            insertStmt.close();
-        } finally {
-            Database.closeConnection(storageConn);
-        }
-    }
-
-    public void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception {
-        StringWhere where = (StringWhere) wheres.get(0);
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder paramBuilder = new StringBuilder();
-        for (KeyMetadata keyMetadata : keys.values()) {
-            columnBuilder.append(keyMetadata.createInsertClause());
-            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
-            columnBuilder.append(",");
-            paramBuilder.append(",");
-        }
-        columnBuilder.append("update_key_field");
-        paramBuilder.append("?");
-        String columns = columnBuilder.toString();
-        String parameters = paramBuilder.toString();
-        String insertSQL = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + parameters + ")";
-        EIConnection storageConn = storageDatabase.getConnection();
-
-        try {
-            PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-            for (IRow row : dataSet.getRows()) {
-                int i = 1;
-                for (KeyMetadata keyMetadata : keys.values()) {
-                    i = setValue(insertStmt, row, i, keyMetadata, storageConn);
-                }
-                insertStmt.setString(i, where.getValue());
-                insertStmt.execute();
-            }
-            insertStmt.close();
-        } finally {
-            Database.closeConnection(storageConn);
         }
     }
 

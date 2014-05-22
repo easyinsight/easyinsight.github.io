@@ -18,7 +18,7 @@ public interface IStorageDialect {
 
     String getColumnDefinitionSQL(Key key, int type, boolean hugeTable);
 
-    void createTempTable(String sql, Database database) throws SQLException;
+    void createTempTable(String sql, Database database, boolean insert) throws SQLException;
 
     String defineTempInsertTable();
 

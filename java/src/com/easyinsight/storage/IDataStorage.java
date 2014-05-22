@@ -17,6 +17,4 @@ public interface IDataStorage {
     void insertData(DataSet dataSet) throws Exception;
 
     void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception;
-
-    void updateData(IRow row, List<IWhere> wheres) throws Exception;
 }
