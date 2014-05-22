@@ -402,6 +402,7 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
             }
         } catch (Exception e) {
             LogClass.error(e);
+            throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
         }
         return null;
     }
