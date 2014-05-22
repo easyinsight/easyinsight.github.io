@@ -300,7 +300,25 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                 Map<Integer, String> columnMap = new HashMap<Integer, String>();
                 Map<Integer, Integer> columnTypeMap = new HashMap<Integer, Integer>();
                 int cachedColumnCount = 0;
-                while (rs.next()) {
+                boolean done = false;
+                while (!done) {
+                    boolean valid;
+                    try {
+                        valid = rs.next();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("retrying once...");
+                        try {
+                            valid = rs.next();
+                        } catch (SQLException e1) {
+                            System.out.println("nopers");
+                            e.printStackTrace();
+                            valid = false;
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
                     System.out.println("okay, so we got a row...");
                     IRow row = dataSet.createRow();
                     if (cachedColumnCount == 0) {
