@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,11 +80,15 @@ public class FlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
-        if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
-            return "month(" + getField().toKeySQL() + ") = (? + 1)";
-        else
-            return "year(" + getField().toKeySQL() + ") = ?";
+    public String toQuerySQL(String tableName, Database database) {
+        if (database.getDialect() == Database.MYSQL) {
+            if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
+                return "month(" + getField().toKeySQL() + ") = (? + 1)";
+            else
+                return "year(" + getField().toKeySQL() + ") = ?";
+        } else {
+            return "EXTRACT(year FROM " + getField().toKeySQL() + ") = ?";
+        }
     }
 
     @Override

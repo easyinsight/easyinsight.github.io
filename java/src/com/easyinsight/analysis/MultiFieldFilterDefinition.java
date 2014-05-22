@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
 import com.easyinsight.tag.Tag;
 import org.hibernate.Session;
 import org.json.JSONArray;
@@ -145,7 +146,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         return null;
     }
 

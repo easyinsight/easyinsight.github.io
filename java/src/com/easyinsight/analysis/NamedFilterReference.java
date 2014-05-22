@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.IComponent;
 
@@ -53,8 +54,8 @@ public class NamedFilterReference extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
-        return filter.toQuerySQL(tableName);
+    public String toQuerySQL(String tableName, Database database) {
+        return filter.toQuerySQL(tableName, database);
     }
 
     @Override

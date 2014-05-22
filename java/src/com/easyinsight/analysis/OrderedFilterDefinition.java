@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import nu.xom.Element;
 import org.hibernate.Session;
 
@@ -52,7 +53,7 @@ public class OrderedFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

@@ -2,7 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
-import com.easyinsight.html.FilterUtils;
+import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.servlet.SystemSettings;
 import nu.xom.Attribute;
@@ -211,7 +211,7 @@ public class FilterValueDefinition extends FilterDefinition {
         setFilteredValues(values);
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         StringBuilder queryBuilder = new StringBuilder();
 
         String columnName = getField().toKeySQL();
