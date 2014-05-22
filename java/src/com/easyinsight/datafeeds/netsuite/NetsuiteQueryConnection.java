@@ -296,15 +296,20 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                 Statement statement = connection.createStatement();
                 ResultSet rs = statement.executeQuery(query);
                 int ct = 0;
+                System.out.println("running the query...");
                 while (rs.next()) {
+                    System.out.println("okay, so we got a row...");
                     IRow row = dataSet.createRow();
                     int columnCount = rs.getMetaData().getColumnCount();
                     for (int i = 1; i <= columnCount; i++) {
                         String columnName = rs.getMetaData().getColumnName(i);
+                        System.out.println("getting query by column name " + columnName);
                         AnalysisItem analysisItem = map.get(columnName);
                         if (analysisItem == null) {
+                            System.out.println("no item by name " + columnName);
                             continue;
                         }
+                        System.out.println("type = " + rs.getMetaData().getColumnType(i));
                         switch (rs.getMetaData().getColumnType(i)) {
                             case Types.BIGINT:
                             case Types.TINYINT:
