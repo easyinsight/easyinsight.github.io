@@ -50,7 +50,7 @@ public class BeginTransactionServlet extends APIServlet {
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSources.keySet().iterator().next(), conn);
         TempStorage tempStorage = DataStorage.tempConnection(dataSource, conn);
         String sql = tempStorage.defineTempInsertTable();
-        tempStorage.createTable(sql);
+        tempStorage.createTable(sql, true);
 
         PreparedStatement insertTxnStmt = conn.prepareStatement("INSERT INTO DATA_TRANSACTION (USER_ID, external_txn_id, txn_date, txn_status, data_source_name," +
                 "replace_data, change_data_source_to_match, temp_table_name) " +
