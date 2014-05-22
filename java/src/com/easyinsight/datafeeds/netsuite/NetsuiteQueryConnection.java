@@ -397,7 +397,7 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                     }
                 }
                 IDataStorage.insertData(dataSet);
-            } catch (Exception e) {
+            } finally {
                 connection.close();
             }
         } catch (Exception e) {
@@ -409,18 +409,5 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.STORED_PULL;
-    }
-
-    /*protected boolean noDataProcessing() {
-        return true;
-    }
-
-    @Override
-    protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
-    }*/
-
-    public boolean rebuildFieldWindow() {
-        return true;
     }
 }
