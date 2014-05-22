@@ -51,8 +51,8 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:NetsuiteQueryConnection = feedDefinition as NetsuiteQueryConnection;
-            databaseName = ds.netsuiteUserName;
-            userName = ds.netsuitePassword;
+            databaseName = ds.accountID;
+            userName = ds.netsuiteUserName;
             query = ds.query;
             connTimeout = ds.timeout;
             sourceExists = feedDefinition.feedName != null && feedDefinition.feedName != "";
@@ -152,7 +152,7 @@
                 <mx:TextInput id="databaseUserNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{userName}" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Netsuite Password:" labelWidth="200">
-                <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true" text="{password}"/>
+                <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true"/>
             </mx:FormItem>
             <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
                 <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="30"/>
