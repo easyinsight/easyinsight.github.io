@@ -18,6 +18,7 @@ import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -230,34 +231,25 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         startDate = null;
                     }
-                    if (startDate != null && !((AnalysisDateDimension) getField()).isTimeshift()) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(startDate);
-                        cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-                        cal.set(Calendar.HOUR_OF_DAY, 0);
-                        cal.set(Calendar.MINUTE, 0);
-                        cal.set(Calendar.SECOND, 0);
-                        cal.set(Calendar.MILLISECOND, 0);
-                        startDate = cal.getTime();
-                    } else if (startDate != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(startDate);
-                        cal.set(Calendar.HOUR_OF_DAY, 0);
-                        cal.set(Calendar.MINUTE, 0);
-                        cal.set(Calendar.SECOND, 0);
-                        cal.set(Calendar.MILLISECOND, 0);
-                        int time = insightRequestMetadata.getUtcOffset() / 60;
-                        String string;
-                        if (time > 0) {
-                            string = "GMT-"+Math.abs(time);
-                        } else if (time < 0) {
-                            string = "GMT+"+Math.abs(time);
+                    if (startDate != null) {
+                        if (((AnalysisDateDimension) getField()).isTimeshift()) {
+
+                            Instant instant = startDate.toInstant();
+                            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(insightRequestMetadata.getUtcOffset() / 60));
+                            ZonedDateTime zdt = instant.atZone(zoneId);
+                            zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                            instant = zdt.toInstant();
+                            startDate = Date.from(instant);
                         } else {
-                            string = "GMT";
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(startDate);
+                            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+                            cal.set(Calendar.HOUR_OF_DAY, 0);
+                            cal.set(Calendar.MINUTE, 0);
+                            cal.set(Calendar.SECOND, 0);
+                            cal.set(Calendar.MILLISECOND, 0);
+                            startDate = cal.getTime();
                         }
-                        TimeZone timeZone = TimeZone.getTimeZone(string);
-                        cal.setTimeZone(timeZone);
-                        startDate = cal.getTime();
                     }
                     if (interval.isEndDefined()) {
                         Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
