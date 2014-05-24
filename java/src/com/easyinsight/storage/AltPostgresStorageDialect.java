@@ -70,7 +70,12 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             for (Key key : keys.keySet()) {
                 Value value = row.getValue(key);
                 if (value.type() == Value.DATE) {
-                    rowValues[j++] = sdf.format(((DateValue) value).getDate());
+                    DateValue dateValue = (DateValue) value;
+                    if (dateValue.getDate() == null) {
+                        rowValues[j++] = "";
+                    } else {
+                        rowValues[j++] = sdf.format(dateValue.getDate());
+                    }
                 } else if (value.type() == Value.EMPTY) {
                     rowValues[j++] = "";
                 } else if (value.type() == Value.STRING) {
