@@ -171,9 +171,9 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                     zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
                     break;
                 case QUARTER_TO_NOW:
-                    int month = zdt.getMonthValue();
-                    int quarterMonth = month - (month % 3);
-                    zdt.withMonth(quarterMonth);
+                    int month = zdt.getMonthValue() - 1;
+                    int quarterMonth = month - (month % 3) + 1;
+                    zdt = zdt.withMonth(quarterMonth);
                     zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
                     break;
                 case YEAR_TO_NOW:
@@ -341,6 +341,14 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             return cal.getTimeInMillis();
         }
 
+    }
+
+    public static void main(String[] args) {
+        for (int i = 1; i <= 12; i++){
+            int month = i - 1;
+            int quarterMonth = month - (month % 3) + 1;
+            System.out.println("month " + i + " has quarter start month of " + quarterMonth);
+        }
     }
 
     public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
