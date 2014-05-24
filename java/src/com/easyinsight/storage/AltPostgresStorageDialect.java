@@ -190,7 +190,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         if (type == Value.DATE) {
             column = "k" + key.getKeyID() + " TIMESTAMP, datedim_" + key.getKeyID() + "_id integer";
         } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " NUMERIC";
+            column = "k" + key.getKeyID() + " DECIMAL(18, 4)";
         } else if (type == Value.TEXT) {
             column = "k" + key.getKeyID() + " TEXT";
         } else {
