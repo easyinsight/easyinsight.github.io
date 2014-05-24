@@ -68,7 +68,6 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
 
     protected Map query(String queryString, FeedDefinition parentSource, HttpClient client) throws OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException, IOException, ParsingException {
         try {
-            System.out.println(queryString);
             ConstantContactCompositeSource parentDefinition = (ConstantContactCompositeSource) parentSource;
             HttpMethod restMethod = new GetMethod(queryString);
             restMethod.setRequestHeader("Authorization", "Bearer " + parentDefinition.getAccessToken());
@@ -81,7 +80,11 @@ public abstract class ConstantContactBaseSource extends ServerDataSourceDefiniti
             } else if (restMethod.getStatusCode() == 500) {
                 throw new RuntimeException("Constant Contact server error--please try again later.");
             }
-            Map results = (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            if (obj instanceof List) {
+                System.out.println("list = " + obj);
+            }
+            Map results = (Map) obj;
             restMethod.releaseConnection();
             return results;
         } catch (ParseException e) {
