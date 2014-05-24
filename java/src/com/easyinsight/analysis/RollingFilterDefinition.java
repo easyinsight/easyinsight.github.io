@@ -265,8 +265,8 @@ public class RollingFilterDefinition extends FilterDefinition {
                         endDate = null;
                     }
                     if (endDate != null) {
+                        Instant instant = endDate.toInstant();
                         if (((AnalysisDateDimension) getField()).isTimeshift()) {
-                            Instant instant = endDate.toInstant();
                             ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
                             ZonedDateTime zdt = instant.atZone(zoneId);
                             zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
