@@ -233,12 +233,10 @@ public class RollingFilterDefinition extends FilterDefinition {
                     }
                     if (startDate != null) {
                         if (((AnalysisDateDimension) getField()).isTimeshift()) {
-
                             Instant instant = startDate.toInstant();
-                            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(insightRequestMetadata.getUtcOffset() / 60));
+                            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
                             ZonedDateTime zdt = instant.atZone(zoneId);
                             zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                            zdt = zdt.withZoneSameLocal(ZoneId.of("GMT"));
                             instant = zdt.toInstant();
                             startDate = Date.from(instant);
                         } else {
