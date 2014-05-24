@@ -133,14 +133,15 @@ public class OrFilter extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        boolean valid = true;
+        /*boolean valid = true;
         for (FilterDefinition filter : filters) {
             if (filter.isEnabled() && !filter.validForQuery()) {
                 valid = false;
                 break;
             }
         }
-        return valid;
+        return valid;*/
+        return false;
     }
 
     @Override

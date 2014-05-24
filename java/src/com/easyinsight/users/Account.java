@@ -258,6 +258,9 @@ public class Account {
     @Column(name="special_storage")
     private String specialStorage;
 
+    @Column(name="special_storage_caching")
+    private String cachingStorage;
+
     @Column(name="new_pricing_model_invoice")
     private boolean newPricingModelInvoice;
 
@@ -287,6 +290,14 @@ public class Account {
 
     @Column(name="next_bill_amount")
     private Double nextBillAmount;
+
+    public String getCachingStorage() {
+        return cachingStorage;
+    }
+
+    public void setCachingStorage(String cachingStorage) {
+        this.cachingStorage = cachingStorage;
+    }
 
     public Date getNextBillDate() {
         return nextBillDate;

@@ -69,7 +69,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         limitDate = findStartDate(rollingFilterDefinition, now, insightRequestMetadata);
         endDate = findEndDate(rollingFilterDefinition, now, insightRequestMetadata);
         AnalysisDateDimension date = (AnalysisDateDimension) rollingFilterDefinition.getField();
-        if (date.isTimeshift()) {
+        if (date.isTimeshift() && rollingFilterDefinition.getInterval() <= ALL) {
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
         }
