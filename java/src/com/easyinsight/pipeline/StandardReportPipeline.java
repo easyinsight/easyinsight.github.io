@@ -209,9 +209,6 @@ public class StandardReportPipeline extends Pipeline {
                 }
             }
             components.add(new PipelinePlaceholderComponent("End of Pipeline " + name));
-            /*components.add(new CleanupComponent(name, measureFilter));
-            components.add(new AggregationComponent(AggregationComponent.OTHER));*/
-            /*components.add(new AggregationComponent(AggregationComponent.OTHER));*/
         }
 
 
@@ -223,7 +220,9 @@ public class StandardReportPipeline extends Pipeline {
             endComponent.add(new CleanupComponent(Pipeline.AFTER, measureFilter));
 
             endComponent.add(new NormalizationComponent());
-            endComponent.add(new AggregationComponent(AggregationComponent.OTHER));
+            if (!insightRequestMetadata.isNoAggregation()) {
+                endComponent.add(new AggregationComponent(AggregationComponent.OTHER));
+            }
 
             List<IComponent> postAggCalculations = new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.AFTER, getStructure(), insightRequestMetadata);
             endComponent.addAll(postAggCalculations);
@@ -237,7 +236,9 @@ public class StandardReportPipeline extends Pipeline {
                 }
             }
 
-            endComponent.add(new AggregationComponent(AggregationComponent.FINAL, AggregationTypes.RANK));
+            if (!insightRequestMetadata.isNoAggregation()) {
+                endComponent.add(new AggregationComponent(AggregationComponent.FINAL, AggregationTypes.RANK));
+            }
 
             endComponent.add(new LinkDecorationComponent());
             if (report.getFilterDefinitions() != null) {
