@@ -1023,7 +1023,7 @@ public class AnalysisService {
                 recordIDValues.add(row.getValue(recordID));
             }
             filterValueDefinition.setFilteredValues(recordIDValues);
-            DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
+            DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID(), useSource.getFeedType());
             ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
             readStorage.closeConnection();
 
@@ -1361,7 +1361,7 @@ public class AnalysisService {
                     validFields.add(field);
                 }
             }
-            DataStorage dataStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID());
+            DataStorage dataStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID(), useSource.getFeedType());
             try {
                 ActualRowSet rowSet = dataStorage.allData(filters, useSource.getFields(), null, insightRequestMetadata);
                 rowSet.setOptions(optionMap);

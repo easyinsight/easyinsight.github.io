@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import nu.xom.Element;
 
 import javax.persistence.Entity;
@@ -29,7 +30,7 @@ public class NullFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         return null;
     }
 

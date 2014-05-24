@@ -106,11 +106,11 @@ public class OrFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         StringBuilder sb = new StringBuilder();
         for (FilterDefinition filter : filters) {
             if (filter.isEnabled() && filter.validForQuery()) {
-                sb.append(filter.toQuerySQL(tableName));
+                sb.append(filter.toQuerySQL(tableName, database));
                 sb.append(" OR ");
             }
         }
@@ -133,7 +133,14 @@ public class OrFilter extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        return false;
+        boolean valid = true;
+        for (FilterDefinition filter : filters) {
+            if (filter.isEnabled() && !filter.validForQuery()) {
+                valid = false;
+                break;
+            }
+        }
+        return valid;
     }
 
     @Override

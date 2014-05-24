@@ -296,16 +296,53 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                 Statement statement = connection.createStatement();
                 ResultSet rs = statement.executeQuery(query);
                 int ct = 0;
-                while (rs.next()) {
+                System.out.println("running the query...");
+                Map<Integer, String> columnMap = new HashMap<Integer, String>();
+                Map<Integer, Integer> columnTypeMap = new HashMap<Integer, Integer>();
+                int cachedColumnCount = 0;
+                boolean done = false;
+                while (!done) {
+                    boolean valid;
+                    try {
+                        valid = rs.next();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("retrying once...");
+                        try {
+                            valid = rs.next();
+                        } catch (SQLException e1) {
+                            System.out.println("nopers");
+                            e.printStackTrace();
+                            valid = false;
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
+                    System.out.println("okay, so we got a row...");
                     IRow row = dataSet.createRow();
-                    int columnCount = rs.getMetaData().getColumnCount();
-                    for (int i = 1; i <= columnCount; i++) {
-                        String columnName = rs.getMetaData().getColumnName(i);
+                    if (cachedColumnCount == 0) {
+                        cachedColumnCount = rs.getMetaData().getColumnCount();
+                    }
+                    for (int i = 1; i <= cachedColumnCount; i++) {
+                        String columnName = columnMap.get(i);
+                        if (columnName == null) {
+                            columnName = rs.getMetaData().getColumnName(i);
+                            columnMap.put(i, columnName);
+                        }
+                        System.out.println("getting query by column name " + columnName);
                         AnalysisItem analysisItem = map.get(columnName);
                         if (analysisItem == null) {
+                            System.out.println("no item by name " + columnName);
                             continue;
                         }
-                        switch (rs.getMetaData().getColumnType(i)) {
+                        Integer type = columnTypeMap.get(i);
+                        if (type == null) {
+                            type = rs.getMetaData().getColumnType(i);
+                            columnTypeMap.put(i, type);
+                        }
+                        System.out.println("type = " + type);
+                        switch (type) {
                             case Types.BIGINT:
                             case Types.TINYINT:
                             case Types.SMALLINT:
@@ -331,6 +368,7 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                             case Types.VARCHAR:
                             case Types.LONGVARCHAR:
                                 String string = rs.getString(i);
+                                System.out.println("value for " + columnName + " = " + string);
                                 row.addValue(analysisItem.getKey(), string);
                                 break;
 
@@ -366,7 +404,7 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                                 }
                                 break;
                             default:
-                                throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                                throw new RuntimeException("This data type (" + type + ") is not supported in Easy Insight. Type value: " + type);
                         }
                     }
                     ct++;
@@ -377,11 +415,12 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                     }
                 }
                 IDataStorage.insertData(dataSet);
-            } catch (Exception e) {
+            } finally {
                 connection.close();
             }
         } catch (Exception e) {
             LogClass.error(e);
+            throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
         }
         return null;
     }
@@ -389,18 +428,5 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.STORED_PULL;
-    }
-
-    /*protected boolean noDataProcessing() {
-        return true;
-    }
-
-    @Override
-    protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
-    }*/
-
-    public boolean rebuildFieldWindow() {
-        return true;
     }
 }

@@ -33,7 +33,7 @@ public class MySQLStorageDialect implements IStorageDialect {
 
     private int maxLen = 255;
 
-    public void createTempTable(String sql, Database database) throws SQLException {
+    public void createTempTable(String sql, Database database, boolean insert) throws SQLException {
         EIConnection storageConn = database.getConnection();
         try {
             ResultSet existsRS = storageConn.getMetaData().getTables(null, null, tableName, null);

@@ -5,6 +5,10 @@
 <%@ page import="com.easyinsight.datafeeds.HTMLConnectionProperty" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.datafeeds.FeedType" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -15,6 +19,9 @@
         if (connectionID == FeedType.SERVER_MYSQL.getType()) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID));
             return;
+        } else if (connectionID == FeedType.STATIC.getType()) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/fileUpload.jsp?connectionID=" + connectionID));
+            return;
         }
         HTMLConnectionFactory factory;
         try {
@@ -23,8 +30,21 @@
             response.sendRedirect(RedirectUtil.getURL(request, "/app/html/fullAppRequired.jsp"));
             return;
         }
+        EIConnection conn = Database.instance().getConnection();
+        String existingURLKey = null;
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT DATA_FEED.API_KEY FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE USER.ACCOUNT_ID = UPLOAD_POLICY_USERS.USER_ID AND " +
+                    "UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.FEED_TYPE = ? AND DATA_FEED.VISIBLE = ?");
+            ps.setInt(1, connectionID);
+            ps.setBoolean(2, true);
+            ResultSet rs = ps.executeQuery();
 
-
+            if (rs.next()) {
+                existingURLKey = RedirectUtil.getURL(request, "/app/html/reports/" + rs.getString(1));
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
 %>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,6 +61,16 @@
     <jsp:param name="headerActive" value="<%= HtmlConstants.NONE %>"/>
 </jsp:include>
 <div class="container corePageWell" style="margin-top: 20px">
+
+    <% if (existingURLKey != null) { %>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+        <div class="alert alert-warning">You already have a data source of this connection type at <a href="<%=existingURLKey%>"><%=existingURLKey%></a>. You should probably be using that data source instead of creating a new one.</div>
+        </div>
+    </div>
+    <% } %>
+
+
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <form class="well" method="post" action="/app/html/connectionCreationAction.jsp">

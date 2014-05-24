@@ -2,9 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import nu.xom.Attribute;
 import nu.xom.Element;
-import nu.xom.Nodes;
 import org.hibernate.Session;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +45,7 @@ public class FilterPatternDefinition extends FilterDefinition {
         return new MaterializedFilterPatternDefinition(getField(), pattern, caseSensitive, regex, autoWildCard);
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
         queryBuilder.append(columnName);

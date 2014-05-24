@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.Database;
 import nu.xom.Element;
 
 import java.sql.PreparedStatement;
@@ -27,7 +28,7 @@ public class LastNFilterDefinition extends FilterDefinition {
         return new MaterializedLastNFilterDefinition(getField(), limit);
     }
 
-    public String toQuerySQL(String tableName) {
+    public String toQuerySQL(String tableName, Database database) {
         // TODO: implement
         StringBuilder queryBuilder = new StringBuilder();
         return queryBuilder.toString();
