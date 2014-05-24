@@ -264,34 +264,24 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         endDate = null;
                     }
-                    if (endDate != null && !((AnalysisDateDimension) getField()).isTimeshift()) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(endDate);
-                        cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-                        cal.set(Calendar.HOUR_OF_DAY, 23);
-                        cal.set(Calendar.MINUTE, 59);
-                        cal.set(Calendar.SECOND, 59);
-                        cal.set(Calendar.MILLISECOND, 0);
-                        endDate = cal.getTime();
-                    } else if (endDate != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(endDate);
-                        cal.set(Calendar.HOUR_OF_DAY, 23);
-                        cal.set(Calendar.MINUTE, 59);
-                        cal.set(Calendar.SECOND, 59);
-                        cal.set(Calendar.MILLISECOND, 0);
-                        int time = insightRequestMetadata.getUtcOffset() / 60;
-                        String string;
-                        if (time > 0) {
-                            string = "GMT-"+Math.abs(time);
-                        } else if (time < 0) {
-                            string = "GMT+"+Math.abs(time);
+                    if (endDate != null) {
+                        if (((AnalysisDateDimension) getField()).isTimeshift()) {
+                            Instant instant = endDate.toInstant();
+                            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
+                            ZonedDateTime zdt = instant.atZone(zoneId);
+                            zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                            instant = zdt.toInstant();
+                            endDate = Date.from(instant);
                         } else {
-                            string = "GMT";
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(endDate);
+                            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+                            cal.set(Calendar.HOUR_OF_DAY, 0);
+                            cal.set(Calendar.MINUTE, 0);
+                            cal.set(Calendar.SECOND, 0);
+                            cal.set(Calendar.MILLISECOND, 0);
+                            endDate = cal.getTime();
                         }
-                        TimeZone timeZone = TimeZone.getTimeZone(string);
-                        cal.setTimeZone(timeZone);
-                        endDate = cal.getTime();
                     }
                 }
             }
