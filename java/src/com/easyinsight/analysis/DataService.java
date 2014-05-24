@@ -2196,7 +2196,7 @@ public class DataService {
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
-
+            insightRequestMetadata.setNoAggregation(analysisDefinition.isNoAggregation());
             insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
