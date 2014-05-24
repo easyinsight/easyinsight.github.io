@@ -1,10 +1,14 @@
 package com.easyinsight.api.v3;
 
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.security.SecurityUtil;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,28 +22,31 @@ import javax.servlet.http.HttpServletRequest;
 public class DataSourceListServlet extends JSONServlet {
 
     @Override
-    protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject responseObject = new JSONObject();
         JSONArray array = new JSONArray();
         responseObject.put("data_sources", array);
         String filter = request.getParameter("filter");
         boolean zapierFilter = "zapier".equals(filter);
+        boolean apiFilter = "api".equals(filter);
         java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
-        for(DataSourceDescriptor ds : dataSources) {
+        ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
+        for (DataSourceDescriptor ds : dataSources) {
             if (zapierFilter) {
                 if (ds.getDataSourceType() == FeedType.BLANK.getType()) {
-                    JSONObject dsObject = new JSONObject();
-                    dsObject.put("name", ds.getName());
-                    dsObject.put("url_key", ds.getUrlKey());
-                    array.add(dsObject);
+                    JSONObject dsObject = ds.toJSON(md);
+                    array.put(dsObject);
+                }
+            } else if (apiFilter) {
+                if (ds.getDataSourceType() == FeedType.STATIC.getType() || ds.getDataSourceType() == FeedType.DEFAULT.getType()) {
+                    JSONObject dsObject = ds.toJSON(md);
+                    array.put(dsObject);
                 }
             } else {
-                if(ds.getDataSourceType() == FeedType.STATIC.getType() || ds.getDataSourceType() == FeedType.DEFAULT.getType()) {
-                    JSONObject dsObject = new JSONObject();
-                    dsObject.put("name", ds.getName());
-                    dsObject.put("url_key", ds.getUrlKey());
-                    array.add(dsObject);
-                }
+
+                JSONObject dsObject = ds.toJSON(md);
+                array.put(dsObject);
+
             }
 
         }
