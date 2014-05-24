@@ -74,67 +74,7 @@
         %>
         <jsp:include page="../recent_actions.jsp"/>
         <div class="col-md-9">
-            <%
-                List<EIDescriptor> accountReports = new UserUploadService().getAccountReports();
-                if (accountReports.size() > 0) {
-            %>
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table table-striped table-bordered table-condensed"
-                               style="margin-bottom: 0;padding-bottom: 0">
-                            <thead>
-                            <tr>
-                                <th colspan="2">Your Top Reports and Dashboards</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <%
-                                for (EIDescriptor accountReport : accountReports) {
-                            %>
-                            <tr>
-                                <td class="header-tr">
-                                    <%
-                                        if (accountReport.getType() == EIDescriptor.REPORT) {
-                                    %>
-                                    <a href="report/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getName())%>
-                                    </a>
-                                    <%
-                                    } else if (accountReport.getType() == EIDescriptor.DASHBOARD) {
-                                    %>
-                                    <a href="dashboard/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getName())%>
-                                    </a>
-                                    <%
-                                        }
-                                    %>
-                                </td>
-                                <td>
-                                    <%
-                                        if (accountReport.getType() == EIDescriptor.REPORT) {
-                                    %>
-                                    <a href="report/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getDescription())%>
-                                    </a>
-                                    <%
-                                    } else if (accountReport.getType() == EIDescriptor.DASHBOARD) {
-                                    %>
-                                    <a href="dashboard/<%=accountReport.getUrlKey()%>"><%=StringEscapeUtils.escapeHtml(accountReport.getDescription())%>
-                                    </a>
-                                    <%
-                                        }
-                                    %>
-                                </td>
-                            </tr>
-                            <%
-                                }
-                            %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            <%
-                }
-            %>
 
 
 

@@ -300,7 +300,25 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                 Map<Integer, String> columnMap = new HashMap<Integer, String>();
                 Map<Integer, Integer> columnTypeMap = new HashMap<Integer, Integer>();
                 int cachedColumnCount = 0;
-                while (rs.next()) {
+                boolean done = false;
+                while (!done) {
+                    boolean valid;
+                    try {
+                        valid = rs.next();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        System.out.println("retrying once...");
+                        try {
+                            valid = rs.next();
+                        } catch (SQLException e1) {
+                            System.out.println("nopers");
+                            e.printStackTrace();
+                            valid = false;
+                        }
+                    }
+                    if (!valid) {
+                        break;
+                    }
                     System.out.println("okay, so we got a row...");
                     IRow row = dataSet.createRow();
                     if (cachedColumnCount == 0) {
@@ -397,11 +415,12 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
                     }
                 }
                 IDataStorage.insertData(dataSet);
-            } catch (Exception e) {
+            } finally {
                 connection.close();
             }
         } catch (Exception e) {
             LogClass.error(e);
+            throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), this));
         }
         return null;
     }
@@ -409,18 +428,5 @@ public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.STORED_PULL;
-    }
-
-    /*protected boolean noDataProcessing() {
-        return true;
-    }
-
-    @Override
-    protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
-    }*/
-
-    public boolean rebuildFieldWindow() {
-        return true;
     }
 }
