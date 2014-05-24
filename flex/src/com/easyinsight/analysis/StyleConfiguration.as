@@ -461,6 +461,7 @@ public class StyleConfiguration {
 
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));
         items.addItem(new CheckBoxReportFormItem("Data Discovery Enabled", "dataDiscoveryEnabled", report.dataDiscoveryEnabled, report));
+        items.addItem(new CheckBoxReportFormItem("No Aggregation", "noAggregation", report.noAggregation, report));
 
         items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
