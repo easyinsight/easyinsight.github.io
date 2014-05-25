@@ -85,7 +85,6 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     }
                     rowValues[j++] = string;
                 } else {
-                    System.out.println("value = " + value.toString());
                     rowValues[j++] = value.toString();
                 }
             }
