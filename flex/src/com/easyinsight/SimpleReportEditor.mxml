@@ -585,7 +585,7 @@
                 //this.dataSourceFields = feedMetadata.dataSourceFields;
                 this.admin = feedMetadata.dataSourceAdmin;
                 var cFactory:ClassFactory = new ClassFactory(AvailableFieldRenderer);
-                cFactory.properties = { dataSourceID:dataSourceID, calcRefactor:feedMetadata.allowRefactor, tags: feedMetadata.tags };
+                cFactory.properties = { dataSourceID: dataSourceID, calcRefactor: feedMetadata.allowRefactor, tags: feedMetadata.tags };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
                 joinsCustomizable = this.feedMetadata.customJoinsAllowed;
@@ -1012,7 +1012,6 @@
         }
 
 
-
         private function saved(event:SavedAnalysisEvent):void {
             AnalysisUtil.updateReport(analysisDefinition, event.report);
             if (!embedded) {
@@ -1217,18 +1216,18 @@
 
         private function reportNavigation(event:ReportNavigationEvent):void {
             /*if (event.updatesCurrentReport) {
-                for each (var filter:FilterDefinition in event.filters) {
-                    // apply this filter to the
-                }
-            }*/
+             for each (var filter:FilterDefinition in event.filters) {
+             // apply this filter to the
+             }
+             }*/
             if (analysisChanged) {
                 if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
                     createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
                         if (event.descriptor is InsightDescriptor) {
                             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
                         } else if (event.descriptor is DashboardDescriptor) {
-                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                                initialFilters:event.filters})));
+                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
+                                initialFilters: event.filters})));
                         }
                     });
                 } else {
@@ -1236,8 +1235,8 @@
                         if (event.descriptor is InsightDescriptor) {
                             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
                         } else if (event.descriptor is DashboardDescriptor) {
-                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                                initialFilters:event.filters})));
+                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
+                                initialFilters: event.filters})));
                         }
                     });
                 }
@@ -1245,8 +1244,8 @@
                 if (event.descriptor is InsightDescriptor) {
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters)));
                 } else if (event.descriptor is DashboardDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                        initialFilters:event.filters})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
+                        initialFilters: event.filters})));
                 }
             }
         }
@@ -1281,15 +1280,15 @@
             if (analysisChanged) {
                 if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
                     createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
-                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID, urlKey: feedMetadata.urlKey})));
                     });
                 } else {
                     createPromptWindow("You have unsaved changes to this report.", function ():void {
-                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID, urlKey: feedMetadata.urlKey})));
                     });
                 }
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID:dataSourceID, urlKey: feedMetadata.urlKey})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, {startDataSourceID: dataSourceID, urlKey: feedMetadata.urlKey})));
             }
         }
 
@@ -1309,15 +1308,15 @@
         }
 
         /*private function getWrappers():ArrayCollection {
-            var ret:ArrayCollection = new ArrayCollection();
-            for each (var w:AnalysisItemWrapper in wrappers) {
-                var node:AnalysisItemNode = new AnalysisItemNode();
-                node.analysisItem = w.analysisItem.copy();
-                var copy:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-                ret.addItem(copy);
-            }
-            return ret;
-        }*/
+         var ret:ArrayCollection = new ArrayCollection();
+         for each (var w:AnalysisItemWrapper in wrappers) {
+         var node:AnalysisItemNode = new AnalysisItemNode();
+         node.analysisItem = w.analysisItem.copy();
+         var copy:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+         ret.addItem(copy);
+         }
+         return ret;
+         }*/
 
         private function getWrappers():ArrayCollection {
             return new ArrayCollection(wrappers.toArray());
@@ -1330,13 +1329,13 @@
             window.allFields = getWrappers();
             window.startIndex = index;
             /*window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
-                dispatchEvent(new AnalysisChangedEvent());
-                if (event.refreshData) {
-                    dataView.forceRetrieve();
-                } else {
-                    dataView.rerender();
-                }
-            }, false, 0, true);*/
+             dispatchEvent(new AnalysisChangedEvent());
+             if (event.refreshData) {
+             dataView.forceRetrieve();
+             } else {
+             dataView.rerender();
+             }
+             }, false, 0, true);*/
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1495,15 +1494,15 @@
             if (analysisChanged) {
                 if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
                     createSaveAsPromptWindow("You have unsaved changes to this report.", function ():void {
-                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID, urlKey: feedMetadata.urlKey})));
                     });
                 } else {
                     createPromptWindow("You have unsaved changes to this report.", function ():void {
-                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID, urlKey: feedMetadata.urlKey})));
                     });
                 }
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:dataSourceID , urlKey: feedMetadata.urlKey})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: dataSourceID, urlKey: feedMetadata.urlKey})));
             }
         }
 
@@ -1511,39 +1510,42 @@
         private var reportMode:String = "all";
 
         private function filterFunction(item:Object):Boolean {
-            var a:AnalysisItemWrapper = item as AnalysisItemWrapper;
-            if (a == null) return false;
-            if (a.unqualifiedDisplayName == null) return false;
+            try {
+                var a:AnalysisItemWrapper = item as AnalysisItemWrapper;
+                if (a == null) return false;
+                if (a.unqualifiedDisplayName == null) return false;
 
-            var view:IHierarchicalCollectionView = f as IHierarchicalCollectionView;
-            if (view == null) return false;
-            var children:ICollectionView = view.getChildren(a);
-            if (children == null) return false;
-            var needTags:Boolean = selectedTags != null && selectedTags.length > 0;
-            var tagsValid:Boolean = !needTags;
+                var view:IHierarchicalCollectionView = f as IHierarchicalCollectionView;
+                if (view == null) return false;
+                var children:ICollectionView = view.getChildren(a);
+                if (children == null) return false;
+                var needTags:Boolean = selectedTags != null && selectedTags.length > 0;
+                var tagsValid:Boolean = !needTags;
 
-            if (a.analysisItem == null) {
-                children.filterFunction = filterFunction;
-                children.refresh();
-            } else {
-                if (needTags) {
-                    var foundTag:Boolean = false;
-                    if (a.analysisItem.tags != null) {
-                        for each (var tag:Tag in a.analysisItem.tags) {
-                            for each (var dsTag:Tag in selectedTags) {
-                                if (dsTag.id == tag.id) {
-                                    foundTag = true;
+                if (a.analysisItem == null) {
+                    children.filterFunction = filterFunction;
+                    children.refresh();
+                } else {
+                    if (needTags) {
+                        var foundTag:Boolean = false;
+                        if (a.analysisItem.tags != null) {
+                            for each (var tag:Tag in a.analysisItem.tags) {
+                                for each (var dsTag:Tag in selectedTags) {
+                                    if (dsTag.id == tag.id) {
+                                        foundTag = true;
+                                    }
                                 }
                             }
                         }
+                        tagsValid = foundTag;
                     }
-                    tagsValid = foundTag;
                 }
+
+
+                return children.length > 0 || (a.unqualifiedDisplayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1 && tagsValid);
+            } catch (e:Error) {
             }
-
-
-            return children.length > 0 || (a.unqualifiedDisplayName.toLowerCase().indexOf(searchText.toLowerCase()) != -1 && tagsValid);
-
+            return true;
         }
 
 
