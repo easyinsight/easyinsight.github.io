@@ -9,6 +9,7 @@ import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -74,18 +75,46 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     if (dateValue.getDate() == null) {
                         rowValues[j++] = "";
                     } else {
-                        rowValues[j++] = sdf.format(dateValue.getDate());
+                        String string = sdf.format(dateValue.getDate());
+                        if (string.contains(",")) {
+                            System.out.println(string + " contains comma");
+                        }
+                        rowValues[j++] = string;
                     }
                 } else if (value.type() == Value.EMPTY) {
                     rowValues[j++] = "";
+                } else if (value.type() == Value.NUMBER) {
+                    Double num = null;
+                    if (value.type() == Value.STRING || value.type() == Value.TEXT) {
+                        num = NumericValue.produceDoubleValue(value.toString());
+                    } else if (value.type() == Value.NUMBER) {
+                        NumericValue numericValue = (NumericValue) value;
+                        num = numericValue.toDouble();
+                    }
+                    if (num == null) {
+                        rowValues[j++] = "";
+                    } else {
+                        String string = String.valueOf(num);
+                        if (string.contains(",")) {
+                            System.out.println(string + " contains comma");
+                        }
+                        rowValues[j++] = string;
+                    }
                 } else if (value.type() == Value.STRING) {
                     String string = String.valueOf(value.toString());
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
                     }
+                    if (string.contains(",")) {
+                        System.out.println(string + " contains comma");
+                    }
                     rowValues[j++] = string;
                 } else {
-                    rowValues[j++] = value.toString();
+                    String string = value.toString();
+                    if (string.contains(",")) {
+                        System.out.println(string + " contains comma");
+                    }
+                    rowValues[j++] = string;
                 }
             }
             csvWriter.writeRecord(rowValues);
