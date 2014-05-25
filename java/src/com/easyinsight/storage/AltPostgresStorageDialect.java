@@ -130,7 +130,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             file = new File(tableName + files.size() + ".csv");
             fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
+            csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
         }
     }
 
@@ -253,7 +253,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             file = new File(fileName);
             fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
+            csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
