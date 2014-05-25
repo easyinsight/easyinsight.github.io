@@ -481,7 +481,7 @@ public class DataStorage implements IDataStorage {
                     sb.append("k").append(key.getKeyID()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
@@ -550,7 +550,7 @@ public class DataStorage implements IDataStorage {
                     sb.append("k").append(key.getKeyID()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();

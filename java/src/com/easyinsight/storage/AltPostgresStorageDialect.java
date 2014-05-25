@@ -62,6 +62,18 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
     }
 
+    private String escape(String string) {
+        /*String ret = string;
+        if (string.contains("\\")) {
+            ret = string.replace("\\", "\\\\");
+        }
+        if (string.contains("'")) {
+            ret = string.replace("'", "\\'");
+        }
+        return ret;*/
+        return string;
+    }
+
     public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         int i = 0;
@@ -70,26 +82,25 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             i++;
             String[] rowValues = new String[keys.size()];
             int j = 0;
-            for (Key key : keys.keySet()) {
-
+            for (Map.Entry<Key, KeyMetadata> entry : keys.entrySet()) {
+                Key key = entry.getKey();
+                KeyMetadata keyMetadata = entry.getValue();
                 Value value = row.getValue(key);
                 if (i == 1) {
                     System.out.println("\tkey " + key.toKeyString() + " has value " + value);
                 }
-                if (value.type() == Value.DATE) {
+                if (keyMetadata.getType() == Value.DATE) {
+
                     DateValue dateValue = (DateValue) value;
                     if (dateValue.getDate() == null) {
                         rowValues[j++] = "";
                     } else {
                         String string = sdf.format(dateValue.getDate());
-                        if (string.contains("|")) {
-                            System.out.println(string + " contains comma");
-                        }
-                        rowValues[j++] = string;
+                        rowValues[j++] = escape(string);
                     }
                 } else if (value.type() == Value.EMPTY) {
                     rowValues[j++] = "";
-                } else if (value.type() == Value.NUMBER) {
+                } else if (keyMetadata.getType() == Value.NUMBER) {
                     Double num = null;
                     if (value.type() == Value.STRING || value.type() == Value.TEXT) {
                         num = NumericValue.produceDoubleValue(value.toString());
@@ -101,26 +112,17 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                         rowValues[j++] = "";
                     } else {
                         String string = String.valueOf(num);
-                        if (string.contains("|")) {
-                            System.out.println(string + " contains comma");
-                        }
-                        rowValues[j++] = string;
+                        rowValues[j++] = escape(string);
                     }
                 } else if (value.type() == Value.STRING) {
                     String string = String.valueOf(value.toString());
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
                     }
-                    if (string.contains("|")) {
-                        System.out.println(string + " contains comma");
-                    }
-                    rowValues[j++] = string;
+                    rowValues[j++] = escape(string);
                 } else {
                     String string = value.toString();
-                    if (string.contains("|")) {
-                        System.out.println(string + " contains comma");
-                    }
-                    rowValues[j++] = string;
+                    rowValues[j++] = escape(string);
                 }
             }
             csvWriter.writeRecord(rowValues);
