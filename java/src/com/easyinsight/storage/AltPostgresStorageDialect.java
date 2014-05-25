@@ -167,7 +167,9 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         sqlBuilder.append(tableName);
         sqlBuilder.append("( ");
         for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable));
+            String columnSQL = getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable);
+            System.out.println("\t" + keyMetadata.getKey().toKeyString() + " had column " + columnSQL);
+            sqlBuilder.append(columnSQL);
             sqlBuilder.append(",");
         }
         String primaryKey = tableName + "_ID";
