@@ -74,7 +74,7 @@ public class DataStorage implements IDataStorage {
 
     public static DataStorage readConnection(List<AnalysisItem> fields, long feedID, FeedType feedType) {
         DataStorage dataStorage = new DataStorage();
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : fields) {
             if (analysisItem.isDerived()) {
                 continue;
@@ -144,7 +144,7 @@ public class DataStorage implements IDataStorage {
     }
 
     public static TempStorage existingTempConnection(FeedDefinition feedDefinition, EIConnection conn, String tableName) {
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
                 continue;
@@ -165,7 +165,7 @@ public class DataStorage implements IDataStorage {
     }
 
     public static TempStorage tempConnection(FeedDefinition feedDefinition, EIConnection conn) {
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
@@ -200,7 +200,7 @@ public class DataStorage implements IDataStorage {
         DataStorage dataStorage = new DataStorage();
         dataStorage.accountID = accountID;
         dataStorage.systemUpdate = systemUpdate;
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
                 continue;
@@ -485,6 +485,7 @@ public class DataStorage implements IDataStorage {
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
+                stmt.close();
             } finally {
                 AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("AKIAI5YYYFRMWFLLEC2A", "NmonY27/vE03AeGNWhLBmkR41kJrvbWSYhLzh5pE"));
                 ObjectListing objectListing = s3.listObjects(bucketName);
