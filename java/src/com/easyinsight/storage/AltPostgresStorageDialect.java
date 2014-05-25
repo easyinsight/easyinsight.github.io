@@ -64,12 +64,18 @@ public class AltPostgresStorageDialect implements IStorageDialect {
 
     public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        int i = 0;
         for (IRow row : dataSet.getRows()) {
             rows++;
+            i++;
             String[] rowValues = new String[keys.size()];
             int j = 0;
             for (Key key : keys.keySet()) {
+
                 Value value = row.getValue(key);
+                if (i == 1) {
+                    System.out.println("\tkey " + key.toKeyString() + " has value " + value);
+                }
                 if (value.type() == Value.DATE) {
                     DateValue dateValue = (DateValue) value;
                     if (dateValue.getDate() == null) {
