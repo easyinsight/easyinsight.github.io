@@ -76,7 +76,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                         rowValues[j++] = "";
                     } else {
                         String string = sdf.format(dateValue.getDate());
-                        if (string.contains(",")) {
+                        if (string.contains("|")) {
                             System.out.println(string + " contains comma");
                         }
                         rowValues[j++] = string;
@@ -95,7 +95,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                         rowValues[j++] = "";
                     } else {
                         String string = String.valueOf(num);
-                        if (string.contains(",")) {
+                        if (string.contains("|")) {
                             System.out.println(string + " contains comma");
                         }
                         rowValues[j++] = string;
@@ -105,13 +105,13 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
                     }
-                    if (string.contains(",")) {
+                    if (string.contains("|")) {
                         System.out.println(string + " contains comma");
                     }
                     rowValues[j++] = string;
                 } else {
                     String string = value.toString();
-                    if (string.contains(",")) {
+                    if (string.contains("|")) {
                         System.out.println(string + " contains comma");
                     }
                     rowValues[j++] = string;
