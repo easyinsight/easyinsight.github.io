@@ -195,11 +195,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public MigrationResult migrations(EIConnection conn, FeedDefinition parentDefinition) throws Exception {
         boolean changed = false;
-        conn.commit();
-        conn.setAutoCommit(true);
+        /*conn.commit();
+        conn.setAutoCommit(true);*/
         Map<String, Key> keys = newDataSourceFields(parentDefinition);
         List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
-        conn.setAutoCommit(false);
+        //conn.setAutoCommit(false);
         List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
         boolean renamed = false;
         for (AnalysisItem field : fields) {
