@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.export.ExportMetadata;
@@ -425,6 +426,15 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         } else {
             return displayName;
         }
+    }
+
+    public String toMarkdown(long dataSourceID, List<AnalysisItem> reportItems, WSAnalysisDefinition report, EIConnection conn, Feed feed) {
+        StringBuilder markdown = new StringBuilder();
+        markdown.append("=='''" + toDisplay() + "'''==\r\n\r\n");
+        markdown.append("Field Unqualified Name: '''" + toUnqualifiedDisplay() + "'''\r\n\r\n");
+        markdown.append("Field Original Display Name: '''" + toOriginalDisplayName() + "'''\r\n\r\n");
+        markdown.append("Field Key: '''" + getKey().toDisplayName() + "'''\r\n\r\n");
+        return markdown.toString();
     }
 
     public String toUnqualifiedDisplay() {

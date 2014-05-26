@@ -11,6 +11,8 @@ public class ReportAuditEvent {
     public static final String JOIN = "Join";
     public static final String QUERY = "Query";
     public static final String WARNING = "Warning";
+    public static final String FIELD = "Field";
+    public static final String FILTER = "Filter";
 
     private String auditType;
     private String eventLabel;
