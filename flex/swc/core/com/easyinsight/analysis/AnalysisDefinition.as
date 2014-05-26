@@ -106,6 +106,7 @@ import mx.collections.ArrayCollection;
     public var canSave:Boolean;
     public var filterSets:ArrayCollection;
     public var exportString:String;
+    public var dayAggregation:Boolean;
 
     public var fieldEvents:Object;
     public var filterEvents:Object;
