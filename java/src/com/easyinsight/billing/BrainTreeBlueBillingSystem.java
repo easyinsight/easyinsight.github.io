@@ -77,6 +77,10 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
         }
     }
 
+    public String getEnterpriseRedirect(Request req) {
+        return gateway.transparentRedirect().trData(req, ConfigLoader.instance().getRedirectLocation() + "/app/billing/newSubmit.jsp");
+    }
+
     public String getTargetUrl() {
         return gateway.transparentRedirect().url();
     }
