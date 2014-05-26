@@ -63,15 +63,24 @@ public class AltPostgresStorageDialect implements IStorageDialect {
     }
 
     private String escape(String string) {
-        /*String ret = string;
+        String ret = string;
         if (string.contains("\\")) {
-            ret = string.replace("\\", "\\\\");
+            ret = ret.replace("\\", "\\\\");
         }
         if (string.contains("'")) {
-            ret = string.replace("'", "\\'");
+            ret = ret.replace("'", "\\'");
         }
-        return ret;*/
-        return string;
+        if (string.contains("\"")) {
+            ret = ret.replace("\"", "\\\"");
+        }
+        if (string.contains("\n")) {
+            ret = ret.replace("\n", "\\\n");
+        }
+        if (string.contains("\r")) {
+            ret = ret.replace("\r", "\\\r");
+        }
+        //System.out.println("converted " + string + " to " + ret);
+        return ret;
     }
 
     public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
@@ -89,8 +98,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                 if (i == 1) {
                     System.out.println("\tkey " + key.toKeyString() + " has value " + value);
                 }
-                if (keyMetadata.getType() == Value.DATE) {
-
+                if (value.type() == Value.DATE) {
                     DateValue dateValue = (DateValue) value;
                     if (dateValue.getDate() == null) {
                         rowValues[j++] = "";
@@ -100,7 +108,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     }
                 } else if (value.type() == Value.EMPTY) {
                     rowValues[j++] = "";
-                } else if (keyMetadata.getType() == Value.NUMBER) {
+                } else if (value.type() == Value.NUMBER) {
                     Double num = null;
                     if (value.type() == Value.STRING || value.type() == Value.TEXT) {
                         num = NumericValue.produceDoubleValue(value.toString());
