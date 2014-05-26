@@ -1004,7 +1004,7 @@ public class DataStorage implements IDataStorage {
 
         try {
             dataRS = queryStmt.executeQuery();
-            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized(), rowIDField);
+            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized(), rowIDField, insightRequestMetadata.isOptimizeDays());
         } catch (Exception e) {
             LogClass.error("On running " + queryBuilder.toString(), e);
             throw new RuntimeException(e);
@@ -1056,7 +1056,7 @@ public class DataStorage implements IDataStorage {
     }
 
     private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS,
-                                     boolean aggregateQuery, boolean optimized, @Nullable AnalysisItem rowIDItem) throws SQLException {
+                                     boolean aggregateQuery, boolean optimized, @Nullable AnalysisItem rowIDItem, boolean dayOptimize) throws SQLException {
         int rowID = 0;
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
@@ -1088,6 +1088,18 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, Calendar.JANUARY);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
+                        } else if (optimized && aggregateQuery && dayOptimize && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
+                            try {
+                                java.sql.Date time = dataRS.getDate(i++);
+                                if (dataRS.wasNull()) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    long milliseconds = time.getTime();
+                                    row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
+                                }
+                            } catch (SQLException e) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            }
                         } else {
                             try {
                                 Timestamp time = dataRS.getTimestamp(i++);
@@ -1283,12 +1295,21 @@ public class DataStorage implements IDataStorage {
                     } else {
                         throw new RuntimeException();
                     }
-                    //  "EXTRACT(year FROM " + getField().toKeySQL() + ")
-
                     groupByBuilder.append("year" + columnName + ",");
-                } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
-                    selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL)) {
+                    if (database.getDialect() == Database.MYSQL) {
+                        selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                    } else if (database.getDialect() == Database.POSTGRES) {
+                        selectBuilder.append("extract(month from " + columnName + ") as month" + columnName + ", extract(year from " + columnName + ") as year" + columnName + ",");
+                    }
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
+                } else if (optimized && insightRequestMetadata.isOptimizeDays() && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
+                    if (database.getDialect() == Database.MYSQL) {
+                        selectBuilder.append("date(" + columnName + ") as date" + columnName + ",");
+                    } else if (database.getDialect() == Database.POSTGRES) {
+                        selectBuilder.append(columnName + "::date as date" + columnName + ",");
+                    }
+                    groupByBuilder.append("date" + columnName + ",");
                 } else {
                     selectBuilder.append(columnName);
                     selectBuilder.append(",");
