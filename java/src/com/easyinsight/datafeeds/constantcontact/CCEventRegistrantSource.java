@@ -6,6 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -126,10 +127,9 @@ public class CCEventRegistrantSource extends ConstantContactBaseSource {
             }
             IDataStorage.insertData(dataSet);
             return null;
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        }  catch (Exception e) {
+            LogClass.error(e);
+            return new DataSet();
         }
     }
 }
