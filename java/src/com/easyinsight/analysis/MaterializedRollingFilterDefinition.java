@@ -2,9 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import com.easyinsight.security.SecurityUtil;
 
+import java.time.*;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -57,8 +57,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     private long limitDate;
     private long endDate;
     private int interval;
-    private int intervalType;
-    private int intervalAmount;
     private int mode;
 
     public MaterializedRollingFilterDefinition(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
@@ -66,13 +64,14 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         if (now == null) {
             now = new Date();
         }
+        interval = rollingFilterDefinition.getInterval();
         limitDate = findStartDate(rollingFilterDefinition, now, insightRequestMetadata);
         endDate = findEndDate(rollingFilterDefinition, now, insightRequestMetadata);
         AnalysisDateDimension date = (AnalysisDateDimension) rollingFilterDefinition.getField();
-        if (date.isTimeshift()) {
+        /*if (date.isTimeshift() && rollingFilterDefinition.getInterval() <= ALL) {
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
-        }
+        }*/
         /*System.out.println("Materialized using start date " + new Date(limitDate));
         System.out.println("Materialized using end date " + new Date(endDate));*/
         if (rollingFilterDefinition.getInterval() > ALL) {
@@ -112,193 +111,244 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         if (!(rollingFilterDefinition.getField() instanceof AnalysisDateDimension)) {
             throw new RuntimeException("Report attempted to run a rolling filter on field " + rollingFilterDefinition.getField().toDisplay() + " - " + rollingFilterDefinition.getField().getAnalysisItemID());
         }
+        int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+        DayOfWeek targetDayOfWeek;
+        if (firstDayOfWeek == Calendar.SUNDAY) {
+            targetDayOfWeek = DayOfWeek.SUNDAY;
+        } else if (firstDayOfWeek == Calendar.MONDAY) {
+            targetDayOfWeek = DayOfWeek.MONDAY;
+        } else if (firstDayOfWeek == Calendar.TUESDAY) {
+            targetDayOfWeek = DayOfWeek.TUESDAY;
+        } else if (firstDayOfWeek == Calendar.WEDNESDAY) {
+            targetDayOfWeek = DayOfWeek.WEDNESDAY;
+        } else if (firstDayOfWeek == Calendar.THURSDAY) {
+            targetDayOfWeek = DayOfWeek.THURSDAY;
+        } else if (firstDayOfWeek == Calendar.FRIDAY) {
+            targetDayOfWeek = DayOfWeek.FRIDAY;
+        } else {
+            targetDayOfWeek = DayOfWeek.SATURDAY;
+        }
         System.out.println("looking for start date");
         if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
-            System.out.println("\tTime shifting...");
-            int time = insightRequestMetadata.getUtcOffset() / 60;
-            String string;
-            if (time > 0) {
-                string = "GMT-"+time;
-            } else if (time < 0) {
-                string = "GMT+"+time;
-            } else {
-                string = "GMT";
-            }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-            cal.setTimeZone(timeZone);
-        }
-        switch (interval) {
-            case CUSTOM:
-                if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
-                        rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
-                    switch (intervalType) {
-                        case 0:
-                            cal.add(Calendar.MINUTE, intervalAmount);
-                            break;
-                        case 1:
-                            cal.add(Calendar.HOUR_OF_DAY, intervalAmount);
-                            break;
-                        case 2:
-                            cal.add(Calendar.DAY_OF_YEAR, intervalAmount);
-                            break;
-                        case 3:
-                            cal.add(Calendar.WEEK_OF_YEAR, intervalAmount);
-                            break;
-                        case 4:
-                            cal.add(Calendar.MONTH, intervalAmount);
-                            break;
-                        case 5:
-                            cal.add(Calendar.YEAR, intervalAmount);
-                            break;
+
+            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
+            ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+            switch (interval) {
+                case CUSTOM:
+                    if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
+                            rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
+                        switch (intervalType) {
+                            case 0:
+                                zdt = zdt.plusMinutes(intervalAmount);
+                                break;
+                            case 1:
+                                zdt = zdt.plusHours(intervalAmount);
+                                break;
+                            case 2:
+                                zdt = zdt.plusDays(intervalAmount);
+                                break;
+                            case 3:
+                                zdt = zdt.plusWeeks(intervalAmount);
+                                break;
+                            case 4:
+                                zdt = zdt.plusMonths(intervalAmount);
+                                break;
+                            case 5:
+                                zdt = zdt.plusYears(intervalAmount);
+                                break;
+                        }
                     }
-                }
-                break;
-            case DAY_TO_NOW:
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                break;
-            case WEEK_TO_NOW:
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                cal.set(Calendar.DAY_OF_WEEK, 1);
-                break;
-            case MONTH_TO_NOW:
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                break;
-            case QUARTER_TO_NOW:
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                int quarterMonth = cal.get(Calendar.MONTH) - cal.get(Calendar.MONTH) % 3;
-                cal.set(Calendar.MONTH, quarterMonth);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                break;
-            case YEAR_TO_NOW:
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                cal.set(Calendar.DAY_OF_YEAR, 1);
-                break;
-            case DAY:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60 * 60 * 1000 * 24));
-                break;
-            case WEEK:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L));
-                break;
-            case MONTH:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L));
-                break;
-            case YEAR:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 365L));
-                break;
-            case QUARTER:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L * 3L));
-                break;
-            case LAST_FULL_DAY:
-                cal.add(Calendar.DAY_OF_YEAR, -1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                break;
-            case LAST_FULL_WEEK:
-                cal.add(Calendar.WEEK_OF_YEAR, -1);
-                cal.set(Calendar.DAY_OF_WEEK, 1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                break;
-            case LAST_FULL_MONTH:
-                cal.add(Calendar.MONTH, -1);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                break;
-            case LAST_YEAR:
-                cal.add(Calendar.YEAR, -1);
-                cal.set(Calendar.MONTH, Calendar.JANUARY);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                break;
-            case LAST_FULL_QUARTER:
-                // TODO: ?
-                break;
-            default:
-                if (rollingFilterDefinition.getStartDate() == null) {
-                    return 0;
-                }
-                return rollingFilterDefinition.getStartDate().getTime();
-        }
-        //if (!((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
-        if (interval == DAY_TO_NOW) {
-            Calendar cal1 = Calendar.getInstance();
-            int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-            int year = cal.get(Calendar.YEAR);
-            int time = insightRequestMetadata.getUtcOffset() / 60;
-            String string;
-            if (time > 0) {
-                string = "GMT-"+Math.abs(time);
-            } else if (time < 0) {
-                string = "GMT+"+Math.abs(time);
-            } else {
-                string = "GMT";
+                    break;
+                case DAY_TO_NOW:
+                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case WEEK_TO_NOW:
+                    zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
+                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    System.out.println(zdt);
+                    break;
+                case MONTH_TO_NOW:
+                    zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case QUARTER_TO_NOW:
+                    int month = zdt.getMonthValue() - 1;
+                    int quarterMonth = month - (month % 3) + 1;
+                    zdt = zdt.withMonth(quarterMonth);
+                    zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case YEAR_TO_NOW:
+                    zdt = zdt.withDayOfYear(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case DAY:
+                    zdt = zdt.minusDays(1);
+                    break;
+                case WEEK:
+                    zdt = zdt.minusWeeks(1);
+                    break;
+                case MONTH:
+                    zdt = zdt.minusMonths(1);
+                    break;
+                case YEAR:
+                    zdt = zdt.minusYears(1);
+                    break;
+                case QUARTER:
+                    zdt = zdt.minusMonths(3);
+                    break;
+                case LAST_FULL_DAY:
+                    zdt = zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case LAST_FULL_WEEK:
+                    zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
+                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    System.out.println(zdt);
+                    break;
+                case LAST_FULL_MONTH:
+                    zdt = zdt.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case LAST_YEAR:
+                    zdt = zdt.minusYears(1).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    break;
+                case LAST_FULL_QUARTER:
+                    // TODO: ?
+                    break;
+                default:
+                    if (rollingFilterDefinition.getStartDate() == null) {
+                        return 0;
+                    }
+                    return rollingFilterDefinition.getStartDate().getTime();
             }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-
-            /*cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);*/
-            // 210-878-5904
-            cal1.set(Calendar.DAY_OF_YEAR, dayOfYear);
-            cal1.set(Calendar.YEAR, year);
-            DateTime dateTime = new DateTime(cal1.getTimeInMillis(), DateTimeZone.forTimeZone(timeZone));
-            System.out.println("at this point, we have a date time of " + dateTime);
-            int dayOfYear2 = dateTime.dayOfYear().get();
-            int year2 = dateTime.year().get();
-            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-            cal.set(Calendar.DAY_OF_YEAR, dayOfYear2);
-            cal.set(Calendar.YEAR, year2);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            System.out.println("and now we have " + cal.getTime());
-            /*DateTime hourCopy = dateTime.hourOfDay().setCopy(0).minuteOfHour().setCopy(0).secondOfMinute().setCopy(0).millisOfSecond().setCopy(0);
-            System.out.println("after copy, we have " + hourCopy);
-            long millis = hourCopy.getMillis();
-            System.out.println("and now, we have " + new Date(millis));
-            return hourCopy.getMillis();*/
-
+            Instant instant = zdt.toInstant();
+            return Date.from(instant).getTime();
         } else {
-            int dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-            int year = cal.get(Calendar.YEAR);
-            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
-            cal.set(Calendar.YEAR, year);
+            switch (interval) {
+                case CUSTOM:
+                    if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
+                            rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
+                        switch (intervalType) {
+                            case 0:
+                                cal.add(Calendar.MINUTE, intervalAmount);
+                                break;
+                            case 1:
+                                cal.add(Calendar.HOUR_OF_DAY, intervalAmount);
+                                break;
+                            case 2:
+                                cal.add(Calendar.DAY_OF_YEAR, intervalAmount);
+                                break;
+                            case 3:
+                                cal.add(Calendar.WEEK_OF_YEAR, intervalAmount);
+                                break;
+                            case 4:
+                                cal.add(Calendar.MONTH, intervalAmount);
+                                break;
+                            case 5:
+                                cal.add(Calendar.YEAR, intervalAmount);
+                                break;
+                        }
+                    }
+                    break;
+                case DAY_TO_NOW:
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    break;
+                case WEEK_TO_NOW:
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    cal.set(Calendar.DAY_OF_WEEK, 1);
+                    break;
+                case MONTH_TO_NOW:
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    break;
+                case QUARTER_TO_NOW:
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    int quarterMonth = cal.get(Calendar.MONTH) - cal.get(Calendar.MONTH) % 3;
+                    cal.set(Calendar.MONTH, quarterMonth);
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    break;
+                case YEAR_TO_NOW:
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    cal.set(Calendar.DAY_OF_YEAR, 1);
+                    break;
+                case DAY:
+                    cal.setTimeInMillis(cal.getTimeInMillis() - (60 * 60 * 1000 * 24));
+                    break;
+                case WEEK:
+                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L));
+                    break;
+                case MONTH:
+                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L));
+                    break;
+                case YEAR:
+                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 365L));
+                    break;
+                case QUARTER:
+                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L * 3L));
+                    break;
+                case LAST_FULL_DAY:
+                    cal.add(Calendar.DAY_OF_YEAR, -1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    break;
+                case LAST_FULL_WEEK:
+                    cal.add(Calendar.WEEK_OF_YEAR, -1);
+                    cal.set(Calendar.DAY_OF_WEEK, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    break;
+                case LAST_FULL_MONTH:
+                    cal.add(Calendar.MONTH, -1);
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    break;
+                case LAST_YEAR:
+                    cal.add(Calendar.YEAR, -1);
+                    cal.set(Calendar.MONTH, Calendar.JANUARY);
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
+                    cal.set(Calendar.HOUR_OF_DAY, 0);
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.MILLISECOND, 0);
+                    break;
+                case LAST_FULL_QUARTER:
+                    // TODO: ?
+                    break;
+                default:
+                    if (rollingFilterDefinition.getStartDate() == null) {
+                        return 0;
+                    }
+                    return rollingFilterDefinition.getStartDate().getTime();
+            }
+            return cal.getTimeInMillis();
         }
-        //}
-        return cal.getTimeInMillis();
+
+    }
+
+    public static void main(String[] args) {
+        for (int i = 1; i <= 12; i++){
+            int month = i - 1;
+            int quarterMonth = month - (month % 3) + 1;
+            System.out.println("month " + i + " has quarter start month of " + quarterMonth);
+        }
     }
 
     public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {

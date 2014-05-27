@@ -56,6 +56,7 @@ import mx.collections.ArrayCollection;
     public var cacheFilters:Boolean;
 		public var dataScrubs:ArrayCollection = new ArrayCollection();
         public var logReport:Boolean;
+        public var noAggregation:Boolean;
         public var dataDiscoveryEnabled:Boolean;
         public var reportType:int;
 		public var policy:int = 2;
@@ -105,6 +106,7 @@ import mx.collections.ArrayCollection;
     public var canSave:Boolean;
     public var filterSets:ArrayCollection;
     public var exportString:String;
+    public var dayAggregation:Boolean;
 
     public var fieldEvents:Object;
     public var filterEvents:Object;

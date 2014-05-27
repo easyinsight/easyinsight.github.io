@@ -9,6 +9,7 @@ import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -61,26 +62,75 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
     }
 
+    private String escape(String string) {
+        String ret = string;
+        if (string.contains("\\")) {
+            ret = ret.replace("\\", "\\\\");
+        }
+        if (string.contains("'")) {
+            ret = ret.replace("'", "\\'");
+        }
+        if (string.contains("\"")) {
+            ret = ret.replace("\"", "\\\"");
+        }
+        if (string.contains("\n")) {
+            ret = ret.replace("\n", "\\\n");
+        }
+        if (string.contains("\r")) {
+            ret = ret.replace("\r", "\\\r");
+        }
+        //System.out.println("converted " + string + " to " + ret);
+        return ret;
+    }
+
     public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        int i = 0;
         for (IRow row : dataSet.getRows()) {
             rows++;
+            i++;
             String[] rowValues = new String[keys.size()];
             int j = 0;
-            for (Key key : keys.keySet()) {
+            for (Map.Entry<Key, KeyMetadata> entry : keys.entrySet()) {
+                Key key = entry.getKey();
+                KeyMetadata keyMetadata = entry.getValue();
                 Value value = row.getValue(key);
+                if (i == 1) {
+                    System.out.println("\tkey " + key.toKeyString() + " has value " + value);
+                }
                 if (value.type() == Value.DATE) {
-                    rowValues[j++] = sdf.format(((DateValue) value).getDate());
+                    DateValue dateValue = (DateValue) value;
+                    if (dateValue.getDate() == null) {
+                        rowValues[j++] = "";
+                    } else {
+                        String string = sdf.format(dateValue.getDate());
+                        rowValues[j++] = escape(string);
+                    }
                 } else if (value.type() == Value.EMPTY) {
                     rowValues[j++] = "";
+                } else if (value.type() == Value.NUMBER) {
+                    Double num = null;
+                    if (value.type() == Value.STRING || value.type() == Value.TEXT) {
+                        num = NumericValue.produceDoubleValue(value.toString());
+                    } else if (value.type() == Value.NUMBER) {
+                        NumericValue numericValue = (NumericValue) value;
+                        num = numericValue.toDouble();
+                    }
+                    if (num == null) {
+                        rowValues[j++] = "";
+                    } else {
+                        String string = String.valueOf(num);
+                        rowValues[j++] = escape(string);
+                    }
                 } else if (value.type() == Value.STRING) {
                     String string = String.valueOf(value.toString());
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
                     }
-                    rowValues[j++] = string;
+                    rowValues[j++] = escape(string);
                 } else {
-                    rowValues[j++] = value.toString();
+                    String string = value.toString();
+                    rowValues[j++] = escape(string);
                 }
             }
             csvWriter.writeRecord(rowValues);
@@ -96,7 +146,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             file = new File(tableName + files.size() + ".csv");
             fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
+            csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
         }
     }
 
@@ -162,7 +212,9 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         sqlBuilder.append(tableName);
         sqlBuilder.append("( ");
         for (KeyMetadata keyMetadata : keys.values()) {
-            sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable));
+            String columnSQL = getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable);
+            System.out.println("\t" + keyMetadata.getKey().toKeyString() + " had column " + columnSQL);
+            sqlBuilder.append(columnSQL);
             sqlBuilder.append(",");
         }
         String primaryKey = tableName + "_ID";
@@ -184,7 +236,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         if (type == Value.DATE) {
             column = "k" + key.getKeyID() + " TIMESTAMP, datedim_" + key.getKeyID() + "_id integer";
         } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " NUMERIC";
+            column = "k" + key.getKeyID() + " DECIMAL(18, 4)";
         } else if (type == Value.TEXT) {
             column = "k" + key.getKeyID() + " TEXT";
         } else {
@@ -217,7 +269,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             file = new File(fileName);
             fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
+            csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

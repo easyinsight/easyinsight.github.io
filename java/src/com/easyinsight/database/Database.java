@@ -48,6 +48,11 @@ public class Database {
             if (dialect == MYSQL) {
                 template = urlTemplate1;
             } else if (dialect == POSTGRES) {
+                try {
+                    Class.forName("org.postgresql.Driver");
+                } catch (ClassNotFoundException e) {
+                    LogClass.error(e);
+                }
                 template = urlTemplate3;
             }
         }

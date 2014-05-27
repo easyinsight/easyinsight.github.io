@@ -202,12 +202,6 @@ public class StyleConfiguration {
 
     public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        /*if (report.supportsEmbeddedFonts()) {
-         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande"]));
-         } else {
-         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
-         "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
-         }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
         items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
@@ -225,7 +219,6 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", ListDefinition(report).headerColor2, report));
             items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", ListDefinition(report).summaryRowTextColor, report));
             items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", ListDefinition(report).summaryRowBackgroundColor, report));
-            items.addItem(new CheckBoxReportFormItem("Show Rollover Icon", "rolloverIcon", ListDefinition(report).rolloverIcon, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Word Wrap Headers", "multiLineHeaders", ListDefinition(report).multiLineHeaders, report, null, true));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
@@ -466,16 +459,23 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
-        items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
-        items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
 
+        items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
         items.addItem(new CheckBoxReportFormItem("Run Before Manual", "manualButRunFirst", report.manualButRunFirst, report));
 
-        items.addItem(new NumericReportFormItem("Fetch Size", "fetchSize", report.fetchSize, report, 0, 5000));
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
         items.sort = sort;
         items.refresh();
+        return items;
+    }
+
+    public static function createExperimentalPage(report:AnalysisDefinition, allFields:ArrayCollection = null):ArrayCollection {
+        var items:ArrayCollection = new ArrayCollection();
+        items.addItem(new CheckBoxReportFormItem("Aggregate Days", "dayAggregation", report.dayAggregation, report));
+        items.addItem(new CheckBoxReportFormItem("No Aggregation", "noAggregation", report.noAggregation, report));
+        items.addItem(new NumericReportFormItem("Fetch Size", "fetchSize", report.fetchSize, report, 0, 5000));
+        items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
         return items;
     }
 }

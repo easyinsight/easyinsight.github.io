@@ -72,7 +72,7 @@ public class DataService {
                             dataSourceID = dashboardRS.getLong(1);
                             dashboardID = dashboardRS.getLong(2);
                         } else {
-                            return new ArrayList<AnalysisItemSelection>();
+                            return new ArrayList<>();
                             //throw new RuntimeException();
                         }
                     }
@@ -88,7 +88,8 @@ public class DataService {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
             Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
-            final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
+            final Map<AnalysisItem, Integer> positions = new HashMap<>();
+
             List<AnalysisItem> allFields = dataSource.allFields(conn);
             for (AnalysisItem field : allFields) {
                 map.put(field.getAnalysisItemID(), field);
@@ -307,7 +308,7 @@ public class DataService {
 
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
             Map<Long, AnalysisItem> map = new HashMap<Long, AnalysisItem>();
-            Map<String, AnalysisItem> mapByName = new HashMap<String, AnalysisItem>();
+            Map<String, AnalysisItem> mapByName = new HashMap<>();
             final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
             List<AnalysisItem> allFields = dataSource.allFields(conn);
             for (AnalysisItem field : allFields) {
@@ -328,7 +329,7 @@ public class DataService {
             Map<AnalysisItem, AnalysisItemHandle> selectedMap = new HashMap<AnalysisItem, AnalysisItemHandle>();
 
 
-            Set<AnalysisItem> set = new HashSet<AnalysisItem>();
+            Set<AnalysisItem> set = new HashSet<>();
             int i = 0;
             if (!filter.excludeReportFields() && report != null && report instanceof WSListDefinition) {
                 WSListDefinition list = (WSListDefinition) report;
@@ -677,14 +678,14 @@ public class DataService {
                 }
             }
         }
-        timeshift(Arrays.asList(analysisItem), new ArrayList<FilterDefinition>(), feed, insightRequestMetadata);
+        timeshift(Arrays.asList(analysisItem), new ArrayList<>(), feed, insightRequestMetadata);
         return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
     }
 
     public List<FeedNode> multiAddonFields(WSAnalysisDefinition report) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<FeedNode> nodes = new ArrayList<FeedNode>();
+            List<FeedNode> nodes = new ArrayList<>();
             for (AddonReport addonReport : report.getAddonReports()) {
                 nodes.add(addonFields(addonReport, conn));
             }
@@ -1969,6 +1970,18 @@ public class DataService {
             results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
             results.setFieldEvents(insightRequestMetadata.getFieldAudits());
             results.setFilterEvents(insightRequestMetadata.getFilterAudits());
+
+            for (Map.Entry<String, List<String>> entry : insightRequestMetadata.getFieldAudits().entrySet()) {
+                for (String audit : entry.getValue()) {
+                    events.add(new ReportAuditEvent(ReportAuditEvent.FIELD, entry.getKey() + ": " + audit));
+                }
+            }
+            for (Map.Entry<String, List<String>> entry : insightRequestMetadata.getFilterAudits().entrySet()) {
+                for (String audit : entry.getValue()) {
+                    events.add(new ReportAuditEvent(ReportAuditEvent.FILTER, entry.getKey() + ": " + audit));
+                }
+            }
+
             if (insightRequestMetadata.isLogReport()) {
                 results.setAuditMessages(events);
             }
@@ -2196,7 +2209,8 @@ public class DataService {
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
-
+            insightRequestMetadata.setNoAggregation(analysisDefinition.isNoAggregation());
+            insightRequestMetadata.setOptimizeDays(analysisDefinition.isDayAggregation());
             insightRequestMetadata.setAddonReports(analysisDefinition.getAddonReports());
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
@@ -2416,11 +2430,9 @@ public class DataService {
             List<FieldRule> rules = FieldRule.load(conn, analysisDefinition.getDataFeedID());
 
             Map<String, List<Tag>> fieldMap = new HashMap<String, List<Tag>>();
-            for (AnalysisItem field : feed.getFields()) {
-                if (field.getTags() != null) {
-                    fieldMap.put(field.toOriginalDisplayName(), field.getTags());
-                }
-            }
+            feed.getFields().stream().filter(field -> field.getTags() != null).forEach(field -> {
+                fieldMap.put(field.toOriginalDisplayName(), field.getTags());
+            });
 
             if (analysisDefinition.getAnalysisID() > 0 && analysisDefinition.isDataDiscoveryEnabled()) {
                 for (AnalysisItem analysisItem : items) {
@@ -2455,35 +2467,31 @@ public class DataService {
                 }
             }
 
-            for (AnalysisItem analysisItem : items) {
-                if (analysisItem != null) {
-                    analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+            items.stream().filter(analysisItem -> analysisItem != null).forEach(analysisItem -> {
+                analysisItem.setTags(fieldMap.get(analysisItem.toOriginalDisplayName()));
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                    hierarchyItem.getHierarchyLevel().getAnalysisItem().setTags(fieldMap.get(hierarchyItem.getHierarchyLevel().getAnalysisItem().toOriginalDisplayName()));
+                }
+            });
+
+            items.stream().filter(analysisItem -> analysisItem != null).forEach(analysisItem -> {
+                for (FieldRule rule : rules) {
+                    if (rule.matches(analysisItem)) {
+                        rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                    }
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                        hierarchyItem.getHierarchyLevel().getAnalysisItem().setTags(fieldMap.get(hierarchyItem.getHierarchyLevel().getAnalysisItem().toOriginalDisplayName()));
-                    }
-                }
-            }
-
-            for (AnalysisItem analysisItem : items) {
-                if (analysisItem != null) {
-                    for (FieldRule rule : rules) {
-                        if (rule.matches(analysisItem)) {
-                            rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
-                        }
-                        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                            AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                            if (rule.matches(hierarchyItem.getHierarchyLevel().getAnalysisItem())) {
-                                rule.update(hierarchyItem, analysisDefinition, insightRequestMetadata);
-                            }
+                        if (rule.matches(hierarchyItem.getHierarchyLevel().getAnalysisItem())) {
+                            rule.update(hierarchyItem, analysisDefinition, insightRequestMetadata);
                         }
                     }
                 }
-            }
+            });
 
             analysisDefinition.argh();
 
-            feed.getDataSource().decorateLinks(new ArrayList<AnalysisItem>(items));
+            feed.getDataSource().decorateLinks(new ArrayList<>(items));
 
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
@@ -2520,11 +2528,11 @@ public class DataService {
                 }
             }
 
-            /*try {
+            try {
                 boolean fieldLookupEnabled = feed.getDataSource().isFieldLookupEnabled();
 
                 if (fieldLookupEnabled) {
-                    Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+                    Map<String, AnalysisItem> map = new HashMap<>();
                     for (AnalysisItem field : feed.getFields()) {
                         map.put(field.toDisplay(), field);
                     }
@@ -2535,36 +2543,55 @@ public class DataService {
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && dataSourceField.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                                     AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
                                     AnalysisDateDimension parentDimension = (AnalysisDateDimension) dataSourceField;
-                                    dateDimension.setDateOnlyField(parentDimension.isDateOnlyField());
+                                    if (dateDimension.isDateOnlyField() != parentDimension.isDateOnlyField()) {
+                                        if (parentDimension.isDateOnlyField()) {
+                                            insightRequestMetadata.addAudit(dateDimension, "Forced " + dateDimension.toDisplay() + " to date.");
+                                        } else {
+                                            insightRequestMetadata.addAudit(dateDimension, "Forced " + dateDimension.toDisplay() + " to date time.");
+                                        }
+                                        dateDimension.setDateOnlyField(parentDimension.isDateOnlyField());
+                                    }
                                 } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION) && dataSourceField.hasType(AnalysisItemTypes.CALCULATION)) {
                                     AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                                     AnalysisCalculation dataSourceCalculation = (AnalysisCalculation) dataSourceField;
                                     analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
                                     analysisCalculation.setCalculationString(dataSourceCalculation.getCalculationString());
+                                    if (!analysisCalculation.getCalculationString().equals(dataSourceCalculation.getCalculationString())) {
+                                        insightRequestMetadata.addAudit(analysisCalculation, "Forced " + analysisCalculation.toDisplay() + " to data source formula.");
+                                    }
+                                    if (analysisCalculation.isApplyBeforeAggregation() != dataSourceCalculation.isApplyBeforeAggregation()) {
+                                        insightRequestMetadata.addAudit(analysisCalculation, "Forced " + analysisCalculation.toDisplay() + " to data source aggregation.");
+                                    }
                                 } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION) && dataSourceField.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                                     DerivedAnalysisDimension analysisCalculation = (DerivedAnalysisDimension) analysisItem;
                                     DerivedAnalysisDimension dataSourceCalculation = (DerivedAnalysisDimension) dataSourceField;
                                     analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
                                     analysisCalculation.setDerivationCode(dataSourceCalculation.getDerivationCode());
+                                    if (!analysisCalculation.getDerivationCode().equals(dataSourceCalculation.getDerivationCode())) {
+                                        insightRequestMetadata.addAudit(analysisCalculation, "Forced " + analysisCalculation.toDisplay() + " to data source formula.");
+                                    }
+                                    if (analysisCalculation.isApplyBeforeAggregation() != dataSourceCalculation.isApplyBeforeAggregation()) {
+                                        insightRequestMetadata.addAudit(analysisCalculation, "Forced " + analysisCalculation.toDisplay() + " to data source aggregation.");
+                                    }
                                 } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE) && dataSourceField.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                                     DerivedAnalysisDateDimension analysisCalculation = (DerivedAnalysisDateDimension) analysisItem;
                                     DerivedAnalysisDateDimension dataSourceCalculation = (DerivedAnalysisDateDimension) dataSourceField;
                                     analysisCalculation.setApplyBeforeAggregation(dataSourceCalculation.isApplyBeforeAggregation());
                                     analysisCalculation.setDerivationCode(dataSourceCalculation.getDerivationCode());
+                                    if (!analysisCalculation.getDerivationCode().equals(dataSourceCalculation.getDerivationCode())) {
+                                        insightRequestMetadata.addAudit(analysisCalculation, "Forced " + analysisCalculation.toDisplay() + " to data source formula.");
+                                    }
+                                    if (analysisCalculation.isApplyBeforeAggregation() != dataSourceCalculation.isApplyBeforeAggregation()) {
+                                        insightRequestMetadata.addAudit(analysisCalculation, "Forced " + analysisCalculation.toDisplay() + " to data source aggregation.");
+                                    }
                                 }
                             }
-                        }
-                    }
-                    for (AnalysisItem analysisItem : analysisItems) {
-                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
-                            feed.originalField(dateDimension.getKey(), dateDimension);
                         }
                     }
                 }
             } catch (Exception e) {
                 LogClass.error(e);
-            }*/
+            }
 
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
 

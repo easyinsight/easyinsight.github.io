@@ -74,7 +74,7 @@ public class DataStorage implements IDataStorage {
 
     public static DataStorage readConnection(List<AnalysisItem> fields, long feedID, FeedType feedType) {
         DataStorage dataStorage = new DataStorage();
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : fields) {
             if (analysisItem.isDerived()) {
                 continue;
@@ -144,7 +144,7 @@ public class DataStorage implements IDataStorage {
     }
 
     public static TempStorage existingTempConnection(FeedDefinition feedDefinition, EIConnection conn, String tableName) {
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
                 continue;
@@ -165,7 +165,7 @@ public class DataStorage implements IDataStorage {
     }
 
     public static TempStorage tempConnection(FeedDefinition feedDefinition, EIConnection conn) {
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
@@ -200,7 +200,7 @@ public class DataStorage implements IDataStorage {
         DataStorage dataStorage = new DataStorage();
         dataStorage.accountID = accountID;
         dataStorage.systemUpdate = systemUpdate;
-        Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (!analysisItem.persistable()) {
                 continue;
@@ -478,13 +478,14 @@ public class DataStorage implements IDataStorage {
             try {
                 StringBuilder sb = new StringBuilder();
                 for (Key key : keys.keySet()) {
-                    sb.append("k").append(key.getKeyID()).append(",");
+                    sb.append(key.toSQL()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
+                stmt.close();
             } finally {
                 AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("AKIAI5YYYFRMWFLLEC2A", "NmonY27/vE03AeGNWhLBmkR41kJrvbWSYhLzh5pE"));
                 ObjectListing objectListing = s3.listObjects(bucketName);
@@ -549,7 +550,7 @@ public class DataStorage implements IDataStorage {
                     sb.append("k").append(key.getKeyID()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' csv GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
@@ -993,7 +994,7 @@ public class DataStorage implements IDataStorage {
         } else {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
-        System.out.println(queryBuilder.toString());
+        //System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
 
@@ -1003,7 +1004,7 @@ public class DataStorage implements IDataStorage {
 
         try {
             dataRS = queryStmt.executeQuery();
-            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized(), rowIDField);
+            processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery, insightRequestMetadata.isOptimized(), rowIDField, insightRequestMetadata.isOptimizeDays());
         } catch (Exception e) {
             LogClass.error("On running " + queryBuilder.toString(), e);
             throw new RuntimeException(e);
@@ -1035,6 +1036,13 @@ public class DataStorage implements IDataStorage {
                     continue;
                 }
                 if (filterDefinition.getPipelineName().equals(Pipeline.BEFORE) && filterDefinition.validForQuery()) {
+                    if (filterDefinition instanceof FilterValueDefinition && database.getDialect() == Database.POSTGRES) {
+                        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
+                        if (filterValueDefinition.getFilteredValues().size() > 970) {
+                            System.out.println("Redshift ignoring filter with " + filterValueDefinition.getFilteredValues().size() + " values");
+                            continue;
+                        }
+                    }
                     if (filterDefinition.getField() != null) {
                         if (!keyStrings.contains(filterDefinition.getField().getKey().toSQL())) {
                             continue;
@@ -1055,7 +1063,7 @@ public class DataStorage implements IDataStorage {
     }
 
     private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS,
-                                     boolean aggregateQuery, boolean optimized, @Nullable AnalysisItem rowIDItem) throws SQLException {
+                                     boolean aggregateQuery, boolean optimized, @Nullable AnalysisItem rowIDItem, boolean dayOptimize) throws SQLException {
         int rowID = 0;
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
@@ -1087,6 +1095,18 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, Calendar.JANUARY);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
+                        } else if (aggregateQuery && dayOptimize && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
+                            try {
+                                java.sql.Date time = dataRS.getDate(i++);
+                                if (dataRS.wasNull()) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    long milliseconds = time.getTime();
+                                    row.addValue(aggregateKey, new DateValue(new Date(milliseconds)));
+                                }
+                            } catch (SQLException e) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            }
                         } else {
                             try {
                                 Timestamp time = dataRS.getTimestamp(i++);
@@ -1282,12 +1302,21 @@ public class DataStorage implements IDataStorage {
                     } else {
                         throw new RuntimeException();
                     }
-                    //  "EXTRACT(year FROM " + getField().toKeySQL() + ")
-
                     groupByBuilder.append("year" + columnName + ",");
-                } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) && database.getDialect() == Database.MYSQL) {
-                    selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                } else if (optimized && (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT || date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL)) {
+                    if (database.getDialect() == Database.MYSQL) {
+                        selectBuilder.append("month(" + columnName + ") as month" + columnName + ", year(" + columnName + ") as year" + columnName + ",");
+                    } else if (database.getDialect() == Database.POSTGRES) {
+                        selectBuilder.append("extract(month from " + columnName + ") as month" + columnName + ", extract(year from " + columnName + ") as year" + columnName + ",");
+                    }
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
+                } else if (insightRequestMetadata.isOptimizeDays() && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
+                    if (database.getDialect() == Database.MYSQL) {
+                        selectBuilder.append("date(" + columnName + ") as date" + columnName + ",");
+                    } else if (database.getDialect() == Database.POSTGRES) {
+                        selectBuilder.append(columnName + "::date as date" + columnName + ",");
+                    }
+                    groupByBuilder.append("date" + columnName + ",");
                 } else {
                     selectBuilder.append(columnName);
                     selectBuilder.append(",");

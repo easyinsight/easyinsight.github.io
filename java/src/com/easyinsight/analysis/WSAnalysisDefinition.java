@@ -148,6 +148,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+    private boolean dayAggregation;
 
     private List<AddonReport> addonReports;
 
@@ -157,6 +158,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
+    public boolean isDayAggregation() {
+        return dayAggregation;
+    }
+
+    public void setDayAggregation(boolean dayAggregation) {
+        this.dayAggregation = dayAggregation;
+    }
 
     public String getColorScheme() {
         return colorScheme;
@@ -831,7 +840,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filter : retrieveFilterDefinitions()) {
                 insightRequestMetadata.pipelineAssign(filter);
-                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)), insightRequestMetadata);
+                AnalysisItemRetrievalStructure filterStructure = new AnalysisItemRetrievalStructure(Pipeline.BEFORE);
+                filterStructure.setNamespaceMap(structure.getNamespaceMap());
+                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<>(), filterStructure), insightRequestMetadata);
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {

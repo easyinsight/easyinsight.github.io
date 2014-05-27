@@ -34,6 +34,7 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<String, UniqueKey> fieldToUniqueMap = new HashMap<String, UniqueKey>();
     private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
     private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
+    private transient boolean optimizeDays;
 
     private transient List<ReportAuditEvent> auditEvents = new ArrayList<ReportAuditEvent>();
     private transient List<String> warnings = new ArrayList<String>();
@@ -51,8 +52,8 @@ public class InsightRequestMetadata implements Serializable {
     private boolean noDataOnNoJoin;
     private String ip;
     private transient boolean noLogging;
-    private transient Map<String, List<String>> fieldAudits = new HashMap<String, List<String>>();
-    private transient Map<String, List<String>> filterAudits = new HashMap<String, List<String>>();
+    private transient Map<String, List<String>> fieldAudits = new LinkedHashMap<>();
+    private transient Map<String, List<String>> filterAudits = new LinkedHashMap<>();
 
     private transient boolean aggregationRowChanged;
 
@@ -91,6 +92,14 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setDepth(int depth) {
         this.depth = depth;
+    }
+
+    public boolean isOptimizeDays() {
+        return optimizeDays;
+    }
+
+    public void setOptimizeDays(boolean optimizeDays) {
+        this.optimizeDays = optimizeDays;
     }
 
     public List<AnalysisItem> getAllItems() {
@@ -142,6 +151,15 @@ public class InsightRequestMetadata implements Serializable {
         if (audits == null) {
             audits = new ArrayList<String>();
             fieldAudits.put(field.toDisplay(), audits);
+        }
+        audits.add(audit);
+    }
+
+    public void addFieldAudit(String fieldName, String audit) {
+        List<String> audits = fieldAudits.get(fieldName);
+        if (audits == null) {
+            audits = new ArrayList<String>();
+            fieldAudits.put(fieldName, audits);
         }
         audits.add(audit);
     }

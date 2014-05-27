@@ -257,27 +257,22 @@ public class DatabaseManager {
     public String chooseDatabase(Connection conn, FeedType feedType) throws SQLException {
 
 
-
-        //if (feedType.getType() == FeedType.CACHED_ADDON.getType()) {
-        PreparedStatement stmt = conn.prepareStatement("SELECT SPECIAL_STORAGE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+        PreparedStatement stmt = conn.prepareStatement("SELECT SPECIAL_STORAGE, special_storage_caching FROM ACCOUNT WHERE ACCOUNT_ID = ?");
         stmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet storageRS = stmt.executeQuery();
         storageRS.next();
         String specialStorage = storageRS.getString(1);
+        String specialCachingStorage = storageRS.getString(2);
         stmt.close();
-        if (specialStorage != null && additionalDatabases.containsKey(specialStorage)) {
-            return specialStorage;
+        if (feedType.getType() == FeedType.CACHED_ADDON.getType()) {
+            if (specialCachingStorage != null && additionalDatabases.containsKey(specialCachingStorage)) {
+                return specialCachingStorage;
+            }
+        } else {
+            if (specialStorage != null && additionalDatabases.containsKey(specialStorage)) {
+                return specialStorage;
+            }
         }
-        //}
-        /*PreparedStatement stmt = conn.prepareStatement("SELECT SPECIAL_STORAGE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
-        stmt.setLong(1, SecurityUtil.getAccountID());
-        ResultSet storageRS = stmt.executeQuery();
-        storageRS.next();
-        String specialStorage = storageRS.getString(1);
-        stmt.close();
-        if (specialStorage != null && additionalDatabases.containsKey(specialStorage)) {
-            return specialStorage;
-        }*/
         String dbToUse = null;
         long smallestSize = Long.MAX_VALUE;
         Set<String> foundDBs = new HashSet<String>(dbMap.keySet());
