@@ -46,6 +46,9 @@ public abstract class KashooBaseSource extends ServerDataSourceDefinition {
             Object postObject = parser.parse(restMethod.getResponseBodyAsStream());
             return postObject;
         } catch (Exception pe) {
+            if (restMethod.getStatusLine() == null) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
+            }
             String statusLine = restMethod.getStatusLine().toString();
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Kashoo instance.", parentDefinition));

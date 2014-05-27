@@ -4,10 +4,13 @@ import com.easyinsight.calculations.*;
 import com.easyinsight.core.ReportKey;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.Pipeline;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import org.antlr.runtime.RecognitionException;
 
 import javax.persistence.*;
 import java.util.*;
@@ -36,6 +39,52 @@ public class DerivedAnalysisDimension extends AnalysisDimension {
     @Override
     public int actualType() {
         return AnalysisItemTypes.DERIVED_DIMENSION;
+    }
+
+    public String toMarkdown(long dataSourceID, List<AnalysisItem> reportItems, WSAnalysisDefinition report, EIConnection conn, Feed feed) {
+        List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(feed.getFields());
+        allItems.addAll(reportItems);
+        CalculationTreeNode tree;
+        ICalculationTreeVisitor visitor;
+
+        Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> displayMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, List<AnalysisItem>> unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
+        Map<String, UniqueKey> map = new NamespaceGenerator().generate(dataSourceID, report != null ? report.getAddonReports() : new ArrayList<AddonReport>(), conn);
+        try {
+            tree = CalculationHelper.createTree(derivationCode, true);
+
+            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+            keyMap = mapper.getKeyMap();
+            displayMap = mapper.getDisplayMap();
+            unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
+
+            if (report != null && report.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    filter.calculationItems(displayMap);
+                }
+            }
+            visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), map);
+            tree.accept(visitor);
+        } catch (RecognitionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        VariableListVisitor variableVisitor = new VariableListVisitor();
+        tree.accept(variableVisitor);
+
+        // which fields were used?
+
+        Set<AnalysisItem> items = variableVisitor.getVariableList();
+        StringBuilder markdown = new StringBuilder();
+        markdown.append(super.toMarkdown(dataSourceID, reportItems, report, conn, feed));
+        markdown.append("Calculation: '''" + derivationCode + "'''\r\n\r\n");
+        markdown.append("Apply before Aggregation: '''" + applyBeforeAggregation + "'''\r\n\r\n");
+        markdown.append("Field uses:\r\n\r\n");
+        for (AnalysisItem item : items) {
+            markdown.append("#" + item.toDisplay() + "\r\n\r\n");
+        }
+        return markdown.toString();
     }
 
     public String getPipelineName() {

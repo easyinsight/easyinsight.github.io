@@ -20,15 +20,12 @@
             }
             this.auditTypes = auditTypes;
         }
-
-        // 1 is yes, 0 is no, -1 is n/a, exclude n/a's
-        // overall csi score = q6
         ]]></mx:Script>
     <mx:ComboBox id="auditTypeBox" dataProvider="{auditTypes}"/>
-    <mx:DataGrid dataProvider="{audits}" wordWrap="true" variableRowHeight="true">
+    <mx:DataGrid dataProvider="{audits}" wordWrap="true" variableRowHeight="true" height="500">
         <mx:columns>
             <mx:DataGridColumn headerText="Event Type" dataField="auditType" width="150"/>
-            <mx:DataGridColumn headerText="Event Label" dataField="eventLabel" width="400" wordWrap="true"/>
+            <mx:DataGridColumn headerText="Event Label" dataField="eventLabel" width="500" wordWrap="true"/>
         </mx:columns>
     </mx:DataGrid>
     <util:SaveButton label="Close" click="PopUpManager.removePopUp(this)"/>

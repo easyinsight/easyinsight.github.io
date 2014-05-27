@@ -202,12 +202,6 @@ public class StyleConfiguration {
 
     public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
-        /*if (report.supportsEmbeddedFonts()) {
-         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande"]));
-         } else {
-         items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Arial", "Arial Black", "Comic Sans MS",
-         "Courier", "Georgia", "Impact", "Monaco", "Palatino", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]));
-         }*/
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
         items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
         items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
@@ -464,6 +458,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("No Aggregation", "noAggregation", report.noAggregation, report));
 
         items.addItem(new CheckBoxReportFormItem("Aggregate Query if Possible", "aggregateQueryIfPossible", report.aggregateQueryIfPossible, report));
+        items.addItem(new CheckBoxReportFormItem("Aggregate Days", "dayAggregation", report.dayAggregation, report));
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));

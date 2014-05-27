@@ -148,6 +148,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String fontName = "Tahoma";
     private int fontSize = 12;
     private double backgroundAlpha = 1;
+    private boolean dayAggregation;
 
     private List<AddonReport> addonReports;
 
@@ -157,6 +158,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
+    public boolean isDayAggregation() {
+        return dayAggregation;
+    }
+
+    public void setDayAggregation(boolean dayAggregation) {
+        this.dayAggregation = dayAggregation;
+    }
 
     public String getColorScheme() {
         return colorScheme;

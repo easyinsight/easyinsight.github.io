@@ -496,6 +496,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ReportMarkdown</servlet-name>
+        <display-name>ReportMarkdown</display-name>
+        <servlet-class>com.easyinsight.html.ReportMarkdownServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>NewUser</servlet-name>
         <display-name>NewUser</display-name>
         <servlet-class>com.easyinsight.servlet.NewUserServlet</servlet-class>
@@ -926,6 +932,11 @@
     <servlet-mapping>
         <servlet-name>TriggerCache</servlet-name>
         <url-pattern>/triggerCache</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReportMarkdown</servlet-name>
+        <url-pattern>/reportMarkdown</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

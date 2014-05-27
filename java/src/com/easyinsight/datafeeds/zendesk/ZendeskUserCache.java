@@ -29,6 +29,9 @@ public class ZendeskUserCache extends ZendeskBaseSource {
         while (nextPage != null) {
             Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
             List results = (List) ticketObjects.get("users");
+            if (results == null) {
+                return;
+            }
             for (Object obj : results) {
                 Map map = (Map) obj;
                 String name = queryField(map, "name");
