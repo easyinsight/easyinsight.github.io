@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="400">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="800" height="400">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
@@ -98,6 +98,27 @@
                 }
                 tabNavigator.addChild(repBox);
             }
+            experimentalSpecificItems = StyleConfiguration.createExperimentalPage(_definition, _allFields);
+            if (experimentalSpecificItems.length > 0) {
+                var experimentBox:Box = new Box();
+                experimentBox.verticalScrollPolicy = "on";
+                experimentBox.percentWidth = 100;
+                experimentBox.percentHeight = 100;
+                experimentBox.setStyle("borderThickness", 1);
+                experimentBox.setStyle("borderStyle", "solid");
+                experimentBox.setStyle("borderColor", 0xCCCCCC);
+                experimentBox.setStyle("paddingLeft", 5);
+                experimentBox.setStyle("paddingTop", 5);
+                experimentBox.setStyle("paddingBottom", 5);
+                experimentBox.setStyle("horizontalAlign", "center");
+                experimentBox.label = "Experimental Items";
+                var experimentForm:Form = new Form();
+                experimentBox.addChild(experimentForm);
+                for each (var expItem:ReportFormItem in experimentalSpecificItems) {
+                    experimentForm.addChild(expItem);
+                }
+                tabNavigator.addChild(experimentBox);
+            }
 
             /*addEventListener("refreshNecessary", function(event:Event):void {
                 refreshNecessary = true;
@@ -108,6 +129,7 @@
 
         private var limitItems:ArrayCollection;
         private var reportSpecificItems:ArrayCollection;
+        private var experimentalSpecificItems:ArrayCollection;
 
         private var reportItems:ArrayCollection;
         private var cacheItems:ArrayCollection;
@@ -139,6 +161,9 @@
             }
             for each (var repItem:ReportFormItem in reportSpecificItems) {
                 repItem.save();
+            }
+            for each (var expItem:ReportFormItem in experimentalSpecificItems) {
+                expItem.save();
             }
             _definition.name = reportNameInput.text;
             _definition.description = reportDescriptionInput.text;

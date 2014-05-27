@@ -840,7 +840,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (retrieveFilterDefinitions() != null) {
             for (FilterDefinition filter : retrieveFilterDefinitions()) {
                 insightRequestMetadata.pipelineAssign(filter);
-                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(Pipeline.BEFORE)), insightRequestMetadata);
+                AnalysisItemRetrievalStructure filterStructure = new AnalysisItemRetrievalStructure(Pipeline.BEFORE);
+                filterStructure.setNamespaceMap(structure.getNamespaceMap());
+                populate(map, filter.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<>(), filterStructure), insightRequestMetadata);
             }
         }
         for (AnalysisItem analysisItem : getLimitFields()) {

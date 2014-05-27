@@ -73,6 +73,10 @@ public class AnalysisItemRetrievalStructure {
         this.insightRequestMetadata = insightRequestMetadata;
     }
 
+    public void setNamespaceMap(Map<String, UniqueKey> namespaceMap) {
+        this.namespaceMap = namespaceMap;
+    }
+
     public List<String> getSections() {
         return sections;
     }
