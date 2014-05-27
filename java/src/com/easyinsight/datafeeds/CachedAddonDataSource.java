@@ -387,6 +387,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             for (AnalysisItem field : getFields()) {
                 if (field.getBasedOnReportField() != null && field.getBasedOnReportField() == reportItem.getAnalysisItemID()) {
                     map.put(reportItem, field);
+                    System.out.println("mapping " + reportItem.toDisplay() + " into " + field.toDisplay() + " with key " + field.getKey().toKeyString());
                     break;
                 }
             }
