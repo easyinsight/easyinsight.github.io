@@ -89,6 +89,7 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         storyIDToLabelMap = null;
+        storyIDToUserMap = null;
         epicIDToLabelMap = null;
         iterationToStoryMap = null;
         iterationToStateMap = null;
@@ -118,6 +119,8 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         this.storyIDToLabelMap = storyIDToLabelMap;
     }
 
+
+
     public Map<String, List<String>> getEpicIDToLabelMap() {
         return epicIDToLabelMap;
     }
@@ -142,8 +145,17 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         this.iterationToStateMap = iterationToStateMap;
     }
 
+    public Map<String, List<String>> getStoryIDToUserMap() {
+        return storyIDToUserMap;
+    }
+
+    public void setStoryIDToUserMap(Map<String, List<String>> storyIDToUserMap) {
+        this.storyIDToUserMap = storyIDToUserMap;
+    }
+
     private Map<String, String> userMap = new HashMap<String, String>();
     private Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
+    private Map<String, List<String>> storyIDToUserMap = new HashMap<String, List<String>>();
     private Map<String, List<String>> epicIDToLabelMap = new HashMap<String, List<String>>();
     private Map<String, String> iterationToStoryMap = new HashMap<String, String>();
     private Map<String, String> iterationToStateMap = new HashMap<String, String>();
@@ -167,6 +179,7 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         types.add(FeedType.PIVOTAL_V5_STORY_TO_LABEL);
         types.add(FeedType.PIVOTAL_V5_LABEL);
         types.add(FeedType.PIVOTAL_V5_ITERATION);
+        /*types.add(FeedType.PIVOTAL_V5_STORY_TO_OWNER);*/
         return types;
     }
 
@@ -175,12 +188,13 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
         return Arrays.asList(new ChildConnection(FeedType.PIVOTAL_V5_PROJECT, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5ProjectSource.ID, PivotalTrackerV5StorySource.PROJECT_ID),
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5StorySource.ITERATION_ID, PivotalTrackerV5IterationSource.ID, true),
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StorySource.ID, PivotalTrackerV5StoryToLabelSource.STORY_ID, true),
+                /*new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_STORY_TO_OWNER, PivotalTrackerV5StorySource.ID, PivotalTrackerV5StoryOwnerService.ID, true),*/
                 new ChildConnection(FeedType.PIVOTAL_V5_STORY_TO_LABEL, FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5StoryToLabelSource.LABEL_ID, PivotalTrackerV5LabelSource.ID, true),
                 new ChildConnection(FeedType.PIVOTAL_V5_LABEL, FeedType.PIVOTAL_V5_EPIC, PivotalTrackerV5LabelSource.ID, PivotalTrackerV5EpicSource.LABEL_ID, true));
     }
 
     public void configureFactory(HTMLConnectionFactory factory) {
-        factory.addField("Pivotal Tracker API Authentication Token:", "token", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.addField("Pivotal Tracker API Authentication Token:", "token", "You can find the token on your Pivotal Tracker page under My Info - API Token.");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }
