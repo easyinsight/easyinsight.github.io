@@ -1036,6 +1036,13 @@ public class DataStorage implements IDataStorage {
                     continue;
                 }
                 if (filterDefinition.getPipelineName().equals(Pipeline.BEFORE) && filterDefinition.validForQuery()) {
+                    if (filterDefinition instanceof FilterValueDefinition && database.getDialect() == Database.POSTGRES) {
+                        FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
+                        if (filterValueDefinition.getFilteredValues().size() > 970) {
+                            System.out.println("Redshift ignoring filter with " + filterValueDefinition.getFilteredValues().size() + " values");
+                            continue;
+                        }
+                    }
                     if (filterDefinition.getField() != null) {
                         if (!keyStrings.contains(filterDefinition.getField().getKey().toSQL())) {
                             continue;
