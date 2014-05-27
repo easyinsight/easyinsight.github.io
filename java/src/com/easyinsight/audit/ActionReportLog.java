@@ -1,6 +1,9 @@
 package com.easyinsight.audit;
 
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -76,6 +79,14 @@ public class ActionReportLog extends ActionLog {
         int result = super.hashCode();
         result = 31 * result + (int) (reportID ^ (reportID >>> 32));
         return result;
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("source_type", "report");
+        jo.put("source", insightDescriptor.toJSON(md));
+        return jo;
     }
 }
 

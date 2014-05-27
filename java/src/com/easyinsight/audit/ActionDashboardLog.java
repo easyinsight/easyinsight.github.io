@@ -1,6 +1,9 @@
 package com.easyinsight.audit;
 
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -76,6 +79,14 @@ public class ActionDashboardLog extends ActionLog {
         int result = super.hashCode();
         result = 31 * result + (int) (dashboardID ^ (dashboardID >>> 32));
         return result;
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("source_type", "dashboard");
+        jo.put("source", dashboardDescriptor.toJSON(md));
+        return jo;
     }
 }
 
