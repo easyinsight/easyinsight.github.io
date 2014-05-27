@@ -223,7 +223,11 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                                 sb.deleteCharAt(sb.length() - 1);
                                 c.setCategories(sb.toString());
                             }
-                            c.setCompanyId(Integer.parseInt(Solve360BaseSource.queryField(companyNode, "id/text()")));
+                            try {
+                                c.setCompanyId(Integer.parseInt(Solve360BaseSource.queryField(companyNode, "id/text()")));
+                            } catch (NumberFormatException e) {
+                                throw new ReportException(new DataSourceConnectivityReportFault("Error in trying to pull back Solve360 data.", this));
+                            }
                             c.setName(Solve360BaseSource.queryField(companyNode, "name/text()"));
                             c.setShippingAddress(Solve360BaseSource.queryField(companyNode, "shippingaddress/text()"));
                             c.setBillingAddress(Solve360BaseSource.queryField(companyNode, "billingaddress/text()"));
