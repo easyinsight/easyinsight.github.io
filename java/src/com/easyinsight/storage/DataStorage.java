@@ -1088,7 +1088,7 @@ public class DataStorage implements IDataStorage {
                             cal.set(Calendar.MONTH, Calendar.JANUARY);
                             cal.set(Calendar.YEAR, year);
                             row.addValue(aggregateKey, new DateValue(cal.getTime()));
-                        } else if (optimized && aggregateQuery && dayOptimize && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
+                        } else if (aggregateQuery && dayOptimize && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
                             try {
                                 java.sql.Date time = dataRS.getDate(i++);
                                 if (dataRS.wasNull()) {
@@ -1303,7 +1303,7 @@ public class DataStorage implements IDataStorage {
                         selectBuilder.append("extract(month from " + columnName + ") as month" + columnName + ", extract(year from " + columnName + ") as year" + columnName + ",");
                     }
                     groupByBuilder.append("month" + columnName + ", year" + columnName + ",");
-                } else if (optimized && insightRequestMetadata.isOptimizeDays() && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
+                } else if (insightRequestMetadata.isOptimizeDays() && (date.getDateLevel() == AnalysisDateDimension.DAY_LEVEL)) {
                     if (database.getDialect() == Database.MYSQL) {
                         selectBuilder.append("date(" + columnName + ") as date" + columnName + ",");
                     } else if (database.getDialect() == Database.POSTGRES) {
