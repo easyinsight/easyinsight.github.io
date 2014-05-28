@@ -415,7 +415,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.CC_EVENT, CCEventSource.class);
         registerType(FeedType.CC_EVENT_REGISTRANTS, CCEventRegistrantSource.class);
         registerType(FeedType.NETSUITE, NetsuiteQueryConnection.class);
-        registerType(FeedType.INFUSIONSOFT_USERS, InfusionsoftUserSource.class);
+        //registerType(FeedType.INFUSIONSOFT_USERS, InfusionsoftUserSource.class);
         registerType(FeedType.YOUTRACK_TIME, YoutrackTimeSource.class);
         registerType(FeedType.BATCHBOOK2_COMMUNICATIONS, Batchbook2CommunicationsSource.class);
     }
