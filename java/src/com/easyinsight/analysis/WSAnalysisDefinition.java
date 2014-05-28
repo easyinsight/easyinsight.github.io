@@ -1061,6 +1061,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         noAggregation = findBooleanProperty(properties, "noAggregation", false);
         headerImage = findImage(properties, "headerImage", null);
         lookupTableOptimization = findBooleanProperty(properties, "lookupTableOptimization", false);
+        dayAggregation = findBooleanProperty(properties, "dayAggregation", false);
         adHocExecution = findBooleanProperty(properties, "adHocExecution", false);
         cacheable = findBooleanProperty(properties, "cacheable", false);
         manualButRunFirst = findBooleanProperty(properties, "manualButRunFirst", false);
@@ -1093,6 +1094,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("persistedCache", persistedCache));
         properties.add(new ReportBooleanProperty("fullJoins", fullJoins));
         properties.add(new ReportBooleanProperty("dataSourceFields", dataSourceFields));
+        properties.add(new ReportBooleanProperty("dayAggregation", dayAggregation));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportBooleanProperty("noAggregation", noAggregation));
         properties.add(new ReportStringProperty("exportString", exportString));
