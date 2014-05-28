@@ -77,6 +77,16 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         return DataSourceInfo.COMPOSITE_PULL;
     }
 
+    private transient List<YoutrackTimeEntry> timeEntries;
+
+    public List<YoutrackTimeEntry> getTimeEntries() {
+        return timeEntries;
+    }
+
+    public void setTimeEntries(List<YoutrackTimeEntry> timeEntries) {
+        this.timeEntries = timeEntries;
+    }
+
     public String createURL() {
         String target;
         if (!url.startsWith("http")) {
@@ -176,15 +186,23 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        timeEntries = null;
+    }
+
+    @Override
     protected Set<FeedType> getFeedTypes() {
         Set<FeedType> types = new HashSet<FeedType>();
         types.add(FeedType.YOUTRACK_PROJECTS);
         types.add(FeedType.YOUTRACK_TASKS);
+        types.add(FeedType.YOUTRACK_TIME);
         return types;
     }
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.YOUTRACK_PROJECTS, FeedType.YOUTRACK_TASKS, YouTrackProjectSource.PROJECT_ID, YouTrackIssueSource.PROJECT));
+        return Arrays.asList(new ChildConnection(FeedType.YOUTRACK_PROJECTS, FeedType.YOUTRACK_TASKS, YouTrackProjectSource.PROJECT_ID, YouTrackIssueSource.PROJECT),
+            new ChildConnection(FeedType.YOUTRACK_TASKS, FeedType.YOUTRACK_TIME, YouTrackIssueSource.ID, YoutrackTimeSource.ISSUE_ID));
     }
 }
