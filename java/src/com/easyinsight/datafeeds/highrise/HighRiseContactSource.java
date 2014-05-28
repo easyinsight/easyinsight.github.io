@@ -52,6 +52,9 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     public static final String CONTACT_CITY = "Contact City";
     public static final String CONTACT_STATE = "Contact State";
     public static final String CONTACT_COUNTRY = "Contact Country";
+    public static final String URL = "Contact URL";
+    public static final String CONTACT_FIRST_NAME = "Contact First Name";
+    public static final String CONTACT_LAST_NAME = "Contact Last Name";
 
     public HighRiseContactSource() {
         setFeedName("Contact");
@@ -61,7 +64,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
     protected List<String> getKeys(FeedDefinition parentDefinition) {
         return Arrays.asList(CONTACT_NAME, COMPANY_ID, TAGS, OWNER, CREATED_AT, COUNT, TITLE, CONTACT_ID, ZIP_CODE, BACKGROUND,
                 CONTACT_WORK_EMAIL, CONTACT_MOBILE_PHONE, CONTACT_OFFICE_PHONE, CONTACT_HOME_PHONE, CONTACT_FAX_PHONE, CONTACT_HOME_EMAIL,
-                CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY, CONTACT_OTHER_EMAIL);
+                CONTACT_STREET, CONTACT_CITY, CONTACT_STATE, CONTACT_COUNTRY, CONTACT_OTHER_EMAIL, CONTACT_FIRST_NAME, URL, CONTACT_LAST_NAME);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -91,6 +94,21 @@ public class HighRiseContactSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(OWNER), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        Key url = keys.get(URL);
+        if (url == null) {
+            url = new NamedKey(URL);
+        }
+        analysisItems.add(new AnalysisDimension(url));
+        Key firstNameKey = keys.get(CONTACT_FIRST_NAME);
+        if (firstNameKey == null) {
+            firstNameKey = new NamedKey(CONTACT_FIRST_NAME);
+        }
+        analysisItems.add(new AnalysisDimension(firstNameKey));
+        Key lastNameKey = keys.get(CONTACT_LAST_NAME);
+        if (lastNameKey == null) {
+            lastNameKey = new NamedKey(CONTACT_LAST_NAME);
+        }
+        analysisItems.add(new AnalysisDimension(lastNameKey));
         try {
             HighRiseCompositeSource compositeSource = (HighRiseCompositeSource) parentDefinition;
             Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, (EIConnection) conn);
@@ -160,6 +178,8 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     row.addValue(TITLE, title);
 
                     row.addValue(CONTACT_NAME, name);
+                    row.addValue(CONTACT_FIRST_NAME, firstName);
+                    row.addValue(CONTACT_LAST_NAME, lastName);
 
                     String background = queryField(companyNode, "background/text()");
                     row.addValue(BACKGROUND, background);
@@ -206,6 +226,7 @@ public class HighRiseContactSource extends HighRiseBaseSource {
                     }
 
                     String id = queryField(companyNode, "id/text()");
+                    row.addValue(URL, highRiseCompositeSource.getUrl() + "/contacts/" + id);
                     row.addValue(CONTACT_ID, id);
 
                     String companyID = queryField(companyNode, "company-id/text()");
