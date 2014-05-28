@@ -102,11 +102,13 @@ public class Batchbook2CompositeSource extends CompositeServerDataSource {
     protected Set<FeedType> getFeedTypes() {
         Set<FeedType> types = new HashSet<FeedType>();
         types.add(FeedType.BATCHBOOK2_COMPANIES);
+        types.add(FeedType.BATCHBOOK2_COMMUNICATIONS);
         types.add(FeedType.BATCHBOOK2_PEOPLE);
         types.add(FeedType.BATCHBOOK2_PHONES);
         types.add(FeedType.BATCHBOOK2_WEBSITES);
         types.add(FeedType.BATCHBOOK2_ADDRESSES);
         types.add(FeedType.BATCHBOOK2_EMAILS);
+        types.add(FeedType.BATCHBOOK2_DEALS);
         return types;
     }
 
@@ -155,7 +157,8 @@ public class Batchbook2CompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.BATCHBOOK2_PEOPLE, FeedType.BATCHBOOK2_ADDRESSES, Batchbook2PeopleSource.ID, Batchbook2AddressSource.ID),
                 new ChildConnection(FeedType.BATCHBOOK2_PEOPLE, FeedType.BATCHBOOK2_EMAILS, Batchbook2PeopleSource.ID, Batchbook2EmailSource.ID),
                 new ChildConnection(FeedType.BATCHBOOK2_PEOPLE, FeedType.BATCHBOOK2_PHONES, Batchbook2PeopleSource.ID, Batchbook2PhoneSource.ID),
-                new ChildConnection(FeedType.BATCHBOOK2_PEOPLE, FeedType.BATCHBOOK2_WEBSITES, Batchbook2PeopleSource.ID, Batchbook2WebsiteSource.ID));
+                new ChildConnection(FeedType.BATCHBOOK2_PEOPLE, FeedType.BATCHBOOK2_WEBSITES, Batchbook2PeopleSource.ID, Batchbook2WebsiteSource.ID),
+                new ChildConnection(FeedType.BATCHBOOK2_PEOPLE, FeedType.BATCHBOOK2_COMMUNICATIONS, Batchbook2PeopleSource.ID, Batchbook2CommunicationsSource.TO_ID));
     }
 
     @Override
