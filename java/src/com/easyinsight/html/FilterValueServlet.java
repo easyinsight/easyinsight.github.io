@@ -50,13 +50,15 @@ public class FilterValueServlet extends HttpServlet {
                                 JSONObject filterObj = (JSONObject) o;
                                 long curID = Long.valueOf((Integer) filterObj.get("id"));
                                 FilterDefinition f = (FilterDefinition) s.createQuery("from FilterDefinition where filterID = ?").setLong(0, curID).list().get(0);
+                                f.afterLoad();
                                 FilterUtils.adjustFilter("Filter", false, f, filterObj);
                                 adjustedFilters.add(f);
                             }
 
                             FilterDefinition f = (FilterDefinition) s.createQuery("from FilterDefinition where filterID = ?").setLong(0, id).list().get(0);
                             if (f instanceof FilterValueDefinition) {
-                                AnalysisItemResultMetadata result = new DataService().getAnalysisItemMetadataForFilter(id, adjustedFilters, offset);
+                                f.afterLoad();
+                                AnalysisItemResultMetadata result = new DataService().getAnalysisItemMetadataForFilter(id, adjustedFilters, offset, conn);
                                 AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) result;
                                 JSONArray ja = new JSONArray();
                                 for (String v : dimensionMetadata.getStrings()) {
