@@ -80,6 +80,7 @@ import com.easyinsight.datafeeds.wufoo.WufooFormSource;
 import com.easyinsight.datafeeds.youtrack.YouTrackCompositeSource;
 import com.easyinsight.datafeeds.youtrack.YouTrackIssueSource;
 import com.easyinsight.datafeeds.youtrack.YouTrackProjectSource;
+import com.easyinsight.datafeeds.youtrack.YoutrackTimeSource;
 import com.easyinsight.datafeeds.zendesk.*;
 
 import java.util.HashMap;
@@ -401,7 +402,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.REDBOOTH_TASK_LIST, RedboothTaskListSource.class);
         registerType(FeedType.REDBOOTH_TASK, RedboothTaskSource.class);
         registerType(FeedType.REDBOOTH_COMMENT, RedboothCommentSource.class);
-        //registerType(FeedType.BATCHBOOK2_DEALS, Batchbook2DealSource.class);
+        registerType(FeedType.BATCHBOOK2_DEALS, Batchbook2DealSource.class);
         registerType(FeedType.TRELLO_CHECKLISTS, TrelloChecklistSource.class);
         registerType(FeedType.TRELLO_MEMBERSHIPS, TrelloMembershipSource.class);
         registerType(FeedType.TRELLO_LABELS, TrelloLabelSource.class);
@@ -414,6 +415,9 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.CC_EVENT, CCEventSource.class);
         registerType(FeedType.CC_EVENT_REGISTRANTS, CCEventRegistrantSource.class);
         registerType(FeedType.NETSUITE, NetsuiteQueryConnection.class);
+        registerType(FeedType.INFUSIONSOFT_USERS, InfusionsoftUserSource.class);
+        registerType(FeedType.YOUTRACK_TIME, YoutrackTimeSource.class);
+        registerType(FeedType.BATCHBOOK2_COMMUNICATIONS, Batchbook2CommunicationsSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

@@ -54,4 +54,26 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
             throw new RuntimeException(e);
         }
     }
+
+    protected static Map runV2RestRequest(String path, HttpClient client, Batchbook2CompositeSource parentDefinition) throws ReportException {
+        String url = parentDefinition.getUrl() + "/api/v2";
+        String blah = url + path + (path.contains("?") ? "&" : "?") + "auth_token=" + parentDefinition.getToken();
+        HttpMethod restMethod = new GetMethod(blah);
+        restMethod.setRequestHeader("Accept", "application/json");
+        restMethod.setRequestHeader("Content-Type", "application/json");
+
+        try {
+            client.executeMethod(restMethod);
+            if (restMethod.getStatusCode() == 404) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Batchbook instance at " + url, parentDefinition));
+            } else if (restMethod.getStatusCode() == 401) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
+            }
+            return (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
