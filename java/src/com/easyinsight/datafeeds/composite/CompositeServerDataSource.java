@@ -267,6 +267,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 getFeedType().getType() == FeedType.BATCHBOOK2_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.INSIGHTLY_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.TRELLO_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.YOUTRACK_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.INFUSIONSOFT_COMPOSITE.getType();
 
         for (FeedType feedType : feedTypes) {
