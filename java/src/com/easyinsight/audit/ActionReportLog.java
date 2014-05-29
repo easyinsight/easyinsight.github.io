@@ -82,6 +82,18 @@ public class ActionReportLog extends ActionLog {
     }
 
     @Override
+    public String actionTypeString() {
+        switch(getActionType()) {
+            case EDIT:
+                return "edit";
+            case VIEW:
+                return "view";
+            default:
+                return super.actionTypeString();
+        }
+    }
+
+    @Override
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = super.toJSON(md);
         jo.put("source_type", "report");

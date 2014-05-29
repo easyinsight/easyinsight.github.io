@@ -68,6 +68,10 @@ public class ActionLog {
         this.actionType = actionType;
     }
 
+    public String actionTypeString() {
+        return String.valueOf(actionType);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
