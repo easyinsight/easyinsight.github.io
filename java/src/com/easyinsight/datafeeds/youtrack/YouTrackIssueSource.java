@@ -112,6 +112,7 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
         try {
             Document doc = runRestRequest("/rest/admin/project", new HttpClient(), new Builder(), (YouTrackCompositeSource) parentDefinition);
             Nodes projects = doc.query("/projectRefs/project");
+            List<YoutrackTimeEntry> timeEntries = new ArrayList<YoutrackTimeEntry>();
             DataSet dataSet = new DataSet();
             for (int i = 0; i < projects.size(); i++) {
                 Element project = (Element) projects.get(i);
@@ -140,7 +141,35 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
                         for (String field : fieldNameSet) {
                             row.addValue(field, getValue(issueNode, "field[@name='"+field+"']/value/text()"));
                         }
-                        row.addValue(ID, getValue(issueNode, "field[@name='numberInProject']/value/text()"));
+                        String issueID = getValue(issueNode, "field[@name='numberInProject']/value/text()");
+                        String pointID = id + "-" + issueID;
+                        row.addValue(ID, pointID);
+                        int spentTime = 0;
+                        try {
+                            String string = getValue(issueNode, "field[@name='Spent time']/value/text()");
+                            if (!"".equals(string)) {
+                                spentTime = Integer.parseInt(string);
+                            }
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                        if (spentTime > 0) {
+                            Document timeTrackingDoc = runRestRequest("/rest/issue/" + pointID + "/timetracking/workitem", new HttpClient(), new Builder(), (YouTrackCompositeSource) parentDefinition);
+                            Nodes workItems = timeTrackingDoc.query("/workItems/workItem");
+                            for (int k = 0; k < workItems.size(); k++) {
+                                Node workItem = workItems.get(k);
+                                try {
+                                    int duration = Integer.parseInt(getValue(workItem, "duration/text()"));
+                                    if (duration > 0) {
+                                        Value date = getDate(workItem, "date/text()");
+                                        String author = ((Element) workItem.query("author").get(0)).getAttribute("login").getValue();
+                                        timeEntries.add(new YoutrackTimeEntry(pointID, author, duration, date));
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
                         row.addValue(REPORTER_NAME, getValue(issueNode, "field[@name='reporterName']/value/text()"));
                         row.addValue(SUMMARY, getValue(issueNode, "field[@name='summary']/value/text()"));
                         row.addValue(DESCRIPTION, getValue(issueNode, "field[@name='description']/value/text()"));
@@ -154,7 +183,7 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
                     }
                 } while (count == 20);
             }
-
+            ((YouTrackCompositeSource) parentDefinition).setTimeEntries(timeEntries);
             return dataSet;
         } catch (ReportException re) {
             throw re;

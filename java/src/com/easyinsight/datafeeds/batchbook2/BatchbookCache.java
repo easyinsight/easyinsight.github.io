@@ -150,6 +150,9 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 String id = (person.get("id")).toString();
                 String about = (String) person.get("about");
                 String name = (String) person.get("name");
+                if ("Delta Metrics".equals(name)){
+                    System.out.println(".");
+                }
 
                 List emails = (List) person.get("emails");
                 List<Stuff> emailStuff = new ArrayList<Stuff>();
