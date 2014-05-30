@@ -91,7 +91,7 @@ public class ActionLog {
 
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = new JSONObject();
-        jo.put("type", getActionType());
+        jo.put("type", actionTypeString());
         return jo;
     }
 }
