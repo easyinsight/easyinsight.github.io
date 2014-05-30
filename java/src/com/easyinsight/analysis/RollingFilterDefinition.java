@@ -201,18 +201,6 @@ public class RollingFilterDefinition extends FilterDefinition {
                                            Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) {
         try {
 
-            /*
-            public static final int LAST_FULL_QUARTER = -1;
-    public static final int LAST_FULL_YEAR = -2;
-    public static final int LAST_MONTH_TO_NOW = -3;
-    public static final int PREVIOUS_FULL_MONTH = -4;
-    public static final int LAST_WEEK_TO_NOW = -5;
-    public static final int PREVIOUS_FULL_WEEK = -6;
-    public static final int LAST_QUARTER_TO_NOW = -7;
-    public static final int PREVIOUS_FULL_QUARTER = -8;
-    public static final int PREVIOUS_FULL_YEAR = -9;
-    public static final int LAST_YEAR_TO_NOW = -10;
-             */
             List<CustomRollingInterval> intervalList = new ArrayList<CustomRollingInterval>(intervals);
             intervalList.addAll(createAdditionalIntervals());
             for (CustomRollingInterval interval : intervalList) {
@@ -269,7 +257,7 @@ public class RollingFilterDefinition extends FilterDefinition {
                         if (((AnalysisDateDimension) getField()).isTimeshift()) {
                             ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
                             ZonedDateTime zdt = instant.atZone(zoneId);
-                            zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                            zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(1).minusNanos(1);
                             instant = zdt.toInstant();
                             endDate = Date.from(instant);
                         } else {
