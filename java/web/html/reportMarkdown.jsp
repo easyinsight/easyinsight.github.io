@@ -9,8 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Server Error</title>
-    <jsp:include page="../html/bootstrapHeader.jsp"/>
+    <title>Easy Insight Report Explanation</title>
+    <jsp:include page="bootstrapHeader.jsp"/>
+    <jsp:include page="reportDashboardHeader.jsp"/>
 </head>
 <body>
 <%
@@ -29,8 +30,14 @@
 %>
 <script type="text/javascript">
     $(function() {
+        _.templateSettings = {
+            interpolate: /\<\@\=(.+?)\@\>/gim,
+            evaluate: /\<\@(.+?)\@\>/gim,
+            escape: /\<\@\-(.+?)\@\>/gim
+        };
+        var fields = _.template($("#fieldsTemplate").html());
         $.getJSON('/app/reportMarkdown?urlKey=<%=urlKey %>', function (data) {
-            $("#primaryDiv").html(data.markdown);
+            $("#primaryDiv").html(fields({ data: data }));
         });
     });
 </script>
@@ -47,6 +54,9 @@
         </div>
         <div class="col-md-12">
             <div class="well" style="text-align:left;background-color: #FFFFFF" id="primaryDiv">
+                <div>
+                    Generating report documentation...
+                </div>
                 <div class="progress progress-striped active">
                     <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                 </div>
@@ -54,6 +64,69 @@
         </div>
     </div>
 </div>
+<script id="fieldsTemplate" type="text/template">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Fields for <a href="/app/html/report/<@- data.reportID @>"><@- data.reportName @></a></h1>
+        </div>
+    </div>
+            <table>
+                <@ _.each(data.fields, function(e, i, l) { @>
+                    <tr>
+                        <td><@- e.name @></td>
+                    </tr>
+                <@ }); @>
+            </table>
+    <div class="row">
+        <div class="col-md-12">
+    <@ _.each(data.fields, function(e, i, l) { @>
+            <div class="row" style="margin-top: 10px;border-style: solid;border-color: #CFCCCC">
+                <div class="col-md-12">
+    <div class="row">
+        <div class="col-md-12" style="background-color: #EEEEEE">
+            <h2><@- e.name @></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel-group" id="<@= e.id @>accordion" style="margin-top:10px">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="<@= e.id @>accordion" href="#<@= e.id @>what">
+                                What is this field?
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="<@= e.id @>what" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <@= e.whatIsField @>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="<@= e.id @>accordion" href="#<@= e.id @>where">
+                                Where does this field come from?
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="<@= e.id @>where" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <@= e.whereFrom @>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                </div>
+            </div>
+    <@ }); @>
+        </div>
+    </div>
+</script>
 
 <%
     } finally {

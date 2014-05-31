@@ -100,7 +100,7 @@
         </div>
         <div class="col-md-6 col-md-offset-3" style="padding-top: 10px;padding-bottom: 10px">
             <h3 style="width:100%;text-align: center"><%= billingHeader %></h3>
-            <p style="font-size:14px;font-family: 'PT Sans',arial,serif"><%= billingIntroParagraph %></p>
+            <p style="font-size:14px"><%= billingIntroParagraph %></p>
         </div>
         <div class="row">
             <div class="col-md-8 col-md-offset-1">
