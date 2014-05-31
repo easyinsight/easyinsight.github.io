@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.core.*;
@@ -20,6 +21,7 @@ import com.easyinsight.pipeline.StandardReportPipeline;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.util.ServiceUtil;
+import net.spy.memcached.MemcachedClient;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -1123,6 +1125,26 @@ public class DataService {
         return copyResults;
     }
 
+    public static DataSet listDataSetViaCache(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn, String uid) {
+        MemcachedClient client = MemCachedManager.instance();
+        DataSet dataSet = (DataSet) client.get(uid);
+        if (dataSet == null) {
+            ReportRetrieval reportRetrieval;
+            try {
+                reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            if (analysisDefinition.isLogReport()) {
+                dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
+            }
+            dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
+            client.add(uid, 2500, dataSet);
+        }
+        return dataSet;
+    }
+
     public EmbeddedDataResults moreEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                                    InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, String uid) {
         /*MemcachedClient client = MemCachedManager.instance();
@@ -1213,6 +1235,8 @@ public class DataService {
             Database.closeConnection(conn);
         }
     }
+
+
 
     public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         ReportRetrieval reportRetrieval;

@@ -24,7 +24,10 @@ import java.util.regex.Pattern;
  */
 public class DocReader {
 
-    public static String toHTML(String page, HttpServletRequest request) throws Exception {
+    public static final int APP = 1;
+    public static final int WEBSITE = 2;
+
+    public static String toHTML(String page, HttpServletRequest request, int site) throws Exception {
         if (page == null) {
             page = "Main_Page";
         }
@@ -134,8 +137,13 @@ public class DocReader {
                         substring = substring.split("\\|")[0];
                     }
                     String link = substring.replace(" ", "_");
-                    String blah = "[" + RedirectUtil.getURL(request, "/app/docs/" + link) + " " + substring + "]";
-                    gs.put(g, blah);
+                    if (site == APP) {
+                        String blah = "[" + RedirectUtil.getURL(request, "/app/docs/" + link) + " " + substring + "]";
+                        gs.put(g, blah);
+                    } else if (site == WEBSITE) {
+                        String blah = "[" + RedirectUtil.getURL(request, "/app/websiteDocs/" + link) + " " + substring + "]";
+                        gs.put(g, blah);
+                    }
                 }
 
                 //System.out.println();
