@@ -1,7 +1,7 @@
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
 <%
     String errorString = (String) request.getSession().getAttribute("errorString");
     if ("".equals(errorString) || "null".equals(errorString)) {
@@ -10,48 +10,30 @@
     if (errorString != null) {
         request.getSession().removeAttribute("errorString");
     }
-    String tier = request.getParameter("tier");
-    String connectionID = request.getParameter("connectionID");
 %>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <!-- InstanceBeginEditable name="doctitle" -->
-    <title>Easy Insight Signup</title>
-    <style type="text/css">
-        h2 {
-            color: #000000;
-            font-size: 16px;
-            font-weight: bold;
-        }
+    <title>Easy Insight &mdash; SaaS Business Intelligence, Reporting, and Analytics</title>
+    <meta name="description"
+          content="Easy Insight provides a self service, business user friendly solution for quick, easy, and affordable business intelligence over the cloud."/>
+    <meta name="keywords"
+          content="business intelligence, bi, saas bi, saas business intelligence, saas reporting, saas analytics, saas analysis, google analytics, salesforce, basecamp, highrise, ec2, mysql, sql server, saas, software as a service"/>
 
-        h3 {
-            color: #CC0033;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        p {
-            text-align: left;
-            padding: 10px 30px;
-        }
-
-        ul {
-            height: 220px;
-            list-style: none;
-            text-align: left;
-        }
-
-        ul li {
-            padding: 3px 0;
-        }
-    </style>
-    <!-- InstanceEndEditable -->
-    <!-- InstanceBeginEditable name="head" -->
-    <!-- InstanceEndEditable -->
-    <link type="text/css" rel="stylesheet" media="screen" href="../../css/base.css"/>
-    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
+    <!-- font -->
     <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
+
+    <!-- main includes -->
+
+    <script type="text/javascript" src="/js/modernizr.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <link href="/css/bootstrap-website.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+    <!-- lightbox -->
+
     <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
@@ -59,179 +41,201 @@
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
-<body style="width:100%;text-align:center;margin:0px auto;">
-<div id="whiteDiv"></div>
-<div id="topMenuDiv"></div>
-<div id="trialDiv" style="margin-top: 108px"></div>
-<div style="width:1000px;margin:0 auto;">
-    <div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<body>
+<nav class="navbar navbar-static-top navbar-main website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
+                                                                    name="logo"/></a>
+        </div>
 
-        <div class="signupHeadline">
-            <a href="/app/">Customer Login</a>
-            <a href="/app/newaccount/">Free Trial</a>
-            <a href="/app/whatsnew.jsp">What's New</a>
-            <a href="/contactus.html">Contact Us</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right navbar-main-item">
+                <li><a href="/app/" class="fontA">Customer Login</a></li>
+                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/whatsnew.jsp" class="fontA">What's New</a></li>
+            </ul>
         </div>
     </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/pricing.html">Pricing</a>
-        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
-        <a class="inactive" href="/api.html">Developers</a>
+</nav>
+<nav class="navbar navbar-subheader website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-subheader-item">
+                <li><a href="/product.html">Features</a></li>
+                <li><a href="/data.html">Connections</a></li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/documentation.html">Documentation</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
+        </div>
     </div>
-    <div class="trialBar">
-
-        Have questions? Call 1 (720) 316-8174 or email us at <a href="mailto:sales@easy-insight.com">sales@easy-insight.com</a>.
+</nav>
+<div class="container-fluid screenshotDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dragDropDone" style="padding-top:0">Beautiful dashboards in a few clicks!</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dragDropDone" style="padding-top:0;font-size:16px">Drag. Drop. Done. Business Intelligence Made Easy.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="contentHeaderStart"></div>
-    <div id="midContent">
-        <form method="post" id="profileForm" action="accountCreation.jsp">
-            <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
-            <input type="hidden" id="tier" name="tier" value="<%=StringEscapeUtils.escapeHtml(request.getParameter("tier"))%>"/>
-            <input type="hidden" id="wasSubmit" name="wasSubmit" value="1"/>
-            <div style="width:100%;position:relative;height:500px">
-                <div style="height:450px; width: 655px; float:right;padding-left: 50px;padding-right: 50px;">
-                    <div>
-                        <p style="text-align:center;font-size:32px;font-weight:bold;width: 100%;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">Start Using Easy Insight
-                            Now!</p>
-
-                        <p style="text-align:center;font-size:24px;padding-top:20px;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif;width: 100%">
-                            Fully functional 30 day free trial, no credit card required</p>
-                    </div>
-
-                    <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;">
-                        <% if (errorString != null) { %>
-                        <%= errorString %>
-                        <% } %>
-                    </div>
-                    <table style="padding-top:5px;border-spacing:10px;padding-left:65px">
-                        <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
+</div>
+<div class="container corePageWell">
+    <div class="row">
+        <div class="col-md-12">
+            <form method="post" id="profileForm" action="accountCreation.jsp">
+                <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
+                <input type="hidden" id="tier" name="tier" value="<%=StringEscapeUtils.escapeHtml(request.getParameter("tier"))%>"/>
+                <input type="hidden" id="wasSubmit" name="wasSubmit" value="1"/>
+                <div class="row">
+                    <div class="col-md-7" style="text-align: left">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;">
+                                    <% if (errorString != null) { %>
+                                    <%= errorString %>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label for="firstName" class="promptLabel" style="font-size:14px;color:#333333;font-family:'Cabin',sans-serif">
                                 First Name
-                            </td>
-                            <td><input style="font-size:14px;width:400px" id="firstName" type="text"
-                                       value="<%= request.getSession().getAttribute("firstName") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("firstName").toString())%>"
-                                       name="firstName"/></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
+                            </label>
+                            <input type="text" class="form-control" name="firstName" id="firstName" style="width:100%;font-size:16px;height:32px" autocapitalize="off" autocorrect="off" autoFocus
+                                   value="<%= request.getSession().getAttribute("firstName") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("firstName").toString())%>"/>
+                        </div>
+                        <div class="row"  style="margin-top:15px">
+                            <label for="lastName" class="promptLabel" style="font-size:14px;color:#333333;font-family:'Cabin',sans-serif">
                                 Last Name
-                            </td>
-                            <td><input style="font-size:14px;width:400px" id="lastName" type="text"
-                                       value="<%=request.getSession().getAttribute("lastName") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("lastName").toString()) %>"
-                                       name="lastName"/></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
-                                Company
-                            </td>
-                            <td><input style="font-size:14px;width:400px" id="company" type="text"
-                                       value="<%=request.getSession().getAttribute("company") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("company").toString())%>"
-                                       name="company"/></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
+                            </label>
+                            <input type="text" class="form-control" name="lastName" id="lastName" style="width:100%;font-size:14px;height:32px" autocapitalize="off" autocorrect="off"
+                                   value="<%= request.getSession().getAttribute("lastName") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("lastName").toString())%>"/>
+                        </div>
+                        <div class="row" style="margin-top:15px">
+                            <label for="email" class="promptLabel">
                                 Email
-                            </td>
-                            <td><input style="font-size:14px;width:400px" id="email" type="text"
-                                       value="<%=request.getSession().getAttribute("email") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("email").toString())%>"
-                                       name="email"/></td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:14px;color:#333333;width:105px;text-align:left;font-weight:bold;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif">
+                            </label>
+                            <input type="text" class="form-control" name="email" id="email" style="width:100%;font-size:14px;height:32px" autocapitalize="off" autocorrect="off"
+                                   value="<%= request.getSession().getAttribute("email") == null ? "" : StringEscapeUtils.escapeHtml(request.getSession().getAttribute("email").toString())%>"/>
+                        </div>
+                        <div class="row" style="margin-top:15px">
+                            <label for="password" class="promptLabel">
                                 Password
-                            </td>
-                            <td><input style="font-size:14px;width:400px" id="password" type="password"
-                                       value="" name="password"/></td>
-                        </tr>
-                    </table>
-                    <div style="padding-top:20px">
-                        <input type="submit" class="btn btn-inverse btn-large" style="margin-top: 8px" value="Create Account"/>
-                        <%--<input type="image" src="/images/GetStartedSmaller2.png" alt="Create Account"/>--%>
+                            </label>
+                            <input type="password" class="form-control" name="password" id="password" style="width:100%;font-size:14px;height:32px"
+                                   value=""/>
+                        </div>
+                        <div class="row" style="margin-top:30px">
+                            <div class="col-md-12">
+                                <input type="submit" class="btn btn-primary btn-large" style="font-size: 24px" value="Get Started Now"/>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:30px">
+                            <div class="col-md-12">
+                                <div style="fontSize:12px;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif;color:#333333;">By
+                                    clicking Get
+                                    Started Now you agree to the <a href="/terms.html"
+                                                                    style="text-decoration:underline;color:#CC0033">Terms
+                                        of Service</a> and <a href="/privacy.html" style="text-decoration:underline;color:#CC0033">Privacy</a>
+                                    policies.
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                    <div style="fontSize:12px;font-family:'Helvetica Neue',Helvetica,Arial, sans-serif;color:#333333;padding-top:30px">By
-                        clicking Get
-                        Started Now you agree to the <a href="/terms.html"
-                                                        style="text-decoration:underline;color:#CC0033">Terms
-                            of Service</a> and <a href="/privacy.html" style="text-decoration:underline;color:#CC0033">Privacy</a>
-                        policies.
+                    <div class="col-md-4 col-md-offset-1">
+                        <div class="row well">
+                            <div class="col-md-12">
+                                <p style="font-size:14px;font-family:'Cabin',arial,serif;text-align: center">What Our Customers are Saying</p>
+
+                                <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
+                                    I am neither a database analyst nor SaaS engineer, but I am able to create the reports I need
+                                    using EI's simple drag and drop interface. Job well done!
+                                </p>
+
+                                <p style="font-size:13px;font-family:'Cabin',arial,serif">Michael Aaron, Attention</p>
+
+                                <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
+                                    Easy Insight has proven to be a perfect compliment to Highrise. I highly recommend this software.
+                                </p>
+
+                                <p style="font-size:13px;font-family:'Cabin',arial,serif">Susan Wildeboer, Talenthouse</p>
+
+                                <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
+                                    Easy Insight has proven to be a hugely powerful
+                                    system for us. Coupled with the incredibly fast and attentive support, it has enabled ChannelCreator to
+                                    automate 90% of its reporting function and focus on our strength, selling our product.
+                                </p>
+
+                                <p style="font-size:13px;font-family:'Cabin',arial,serif">Matt Ball, ChannelCreator Ltd.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div id="rightSideBar" style="float:left;margin-left:20px">
-                    <p style="font-size:14px;font-family:'Cabin',arial,serif;text-align: center">What Our Customers are Saying</p>
-
-                    <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
-                        I am neither a database analyst nor SaaS engineer, but I am able to create the reports I need
-                        using EI's simple drag and drop interface. Job well done!
-                    </p>
-
-                    <p style="font-size:13px;font-family:'Cabin',arial,serif">Michael Aaron, Attention</p>
-
-                    <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
-                        Easy Insight has proven to be a perfect compliment to Highrise. I highly recommend this software.
-                    </p>
-
-                    <p style="font-size:13px;font-family:'Cabin',arial,serif">Susan Wildeboer, Talenthouse</p>
-
-                    <p style="font-size:12px;font-family:'Cabin',arial,serif;padding-top: 20px">
-                        Easy Insight has proven to be a hugely powerful
-                        system for us. Coupled with the incredibly fast and attentive support, it has enabled ChannelCreator to
-                        automate 90% of its reporting function and focus on our strength, selling our product.
-                    </p>
-
-                    <p style="font-size:13px;font-family:'Cabin',arial,serif">Matt Ball, ChannelCreator Ltd.</p>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-    <div id="contentHeaderEnd"></div>
-    <!-- InstanceEndEditable -->
-    <div id="footer">
-        <div id="linkLine">
-            <div style="padding-left:15px;">
-                <a href="/company.html">Company</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/pricing.html">Pricing</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/api.html">Developers</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/privacy.html">Privacy Policy</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/terms.html">Terms of Service</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/partners.html">Partners</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/contactus.html">Contact Us</a>
+</div>
+<div class="container-fluid" id="newFooter">
+    <div class="row">
+        <div class="col-sm-2 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
             </div>
         </div>
-        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright �2008-2012 Easy Insight, LLC. All rights reserved.
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/pricing.html">Pricing</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/partners.html">Partners</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/api.html">Developers</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 copyright">
+            Copyright ©2008-2014 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

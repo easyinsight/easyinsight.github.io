@@ -1,5 +1,9 @@
 package com.easyinsight.audit;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -64,6 +68,10 @@ public class ActionLog {
         this.actionType = actionType;
     }
 
+    public String actionTypeString() {
+        return String.valueOf(actionType);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,5 +87,11 @@ public class ActionLog {
     @Override
     public int hashCode() {
         return actionType;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("type", getActionType());
+        return jo;
     }
 }

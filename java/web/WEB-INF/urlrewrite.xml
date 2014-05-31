@@ -127,6 +127,11 @@
     </rule>
 
     <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/describe.json$</from>
+        <to>/json/reportInfo?reportID=$1</to>
+    </rule>
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)/config/([A-Za-z0-9]+)/delete$</from>
         <to>/html/deleteConfiguration?dashboardID=$1&amp;dashboardConfig=$2</to>
     </rule>
@@ -297,6 +302,11 @@
         <from>/dataSources.json</from>
         <to>/json/dataSourceList</to>
     </rule>
+
+    <rule>
+        <from>/recentActions.json</from>
+        <to>/json/recentActions</to>
+    </rule>
     <rule>
         <from>/dataSources/([A-Za-z0-9]+)/fields.json</from>
         <to>/json/fieldList?dataSourceID=$1</to>
@@ -413,10 +423,24 @@
     </rule>
 
     <rule>
-        <from>^/docs/([A-Za-z0-9_\\-]+)</from>
+        <from>^/users.json</from>
+        <to>/json/getUsers</to>
+    </rule>
+
+    <rule>
+        <from>^/docs/(.*?)</from>
         <to>/docs/index.jsp?doc=$1</to>
     </rule>
 
+    <rule>
+        <from>^/websiteDocs/(.*?)</from>
+        <to>/websiteDocs/index.jsp?doc=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/sales</from>
+        <to>/newaccount/sales.jsp</to>
+    </rule>
 
 </urlrewrite>
 

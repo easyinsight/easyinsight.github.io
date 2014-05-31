@@ -59,27 +59,9 @@
             return;
         }
 
-        int numberStorageBlocks;
-        try {
-            numberStorageBlocks = Integer.parseInt(request.getParameter("numberStorageBlocks"));
-        } catch (NumberFormatException e) {
-            request.getSession().setAttribute("errorString", "The number of storage blocks must be a number.");
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-            return;
-        }
 
-        if (numberStorageBlocks < 0) {
-            request.getSession().setAttribute("errorString", "The number of storage blocks must be a number greater than or equal to zero.");
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-            return;
-        }
 
-        long used = account.getCoreStorage() + (numberStorageBlocks * 250000000L);
-        if (used < stats.getUsedSpace()) {
-            request.getSession().setAttribute("errorString", "Your account currently has more custom data storage in use than the amount of storage you just specified.");
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/accountType.jsp?error=true"));
-            return;
-        }
+
 
         String billingInterval = request.getParameter("billingInterval");
         boolean yearly = "2".equals(billingInterval);
@@ -97,7 +79,6 @@
         accountTypeChange.setYearly(yearly);
         accountTypeChange.setAddonConnections(numberConnections);
         accountTypeChange.setAddonDesigners(numberDesigners);
-        accountTypeChange.setAddonStorage(numberStorageBlocks);
         session.setAttribute("accountTypeChange", accountTypeChange);
 
         if (account.getAccountState() == Account.TRIAL) {

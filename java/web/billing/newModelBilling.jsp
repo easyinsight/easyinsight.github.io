@@ -117,7 +117,7 @@
         </div>
         <div class="col-md-6 col-md-offset-3" style="padding-top: 10px;padding-bottom: 10px">
             <h3 style="width:100%;text-align: center"><%= billingHeader %></h3>
-            <p style="font-size:14px;font-family: 'PT Sans',arial,serif"><%= billingIntroParagraph %></p>
+            <p style="font-size:14px"><%= billingIntroParagraph %></p>
         </div>
         <div class="row">
             <div class="col-md-8 col-md-offset-1">
@@ -214,14 +214,14 @@
                             </div>
                         </div>
                         <p><%= billingMessage %></p>
-                        <button class="btn btn-default" type="submit" value="" name="commit">Submit</button>
+                        <button class="btn btn-default btn-primary" type="submit" value="" name="commit">Submit</button>
                     </fieldset>
                 </form>
             </div>
             <div class="col-md-3">
                 <div class="well" style="background-color: #d5d5d5">
                     <p><strong>Have questions?</strong></p>
-                    <p>You can contact Easy Insight at 1-720-316-8174 or sales@easy-insight.com if you have any questions or concerns around your account billing.</p>
+                    <p>You can contact Easy Insight at <strong>1-720-316-8174</strong> or <strong>sales@easy-insight.com</strong> if you have any questions or concerns around your account billing.</p>
                 </div>
             </div>
             <div class="col-md-3">
@@ -232,8 +232,6 @@
                         </p>
 
                         <p><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections() %> Small Business Connections
-                        </p>
-                        <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage
                         </p>
                     <%
                         if (account.getEnterpriseAddonCost() > 0) {

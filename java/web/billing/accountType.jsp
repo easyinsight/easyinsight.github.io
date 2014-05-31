@@ -50,30 +50,23 @@
             } else {
                 discountString = "$0.00";
             }
-
-            String priceString = account.createCostString();
-
             long usedStorage = new UserAccountAdminService().getAccountStorage();
-            String usedStorageString = Account.humanReadableByteCount(usedStorage, true) + " / " + Account.humanReadableByteCount(account.getMaxSize(), true);
     %>
     <script type="text/javascript">
 
         var designers = <%= account.getCoreDesigners() %>;
-        var baseStorage = <%= account.getCoreStorage() / 1000000 %>;
         var baseConnections = <%= account.getCoreSmallBizConnections() %>;
         var addonDesigners = <%= account.getAddonDesigners() %>;
-        var addonStorageUnits = <%= account.getAddonStorageUnits() %>;
         var addonConnections = <%= account.getAddonSmallBizConnections() %>;
         var accountType = <%= account.getAccountType() %>;
         var enterpriseCost = <%= account.getEnterpriseAddonCost() %>
-        var storageCost = 0;
         var billingInterval = <%= account.getBillingMonthOfYear() != null ? 2 : 1%>;
 
         function updateAccountValue(designerInput) {
             addonDesigners = parseInt(designerInput.value);
             $('#additionalDesigners').html(addonDesigners);
             $('#totalDesigners').html(designers + addonDesigners);
-            $('#designerCost').html("$" + addonDesigners * 50);
+            $('#designerCost').html("$" + addonDesigners * 15);
             updatePrice();
         }
 
@@ -83,7 +76,7 @@
         }
 
         function updatePrice() {
-            var cost = 50 + (addonDesigners * 50) + (addonStorageUnits * 150) + (addonConnections * 25) + enterpriseCost;
+            var cost = 50 + (addonDesigners * 15) + (addonConnections * 15) + enterpriseCost;
             if (billingInterval == 2) {
                 cost = cost * 12;
             }
@@ -97,19 +90,11 @@
             $('#proTotal').html(endCost);
         }
 
-        function updateStorageCostPro(source) {
-            addonStorageUnits = parseInt(source.value);
-            $('#additionalStorage').html(addonStorageUnits);
-            $('#totalStorage').html(baseStorage + addonStorageUnits * 250 + " MB");
-            $('#storageCost').html("$" + addonStorageUnits * 150);
-            updatePrice();
-        }
-
         function updateSmallBizConnections(source) {
             addonConnections = parseInt(source.value);
             $('#additionalConnections').html(addonConnections);
             $('#totalConnections').html(baseConnections + addonConnections);
-            $('#connectionCost').html("$" + addonConnections * 25);
+            $('#connectionCost').html("$" + addonConnections * 15);
             updatePrice();
         }
     </script>
@@ -149,15 +134,13 @@
                             <%
                                 if (trial) {
                             %>
-                            <div style="float:left;height:110px;padding-top:30px;padding-right:60px"><h4>Your Free Trial
+                            <div style="float:left;height:80px;padding-top:30px;padding-right:60px"><h4>Your Free Trial
                                 Account</h4></div>
-                            <div style="height:110px">
+                            <div style="height:80px">
                                 <p><%= account.getCoreDesigners() + account.getAddonDesigners() %> Designers
                                 </p>
 
                                 <p><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections() %> Small Business Connections
-                                </p>
-                                <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage
                                 </p>
                                 <p>Billed <%= account.billingInterval() %>
                                 </p>
@@ -167,15 +150,14 @@
                             <%
                             } else {
                             %>
-                            <div style="float:left;height:110px;padding-top:30px;padding-right:60px"><h4>Your Current
+                            <div style="float:left;height:80px;padding-top:30px;padding-right:60px"><h4>Your Current
                                 Account</h4></div>
-                            <div style="height:110px">
+                            <div style="height:80px">
                                 <p><%= account.getCoreDesigners() + account.getAddonDesigners() %> Designers
                                 </p>
 
                                 <p><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections() %> Small Business Connections
                                 </p>
-                                <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage</p>
                                 <p>Billed <%= account.billingInterval() %></p>
                             </div>
                             <%
@@ -212,7 +194,7 @@
                             </div>
                             <div class="col-md-2" style="text-align: center">
                                 <div>
-                                    <h3 id="designerCost">$<%= account.getAddonDesigners() * 50 %></h3>
+                                    <h3 id="designerCost">$<%= account.getAddonDesigners() * 15 %></h3>
                                     <h5>Cost</h5>
                                 </div>
                             </div>
@@ -241,41 +223,11 @@
                             </div>
                             <div class="col-md-2" style="text-align: center">
                                 <div>
-                                    <h3 id="connectionCost">$<%= account.getAddonSmallBizConnections() * 25%></h3>
+                                    <h3 id="connectionCost">$<%= account.getAddonSmallBizConnections() * 15%></h3>
                                     <h5>Cost</h5>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <h3>Custom Data Storage</h3>
-                            </div>
-                            <div class="col-md-2" style="text-align: center">
-                                <div>
-                                    <h3><%= account.getCoreStorage() / 1000000 %> MB</h3>
-                                    <h5>Free</h5>
-                                </div>
-                            </div>
-                            <div class="col-md-2" style="text-align: center">
-                                <div>
-                                    <h3 id="additionalStorage"><%= account.getAddonStorageUnits()%></h3>
-                                    <h5>250 MB addons</h5>
-                                </div>
-                            </div>
-                            <div class="col-md-2" style="text-align: center">
-                                <div>
-                                    <h3 id="totalStorage"><%= (account.getCoreStorage() + ((long) account.getAddonStorageUnits() * 250000000L)) / 1000000 %> MB</h3>
-                                    <h5>Total</h5>
-                                </div>
-                            </div>
-                            <div class="col-md-2" style="text-align: center">
-                                <div>
-                                    <h3 id="storageCost">$<%= account.getAddonStorageUnits() * 150%></h3>
-                                    <h5>Cost</h5>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                     <form method="post"
                           action="/app/billing/newModelAccountTypeAction.jsp">
@@ -283,19 +235,14 @@
 
                             <div class="col-md-6" style="background-color:#FFFFFF;padding: 10px; margin: 10px;text-align: left">
 
-                                <label style="font-size: 14px">Additional Designers ($50/per)</label>
+                                <label style="font-size: 14px">Additional Designers ($15 / per)</label>
                                 <input type="number" min="0" style="width:290px" name="numberDesigners"
                                        value="<%= account.getAddonDesigners() %>" id="numberDesignersPro"
                                        onchange="updateAccountValue(this)">
-                                <label style="font-size: 14px">Additional Small Business Connections ($25/per)</label>
+                                <label style="font-size: 14px">Additional Small Business Connections ($15 / per)</label>
                                 <input type="number" min="0" style="width:290px" name="numberConnections"
                                        value="<%= account.getAddonSmallBizConnections() %>" id="numberSmallConnections"
                                        onchange="updateSmallBizConnections(this)">
-                                <label style="font-size: 14px">Additional 250 MB Storage Blocks ($150/per)</label>
-                                <input type="number" min="0" style="width:290px" name="numberStorageBlocks"
-                                       value="<%= account.getAddonStorageUnits() %>" id="numberStorageBlocks"
-                                       onchange="updateStorageCostPro(this)">
-
                             </div>
                             <div class="col-md-4" style="background-color:#FFFFFF;padding: 10px; margin: 10px;width:313px;text-align: left">
                                 <div style="float:right">
@@ -309,12 +256,6 @@
                                 </div>
                                 <div>
                                     <p style="font-size: 14px">Addon Price</p>
-                                </div>
-                                <div style="float:right">
-                                    <span style="font-size: 14px" id="enterpriseAddonPrice"><%= account.enterpriseCostString() %></span>
-                                </div>
-                                <div>
-                                    <p style="font-size: 14px">Enterprise Addon Price</p>
                                 </div>
                                 <div style="float:right">
                                     <span style="font-size: 14px" id="proDiscount"><%= discountString %></span>

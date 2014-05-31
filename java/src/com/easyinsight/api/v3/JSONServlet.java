@@ -106,7 +106,6 @@ public abstract class JSONServlet extends HttpServlet {
                     } finally {
                         conn.setAutoCommit(true);
                         Database.closeConnection(conn);
-                        SecurityUtil.clearThreadLocal();
                     }
                     resp.setContentType("application/json");
                     resp.setStatus(responseInfo.getCode());
