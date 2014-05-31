@@ -162,7 +162,7 @@ public class AnalysisService {
 
     public String getBaseDocs() {
         try {
-            String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
+            String html = DocReader.toHTML(null, FlexContext.getHttpRequest(), DocReader.APP);
             html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
             html = html.replace("</h2>", "</b>");
             html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");
