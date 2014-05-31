@@ -307,6 +307,16 @@ public class DataSet implements Serializable, Cloneable {
         return remainder;
     }
 
+    public DataSet subset(int start, int end) {
+
+
+        int index = Math.min(rows.size(), end);
+        List<IRow> subsetRows = new ArrayList<IRow>(rows.subList(start, index));
+        DataSet copy = new DataSet(subsetRows);
+
+        return copy;
+    }
+
     public void mergeWheres(List<IWhere> wheres) {
         for (IRow row : rows) {
             for (IWhere where : wheres) {
