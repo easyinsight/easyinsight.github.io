@@ -261,6 +261,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>AsyncList</servlet-name>
+        <display-name>AsyncList</display-name>
+        <servlet-class>com.easyinsight.html.AsyncListServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>UnsubscribeServlet</servlet-name>
         <display-name>UnsubscribeServlet</display-name>
         <servlet-class>com.easyinsight.users.UnsubscribeServlet</servlet-class>
@@ -998,6 +1004,11 @@
     <servlet-mapping>
         <servlet-name>Gauge</servlet-name>
         <url-pattern>/gauge</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AsyncList</servlet-name>
+        <url-pattern>/asyncList</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
