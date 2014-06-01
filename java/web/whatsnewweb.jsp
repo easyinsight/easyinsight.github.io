@@ -54,7 +54,7 @@
             <ul class="nav navbar-nav navbar-right navbar-main-item">
                 <li><a href="/app/" class="fontA">Customer Login</a></li>
                 <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
-                <li><a href="/app/whatsnew.jsp" class="fontA">What's New</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
             </ul>
         </div>
     </div>
@@ -123,11 +123,11 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="well">
-                            <div><a href="whatsnewweb.jsp" style="font-size:16px">All</a></div>
+                            <div><a href="/app/news/" style="font-size:16px">All</a></div>
                             <%
                                 for (String tag : tagList) {
                             %>
-                            <div><a href="whatsnewweb.jsp?tag=<%= tag %>" style="font-size:16px"><%= tag %></a></div>
+                            <div><a href="/app/news/<%= tag %>" style="font-size:16px"><%= tag %></a></div>
                             <%
                                 }
                             %>
@@ -204,7 +204,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <a href="/api.html">Developers</a>
+                    <a href="/api/">Developers</a>
                 </div>
             </div>
         </div>

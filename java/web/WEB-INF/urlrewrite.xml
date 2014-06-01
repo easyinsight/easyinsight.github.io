@@ -43,7 +43,7 @@
         <to>/xml/Me</to>
     </rule>
     <rule>
-        <from>/news/([A-Za-z0-9]+)</from>
+        <from>/news/(.*?)</from>
         <to>/whatsnewweb.jsp?tag=$1</to>
     </rule>
     <rule>
