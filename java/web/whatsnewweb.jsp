@@ -77,38 +77,13 @@
         <div class="col-sm-12">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
-                        <a href="" rel="lightbox-highrise"
-                           title=""><img width="450" height="340" src=""
-                                         alt=""/></a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="" rel="lightbox-highrise"
-                           title=""><img width="451" height="340" src=""
-                                         alt=""/></a>
-
+                    <div class="col-sm-12">
+                        <div class="dragDropDone" style="padding-top:0">What's New with Easy Insight</div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="dragDropDone">Drag. Drop. Done. Business Intelligence Made Easy.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="container-fluid trialDiv">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
-                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
-                            Insight Now!</a>
-
-                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+                        <div class="dragDropDone" style="padding-top:0;font-size:16px">Drag. Drop. Done. Business Intelligence Made Easy.</div>
                     </div>
                 </div>
             </div>
@@ -116,15 +91,6 @@
     </div>
 </div>
 <div class="container corePageWell">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="col-md-6 col-md-offset-3">
-                <div style="width:100%;text-align: center">
-                    <h2>What's New with Easy Insight</h2>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <%
 
@@ -157,11 +123,11 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="well">
-                            <div><a href="whatsnew.jsp" style="font-size:16px">All</a></div>
+                            <div><a href="whatsnewweb.jsp" style="font-size:16px">All</a></div>
                             <%
                                 for (String tag : tagList) {
                             %>
-                            <div><a href="whatsnew.jsp?tag=<%= tag %>" style="font-size:16px"><%= tag %></a></div>
+                            <div><a href="whatsnewweb.jsp?tag=<%= tag %>" style="font-size:16px"><%= tag %></a></div>
                             <%
                                 }
                             %>
