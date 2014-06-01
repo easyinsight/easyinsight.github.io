@@ -59,7 +59,7 @@
             <ul class="nav navbar-nav navbar-right navbar-main-item">
                 <li><a href="/app/" class="fontA">Customer Login</a></li>
                 <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
-                <li><a href="/app/whatsnew.jsp" class="fontA">What's New</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
             </ul>
         </div>
     </div>
@@ -184,7 +184,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <a href="/api.html">Developers</a>
+                    <a href="/api/">Developers</a>
                 </div>
             </div>
         </div>
