@@ -10,6 +10,7 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.dataset.CacheableDataSet;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.export.TreeData;
@@ -29,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -1127,8 +1129,20 @@ public class DataService {
 
     public static DataSet listDataSetViaCache(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn, String uid) {
         MemcachedClient client = MemCachedManager.instance();
-        DataSet dataSet = (DataSet) client.get(uid);
-        if (dataSet == null) {
+        CacheableDataSet cacheableDataSet = (CacheableDataSet) client.get(uid);
+        DataSet dataSet = null;
+        if (cacheableDataSet == null) {
+            System.out.println("nothing in cache for UID " + uid);
+        }
+        List<String> filters = new ArrayList<>();
+        XMLMetadata xmlMetadata = new XMLMetadata();
+        xmlMetadata.setConn(conn);
+        filters.addAll(analysisDefinition.getFilterDefinitions().stream().map(filter -> filter.toXML(xmlMetadata).toXML()).collect(Collectors.toList()));
+        if (cacheableDataSet != null && !cacheableDataSet.getFilters().equals(filters)) {
+            System.out.println("filters did not match for " + uid);
+        }
+        if (cacheableDataSet == null || !cacheableDataSet.getFilters().equals(filters)) {
+
             ReportRetrieval reportRetrieval;
             try {
                 reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -1140,7 +1154,14 @@ public class DataService {
                 dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
             }
             dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
-            client.add(uid, 2500, dataSet);
+            cacheableDataSet = new CacheableDataSet();
+            cacheableDataSet.setFilters(filters);
+            cacheableDataSet.setDataSet(dataSet);
+            client.delete(uid);
+            client.add(uid, 2500, cacheableDataSet);
+        } else {
+            System.out.println("using cache for " + uid);
+            dataSet = cacheableDataSet.getDataSet();
         }
         return dataSet;
     }

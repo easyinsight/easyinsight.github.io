@@ -351,7 +351,16 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
 
         sb.append("</tbody>");
-
+        if (isSummaryTotal()) {
+            sb.append("<tfoot>");
+            sb.append("<tr>");
+            for (AnalysisItem headerItem : items) {
+                sb.append("<td>");
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+            sb.append("</tfoot>");
+        }
         sb.append("</table>");
         return sb.toString();
     }
