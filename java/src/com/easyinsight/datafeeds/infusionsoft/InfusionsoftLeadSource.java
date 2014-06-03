@@ -28,17 +28,20 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
     public static final String OPPORTUNITY_TITLE = "OpportunityTitle";
     public static final String CONTACT_ID = "ContactID";
     public static final String USER_ID = "UserID";
+    public static final String USER_NAME = "LeadUserName";
     public static final String AFFILIATE_ID = "AffiliateId";
     public static final String STAGE_ID = "StageID";
     public static final String STAGE_NAME = "StageName";
     public static final String STATUS_ID = "StatusID";
+    public static final String STATUS_NAME = "StatusName";
     public static final String LEAD_SOURCE = "Leadsource";
     public static final String PROJECTED_REVENUE_LOW = "ProjectedRevenueLow";
     public static final String PROJECTED_REVENUE_HIGH = "ProjectedRevenueHigh";
     public static final String DATE_CREATED = "DateCreated";
+    public static final String OPPORTUNITY_COUNT = "OpportunityCount";
 
     public InfusionsoftLeadSource() {
-        setFeedName("Leads");
+        setFeedName("Opportunities");
     }
 
     @Override
@@ -46,33 +49,21 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
         return FeedType.INFUSIONSOFT_LEAD;
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(LEAD_ID, OPPORTUNITY_TITLE, CONTACT_ID, USER_ID, AFFILIATE_ID, STAGE_ID, STATUS_ID, LEAD_SOURCE,
-                PROJECTED_REVENUE_HIGH, PROJECTED_REVENUE_LOW, DATE_CREATED);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(LEAD_ID), "Lead ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(OPPORTUNITY_TITLE), "Opportunity Title"));
-        analysisitems.add(new AnalysisDimension(keys.get(USER_ID), "Lead User ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Lead Contact ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(AFFILIATE_ID), "Lead Affiliate ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(STAGE_ID), "Lead Stage ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(STATUS_ID), "Lead Status ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(LEAD_SOURCE), "Lead Source"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Lead Created At", AnalysisDateDimension.DAY_LEVEL, true));
-        analysisitems.add(new AnalysisMeasure(keys.get(PROJECTED_REVENUE_HIGH), "Project Revenue High", AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        analysisitems.add(new AnalysisMeasure(keys.get(PROJECTED_REVENUE_LOW), "Project Revenue Low", AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        Key stageNameKey = keys.get(STAGE_NAME);
-        if (stageNameKey == null) {
-            stageNameKey = new NamedKey(STAGE_NAME);
-        }
-        analysisitems.add(new AnalysisDimension(stageNameKey, "Stage Name"));
-        return analysisitems;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(LEAD_ID, new AnalysisDimension("Opportunity ID"));
+        fieldBuilder.addField(OPPORTUNITY_TITLE, new AnalysisDimension("Opportunity Title"));
+        fieldBuilder.addField(CONTACT_ID, new AnalysisDimension("Opportunity Contact ID"));
+        fieldBuilder.addField(USER_ID, new AnalysisDimension("Opportunity User ID"));
+        fieldBuilder.addField(USER_NAME, new AnalysisDimension("Opportunity User Name"));
+        fieldBuilder.addField(AFFILIATE_ID, new AnalysisDimension("Opportunity Affiliate ID"));
+        fieldBuilder.addField(STAGE_ID, new AnalysisDimension("Opportunity Stage ID"));
+        fieldBuilder.addField(STAGE_NAME, new AnalysisDimension("Opportunity Stage Name"));
+        fieldBuilder.addField(STATUS_ID, new AnalysisDimension("Opportunity Status ID"));
+        fieldBuilder.addField(LEAD_SOURCE, new AnalysisDimension("Opportunity Source"));
+        fieldBuilder.addField(PROJECTED_REVENUE_HIGH, new AnalysisDimension("Projected Revenue High"));
+        fieldBuilder.addField(PROJECTED_REVENUE_LOW, new AnalysisDimension("Projected Revenue Low"));
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension("Opportunity Created At"));
+        fieldBuilder.addField(OPPORTUNITY_COUNT, new AnalysisMeasure("Number of Opportunities"));
     }
 
     public List<AnalysisItem> createStageItems() {
@@ -85,18 +76,15 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            DataSet stages = query("Stage", createStageItems(), (InfusionsoftCompositeSource) parentDefinition);
-            Map<Value, Value> map = new HashMap<Value, Value>();
-            for (IRow row : stages.getRows()) {
-                Value stageID = row.getValue(new NamedKey(InfusionsoftStageSource.STAGE_ID));
-                Value stageName = row.getValue(new NamedKey(InfusionsoftStageSource.STAGE_NAME));
-                map.put(stageID, stageName);
-            }
-            DataSet leads = query("Lead", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(STAGE_NAME));
+            InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+            Map<String, String> stages = infusionsoftCompositeSource.getLeadStageCache();
+            Map<String, String> users = infusionsoftCompositeSource.getUserCache();
+            DataSet leads = query("Lead", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(STAGE_NAME, USER_NAME,
+                    STATUS_NAME, OPPORTUNITY_COUNT));
             for (IRow row : leads.getRows()) {
-                Value stageIDValue = row.getValue(keys.get(STAGE_ID));
-                Value stageNameValue = map.get(stageIDValue);
-                row.addValue(keys.get(STAGE_NAME), stageNameValue);
+                row.addValue(keys.get(STAGE_NAME), stages.get(row.getValue(keys.get(STAGE_ID)).toString()));
+                row.addValue(keys.get(USER_NAME), users.get(row.getValue(keys.get(USER_ID)).toString()));
+                row.addValue(keys.get(OPPORTUNITY_COUNT), 1);
             }
             return leads;
         } catch (Exception e) {

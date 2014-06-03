@@ -2,6 +2,8 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -51,7 +53,15 @@ public class InfusionsoftStageSource extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("Stage", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            DataSet dataSet = query("Stage", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            Map<String, String> map = new HashMap<>();
+            for (IRow row : dataSet.getRows()) {
+                String stageID = row.getValue(new NamedKey(InfusionsoftStageSource.STAGE_ID)).toString();
+                String stageName = row.getValue(new NamedKey(InfusionsoftStageSource.STAGE_NAME)).toString();
+                map.put(stageID, stageName);
+            }
+            ((InfusionsoftCompositeSource) parentDefinition).setLeadStageCache(map);
+            return dataSet;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

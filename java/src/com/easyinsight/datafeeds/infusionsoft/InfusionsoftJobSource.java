@@ -1,9 +1,6 @@
 package com.easyinsight.datafeeds.infusionsoft;
 
-import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -31,6 +28,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
     public static final String PRODUCT_ID = "ProductId";
     public static final String JOB_STATUS = "JobStatus";
     public static final String DATE_CREATED = "DateCreated";
+    public static final String JOB_COUNT = "JobCount";
 
     public InfusionsoftJobSource() {
         setFeedName("Job");
@@ -41,30 +39,22 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
         return FeedType.INFUSIONSOFT_JOBS;
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(JOB_ID, JOB_TITLE, ORDER_TYPE, ORDER_STATUS, CONTACT_ID, PRODUCT_ID, JOB_STATUS, DATE_CREATED);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(JOB_ID), "Job ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(JOB_TITLE), "Job Title"));
-        analysisitems.add(new AnalysisDimension(keys.get(ORDER_TYPE), "Order Type"));
-        analysisitems.add(new AnalysisDimension(keys.get(ORDER_STATUS), "Order Status"));
-        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Job Contact ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Job Product ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(JOB_STATUS), "Job Status"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Date Created", AnalysisDateDimension.DAY_LEVEL, true));
-        return analysisitems;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(JOB_ID, new AnalysisDimension("Job ID"));
+        fieldBuilder.addField(JOB_TITLE, new AnalysisDimension("Job Title"));
+        fieldBuilder.addField(ORDER_TYPE, new AnalysisDimension("Order Type"));
+        fieldBuilder.addField(ORDER_STATUS, new AnalysisDimension("Order Status"));
+        fieldBuilder.addField(CONTACT_ID, new AnalysisDimension("Contact ID"));
+        fieldBuilder.addField(PRODUCT_ID, new AnalysisDimension("Product ID"));
+        fieldBuilder.addField(JOB_STATUS, new AnalysisDimension("Job Status"));
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension("Date Created"));
+        fieldBuilder.addField(JOB_COUNT, new AnalysisMeasure("Number of Jobs"));
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("Job", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            return query("Job", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(JOB_COUNT));
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
