@@ -1205,7 +1205,7 @@ public class FeedService {
         }
     }
 
-    public FederatedDataSource createFederatedDataSource(List<FederationSource> sources, String name, EIConnection conn) throws Exception {
+    public FederatedDataSource createdFederatedDataSourceWithConn(List<FederationSource> sources, String name, EIConnection conn) throws Exception {
 
             FederatedDataSource federatedDataSource = new FederatedDataSource();
             federatedDataSource.setFeedName(name);
