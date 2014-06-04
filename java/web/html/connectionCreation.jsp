@@ -33,10 +33,11 @@
         EIConnection conn = Database.instance().getConnection();
         String existingURLKey = null;
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT DATA_FEED.API_KEY FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE USER.ACCOUNT_ID = UPLOAD_POLICY_USERS.USER_ID AND " +
+            PreparedStatement ps = conn.prepareStatement("SELECT DATA_FEED.API_KEY FROM DATA_FEED, UPLOAD_POLICY_USERS, USER WHERE USER.ACCOUNT_ID = ? AND USER.USER_ID = UPLOAD_POLICY_USERS.USER_ID AND " +
                     "UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.FEED_TYPE = ? AND DATA_FEED.VISIBLE = ?");
-            ps.setInt(1, connectionID);
-            ps.setBoolean(2, true);
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ps.setInt(2, connectionID);
+            ps.setBoolean(3, true);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
