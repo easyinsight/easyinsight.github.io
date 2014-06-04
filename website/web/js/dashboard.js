@@ -349,8 +349,10 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     if (obj.metadata.type == "pie") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3PieChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
-    }
-    else if (obj.metadata.type == "diagram") {
+    } else if (obj.metadata.type == "serverList") {
+        var p = postData.url.substr(obj.metadata.url.length);
+        AsyncList.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID);
+    } else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID));
         }) }));
@@ -758,43 +760,50 @@ $(function () {
             })
 
             var allCheck = function (e) {
+                var a = $(e.target).parent().parent().parent().parent().parent().parent().parent();
+
+                var k = a.attr("id").replace(/_modal$/g, "");
+                var selMap = selectionMap[k];
                 if ($(e.target).is(":checked")) {
-                    $("input", $(e.target).parent().parent()).attr("checked", "checked");
-                    for(i in selectionMap)
-                        selectionMap[i] = true;
+                    selMap["All"] = true;
+                    $(".cb_filter_choice", $(e.target).parent().parent()).prop('checked', true);
+                    for(i in selMap)
+                        selMap[i] = true;
                 } else {
-                    $("input", $(e.target).parent().parent()).removeAttr("checked");
-                    for(i in selectionMap)
-                        selectionMap[i] = false;
+                    selMap["All"] = false;
+                    $(".cb_filter_choice", $(e.target).parent().parent()).removeAttr("checked", "checked");
+                    for(i in selMap)
+                        selMap[i] = false;
                 }
             }
 
-            // todo: blah
             var choiceAllCheck = function (e) {
+                var a = $(e.target).parent().parent().parent().parent().parent().parent().parent();
+                var k = a.attr("id").replace(/_modal$/g, "");
+                var selMap = selectionMap[k];
 
                 var checked = $(e.target).is(":checked");
-                selectionMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
-                if (checked) {
+                selMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
+                /*if (checked) {
                     var allSelected = _.all(selectionMap, function(e, i, l) {
                         return (i == "All") || e;
                     });
                     if (allSelected) {
-                        alert("all selected");
-                    } else {
 
                     }
-                }
-                if (checked && _.all(selectionMap, function(e, i, l) {
+                }*/
+                if (checked && _.all(selMap, function(e, i, l) {
                     return (i == "All") || e; })) {
-                    $(".cb_all_choice", $(e.target).parent().parent()).attr("checked", "checked");
-                    selectionMap["All"] = true;
+                    $(".cb_all_choice", $(e.target).parent().parent()).prop('checked', true);
+                    selMap["All"] = true;
                 } else {
                     $(".cb_all_choice", $(e.target).parent().parent()).removeAttr("checked");
-                    selectionMap["All"] = false;
+                    selMap["All"] = false;
                 }
             };
 
             $('.multi_value_modal', target).on('show.bs.modal', function (e) {
+                var target = $(e.target).attr("id").replace(/_modal$/g, "");
                 var ff = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")];
                 var f = ff.filter;
 
@@ -816,18 +825,26 @@ $(function () {
                             m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
                             return m;
                         }, {});
+                        var selMap = {};
+                        selectionMap[target] = selMap;
+                        if (f.selected["All"]) {
+                            selMap["All"] = true;
+                        }
                         for (var mo in m) {
                             var selected = f.selected[mo];
                             if (selected) {
-                                selectionMap[mo] = true;
+                                selMap[mo] = true;
                             } else {
-                                selectionMap[mo] = false;
+                                selMap[mo] = false;
                             }
                         }
                         if(d.values.length > 100) {
                             d.error = "Too many values, please refine your search."
+                        } else {
+                            $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selMap }, results: d }));
+                            $(".cb_all_choice", $(e.target)).click(allCheck);
+                            $(".cb_filter_choice", $(e.target)).click(choiceAllCheck);
                         }
-                        $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selectionMap }, results: d }));
                         delete f.error;
                     } }))
                 } else {
@@ -835,25 +852,28 @@ $(function () {
                                     m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
                                     return m;
                                 }, {});
+                    var selMap = {};
+                    selectionMap[target] = selMap;
                     for (var mo in m) {
                         var selected = f.selected[mo];
                         if (selected) {
-                            selectionMap[mo] = true;
+                            selMap[mo] = true;
                         } else {
-                            selectionMap[mo] = false;
+                            selMap[mo] = false;
                         }
                     }
                 }
             });
 
             $('.multi_field_value_modal', target).on('show.bs.modal', function (e) {
+                var target = $(e.target).attr("id").replace(/_modal$/g, "");
                 var f = filterMap[$(e.target).attr("id").replace(/_modal$/g, "")].filter;
 
                 var m = _.reduce(f.values, function(m, e) {
                     m[e == "" ? "[ No Value ]" : e] = f.selected["All"];
                     return m;
                 }, {});
-                selectionMap = $.extend({}, m, f.selected);
+                selectionMap[f.id] = $.extend({}, m, f.selected);
             });
 
             $(".cb_all_choice", target).click(allCheck);
@@ -864,10 +884,11 @@ $(function () {
                 var a = $(e.target).parent().parent().parent().parent();
                 var k = a.attr("id").replace(/_modal$/g, "");
                 var f = filterMap[k];
-                f.filter.selected = selectionMap;
-                var selectVals = toSelectedArray(selectionMap);
+                var selMap = selectionMap[k];
+                f.filter.selected = selMap;
+                var selectVals = toSelectedArray(selMap);
                 var label;
-                if(selectionMap["All"]) {
+                if(selMap["All"]) {
                     label = "All";
                 } else {
                     label = selectVals.length == 1 ? selectVals[0] : selectVals.length + " Items";

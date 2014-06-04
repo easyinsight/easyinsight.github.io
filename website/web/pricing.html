@@ -1,300 +1,245 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%">
-<!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <!-- InstanceBeginEditable name="doctitle" -->
-    <title>Plans and Pricing</title>
-    <style type="text/css">
+    <title>Easy Insight Plans and Pricing</title>
+    <meta name="description"
+          content="Easy Insight provides a self service, business user friendly solution for quick, easy, and affordable business intelligence over the cloud."/>
+    <meta name="keywords"
+          content="business intelligence, bi, saas bi, saas business intelligence, saas reporting, saas analytics, saas analysis, google analytics, salesforce, basecamp, highrise, ec2, mysql, sql server, saas, software as a service"/>
 
-        h2 {
-            color: #000000;
-            font-size: 16px;
-            font-weight: bold;
-        }
+    <!-- font -->
+    <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
 
-        p {
-            text-align: left;
-            padding: 10px 30px;
-        }
+    <!-- main includes -->
 
-        ul {
-            height: 220px;
-            list-style: none;
-            text-align: left;
-        }
-
-        ul li {
-            padding: 3px 0px;
-        }
-
-        .optionsTable {
-            padding: 0;
-            margin: 0;
-            border-collapse: collapse;
-            color: #FFFFFF;
-            border: 1px solid #333;
-        }
-
-        .optionsTable a {
-            color: #FFFFFF;
-        }
-
-        .optionsTable td {
-            padding: 0.5em;
-            border: 1px solid #F00;
-        }
-
-        .featureTable {
-            padding: 0;
-            margin: 0;
-            border-collapse: collapse;
-            border: 1px solid #999;
-        }
-
-        .featureTable a {
-            color: #FFFFFF;
-        }
-
-        .featureTable td {
-            border: 1px solid #999;
-            padding: 0.5em;
-        }
-
-        .firstCell {
-            text-align: left;
-        }
-
-        .barrierRow {
-            background-color: #333333;
-            color: #FFFFFF;
-        }
-
-        .firstOptionCell {
-            background-color: #FF0000;
-            color: #FFFFFF;
-            border-left: 1px solid #DD0000;
-        }
-
-        .secondOptionCell {
-            background-color: #DD0000;
-            color: #FFFFFF;
-            border-left: 1px solid #DD0000;
-        }
-
-        .thirdOptionCell {
-            background-color: #BB0000;
-            color: #FFFFFF;
-            border-left: 1px solid #DD0000;
-        }
-
-        .fourthOptionCell {
-            background-color: #990000;
-            color: #FFFFFF;
-            border-left: 1px solid #DD0000;
-        }
-
-        .fifthOptionCell {
-            background-color: #770000;
-            color: #FFFFFF;
-            border-left: 1px solid #DD0000;
-        }
-    </style>
-    <!-- InstanceEndEditable -->
-    <!-- InstanceBeginEditable name="head" -->
-    <!-- InstanceEndEditable -->
-    <link type="text/css" rel="stylesheet" media="screen" href="css/base.css"/>
-    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
-    <script type="text/javascript" src="/js/swfobject.js"></script>
-    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
-    <script type="text/javascript" src="/js/startup.js"></script>
-    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
-    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
+    <script type="text/javascript" src="/js/modernizr.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <link href="/css/bootstrap-website.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
 <body>
-<div id="whiteDiv"></div>
-<div id="topMenuDiv"></div>
-<div id="blackIntroDiv" style="height:160px"></div>
-<div id="trialDiv" style="margin-top: 268px;height:54px"></div>
-<div style="width:1000px;margin:0 auto;">
-    <div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<nav class="navbar navbar-static-top navbar-main website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
+                                                                    name="logo"/></a>
+        </div>
 
-        <div class="signupHeadline">
-            <a href="/app/">Customer Login</a>
-            <a href="/app/newaccount/">Free Trial</a>
-            <a href="/app/news/">What's New</a>
-            <a href="contactus.html">Contact Us</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right navbar-main-item">
+                <li><a href="/app/" class="fontA">Customer Login</a></li>
+                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
+            </ul>
         </div>
     </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="active" href="/pricing.html">Pricing</a>
-        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
-        <a class="inactive" href="/api.html">Developers</a>
-    </div>
-    <div id="coreContent" style="height:160px;width:950px">
-        <div class="coreContentBlock" style="padding-top:0">
-            <h2 class="coreContentHeader">30 Day Free Trial on All Accounts</h2>
-
-            <p class="coreContentParagraph">
-                Hundreds of businesses are making better business decisions because of Easy Insight right now. Start
-                building better reports and analyzing data yourself! No credit card is required for your 30 day free
-                trial.
-            </p>
-        </div>
-        <div style="margin-top:50px;float:right;width:360px;padding:5px">
-            <a href="/app/newaccount" class="btn btn-primary btn-large" style="margin-top: 8px">Try Easy Insight Now!</a>
+</nav>
+<nav class="navbar navbar-subheader website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-subheader-item">
+                <li><a href="/product.html">Features</a></li>
+                <li><a href="/data.html">Connections</a></li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/app/websiteDocs/">Documentation</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
         </div>
     </div>
-    <div id="trialBar">
-        <div id="trialBarLeft" style="float: none;">Have questions? You can reach us at 1-720-316-8174 or <a style="color:#CC0033" href="mailto:sales@easy-insight.com">sales@easy-insight.com</a></div>
+</nav>
+<div class="container-fluid screenshotDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2 class="coreContentHeader" style="color: #FFFFFF">30 Day Free Trial on All Accounts</h2>
 
-        <!--<a href="/app/newaccount/"><img src="/images/TryEasyInsight.png"
-                                        alt="Easy Insight Free Trial"/></a>-->
-    </div>
-    <div id="contentHeaderStart">
-    </div>
-    <div id="midContent">
-        <div style="height:870px;padding-left:30px;padding-right: 30px">
-            <div style="background-color: #EEEEEE;width: 100%;height: 100px">
-                <div style="float:right;width: 590px;padding-top: 10px;padding-right: 10px">
-                    <p>
-                        Your Easy Insight account starts off at $50 / month. For many small businesses, this is all you
-                        need! This account includes one Designer user to create reports and dashboards, unlimited users
-                        for viewing reports, two connections to small business SaaS systems, and 50 MB of custom data
-                        storage.
-                    </p>
+                        <p class="coreContentParagraph" style="color: #FFFFFF">
+                            Hundreds of businesses are making better business decisions because of Easy Insight right now. Start
+                            building better reports and analyzing data yourself! No credit card is required for your 30 day free
+                            trial.
+                        </p>
+                    </div>
                 </div>
-                <div style="width:250px;padding-top: 25px;text-align: center">
-                    <p style="font-size: 36px">$50 / month</p>
-
-                    <p style="font-size: 20px;padding-top: 15px">Base Price</p>
-                </div>
-            </div>
-
-            <h2 style="font-size: 22px;margin-right: 137px;margin-top:20px">Basic Addons</h2>
-
-            <div style="background-color: #EEEEEE;width: 100%;height: 100px;margin-top: 10px">
-                <div style="float:right;width: 590px;padding-top: 10px;padding-right: 10px">
-                    <p>
-                        Designer users are capable of creating reports and dashboards. Each additional Designer license
-                        costs $50 / month. There's no restriction on the number of users who can view or receive
-                        reports.
-                    </p>
-                </div>
-                <div style="width:250px;padding-top: 25px;text-align: center">
-                    <p style="font-size: 36px">$50 / month</p>
-
-                    <p style="font-size: 20px;padding-top: 15px">Additional Designer</p>
-                </div>
-            </div>
-
-            <div style="background-color: #EEEEEE;width: 100%;height: 100px;margin-top: 20px">
-                <div style="float:right;width: 590px;padding-top: 20px;padding-right: 10px">
-                    <p>
-                        Two small business SaaS connections are included with your base account. Additional connections are $25 / month each.
-                    </p>
-                </div>
-                <div style="width:250px;padding-top: 25px;text-align: center">
-                    <p style="font-size: 36px">$25 / month</p>
-
-                    <p style="font-size: 20px;padding-top: 15px">Additional Connection</p>
-                </div>
-            </div>
-
-            <div style="background-color: #EEEEEE;width: 100%;height: 100px;margin-top: 20px">
-                <div style="float:right;width: 590px;padding-top: 20px;padding-right: 10px">
-                    <p>
-                        50 MB of custom data storage for flat files, relational databases, and the API are included with your base account. Additional storage is $150 / mo for 250 MB.
-                    </p>
-                </div>
-                <div style="width:250px;padding-top: 25px;text-align: center">
-                    <p style="font-size: 36px">$150 / month</p>
-
-                    <p style="font-size: 20px;padding-top: 15px">250 MB of Custom Storage</p>
-                </div>
-            </div>
-
-            <h2 style="font-size: 22px;margin-right: 95px;margin-top:20px">Enterprise Addons</h2>
-
-            <div style="background-color: #EEEEEE;width: 100%;height: 100px;margin-top: 20px">
-                <div style="float:right;width: 590px;padding-top: 20px;padding-right: 10px">
-                    <p>
-                        Connections to Salesforce are $150 / mo per connection. One connection represents one Salesforce account.
-                    </p>
-                </div>
-                <div style="width:250px;padding-top: 15px;text-align: center">
-                    <p style="font-size: 36px">$150 / month</p>
-
-                    <p style="font-size: 20px;padding-top: 15px">Salesforce</p>
-                </div>
-            </div>
-
-            <div style="background-color: #EEEEEE;width: 100%;height: 100px;margin-top: 20px">
-                <div style="float:right;width: 590px;padding-top: 20px;padding-right: 10px">
-                    <p>
-                        We offer multiple packages to best meet your QuickBase reporting needs. Please contact sales at <a href="mailto:sales@easy-insight.com">sales@easy-insight.com</a> and we'll help you to find the best solution for your business.
-                    </p>
-                </div>
-                <div style="width:250px;padding-top: 15px;text-align: center">
-                    <p style="font-size: 36px">Contact Us</p>
-
-                    <p style="font-size: 20px;padding-top: 15px">QuickBase</p>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dragDropDone">Drag. Drop. Done. Business Intelligence Made Easy.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="contentHeaderEnd"></div>
-    <!-- InstanceEndEditable -->
-    <div id="footer" style="margin:0px;width:100%;height:60px">
-        <div id="linkLine">
-            <div style="padding-left:15px;">
-                <a href="/company.html">Company</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/pricing.html">Pricing</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/api.html">Developers</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/privacy.html">Privacy Policy</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/terms.html">Terms of Service</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/partners.html">Partners</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/contactus.html">Contact Us</a>
+</div>
+<div class="container-fluid trialDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
+                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
+                            Insight Now!</a>
+
+                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+    </div>
+</div>
+<div class="container corePageWell">
+    <div class="row">
+        <div class="col-md-12">
+            <p style="font-size: 16px">Easy Insight offers two types of accounts to ensure that you're able to get an affordable solution tailored to your needs:</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>Team</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p>Looking for reporting on data from a couple of your SaaS systems? The Team package is designed to help you with this use case.</p>
+                </div>
+                <div class="col-md-12" style="background-color: #EEEEEE; padding: 10px">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12" style="margin-top: 40px">
+                                    <div style="font-size: 18px">$50 / month</div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div style="font-size: 14px;">Base Price</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <p>Your Easy Insight Team account starts off at $50 / month. This account includes one Designer user to create reports and dashboards, unlimited users
+                                for viewing reports, two connections to small business SaaS systems, and 50 MB of custom data
+                                storage.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 20px; ">
+                <div class="col-md-12" style="background-color: #EEEEEE; padding: 10px">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12" style="margin-top: 20px">
+                                    <div style="font-size: 18px">$15 / month</div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div style="font-size: 14px;">Additional Designer</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <p>Designer users are capable of creating reports and dashboards. Each additional Designer license
+                                costs $15 / month. There's no restriction on the number of users who can view or receive
+                                reports.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 20px; ">
+                <div class="col-md-12" style="background-color: #EEEEEE; padding: 10px">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12" style="margin-top: 0px">
+                                    <div style="font-size: 18px">$15 / month</div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div style="font-size: 14px;">Additional Connection</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <p>Two small business SaaS connections are included with your base account. Additional connections are $15 / month each.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 col-md-offset-2">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>Enterprise</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p>Need more custom data? Have more users? The Enterprise package is designed to provide a low total cost of ownership while scaling to meet your needs up to terabytes of data and thousands of users.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Contact Easy Insight Sales</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="newFooter">
+    <div class="row">
+        <div class="col-sm-2 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/pricing.html">Pricing</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/partners.html">Partners</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/api/">Developers</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 copyright">
+            Copyright ©2008-2014 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>
