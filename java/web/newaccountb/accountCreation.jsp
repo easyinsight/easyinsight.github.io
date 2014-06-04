@@ -48,6 +48,7 @@
             account.setAccountType(Account.PROFESSIONAL);
             account.setAccountState(Account.TRIAL);
             account.setDefaultHTML(true);
+            account.setName(email);
 
             String exists = new com.easyinsight.users.UserService().doesUserExist(user.getUserName(), user.getEmail(), account.getName());
             if (exists == null) {
