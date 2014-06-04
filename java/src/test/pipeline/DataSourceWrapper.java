@@ -265,7 +265,7 @@ public class DataSourceWrapper implements  ITestConstants {
             federationSource.setFieldMappings(new ArrayList<FieldMapping>());
             federatedDataSources.add(federationSource);
         }
-        FederatedDataSource federatedDataSource = new FeedService().createFederatedDataSource(federatedDataSources, name, conn);
+        FederatedDataSource federatedDataSource = new FeedService().createdFederatedDataSourceWithConn(federatedDataSources, name, conn);
         return new DataSourceWrapper(federatedDataSource, conn);
     }
 
