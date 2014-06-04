@@ -191,7 +191,7 @@ public class WSCompareYearsDefinition extends WSAnalysisDefinition {
         return analysisItem.hasType(AnalysisItemTypes.MEASURE);
     }
 
-    public void argh() {
+    public void handleFieldExtensions() {
         Map<String, List<AnalysisItem>> map = new LinkedHashMap<String, List<AnalysisItem>>();
         boolean firstPH = true;
         for (AnalysisItem field : measures) {

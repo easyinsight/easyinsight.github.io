@@ -290,3 +290,9 @@ nav.navbar_first {
 .nv-axislabel {
     font-weight: bold;
 }
+
+table.dataTable tfoot th,
+table.dataTable tfoot td {
+    padding: 8px 10px;
+    border-top: 0px;
+}

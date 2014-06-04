@@ -4,6 +4,14 @@ import com.easyinsight.admin.ConstantContactSync;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.util.RandomTextGenerator;
+import net.minidev.json.parser.JSONParser;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.json.JSONObject;
 
 import javax.mail.MessagingException;
 import java.sql.PreparedStatement;
@@ -120,9 +128,7 @@ public class AccountMemberInvitation {
         }
     }
 
-    public void sendWelcomeEmail(String to, EIConnection conn, long userID, String firstName) throws SQLException {
-        String body = ConstantContactSync.getContent(ConstantContactSync.CREATION_DAY);
-        String subject = "Welcome to Easy Insight!";
+    public void sendWelcomeEmail(String to, EIConnection conn, long userID, String firstName) throws Exception {
         PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
         PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
         queryUnsubscribeStmt.setLong(1, userID);
@@ -136,13 +142,33 @@ public class AccountMemberInvitation {
             insertKeyStmt.setString(2, unsubscribeKey);
             insertKeyStmt.execute();
         }
-        body = body.replace("{0}", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey).replace("{1}", firstName);
-        try {
-            new SendGridEmail().sendEmail(to, subject, body, "sales@easy-insight.com", true, "Easy Insight");
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
+        HttpClient sendWithUsClient = new HttpClient();
+        sendWithUsClient.getParams().setAuthenticationPreemptive(true);
+        Credentials defaultcreds = new UsernamePasswordCredentials("live_2d56944c0596aea84504bd0947e0421ab3e1c56c", "");
+        sendWithUsClient.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
+
+        JSONObject json = new JSONObject();
+        json.put("email_id", "tem_RMZQDewvrB2GRX4fUGWLYN");
+        JSONObject recipient = new JSONObject();
+        recipient.put("address", to);
+        json.put("recipient", recipient);
+        JSONObject sender = new JSONObject();
+        sender.put("address", "sales@easy-insight.com");
+        sender.put("reply_to", "sales@easy-insight.com");
+        sender.put("name", "Easy Insight Marketing");
+        json.put("sender", sender);
+
+        JSONObject emailData = new JSONObject();
+        emailData.put("user_name", firstName);
+        emailData.put("unsubscribeLink", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+        json.put("email_data", emailData);
+
+        PostMethod method = new PostMethod("https://api.sendwithus.com/api/v1/send");
+        StringRequestEntity entity = new StringRequestEntity(json.toString(), "application/json", "UTF-8");
+        method.setRequestEntity(entity);
+        sendWithUsClient.executeMethod(method);
+        Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(method.getResponseBodyAsStream());
+        System.out.println(obj);
     }
 
     public void salesNotification(String userName, String email, String company, String additionalInfo) throws MessagingException, UnsupportedEncodingException {

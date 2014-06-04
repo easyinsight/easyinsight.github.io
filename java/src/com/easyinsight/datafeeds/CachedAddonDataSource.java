@@ -328,7 +328,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             FilterDefinition partitionFilter = findPartitionFilter(report);
             if (partitionFilter == null) {
-                blah(IDataStorage, conn, report, null, null, false);
+                cacheForPartition(IDataStorage, conn, report, null, null, false);
             } else if (partitionFilter instanceof FlatDateFilter) {
                 FlatDateFilter flatDateFilter = (FlatDateFilter) partitionFilter;
                 int startYear;
@@ -352,7 +352,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                             System.out.println("Generating report for " + year);
                             flatDateFilter.setValue(year);
                             Key key = new NamedKey(flatDateFilter.getFilterName() + "cache");
-                            blah(IDataStorage, conn, report, key, String.valueOf(year), lastRefreshDate != null && lastRefreshDate.after(new Date(1000)));
+                            cacheForPartition(IDataStorage, conn, report, key, String.valueOf(year), lastRefreshDate != null && lastRefreshDate.after(new Date(1000)));
                             cal.add(Calendar.YEAR, 1);
                         }
                     } while (keepGoing);
@@ -380,7 +380,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    private void blah(IDataStorage IDataStorage, EIConnection conn, WSAnalysisDefinition report, @Nullable Key partitionKey, @Nullable String partitionValue, boolean update) throws Exception {
+    private void cacheForPartition(IDataStorage IDataStorage, EIConnection conn, WSAnalysisDefinition report, @Nullable Key partitionKey, @Nullable String partitionValue, boolean update) throws Exception {
         Map<AnalysisItem, AnalysisItem> map = new HashMap<AnalysisItem, AnalysisItem>();
         Map<String, AnalysisItem> structure = report.createStructure();
         for (AnalysisItem reportItem : structure.values()) {

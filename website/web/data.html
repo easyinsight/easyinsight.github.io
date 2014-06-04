@@ -1,323 +1,553 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%">
-<!-- InstanceBegin template="/Templates/plaintemplate.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <!-- InstanceBeginEditable name="doctitle" -->
     <title>Easy Insight - SaaS Reports and Analytics</title>
-    <!-- InstanceEndEditable -->
-    <!-- InstanceBeginEditable name="head" -->
-    <link type="text/css" rel="stylesheet" media="screen" href="css/data.css"/>
     <meta name="keywords"
           content="business intelligence, data, report, solution, exchange, cloudwatch, ec2, google analytics, web analytics, mysql, salesforce, sql server, jetbrains, teamcity, highrise, basecamp, jira, atlassian"/>
     <meta name="description"
           content="Connect your Easy Insight business intelligence to a wide variety of external systems."/>
-    <!-- InstanceEndEditable -->
-    <link type="text/css" rel="stylesheet" media="screen" href="css/base.css"/>
-    <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
-    <script type="text/javascript" src="/js/swfobject.js"></script>
-    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
-    <script type="text/javascript" src="/js/startup.js"></script>
-    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
-    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
+
+    <!-- font -->
+    <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
+
+    <!-- main includes -->
+
+    <script type="text/javascript" src="/js/modernizr.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <link href="/css/bootstrap-website.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
 </head>
 <body>
-<div id="whiteDiv"></div>
-<div id="topMenuDiv"></div>
-<div id="blackIntroDiv"></div>
-<div style="width:1000px;margin:0 auto;">
-<div id="topBar">
-    <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<nav class="navbar navbar-static-top navbar-main website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
+                                                                    name="logo"/></a>
+        </div>
 
-    <div class="signupHeadline">
-        <a href="/app/">Customer Login</a>
-        <a href="/app/newaccount/">Free Trial</a>
-        <a href="/app/news/">What's New</a>
-        <a href="contactus.html">Contact Us</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right navbar-main-item">
+                <li><a href="/app/" class="fontA">Customer Login</a></li>
+                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<nav class="navbar navbar-subheader website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-subheader-item">
+                <li><a href="/product.html">Features</a></li>
+                <li><a href="/data.html">Connections</a></li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/app/websiteDocs/">Documentation</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid screenshotDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h2 style="color: #FFFFFF">Instant SaaS Connections</h2>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p class="coreContentParagraph" style="color: #FFFFFF">
+                                    You can quickly pull data into Easy Insight for any of the data sources listed below. Simply
+                                    click on
+                                    the data source name to jump into the Easy Insight application and start running! Prebuilt
+                                    KPIs are
+                                    available with each solution to help improve your time to results. Further reports produced
+                                    by the
+                                    community can be found in the Exchange.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <img src="/images/components128.png" alt="Connections Image"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
-<div class="headline">
-    <a class="inactive" href="/product.html">Features</a>
-    <a class="active" href="/data.html">Connections</a>
-    <a class="inactive" href="/pricing.html">Pricing</a>
-    <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
-    <a class="inactive" href="/api.html">Developers</a>
-</div>
-<!-- InstanceBeginEditable name="submenu" -->
-<!-- InstanceEndEditable -->
+<div class="container-fluid trialDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
+                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
+                            Insight Now!</a>
 
-<div id="coreContent">
-    <div class="coreContentBlock" style="padding-top:20px;">
-        <h2 class="coreContentHeader">Instant SaaS Connections</h2>
-
-        <p class="coreContentParagraph">
-            You can quickly pull data into Easy Insight for any of the data sources listed below. Simply click on
-            the data source name to jump into the Easy Insight application and start running! Prebuilt KPIs are
-            available with each solution to help improve your time to results. Further reports produced by the
-            community can be found in the Exchange.
-        </p>
-    </div>
-    <div style="padding-top:50px;padding-right:50px;margin:0px;float:right">
-        <img src="/images/components128.png" alt="Connections Image"/>
+                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-<div id="contentHeaderStart"></div>
-<div id="midContent">
-    <div style="width:100%;text-align:left;height:180px">
+<div class="container corePageWell">
+<div class="row">
+    <div class="col-sm-12">
         <h2>Project Management Reporting and Analysis</h2>
-
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px">
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/basecamp.html"><img src="images/logos/Basecamp.png" alt="Basecamp Logo"></a>
             </div>
-            <p>Basecamp reporting and analysis for your todos and time tracking</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:60px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Basecamp reporting and analysis for your todos and time tracking</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/PivotalTracker.html" style="padding-left:10px"><img
                         src="images/logos/Pivotal%20Tracker%20Logo.png" alt="Pivotal Tracker Logo"></a>
             </div>
-            <p>Track and report against your iterations in Pivotal Tracker</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:60px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Track and report against your iterations in Pivotal Tracker</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="data.html" style="padding-left:10px"><img
                         src="images/logos/youtrack.png" alt="YouTrack Logo"></a>
             </div>
-            <p>Track and analyze your YouTrack charts</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Track and analyze your YouTrack charts</p>
+            </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
+                <a href="solutions/smartsheet.html" style="padding-left:10px"><img src="images/smartsheet.png"
+                                                                                   alt="Smartsheet Logo"></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Create rich reports and dashboards on your Smartsheet data</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
+                <a href="solutions/redbooth.html" style="padding-left:10px"><img src="images/redbooth.png"
+                                                                                 alt="Redbooth Logo"></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Redbooth reporting and analysis to optimize your project management</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:180px">
-        <h2>Spreadsheet Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Spreadsheet Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px">
+<div class="row">
+
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/googlespreadsheets.html" style="padding-left:10px"><img
                         src="images/logos/Google%20Docs.png" alt="Google Docs Logo"></a>
             </div>
-            <p>Build reports and analyze your Google Spreadsheets data</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:60px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Build reports and analyze your Google Spreadsheets data</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/excel.html" style="padding-left:10px"><img src="images/logos/Excel.png"
                                                                               alt="Microsoft Excel Logo"></a>
             </div>
-            <p>Upload Excel or CSV files for reports and analysis</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Upload Excel or CSV files for reports and analysis</p>
+            </div>
         </div>
     </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:200px">
-        <h2>Sales Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Sales Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:80px;padding-top:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/highrise.html" style="padding-left:10px"><img src="images/logos/Highrise.png"
                                                                                  alt="Highrise Logo"></a>
             </div>
-            <p>Highrise reporting and analysis for your sales pipeline data</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Highrise reporting and analysis for your sales pipeline data</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/salesforce.html" style="padding-left:10px"><img
                         src="images/logos/Salesforce.png" alt="Salesforce Logo"></a>
             </div>
-            <p>Maximize your Salesforce value with ad hoc reports and analysis</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Maximize your Salesforce value with ad hoc reports and analysis</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/batchbook.html" style="padding-left:10px"><img
                         src="images/batchbook_icon.gif" alt="Batchbook Logo"></a>
             </div>
-            <p>Batchbook reporting and analysis for your sales pipeline data</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Batchbook reporting and analysis for your sales pipeline data</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/insightly.html" style="padding-left:10px"><img
                         src="images/logos/insightly.png" alt="Insightly Logo"></a>
             </div>
-            <p>Insightly reporting and analysis for your sales pipeline data</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Insightly reporting and analysis for your sales pipeline data</p>
+            </div>
         </div>
     </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:200px">
-        <h2>Email and Website Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Email and Website Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:80px;padding-top:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/googleanalytics.html" style="padding-left:10px"><img
                         src="images/logos/Google%20Analytics.png" alt="Google Analytics Logo"></a>
             </div>
-            <p>Extend your Google Analytics reporting to the next level</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Extend your Google Analytics reporting to the next level</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/SendGrid.html" style="padding-left:10px"><img src="images/logos/SendGrid.png"
                                                                                  alt="SendGrid Logo"></a>
             </div>
-            <p>Maximize your email success and join campaign data with other sources</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Maximize your email success and join campaign data with other sources</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/constantcontact.html" style="padding-left:10px"><img
                         src="images/logos/ConstantContactLogo.gif"
                         alt="SendGrid Logo"></a>
             </div>
-            <p>Maximize your email success and join campaign data with other sources</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Maximize your email success and join campaign data with other sources</p>
+            </div>
         </div>
     </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:200px">
-        <h2>Database Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Database Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:80px;padding-top:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/MySQL.html" style="padding-left:10px"><img src="images/logos/MySQL.png"
                                                                               alt="MySQL Logo"></a>
             </div>
-            <p>Report on and analyze the data in your MySQL databases</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Report on and analyze the data in your MySQL databases</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/Oracle.html" style="padding-left:10px"><img src="images/logos/Oracle.png"
                                                                                alt="Oracle Logo"></a>
             </div>
-            <p>Report on and analyze the data in your Oracle databases</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Report on and analyze the data in your SQL Server databases</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/SQLServer.html" style="padding-left:10px"><img
                         src="images/logos/SQL%20Server.png" alt="SQL Server Logo"></a>
             </div>
-            <p>Report on and analyze the data in your SQL Server databases</p>
         </div>
-        <div style="float:left;padding-left:30px;padding-top:20px;width:200px">
-            <div style="height:80px">
-                <a href="solutions/redshift.html" style="padding-left:10px"><img src="images/logos/Amazon%20Web%20Services.png"
-                                                                                  alt="Amazon Web Services Logo"></a></a>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Batchbook reporting and analysis for your sales pipeline data</p>
             </div>
-            <p>Report on and analyze the data in your Amazon Redshift databases</p>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
+                <a href="solutions/redshift.html" style="padding-left:10px"><img
+                        src="images/logos/Amazon%20Web%20Services.png"
+                        alt="Amazon Web Services Logo"></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Report on and analyze the data in your Amazon Redshift databases</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:200px">
-        <h2>Financial Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Financial Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px;padding-bottom:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/freshbooks.html"><img src="images/logos/FreshbooksLogo.gif"
                                                          alt="FreshBooks Logo"></a>
             </div>
-            <p>Create reports on your invoices and expenses in FreshBooks</p>
         </div>
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px;padding-bottom:20px">
-                <a href="data.html"><img src="images/harvest.jpg"
-                                                         alt="Harvest Logo"></a>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Create reports on your invoices and expenses in FreshBooks</p>
             </div>
-            <p>Create reports on your invoices and expenses in Harvest</p>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
+                <a href="data.html"><img src="images/harvest.jpg"
+                                         alt="Harvest Logo"></a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Create reports on your invoices and expenses in Harvest</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:220px">
-        <h2>Help Desk Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Help Desk Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:80px;padding-top:20px;padding-bottom:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/zendesk.html"><img src="images/zendesk-icon.gif"
                                                       alt="Zendesk Logo"></a>
             </div>
-            <p>Keep on top of your Zendesk tickets with the best possible reporting</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Keep on top of your Zendesk tickets with the best possible reporting</p>
+            </div>
         </div>
     </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:180px">
-        <h2>Custom Application Reporting and Analysis</h2>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Custom Application Reporting and Analysis</h2>
+    </div>
+</div>
 
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="solutions/quickbase.html"><img src="images/quickbase.png"
-                                                         alt="Intuit QuickBase Logo"></a>
+                                                        alt="Intuit QuickBase Logo"></a>
             </div>
-            <p>Business intelligence on your Intuit QuickBase data</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Business intelligence on your Intuit QuickBase data</p>
+            </div>
         </div>
     </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:180px">
-        <h2>Cloud Reporting and Analysis</h2>
-
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px">
-                <a href="solutions/cloudwatch.html"><img src="images/logos/Amazon%20Web%20Services.png"
-                                                         alt="Amazon Web Services Logo"></a>
-            </div>
-            <p>Create reports on your EC2 system performance through Cloudwatch</p>
-        </div>
+<hr class="connectionHR"/>
+<div class="row">
+    <div class="col-sm-12">
+        <h2 class="connectionCategoryHeadline">Survey Reporting and Analysis</h2>
     </div>
+</div>
 
-    <div style="width:100%;text-align:left;height:180px">
-        <h2>Survey Reporting and Analysis</h2>
-
-        <div style="float:left;padding-left:10px;width:200px">
-            <div style="height:60px;padding-top:20px">
+<div class="row">
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12 connectionLogoImage">
                 <a href="data.html"><img src="images/logos/wufoo-logo.png"
-                                                         alt="Wufoo Logo"></a>
+                                         alt="Wufoo Logo"></a>
             </div>
-            <p>Custom reports on your Wufoo surveys</p>
+        </div>
+        <div class="row">
+            <div class="col-md-12 connectionText">
+                <p>Custom reports on your Wufoo surveys</p>
+            </div>
         </div>
     </div>
+</div>
 
 </div>
-<div id="contentHeaderEnd"></div>
-<div id="footer">
-    <div id="linkLine">
-        <div style="padding-left:15px;">
-            <a href="/company.html">Company</a>
+<div class="container-fluid" id="newFooter">
+    <div class="row">
+        <div class="col-sm-2 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
+            </div>
         </div>
-        <div>
-            |
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/pricing.html">Pricing</a>
+                </div>
+            </div>
         </div>
-        <div>
-            <a href="/pricing.html">Pricing</a>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/partners.html">Partners</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/api/">Developers</a>
+                </div>
+            </div>
         </div>
-        <div>
-            |
-        </div>
-        <div>
-            <a href="/api.html">Developers</a>
-        </div>
-        <div>
-            |
-        </div>
-        <div>
-            <a href="/privacy.html">Privacy Policy</a>
-        </div>
-        <div>
-            |
-        </div>
-        <div>
-            <a href="/terms.html">Terms of Service</a>
-        </div>
-        <div>
-            |
-        </div>
-        <div>
-            <a href="/partners.html">Partners</a>
-        </div>
-        <div>
-            |
-        </div>
-        <div>
-            <a href="/contactus.html">Contact Us</a>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/terms.html">Terms of Service</a>
+                </div>
+            </div>
         </div>
     </div>
-    <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-        Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+    <div class="row">
+        <div class="col-sm-12 copyright">
+            Copyright ©2008-2014 Easy Insight, LLC. All rights reserved.
+        </div>
     </div>
-</div>
 </div>
 <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

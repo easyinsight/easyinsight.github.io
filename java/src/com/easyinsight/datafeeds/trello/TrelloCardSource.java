@@ -83,9 +83,6 @@ public class TrelloCardSource extends TrelloBaseSource {
                     JSONObject card = (JSONObject) cards.get(j);
                     IRow row = dataSet.createRow();
                     row.addValue(CARD_ID, card.get("id").toString());
-                    if ("Card 4".equals(card.get("name"))) {
-                        System.out.println("argh");
-                    }
                     JSONArray checklists = (JSONArray) card.get("checklists");
                     for (int k = 0; k < checklists.length(); k++) {
                         JSONObject checkListObject = (JSONObject) checklists.get(k);

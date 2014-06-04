@@ -386,6 +386,10 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
         }
     }
 
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
+
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);

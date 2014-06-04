@@ -74,6 +74,10 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         return includes;
     }
 
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
+
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);

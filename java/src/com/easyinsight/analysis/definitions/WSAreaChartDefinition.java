@@ -78,6 +78,10 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
 
     }
 
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
+
     @Override
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();

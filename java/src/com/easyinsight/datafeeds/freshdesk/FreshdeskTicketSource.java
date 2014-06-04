@@ -76,13 +76,13 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         int page = 1;
         do {
             ctr = 0;
-            List blah;
+            List responseList;
             if (page == 1) {
-                blah = runRestRequestForList("tickets.json?filter_name=all_tickets", client, freshdeskCompositeSource);
+                responseList = runRestRequestForList("tickets.json?filter_name=all_tickets", client, freshdeskCompositeSource);
             } else {
-                blah = runRestRequestForList("tickets.json?filter_name=all_tickets&page=" + page, client, freshdeskCompositeSource);
+                responseList = runRestRequestForList("tickets.json?filter_name=all_tickets&page=" + page, client, freshdeskCompositeSource);
             }
-            for (Object obj : blah) {
+            for (Object obj : responseList) {
                 ctr++;
                 Map map = (Map) obj;
                 String id = map.get("id").toString();

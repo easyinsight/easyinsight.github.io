@@ -162,7 +162,7 @@ public class WSYTDDefinition extends WSAnalysisDefinition {
         return measures;
     }
 
-    public void argh() {
+    public void handleFieldExtensions() {
         Map<String, List<AnalysisItem>> map = new LinkedHashMap<String, List<AnalysisItem>>();
         boolean firstPH = true;
         for (AnalysisItem field : measures) {
