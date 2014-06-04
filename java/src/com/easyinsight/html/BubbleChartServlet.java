@@ -60,8 +60,8 @@ public class BubbleChartServlet extends HtmlServlet {
         configureAxes(object, bubbleDefinition, bubbleDefinition.getXaxisMeasure(), bubbleDefinition.getYaxisMeasure());
 
         response.setContentType("application/json");
-        String argh = object.toString();
-        response.getOutputStream().write(argh.getBytes());
+        String jsonString = object.toString();
+        response.getOutputStream().write(jsonString.getBytes());
         response.getOutputStream().flush();
     }
 }

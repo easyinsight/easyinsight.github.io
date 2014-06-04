@@ -149,8 +149,8 @@ public class LineD3ChartServlet extends HtmlServlet {
         }
 
         response.setContentType("application/json");
-        String argh = object.toString();
-        response.getOutputStream().write(argh.getBytes());
+        String jsonString = object.toString();
+        response.getOutputStream().write(jsonString.getBytes());
         response.getOutputStream().flush();
     }
 }
