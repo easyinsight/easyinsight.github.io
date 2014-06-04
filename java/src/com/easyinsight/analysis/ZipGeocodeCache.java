@@ -30,7 +30,7 @@ public class ZipGeocodeCache {
 
     private Map<String, Point> pointMap = new WeakHashMap<String, Point>();
 
-    public void blah(DataSet dataSet, AnalysisItem zip) {
+    public void findLatLongForZips(DataSet dataSet, AnalysisItem zip) {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT LONGITUDE, LATITUDE FROM ZIP_CODE_GEOCODE WHERE ZIP_CODE = ?");
