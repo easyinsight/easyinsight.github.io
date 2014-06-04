@@ -35,8 +35,8 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
 
     protected static Map runRestRequest(String path, HttpClient client, Batchbook2CompositeSource parentDefinition) throws ReportException {
         String url = parentDefinition.getUrl() + "/api/v1";
-        String blah = url + path + (path.contains("?") ? "&" : "?") + "auth_token=" + parentDefinition.getToken();
-        HttpMethod restMethod = new GetMethod(blah);
+        String getURL = url + path + (path.contains("?") ? "&" : "?") + "auth_token=" + parentDefinition.getToken();
+        HttpMethod restMethod = new GetMethod(getURL);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
 
