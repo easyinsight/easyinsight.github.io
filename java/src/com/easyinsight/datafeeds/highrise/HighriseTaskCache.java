@@ -37,15 +37,16 @@ public class HighriseTaskCache extends HighRiseBaseSource {
         Map<String, String> peopleCache = new HashMap<String, String>();
         Map<String, String> categoryCache = new HashMap<String, String>();
         List<TaskInfo> tasks = new ArrayList<TaskInfo>();
-        tasks.addAll(getTasks(token.getTokenValue(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-        tasks.addAll(getTasks(token.getTokenValue(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-        tasks.addAll(getTasks(token.getTokenValue(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
+        Set<String> taskIDs = new HashSet<String>();
+        tasks.addAll(getTasks(token.getTokenValue(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat, taskIDs));
+        tasks.addAll(getTasks(token.getTokenValue(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat, taskIDs));
+        tasks.addAll(getTasks(token.getTokenValue(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat, taskIDs));
 
         for (HighriseAdditionalToken additionalToken : parentDefinition.getAdditionalTokens()) {
             try {
-                tasks.addAll(getTasks(additionalToken.getToken(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                tasks.addAll(getTasks(additionalToken.getToken(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
-                tasks.addAll(getTasks(additionalToken.getToken(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat));
+                tasks.addAll(getTasks(additionalToken.getToken(), "upcoming", url, parentDefinition, peopleCache, categoryCache, deadlineFormat, taskIDs));
+                tasks.addAll(getTasks(additionalToken.getToken(), "assigned", url, parentDefinition, peopleCache, categoryCache, deadlineFormat, taskIDs));
+                tasks.addAll(getTasks(additionalToken.getToken(), "completed", url, parentDefinition, peopleCache, categoryCache, deadlineFormat, taskIDs));
             } catch (Exception e) {
                 System.out.println("Failed to load tasks for token " + additionalToken.getToken());
             }
@@ -58,7 +59,7 @@ public class HighriseTaskCache extends HighRiseBaseSource {
     }
 
     private List<TaskInfo> getTasks(String apiToken, String path, String url, FeedDefinition parentDefinition, Map<String, String> peopleCache,
-                                    Map<String, String> categoryCache, DateFormat deadlineFormat) throws HighRiseLoginException, ParsingException, ParseException {
+                                    Map<String, String> categoryCache, DateFormat deadlineFormat, Set<String> taskIDs) throws HighRiseLoginException, ParsingException, ParseException {
         List<TaskInfo> taskInfos = new ArrayList<TaskInfo>();
         HttpClient client = getHttpClient(apiToken, "");
         Builder builder = new Builder();
@@ -71,7 +72,10 @@ public class HighriseTaskCache extends HighRiseBaseSource {
 
 
             String id = queryField(taskNode, "id/text()");
-
+            if (taskIDs.contains(id)) {
+                continue;
+            }
+            taskIDs.add(id);
             String categoryID = queryField(taskNode, "category-id/text()");
             String category = retrieveCategoryInfo(client, builder, categoryCache, categoryID, url, parentDefinition);
             String authorID = queryField(taskNode, "author-id/text()");

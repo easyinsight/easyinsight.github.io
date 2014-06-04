@@ -10,9 +10,12 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.documentation.DocReader;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.HTMLPolicy;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +28,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -114,9 +119,11 @@ public class ReportMarkdownServlet extends HttpServlet {
 
             EIConnection conn = Database.instance().getConnection();
             List<JSONObject> fields = new ArrayList<>();
+            List<JSONObject> filters = new ArrayList<>();
             try {
                 /*markdownBuilder.append("=='''Report Fields'''==\r\n\r\n");*/
                 WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                report.setLogReport(true);
                 jo.put("reportName", report.getName());
                 jo.put("reportID", report.getUrlKey());
                 Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
@@ -126,7 +133,7 @@ public class ReportMarkdownServlet extends HttpServlet {
                 for (AnalysisItem item : report.getAllAnalysisItems()) {
 
                     JSONObject fieldObject = new JSONObject();
-                    fieldObject.put("id", reportIDString + "-" + item.toDisplay());
+                    fieldObject.put("id", (reportIDString + "-" + item.toDisplay()).replaceAll(" ", "\\_"));
                     fieldObject.put("name", item.toDisplay());
                     String whereFrom = trace(item, item.getKey(), conn, feed);
                     fieldObject.put("whereFrom", HTMLPolicy.getPolicyFactory().sanitize(DocReader.parseMediaWiki(whereFrom)));
@@ -142,15 +149,32 @@ public class ReportMarkdownServlet extends HttpServlet {
                     //markdownBuilder.append(trace(item.getKey(), conn, feed));
 
                     /*markdownBuilder.append(item.toMarkdown(report.getDataFeedID(), addedItems, report, conn, feed));
-                    List<String> audits = insightRequestMetadata.getFieldAudits().get(item.toDisplay());
+                    */
+                    /*markdownBuilder.append("----\r\n\r\n");*/
+                    /*List<String> audits = insightRequestMetadata.getFieldAudits().get(item.toDisplay());
+                    StringBuilder sb = new StringBuilder();
                     if (audits != null) {
                         markdownBuilder.append("Events related to field on running report:\r\n\r\n");
                         for (String audit : audits) {
                             markdownBuilder.append("#").append(audit).append("\r\n\r\n");
                         }
                     }*/
-                    /*markdownBuilder.append("----\r\n\r\n");*/
                 }
+                List<ReportAuditEvent> events = dataSet.getAudits();
+                for (Map.Entry<String, List<String>> entry : insightRequestMetadata.getFieldAudits().entrySet()) {
+                    events.addAll(entry.getValue().stream().map(audit -> new ReportAuditEvent(ReportAuditEvent.FIELD, entry.getKey() + ": " + audit)).collect(Collectors.toList()));
+                }
+                for (Map.Entry<String, List<String>> entry : insightRequestMetadata.getFilterAudits().entrySet()) {
+                    events.addAll(entry.getValue().stream().map(audit -> new ReportAuditEvent(ReportAuditEvent.FILTER, entry.getKey() + ": " + audit)).collect(Collectors.toList()));
+                }
+                /*for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+                    JSONObject filterObject = new JSONObject();
+                    String name = filterDefinition.label(false);
+                    filterObject.put("id", (reportIDString + "-" + name).replaceAll(" ", "\\_"));
+                    filterObject.put("name", name);
+                    filterObject.put("whatIsFilter", HTMLPolicy.getPolicyFactory().sanitize(DocReader.parseMediaWiki(filterDefinition.toMarkdown(report.getDataFeedID(), addedItems, report, conn, feed))));
+                    filters.add(filterObject);
+                }*/
                 /*markdownBuilder.append("=='''Additional Fields'''==\r\n\r\n");
                 for (AnalysisItem item : report.getAddedItems()) {
                     markdownBuilder.append(item.toMarkdown(report.getDataFeedID(), addedItems, report, conn, feed));
@@ -163,19 +187,34 @@ public class ReportMarkdownServlet extends HttpServlet {
                     }
                     markdownBuilder.append("----\r\n\r\n");
                 }*/
+
+                JSONArray auditEvents = new JSONArray();
+                for (ReportAuditEvent event : events) {
+                    JSONObject auditEvent = new JSONObject();
+                    auditEvent.put("label", event.getEventLabel());
+                    auditEvents.put(auditEvent);
+                }
+
+                jo.put("reportEvents", auditEvents);
+
+                Usage u = new AnalysisService().whatUsesReport(report);
+                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
+                JSONObject usage = u.toJSON(md);
+                usage.put("report", report.toJSON(new HTMLReportMetadata(), new ArrayList<FilterDefinition>()));
+                jo.put("reportUsages", usage);
             } finally {
                 Database.closeConnection(conn);
             }
 
-            try {
 
-                jo.put("fields", fields);
-                resp.setContentType("application/json");
-                resp.getOutputStream().write(jo.toString().getBytes());
-                resp.getOutputStream().flush();
-            } catch (JSONException e) {
-                LogClass.error(e);
-            }
+
+            JSONObject reportContents = new JSONObject();
+            reportContents.put("fields", fields);
+            reportContents.put("filters", filters);
+            jo.put("reportContents", reportContents);
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(jo.toString().getBytes());
+            resp.getOutputStream().flush();
         } catch (Exception e) {
             LogClass.error(e);
         } finally {

@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
@@ -42,22 +43,45 @@ public class AsyncListServlet extends HtmlServlet {
         int displaystart = Integer.parseInt(request.getParameter("iDisplayStart"));
         int displaylength = Integer.parseInt(request.getParameter("iDisplayLength"));
 
-        // what's the sort column
-        String sortColumn = request.getParameter("iSortCol_0");
-        // which direction is it sorting
-        String sortDirection = request.getParameter("sSortDir_0");
+        WSListDefinition listDefinition = (WSListDefinition) report;
+
+
+
+
+
+        System.out.println(request.getParameter("iSortCol_1"));
 
         String uid = request.getParameter("uid");
+
         DataSet dataSet = DataService.listDataSetViaCache(report, insightRequestMetadata, conn, uid);
-        WSListDefinition listDefinition = (WSListDefinition) report;
-        if (sortColumn != null) {
-            AnalysisItem item = listDefinition.getColumns().get(Integer.parseInt(sortColumn));
-            dataSet.sort(item, sortDirection.equals("desc"));
+
+        RowComparator rowComparator = new RowComparator();
+        boolean sort = false;
+        for (int i = 0; i < listDefinition.getColumns().size(); i++) {
+            // what's the sort column
+            String sortColumn = request.getParameter("iSortCol_" + i);
+            // which direction is it sorting
+            String sortDirection = request.getParameter("sSortDir_" + i);
+
+            if (sortColumn != null) {
+                sort = true;
+                AnalysisItem item = listDefinition.getColumns().get(Integer.parseInt(sortColumn));
+                boolean descending = sortDirection.equals("desc");
+                rowComparator.addSortKey(item, !descending);
+            } else {
+                break;
+            }
+
+        }
+
+        if (sort) {
+            dataSet.sort(rowComparator);
         }
 
         java.util.List<AnalysisItem> items = new java.util.ArrayList<>(listDefinition.getColumns());
 
         Map<AnalysisItem, Link> linkMap = new HashMap<>();
+
 
         for (AnalysisItem headerItem : items) {
             if (headerItem.getLinks() != null) {
@@ -78,9 +102,13 @@ public class AsyncListServlet extends HtmlServlet {
         }
 
         JSONObject returnObject = new JSONObject();
+        JSONObject results = new JSONObject();
         JSONArray jsonRows = new JSONArray();
+        results.put("rows", jsonRows);
         int totalRecords = dataSet.getRows().size();
+        Map<String, Object> props = dataSet.getAdditionalProperties();
         dataSet = dataSet.subset(displaystart, displaystart + displaylength);
+        dataSet.setAdditionalProperties(props);
         for (IRow row : dataSet.getRows()) {
             JSONObject jsonRow = new JSONObject();
             int i = 0;
@@ -171,9 +199,25 @@ public class AsyncListServlet extends HtmlServlet {
             }
             jsonRows.put(jsonRow);
         }
+        if (listDefinition.isSummaryTotal()) {
+            JSONArray summaryData = new JSONArray();
+            for (AnalysisItem analysisItem : items) {
+                Value summary = (Value) dataSet.getAdditionalProperties().get("summary" + analysisItem.qualifiedName());
+                if (summary == null) {
+                    summaryData.put("");
+                } else {
+                    double doubleValue = summary.toDouble();
+                    String string = ExportService.createValue(md, analysisItem, new NumericValue(doubleValue), false);
+                    summaryData.put(string);
+                }
+            }
+            results.put("summaries", summaryData);
+        }
+        results.put("columnLength", listDefinition.getColumns().size());
         returnObject.put("iTotalRecords", totalRecords);
         returnObject.put("iTotalDisplayRecords", totalRecords);
-        returnObject.put("aaData", jsonRows);
+        returnObject.put("rowData", results);
+        System.out.println(returnObject);
         response.setContentType("application/json");
         response.getOutputStream().write(returnObject.toString().getBytes());
         response.getOutputStream().flush();

@@ -22,6 +22,7 @@ public class DataSet implements Serializable, Cloneable {
     private DataSetKeys dataSetKeys = new DataSetKeys();
     private String reportLog;
     private transient PipelineData pipelineData;
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     private List<DataSet> additionalSets = new ArrayList<DataSet>();
 
@@ -61,6 +62,14 @@ public class DataSet implements Serializable, Cloneable {
     public void copyState(DataSet dataSet) {
         additionalSets = dataSet.getAdditionalSets();
         audits = dataSet.getAudits();
+    }
+
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     public DataSet clone() throws CloneNotSupportedException {
@@ -292,6 +301,10 @@ public class DataSet implements Serializable, Cloneable {
 
     public void sort(AnalysisItem analysisItem, boolean descending) {
         Collections.sort(rows, new RowComparator(analysisItem, !descending));
+    }
+
+    public void sort(RowComparator rowComparator) {
+        Collections.sort(rows, rowComparator);
     }
 
     public List<IRow> subset(int number) {

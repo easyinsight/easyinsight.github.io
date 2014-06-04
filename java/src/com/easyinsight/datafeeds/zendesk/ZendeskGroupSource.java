@@ -66,11 +66,13 @@ public class ZendeskGroupSource extends ZendeskBaseSource {
                 Map m = queryList(nextPage, zendeskCompositeSource, httpClient);
 
                 JSONArray groupNodes = (JSONArray) m.get("groups");
-                for (int i = 0; i < groupNodes.size(); i++) {
-                    JSONObject groupNode = (JSONObject) groupNodes.get(i);
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(NAME), (String) groupNode.get("name"));
-                    row.addValue(keys.get(ID), String.valueOf(groupNode.get("id")));
+                if (groupNodes != null) {
+                    for (Object groupNode1 : groupNodes) {
+                        JSONObject groupNode = (JSONObject) groupNode1;
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(NAME), (String) groupNode.get("name"));
+                        row.addValue(keys.get(ID), String.valueOf(groupNode.get("id")));
+                    }
                 }
                 nextPage = (String) m.get("next_page");
             } while (nextPage != null);
