@@ -83,6 +83,10 @@ public class GaugeServlet extends HtmlServlet {
                     JSONArray benchmarkArray = new JSONArray();
                     benchmarkArray.put(benchmarkValue.toDouble());
                     valuesObject.put("markers", benchmarkArray);
+                } else {
+                    JSONArray benchmarkArray = new JSONArray();
+                    benchmarkArray.put(0);
+                    valuesObject.put("markers", benchmarkArray);
                 }
 
                 JSONArray ranges = new JSONArray();
