@@ -230,7 +230,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     public HighriseCustomFieldsCache getOrCreateCustomFieldCache(HttpClient httpClient, Date date) throws HighRiseLoginException, ParsingException, ParseException {
         if (customFieldsCache == null) {
             customFieldsCache = new HighriseCustomFieldsCache();
-            customFieldsCache.blah(httpClient, getUrl(), this, date, getOrCreateCache(httpClient));
+            customFieldsCache.retrieveCustomFields(httpClient, getUrl(), this, date, getOrCreateCache(httpClient));
         }
         return customFieldsCache;
     }
