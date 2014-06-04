@@ -121,13 +121,13 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
         SalesforceBaseDataSource salesforceBaseDataSource = (SalesforceBaseDataSource) parentDefinition;
         DataSet dataSet;
         try {
-            dataSet = argh(salesforceBaseDataSource);
+            dataSet = retrieveDataSet(salesforceBaseDataSource);
         } catch (HttpResponseException e) {
             if ("Unauthorized".equals(e.getMessage())) {
                 try {
                     salesforceBaseDataSource.refreshTokenInfo();
                     new FeedStorage().updateDataFeedConfiguration(salesforceBaseDataSource);
-                    return argh(salesforceBaseDataSource);
+                    return retrieveDataSet(salesforceBaseDataSource);
                 } catch (HttpResponseException hre) {
                     throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Salesforce data.", salesforceBaseDataSource));
                 } catch (Exception e1) {
@@ -144,7 +144,7 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
 
 
 
-    private DataSet argh(SalesforceBaseDataSource salesforceBaseDataSource) throws IOException, ParsingException {
+    private DataSet retrieveDataSet(SalesforceBaseDataSource salesforceBaseDataSource) throws IOException, ParsingException {
         DataSet dataSet = new DataSet();
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("SELECT+");
