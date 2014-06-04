@@ -296,19 +296,14 @@ public abstract class Pipeline {
 
     public DataSet toDataSet(DataSet dataSet) {
         for (IComponent component : components) {
-            //System.out.println(component.getClass() + " - " + dataSet.getRows());
             dataSet = component.apply(dataSet, pipelineData);
-            /*if (pipelineData.getReport() != null && pipelineData.getReport().isLogReport()) {
-                String componentName;
-                if (component instanceof DescribableComponent) {
-                    componentName = ((DescribableComponent) component).getDescription();
-                } else {
-                    componentName = component.getClass().getName();
-                }
-                logger.append("<h1>" + componentName + "</h1>");
-                logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, null, pipelineData.getInsightRequestMetadata()));
-            }*/
         }
+        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()), new HashMap<AnalysisItem, AnalysisItem>(),
+                pipelineData.getReport());
+        for (IComponent component : components) {
+            component.decorate(results);
+        }
+        dataSet.setAdditionalProperties(results.getAdditionalProperties());
         return dataSet;
     }
 
@@ -317,14 +312,6 @@ public abstract class Pipeline {
     public DataSet getResultSet() {
         return resultSet;
     }
-
-    /*
-    class com.easyinsight.pipeline.AggregationComponent -
-    [{Hours Cost=4.0, Hours=4.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
-    {Hours Cost=20.0, Hours=20.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
-    {Hours Cost=50.0, Hours=50.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203116, Time Tracking Project ID=1701498, Time Tracking User ID=203116, Expenses Project ID=1701498, User Default Hourly Rate=1.0, Project Name=Shivano Budgeted},
-    {Hours Cost=5000.0, Hours=5.0, Project ID=1701498, Expenses - User ID=203116, Expenses Total Cost=500.0, User ID=203115, Time Tracking Project ID=1701498, Time Tracking User ID=203115, Expenses Project ID=1701498, User Default Hourly Rate=1000.0, Project Name=Shivano Budgeted}]
-     */
     
     private StringBuilder logger = new StringBuilder();
 
@@ -332,17 +319,9 @@ public abstract class Pipeline {
         pipelineData.setConn(conn);
         try {
             for (IComponent component : components) {
-                //System.out.println(component.getClass() + " - " + dataSet.getRows().size());
-                /*if (pipelineData.getReport().isLogReport()) {
-                    logger.append("<h1>" + component.getClass().getName() + "</h1>");
-                    logger.append(ExportService.dataSetToHTMLTable(pipelineData.getReportItems(), dataSet, conn, pipelineData.getInsightRequestMetadata()));
-                }*/
                 long startTime = System.currentTimeMillis();
                 dataSet = component.apply(dataSet, pipelineData);
                 long endTime = System.currentTimeMillis();
-                /*if (pipelineData.getReport().isLogReport()) {
-                    System.out.println(dataSet.getRows().size() + " - " + pipelineData.getReportItems().size() + " - " + component.getClass().getName() + " - " + (endTime - startTime));
-                }*/
             }
         } finally {
             pipelineData.setConn(null);
