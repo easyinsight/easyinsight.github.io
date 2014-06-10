@@ -131,12 +131,48 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         }
     }
 
+    private boolean greaterThanOrEqualNodes(EvaluationVisitor node1, EvaluationVisitor node2) {
+        Value compare1 = Function.minusQuotes(node1.getResult());
+        Value compare2 = Function.minusQuotes(node2.getResult());
+        if (compare1.type() == Value.DATE || compare2.type() == Value.DATE) {
+            Calendar cal1 = Calendar.getInstance();
+            Calendar cal2 = Calendar.getInstance();
+
+            if (compare1.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) compare1;
+                cal1.setTime(dateValue.getDate());
+            } else {
+                cal1.setTimeInMillis(compare1.toDouble().longValue());
+            }
+
+            if (compare2.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) compare2;
+                cal2.setTime(dateValue.getDate());
+            } else {
+                cal2.setTimeInMillis(compare2.toDouble().longValue());
+            }
+
+            if (cal1.get(Calendar.YEAR) > cal2.get(Calendar.YEAR) ||
+                    (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) >= cal2.get(Calendar.DAY_OF_YEAR))) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (compare1.toDouble() >= compare2.toDouble()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
     public void visit(GreaterThanEqualToNode node) {
         EvaluationVisitor node1 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
-        if (greaterThanNodes(node1, node2) || equalsNodes(node1, node2))
+        if (greaterThanOrEqualNodes(node1, node2))
             result = new NumericValue(1);
         else
             result = new NumericValue(0);
