@@ -322,10 +322,8 @@ public class ExportService {
             queryStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         return reportDelivery;
