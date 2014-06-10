@@ -1,5 +1,6 @@
 package com.easyinsight.scheduler;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -239,8 +240,14 @@ public class Scheduler {
         int curClaimed = 0;
         try {
             session.getTransaction().begin();
-            Query query = session.createQuery("from ScheduledTask where status = ?").
-                setInteger(0, ScheduledTask.SCHEDULED);
+            Query query;
+            if (ConfigLoader.instance().isEmailRunner()) {
+                query = session.createQuery("from ScheduledTask where status = ?").
+                        setInteger(0, ScheduledTask.SCHEDULED);
+            } else {
+                query = session.createQuery("from ScheduledTask where status = ? and taskType = ?").
+                        setInteger(0, ScheduledTask.SCHEDULED).setInteger(1, ScheduledTask.OTHER);
+            }
             query.setMaxResults(executor.getMaximumPoolSize() - executor.getActiveCount());
             results = query.list();
             for (ScheduledTask task : results) {
