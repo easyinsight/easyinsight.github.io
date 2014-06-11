@@ -1,5 +1,9 @@
 package com.easyinsight.users;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
@@ -219,5 +223,16 @@ public class AccountStats {
 
     public void setMaxSpace(long maxSpace) {
         this.maxSpace = maxSpace;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("used_space", getUsedSpaceString());
+        jo.put("max_space", getMaxSpaceString());
+        jo.put("used_designers", Math.max(getCurrentUsers(), getUsedDesigners()));
+        jo.put("max_designers", Math.max(getAvailableUsers(), getCoreDesigners() + getAddonDesigners()));
+        jo.put("used_connections", getCurrentSmallBizConnections());
+        jo.put("max_connections", getCoreSmallBizConnections() + getAddonSmallBizConnections());
+        return jo;
     }
 }

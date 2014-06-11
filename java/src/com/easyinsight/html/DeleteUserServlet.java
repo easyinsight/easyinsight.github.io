@@ -1,7 +1,12 @@
 package com.easyinsight.html;
 
+import com.easyinsight.api.v3.JSONServlet;
+import com.easyinsight.api.v3.ResponseInfo;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.UserAccountAdminService;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,17 +21,23 @@ import java.io.IOException;
  * Time: 10:02 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DeleteUserServlet extends HttpServlet {
+public class DeleteUserServlet extends JSONServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SecurityUtil.populateThreadLocalFromSession(req);
+    protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        long userID = Long.parseLong(request.getParameter("userID"));
+        UserAccountAdminService service = new UserAccountAdminService();
+        service.deleteUser(userID);
+        JSONObject response = new JSONObject();
         try {
-            long userID = Long.parseLong(req.getParameter("userID"));
-            UserAccountAdminService service = new UserAccountAdminService();
-            service.deleteUser(userID);
-            resp.sendRedirect(RedirectUtil.getURL(req, "/app/html/account/users.jsp"));
-        } finally {
-            SecurityUtil.clearThreadLocal();
+            response.put("success", true);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
+        return new ResponseInfo(200, response.toString());
+    }
+
+    @Override
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

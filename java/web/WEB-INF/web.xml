@@ -651,6 +651,17 @@
         <display-name>PieChart</display-name>
         <servlet-class>com.easyinsight.html.PieChartServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>UserInfoServlet</servlet-name>
+        <display-name>UserInfo</display-name>
+        <servlet-class>com.easyinsight.api.v3.UserInfoServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AccountInfoServlet</servlet-name>
+        <display-name>AccountInfo</display-name>
+        <servlet-class>com.easyinsight.api.v3.AccountInfoServlet</servlet-class>
+    </servlet>
 
     <servlet>
         <servlet-name>DataSourceRefresh</servlet-name>
@@ -771,6 +782,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>AccountInfoServlet</servlet-name>
+        <url-pattern>/account.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>JSONAddRowsServlet</servlet-name>
         <url-pattern>/json/addRows</url-pattern>
     </servlet-mapping>
@@ -857,6 +873,11 @@
     <servlet-mapping>
         <servlet-name>DefineDataSource</servlet-name>
         <url-pattern>/xml/defineDataSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>UserInfoServlet</servlet-name>
+        <url-pattern>/userInfo.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

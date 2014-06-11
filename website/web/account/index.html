@@ -1,0 +1,55 @@
+<html ng-app="eiAccounts">
+<head>
+    <title>Easy Insight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/jquery-ui.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="/css/app.css" rel="stylesheet" />
+    <link href="/css/angular-busy.css" rel="stylesheet" />
+    <script type="text/javascript" src="/js/angular/angular.min.js"></script>
+    <script type="text/javascript" src="/js/angular/angular-route.min.js"></script>
+    <script type="text/javascript" src="/js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
+    <script type="text/javascript" src="/js/angular/promise-tracker.js"></script>
+    <script type="text/javascript" src="/js/angular/angular-busy.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-route-segment/1.3.0/angular-route-segment.js"></script>
+    <script type="text/javascript" src="/js/app/account/account.js"></script>
+    <base href="/" />
+</head>
+<body>
+<nav class="navbar_first navbar navbar-static-top navbar-inverse" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+        <ul class="nav navbar-nav">
+            <li><a href="/app/html" ng-click="$event.stopPropagation()">Home</a></li>
+            <li><a href="/app/html/connections.jsp" ng-click="$event.stopPropagation()">Connections</a></li>
+            <li><a href="/app/embeddedScheduleManagement.jsp" ng-click="$event.stopPropagation()">Scheduling</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="/app/whatsnew.jsp" ng-click="$event.stopPropagation()">What's New</a></li>
+            <li><a href="/app/docs" ng-click="$event.stopPropagation()">Help</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <i class="icon-user"></i>{{ user.username }} <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="/account/" ng-click="$event.stopPropagation()">Account Settings</a></li>
+                    <li class="divider"></li>
+                    <li><a href="/app/logoutAction.jsp" ng-click="$event.stopPropagation()">Sign Out</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div app-view-segment="0" />
+</body>
+</html>

@@ -1,6 +1,15 @@
 package com.easyinsight.users;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * User: James Boe
@@ -157,7 +166,53 @@ public class AccountTransferObject {
         account.setName(name);
         account.setApiEnabled(apiEnabled);
         account.setCreationDate(creationDate);
-        account.setSnappCloudId(snappCloudId);
+        account.setSnappCloudId(snappCloudId); // TODO: NUKE THIS
         return account;
     }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.DAY_LEVEL, null, md.dateFormat);
+        JSONObject jo = new JSONObject();
+        jo.put("name", getName());
+        jo.put("google_domain_name", getGoogleAppsDomain());
+        jo.put("max_users", getMaxUsers());
+        jo.put("max_size", getMaxSize());
+        jo.put("opt_in_email", isOptInEmail());
+        jo.put("account_state", getAccountState()); // TODO: BETTER
+        switch(getAccountType()) {
+            case Account.ENTERPRISE:
+                jo.put("account_type", "enterprise");
+                break;
+            case Account.PREMIUM:
+                jo.put("account_type", "premium");
+                break;
+            case Account.BASIC:
+                jo.put("account_type", "basic");
+                break;
+            case Account.ADMINISTRATOR:
+                jo.put("account_type", "administrator");
+                break;
+            case Account.PLUS:
+                jo.put("account_type", "plus");
+                break;
+            case Account.PROFESSIONAL:
+                jo.put("account_type", "professional");
+                break;
+            default:
+                jo.put("account_type", getAccountType());
+            break;
+        }
+        jo.put("pricing_model", getPricingModel());
+        jo.put("account_id", getAccountID());
+        jo.put("api_enabled", isApiEnabled());
+        jo.put("creation_date", dateFormat.format(getCreationDate()));
+        if(getNextBillDate() != null) {
+            JSONObject bill = new JSONObject();
+            jo.put("next_bill", bill);
+            bill.put("amount", NumberFormat.getCurrencyInstance(Locale.US).format(getNextBillAmount()));
+            bill.put("date", dateFormat.format(getNextBillDate()));
+        }
+        return jo;
+    }
+
 }

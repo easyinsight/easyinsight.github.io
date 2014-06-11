@@ -1,7 +1,10 @@
 package com.easyinsight.users;
 
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.preferences.UISettings;
 import com.easyinsight.util.RandomTextGenerator;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.util.Date;

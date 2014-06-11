@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-md-offset-1 col-md-10">
+        <h2>Your Easy Insight account ({{ account.name }})</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-offset-1 col-md-10">
+        <span ng-if="isEnterprise()">You have an enterprise licensed account with Easy Insight. </span>
+        <span ng-if="account.pricing_model == 0">You have a <strong>{{planName()}}</strong> account.</span>
+        You have <strong>{{ stats.used_designers }}</strong> of <strong> {{ stats.max_designers }}</strong> designers,
+        <strong>{{ stats.used_connections }}</strong> of <strong>{{ stats.max_connections }}</strong> small
+        business connections, and <strong>{{ stats.used_space }}</strong> of <strong>{{ stats.max_space }}</strong>
+        custom data storage used.
+    </div>
+</div>
+<div ng-if="!isEnterprise()">
+    <div class="row" ng-if="account.next_bill">
+        <div class="col-md-offset-1 col-md-10">You will be charged again on {{ account.next_bill.date }} for
+            {{ account.next_bill.amount }}.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-offset-1 col-md-10">
+            <a href="/app/billing/accountType.jsp" ng-click="$event.stopPropagation()">Upgrade / Downgrade Account</a>
+        </div>
+    </div>
+</div>
+<hr/>
+<div class="row">
+    <div class="col-md-offset-1 col-md-10">
+        <h2>Billing and Invoices</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-offset-1 col-md-10">
+        <a href="/app/billing/index.jsp" ng-click="$event.stopPropagation()">Configure Billing</a>
+    </div>
+</div>

@@ -3179,6 +3179,10 @@ public class ExportService {
         return style;
     }
 
+    public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException{
+        return createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
+    }
+
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         long userID = SecurityUtil.getUserID(false);
         int dateFormat;

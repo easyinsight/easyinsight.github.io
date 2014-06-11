@@ -7,6 +7,8 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.preferences.*;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.UserAccountAdminService;
@@ -14,12 +16,14 @@ import com.easyinsight.users.UserCreationResponse;
 import com.easyinsight.users.UserTransferObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.json.JSONException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: jamesboe
@@ -145,60 +149,18 @@ public class GetUsersServlet extends JSONServlet {
 
     @Override
     protected ResponseInfo processGet(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
-        JSONObject result = new JSONObject();
-        JSONArray userList = new JSONArray();
+        org.json.JSONObject result = new org.json.JSONObject();
         List<UserTransferObject> users = new UserAccountAdminService().getUsers();
-        for (UserTransferObject user : users) {
-            JSONObject userObject = new JSONObject();
-            userObject.put("email", user.getEmail());
-            userObject.put("user_name", user.getEmail());
-            userObject.put("first_name", user.getFirstName());
-            userObject.put("last_name", user.getName());
-            userObject.put("account_admin", user.isAccountAdmin());
-            userObject.put("analyst", user.isAnalyst());
-            userObject.put("initial_setup_done", user.isInitialSetupDone());
-            userObject.put("invoice_recipient", user.isInvoiceRecipient());
-            userObject.put("test_account_visible", user.isTestAccountVisible());
-            PreparedStatement stmt = conn.prepareStatement("SELECT PERSONA.PERSONA_NAME FROM PERSONA WHERE PERSONA_ID = ?");
-            stmt.setLong(1, user.getPersonaID());
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                userObject.put("persona", rs.getString(1));
-                List<UserDLS> dls = new PreferencesService().getUserDLS(user.getUserID(), user.getPersonaID());
-                JSONArray dlsInfo = new JSONArray();
-                for (UserDLS d : dls) {
-                    JSONObject dlsObject = new JSONObject();
-                    // api key, not name
-                    dlsObject.put("data_source", d.getDataSourceName());
-
-                    JSONArray filters = new JSONArray();
-
-                    for (UserDLSFilter dlsFilter : d.getUserDLSFilterList()) {
-                        FilterValueDefinition filter = (FilterValueDefinition) dlsFilter.getFilterDefinition();
-                        JSONObject filterObject = new JSONObject();
-                        filterObject.put("field", filter.getField().toDisplay());
-                        List<Object> filteredValues = filter.getFilteredValues();
-                        JSONArray values = new JSONArray();
-                        for (Object value : filteredValues) {
-                            values.add(value.toString());
-                        }
-                        filterObject.put("values", values);
-                        filters.add(filterObject);
-                    }
-                    dlsObject.put("filters", filters);
-
-                    dlsInfo.add(dlsObject);
-                }
-                userObject.put("dls", dlsInfo);
-            } else {
-                userObject.put("persona", "");
+        ExportMetadata md = ExportService.createExportMetadata(conn);
+        List<org.json.JSONObject> l = users.stream().sequential().map(a -> {
+            try {
+                return a.toJSON(md);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
-            stmt.close();
-            userObject.put("user_id", user.getUserName());
+        }).collect(Collectors.toList());
 
-            userList.add(userObject);
-        }
-        result.put("users", userList);
+        result.put("users", new org.json.JSONArray(l));
         ResponseInfo responseInfo = new ResponseInfo(200, result.toString());
         return responseInfo;
     }

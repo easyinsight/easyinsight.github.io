@@ -1,0 +1,34 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="btn-grp pull-right"><a href="/account/users/designer/new" class="btn">Add Designer</a>
+            <a href="/account/users/viewer/new" class="btn">Add Viewer</a></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div cg-busy="load" />
+        <div cg-busy="delete_promise" />
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+
+                <th>Email</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th style="width: 8em;"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-if="typeof(users) == 'undefined' || users.length == 0">
+                <td colspan="4">...</td>
+            </tr>
+            <tr ng-repeat="user in users">
+                <td><a href="/account/users/{{user.id}}">{{ user.email }}</a></td>
+                <td><a href="/account/users/{{user.id}}">{{ user.first_name }} {{ user.last_name }}</a></td>
+                <td><a href="/account/users/{{user.id}}">{{ user.designer ? "Designer" : "Viewer" }}</a></td>
+                <td><a ng-click="delete(user)">Delete</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
