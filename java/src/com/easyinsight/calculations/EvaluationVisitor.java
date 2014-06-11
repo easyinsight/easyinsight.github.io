@@ -183,7 +183,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         ((CalculationTreeNode) node.getChild(0)).accept(node1);
         EvaluationVisitor node2 = new EvaluationVisitor(row, analysisItem, calculationMetadata);
         ((CalculationTreeNode) node.getChild(1)).accept(node2);
-        if (greaterThanNodes(node1, node2) || equalsNodes(node1, node2))
+        if (greaterThanOrEqualNodes(node1, node2))
             result = new NumericValue(0);
         else
             result = new NumericValue(1);
