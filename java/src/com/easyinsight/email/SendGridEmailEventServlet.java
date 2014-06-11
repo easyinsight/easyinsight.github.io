@@ -4,9 +4,9 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,41 +40,43 @@ public class SendGridEmailEventServlet extends HttpServlet {
             for (Object aJsonArray : jsonArray) {
                 JSONObject eventObject = (JSONObject) aJsonArray;
                 String event = eventObject.get("event").toString();
-                String auditID = eventObject.getString("auditID");
-                String emailType = eventObject.getString("emailType");
-                System.out.println(auditID + " - " + emailType);
-                if ("ReportDelivery".equals(emailType)) {
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        PreparedStatement auditStmt = conn.prepareStatement("UPDATE REPORT_DELIVERY_AUDIT SET SUCCESSFUL = ?, MESSAGE = ? WHERE REPORT_DELIVERY_AUDIT_ID = ?");
-                        String message = null;
-                        int status = -1;
-                        if ("delivered".equals(event)) {
-                            status = SUCCESSFUL;
-                            message = "Successfully delivered";
-                        } else if ("dropped".equals(event)) {
-                            status = FAILED;
-                            message = req.getParameter("reason");
-                        } else if ("bounce".equals(event)) {
-                            status = FAILED;
-                            message = req.getParameter("reason");
+                if (eventObject.containsKey("auditID") && eventObject.containsKey("emailType")) {
+                    String auditID = eventObject.get("auditID").toString();
+                    String emailType = eventObject.get("emailType").toString();
+                    System.out.println(auditID + " - " + emailType);
+                    if ("ReportDelivery".equals(emailType)) {
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement auditStmt = conn.prepareStatement("UPDATE REPORT_DELIVERY_AUDIT SET SUCCESSFUL = ?, MESSAGE = ? WHERE REPORT_DELIVERY_AUDIT_ID = ?");
+                            String message = null;
+                            int status = -1;
+                            if ("delivered".equals(event)) {
+                                status = SUCCESSFUL;
+                                message = "Successfully delivered";
+                            } else if ("dropped".equals(event)) {
+                                status = FAILED;
+                                message = req.getParameter("reason");
+                            } else if ("bounce".equals(event)) {
+                                status = FAILED;
+                                message = req.getParameter("reason");
+                            }
+                            if (status != -1) {
+                                auditStmt.setInt(1, status);
+                                auditStmt.setString(2, message);
+                                auditStmt.setLong(3, Long.parseLong(auditID));
+                                auditStmt.executeUpdate();
+                            }
+                            auditStmt.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            Database.closeConnection(conn);
                         }
-                        if (status != -1) {
-                            auditStmt.setInt(1, status);
-                            auditStmt.setString(2, message);
-                            auditStmt.setLong(3, Long.parseLong(auditID));
-                            auditStmt.executeUpdate();
-                        }
-                        auditStmt.close();
-                    } catch (Exception e) {
-                        LogClass.error(e);
-                    } finally {
-                        Database.closeConnection(conn);
                     }
                 }
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            e.printStackTrace();
         }
     }
 }
