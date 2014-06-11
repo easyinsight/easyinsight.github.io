@@ -43,6 +43,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
         Date time = scheduleType.runTime(lastRunTime, now);
         if (time != null) {
             DeliveryScheduledTask deliveryTask = new DeliveryScheduledTask();
+            deliveryTask.setTaskType(ScheduledTask.EMAIL);
             deliveryTask.setActivityID(activityID);
             deliveryTask.setStatus(ScheduledTask.SCHEDULED);
             deliveryTask.setExecutionDate(time);

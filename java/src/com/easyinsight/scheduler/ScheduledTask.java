@@ -26,6 +26,9 @@ public abstract class ScheduledTask implements Runnable {
     public static final int FAILED = 4;
     public static final int INMEMORY = 5;
 
+    public static final int OTHER = 0;
+    public static final int EMAIL = 1;
+
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="scheduled_task_id")
@@ -40,6 +43,17 @@ public abstract class ScheduledTask implements Runnable {
     private Date startedDate;
     @Column(name="task_generator_id")
     private long taskGeneratorID;
+
+    @Column(name="task_type")
+    private int taskType;
+
+    public int getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(int taskType) {
+        this.taskType = taskType;
+    }
 
     public void run() {
         EIConnection conn = Database.instance().getConnection();

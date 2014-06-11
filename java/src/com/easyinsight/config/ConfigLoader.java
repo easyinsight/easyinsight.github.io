@@ -39,6 +39,7 @@ public class ConfigLoader {
     private int billingSystem;
 
     private boolean taskRunner;
+    private boolean emailRunner;
 
     private boolean billingEnabled;
 
@@ -48,6 +49,14 @@ public class ConfigLoader {
     private String databaseResponseQueue;
 
     private String memcachedUrl;
+
+    public boolean isEmailRunner() {
+        return emailRunner;
+    }
+
+    public void setEmailRunner(boolean emailRunner) {
+        this.emailRunner = emailRunner;
+    }
 
     public String getReportDeliveryQueue() {
         return reportDeliveryQueue;
@@ -254,6 +263,7 @@ public class ConfigLoader {
             merchantID = (String) properties.get("billing.blue.merchantKey");
 
             taskRunner = Boolean.valueOf((String) properties.get("taskrunner"));
+            emailRunner = Boolean.valueOf((String) properties.get("emailrunner"));
 
             localURL = (String) properties.get("localurl");
 
