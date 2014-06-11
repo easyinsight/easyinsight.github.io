@@ -1,7 +1,6 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.dataset.DataSet;
 
 /**
@@ -18,7 +17,7 @@ public class CoordinateComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {        
-        new ZipGeocodeCache().blah(dataSet, analysisZipCode);
+        new ZipGeocodeCache().findLatLongForZips(dataSet, analysisZipCode);
         return dataSet;
     }
 

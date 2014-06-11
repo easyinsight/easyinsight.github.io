@@ -18,6 +18,7 @@
 <script type="text/javascript" src="/js/visualizations/util.js"></script>
 <script type="text/javascript" src="/js/visualizations/chart.js"></script>
 <script type="text/javascript" src="/js/visualizations/list.js"></script>
+<script type="text/javascript" src="/js/visualizations/asyncList.js"></script>
 <script type="text/javascript" src="/js/color.js"></script>
 <script type="text/javascript" src="/js/helper.js"></script>
 

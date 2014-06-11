@@ -510,9 +510,9 @@ public class SecurityUtil {
                 return rs.getInt(1);
             } else {
                 if (isAccountAdmin()) {
-                    PreparedStatement blahStmt = conn.prepareStatement("SELECT GROUP_ACCOUNT_ID FROM COMMUNITY_GROUP WHERE GROUP_ACCOUNT_ID = ?");
-                    blahStmt.setLong(1, getAccountID());
-                    ResultSet blahRS = blahStmt.executeQuery();
+                    PreparedStatement getGroupAccountIDStmt = conn.prepareStatement("SELECT GROUP_ACCOUNT_ID FROM COMMUNITY_GROUP WHERE GROUP_ACCOUNT_ID = ?");
+                    getGroupAccountIDStmt.setLong(1, getAccountID());
+                    ResultSet blahRS = getGroupAccountIDStmt.executeQuery();
                     if (blahRS.next()) {
                         return Roles.OWNER;
                     } else {

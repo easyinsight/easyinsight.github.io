@@ -249,7 +249,7 @@ public class TokenService {
                 session.setAttribute("redirectTarget", redirectType);
                 session.setAttribute("dataSourceID", dataSource.getApiKey());
                 String uri = request.getLocationUri();
-                uri = uri + "&scope=READ_SHEETS&state=blah";
+                uri = uri + "&scope=READ_SHEETS&state=EI";
                 return new OAuthResponse(uri, true);
                 // https://www.smartsheet.com/b/authorize?response_type=code&client_id=dheu3dmkd32fhxme&redirect_uri=https%3A%2F%2Fmyapp.smartsheet.com%2Ftarget&scope=READ_SHEETS,WRITE_SHEETS&state=MY_STATE
                 // https://app.smartsheet.com/b/authorize?formName=fn_authorize&formAction=fa_loadAuthorize&response_type=code&client_id=ykzjc8ug4gz2wl85ct&redirect_uri=https%3A%2F%2Fwww.easy-insight.com%2Fapp%2Foauth&scope=READ_SHEETS

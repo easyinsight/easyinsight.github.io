@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IJoin;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
@@ -28,6 +29,88 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         factory.addField("Infusionsoft URL", "url");
         factory.addField("Infusionsoft API Key", "infusionApiKey");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
+    private Map<String, String> userCache;
+    private Map<String, String> leadStageCache;
+    private Map<String, String> leadStatusCache;
+    private Map<String, String> contactCache;
+    private Map<String, String> leadSourceCategoryCache;
+    private Map<String, String> affiliateCache;
+    private Map<String, String> productCache;
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.INFUSIONSOFT_STAGE.getType() ||
+                    s.getFeedType().getType() == FeedType.INFUSIONSOFT_USERS.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
+    }
+
+    public Map<String, String> getUserCache() {
+        return userCache;
+    }
+
+    public void setUserCache(Map<String, String> userCache) {
+        this.userCache = userCache;
+    }
+
+    public Map<String, String> getLeadStageCache() {
+        return leadStageCache;
+    }
+
+    public void setLeadStageCache(Map<String, String> leadStageCache) {
+        this.leadStageCache = leadStageCache;
+    }
+
+    public Map<String, String> getLeadStatusCache() {
+        return leadStatusCache;
+    }
+
+    public void setLeadStatusCache(Map<String, String> leadStatusCache) {
+        this.leadStatusCache = leadStatusCache;
+    }
+
+    public Map<String, String> getContactCache() {
+        return contactCache;
+    }
+
+    public void setContactCache(Map<String, String> contactCache) {
+        this.contactCache = contactCache;
+    }
+
+    public Map<String, String> getLeadSourceCategoryCache() {
+        return leadSourceCategoryCache;
+    }
+
+    public void setLeadSourceCategoryCache(Map<String, String> leadSourceCategoryCache) {
+        this.leadSourceCategoryCache = leadSourceCategoryCache;
+    }
+
+    public Map<String, String> getAffiliateCache() {
+        return affiliateCache;
+    }
+
+    public void setAffiliateCache(Map<String, String> affiliateCache) {
+        this.affiliateCache = affiliateCache;
+    }
+
+    public Map<String, String> getProductCache() {
+        return productCache;
+    }
+
+    public void setProductCache(Map<String, String> productCache) {
+        this.productCache = productCache;
     }
 
     public InfusionsoftCompositeSource() {
@@ -109,6 +192,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INFUSIONSOFT_EXPENSES);
         types.add(FeedType.INFUSIONSOFT_TAG);
         types.add(FeedType.INFUSIONSOFT_CONTACT_TO_TAG);
+        types.add(FeedType.INFUSIONSOFT_USERS);
         return types;
     }
 

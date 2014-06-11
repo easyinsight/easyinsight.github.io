@@ -22,6 +22,7 @@ public class DataSet implements Serializable, Cloneable {
     private DataSetKeys dataSetKeys = new DataSetKeys();
     private String reportLog;
     private transient PipelineData pipelineData;
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     private List<DataSet> additionalSets = new ArrayList<DataSet>();
 
@@ -61,6 +62,14 @@ public class DataSet implements Serializable, Cloneable {
     public void copyState(DataSet dataSet) {
         additionalSets = dataSet.getAdditionalSets();
         audits = dataSet.getAudits();
+    }
+
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     public DataSet clone() throws CloneNotSupportedException {
@@ -294,6 +303,10 @@ public class DataSet implements Serializable, Cloneable {
         Collections.sort(rows, new RowComparator(analysisItem, !descending));
     }
 
+    public void sort(RowComparator rowComparator) {
+        Collections.sort(rows, rowComparator);
+    }
+
     public List<IRow> subset(int number) {
         int index = Math.min(rows.size(), number);
         List<IRow> subsetRows = new ArrayList<IRow>(rows.subList(0, index));
@@ -305,6 +318,16 @@ public class DataSet implements Serializable, Cloneable {
             remainder = new ArrayList<IRow>();
         }
         return remainder;
+    }
+
+    public DataSet subset(int start, int end) {
+
+
+        int index = Math.min(rows.size(), end);
+        List<IRow> subsetRows = new ArrayList<IRow>(rows.subList(start, index));
+        DataSet copy = new DataSet(subsetRows);
+
+        return copy;
     }
 
     public void mergeWheres(List<IWhere> wheres) {

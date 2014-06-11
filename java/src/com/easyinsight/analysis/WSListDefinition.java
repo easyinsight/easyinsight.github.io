@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.ReportPropertiesIntention;
@@ -37,6 +38,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private String defaultColumnAlignment;
     private boolean rolloverIcon;
     private boolean multiLineHeaders;
+    private boolean async;
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
 
     public String getDefaultColumnAlignment() {
         return defaultColumnAlignment;
@@ -256,6 +266,131 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
     private JSONObject getAnalysisItemMap() throws JSONException {
         JSONObject analysisItemMap = new JSONObject();
+        JSONArray columnJSON = new JSONArray();
+        JSONObject columnClassJSON = new JSONObject();
+
+        JSONObject sorting = new JSONObject();
+        for (int i = 0; i < columns.size(); i++) {
+            AnalysisItem analysisItem = columns.get(i);
+            JSONObject columnObject = new JSONObject();
+            String className = String.valueOf(i);
+            columnObject.put("sClass", className);
+            columnJSON.put(columnObject);
+
+            JSONObject styleData = new JSONObject();
+            columnClassJSON.put(className, styleData);
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                TextReportFieldExtension tfe = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                if ("Center".equals(tfe.getAlign())) {
+                    styleData.put("align", "center");
+                } else if ("Right".equals(tfe.getAlign())) {
+                    styleData.put("align", "right");
+                } else {
+                    styleData.put("align", "left");
+                }
+                if (tfe.getFixedWidth() > 0) {
+                    // TODO: impl
+                }
+            } else {
+                styleData.put("align", "left");
+            }
+
+
+            if (analysisItem.getSortSequence() > 0) {
+                JSONArray array = new JSONArray();
+                array.put(String.valueOf(analysisItem.getItemPosition()));
+                array.put(analysisItem.getSort() == 2 ? "desc" : "asc");
+                sorting.put(String.valueOf(analysisItem.getSortSequence()), array);
+            }
+        }
+        analysisItemMap.put("columns", columnJSON);
+        analysisItemMap.put("classes", columnClassJSON);
+        analysisItemMap.put("sorting", sorting);
+        return analysisItemMap;
+    }
+
+    private String listReportToHTMLTableWithActualCSS() {
+
+
+
+        StringBuilder sb = new StringBuilder();
+        java.util.List<AnalysisItem> items = getColumns();
+
+
+
+
+        String backgroundColor1;
+        String backgroundColor2;
+
+        backgroundColor1 = ExportService.createHexString(getRowColor1());
+        backgroundColor2 = ExportService.createHexString(getRowColor2());
+
+        sb.append("<style type=\"text/css\">").
+                append(".reportTable").append(getAnalysisID()).append(" > tbody > tr:nth-child(odd) > td,\n" +
+                ".reportTable").append(getAnalysisID()).append(" > tbody > tr:nth-child(odd) > th {\n" +
+                "  background-color: ").append(backgroundColor1).append(";\n" +
+                "}").append("}");
+        sb.append(".reportTable").append(getAnalysisID()).append(" > tbody > tr:nth-child(even) > td,\n" +
+                ".reportTable").append(getAnalysisID()).append(" > tbody > tr:nth-child(even) > th {\n" +
+                "  background-color: ").append(backgroundColor2).append(";\n" +
+                "}").append("}");
+        /*sb.append(".reportTable").append(report.getAnalysisID()).append("{ font-size:").append(report.getFontSize()).append("px;\n").append("}");*/
+        sb.append("</style>");
+        sb.append("<table style=\"font-size:").append(getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+        sb.append("<thead>");
+        sb.append("<tr>");
+
+        for (AnalysisItem headerItem : items) {
+            sb.append("<th style=\"text-align:center\">");
+            sb.append(headerItem.toUnqualifiedDisplay());
+            sb.append("</th>");
+        }
+        sb.append("</tr>");
+        sb.append("</thead>");
+        sb.append("<tbody>");
+
+
+        sb.append("</tbody>");
+        if (isSummaryTotal()) {
+            sb.append("<tfoot>");
+            sb.append("<tr>");
+            for (AnalysisItem headerItem : items) {
+                sb.append("<td>");
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+            sb.append("</tfoot>");
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    @Override
+    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
+        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
+
+        if (async) {
+            list.put("tableHTML", listReportToHTMLTableWithActualCSS());
+            list.put("type", "serverList");
+            list.put("key", getUrlKey());
+            list.put("url", "/app/htmlExport");
+            list.put("properties", jsonProperties());
+            list.put("columnData", getAnalysisItemMap());
+            list.put("columns", columns.size());
+            list.put("uid", getUrlKey() + System.currentTimeMillis());
+        } else {
+            list.put("type", "list");
+            list.put("key", getUrlKey());
+            list.put("url", "/app/htmlExport");
+            list.put("properties", jsonProperties());
+            list.put("sorting", getSyncAnalysisItemMap());
+            list.put("columns", columns.size());
+        }
+        return list;
+    }
+
+    private JSONObject getSyncAnalysisItemMap() throws JSONException {
+        JSONObject analysisItemMap = new JSONObject();
         for (AnalysisItem i : columns) {
             if (i.getSortSequence() > 0) {
                 JSONArray array = new JSONArray();
@@ -265,18 +400,6 @@ public class WSListDefinition extends WSAnalysisDefinition {
             }
         }
         return analysisItemMap;
-    }
-
-    @Override
-    public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
-        JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
-        list.put("type", "list");
-        list.put("key", getUrlKey());
-        list.put("url", "/app/htmlExport");
-        list.put("properties", jsonProperties());
-        list.put("sorting", getAnalysisItemMap());
-        list.put("columns", columns.size());
-        return list;
     }
 
     @Override
@@ -292,6 +415,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         summaryRowBackgroundColor = (int) findNumberProperty(properties, "summaryRowBackgroundColor", 0x6699ff);
         rolloverIcon = findBooleanProperty(properties, "rolloverIcon", false);
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
+        async = findBooleanProperty(properties, "async", false);
         defaultColumnAlignment = findStringProperty(properties, "defaultColumnAlignment", "left");
     }
 
@@ -322,6 +446,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("summaryRowTextColor", summaryRowTextColor));
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
         properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
+        properties.add(new ReportBooleanProperty("async", async));
         properties.add(new ReportBooleanProperty("multiLineHeaders", multiLineHeaders));
         properties.add(new ReportStringProperty("defaultColumnAlignment", defaultColumnAlignment));
         return properties;

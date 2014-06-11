@@ -105,11 +105,11 @@ public class AnalysisService {
                         "DASHBOARD_GRID, DASHBOARD_GRID_ITEM WHERE DASHBOARD_GRID_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_GRID_ITEM.DASHBOARD_GRID_ID = DASHBOARD_GRID.DASHBOARD_GRID_ID");
                 PreparedStatement findParentInStackStmt = conn.prepareStatement("SELECT DASHBOARD_STACK.DASHBOARD_ELEMENT_ID  FROM " +
                         "DASHBOARD_STACK, DASHBOARD_STACK_ITEM WHERE DASHBOARD_STACK_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_STACK_ITEM.DASHBOARD_STACK_ID = DASHBOARD_STACK.DASHBOARD_STACK_ID");
-                Blah blah = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
-                if (blah == null) {
+                DashboardStructureStub dashboardStructureStub = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
+                if (dashboardStructureStub == null) {
                     throw new RuntimeException();
                 }
-                long dashboardID = blah.dashboardID;
+                long dashboardID = dashboardStructureStub.dashboardID;
                 rootStmt.close();
                 findParentInGridStmt.close();
                 findParentInStackStmt.close();
@@ -131,11 +131,11 @@ public class AnalysisService {
         return new Usage(reportsUsingAsAddon, dataSourcesBasedOn, dashboardsUsing);
     }
 
-    private Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
+    private DashboardStructureStub findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
         rootStmt.setLong(1, dashboardElementID);
         ResultSet rootRS = rootStmt.executeQuery();
         if (rootRS.next()) {
-            return new Blah(rootRS.getLong(1), rootRS.getLong(2));
+            return new DashboardStructureStub(rootRS.getLong(1), rootRS.getLong(2));
         }
         findParentInGridStmt.setLong(1, dashboardElementID);
         ResultSet gridRS = findParentInGridStmt.executeQuery();
@@ -150,11 +150,11 @@ public class AnalysisService {
         return null;
     }
 
-    private static class Blah {
+    private static class DashboardStructureStub {
         long dashboardID;
         long dataSourceID;
 
-        private Blah(long dashboardID, long dataSourceID) {
+        private DashboardStructureStub(long dashboardID, long dataSourceID) {
             this.dashboardID = dashboardID;
             this.dataSourceID = dataSourceID;
         }
@@ -162,7 +162,7 @@ public class AnalysisService {
 
     public String getBaseDocs() {
         try {
-            String html = DocReader.toHTML(null, FlexContext.getHttpRequest());
+            String html = DocReader.toHTML(null, FlexContext.getHttpRequest(), DocReader.APP);
             html = html.replace("<h2 id=\"Easy_Insight_Documentation\">", "<b>");
             html = html.replace("</h2>", "</b>");
             html = html.replace("Connections<ol>", "Connections<textformat leftmargin=\"50\">");

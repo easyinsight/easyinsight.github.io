@@ -43,7 +43,7 @@
         <to>/xml/Me</to>
     </rule>
     <rule>
-        <from>/news/([A-Za-z0-9]+)</from>
+        <from>/news/(.*?)</from>
         <to>/whatsnewweb.jsp?tag=$1</to>
     </rule>
     <rule>
@@ -124,6 +124,11 @@
     <rule>
         <from>^/html/report/([A-Za-z0-9]+)/data.json$</from>
         <to>/html/reportData?reportID=$1&amp;format=json</to>
+    </rule>
+
+    <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/describe.json$</from>
+        <to>/json/reportInfo?reportID=$1</to>
     </rule>
 
     <rule>
@@ -418,10 +423,24 @@
     </rule>
 
     <rule>
-        <from>^/docs/([A-Za-z0-9_\\-]+)</from>
+        <from>^/users.json</from>
+        <to>/json/getUsers</to>
+    </rule>
+
+    <rule>
+        <from>^/docs/(.*?)</from>
         <to>/docs/index.jsp?doc=$1</to>
     </rule>
 
+    <rule>
+        <from>^/websiteDocs/(.*?)</from>
+        <to>/websiteDocs/index.jsp?doc=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/sales</from>
+        <to>/newaccount/sales.jsp</to>
+    </rule>
 
 </urlrewrite>
 

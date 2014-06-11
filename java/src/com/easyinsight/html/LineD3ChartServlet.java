@@ -70,7 +70,6 @@ public class LineD3ChartServlet extends HtmlServlet {
                 axisObject.put("values", points);
                 axisObject.put("key", measure.toDisplay());
                 String color = colors.get(i % colors.size());
-                color = color.substring(1, color.length() - 1);
                 axisObject.put("color", color);
                 blahArray.put(axisObject);
                 i++;
@@ -149,8 +148,8 @@ public class LineD3ChartServlet extends HtmlServlet {
         }
 
         response.setContentType("application/json");
-        String argh = object.toString();
-        response.getOutputStream().write(argh.getBytes());
+        String jsonString = object.toString();
+        response.getOutputStream().write(jsonString.getBytes());
         response.getOutputStream().flush();
     }
 }

@@ -52,8 +52,16 @@ public class HtmlServlet extends HttpServlet {
 
             InputStream is = req.getInputStream();
             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-            Object o = parser.parse(is);
-            JSONObject filterObject = (JSONObject) o;
+            JSONObject filterObject;
+            Object o = null;
+            try {
+                o = parser.parse(is);
+
+                filterObject = (JSONObject) o;
+            } catch (Exception e) {
+                String filters = req.getParameter("filters");
+                filterObject = (JSONObject) parser.parse(filters);
+            }
             if(reportIDString == null)
                 reportIDString = (String) filterObject.get("reportID");
             InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
@@ -159,7 +167,8 @@ public class HtmlServlet extends HttpServlet {
             } finally {
                 Database.closeConnection(conn);
             }
-        } catch (ParseException e) {
+        } catch (Exception e) {
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             if (req.getSession().getAttribute("userID") != null) {

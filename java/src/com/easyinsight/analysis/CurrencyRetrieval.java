@@ -70,11 +70,11 @@ public class CurrencyRetrieval {
                     HttpClient httpClient = new HttpClient();
                     HttpMethod getMethod = new GetMethod("http://www.ecb.int/stats/eurofxref/eurofxref-daily.xml");
                     httpClient.executeMethod(getMethod);
-                    String blah = getMethod.getResponseBodyAsString();
-                    blah = blah.replace("xmlns:gesmes=\"http://www.gesmes.org/xml/2002-08-01\"", "");
-                    blah = blah.replace("xmlns=\"http://www.ecb.int/vocabulary/2002-08-01/eurofxref\"", "");
-                    blah = blah.replace("gesmes:", "");
-                    ByteArrayInputStream bais = new ByteArrayInputStream(blah.getBytes());
+                    String currencyResponse = getMethod.getResponseBodyAsString();
+                    currencyResponse = currencyResponse.replace("xmlns:gesmes=\"http://www.gesmes.org/xml/2002-08-01\"", "");
+                    currencyResponse = currencyResponse.replace("xmlns=\"http://www.ecb.int/vocabulary/2002-08-01/eurofxref\"", "");
+                    currencyResponse = currencyResponse.replace("gesmes:", "");
+                    ByteArrayInputStream bais = new ByteArrayInputStream(currencyResponse.getBytes());
                     Document doc = new Builder().build(bais);
                     Nodes currencyNodes = doc.query("/Envelope/Cube/Cube/Cube");
                     PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO CURRENCY_EXCHANGE_RATES (CURRENCY_CODE, CURRENCY_AMOUNT) VALUES (?, ?)");

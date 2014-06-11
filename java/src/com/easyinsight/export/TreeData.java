@@ -98,26 +98,26 @@ public class TreeData {
     public List<TreeRow> toTreeRows(PipelineData pipelineData) {
         List<TreeRow> rows = new ArrayList<TreeRow>();
 
-        List<Argh> children = new ArrayList<Argh>(map.values());
+        List<AbstractTreeRow> children = new ArrayList<AbstractTreeRow>(map.values());
 
-        Collections.sort(children, new Comparator<Argh>() {
+        Collections.sort(children, new Comparator<AbstractTreeRow>() {
 
-            public int compare(Argh argh, Argh argh1) {
-                if (argh instanceof HigherLevel) {
-                    HigherLevel higherLevel = (HigherLevel) argh;
-                    HigherLevel higherLevel1 = (HigherLevel) argh1;
+            public int compare(AbstractTreeRow abstractTreeRow, AbstractTreeRow abstractTreeRow1) {
+                if (abstractTreeRow instanceof HigherLevel) {
+                    HigherLevel higherLevel = (HigherLevel) abstractTreeRow;
+                    HigherLevel higherLevel1 = (HigherLevel) abstractTreeRow1;
                     return getComparison(hierarchy.getHierarchyLevels().get(0).getAnalysisItem(), higherLevel.value, higherLevel1.value);
-                } else if (argh instanceof LowerLevel) {
-                    LowerLevel lowerLevel = (LowerLevel) argh;
-                    LowerLevel lowerLevel1 = (LowerLevel) argh1;
+                } else if (abstractTreeRow instanceof LowerLevel) {
+                    LowerLevel lowerLevel = (LowerLevel) abstractTreeRow;
+                    LowerLevel lowerLevel1 = (LowerLevel) abstractTreeRow1;
                     return getComparison(hierarchy.getHierarchyLevels().get(0).getAnalysisItem(), lowerLevel.row.getValue(lowerLevel.analysisItem), lowerLevel1.row.getValue(lowerLevel1.analysisItem));
                 }
                 return 0;
             }
         });
 
-        for (Argh argh : children) {
-            TreeRow treeRow = argh.toTreeRow(pipelineData);
+        for (AbstractTreeRow abstractTreeRow : children) {
+            TreeRow treeRow = abstractTreeRow.toTreeRow(pipelineData);
             rows.add(treeRow);
 
         }
@@ -125,19 +125,19 @@ public class TreeData {
         return rows;
     }
 
-    private Map<Value, Argh> map = new LinkedHashMap<Value, Argh>();
+    private Map<Value, AbstractTreeRow> map = new LinkedHashMap<Value, AbstractTreeRow>();
 
     private Map<AnalysisItem, Aggregation> grandTotalTotals = new HashMap<AnalysisItem, Aggregation>();
 
     public void addRow(IRow row) {
         AnalysisItem analysisItem = hierarchy.getHierarchyLevels().get(0).getAnalysisItem();
         Value value = row.getValue(analysisItem);
-        Argh argh = map.get(value);
-        if (argh == null) {
-            argh = new HigherLevel(analysisItem, hierarchy, 0, null);
-            map.put(value, argh);
+        AbstractTreeRow abstractTreeRow = map.get(value);
+        if (abstractTreeRow == null) {
+            abstractTreeRow = new HigherLevel(analysisItem, hierarchy, 0, null);
+            map.put(value, abstractTreeRow);
         }
-        argh.addRow(row);
+        abstractTreeRow.addRow(row);
     }
 
     public static String rgbToString(float r, float g, float b) {
@@ -147,8 +147,8 @@ public class TreeData {
         return rs + gs + bs;
     }
 
-    private class HigherLevel extends Argh {
-        private Map<Map<String, Value>, Argh> map = new LinkedHashMap<Map<String, Value>, Argh>();
+    private class HigherLevel extends AbstractTreeRow {
+        private Map<Map<String, Value>, AbstractTreeRow> map = new LinkedHashMap<Map<String, Value>, AbstractTreeRow>();
         private AnalysisItem level;
         private AnalysisHierarchyItem hierarchy;
         private int index;
@@ -197,16 +197,16 @@ public class TreeData {
                 }
             }
             keyMap.put(nextItem.qualifiedName(), value);
-            Argh argh = map.get(keyMap);
-            if (argh == null) {
+            AbstractTreeRow abstractTreeRow = map.get(keyMap);
+            if (abstractTreeRow == null) {
                 if ((index + 1) == (hierarchy.getHierarchyLevels().size() - 1)) {
-                    argh = new LowerLevel(nextItem);
+                    abstractTreeRow = new LowerLevel(nextItem);
                 } else {
-                    argh = new HigherLevel(nextItem, hierarchy, index + 1, this);
+                    abstractTreeRow = new HigherLevel(nextItem, hierarchy, index + 1, this);
                 }
-                map.put(keyMap, argh);
+                map.put(keyMap, abstractTreeRow);
             }
-            argh.addRow(row);
+            abstractTreeRow.addRow(row);
             String key = createKey();
             aggregateLevel = masterIndex.get(key);
         }
@@ -233,12 +233,12 @@ public class TreeData {
 
             treeRow.setGroupingColumn(this.value);
 
-            List<Argh> arghs = new ArrayList<Argh>(map.values());
+            List<AbstractTreeRow> abstractTreeRows = new ArrayList<AbstractTreeRow>(map.values());
 
 
 
-            for (Argh argh : arghs) {
-                TreeRow childRow = argh.toTreeRow(pipelineData);
+            for (AbstractTreeRow abstractTreeRow : abstractTreeRows) {
+                TreeRow childRow = abstractTreeRow.toTreeRow(pipelineData);
                 treeRow.getChildren().add(childRow);
             }
 
@@ -388,15 +388,15 @@ public class TreeData {
                 sb.append("</tr>");
 
             }
-            for (Argh argh : map.values()) {
-                sb.append(argh.toHTML());
+            for (AbstractTreeRow abstractTreeRow : map.values()) {
+                sb.append(abstractTreeRow.toHTML());
             }
 
             return sb.toString();
         }
     }
 
-    private class LowerLevel extends Argh {
+    private class LowerLevel extends AbstractTreeRow {
         private IRow row;
         private AnalysisItem analysisItem;
 
@@ -502,7 +502,7 @@ public class TreeData {
         }
     }
 
-    private abstract class Argh {
+    private abstract class AbstractTreeRow {
         public void addRow(IRow row) {
 
         }

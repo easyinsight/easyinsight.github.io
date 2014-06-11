@@ -5,7 +5,7 @@
 <html lang="en">
 <%
     String doc = request.getParameter("doc");
-    String html = DocReader.toHTML(doc, request);
+    String html = DocReader.toHTML(doc, request, DocReader.APP);
     String userName = (String) session.getAttribute("userName");
     if (userName != null) {
         com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
@@ -23,7 +23,7 @@
 <body>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.NONE %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.HELP %>"/>
 </jsp:include>
 <div class="container corePageWell">
     <%= html %>

@@ -29,6 +29,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String LEAD_SOURCE_ID = "LeadSourceId";
     public static final String NAME = "Name";
     public static final String EMAIL = "Email";
+    public static final String CONTACT_COUNT = "ContactCount";
 
     public InfusionsoftContactSource() {
         setFeedName("Contacts");
@@ -39,49 +40,22 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         return FeedType.INFUSIONSOFT_CONTACTS;
     }
 
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, COMPANY_ID, FIRST_NAME, LAST_NAME, DATE_CREATED);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(ID), "Contact ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(COMPANY_ID), "Contact Company ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(FIRST_NAME), "First Name"));
-        analysisitems.add(new AnalysisDimension(keys.get(LAST_NAME), "Last Name"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), "Contact Creation Date", AnalysisDateDimension.DAY_LEVEL, true));
-        Key nameKey = keys.get(NAME);
-        if (nameKey == null) {
-            nameKey = new NamedKey(NAME);
-        }
-        analysisitems.add(new AnalysisDimension(nameKey, "Name"));
-        Key leadSourceID = keys.get(LEAD_SOURCE_ID);
-        if (leadSourceID == null) {
-            leadSourceID = new NamedKey(LEAD_SOURCE_ID);
-        }
-        Key email = keys.get(EMAIL);
-        if (email == null) {
-            email = new NamedKey(EMAIL);
-        }
-        analysisitems.add(new AnalysisDimension(leadSourceID, "Lead Source ID"));
-        analysisitems.add(new AnalysisDimension(email, "Email"));
-        InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
-        List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-1);
-        if (customFields != null) {
-            for (CustomField customField : customFields) {
-                analysisitems.add(customField.createAnalysisItem(keys));
-            }
-        }
-        return analysisitems;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(ID, new AnalysisDimension("Contact ID"));
+        fieldBuilder.addField(COMPANY_ID, new AnalysisDimension("Contact Company ID"));
+        fieldBuilder.addField(FIRST_NAME, new AnalysisDimension("First Name"));
+        fieldBuilder.addField(LAST_NAME, new AnalysisDimension("Last Name"));
+        fieldBuilder.addField(LEAD_SOURCE_ID, new AnalysisDimension("Lead Source ID"));
+        fieldBuilder.addField(NAME, new AnalysisDimension("Contact Name"));
+        fieldBuilder.addField(EMAIL, new AnalysisDimension("Email"));
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension("Contact Creation Date"));
+        fieldBuilder.addField(CONTACT_COUNT, new AnalysisMeasure("Number of Contacts"));
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            DataSet dataSet = query("Contact", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(NAME));
+            DataSet dataSet = query("Contact", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(NAME, CONTACT_COUNT));
             for (IRow row : dataSet.getRows()) {
                 String firstName = row.getValue(keys.get(FIRST_NAME)).toString();
                 String lastName = row.getValue(keys.get(LAST_NAME)).toString();
@@ -94,6 +68,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
                     name = firstName;
                 }
                 row.addValue(keys.get(NAME), name);
+                row.addValue(keys.get(CONTACT_COUNT), 1);
             }
             return dataSet;
         } catch (Exception e) {

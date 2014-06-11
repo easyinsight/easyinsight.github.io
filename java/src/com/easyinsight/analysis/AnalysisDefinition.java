@@ -964,21 +964,21 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         for (AnalysisItem analysisItem : reportStructure.values()) {
-            blah(analysisItem, reportReplacementMap, session);
+            cleanupField(analysisItem, reportReplacementMap, session);
         }
         for (FilterDefinition filterDefinition : getFilterDefinitions()) {
             if (filterDefinition.getField() != null) {
-                blah(filterDefinition.getField(), reportReplacementMap, session);
+                cleanupField(filterDefinition.getField(), reportReplacementMap, session);
             }
         }
         for (AnalysisItem addedItem : getAddedItems()) {
-            blah(addedItem, reportReplacementMap, session);
+            cleanupField(addedItem, reportReplacementMap, session);
         }
         for (JoinOverride joinOverride : getJoinOverrides()) {
             AnalysisItem sourceItem = joinOverride.getSourceItem();
             AnalysisItem targetItem = joinOverride.getTargetItem();
-            blah(sourceItem, reportReplacementMap, session);
-            blah(targetItem, reportReplacementMap, session);
+            cleanupField(sourceItem, reportReplacementMap, session);
+            cleanupField(targetItem, reportReplacementMap, session);
         }
         for (ReportStub reportStub : reportStubs) {
             if (reportReplacementMap.containsKey(reportStub.getReportID())) {
@@ -987,11 +987,11 @@ public class AnalysisDefinition implements Cloneable {
         }
     }
 
-    private void blah(AnalysisItem analysisItem, Map<Long, AnalysisDefinition> reportReplacementMap, Session session) {
+    private void cleanupField(AnalysisItem analysisItem, Map<Long, AnalysisDefinition> reportReplacementMap, Session session) {
             //Key key = (Key) Database.deproxy(analysisItem.getKey());
-        Key argh = (Key) Database.deproxy(analysisItem.getKey());
-        if (argh instanceof ReportKey) {
-                ReportKey reportKey = (ReportKey) argh;
+        Key deproxiedKey = (Key) Database.deproxy(analysisItem.getKey());
+        if (deproxiedKey instanceof ReportKey) {
+                ReportKey reportKey = (ReportKey) deproxiedKey;
                 //reportKey.afterLoad();
                 if (reportReplacementMap.containsKey(reportKey.getReportID())) {
                     ReportKey cloneKey = new ReportKey();

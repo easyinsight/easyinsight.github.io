@@ -63,8 +63,6 @@
 
                         <p><%= account.getCoreSmallBizConnections() + account.getAddonSmallBizConnections() %> Small Business Connections
                         </p>
-                        <p><%= Account.humanReadableByteCount(account.getCoreStorage() + (long) account.getAddonStorageUnits() * 250000000L, true) %> Custom Data Storage
-                        </p>
                         <p>Billed <%= account.billingInterval() %>
                         </p>
                     </div>

@@ -77,24 +77,6 @@
                         <span><strong>Additional Connections:</strong></span>
                     </div>
 
-                    <div style="width:300px; font-size: 16px">
-                        <div style="float:right">
-                            <strong><%= accountTypeChange.storageString(account.getAddonStorageUnits()) %></strong>
-                        </div>
-                        <span><strong>Additional Storage:</strong></span>
-                    </div>
-                        <%
-                            if (account.getEnterpriseAddonCost() > 0) {
-                        %>
-                    <div style="width:300px; font-size: 16px">
-                        <div style="float:right">
-                            <strong><%= account.enterpriseCostString() %></strong>
-                        </div>
-                        <span><strong>Enterprise Addon Cost:</strong></span>
-                    </div>
-                        <%
-                            }
-                        %>
                     <br>
                     <div style="width:300px; font-size: 16px">
                         <div style="float:right">

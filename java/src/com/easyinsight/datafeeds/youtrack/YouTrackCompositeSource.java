@@ -205,4 +205,10 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         return Arrays.asList(new ChildConnection(FeedType.YOUTRACK_PROJECTS, FeedType.YOUTRACK_TASKS, YouTrackProjectSource.PROJECT_ID, YouTrackIssueSource.PROJECT),
             new ChildConnection(FeedType.YOUTRACK_TASKS, FeedType.YOUTRACK_TIME, YouTrackIssueSource.ID, YoutrackTimeSource.ISSUE_ID));
     }
+
+    @Override
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return Arrays.asList(new ChildConnection(FeedType.YOUTRACK_PROJECTS, FeedType.YOUTRACK_TASKS, YouTrackProjectSource.PROJECT_ID, YouTrackIssueSource.PROJECT),
+                new ChildConnection(FeedType.YOUTRACK_TASKS, FeedType.YOUTRACK_TIME, YouTrackIssueSource.ID, YoutrackTimeSource.ISSUE_ID));
+    }
 }

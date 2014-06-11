@@ -1,0 +1,351 @@
+body {
+    margin:0 auto;
+    padding:0;
+    width:100%;
+    text-align: center;
+    /*background-image:url('/images/bgnoise.png');*/
+}
+
+p {
+    text-align:left;
+}
+
+li {
+    text-align:left;
+}
+
+.navbar-main {
+    margin-bottom: 0;
+    background-color: #ffffff;
+}
+
+.navbar-main-item {
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+
+
+.navbar .navbar-nav > .active > a {
+    background-color: #f8f8f8;
+}
+
+.nav > li > a:hover,
+.nav > li > a:focus {
+    text-decoration: none;
+    background-color: #000000;
+}
+
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+    color: #FFFFFF;
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+    color: #000000;
+}
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:focus {
+    color: #555555;
+}
+
+.navbar-subheader > .active > li > a {
+    color: #333333;
+}
+
+.navbar-brand,
+.navbar-nav > li > a {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.navbar-subheader .navbar-nav > .active > a {
+    background-color: #777777;
+}
+
+.navbar-subheader .navbar-brand,
+.navbar-subheader .navbar-nav > li > a {
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.navbar-static-top,
+.navbar-fixed-top,
+.navbar-fixed-bottom {
+    border-radius: 0;
+}
+
+.btn-inverse {
+    color: #ffffff;
+    background-color: #333333;
+    border-color: #303030;
+}
+
+.btn-inverse:hover,
+.btn-inverse:focus,
+.btn-inverse:active,
+.btn-inverse.active,
+.open .dropdown-toggle.btn-inverse {
+    color: #ffffff;
+    background-color: #222222;
+    border-color: #202020;
+}
+
+.btn-inverse:active,
+.btn-inverse.active,
+.open .dropdown-toggle.btn-inverse {
+    background-image: none;
+}
+
+.btn-inverse.disabled,
+.btn-inverse[disabled],
+fieldset[disabled] .btn-inverse,
+.btn-inverse.disabled:hover,
+.btn-inverse[disabled]:hover,
+fieldset[disabled] .btn-inverse:hover,
+.btn-inverse.disabled:focus,
+.btn-inverse[disabled]:focus,
+fieldset[disabled] .btn-inverse:focus,
+.btn-inverse.disabled:active,
+.btn-inverse[disabled]:active,
+fieldset[disabled] .btn-inverse:active,
+.btn-inverse.disabled.active,
+.btn-inverse[disabled].active,
+fieldset[disabled] .btn-inverse.active {
+    background-color: #272727;
+    border-color: #242424;
+}
+
+.thumbnail,
+.img-thumbnail {
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.075);
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.075);
+}
+
+.stackButton {
+    padding: 0 15px;
+}
+
+.navbar {
+    min-height:36px;
+    margin-bottom:20px;
+}
+
+.website-navbar {
+    min-height:62px;
+    margin-bottom:0;
+    border: 0;
+    border-radius: 0;
+    padding-right: 20px;
+}
+
+.fontA {
+    font-family: "Cabin",serif;
+    color: #1c5c76;
+}
+.navbar-subheader {
+    min-height:40px;
+    margin-bottom: 0;
+    margin-top: 0;
+    background-color: #272727;
+    color: #FFFFFF;
+}
+
+.screenshotDiv {
+    background-color: #444455;
+    padding-top: 20px;
+    padding-bottom:20px;
+}
+
+.navbar-subheader-item > li > a {
+    font-size:16px;
+    color: #EFEFEF;
+}
+
+@media (min-width: 768px) {
+    .navbar-subheader .navbar-nav {
+        display: inline-block;
+        float: none;
+    }
+}
+
+.navbar-toggle {
+    border-color: #333;
+}
+.navbar-toggle:hover,
+.navbar-toggle:focus {
+    background-color: #333;
+}
+.navbar-toggle .icon-bar {
+    background-color: #666;
+    color:#333;
+}
+
+.corePageWell {
+    background-color: #FFFFFF;
+    /*border-style: solid;
+    border-width: 1px;
+    border-color: #CCCCCC;
+    border-radius: 5px;*/
+    padding: 10px;
+    margin-top:10px;
+}
+
+h2 {
+    font-size: 20px;
+    font-family: "ProximaNova","Helvetica Neue",helvetica,arial,sans-serif;
+    font-weight: normal;
+    color: #770000;
+}
+
+.eiBrand {
+    padding-top:5px;
+    padding-left:20px;
+}
+
+
+
+.dragDropDone {
+    font-size:24px;
+    color:#FFFFFF;
+    padding-top:25px;
+    width: 100%;
+    text-align: center;
+}
+
+.trialDiv {
+    background-color: #272727;
+}
+
+.trialTryEasyInsightNow {
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+#newFooter {
+    color:#FCE9E9;
+    text-align: left;
+    margin-top: 10px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    background-color: #282828;
+}
+
+#trialBarLeft {
+    float:left;
+    font-size: 18px;
+    padding-left: 15px;
+    color: #FFFFFF;
+    margin-top: 10px;
+}
+
+.trialBarRight {
+    float:right;
+    font-size: 18px;
+    padding-right: 15px;
+    margin-left:40px;
+    color: #FFFFFF;
+    margin-top: 10px;
+}
+
+.trialBarRight > a {
+    color:#FFFFFF;
+}
+
+.trialBarRight > a:visited {
+    color:#FFFFFF;
+}
+
+.trialBarRight > a:hover {
+    color:#FFFFFF;
+}
+
+.trialBarRight > a:active {
+    color:#FFFFFF;
+}
+
+#newFooter a {
+    color:#FCE9E9;
+}
+
+.customerQuoteText {
+    font-size:12px;
+    font-family:'Cabin',arial,serif;
+}
+
+.customerQuotePerson {
+    font-size:13px;
+    font-family:'Cabin',arial,serif;
+}
+
+.navbar-nav > .open > a,
+.navbar-nav > .open > a:hover,
+.navbar-nav > .open > a:focus {
+    color: #fff;
+    background-color: #0084b4;
+}
+
+.navbar-nav > .open > li > a,
+.navbar-nav > .open > li > a:hover,
+.navbar-nav > .open > li > a:focus {
+    color: #fff;
+    background-color: #0084b4;
+}
+
+.navbar-main-item > li > a:hover {
+    color: #fff !important;
+}
+
+.navbar-subheader-item > li > a:hover {
+    color: #fff !important;
+}
+
+.copyright {
+    text-align: center;
+    padding-top: 15px;
+}
+
+@media (max-width: 768px) {
+    .navbar-subheader {
+        background-color: #FFFFFF;
+    }
+
+    .navbar-subheader-item > li > a {
+        font-size:16px;
+        font-family:"Helvetica Neue", Helvetica, sans-serif;
+        color: #000000;
+    }
+
+    .navbar-main-item > li > a {
+        font-size:16px;
+        font-family:"Helvetica Neue", Helvetica, sans-serif;
+        color: #000000;
+    }
+}
+
+p.disclaimer {
+    font-size:10px;
+    padding-left:20px;
+}
+
+.connectionLogoImage {
+    margin-top: 20px;
+    height: 100px;
+}
+
+.connectionText {
+
+}
+
+.connectionHR {
+    color: #666666; border-color: #666666; background-color: #666666; height: 2px; border: 0;
+}
+
+.connectionCategoryHeadline {
+    margin-top:0;margin-bottom:0
+}
+
+.sidedocs a {
+    color: #333333;
+}

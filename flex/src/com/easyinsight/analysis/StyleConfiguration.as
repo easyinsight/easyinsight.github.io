@@ -211,6 +211,7 @@ public class StyleConfiguration {
         if (report is ListDefinition) {
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", ListDefinition(report).summaryTotal, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Show Line Numbers", "showLineNumbers", ListDefinition(report).showLineNumbers, report));
+            items.addItem(new CheckBoxReportFormItem("HTML Async Load", "async", ListDefinition(report).async, report));
             items.addItem(new ColorReportFormItem("Text Color", "textColor", ListDefinition(report).textColor, report));
             items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", ListDefinition(report).headerTextColor, report));
             items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", ListDefinition(report).rowColor1, report));

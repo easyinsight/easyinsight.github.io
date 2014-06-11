@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.core.*;
@@ -9,6 +10,7 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.dataset.CacheableDataSet;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.export.TreeData;
@@ -20,6 +22,7 @@ import com.easyinsight.pipeline.StandardReportPipeline;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.util.ServiceUtil;
+import net.spy.memcached.MemcachedClient;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -550,12 +554,12 @@ public class DataService {
                         "DASHBOARD_GRID, DASHBOARD_GRID_ITEM WHERE DASHBOARD_GRID_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_GRID_ITEM.DASHBOARD_GRID_ID = DASHBOARD_GRID.DASHBOARD_GRID_ID");
                 PreparedStatement findParentInStackStmt = conn.prepareStatement("SELECT DASHBOARD_STACK.DASHBOARD_ELEMENT_ID  FROM " +
                         "DASHBOARD_STACK, DASHBOARD_STACK_ITEM WHERE DASHBOARD_STACK_ITEM.DASHBOARD_ELEMENT_ID = ? AND DASHBOARD_STACK_ITEM.DASHBOARD_STACK_ID = DASHBOARD_STACK.DASHBOARD_STACK_ID");
-                Blah blah = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
-                if (blah == null) {
+                DashboardStructureStub dashboardStructureStub = findDashboard(dashboardElementID, rootStmt, findParentInGridStmt, findParentInStackStmt);
+                if (dashboardStructureStub == null) {
                     throw new RuntimeException();
                 }
-                dataSourceID = blah.dataSourceID;
-                SecurityUtil.authorizeDashboard(blah.dashboardID);
+                dataSourceID = dashboardStructureStub.dataSourceID;
+                SecurityUtil.authorizeDashboard(dashboardStructureStub.dashboardID);
                 rootStmt.close();
                 findParentInGridStmt.close();
                 findParentInStackStmt.close();
@@ -570,11 +574,11 @@ public class DataService {
         }
     }
 
-    private Blah findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
+    private DashboardStructureStub findDashboard(long dashboardElementID, PreparedStatement rootStmt, PreparedStatement findParentInGridStmt, PreparedStatement findParentInStackStmt) throws SQLException {
         rootStmt.setLong(1, dashboardElementID);
         ResultSet rootRS = rootStmt.executeQuery();
         if (rootRS.next()) {
-            return new Blah(rootRS.getLong(1), rootRS.getLong(2));
+            return new DashboardStructureStub(rootRS.getLong(1), rootRS.getLong(2));
         }
         findParentInGridStmt.setLong(1, dashboardElementID);
         ResultSet gridRS = findParentInGridStmt.executeQuery();
@@ -589,11 +593,11 @@ public class DataService {
         return null;
     }
 
-    private static class Blah {
+    private static class DashboardStructureStub {
         long dashboardID;
         long dataSourceID;
 
-        private Blah(long dashboardID, long dataSourceID) {
+        private DashboardStructureStub(long dashboardID, long dataSourceID) {
             this.dashboardID = dashboardID;
             this.dataSourceID = dataSourceID;
         }
@@ -1123,6 +1127,45 @@ public class DataService {
         return copyResults;
     }
 
+    public static DataSet listDataSetViaCache(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn, String uid) {
+        MemcachedClient client = MemCachedManager.instance();
+        CacheableDataSet cacheableDataSet = (CacheableDataSet) client.get(uid);
+        DataSet dataSet = null;
+        if (cacheableDataSet == null) {
+            System.out.println("nothing in cache for UID " + uid);
+        }
+        List<String> filters = new ArrayList<>();
+        XMLMetadata xmlMetadata = new XMLMetadata();
+        xmlMetadata.setConn(conn);
+        filters.addAll(analysisDefinition.getFilterDefinitions().stream().map(filter -> filter.toXML(xmlMetadata).toXML()).collect(Collectors.toList()));
+        if (cacheableDataSet != null && !cacheableDataSet.getFilters().equals(filters)) {
+            System.out.println("filters did not match for " + uid);
+        }
+        if (cacheableDataSet == null || !cacheableDataSet.getFilters().equals(filters)) {
+
+            ReportRetrieval reportRetrieval;
+            try {
+                reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            if (analysisDefinition.isLogReport()) {
+                dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
+            }
+            dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
+            cacheableDataSet = new CacheableDataSet();
+            cacheableDataSet.setFilters(filters);
+            cacheableDataSet.setDataSet(dataSet);
+            client.delete(uid);
+            client.add(uid, 2500, cacheableDataSet);
+        } else {
+            System.out.println("using cache for " + uid);
+            dataSet = cacheableDataSet.getDataSet();
+        }
+        return dataSet;
+    }
+
     public EmbeddedDataResults moreEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                                    InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, String uid) {
         /*MemcachedClient client = MemCachedManager.instance();
@@ -1213,6 +1256,8 @@ public class DataService {
             Database.closeConnection(conn);
         }
     }
+
+
 
     public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         ReportRetrieval reportRetrieval;
@@ -2487,7 +2532,7 @@ public class DataService {
                 }
             });
 
-            analysisDefinition.argh();
+            analysisDefinition.handleFieldExtensions();
 
             feed.getDataSource().decorateLinks(new ArrayList<>(items));
 

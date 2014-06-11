@@ -1,7 +1,6 @@
 package com.easyinsight.users;
 
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.salesautomation.PersonalizedSalesEmail;
 import com.easyinsight.scheduler.ScheduledTask;
 
 import javax.persistence.Entity;
@@ -20,6 +19,6 @@ import java.util.Date;
 public class SalesEmailTask extends ScheduledTask {
     @Override
     protected void execute(Date now, EIConnection conn) throws Exception {
-        new PersonalizedSalesEmail().sync();
+
     }
 }

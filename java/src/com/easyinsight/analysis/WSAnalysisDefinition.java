@@ -1367,7 +1367,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     }
 
-    public void argh() {
+    public void handleFieldExtensions() {
 
     }
 

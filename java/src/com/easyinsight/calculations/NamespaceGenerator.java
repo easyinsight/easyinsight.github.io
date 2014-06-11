@@ -28,7 +28,7 @@ public class NamespaceGenerator {
             } else {
                 if (conn != null) {
 
-                    Blah blah = new Blah();
+                    NamespaceTraversal blah = new NamespaceTraversal();
                     blah.traverse(dataSourceID, conn);
                     map = blah.map;
                 } else {
@@ -48,7 +48,7 @@ public class NamespaceGenerator {
         }
     }
 
-    private class Blah  {
+    private class NamespaceTraversal {
 
         private Map<String, UniqueKey> map = new HashMap<String, UniqueKey>();
 

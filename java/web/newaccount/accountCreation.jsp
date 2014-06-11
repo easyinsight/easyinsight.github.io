@@ -11,7 +11,6 @@
     String firstName = request.getParameter("firstName");
     String lastName = request.getParameter("lastName");
     String email = request.getParameter("email");
-    String company = request.getParameter("company");
     String password = request.getParameter("password");
     String wasSubmit = request.getParameter("wasSubmit");
     String errorString = UserService.checkPassword(password);
@@ -26,8 +25,6 @@
             errorString = "Please specify a last name.";
         } else if (email == null || "".equals(email)) {
             errorString = "Please specify an email address";
-        } else if (company == null || "".equals(company)) {
-            errorString = "Please specify a company name.";
         } else if (password == null || "".equals(password)) {
             errorString = "Please specify a password.";
         } else if (password.length() < 8) {
@@ -47,7 +44,7 @@
             user.setAnalyst(true);
             user.setTestAccountVisible(true);
             com.easyinsight.users.AccountTransferObject account = new com.easyinsight.users.AccountTransferObject();
-            account.setName(company);
+            account.setName(email);
             account.setAccountType(Account.PROFESSIONAL);
             account.setAccountState(Account.TRIAL);
 
@@ -93,7 +90,6 @@
         request.getSession().setAttribute("firstName", firstName);
         request.getSession().setAttribute("lastName", lastName);
         request.getSession().setAttribute("email", email);
-        request.getSession().setAttribute("company", company);
         response.sendRedirect(RedirectUtil.getURL(request, "/app/newaccount/index.jsp"));
         return;
     }
