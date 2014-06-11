@@ -68,7 +68,7 @@ public class SendGridEmailEventServlet extends HttpServlet {
                             }
                             auditStmt.close();
                         } catch (Exception e) {
-                            LogClass.error(e);
+                            e.printStackTrace();
                         } finally {
                             Database.closeConnection(conn);
                         }
@@ -76,7 +76,7 @@ public class SendGridEmailEventServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            e.printStackTrace();
         }
     }
 }
