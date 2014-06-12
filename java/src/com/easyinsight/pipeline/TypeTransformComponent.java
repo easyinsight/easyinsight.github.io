@@ -30,6 +30,8 @@ public class TypeTransformComponent implements IComponent {
         for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
             map.put(analysisItem, Calendar.getInstance());
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                System.out.println(date.toDisplay() + " - " + date.isDateOnlyField() + " - " + date.isTimeshift());
                 boolean shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
                 if (shift) {
                     pipelineData.getInsightRequestMetadata().addAudit(analysisItem, "Time shifted " + analysisItem.toDisplay() + ".");
