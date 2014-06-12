@@ -59,6 +59,9 @@ public class TypeTransformComponent implements IComponent {
                         shift = ((AnalysisDateDimension) analysisItem).isTimeshift(pipelineData.getInsightRequestMetadata());
                     }
                 }
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    System.out.println("converting to " + ((AnalysisDateDimension) analysisItem).getDateLevel());
+                }
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, map.get(analysisItem));
                 if (transformedValue != value) {
                     row.addValue(analysisItem.createAggregateKey(), transformedValue);
