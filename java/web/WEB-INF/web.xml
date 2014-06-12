@@ -502,6 +502,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>TopoMap</servlet-name>
+        <display-name>TopoMap</display-name>
+        <servlet-class>com.easyinsight.html.TopoMapServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ReportMarkdown</servlet-name>
         <display-name>ReportMarkdown</display-name>
         <servlet-class>com.easyinsight.html.ReportMarkdownServlet</servlet-class>
@@ -710,6 +716,11 @@
         <servlet-class>com.easyinsight.html.DeleteUserServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>DeleteUsersServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.DeleteUsersServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -785,6 +796,11 @@
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
         <url-pattern>/html/account/delete</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DeleteUsersServlet</servlet-name>
+        <url-pattern>/html/account/deleteUsers</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -975,6 +991,11 @@
     <servlet-mapping>
         <servlet-name>ReportMarkdown</servlet-name>
         <url-pattern>/reportMarkdown</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TopoMap</servlet-name>
+        <url-pattern>/topoMap</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

@@ -44,7 +44,23 @@ eiAccounts.controller('UserBaseController', function ($scope, $http) {
     }
 })
 
-eiAccounts.controller('UsersController', function () {
+eiAccounts.controller('UsersController', function ($scope, $filter, $http) {
+    $scope.deleteSelected = function() {
+        var usersToDelete = $filter('filter')($scope.users, {delete:true}, true);
+        var usersToDeleteIDs = usersToDelete.map(function(e, i, l) {
+            return e.id;
+        });
+        if (confirm("Are you sure you want to delete the selected set of users?"))
+            $scope.delete_promise = $http.post("/app/html/account/deleteUsers", JSON.stringify({user_ids: usersToDeleteIDs})).then(function (c) {
+                if (c.data.success) {
+                    for (var ctr = 0; ctr < usersToDelete.length; ctr++) {
+                        var user = usersToDelete[ctr];
+                        var index = $scope.users.indexOf(user);
+                        $scope.users.splice(index, 1);
+                    }
+                }
+            })
+    }
 })
 
 eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location) {
