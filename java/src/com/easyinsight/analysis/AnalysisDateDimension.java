@@ -181,6 +181,13 @@ public class AnalysisDateDimension extends AnalysisDimension {
         return !dateOnlyField && timeshift;
     }
 
+    public boolean isTimeshift(InsightRequestMetadata insightRequestMetadata) {
+        if (insightRequestMetadata != null && insightRequestMetadata.getTimeshiftState() != null && insightRequestMetadata.getTimeshiftState().containsKey(toDisplay())) {
+            return insightRequestMetadata.getTimeshiftState().get(toDisplay());
+        }
+        return !dateOnlyField && timeshift;
+    }
+
     public void setTimeshift(boolean timeshift) {
         this.timeshift = timeshift;
     }

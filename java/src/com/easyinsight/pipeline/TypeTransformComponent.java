@@ -31,8 +31,8 @@ public class TypeTransformComponent implements IComponent {
             map.put(analysisItem, Calendar.getInstance());
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                System.out.println(date.toDisplay() + " - " + date.isDateOnlyField() + " - " + date.isTimeshift());
-                boolean shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
+                System.out.println(date.toDisplay() + " - " + date.isDateOnlyField() + " - " + date.isTimeshift(pipelineData.getInsightRequestMetadata()));
+                boolean shift = ((AnalysisDateDimension) analysisItem).isTimeshift(pipelineData.getInsightRequestMetadata());
                 if (shift) {
                     pipelineData.getInsightRequestMetadata().addAudit(analysisItem, "Time shifted " + analysisItem.toDisplay() + ".");
                 } else {
@@ -50,7 +50,7 @@ public class TypeTransformComponent implements IComponent {
                 boolean shift = false;
                 if (timeShift) {
                     if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        shift = ((AnalysisDateDimension) analysisItem).isTimeshift();
+                        shift = ((AnalysisDateDimension) analysisItem).isTimeshift(pipelineData.getInsightRequestMetadata());
                     }
                 }
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, map.get(analysisItem));

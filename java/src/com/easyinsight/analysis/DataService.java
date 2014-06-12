@@ -1314,6 +1314,7 @@ public class DataService {
                     System.out.println("Setting " + dateDim.toDisplay() + " to timeshift of " + dateTime);
                 }
                 dateDim.setTimeshift(dateTime);
+                insightRequestMetadata.getTimeshiftState().put(dateDim.toDisplay(), dateTime);
             }
         }
         for (AnalysisItem item : items) {
