@@ -559,7 +559,8 @@ public class ExportService {
             } else if (format == ReportDelivery.PDF) {
                 byte[] result;
                 if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
+                        analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
                     analysisDefinition.updateMetadata();
                     result = toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                 } else {
@@ -1808,7 +1809,7 @@ public class ExportService {
         DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
         StringBuilder sb = new StringBuilder();
         for (IRow row : dataSet.getRows()) {
-            sb.append("<table>");
+            sb.append("<table style=\"font-size:12px;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000;width:100%\">");
             for (AnalysisItem item : form.getColumns()) {
                 sb.append("<tr>");
                 sb.append("<td>");
