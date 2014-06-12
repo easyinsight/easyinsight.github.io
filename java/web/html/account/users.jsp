@@ -35,7 +35,7 @@
         <div class="col-md-12">
             <div class="btn-toolbar pull-right topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
-                    <a href="<%= RedirectUtil.getURL(request, "/app/billing/account.jsp")%>">Account Administration</a>
+                    <a href="<%= RedirectUtil.getURL(request, "/account")%>">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="#">Users</a>
