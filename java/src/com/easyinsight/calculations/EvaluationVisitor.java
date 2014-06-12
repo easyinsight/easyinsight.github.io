@@ -103,13 +103,18 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             DateValue d1 = (DateValue) compare1;
             DateValue d2 = (DateValue) compare2;
 
+            System.out.println("comparing " + d1.getDate() + " - " + d1.isDateTime() + " to " + d2.getDate() + " - " + d2.isDateTime());
+
             if (d1.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || d1.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL ||
                     d2.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || d2.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                System.out.println("used hour minute");
                 return compare1.toDouble() > compare2.toDouble();
             }
 
             DayOfYearPair pair1 = createPair(d1);
             DayOfYearPair pair2 = createPair(d2);
+
+            System.out.println("d1 dayOfYear = " + pair1.dayOfYear + ", pair2 day of year = " + pair2.dayOfYear);
 
             return pair1.year > pair2.year || (pair1.year == pair2.year && pair1.dayOfYear > pair2.dayOfYear);
         } else {
