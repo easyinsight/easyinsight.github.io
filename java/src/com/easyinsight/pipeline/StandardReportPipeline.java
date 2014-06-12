@@ -69,7 +69,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-
+        components.add(new TypeTransformComponent());
 
         components.addAll(new CalcGraph().doFunGraphStuff(allNeededAnalysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure(), insightRequestMetadata));
 
@@ -86,7 +86,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-        components.add(new TypeTransformComponent());
+
 
         if (report.getFilterDefinitions() != null) {
 

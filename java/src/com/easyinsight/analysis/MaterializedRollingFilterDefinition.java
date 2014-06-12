@@ -129,7 +129,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             targetDayOfWeek = DayOfWeek.SATURDAY;
         }
         System.out.println("looking for start date");
-        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift(insightRequestMetadata)) {
 
             ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
             ZonedDateTime zdt = ZonedDateTime.now(zoneId);
@@ -374,7 +374,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
-        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift()) {
+        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift(insightRequestMetadata)) {
             int time = insightRequestMetadata.getUtcOffset() / 60;
             String string;
             if (time > 0) {
@@ -479,10 +479,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     @Override
     public void log(InsightRequestMetadata insightRequestMetadata, FilterDefinition filterDefinition) {
         if (limitDate > 0) {
-            insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(limitDate));
+            insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " +  new Date(limitDate));
         }
         if (endDate > 0) {
-            insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  new Date(endDate));
+            insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " +  new Date(endDate));
         }
     }
 

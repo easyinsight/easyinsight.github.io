@@ -83,7 +83,7 @@ public class LineChartComponent implements IComponent {
                     Value value = map1.get("date");
                     if (value.type() == Value.DATE) {
                         DateValue dateValue = (DateValue) value;
-                        dateValue.calculate(date.isTimeshift() ? shiftedCal : cal);
+                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()) ? shiftedCal : cal);
                     }
                 }
                 trendLineValues = values;

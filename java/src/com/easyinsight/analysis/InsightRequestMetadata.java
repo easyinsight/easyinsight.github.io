@@ -35,6 +35,7 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
     private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
     private transient boolean optimizeDays;
+    private transient Map<String, Boolean> timeshiftState = new HashMap<String, Boolean>();
 
     private transient List<ReportAuditEvent> auditEvents = new ArrayList<ReportAuditEvent>();
     private transient List<String> warnings = new ArrayList<String>();
@@ -62,12 +63,30 @@ public class InsightRequestMetadata implements Serializable {
     private transient List<AnalysisItem> allItems;
     private transient AnalysisItemRetrievalStructure structure;
 
+    private transient Set<AnalysisItem> originalDateItems;
+
+    public Map<String, Boolean> getTimeshiftState() {
+        return timeshiftState;
+    }
+
+    public void setTimeshiftState(Map<String, Boolean> timeshiftState) {
+        this.timeshiftState = timeshiftState;
+    }
+
     public boolean isAggregationRowChanged() {
         return aggregationRowChanged;
     }
 
     public void setAggregationRowChanged(boolean aggregationRowChanged) {
         this.aggregationRowChanged = aggregationRowChanged;
+    }
+
+    public Set<AnalysisItem> getOriginalDateItems() {
+        return originalDateItems;
+    }
+
+    public void setOriginalDateItems(Set<AnalysisItem> originalDateItems) {
+        this.originalDateItems = originalDateItems;
     }
 
     public boolean isAvoidKeyDisplayCollisions() {

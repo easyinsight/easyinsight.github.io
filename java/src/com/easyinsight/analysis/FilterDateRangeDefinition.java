@@ -229,7 +229,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         endCal.set(Calendar.MILLISECOND, 0);
         workingEndDate = endCal.getTime();
         AnalysisDateDimension date = (AnalysisDateDimension) getField();
-        if (date.isTimeshift()) {
+        if (date.isTimeshift(insightRequestMetadata)) {
             workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
             workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
@@ -301,8 +301,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             workingEndDate = endDate;
             workingStartDate = startDate;
         }*/
-        insightRequestMetadata.addAudit(this, "Start date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " + workingStartDate);
-        insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " + workingEndDate);
+        insightRequestMetadata.addAudit(this, "Start date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " + workingStartDate);
+        insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " + workingEndDate);
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;
