@@ -135,7 +135,12 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     private DayOfYearPair createPair(DateValue dateValue) {
         if (dateValue.isDateTime()) {
             Instant instant = dateValue.getDate().toInstant();
-            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+            ZoneId zoneId;
+            if (calculationMetadata.getInsightRequestMetadata() == null ){
+                zoneId = ZoneId.systemDefault();
+            } else {
+                zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+            }
             ZonedDateTime zdt = instant.atZone(zoneId);
             int dayOfYear = zdt.getDayOfYear();
             int year = zdt.getYear();
