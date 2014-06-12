@@ -48,7 +48,7 @@
                     <a href="<%= RedirectUtil.getURL(request, "/account")%>">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="account/users.jsp">Users</a>
+                    <a href="/account/users">Users</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="#">My Profile</a>
