@@ -32,7 +32,7 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
 
     @Override
     public void log(InsightRequestMetadata insightRequestMetadata, FilterDefinition filterDefinition) {
-        insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  lowValue);
-        insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift() ? " time shifted " : " not time shifted ") + " at query to " +  highValue);
+        insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " +  lowValue);
+        insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " +  highValue);
     }
 }
