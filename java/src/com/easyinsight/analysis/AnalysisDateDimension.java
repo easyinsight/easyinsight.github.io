@@ -444,7 +444,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
         }
         if (resultValue.type() == Value.DATE) {
             DateValue dateValue = (DateValue) resultValue;
-            if (timeshift) {
+            if (timezoneShift) {
                 dateValue.setDateTime(true);
             }
             dateValue.setDateLevel(getDateLevel());
