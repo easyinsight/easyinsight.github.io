@@ -103,16 +103,17 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             DateValue d1 = (DateValue) compare1;
             DateValue d2 = (DateValue) compare2;
 
+            if (d1.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || d1.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL ||
+                    d2.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || d2.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                return compare1.toDouble() > compare2.toDouble();
+            }
+
             DayOfYearPair pair1 = createPair(d1);
             DayOfYearPair pair2 = createPair(d2);
 
             return pair1.year > pair2.year || (pair1.year == pair2.year && pair1.dayOfYear > pair2.dayOfYear);
         } else {
-            if (compare1.toDouble() > compare2.toDouble()) {
-                return true;
-            } else {
-                return false;
-            }
+            return compare1.toDouble() > compare2.toDouble();
         }
     }
 
@@ -148,16 +149,19 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             DateValue d1 = (DateValue) compare1;
             DateValue d2 = (DateValue) compare2;
 
+            // if date level is hour/minute, we can't compare day/year
+
+            if (d1.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || d1.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL ||
+                    d2.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || d2.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                return compare1.toDouble() >= compare2.toDouble();
+            }
+
             DayOfYearPair pair1 = createPair(d1);
             DayOfYearPair pair2 = createPair(d2);
 
             return pair1.year > pair2.year || (pair1.year == pair2.year && pair1.dayOfYear >= pair2.dayOfYear);
         } else {
-            if (compare1.toDouble() >= compare2.toDouble()) {
-                return true;
-            } else {
-                return false;
-            }
+            return compare1.toDouble() >= compare2.toDouble();
         }
     }
 

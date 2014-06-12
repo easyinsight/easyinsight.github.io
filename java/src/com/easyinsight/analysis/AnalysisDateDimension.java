@@ -442,6 +442,13 @@ public class AnalysisDateDimension extends AnalysisDimension {
         } else {
             resultValue = new EmptyValue();
         }
+        if (resultValue.type() == Value.DATE) {
+            DateValue dateValue = (DateValue) resultValue;
+            if (timeshift) {
+                dateValue.setDateTime(true);
+            }
+            dateValue.setDateLevel(getDateLevel());
+        }
         return resultValue;
     }
 
