@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.*;
 import java.util.*;
 
 /**
@@ -98,30 +99,14 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     private boolean greaterThanNodes(EvaluationVisitor node1, EvaluationVisitor node2) {
         Value compare1 = Function.minusQuotes(node1.getResult());
         Value compare2 = Function.minusQuotes(node2.getResult());
-        if (compare1.type() == Value.DATE || compare2.type() == Value.DATE) {
-            Calendar cal1 = Calendar.getInstance();
-            Calendar cal2 = Calendar.getInstance();
+        if (compare1.type() == Value.DATE && compare2.type() == Value.DATE) {
+            DateValue d1 = (DateValue) compare1;
+            DateValue d2 = (DateValue) compare2;
 
-            if (compare1.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) compare1;
-                cal1.setTime(dateValue.getDate());
-            } else {
-                cal1.setTimeInMillis(compare1.toDouble().longValue());
-            }
+            DayOfYearPair pair1 = createPair(d1);
+            DayOfYearPair pair2 = createPair(d2);
 
-            if (compare2.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) compare2;
-                cal2.setTime(dateValue.getDate());
-            } else {
-                cal2.setTimeInMillis(compare2.toDouble().longValue());
-            }
-
-            if (cal1.get(Calendar.YEAR) > cal2.get(Calendar.YEAR) ||
-                    (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) > cal2.get(Calendar.DAY_OF_YEAR))) {
-                return true;
-            } else {
-                return false;
-            }
+            return pair1.year > pair2.year || (pair1.year == pair2.year && pair1.dayOfYear > pair2.dayOfYear);
         } else {
             if (compare1.toDouble() > compare2.toDouble()) {
                 return true;
@@ -131,33 +116,42 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         }
     }
 
+    private class DayOfYearPair {
+        int dayOfYear;
+        int year;
+
+        private DayOfYearPair(int dayOfYear, int year) {
+            this.dayOfYear = dayOfYear;
+            this.year = year;
+        }
+    }
+
+    private DayOfYearPair createPair(DateValue dateValue) {
+        if (dateValue.isDateTime()) {
+            Instant instant = dateValue.getDate().toInstant();
+            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+            ZonedDateTime zdt = instant.atZone(zoneId);
+            int dayOfYear = zdt.getDayOfYear();
+            int year = zdt.getYear();
+            return new DayOfYearPair(dayOfYear, year);
+        } else {
+            LocalDate localDate = dateValue.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            return new DayOfYearPair(localDate.getDayOfYear(), localDate.getYear());
+        }
+    }
+
     private boolean greaterThanOrEqualNodes(EvaluationVisitor node1, EvaluationVisitor node2) {
         Value compare1 = Function.minusQuotes(node1.getResult());
         Value compare2 = Function.minusQuotes(node2.getResult());
-        if (compare1.type() == Value.DATE || compare2.type() == Value.DATE) {
-            Calendar cal1 = Calendar.getInstance();
-            Calendar cal2 = Calendar.getInstance();
+        if (compare1.type() == Value.DATE && compare2.type() == Value.DATE) {
 
-            if (compare1.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) compare1;
-                cal1.setTime(dateValue.getDate());
-            } else {
-                cal1.setTimeInMillis(compare1.toDouble().longValue());
-            }
+            DateValue d1 = (DateValue) compare1;
+            DateValue d2 = (DateValue) compare2;
 
-            if (compare2.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) compare2;
-                cal2.setTime(dateValue.getDate());
-            } else {
-                cal2.setTimeInMillis(compare2.toDouble().longValue());
-            }
+            DayOfYearPair pair1 = createPair(d1);
+            DayOfYearPair pair2 = createPair(d2);
 
-            if (cal1.get(Calendar.YEAR) > cal2.get(Calendar.YEAR) ||
-                    (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) >= cal2.get(Calendar.DAY_OF_YEAR))) {
-                return true;
-            } else {
-                return false;
-            }
+            return pair1.year > pair2.year || (pair1.year == pair2.year && pair1.dayOfYear >= pair2.dayOfYear);
         } else {
             if (compare1.toDouble() >= compare2.toDouble()) {
                 return true;
