@@ -13,22 +13,22 @@ public class ResponseInfo {
     public static final int ALL_GOOD = 200;
 
     private int code;
-    private String xml;
+    private String responseBody;
 
-    public ResponseInfo(int code, String xml) {
+    public ResponseInfo(int code, String responseBody) {
         this.code = code;
-        this.xml = xml;
+        this.responseBody = responseBody;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getXml() {
-        return xml;
+    public String getResponseBody() {
+        return responseBody;
     }
 
     public String toResponse() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><code>" + code + "</code>" + xml + "</response>";
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><response><code>" + code + "</code>" + responseBody + "</response>";
     }
 }

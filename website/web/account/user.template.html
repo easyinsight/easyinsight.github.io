@@ -1,0 +1,60 @@
+<div cg-busy="save" />
+<form role="form" method="POST" name="userForm" ng-submit="submit()" novalidate>
+    <div class="form-group">
+        <label for="user_name">User ID</label>
+        <input type="text" class="form-control" id="user_name" name="user_name" placeholder="User ID"
+               ng-model="user.username" required />
+        <p ng-show="userForm.user_name.$invalid && !userForm.user_name.$pristine">User ID is required.</p>
+    </div>
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name"
+               ng-model="user.first_name" required />
+        <p ng-show="userForm.first_name.$invalid && !userForm.first_name.$pristine">First name is required.</p>
+
+    </div>
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name"
+               ng-model="user.last_name" required />
+        <p ng-show="userForm.last_name.$invalid && !userForm.last_name.$pristine">Last name is required.</p>
+    </div>
+    <div class="form-group">
+        <label for="email_address">Email Address</label>
+        <input type="email" class="form-control" id="email_address" name="email_address" placeholder="Email Address"
+               ng-model="user.email" required />
+        <p ng-show="userForm.email_address.$error.required && !userForm.email_address.$pristine">Email is required.</p>
+        <p ng-show="!userForm.email_address.$pristine && !userForm.email_address.$error.required && userForm.email_address.$error.email">Must be a valid email.</p>
+
+    </div>
+    <div class="checkbox" ng-if="user.designer">
+        <label>
+            <input type="checkbox" name="account_admin" ng-model="user.admin"/> Account Administrator
+        </label>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="all_reports_and_dashboards" ng-model="user.all_reports"/> User Can See All
+            Reports and Dashboards
+        </label>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="invoice_recipient" ng-model="user.invoice_recipient"/> Invoice Recipient
+        </label>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="newsletter" ng-model="user.newsletter"/> Send Newsletter to User
+        </label>
+    </div>
+    <div class="checkbox" ng-if="new">
+        <label>
+            <input type="checkbox" name="require_password_change" ng-model="user.change_password" /> Require Password Change
+        </label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Create User" ng-if="new" ng-disabled="userForm.$invalid" />
+        <input type="submit" value="Update User" ng-if="!new" ng-disabled="userForm.$invalid" />
+    </div>
+</form>

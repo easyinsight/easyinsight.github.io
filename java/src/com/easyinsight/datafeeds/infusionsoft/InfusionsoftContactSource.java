@@ -30,6 +30,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String NAME = "Name";
     public static final String EMAIL = "Email";
     public static final String CONTACT_COUNT = "ContactCount";
+    public static final String COMPANY = "Company";
 
     public InfusionsoftContactSource() {
         setFeedName("Contacts");
@@ -43,6 +44,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension("Contact ID"));
         fieldBuilder.addField(COMPANY_ID, new AnalysisDimension("Contact Company ID"));
+        fieldBuilder.addField(COMPANY, new AnalysisDimension("Contact Company Name"));
         fieldBuilder.addField(FIRST_NAME, new AnalysisDimension("First Name"));
         fieldBuilder.addField(LAST_NAME, new AnalysisDimension("Last Name"));
         fieldBuilder.addField(LEAD_SOURCE_ID, new AnalysisDimension("Lead Source ID"));

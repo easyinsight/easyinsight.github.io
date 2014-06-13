@@ -502,6 +502,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>TopoMap</servlet-name>
+        <display-name>TopoMap</display-name>
+        <servlet-class>com.easyinsight.html.TopoMapServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ReportMarkdown</servlet-name>
         <display-name>ReportMarkdown</display-name>
         <servlet-class>com.easyinsight.html.ReportMarkdownServlet</servlet-class>
@@ -657,6 +663,17 @@
         <display-name>PieChart</display-name>
         <servlet-class>com.easyinsight.html.PieChartServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>UserInfoServlet</servlet-name>
+        <display-name>UserInfo</display-name>
+        <servlet-class>com.easyinsight.api.v3.UserInfoServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AccountInfoServlet</servlet-name>
+        <display-name>AccountInfo</display-name>
+        <servlet-class>com.easyinsight.api.v3.AccountInfoServlet</servlet-class>
+    </servlet>
 
     <servlet>
         <servlet-name>DataSourceRefresh</servlet-name>
@@ -697,6 +714,11 @@
     <servlet>
         <servlet-name>DeleteUserServlet</servlet-name>
         <servlet-class>com.easyinsight.html.DeleteUserServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>DeleteUsersServlet</servlet-name>
+        <servlet-class>com.easyinsight.html.DeleteUsersServlet</servlet-class>
     </servlet>
 
     <!--<servlet>
@@ -774,6 +796,16 @@
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
         <url-pattern>/html/account/delete</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>DeleteUsersServlet</servlet-name>
+        <url-pattern>/html/account/deleteUsers</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AccountInfoServlet</servlet-name>
+        <url-pattern>/account.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -866,6 +898,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>UserInfoServlet</servlet-name>
+        <url-pattern>/userInfo.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>ExportActivity</servlet-name>
         <url-pattern>/exportActivity</url-pattern>
     </servlet-mapping>
@@ -954,6 +991,11 @@
     <servlet-mapping>
         <servlet-name>ReportMarkdown</servlet-name>
         <url-pattern>/reportMarkdown</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>TopoMap</servlet-name>
+        <url-pattern>/topoMap</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

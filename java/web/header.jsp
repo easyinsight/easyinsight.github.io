@@ -118,7 +118,7 @@
                     <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="/app/billing/account.jsp">Account Settings</a></li>
+                    <li><a href="/account/">Account Settings</a></li>
                     <li class="divider"></li>
                     <% if(!phone) { %>
                     <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>

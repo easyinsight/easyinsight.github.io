@@ -1,5 +1,9 @@
 package com.easyinsight.users;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Date;
 
 /**
@@ -220,6 +224,39 @@ public class UserTransferObject {
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());
         }
+        return user;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("id", getUserID());
+        jo.put("admin", isAccountAdmin());
+        jo.put("email", getEmail());
+        jo.put("first_name", getFirstName());
+        jo.put("title", getTitle());
+        jo.put("last_name", getName());
+        jo.put("username", getUserName());
+        jo.put("designer", isAnalyst());
+        jo.put("all_reports", isTestAccountVisible());
+        jo.put("invoice_recipient", isInvoiceRecipient());
+        jo.put("newsletter", isOptInEmail());
+        return jo;
+    }
+
+    public static UserTransferObject fromJSON(net.minidev.json.JSONObject jo) {
+        UserTransferObject user = new UserTransferObject();
+        if(jo.containsKey("id"))
+            user.setUserID(Long.valueOf(String.valueOf((Integer) jo.get("id"))));
+        user.setAccountAdmin((Boolean) jo.get("admin"));
+        user.setEmail((String) jo.get("email"));
+        user.setFirstName((String) jo.get("first_name"));
+        user.setTitle((String) jo.get("title"));
+        user.setName((String) jo.get("last_name"));
+        user.setUserName((String) jo.get("username"));
+        user.setAnalyst((Boolean) jo.get("designer"));
+        user.setTestAccountVisible((Boolean) jo.get("all_reports"));
+        user.setInvoiceRecipient((Boolean) jo.get("invoice_recipient"));
+        user.setOptInEmail((Boolean) jo.get("newsletter"));
         return user;
     }
 }
