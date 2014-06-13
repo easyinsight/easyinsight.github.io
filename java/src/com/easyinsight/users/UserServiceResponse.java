@@ -229,7 +229,11 @@ public class UserServiceResponse {
         response.setThousandsSeperator(thousandsSeperator);
         response.setDecimalSeperator(decimalSeperator);
         if (user.getDateFormat() != 6) {
-            response.setDateFormat(user.getDateFormat());
+            if (user.getDateFormat() == 8) {
+                response.setDateFormat(0);
+            } else {
+                response.setDateFormat(user.getDateFormat());
+            }
         }
         if (user.getCurrency() == 1) {
             response.setCurrencySymbol("$");
