@@ -3300,7 +3300,8 @@ public class ExportService {
                 }
 
                 if (userDateFormat == 6) {
-
+                } else if (userDateFormat == 8) {
+                    dateFormat = 0;
                 } else {
                     dateFormat = userDateFormat;
                 }
