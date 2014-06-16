@@ -101,7 +101,6 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
     };
     $scope.new = true;
     $scope.submit = function () {
-        console.log(arguments);
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user));
         $scope.save.then(function (c) {
             if (c.data.success) {
@@ -128,7 +127,6 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location)
     };
     $scope.new = true;
     $scope.submit = function () {
-        console.log(arguments);
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user))
         $scope.save.then(function (c) {
             if (c.data.success) {
@@ -139,22 +137,15 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location)
     }
 })
 
-eiAccounts.controller('MissingFileController', function() {
-    console.log("here");
-})
 
-eiAccounts.config(function ($routeProvider, $locationProvider, $routeSegmentProvider) {
-    $locationProvider.html5Mode(true);
+
+eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
 
     $routeSegmentProvider.when("/account", "account.index").
         when("/account/users", "account.user_base.index").
         when("/account/users/:id", "account.user_base.user").
         when("/account/users/designer/new", "account.user_base.new_designer").
         when("/account/users/viewer/new", "account.user_base.new_viewer").
-        when("/missing", "missing").
-        segment("missing", {
-            templateUrl: function() {console.log(arguments); return '/missing.template.html';}
-        }).
         segment("account", {
             templateUrl: '/account/base.template.html',
             controller: 'AccountController'
@@ -182,22 +173,4 @@ eiAccounts.config(function ($routeProvider, $locationProvider, $routeSegmentProv
             templateUrl: '/account/user.template.html',
             controller: 'NewViewerController'
         });
-
-    $routeProvider.otherwise({ redirectTo: "/missing" })
-
 })
-
-eiAccounts.run(function ($rootScope, $http) {
-    $rootScope.user = {
-        "username": "..."
-    };
-    $http.get("/app/userInfo.json").success(function (d, r) {
-        if (r == 401)
-            window.location = "/app/login.jsp";
-        else {
-            $rootScope.user = d.user;
-        }
-    }).error(function () {
-        window.location = "/app/login.jsp";
-    });
-});

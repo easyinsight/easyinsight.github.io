@@ -1,0 +1,10 @@
+<img src="/images/logo2.PNG"/>
+
+<div class="well sidebar-nav">
+    <ul class="nav nav-list">
+        <li class="nav-header">Recent Actions</li>
+        <li ng-repeat="action in actions">
+            <a href="/app/html/{{action.source_type}}/{{action.source.url_key}}" ng-click="$event.stopPropagation()">View {{ action.source.name }}</a>
+        </li>
+    </ul>
+</div>
