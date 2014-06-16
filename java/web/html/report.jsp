@@ -18,6 +18,7 @@
 <%@ page import="com.easyinsight.dashboard.DashboardInfo" %>
 <%@ page import="com.easyinsight.admin.AdminService" %>
 <%@ page import="com.easyinsight.audit.ActionReportLog" %>
+<%@ page import="com.easyinsight.analysis.DataService" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
     <%
