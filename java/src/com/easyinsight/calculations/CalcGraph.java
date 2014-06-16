@@ -2,7 +2,6 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.ReportKey;
 import com.easyinsight.pipeline.*;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.alg.CycleDetector;
@@ -52,7 +51,7 @@ public class CalcGraph {
                 }
             }
 
-            if (new CycleDetector<AnalysisItem, DefaultEdge>(graph).detectCycles()) {
+            if (new CycleDetector<>(graph).detectCycles()) {
                 throw new RuntimeException("Cycle detected in calculated fields.");
             }
 
@@ -68,6 +67,7 @@ public class CalcGraph {
                     components.add(new DerivedGroupingComponent((DerivedAnalysisDimension) calcNode));
                 } else if (calcNode.hasType(AnalysisItemTypes.DERIVED_DATE)) {
                     components.add(new DerivedDateComponent((DerivedAnalysisDateDimension) calcNode));
+                    components.add(new TypeTransformComponent(Arrays.asList(calcNode)));
                 }
             }
             FieldFilterComponent fieldFilterComponent = new FieldFilterComponent();
