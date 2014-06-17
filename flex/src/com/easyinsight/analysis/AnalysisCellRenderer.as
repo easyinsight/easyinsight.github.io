@@ -192,7 +192,11 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
                 if (objVal == null) {
                     text = "";
                 } else {
-                    text = formatter.format(objVal.getValue());
+                    try {
+                        text = formatter.format(objVal.getValue());
+                    } catch (e:Error) {
+                        text = "";
+                    }
                 }
                 if (_report is ListDefinition) {
                     var listDefinition:ListDefinition = _report as ListDefinition;
