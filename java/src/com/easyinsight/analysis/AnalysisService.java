@@ -9,6 +9,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.composite.FallthroughConnection;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.documentation.DocReader;
@@ -991,15 +992,12 @@ public class AnalysisService {
                 pair.add(location.toString());
                 String relatedProvider = map.get(pair);
                 if (relatedProvider == null || "(Empty)".equals(relatedProvider)) {
-                    // ignore
-                    //return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
+                    return "We couldn't find " + location.toString() + " - " + provider.toString() + ".";
                 } else {
                     row.addValue(new NamedKey("beutk2zd6.6"), relatedProvider);
                     row.addValue(useSourceRelatedProviderField.getKey(), relatedProvider);
                     filteredValues.add(relatedProvider);
                 }
-                //Value providerID = row.getValue(relatedProviderField);
-
             }
 
             WSListDefinition existingReport = new WSListDefinition();
@@ -1092,6 +1090,9 @@ public class AnalysisService {
                 throw e;
             } finally {
                 dataStorage.closeConnection();
+            }
+            if (dataSource.getParentSourceID() > 0) {
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
             }
             conn.commit();
             return null;
@@ -1393,6 +1394,7 @@ public class AnalysisService {
     }
 
     private List<ActualRowLayoutItem> createForms(List<AnalysisItem> pool, long dataSourceID) throws SQLException {
+        // ([Payments-Override]-[Cache Bonus Base])*[Cache Bonus %]
         List<ActualRowLayoutItem> forms = new ArrayList<ActualRowLayoutItem>();
         forms.addAll(new ReportCalculation("defineform(2, 0, 300, 110, \"Related Provider\", \"Date\")").apply(pool, dataSourceID));
         forms.addAll(new ReportCalculation("defineform(3, 0, 120, 140, \"Visits Schd\", \"Walk-Ins\", \"MC/WC Schd\", \"Init Evals Schd\"," +

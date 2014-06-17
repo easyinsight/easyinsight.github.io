@@ -120,6 +120,9 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                                             analysisItem = new AnalysisDimension(new NamedKey(columnName), true);
                                             break;
                                         case Types.DATE:
+                                            analysisItem = new AnalysisDateDimension(new NamedKey(columnName), true, AnalysisDateDimension.DAY_LEVEL);
+                                            ((AnalysisDateDimension) analysisItem).setDateOnlyField(true);
+                                            break;
                                         case Types.TIME:
                                         case Types.TIMESTAMP:
                                             analysisItem = new AnalysisDateDimension(new NamedKey(columnName), true, AnalysisDateDimension.DAY_LEVEL);
