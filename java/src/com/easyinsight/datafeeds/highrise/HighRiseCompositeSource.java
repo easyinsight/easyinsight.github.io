@@ -524,7 +524,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             if (analysisItem.getLinks() == null) {
                 analysisItem.setLinks(new ArrayList<Link>());
             }
-            if (analysisItem.getLinks().size() > 0) {
+            if (analysisItem.getLinks().size() > 0 && analysisItem.getLinks().get(0) instanceof DrillThrough) {
                 return;
             }
             if (isContactLinkable(analysisItem)) {
