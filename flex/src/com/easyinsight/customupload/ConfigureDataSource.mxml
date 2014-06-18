@@ -111,7 +111,7 @@
 
         private function gotCallData():void {
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
-            if (callData.status == CallData.DONE) {
+            if (callData == null || callData.status == CallData.DONE) {
                 timer.stop();
                 var newFields:Boolean = false;
                 if (callData.result is DataSourceRefreshResult) {
