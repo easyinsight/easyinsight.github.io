@@ -5,6 +5,7 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.WindowManagement;
         import com.easyinsight.framework.User;
 
         import mx.controls.Alert;
@@ -133,6 +134,7 @@
             <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
             <node label="YTD" type="{AnalysisDefinition.YTD}"/>
             <node label="Compare Years" type="{AnalysisDefinition.COMPARE_YEARS}"/>
+            <node label="Topo Map" type="{AnalysisDefinition.TOPO}"/>
         </node>
     </mx:XMLList>
     <mx:XMLList id="simplified">
@@ -165,10 +167,11 @@
             <node label="Vertical List" type="{AnalysisDefinition.VERTICAL_LIST}"/>
             <node label="YTD" type="{AnalysisDefinition.YTD}"/>
             <node label="Compare Years" type="{AnalysisDefinition.COMPARE_YEARS}"/>
+            <node label="Topo Map" type="{AnalysisDefinition.TOPO}"/>
         </node>
     </mx:XMLList>
     <mx:PopUpMenuButton id="p2" 
             dataProvider="{xmlList}" label="{reportLabel}"
             labelField="@label" width="100" popUpStyleName="CustomPopupMenu"
-            showRoot="false" itemClick="itemClickHandler(event);"/>
+            showRoot="false" itemClick="itemClickHandler(event);" open="WindowManagement.manager.hideReport()" close="WindowManagement.manager.restoreReport()"/>
 </mx:Box>
