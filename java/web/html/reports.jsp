@@ -53,7 +53,7 @@
                 customFolder.setName(name);
                 customFolder.setId(id);
                 folderMap.put(id, customFolder);
-                folderList.put(String.valueOf(id), customFolder.toJSON());
+                folderList.put(String.valueOf(id), customFolder.toJSON(md));
             }
         } finally {
             Database.closeConnection(conn);

@@ -12,6 +12,18 @@ easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentPro
 easyInsight.controller('MissingFileController', function() {
 })
 
+easyInsight.config(function($httpProvider) {
+    $httpProvider.interceptors.push(function($q) {
+        console.log("here");
+        return {
+            'request': function(config) {
+                config.headers["X-REQUESTED-WITH"] = "XmlHttpRequest";
+                return config;
+            }
+        }
+    })
+})
+
 easyInsight.run(function ($rootScope, $http) {
     $rootScope.user = {
         "username": "..."
@@ -25,4 +37,9 @@ easyInsight.run(function ($rootScope, $http) {
     }).error(function () {
         window.location = "/app/login.jsp";
     });
+
+    $rootScope.numKeys = function(obj) {
+        if(!obj) return 0;
+        return Object.keys(obj).length;
+    }
 });

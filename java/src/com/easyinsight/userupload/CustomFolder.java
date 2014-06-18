@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.export.ExportMetadata;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,7 +29,7 @@ public class CustomFolder {
         this.id = id;
     }
 
-    public JSONObject toJSON() throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("name", getName());
         jo.put("id", getId());
