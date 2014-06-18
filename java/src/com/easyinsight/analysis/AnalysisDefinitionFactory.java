@@ -128,6 +128,11 @@ public class AnalysisDefinitionFactory {
             trendDefinitionState.setDiagramReportID(wsTrendDefinition.getDiagramReportID());
             trendDefinitionState.setLinks(wsTrendDefinition.getLinks());
             analysisDefinitionState = trendDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TOPO)) {
+            WSMap wsTextDefinition = (WSMap) wsAnalysisDefinition;
+            TopoMapDefinitionState textDefinitionState = new TopoMapDefinitionState();
+            textDefinitionState.setTopoDefinitionID(wsTextDefinition.getMapID());
+            analysisDefinitionState = textDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TEXT)) {
             WSTextDefinition wsTextDefinition = (WSTextDefinition) wsAnalysisDefinition;
             TextDefinitionState textDefinitionState = new TextDefinitionState();

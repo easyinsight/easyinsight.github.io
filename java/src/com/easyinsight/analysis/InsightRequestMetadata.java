@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
     private int depth = 0;
+    private boolean cacheForHTML;
     private AnalysisDateDimension baseDate;
     private boolean dateJoin;
     private int utcOffset;
@@ -67,6 +68,14 @@ public class InsightRequestMetadata implements Serializable {
 
     public Map<String, Boolean> getTimeshiftState() {
         return timeshiftState;
+    }
+
+    public boolean isCacheForHTML() {
+        return cacheForHTML;
+    }
+
+    public void setCacheForHTML(boolean cacheForHTML) {
+        this.cacheForHTML = cacheForHTML;
     }
 
     public void setTimeshiftState(Map<String, Boolean> timeshiftState) {

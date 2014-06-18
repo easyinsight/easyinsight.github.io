@@ -22,6 +22,7 @@ import com.easyinsight.analysis.crosstab.CrosstabDefinition;
 import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
+import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.text.TextReport;
@@ -149,6 +150,7 @@ public class StyleConfiguration {
         items.sort = sort;
         items.refresh();
         return items;
+        // dedwards@mwacademy.org
     }
 
     public static function createReportPage(report:AnalysisDefinition, allFields:ArrayCollection = null):ArrayCollection {
@@ -159,6 +161,15 @@ public class StyleConfiguration {
             items.addItem(new FieldFormItem("Alert Measure 2", "alert2Measure", GaugeDefinition(report).alert2Measure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new FieldFormItem("Benchmark Measure", "benchmarkMeasure", GaugeDefinition(report).benchmarkMeasure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new ComboBoxReportFormItem("Gauge Model", "gaugeModel", GaugeDefinition(report).gaugeModel, report, ["Gauge", "Bullet"]));
+        }
+        if (report is TopoMapDefinition) {
+            items.addItem(new FieldFormItem("Longitude", "longitude", TopoMapDefinition(report).longitude, report, allFields, AnalysisItemTypes.DIMENSION));
+            items.addItem(new FieldFormItem("Latitude", "latitude", TopoMapDefinition(report).latitude, report, allFields, AnalysisItemTypes.DIMENSION));
+            items.addItem(new FieldFormItem("Point Measure", "pointMeasure", TopoMapDefinition(report).pointMeasure, report, allFields, AnalysisItemTypes.MEASURE));
+            items.addItem(new FieldFormItem("Point Grouping", "pointGrouping", TopoMapDefinition(report).pointGrouping, report, allFields, AnalysisItemTypes.DIMENSION));
+            items.addItem(new ColorReportFormItem("Region Fill Start", "regionFillStart",  TopoMapDefinition(report).regionFillStart, report));
+            items.addItem(new ColorReportFormItem("Region Fill End", "regionFillEnd",  TopoMapDefinition(report).regionFillEnd, report));
+            items.addItem(new MultiColorReportFormItem("Point Colors", "pointColors", TopoMapDefinition(report).pointColors, report));
         }
         return items;
     }
@@ -239,6 +250,8 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report));
             items.addItem(new ComboBoxReportFormItem("Align", "align", CrosstabDefinition(report).align, report, ["left", "center", "right"]));
             items.addItem(new CheckBoxReportFormItem("Exclude Zero Rows", "excludeZero", CrosstabDefinition(report).excludeZero, report));
+            items.addItem(new NumericReportFormItem("Max Rows", "maxRows", CrosstabDefinition(report).maxRows, report, 0, 10000000));
+            items.addItem(new NumericReportFormItem("Max Columns", "maxColumns", CrosstabDefinition(report).maxColumns, report, 0, 10000000));
         }
         if (report is GaugeDefinition) {
             items.addItem(new NumericReportFormItem("Alert Point 1", "alertPoint1", GaugeDefinition(report).alertPoint1, report, 0, 1000000000));
@@ -451,6 +464,9 @@ public class StyleConfiguration {
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
+        }
+        if (report is TopoMapDefinition) {
+            items.addItem(new ComboBoxReportFormItem("Map", "map", TopoMapDefinition(report).map, report, [ "US States", "World" ]));
         }
 
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));

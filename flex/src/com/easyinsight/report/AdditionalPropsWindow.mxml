@@ -3,6 +3,7 @@
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.SimpleReportEditor;
+        import com.easyinsight.WindowManagement;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemWrapper;
@@ -70,6 +71,7 @@
 
         public function joinControl():void {
             var window:ReportJoinWindow = new ReportJoinWindow();
+            window.report = _analysisDefinition;
             window.addonReports = _analysisDefinition.addonReports;
             var items:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in _wrappers) {
@@ -79,6 +81,7 @@
             window.dataSourceID = _dataSourceID;
             window.startJoins = _analysisDefinition.joinOverrides;
             window.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);
@@ -115,6 +118,7 @@
             window.script = _analysisDefinition.marmotScript;
             window.afterScript = _analysisDefinition.reportRunMarmotScript;
             window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);
@@ -125,14 +129,7 @@
             window.definition = _analysisDefinition;
             window.allFields = _wrappers;
             window.startIndex = index;
-            /*window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, function (event:ReportPreferencesEvent):void {
-                dispatchEvent(new AnalysisChangedEvent());
-                if (event.refreshData) {
-                    _dataView.forceRetrieve();
-                } else {
-                    _dataView.rerender();
-                }
-            }, false, 0, true);*/
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);

@@ -39,6 +39,7 @@ import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection;
+import com.easyinsight.datafeeds.oracle.*;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.pivotaltrackerv5.*;
 import com.easyinsight.datafeeds.quickbase.QuickbaseCompositeSource;
@@ -418,6 +419,25 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.INFUSIONSOFT_USERS, InfusionsoftUserSource.class);
         registerType(FeedType.YOUTRACK_TIME, YoutrackTimeSource.class);
         registerType(FeedType.BATCHBOOK2_COMMUNICATIONS, Batchbook2CommunicationsSource.class);
+        //registerType(FeedType.ORACLE_OPPORTUNITY, OracleOpportunitySource.class);
+        registerType(FeedType.ORACLE_COMPOSITE, OracleDataSource.class);
+        //registerType(FeedType.ORACLE_TRANSIENTAPPOINTMENT, OracleTransientAppointmentSource.class);
+        registerType(FeedType.ORACLE_REVENUE, OracleRevenueSource.class);
+        registerType(FeedType.ORACLE_SPLITREVENUE, OracleSplitRevenueSource.class);
+        registerType(FeedType.ORACLE_CATEGORYSUMMARYREVENUE, OracleCategorySummaryRevenueSource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYLEAD, OracleOpportunityLeadSource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYSOURCE, OracleOpportunitySource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYCONTACT, OracleOpportunityContactSource.class);
+        registerType(FeedType.ORACLE_RECURRINGREVENUE, OracleRecurringRevenueSource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYRESPONSE, OracleOpportunityResponseSource.class);
+        registerType(FeedType.ORACLE_REVENUEPARTNER, OracleRevenuePartnerSource.class);
+        registerType(FeedType.ORACLE_NOTE, OracleNoteSource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYRESOURCE, OracleOpportunityResourceSource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYREFERENCE, OracleOpportunityReferenceSource.class);
+        registerType(FeedType.ORACLE_REVENUELINESET, OracleRevenueLineSetSource.class);
+        registerType(FeedType.ORACLE_REVENUETERRITORY, OracleRevenueTerritorySource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITYCOMPETITOR, OracleOpportunityCompetitorSource.class);
+        registerType(FeedType.ORACLE_OPPORTUNITY_HISTORY, OracleOpportunityHistorySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

@@ -283,6 +283,25 @@ public class FeedType implements Serializable {
     public static final FeedType INFUSIONSOFT_USERS = new FeedType(254);
     public static final FeedType YOUTRACK_TIME = new FeedType(255);
 
+    public static final FeedType ORACLE_COMPOSITE = new FeedType(257);
+    public static final FeedType ORACLE_TRANSIENTAPPOINTMENT = new FeedType(258);
+    public static final FeedType ORACLE_REVENUE = new FeedType(259);
+    public static final FeedType ORACLE_SPLITREVENUE = new FeedType(260);
+    public static final FeedType ORACLE_CATEGORYSUMMARYREVENUE = new FeedType(261);
+    public static final FeedType ORACLE_OPPORTUNITYLEAD = new FeedType(262);
+    public static final FeedType ORACLE_OPPORTUNITYSOURCE = new FeedType(263);
+    public static final FeedType ORACLE_OPPORTUNITYCONTACT = new FeedType(264);
+    public static final FeedType ORACLE_RECURRINGREVENUE = new FeedType(265);
+    public static final FeedType ORACLE_OPPORTUNITYRESPONSE = new FeedType(266);
+    public static final FeedType ORACLE_REVENUEPARTNER = new FeedType(267);
+    public static final FeedType ORACLE_NOTE = new FeedType(268);
+    public static final FeedType ORACLE_OPPORTUNITYRESOURCE = new FeedType(269);
+    public static final FeedType ORACLE_OPPORTUNITYCOMPETITOR = new FeedType(270);
+    public static final FeedType ORACLE_OPPORTUNITYREFERENCE = new FeedType(271);
+    public static final FeedType ORACLE_REVENUELINESET = new FeedType(272);
+    public static final FeedType ORACLE_REVENUETERRITORY = new FeedType(273);
+    public static final FeedType ORACLE_OPPORTUNITY_HISTORY = new FeedType(274);
+
     public FeedType() {
     }
 

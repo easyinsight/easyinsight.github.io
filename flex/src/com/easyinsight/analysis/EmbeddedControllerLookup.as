@@ -17,6 +17,7 @@ import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
 import com.easyinsight.analysis.summary.SummaryEmbeddedController;
 import com.easyinsight.analysis.text.TextEmbeddedController;
+import com.easyinsight.analysis.text.TopoEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
 import com.easyinsight.analysis.trend.TrendEmbeddedController;
@@ -107,6 +108,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.TEXT:
                 controller = TextEmbeddedController;
+                break;
+            case AnalysisDefinition.TOPO:
+                controller = TopoEmbeddedController;
                 break;
         }
         return controller;

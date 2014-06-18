@@ -132,6 +132,7 @@
                     event.solution.dataSourceType == DataSourceType.REDBOOTH ||
                     event.solution.dataSourceType == DataSourceType.ZENDESK ||
                     event.solution.dataSourceType == DataSourceType.KASHOO ||
+                    event.solution.dataSourceType == DataSourceType.ORACLE_SALESCLOUD ||
                     event.solution.dataSourceType == DataSourceType.SOLVE360) {
                 var renderer:NewSolutionDetailRenderer = new NewSolutionDetailRenderer();
                 renderer.solution = event.solution;

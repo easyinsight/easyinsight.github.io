@@ -26,6 +26,8 @@ import net.spy.memcached.MemcachedClient;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -2033,7 +2035,15 @@ public class DataService {
                 reportEditorBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime(), conn);
             }
             results.setReport(analysisDefinition);
-
+            if (insightRequestMetadata.isCacheForHTML()) {
+                String req = String.valueOf("chtml" + System.currentTimeMillis());
+                results.setCacheForHTMLKey(req);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(analysisDefinition);
+                oos.flush();
+                MemCachedManager.add(req, 50000, baos.toByteArray());
+            }
             return results;
         } catch (ReportException dae) {
             ListDataResults embeddedDataResults = new ListDataResults();
