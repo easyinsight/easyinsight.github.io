@@ -21,6 +21,7 @@ import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.diagram.DiagramModule;
 import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
+import com.easyinsight.analysis.heatmap.TopoMapModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.summary.NewSummaryModule;
 import com.easyinsight.analysis.text.TextModule;
@@ -70,7 +71,7 @@ public class ReportModuleLoader extends EventDispatcher {
                 _reportRendererModule == "YTD.swf" || _reportRendererModule == "CompareYears.swf" ||
                 _reportRendererModule == "FormModule.swf" || _reportRendererModule == "PieChartModule.swf" ||
                 _reportRendererModule == "SummaryModule.swf" || _reportRendererModule == "BubbleChartModule.swf" ||
-                _reportRendererModule == "PlotChartModule.swf" || _reportRendererModule == "TextModule.swf") {
+                _reportRendererModule == "PlotChartModule.swf" || _reportRendererModule == "TextModule.swf" || _reportRendererModule == "TopoModule.swf") {
             inline = true;
             moduleName = _reportRendererModule;
             dispatchEvent(new Event("moduleLoaded"));
@@ -145,6 +146,8 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new PlotChartModule();
             } else if (moduleName == "TextModule.swf") {
                 return new TextModule();
+            } else if (moduleName == "TopoModule.swf") {
+                return new TopoMapModule();
             }
         }
         return moduleInfo.factory.create();
