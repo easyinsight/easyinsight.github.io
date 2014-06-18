@@ -323,6 +323,7 @@
         }
 
         private function loadController(controller:IReportController):void {
+            WindowManagement.manager.clearFactory();
             var dataViewFactory:DataViewFactory = controller.createDataView();
             dataViewFactory.availableFields = wrappers;
             if (dataView != null) {
@@ -365,6 +366,7 @@
                 //dataView.overlayIndex = 5;
                 dataView.defaultManualRun = true;
             }
+            WindowManagement.manager.registerFactory(dataView);
             rightBox.addChildAt(dataViewFactory, rightBox.getChildren().length);
             dataViewFactory.refresh();
         }
@@ -411,6 +413,7 @@
                 window.editorClass = HierarchyWindow;
                 window.analysisItems = wrappers;
                 window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem, false, 0, true);
+                WindowManagement.manager.addWindow(window);
                 PopUpManager.addPopUp(window, this);
                 PopUpUtil.centerPopUp(window);
             } else if (event.joins) {
@@ -430,6 +433,7 @@
             joinWindow.dataSourceID = dataService.dataFeedID;
             joinWindow.startJoins = _analysisDefinition.joinOverrides;
             joinWindow.addEventListener(JoinOverrideEvent.JOIN_OVERRIDE_SET, onJoinOverride, false, 0, true);
+            WindowManagement.manager.addWindow(joinWindow);
             PopUpManager.addPopUp(joinWindow, this, true);
             PopUpUtil.centerPopUp(joinWindow);
             PopUpManager.removePopUp(this);
@@ -461,6 +465,7 @@
             window.addEventListener(FilterSetReportEvent.NEW_FILTER_SETS, onNewFilterSets, false, 0, true);
             window.report = analysisDefinition;
             window.dataSourceID = dataService.dataFeedID;
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -470,6 +475,7 @@
 
             window.addEventListener(AddonReportEvent.NEW_ADDONS, onNewAddons, false, 0, true);
             window.report = analysisDefinition;
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -745,12 +751,11 @@
                         }
                     }
                 }
-
-
                 loading = false;
             } catch (e:Error) {
                 var errorWindow:ErrorReportView = new ErrorReportView();
                 errorWindow.error = e;
+                WindowManagement.manager.addWindow(errorWindow);
                 PopUpManager.addPopUp(errorWindow, this, true);
                 PopUpUtil.centerPopUp(errorWindow);
             }
@@ -765,6 +770,7 @@
             window.selectedTags = selectedTags;
             window.tags = possibleTags;
             window.addEventListener(TagSelectionEvent.TAG_SELECT, onTagSelect, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this);
             window.x = button.x + 5;
             window.y = button.y + 60;
@@ -842,6 +848,7 @@
                 ProgressAlert.alert(parent, "Updating reports...", null, feedService.fieldToDataSourceLevel);
                 feedService.fieldToDataSourceLevel.send(analysisDefinition, event.item.analysisItem, dataService.dataFeedID);
             });
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -928,6 +935,7 @@
             } catch (e:Error) {
                 var errorWindow:ErrorReportView = new ErrorReportView();
                 errorWindow.error = e;
+                WindowManagement.manager.addWindow(errorWindow);
                 PopUpManager.addPopUp(errorWindow, this, true);
                 PopUpUtil.centerPopUp(errorWindow);
             }
@@ -1004,12 +1012,14 @@
             }
             window.closeAfterSave = closeAfterSave;
             window.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveHandler, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             window.coreView = dataView.getCoreView();
             window.report = dataView.updatedReport;
             window.exchangeSave = exchangeSave;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
 
 
         private function saved(event:SavedAnalysisEvent):void {
@@ -1040,6 +1050,7 @@
         }
 
         public function cleanup():void {
+            WindowManagement.manager.clearFactory();
             removeEventListener(CommandEvent.COMMAND, onCommand);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             if (dataService != null) {
@@ -1082,6 +1093,7 @@
                     doneHandler.call();
                 });
             }, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1097,6 +1109,7 @@
                     doneHandler.call();
                 });
             }, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1113,6 +1126,7 @@
             window.addEventListener(PromptEvent.PROMPT_DISCARD, function (event:PromptEvent):void {
                 doneHandler.call();
             }, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1130,6 +1144,7 @@
             window.addEventListener(PromptEvent.PROMPT_DISCARD, function (event:PromptEvent):void {
                 doneHandler.call();
             }, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1336,6 +1351,7 @@
              dataView.rerender();
              }
              }, false, 0, true);*/
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1403,6 +1419,7 @@
             saveDialog.closeAfterSave = closeAfterSave;
             saveDialog.analysisDefinition = analysisDefinition;
             saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, saveHandler, false, 0, true);
+            WindowManagement.manager.addWindow(saveDialog);
             PopUpManager.addPopUp(saveDialog, this, true);
             PopUpUtil.centerPopUp(saveDialog);
         }
@@ -1416,6 +1433,7 @@
             var window:ReportExportWindow = new ReportExportWindow();
             window.report = analysisDefinition;
             window.coreView = dataView.getCoreView();
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this);
             window.x = exportButton.x - 160;
             window.y = exportButton.y + exportButton.height + 10;
@@ -1431,6 +1449,7 @@
             window.joinsCustomizable = joinsCustomizable;
             window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged, false, 0, true);
             window.addEventListener(AnalyzeEvent.ANALYZE, onRevision, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this);
             window.x = propsButton.x - 160;
             window.y = propsButton.y + customFieldButton.height + 10;
@@ -1451,6 +1470,7 @@
             window.addEventListener(ReportEditorFieldEvent.ITEM_COPY, fieldEventHandler.copyField, false, 0, true);
             window.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged, false, 0, true);
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onAnalysisItemEdit, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this);
             window.x = customFieldButton.x - 20;
             window.y = customFieldButton.y + customFieldButton.height + 10;
@@ -1572,6 +1592,7 @@
             window.transformContainer = transformContainer;
             window.dataView = dataView;
             window.suggestions = quickActions;
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -1585,6 +1606,7 @@
         private function explain(event:Event):void {
             var window:ReportAuditWindow = new ReportAuditWindow();
             window.audits = audits;
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

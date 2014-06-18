@@ -1,4 +1,5 @@
 package com.easyinsight.analysis {
+import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -54,9 +55,23 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private var pendingRequest:Boolean = false;
 
+    private var htmlView:Boolean;
+
     public function DataViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;        
+    }
+
+    public function hideReport():void {
+        if (htmlView) {
+            currentComponent.visible = false;
+        }
+    }
+
+    public function restoreReport():void {
+        if (htmlView) {
+            currentComponent.visible = true;
+        }
     }
 
     [Bindable(event="reportSelectionEnabledChanged")]
@@ -123,6 +138,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     public function set analysisDefinition(val:AnalysisDefinition):void {
         _analysisDefinition = val;
+        if (_analysisDefinition is TopoMapDefinition) {
+            htmlView = true;
+        } else {
+            htmlView = false;
+        }
     }
 
     public function get updatedReport():AnalysisDefinition {

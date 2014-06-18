@@ -18,6 +18,7 @@ public class DataResults {
     public var report:AnalysisDefinition;
     public var fieldEvents:Object;
     public var filterEvents:Object;
+    public var cacheForHTMLKey:String;
 
     public var databaseTime:int;
     public var processingTime:int;

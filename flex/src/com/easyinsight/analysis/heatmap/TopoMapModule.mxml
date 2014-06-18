@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:flexiframe="http://code.google.com/p/flex-iframe/"
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%" paddingBottom="0" paddingLeft="0"
+        paddingRight="0" paddingTop="0" backgroundColor="#AAAAAA">
+
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+
+        import com.easyinsight.analysis.CustomChangeEvent;
+
+        import mx.collections.ArrayCollection;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+            iFrameBySource.source = "/app/html/report/abc/embed?noHeader=1&noBackground=1&iframeKey=" + additionalProperties["iframeKey"];
+        }
+
+        public function updateExportMetadata(report:AnalysisDefinition = null):void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
+        ]]></mx:Script>
+    <flexiframe:IFrame id="iFrameBySource"
+    width="100%"
+    height="100%" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"/>
+</mx:Module>

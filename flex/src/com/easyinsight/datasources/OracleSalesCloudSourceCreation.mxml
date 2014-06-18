@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var usernameInputText:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new OracleSalesCloudCompositeSource();
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:OracleSalesCloudCompositeSource = feedDefinition as OracleSalesCloudCompositeSource;
+            usernameInputText = ds.oracleUserName;
+            url = ds.oracleAccount;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:OracleSalesCloudCompositeSource = feedDefinition as OracleSalesCloudCompositeSource;
+            ds.oracleUserName = userNameInput.text;
+            ds.oraclePassword = passwordInput.text;
+            ds.oracleAccount = urlInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form>
+		<mx:FormItem label="Oracle Sales Cloud Email: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Oracle Sales Cloud Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+		</mx:FormItem>
+        <mx:FormItem label="Oracle Sales URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+            <mx:TextInput id="urlInput" text="{url}"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>
