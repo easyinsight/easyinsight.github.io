@@ -64,6 +64,7 @@
         <mapping class="com.easyinsight.analysis.FormDefinitionState"/>
         <mapping class="com.easyinsight.analysis.VerticalListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TextDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.TopoMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CompareYearsDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TrendDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TrendGridDefinitionState"/>
