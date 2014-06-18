@@ -25,6 +25,15 @@ public abstract class DataResults implements Cloneable {
     private long processingTime;
     private Map<String, List<String>> fieldEvents = new HashMap<String, List<String>>();
     private Map<String, List<String>> filterEvents = new HashMap<String, List<String>>();
+    private String cacheForHTMLKey;
+
+    public String getCacheForHTMLKey() {
+        return cacheForHTMLKey;
+    }
+
+    public void setCacheForHTMLKey(String cacheForHTMLKey) {
+        this.cacheForHTMLKey = cacheForHTMLKey;
+    }
 
     public Map<String, List<String>> getFilterEvents() {
         return filterEvents;

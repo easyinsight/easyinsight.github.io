@@ -27,4 +27,5 @@ public interface AnalysisTypes {
     public static final String DIAGRAM = "Diagram";
     public static final String SUMMARY = "Summary";
     public static final String TEXT = "Text";
+    public static final String TOPO = "Topo";
 }

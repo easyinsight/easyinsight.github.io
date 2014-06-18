@@ -23,6 +23,24 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     private int summaryTextColor = 0xFFFFFF;
     private String align;
     private boolean excludeZero;
+    private int maxColumns;
+    private int maxRows;
+
+    public int getMaxColumns() {
+        return maxColumns;
+    }
+
+    public void setMaxColumns(int maxColumns) {
+        this.maxColumns = maxColumns;
+    }
+
+    public int getMaxRows() {
+        return maxRows;
+    }
+
+    public void setMaxRows(int maxRows) {
+        this.maxRows = maxRows;
+    }
 
     public boolean isExcludeZero() {
         return excludeZero;
@@ -142,6 +160,8 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         summaryTextColor = (int) findNumberProperty(properties, "summaryTextColor", 0xFFFFFF);
         headerBackgroundColor = (int) findNumberProperty(properties, "headerBackgroundColor", 0x333333);
         summaryBackgroundColor = (int) findNumberProperty(properties, "summaryBackgroundColor", 0x555555);
+        maxColumns = (int) findNumberProperty(properties, "maxColumns", 0);
+        maxRows = (int) findNumberProperty(properties, "maxRows", 0);
         align = findStringProperty(properties, "align", "left");
     }
 
@@ -151,6 +171,8 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("excludeZero", excludeZero));
         properties.add(new ReportNumericProperty("headerBackgroundColor", headerBackgroundColor));
         properties.add(new ReportNumericProperty("summaryTextColor", summaryTextColor));
+        properties.add(new ReportNumericProperty("maxColumns", maxColumns));
+        properties.add(new ReportNumericProperty("maxRows", maxRows));
         properties.add(new ReportNumericProperty("summaryBackgroundColor", summaryBackgroundColor));
         properties.add(new ReportStringProperty("align", align));
         return properties;
