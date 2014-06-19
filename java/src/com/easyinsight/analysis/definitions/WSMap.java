@@ -21,9 +21,18 @@ public class WSMap extends WSAnalysisDefinition {
     private AnalysisItem pointGrouping;
     private int regionFillStart;
     private int regionFillEnd;
+    private int noDataFill = 0xCCCCCC;
     private String map = "US States";
     private List<MultiColor> pointColors = new ArrayList<>();
     private long mapID;
+
+    public int getNoDataFill() {
+        return noDataFill;
+    }
+
+    public void setNoDataFill(int noDataFill) {
+        this.noDataFill = noDataFill;
+    }
 
     public List<MultiColor> getPointColors() {
         return pointColors;
@@ -187,6 +196,7 @@ public class WSMap extends WSAnalysisDefinition {
         regionFillStart = (int) findNumberProperty(properties, "regionFillStart", 0x0);
         regionFillEnd = (int) findNumberProperty(properties, "regionFillEnd", 0x0);
         pointColors = multiColorProperty(properties, "pointColors");
+        noDataFill = (int) findNumberProperty(properties, "noDataFill", 0xCCCCCC);
     }
 
     @Override
@@ -195,6 +205,7 @@ public class WSMap extends WSAnalysisDefinition {
         properties.add(new ReportStringProperty("map", map));
         properties.add(new ReportNumericProperty("regionFillStart", regionFillStart));
         properties.add(new ReportNumericProperty("regionFillEnd", regionFillEnd));
+        properties.add(new ReportNumericProperty("noDataFill", noDataFill));
         properties.add(ReportMultiColorProperty.fromColors(pointColors, "pointColors"));
         return properties;
     }
