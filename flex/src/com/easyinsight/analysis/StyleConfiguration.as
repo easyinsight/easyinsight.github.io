@@ -169,6 +169,7 @@ public class StyleConfiguration {
             items.addItem(new FieldFormItem("Point Grouping", "pointGrouping", TopoMapDefinition(report).pointGrouping, report, allFields, AnalysisItemTypes.DIMENSION));
             items.addItem(new ColorReportFormItem("Region Fill Start", "regionFillStart",  TopoMapDefinition(report).regionFillStart, report));
             items.addItem(new ColorReportFormItem("Region Fill End", "regionFillEnd",  TopoMapDefinition(report).regionFillEnd, report));
+            items.addItem(new ColorReportFormItem("No Data Fill", "noDataFill",  TopoMapDefinition(report).noDataFill, report));
             items.addItem(new MultiColorReportFormItem("Point Colors", "pointColors", TopoMapDefinition(report).pointColors, report));
         }
         return items;
@@ -286,6 +287,7 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("X Axis Base At Zero", "xAxisBaseAtZero", ChartDefinition(report).xAxisBaseAtZero, report));
             items.addItem(new CheckBoxReportFormItem("Y Axis Base At Zero", "yAxisBaseAtZero", ChartDefinition(report).yAxisBaseAtZero, report));
             items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
+            items.addItem(new CheckBoxReportFormItem("Hide No Data Values", "hideNoData", ChartDefinition(report).hideNoData, report));
 
             items.addItem(new NumericReportFormItem("X Axis Max", "xAxisMaximum", ChartDefinition(report).xAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMaximumDefined"));
             items.addItem(new NumericReportFormItem("Y Axis Max", "yAxisMaximum", ChartDefinition(report).yAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMaximumDefined"));

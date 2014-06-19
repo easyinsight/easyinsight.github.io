@@ -42,6 +42,10 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         this.stackLimit = stackLimit;
     }
 
+    protected AnalysisItem itemForNoDataTest() {
+        return getXaxis();
+    }
+
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
         LimitsMetadata limitsMetadata = getLimitsMetadata();

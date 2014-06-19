@@ -180,6 +180,10 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
         return properties;
     }
 
+    protected AnalysisItem itemForNoDataTest() {
+        return getXaxis();
+    }
+
     @Override
     public String rootHTML() {
         return "<div id=\"chartpseudotooltip\"></div>";

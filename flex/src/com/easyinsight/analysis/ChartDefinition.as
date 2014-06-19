@@ -33,6 +33,8 @@ public class ChartDefinition extends AnalysisDefinition {
     public var yAxisMaximum:Number = 0;
     public var yAxisMaximumDefined:Boolean;
 
+    public var hideNoData:Boolean;
+
     public static const SORT_X_DESCENDING:String = "X-Axis Descending";
     public static const SORT_X_ASCENDING:String = "X-Axis Ascending";
     public static const SORT_Y_ASCENDING:String = "Y-Axis Ascending";

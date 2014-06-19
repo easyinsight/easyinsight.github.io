@@ -199,6 +199,7 @@ public class TopoMapServlet extends HtmlServlet {
         }
 
         object.put("colors", colorArray);
+        object.put("noDataFill", ExportService.createHexString(wsMap.getNoDataFill()));
     }
 
     private interface IRegionLookup {
