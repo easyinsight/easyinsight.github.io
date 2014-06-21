@@ -249,6 +249,8 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     protected Collection<ChildConnection> getChildConnections() {
         List<ChildConnection> connections = new ArrayList<ChildConnection>();
 
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_STAGE_HISTORY, InfusionsoftLeadSource.LEAD_ID, InfusionsoftStageMoveSource.OPPORTUNITY_ID, IJoin.ONE, IJoin.ONE));
+
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftAffiliateSource.CONTACT_ID, InfusionsoftContactSource.ID));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftAffiliateSource.AFFILIATE_ID, InfusionsoftReferralSource.AFFILIATE_ID));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftContactSource.ID, InfusionsoftReferralSource.CONTACT_ID));
@@ -282,6 +284,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_CONTACT_TO_TAG, InfusionsoftContactSource.ID, InfusionsoftContactToTag.CONTACT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACT_TO_TAG, FeedType.INFUSIONSOFT_TAG, InfusionsoftContactToTag.GROUP_ID, InfusionsoftTagSource.ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_TAG, FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftTagSource.TAG_CATEGORY_ID, InfusionsoftContactGroupCategorySource.ID, IJoin.ONE, IJoin.ONE));
+
 
         return connections;
     }
