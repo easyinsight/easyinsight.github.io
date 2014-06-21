@@ -10,8 +10,8 @@ public class NumericReportFormItem extends ReportFormItem {
     private var textInput:TextInput;
 
     public function NumericReportFormItem(label:String, property:String, value:Object, report:Object,
-            minValue:int, maxValue:int, enabledProperty:String = null) {
-        super(label, property, value, report, enabledProperty);
+            minValue:int, maxValue:int, enabledProperty:String = null, section:String = null, explicitPosition:int = -1) {
+        super(label, property, value, report, enabledProperty, false, section, explicitPosition);
         this.minValue = minValue;
         this.maxValue = maxValue;
     }
