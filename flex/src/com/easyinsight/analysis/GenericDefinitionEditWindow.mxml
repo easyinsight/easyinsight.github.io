@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="800" height="400">
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="920" height="500">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
+        import mx.containers.VBox;
+        import mx.controls.Text;
+        import mx.events.ItemClickEvent;
         import mx.managers.PopUpManager;
 
         private var _definition:AnalysisDefinition;
@@ -47,10 +50,69 @@
         override protected function createChildren():void {
             super.createChildren();
             reportItems = new ArrayCollection();
-            for each (var formItem:ReportFormItem in StyleConfiguration.getFormItems(_definition)) {
+
+            var styleFormItems:ArrayCollection = StyleConfiguration.getFormItems(_definition);
+            for each (var formItem:ReportFormItem in styleFormItems) {
                 form.addChild(formItem);
                 reportItems.addItem(formItem);
             }
+
+            formattingItems = StyleConfiguration.getVisualItems(_definition);
+            if (formattingItems.length > 0) {
+
+                var formattingBox:VBox = new VBox();
+                /*var formatText:Text = new Text();
+                formatText.maxWidth = 500;
+                formatText.text = "Depending on your report type, you can set a wide variety of formatting options to ensure that your data";
+                formattingBox.addChild(formatText);*/
+                formattingBox.verticalScrollPolicy = "on";
+                formattingBox.percentWidth = 100;
+                formattingBox.percentHeight = 100;
+                formattingBox.setStyle("borderThickness", 1);
+                formattingBox.setStyle("borderStyle", "solid");
+                formattingBox.setStyle("borderColor", 0xCCCCCC);
+                formattingBox.setStyle("paddingLeft", 5);
+                formattingBox.setStyle("paddingTop", 5);
+                formattingBox.setStyle("paddingBottom", 5);
+                formattingBox.setStyle("horizontalAlign", "center");
+                formattingBox.label = "Formatting";
+                var formattingForm:Form = new Form();
+                formattingBox.addChild(formattingForm);
+                for each (var formattingItem:ReportFormItem in formattingItems) {
+                    formattingForm.addChild(formattingItem);
+                }
+                sections.addItemAt("Formatting", 2);
+                tabNavigator.addChildAt(formattingBox, 2);
+            }
+
+            colorItems = StyleConfiguration.getColorSchemeItems(_definition);
+            if (colorItems.length > 0) {
+
+                var colorBox:VBox = new VBox();
+                var colorExplText:Text = new Text();
+                colorExplText.maxWidth = 500;
+                colorExplText.text = "For your report, you can either use the default color scheme specified on your account skin (found under the Account -> Account Skin section of the user interface) by setting the color set below to Primary or Secondary, or you can customize this report alone by setting the color set to None.";
+                colorBox.addChild(colorExplText);
+                colorBox.verticalScrollPolicy = "on";
+                colorBox.percentWidth = 100;
+                colorBox.percentHeight = 100;
+                colorBox.setStyle("borderThickness", 1);
+                colorBox.setStyle("borderStyle", "solid");
+                colorBox.setStyle("borderColor", 0xCCCCCC);
+                colorBox.setStyle("paddingLeft", 5);
+                colorBox.setStyle("paddingTop", 5);
+                colorBox.setStyle("paddingBottom", 5);
+                colorBox.setStyle("horizontalAlign", "center");
+                colorBox.label = "Color Scheme";
+                var colorForm:Form = new Form();
+                colorBox.addChild(colorForm);
+                for each (var colorItem:ReportFormItem in colorItems) {
+                    colorForm.addChild(colorItem);
+                }
+                sections.addItemAt("Color Scheme", 2);
+                tabNavigator.addChildAt(colorBox, 2);
+            }
+
             cacheItems = new ArrayCollection();
             for each (var cacheFormItem:ReportFormItem in StyleConfiguration.getCachingItems(_definition)) {
                 cachingForm.addChild(cacheFormItem);
@@ -75,6 +137,7 @@
                 for each (var limitItem:ReportFormItem in limitItems) {
                     limitForm.addChild(limitItem);
                 }
+                sections.addItem("Limits");
                 tabNavigator.addChild(formBox);
             }
             reportSpecificItems = StyleConfiguration.createReportPage(_definition, _allFields);
@@ -96,11 +159,16 @@
                 for each (var repItem:ReportFormItem in reportSpecificItems) {
                     repForm.addChild(repItem);
                 }
+                sections.addItem("Report Specific Items");
                 tabNavigator.addChild(repBox);
             }
             experimentalSpecificItems = StyleConfiguration.createExperimentalPage(_definition, _allFields);
             if (experimentalSpecificItems.length > 0) {
-                var experimentBox:Box = new Box();
+                var experimentBox:VBox = new VBox();
+                var experimentText:Text = new Text();
+                experimentText.maxWidth = 500;
+                experimentText.text = "These are configuration settings which are still in a beta state of readiness. We don't recommend using these settings unless directed to by support.";
+                experimentBox.addChild(experimentText);
                 experimentBox.verticalScrollPolicy = "on";
                 experimentBox.percentWidth = 100;
                 experimentBox.percentHeight = 100;
@@ -111,6 +179,7 @@
                 experimentBox.setStyle("paddingTop", 5);
                 experimentBox.setStyle("paddingBottom", 5);
                 experimentBox.setStyle("horizontalAlign", "center");
+                sections.addItem("Experimental Items");
                 experimentBox.label = "Experimental Items";
                 var experimentForm:Form = new Form();
                 experimentBox.addChild(experimentForm);
@@ -119,16 +188,14 @@
                 }
                 tabNavigator.addChild(experimentBox);
             }
-
-            /*addEventListener("refreshNecessary", function(event:Event):void {
-                refreshNecessary = true;
-            });*/
         }
 
         private var refreshNecessary:Boolean = false;
 
         private var limitItems:ArrayCollection;
+        private var formattingItems:ArrayCollection;
         private var reportSpecificItems:ArrayCollection;
+        private var colorItems:ArrayCollection;
         private var experimentalSpecificItems:ArrayCollection;
 
         private var reportItems:ArrayCollection;
@@ -165,6 +232,12 @@
             for each (var expItem:ReportFormItem in experimentalSpecificItems) {
                 expItem.save();
             }
+            for each (var colorItem:ReportFormItem in colorItems) {
+                colorItem.save();
+            }
+            for each (var formatItem:ReportFormItem in formattingItems) {
+                formatItem.save();
+            }
             _definition.name = reportNameInput.text;
             _definition.description = reportDescriptionInput.text;
             _definition.accountVisible = accountVisibleCheckbox.selected;
@@ -200,19 +273,27 @@
 
         [Bindable]
         private var localStorage:Boolean;
+
+        [Bindable]
+        private var sections:ArrayCollection = new ArrayCollection(["Collaboration", "Report Processing", "Caching"]);
+
+        private function onItemClick(event:ItemClickEvent):void {
+            tabNavigator.selectedIndex = event.index;
+        }
         ]]>
     </mx:Script>
-    <mx:TabNavigator id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="100%" height="325" paddingLeft="5" paddingRight="5"
-            paddingTop="5" paddingBottom="5">
+    <mx:HBox horizontalGap="0">
+    <mx:TabBar direction="vertical" dataProvider="{sections}" itemClick="onItemClick(event)" tabStyleName="propTabBarStyle" width="160"/>
+    <mx:ViewStack id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="730" height="425">
         <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
-            horizontalAlign="center" label="Report Properties" verticalScrollPolicy="on">
+                horizontalAlign="center" label="Report Properties" verticalScrollPolicy="on">
             <mx:Form label="General Properties">
                 <mx:FormItem label="Report Name:">
                     <mx:TextInput id="reportNameInput" width="380" text="{reportName}"/>
                 </mx:FormItem>
                 <mx:FormItem label="Report Description:">
                     <mx:TextArea width="380" height="75" id="reportDescriptionInput"
-                                             text="{reportDescription}" borderStyle="inset" borderThickness="1"/>
+                                 text="{reportDescription}" borderStyle="inset" borderThickness="1"/>
                 </mx:FormItem>
                 <mx:FormItem label="Account Visible:">
                     <mx:CheckBox id="accountVisibleCheckbox" selected="{accountVisible}"/>
@@ -231,19 +312,20 @@
                 </mx:FormItem>
             </mx:Form>
         </mx:Box>
-        <mx:Box width="100%" height="300" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
-            horizontalAlign="center" label="Additional Properties" verticalScrollPolicy="on">
+        <mx:Box width="100%" height="425" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
+                horizontalAlign="center" label="Report Processing" verticalScrollPolicy="on" id="configBox">
             <mx:Form id="form">
 
             </mx:Form>
         </mx:Box>
-        <mx:Box width="100%" height="300" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
+        <mx:Box width="100%" height="425" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
                 horizontalAlign="center" label="Caching Properties" verticalScrollPolicy="on">
             <mx:Form id="cachingForm">
 
             </mx:Form>
         </mx:Box>
-    </mx:TabNavigator>
+    </mx:ViewStack>
+    </mx:HBox>
     <mx:HBox width="100%" horizontalAlign="center">
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="cancel()"/>
