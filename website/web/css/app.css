@@ -297,3 +297,8 @@ a {
     color: #fff;
     background-color: #0084b4;
 }
+
+.selected_folder a { font-weight: bold; }
+.selected_folder {
+    background-color: #e2d0d0;
+}

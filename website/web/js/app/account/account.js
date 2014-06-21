@@ -1,10 +1,18 @@
 var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
-eiAccounts.controller('AccountController', function ($scope, $http) {
+eiAccounts.controller('AccountController', function ($scope) {
+
+
+});
+
+eiAccounts.controller("AccountInfoController", function($scope, $http, PageInfo, $location, $rootScope) {
+    if(!$rootScope.user.admin)
+                $location.path("/account/profile");
+    PageInfo.setTitle("Account Info");
     $http.get("/app/account.json").success(function (d, r) {
         $scope.account = d.account;
         $scope.stats = d.stats;
-    })
+    });
     $scope.planName = function () {
         switch ($scope.account.account_type) {
             case "basic":
@@ -35,7 +43,10 @@ eiAccounts.controller('UserBaseController', function ($scope, $http) {
     })
 })
 
-eiAccounts.controller('UsersController', function ($scope, $filter, $http) {
+eiAccounts.controller('UsersController', function ($scope, $filter, $http, PageInfo, $location, $rootScope) {
+    if(!$rootScope.user.admin)
+                $location.path("/account/profile");
+    PageInfo.setTitle("Users")
     $scope.deleteSelected = function () {
         var usersToDelete = $filter('filter')($scope.users, {delete: true}, true);
         var usersToDeleteIDs = usersToDelete.map(function (e, i, l) {
@@ -56,7 +67,9 @@ eiAccounts.controller('UsersController', function ($scope, $filter, $http) {
     }
 })
 
-eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location) {
+eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location, PageInfo, $location, $rootScope) {
+    if(!$rootScope.user.admin)
+                $location.path("/account/profile");
     $scope.load.then(function () {
         var i;
         for (i in $scope.users) {
@@ -66,7 +79,7 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
             }
         }
     })
-
+    PageInfo.setTitle($scope.user.first_name + " " + $scope.user.last_name);
     $scope.new = false;
 
     $scope.submit = function () {
@@ -85,7 +98,10 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
 
 });
 
-eiAccounts.controller('NewDesignerController', function ($scope, $http, $location) {
+eiAccounts.controller('NewDesignerController', function ($scope, $http, $location, PageInfo, $location, $rootScope) {
+    if(!$rootScope.user.admin)
+                $location.path("/account/profile");
+    PageInfo.setTitle("New Designer");
     $scope.user = {
         "email": null,
         "first_name": null,
@@ -109,9 +125,12 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
             }
         });
     }
-})
+});
 
-eiAccounts.controller('NewViewerController', function ($scope, $http, $location) {
+eiAccounts.controller('NewViewerController', function ($scope, $http, $location, PageInfo, $location, $rootScope) {
+    if(!$rootScope.user.admin)
+                $location.path("/account/profile");
+    PageInfo.setTitle("New Viewer");
     $scope.user = {
         "email": null,
         "first_name": null,
@@ -137,23 +156,38 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location)
     }
 })
 
+eiAccounts.controller("UserProfileController", function($scope, $rootScope, $http) {
+    $scope.user = angular.copy($rootScope.user);
+    $scope.submit = function () {
+        $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user));
 
+        $scope.save.then(function (c) {
+            if (c.data.success) {
+                $rootScope.user = c.data.user;
+            }
+        });
+    }
+})
 
 eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
-
     $routeSegmentProvider.when("/account", "account.index").
         when("/account/users", "account.user_base.index").
         when("/account/users/:id", "account.user_base.user").
         when("/account/users/designer/new", "account.user_base.new_designer").
         when("/account/users/viewer/new", "account.user_base.new_viewer").
+        when("/account/profile", "account.profile").
         segment("account", {
             templateUrl: '/account/base.template.html',
             controller: 'AccountController'
         }).within().
         segment("index", {
-            templateUrl: "/account/index.template.html"
+            templateUrl: "/account/index.template.html",
+            controller: 'AccountInfoController'
         }).
-
+        segment("profile", {
+            templateUrl: "/account/profile.template.html",
+            controller: "UserProfileController"
+        }).
         segment("user_base", {
             templateUrl: '/account/user_base.template.html',
             controller: 'UserBaseController'

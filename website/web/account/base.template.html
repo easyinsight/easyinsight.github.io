@@ -1,5 +1,5 @@
 <div class="container">
-    <div class="row">
+    <div class="row" ng-if="user.admin">
         <div class="col-md-12">
             <div class="btn-toolbar pull-right topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
@@ -7,6 +7,9 @@
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="/account/users">Users</a>
+                </div>
+                <div class="btn-group topControlBtnGroup">
+                    <a href="/account/profile">Profile</a>
                 </div>
             </div>
         </div>

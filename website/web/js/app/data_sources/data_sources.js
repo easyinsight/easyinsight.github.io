@@ -6,7 +6,8 @@ eiDataSources.controller("homeBaseController", function($scope, $http) {
     })
 })
 
-eiDataSources.controller("dataSourceListController", function($scope, $http) {
+eiDataSources.controller("dataSourceListController", function($scope, $http, PageInfo) {
+    PageInfo.setTitle("Data Sources");
     $scope.load = $http.get("/app/dataSources.json");
     $scope.load.then(function(d) {
         $scope.data_sources = d.data.data_sources;
@@ -19,17 +20,17 @@ eiDataSources.controller("dataSourceListController", function($scope, $http) {
     }
 })
 
-eiDataSources.controller("reportsListController", function($scope, $http, $routeParams) {
+eiDataSources.controller("reportsListController", function($scope, $http, $routeParams, PageInfo) {
     $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json")
     $scope.load.then(function(d) {
         $scope.data_source = d.data.data_source;
+        PageInfo.setTitle($scope.data_source.name)
         $scope.reports = d.data.reports;
         $scope.folders = d.data.folders;
         $scope.current_folder = 1;
     });
 
     $scope.switch_folder = function(folder) {
-        console.log("switching folders...");
         $scope.current_folder = folder;
     }
 

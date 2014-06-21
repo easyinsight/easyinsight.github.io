@@ -1,0 +1,47 @@
+<div cg-busy="save" />
+<form role="form" method="POST" name="userForm" ng-submit="submit()" novalidate>
+    <div class="form-group">
+        <label for="user_name">User ID</label>
+        <span id="user_name" class="form-control">{{user.username}}</span>
+    </div>
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name"
+               ng-model="user.first_name" required />
+        <p ng-show="userForm.first_name.$invalid && !userForm.first_name.$pristine">First name is required.</p>
+
+    </div>
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" ng-model="user.last_name" required />
+        <p ng-show="userForm.last_name.$invalid && !userForm.last_name.$pristine">Last name is required.</p>
+    </div>
+    <div class="form-group">
+        <label for="email_address">Email Address</label>
+        <input type="email" class="form-control" id="email_address" name="email_address" placeholder="Email Address" ng-model="user.email" required />
+        <p ng-show="userForm.email_address.$error.required && !userForm.email_address.$pristine">Email is required.</p>
+        <p ng-show="!userForm.email_address.$pristine && !userForm.email_address.$error.required && userForm.email_address.$error.email">Must be a valid email.</p>
+    </div>
+    <hr />
+    <div class="form-group">
+        <label for="old_password">Old Password</label>
+        <input type="password" class="form-control" id="old_password" name="old_password" placeholder="Old Password" ng-model="user.old_password" />
+    </div>
+    <div class="form-group">
+        <label for="new_password">New Password</label>
+        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="New Password" ng-model="user.new_password" />
+    </div>
+    <div class="form-group">
+        <label for="confirm_new_password">Confirm New Password</label>
+        <input type="password" class="form-control" id="confirm_new_password" name="confirm_new_password" placeholder="Confirm New Password" ng-model="confirm_new_password" data-password-verify="user.new_password" />
+        <p ng-show="!userForm.new_password.$pristine && userForm.confirm_new_password.$error.passwordVerify">The new passwords must match.</p>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="newsletter" ng-model="user.newsletter"/> Send Newsletter
+        </label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Update Profile" ng-disabled="userForm.$invalid" />
+    </div>
+</form>
