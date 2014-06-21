@@ -169,6 +169,7 @@ public class StyleConfiguration {
             items.addItem(new FieldFormItem("Point Grouping", "pointGrouping", TopoMapDefinition(report).pointGrouping, report, allFields, AnalysisItemTypes.DIMENSION));
             items.addItem(new ColorReportFormItem("Region Fill Start", "regionFillStart",  TopoMapDefinition(report).regionFillStart, report));
             items.addItem(new ColorReportFormItem("Region Fill End", "regionFillEnd",  TopoMapDefinition(report).regionFillEnd, report));
+            items.addItem(new ColorReportFormItem("No Data Fill", "noDataFill",  TopoMapDefinition(report).noDataFill, report));
             items.addItem(new MultiColorReportFormItem("Point Colors", "pointColors", TopoMapDefinition(report).pointColors, report));
         }
         return items;
@@ -211,47 +212,90 @@ public class StyleConfiguration {
         return items;
     }
 
-    public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
+    public static function getColorSchemeItems(report:AnalysisDefinition):ArrayCollection {
+        var items:ArrayCollection = new ArrayCollection();
+        var colorSetFormItem:ComboBoxReportFormItem = new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"], null,
+                "Fields in Account Skin");
+        items.addItem(colorSetFormItem);
+        if (report is ListDefinition) {
+            items.addItem(new ColorReportFormItem("Text Color", "textColor", ListDefinition(report).textColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", ListDefinition(report).headerTextColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", ListDefinition(report).rowColor1, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", ListDefinition(report).rowColor2, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", ListDefinition(report).headerColor1, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", ListDefinition(report).headerColor2, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", ListDefinition(report).summaryRowTextColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", ListDefinition(report).summaryRowBackgroundColor, report, null, colorSetFormItem, "Look and Feel"));
+        }
+        if (report is TreeDefinition) {
+            items.addItem(new ColorReportFormItem("Text Color", "textColor", TreeDefinition(report).textColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", TreeDefinition(report).headerTextColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", TreeDefinition(report).rowColor1, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", TreeDefinition(report).rowColor2, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", TreeDefinition(report).headerColor1, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TreeDefinition(report).headerColor2, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", TreeDefinition(report).summaryBackgroundColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", TreeDefinition(report).summaryTextColor, report, null, colorSetFormItem, "Look and Feel"));
+        }
+        if (report is CrosstabDefinition) {
+            items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", CrosstabDefinition(report).headerTextColor, report));
+            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", CrosstabDefinition(report).summaryBackgroundColor, report));
+            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report));
+        }
+        if (report is LineChartDefinition) {
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report));
+        }
+        if (report is AreaChartDefinition) {
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report));
+        }
+        if (report is PieChartDefinition) {
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report));
+        }
+        if (report is ColumnChartDefinition) {
+            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report, "useChartColor"));
+            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", ColumnChartDefinition(report).multiColors, report));
+        }
+        if (report is BarChartDefinition) {
+            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
+            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", BarChartDefinition(report).multiColors, report));
+        }
+        if (report is StackedColumnChartDefinition) {
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedColumnChartDefinition(report).multiColors, report));
+        }
+        if (report is StackedBarChartDefinition) {
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedBarChartDefinition(report).multiColors, report));
+        }
+        if (report is PlotChartDefinition) {
+
+        }
+        if (report is BubbleChartDefinition) {
+
+        }
+        if (items.length <= 1) {
+            return new ArrayCollection();
+        }
+        return items;
+    }
+
+    public static function getVisualItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new NumericReportFormItem("Font Size", "fontSize", report.fontSize, report, 8, 48));
-        items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
-        items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
         items.addItem(new NumericReportFormItem("Header Font Size", "headerFontSize", report.headerFontSize, report, 8, 48));
         items.addItem(new NumericReportFormItem("Max Header Width", "maxHeaderWidth", report.maxHeaderWidth, report, 100, 1500));
         items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", report.fixedWidth, report, 0, 5000));
         if (report is ListDefinition) {
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", ListDefinition(report).summaryTotal, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Show Line Numbers", "showLineNumbers", ListDefinition(report).showLineNumbers, report));
-            items.addItem(new CheckBoxReportFormItem("HTML Async Load", "async", ListDefinition(report).async, report));
-            items.addItem(new ColorReportFormItem("Text Color", "textColor", ListDefinition(report).textColor, report));
-            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", ListDefinition(report).headerTextColor, report));
-            items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", ListDefinition(report).rowColor1, report));
-            items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", ListDefinition(report).rowColor2, report));
-            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", ListDefinition(report).headerColor1, report));
-            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", ListDefinition(report).headerColor2, report));
-            items.addItem(new ColorReportFormItem("Summary Row Text Color", "summaryRowTextColor", ListDefinition(report).summaryRowTextColor, report));
-            items.addItem(new ColorReportFormItem("Summary Row Background Color", "summaryRowBackgroundColor", ListDefinition(report).summaryRowBackgroundColor, report));
-            items.addItem(new CheckBoxReportFormItem("Word Wrap Headers", "multiLineHeaders", ListDefinition(report).multiLineHeaders, report, null, true));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
-            items.addItem(new NumericReportFormItem("Max Rows To Display", "generalSizeLimit", report.generalSizeLimit, report, 0, 10000000));
             items.addItem(new ComboBoxReportFormItem("Default Alignment", "defaultColumnAlignment", ListDefinition(report).defaultColumnAlignment, report, ["left", "center", "right"]));
-            items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
-        }
-        if (report is KPIDefinition) {
-            items.addItem(new TextReportFormItem("Now Date", "nowDate", KPIDefinition(report).nowDate, report));
-            items.addItem(new TextReportFormItem("Previous Date", "previousDate", KPIDefinition(report).previousDate, report));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
-            items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report));
-            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", CrosstabDefinition(report).headerTextColor, report));
-            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", CrosstabDefinition(report).summaryBackgroundColor, report));
-            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report));
             items.addItem(new ComboBoxReportFormItem("Align", "align", CrosstabDefinition(report).align, report, ["left", "center", "right"]));
-            items.addItem(new CheckBoxReportFormItem("Exclude Zero Rows", "excludeZero", CrosstabDefinition(report).excludeZero, report));
-            items.addItem(new NumericReportFormItem("Max Rows", "maxRows", CrosstabDefinition(report).maxRows, report, 0, 10000000));
-            items.addItem(new NumericReportFormItem("Max Columns", "maxColumns", CrosstabDefinition(report).maxColumns, report, 0, 10000000));
         }
         if (report is GaugeDefinition) {
             items.addItem(new NumericReportFormItem("Alert Point 1", "alertPoint1", GaugeDefinition(report).alertPoint1, report, 0, 1000000000));
@@ -261,18 +305,8 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Color 3", "color3", GaugeDefinition(report).color3, report));
         }
         if (report is TreeDefinition) {
-            items.addItem(new ColorReportFormItem("Text Color", "textColor", TreeDefinition(report).textColor, report));
-            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", TreeDefinition(report).headerTextColor, report));
-            items.addItem(new ColorReportFormItem("Alternating Row Color 1", "rowColor1", TreeDefinition(report).rowColor1, report));
-            items.addItem(new ColorReportFormItem("Alternating Row Color 2", "rowColor2", TreeDefinition(report).rowColor2, report));
-            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", TreeDefinition(report).headerColor1, report));
-            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TreeDefinition(report).headerColor2, report));
-            items.addItem(new CheckBoxReportFormItem("Auto Expand All", "autoExpandAll", TreeDefinition(report).autoExpandAll, report));
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", TreeDefinition(report).summaryTotal, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
-            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", TreeDefinition(report).summaryBackgroundColor, report));
-            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", TreeDefinition(report).summaryTextColor, report));
-            items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
         }
         if (report is SummaryDefinition) {
             items.addItem(new CheckBoxReportFormItem("Separate Summary Line", "headerMode", SummaryDefinition(report).headerMode, report));
@@ -285,15 +319,12 @@ public class StyleConfiguration {
             items.addItem(new TextReportFormItem("Y Axis Label", "yAxisLabel", ChartDefinition(report).yAxisLabel, report));
             items.addItem(new CheckBoxReportFormItem("X Axis Base At Zero", "xAxisBaseAtZero", ChartDefinition(report).xAxisBaseAtZero, report));
             items.addItem(new CheckBoxReportFormItem("Y Axis Base At Zero", "yAxisBaseAtZero", ChartDefinition(report).yAxisBaseAtZero, report));
-            items.addItem(new ComboBoxReportFormItem("Color Set", "colorScheme", report.colorScheme, report, [ "Primary", "Secondary", "None"]));
+            items.addItem(new CheckBoxReportFormItem("Hide No Data Values", "hideNoData", ChartDefinition(report).hideNoData, report));
 
             items.addItem(new NumericReportFormItem("X Axis Max", "xAxisMaximum", ChartDefinition(report).xAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMaximumDefined"));
             items.addItem(new NumericReportFormItem("Y Axis Max", "yAxisMaximum", ChartDefinition(report).yAxisMaximum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMaximumDefined"));
             items.addItem(new NumericReportFormItem("X Axis Min", "xAxisMinimum", ChartDefinition(report).xAxisMinimum, report, int.MIN_VALUE, int.MAX_VALUE, "xAxisMinimumDefined"));
             items.addItem(new NumericReportFormItem("Y Axis Min", "yAxisMininum", ChartDefinition(report).yAxisMininum, report, int.MIN_VALUE, int.MAX_VALUE, "yAxisMinimumDefined"));
-        }
-        if (report is HeatMapDefinition) {
-            items.addItem(new NumericReportFormItem("Precision", "precision", HeatMapDefinition(report).precision, report, 0, 3));
         }
         if (report is TreeMapDefinition) {
             items.addItem(new ComboBoxReportFormItem("Color Strategy", "colorStrategy", TreeMapDefinition(report).colorStrategy,
@@ -315,7 +346,7 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Show Points", "showPoints", LineChartDefinition(report).showPoints, report));
             items.addItem(new CheckBoxReportFormItem("Line Shadow", "lineShadow", LineChartDefinition(report).lineShadow, report));
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report));
+
             items.addItem(new ComboBoxReportFormItem("Trend Line Interval", "trendLineTimeInterval", LineChartDefinition(report).trendLineTimeInterval, report,
                     ["None", "Year", "Month", "Week"]));
             items.addItem(new ColorReportFormItem("Trend Line Color", "trendLineColor", LineChartDefinition(report).trendLineColor, report));
@@ -333,18 +364,17 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Stacking Type", "stackingType", AreaChartDefinition(report).stackingType,
                     report, ["overlaid", "stacked", "100%"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", AreaChartDefinition(report).legendMaxWidth, report, 10, 400));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report));
+
         }
         if (report is PieChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", PieChartDefinition(report).labelPosition,
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", PieChartDefinition(report).legendMaxWidth, report, 10, 400));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report));
+
 
         }
         if (report is BarChartDefinition) {
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
-            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
+
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", BarChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                         ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
@@ -364,8 +394,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", ColumnChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
             //items.addItem(new CheckBoxReportFormItem("Use Custom Chart Color", "useChartColor", ColumnChartDefinition(report).useChartColor, report));
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report, "useChartColor"));
-            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
+
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", ColumnChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                         ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
@@ -393,7 +422,7 @@ public class StyleConfiguration {
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", StackedBarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", StackedBarChartDefinition(report).legendMaxWidth, report, 10, 400));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedBarChartDefinition(report).multiColors, report));
+
 
         }
         if (report is StackedColumnChartDefinition) {
@@ -467,6 +496,59 @@ public class StyleConfiguration {
         }
         if (report is TopoMapDefinition) {
             items.addItem(new ComboBoxReportFormItem("Map", "map", TopoMapDefinition(report).map, report, [ "US States", "World" ]));
+        }
+        var sort:Sort = new Sort();
+        sort.fields = [ new SortField("label")];
+        items.sort = sort;
+        items.refresh();
+        return items;
+    }
+
+    public static function getFormItems(report:AnalysisDefinition):ArrayCollection {
+        var items:ArrayCollection = new ArrayCollection();
+
+
+
+
+        items.addItem(new TextReportFormItem("Export String", "exportString", report.exportString, report));
+        items.addItem(new TextReportFormItem("Base Date", "baseDate", report.baseDate, report));
+
+        if (report is ListDefinition) {
+
+
+            items.addItem(new CheckBoxReportFormItem("HTML Async Load", "async", ListDefinition(report).async, report));
+
+            items.addItem(new CheckBoxReportFormItem("Word Wrap Headers", "multiLineHeaders", ListDefinition(report).multiLineHeaders, report, null, true));
+
+            items.addItem(new NumericReportFormItem("Max Rows To Display", "generalSizeLimit", report.generalSizeLimit, report, 0, 10000000));
+
+        }
+        if (report is KPIDefinition) {
+            items.addItem(new TextReportFormItem("Now Date", "nowDate", KPIDefinition(report).nowDate, report));
+            items.addItem(new TextReportFormItem("Previous Date", "previousDate", KPIDefinition(report).previousDate, report));
+        }
+        if (report is CrosstabDefinition) {
+
+            items.addItem(new CheckBoxReportFormItem("Exclude Zero Rows", "excludeZero", CrosstabDefinition(report).excludeZero, report));
+            items.addItem(new NumericReportFormItem("Max Rows", "maxRows", CrosstabDefinition(report).maxRows, report, 0, 10000000));
+            items.addItem(new NumericReportFormItem("Max Columns", "maxColumns", CrosstabDefinition(report).maxColumns, report, 0, 10000000));
+        }
+        if (report is GaugeDefinition) {
+
+        }
+        if (report is TreeDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Auto Expand All", "autoExpandAll", TreeDefinition(report).autoExpandAll, report));
+
+
+        }
+        if (report is SummaryDefinition) {
+
+        }
+        if (report is ChartDefinition) {
+
+        }
+        if (report is HeatMapDefinition) {
+            items.addItem(new NumericReportFormItem("Precision", "precision", HeatMapDefinition(report).precision, report, 0, 3));
         }
 
         items.addItem(new CheckBoxReportFormItem("Optimized", "optimized", report.optimized, report));

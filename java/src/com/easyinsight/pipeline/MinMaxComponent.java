@@ -20,6 +20,10 @@ public class MinMaxComponent implements IComponent {
     private List<MinMax> minMaxList = new ArrayList<MinMax>();
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
+        if (pipelineData.getReport() instanceof WSChartDefinition) {
+            WSChartDefinition chart = (WSChartDefinition) pipelineData.getReport();
+            chart.hideNoData(dataSet);
+        }
         WSAnalysisDefinition baseReport = pipelineData.getReport();
         List<AnalysisMeasure> measures = getMeasures(baseReport);
 

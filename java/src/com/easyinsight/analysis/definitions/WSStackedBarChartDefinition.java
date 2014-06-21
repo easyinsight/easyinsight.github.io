@@ -31,6 +31,10 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private String stackSort;
     private int stackLimit = 15;
 
+    protected AnalysisItem itemForNoDataTest() {
+        return getYaxis();
+    }
+
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
         LimitsMetadata limitsMetadata = getLimitsMetadata();

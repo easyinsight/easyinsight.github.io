@@ -7,8 +7,8 @@ public class TextReportFormItem extends ReportFormItem {
     private var textInput:TextInput;
 
     public function TextReportFormItem(label:String, property:String, value:Object, report:Object,
-            enabledProperty:String = null) {
-        super(label, property, value, report, enabledProperty);
+            enabledProperty:String = null, section:String = null, explicitPosition:int = -1) {
+        super(label, property, value, report, enabledProperty, null, section, explicitPosition);
     }
 
     protected override function createChildren():void {

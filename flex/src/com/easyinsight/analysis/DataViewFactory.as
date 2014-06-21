@@ -695,6 +695,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.cacheable = source.cacheable;
         target.addonReports = source.addonReports;
         target.baseDate = source.baseDate;
+        target.dayAggregation = source.dayAggregation;
+        target.enableLocalStorage = source.enableLocalStorage;
+        target.aggregateQueryIfPossible = source.aggregateQueryIfPossible;
+        target.publicWithKey = source.publicWithKey;
+        target.manualButRunFirst = source.manualButRunFirst;
+        target.adHocExecution = source.adHocExecution;
+        target.generalSizeLimit = source.generalSizeLimit;
 
         copyPropertyIfExists(source, target, "multiColors");
         copyPropertyIfExists(source, target, "labelPosition");
@@ -712,6 +719,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
         copyPropertyIfExists(source, target, "briefLabels");
         copyPropertyIfExists(source, target, "nowDate");
         copyPropertyIfExists(source, target, "previousDate");
+        copyPropertyIfExists(source, target, "summaryTextColor");
+        copyPropertyIfExists(source, target, "summaryBackgroundColor");
+        copyPropertyIfExists(source, target, "headerTextColor");
+        copyPropertyIfExists(source, target, "textColor");
+        copyPropertyIfExists(source, target, "rowColor1");
+        copyPropertyIfExists(source, target, "rowColor2");
+        copyPropertyIfExists(source, target, "colorScheme");
+        copyPropertyIfExists(source, target, "defaultColumnAlignment");
     }
 
     private static function copyPropertyIfExists(source:AnalysisDefinition, target:AnalysisDefinition, property:String):void {

@@ -1,6 +1,7 @@
 <link href="/css/nv.d3.css" rel="stylesheet" type="text/css">
 <script src="/js/d3.js"></script>
 <script src="/js/nv/nv.d3.js"></script>
+<script src="/js/topojson.v1.min.js"></script>
 
 <script src="/js/nv/core.js"></script>
 <script src="/js/nv/tooltip.js"></script>
@@ -19,6 +20,8 @@
 <script type="text/javascript" src="/js/visualizations/chart.js"></script>
 <script type="text/javascript" src="/js/visualizations/list.js"></script>
 <script type="text/javascript" src="/js/visualizations/asyncList.js"></script>
+<script type="text/javascript" src="/js/visualizations/d3.legend.js"></script>
+<script type="text/javascript" src="/js/visualizations/map.js"></script>
 <script type="text/javascript" src="/js/color.js"></script>
 <script type="text/javascript" src="/js/helper.js"></script>
 

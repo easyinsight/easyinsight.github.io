@@ -10,17 +10,39 @@ public class ReportFormItem extends FormItem {
     private var _report:Object;
     private var _value:Object;
     private var _enabledProperty:String;
+    private var _section:String;
+    private var _explicitPosition:int = -1;
     public var reloadOnChange:Boolean;
 
-    public function ReportFormItem(label:String = null, property:String = null, value:Object = null, report:Object = null, enabledProperty:String = null, reloadOnChange:Boolean = false) {
+    public function ReportFormItem(label:String = null, property:String = null, value:Object = null, report:Object = null,
+                                   enabledProperty:String = null, reloadOnChange:Boolean = false, section:String = null,
+            explicitPosition:int = -1) {
         super();
         this.label = label;
         this.value = value;
         this.report = report;
         this.property = property;
         this.enabledProperty = enabledProperty;
+        this.section = section;
+        this.explicitPosition = explicitPosition;
         this.reloadOnChange = reloadOnChange;
         direction = "horizontal";
+    }
+
+    public function get section():String {
+        return _section;
+    }
+
+    public function set section(value:String):void {
+        _section = value;
+    }
+
+    public function get explicitPosition():int {
+        return _explicitPosition;
+    }
+
+    public function set explicitPosition(value:int):void {
+        _explicitPosition = value;
     }
 
     public function get property():String {

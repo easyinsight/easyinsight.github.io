@@ -313,6 +313,8 @@ public class FunctionFactory {
             return new LastTempRecord();
         } else if (s.equals("interval")) {
             return new Interval();
+        } else if (s.equals("pointintime")) {
+            return new Pipeline();
         } else {
             return null;
         }

@@ -626,6 +626,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.enableLocalStorage = enableLocalStorage;
     }
 
+    public List<ReportAuditEvent> validate() {
+        List<ReportAuditEvent> events = new ArrayList<>();
+        return events;
+    }
+
     public List<AnalysisItem> allAddedItems(InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (addedItems != null) {

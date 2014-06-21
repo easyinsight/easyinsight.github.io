@@ -177,6 +177,22 @@ public class DerivedAnalysisDateDimension extends AnalysisDateDimension {
         for (AnalysisItem analysisItem : variableVisitor.getVariableList()) {
             if (analysisItem != null) {
                 for (AnalysisItem analysisItem1 : analysisItem.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure)) {
+                    if (analysisItem1 instanceof AnalysisDateDimension) {
+                        AnalysisDateDimension date = (AnalysisDateDimension) analysisItem1;
+                        try {
+                            if (getDateLevel() == AnalysisDateDimension.HOUR_LEVEL) {
+                                date = (AnalysisDateDimension) date.clone();
+                                date.setDateLevel(getDateLevel());
+                                analysisItem1 = date;
+                            } else if (getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                                analysisItem1 = (AnalysisDateDimension) date.clone();
+                                date.setDateLevel(getDateLevel());
+                                analysisItem1 = date;
+                            }
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                     if (structure.getInsightRequestMetadata().getPipelines(analysisItem).isEmpty()) {
                         structure.getInsightRequestMetadata().getPipelines(analysisItem).add(structure.getInsightRequestMetadata().getDerived(this));
                     }
