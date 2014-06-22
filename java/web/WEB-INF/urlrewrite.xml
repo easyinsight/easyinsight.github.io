@@ -327,6 +327,11 @@
         <to>/html/connectionCreating.jsp?dataSourceID=$1</to>
     </rule>
 
+    <rule>
+        <from>/dataSources/([A-Za-z0-9]+)/reports.json</from>
+        <to>/html/reportListServlet?dataSourceID=$1</to>
+    </rule>
+
     <!--<rule>
         <from>/json/reports/([0-9]+)</from>
         <to>/json/RunReport?reportID=$1</to>

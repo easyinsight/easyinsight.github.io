@@ -98,7 +98,7 @@
                     redirectUrl = redirectUrl + urlHash;
                 } else if (!loginRedirectSet) {
                     if (userServiceResponse.isDefaultHTML()) {
-                        response.sendRedirect(RedirectUtil.getURL(request, "/app/html"));
+                        response.sendRedirect(RedirectUtil.getURL(request, "/home"));
                         return;
                     }
                 }

@@ -12,6 +12,10 @@
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="com.easyinsight.database.Database" %>
 <%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.cache.MemCachedManager" %>
+<%@ page import="java.io.ObjectInputStream" %>
+<%@ page import="java.io.ByteArrayInputStream" %>
+<%@ page import="com.easyinsight.core.InsightDescriptor" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
@@ -19,13 +23,22 @@
         long reportID;
         List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
         String drillthroughArgh = request.getParameter("drillthroughKey");
-
+        WSAnalysisDefinition report = null;
         InsightResponse insightResponse;
         if (drillthroughArgh != null) {
             DrillThroughData drillThroughData = Utils.drillThroughFiltersForReport(drillthroughArgh);
             drillthroughFilters = drillThroughData.getFilters();
             reportID = drillThroughData.getReportID();
             insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
+        } else if (request.getParameter("iframeKey") != null) {
+            byte[] bytes = (byte[]) MemCachedManager.get(request.getParameter("iframeKey"));
+            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+            report = (WSAnalysisDefinition) ois.readObject();
+            for (FilterDefinition filter : report.getFilterDefinitions()) {
+                filter.setShowOnReportView(false);
+            }
+            SecurityUtil.authorizeFeedAccess(report.getDataFeedID());
+            insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor());
         } else {
             String reportIDString = request.getParameter("reportID");
             insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
@@ -44,7 +57,15 @@
 
         boolean phone = Utils.isPhone(request);
         boolean iPad = Utils.isTablet(request);
-        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
+
+        String noBackground = request.getParameter("noBackground");
+        if ("1".equals(noBackground)) {
+
+        }
+
+        if (request.getParameter("iframeKey") == null) {
+            report = new AnalysisStorage().getAnalysisDefinition(reportID);
+        }
         if (report == null) {
             throw new com.easyinsight.analysis.ReportNotFoundException("Attempt made to load report " + reportID + " which doesn't exist.");
         }
@@ -90,6 +111,10 @@
         }
 
         userObject.put("embedded", true);
+        if (request.getParameter("iframeKey") != null) {
+            userObject.put("iframeKey", request.getParameter("iframeKey"));
+        }
+
 %>
 
 <head>
@@ -112,6 +137,23 @@
     }
 %>
     <script type="text/javascript" src="/js/dashboard.js"></script>
+    <% if ("1".equals(noBackground)) { %>
+    <style type="text/css">
+        body {
+            background-image:none;
+        }
+
+        .well {
+            border-style: none;
+            border-color: #ffffff;
+            border-width: 0;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <% } %>
     <script type="text/javascript" language="JavaScript">
         var dashboardJSON = <%= reportJSON %>;
         var userJSON = <%= userObject %>;

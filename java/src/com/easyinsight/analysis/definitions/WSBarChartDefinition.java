@@ -140,6 +140,10 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         return ChartDefinitionState.BAR_FAMILY;
     }
 
+    protected AnalysisItem itemForNoDataTest() {
+        return getYaxis();
+    }
+
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);

@@ -42,6 +42,7 @@ import mx.collections.ArrayCollection;
         public static const COMPARE_YEARS:int = 39;
         public static const SUMMARY:int = 40;
         public static const TEXT:int = 41;
+        public static const TOPO:int = 42;
 
 		public var dataFeedID:int;
         public var urlKey:String;

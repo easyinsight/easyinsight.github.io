@@ -17,6 +17,8 @@ import mx.collections.ArrayCollection;
         public var summaryTextColor:uint = 0xFFFFFF;
         public var align:String = "left";
         public var excludeZero:Boolean;
+        public var maxColumns:int;
+        public var maxRows:int;
 
 		public function CrosstabDefinition()
 		{			

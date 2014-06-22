@@ -538,6 +538,16 @@
     </servlet>
 
     <servlet>
+        <servlet-name>DataSourceTags</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.DataSourceTagServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ReportTags</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.ReportTagServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>RecentActions</servlet-name>
         <display-name>RecentActions</display-name>
         <servlet-class>com.easyinsight.api.v3.RecentActionsServlet</servlet-class>
@@ -721,6 +731,11 @@
         <servlet-class>com.easyinsight.html.DeleteUsersServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>ReportListServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.DataSourceInfoServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -900,6 +915,19 @@
     <servlet-mapping>
         <servlet-name>UserInfoServlet</servlet-name>
         <url-pattern>/userInfo.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReportListServlet</servlet-name>
+        <url-pattern>/html/reportListServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DataSourceTags</servlet-name>
+        <url-pattern>/html/dataSourceTags.json</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReportTags</servlet-name>
+        <url-pattern>/html/reportTags.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

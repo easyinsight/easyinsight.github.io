@@ -168,6 +168,7 @@ public abstract class EIDescriptor implements Serializable {
         jo.put("name", getName());
         jo.put("url_key", getUrlKey());
         jo.put("description", getDescription());
+        jo.put("folder", getFolder());
         return jo;
     }
 }

@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
@@ -31,6 +32,8 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private String xAxisLabel;
     private String yAxisLabel;
 
+    private boolean hideNoData;
+
     private double xAxisMinimum;
     private boolean xAxisMinimumDefined;
 
@@ -45,6 +48,14 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
 
     private boolean xAxisBaseAtZero;
     private boolean yAxisBaseAtZero;
+
+    public boolean isHideNoData() {
+        return hideNoData;
+    }
+
+    public void setHideNoData(boolean hideNoData) {
+        this.hideNoData = hideNoData;
+    }
 
     public abstract int getChartType();
 
@@ -134,6 +145,26 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
 
     public String getDataFeedType() {
         return "Chart";
+    }
+
+    protected AnalysisItem itemForNoDataTest() {
+        return null;
+    }
+
+    public void hideNoData(DataSet dataSet) {
+        if (hideNoData) {
+            AnalysisItem item = itemForNoDataTest();
+            if (item != null) {
+                Iterator<IRow> iter = dataSet.getRows().iterator();
+                while (iter.hasNext()) {
+                    IRow row = iter.next();
+                    Value value = row.getValue(item);
+                    if (value.type() == Value.EMPTY) {
+                        iter.remove();
+                    }
+                }
+            }
+        }
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {

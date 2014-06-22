@@ -22,6 +22,7 @@ import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gantt.GanttModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.heatmap.HeatMapModule;
+import com.easyinsight.analysis.heatmap.TopoMapModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.summary.NewSummaryModule;
 import com.easyinsight.analysis.text.TextModule;
@@ -140,6 +141,9 @@ public class ReportModuleLoader extends EventDispatcher {
                 break;
             case "TextModule.swf":
                 module = new TextModule();
+                break;
+            case "TopoModule.swf":
+                module = new TopoMapModule();
                 break;
         }
         return module;

@@ -2,6 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.Database;
@@ -22,10 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.sql.PreparedStatement;
@@ -49,8 +47,38 @@ public class HtmlServlet extends HttpServlet {
             SecurityUtil.populateThreadLocalFromSession(req);
         }
         try {
+            String iframeKey = req.getParameter("iframeKey");
+
+            WSAnalysisDefinition report = null;
+
+            if (iframeKey != null) {
+                byte[] bytes = (byte[]) MemCachedManager.get(req.getParameter("iframeKey"));
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+                report = (WSAnalysisDefinition) ois.readObject();
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    filter.setShowOnReportView(false);
+                }
+                SecurityUtil.authorizeFeedAccess(report.getDataFeedID());
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                if (req.getParameter("timezoneOffset") != null) {
+                    int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
+                    insightRequestMetadata.setUtcOffset(timezoneOffset);
+                }
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+                    doStuff(req, resp, insightRequestMetadata, conn, report, md);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+                resp.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
+                resp.setHeader("Pragma", "no-cache"); //HTTP 1.0
+                resp.setDateHeader("Expires", 0); //prevents caching at the proxy server
+                return;
+            }
 
             InputStream is = req.getInputStream();
+
             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
             JSONObject filterObject;
             Object o = null;
@@ -73,7 +101,8 @@ public class HtmlServlet extends HttpServlet {
             }
             EIConnection conn = Database.instance().getConnection();
             try {
-                WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(reportID);
+
+                report = new AnalysisService().openAnalysisDefinition(reportID);
 
                 boolean logReport = report.isLogReport();
 

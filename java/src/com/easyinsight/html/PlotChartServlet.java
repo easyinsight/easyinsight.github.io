@@ -11,8 +11,7 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -41,18 +40,34 @@ public class PlotChartServlet extends HtmlServlet {
 
 
         List<JSONObject> arrays = new ArrayList<JSONObject>();
-
+        Map<String, JSONArray> pointMap = new HashMap<>();
         for (IRow row : dataSet.getRows()) {
-            JSONObject point = new JSONObject();
-            JSONArray points = new JSONArray();
+
+
+            String key;
+            if (plotDefinition.getIconGrouping() == null) {
+                key = "";
+            } else {
+                key = row.getValue(plotDefinition.getIconGrouping()).toString();
+            }
+
+            JSONArray points;
+            points = pointMap.get(key);
+            if (points == null) {
+                points = new JSONArray();
+                pointMap.put(key, points);
+            }
+
             JSONObject p1 = new JSONObject();
             p1.put("x", row.getValue(plotDefinition.getXaxisMeasure()).toDouble());
             p1.put("y", row.getValue(plotDefinition.getYaxisMeasure()).toDouble());
-            //p1.put("size", (int)(Math.random() * 10000));
-            //p1.put("shape", "cross");
             points.put(p1);
-            point.put("values", points);
-            point.put("key", row.getValue(plotDefinition.getDimension()).toString());
+        }
+
+        for (Map.Entry<String, JSONArray> entry : pointMap.entrySet()) {
+            JSONObject point = new JSONObject();
+            point.put("values", entry.getValue());
+            point.put("key", entry.getKey());
             arrays.add(point);
         }
 

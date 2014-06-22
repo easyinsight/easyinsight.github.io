@@ -19,6 +19,22 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
     private List<AnalysisItem> measures;
     private boolean multiMeasure;
 
+    public List<ReportAuditEvent> validate() {
+        List<ReportAuditEvent> events = super.validate();
+        if (!xaxis.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            events.add(new ReportAuditEvent(ReportAuditEvent.WARNING, "Easy Insight line and area charts currently require the X axis to be a date."));
+        } else {
+            AnalysisDateDimension date = (AnalysisDateDimension) xaxis;
+            if (date.getDateLevel() == AnalysisDateDimension.DAY_OF_WEEK_FLAT ||
+                    date.getDateLevel() == AnalysisDateDimension.DAY_OF_YEAR_FLAT ||
+                    date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT ||
+                    date.getDateLevel() == AnalysisDateDimension.MONTH_FLAT) {
+                events.add(new ReportAuditEvent(ReportAuditEvent.WARNING, "Easy Insight line and area charts currently require you to use a date value containing a year component."));
+            }
+        }
+        return events;
+    }
+
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
         LimitsMetadata limitsMetadata = getLimitsMetadata();

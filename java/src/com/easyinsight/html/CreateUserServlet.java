@@ -17,7 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,8 +41,7 @@ public class CreateUserServlet extends JSONServlet {
         UserTransferObject uto = UserTransferObject.fromJSON(jsonObject);
         ExportMetadata md = ExportService.createExportMetadata(conn);
         UserAccountAdminService service = new UserAccountAdminService();
-        AccountSettings settings = service.getAccountSettings();
-        boolean sendEmail = settings.isSendEmail();
+
         if (uto.getUserID() > 0) {
             UserTransferObject newUto = null;
             long userID = uto.getUserID();
@@ -50,16 +51,31 @@ public class CreateUserServlet extends JSONServlet {
                 }
             }
             if(newUto != null) {
+
+                if (!newUto.isAccountAdmin() && newUto.getUserID() == SecurityUtil.getUserID()) {
+                    uto.setAnalyst(newUto.isAnalyst());
+                    uto.setTestAccountVisible(newUto.isTestAccountVisible());
+                    uto.setAutoRefreshReports(newUto.isAutoRefreshReports());
+                    uto.setAccountAdmin(newUto.isAccountAdmin());
+                    uto.setUserName(newUto.getUserName());
+                }
                 // TODO: SET THESE UP IN THE HTML INTERFACE
                 uto.setCurrency(newUto.getCurrency());
                 uto.setUserLocale(newUto.getUserLocale());
                 uto.setDateFormat(newUto.getDateFormat());
                 uto.setFixedDashboardID(newUto.getFixedDashboardID());
                 uto.setPersonaID(newUto.getPersonaID());
+
+            } else {
+                throw new SecurityException();
             }
+
+
         }
         UserCreationResponse userCreationResponse;
         if (uto.getUserID() == 0) {
+            AccountSettings settings = service.getAccountSettings();
+                    boolean sendEmail = settings.isSendEmail();
             userCreationResponse = service.addUserToAccount(uto, new ArrayList<UserDLS>(), Boolean.valueOf(String.valueOf(jsonObject.get("change_password"))), sendEmail);
         } else {
             userCreationResponse = service.updateUser(uto, new ArrayList<UserDLS>());
@@ -75,8 +91,19 @@ public class CreateUserServlet extends JSONServlet {
 
         ResponseInfo ri;
         org.json.JSONObject jo = new org.json.JSONObject();
+        if(SecurityUtil.getUserID() == uto.getUserID()) {
+            if(jsonObject.containsKey("new_password") && jsonObject.containsKey("old_password")) {
+                String err = new UserService().updatePassword((String) jsonObject.get("old_password"), (String) jsonObject.get("new_password"));
+                if(err != null) {
+                    jo.put("success", false);
+                    jo.put("error", err);
+                }
+            }
+
+        }
         if(userCreationResponse.isSuccessful()) {
-            jo.put("success", true);
+            if(!jo.has("success"))
+                jo.put("success", true);
             jo.put("user", uto.toJSON(md));
             ri = new ResponseInfo(200, jo.toString());
         } else {

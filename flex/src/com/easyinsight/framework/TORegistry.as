@@ -49,6 +49,7 @@ import com.easyinsight.analysis.form.FormReport;
 import com.easyinsight.analysis.gantt.GanttReport;
 import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
+import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.text.TextReport;
@@ -91,6 +92,7 @@ import com.easyinsight.datasources.LinkedinCompositeDataSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.NetsuiteQueryConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
+import com.easyinsight.datasources.OracleSalesCloudCompositeSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.PivotalTrackerV5CompositeSource;
 import com.easyinsight.datasources.PostgresDatabaseConnection;
@@ -272,6 +274,7 @@ public class TORegistry {
         var stackedColumn:StackedColumnChartDefinition;
         var stackedBar:StackedBarChartDefinition;
         var vert:VerticalListDefinition;
+        var topo:TopoMapDefinition;
         var text1:TextReport;
         var summary:SummaryDefinition;
         var gauge:GaugeDefinition;
@@ -314,6 +317,7 @@ public class TORegistry {
         var s360:Solve360CompositeDataSource;
         var piv:PivotalTrackerV5CompositeSource;
         var lcomp:LinkedinCompositeDataSource;
+        var oracleSales:OracleSalesCloudCompositeSource;
     }
 }
 }

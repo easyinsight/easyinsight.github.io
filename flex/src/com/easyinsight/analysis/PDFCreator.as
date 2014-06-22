@@ -35,6 +35,9 @@ public class PDFCreator {
         var jpgStream:ByteArray = null;
         if (report.reportType == AnalysisDefinition.LIST ||
                 report.reportType == AnalysisDefinition.TREE ||
+                report.reportType == AnalysisDefinition.SUMMARY ||
+                report.reportType == AnalysisDefinition.FORM ||
+                report.reportType == AnalysisDefinition.TREND_GRID ||
                 report.reportType == AnalysisDefinition.CROSSTAB) {
             // server will generate the actual PDF table
         } else {

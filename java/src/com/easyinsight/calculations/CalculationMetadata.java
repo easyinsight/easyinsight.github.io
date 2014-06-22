@@ -62,6 +62,10 @@ public class CalculationMetadata {
         return cache;
     }
 
+    public ICalculationCache getCache(String key) {
+        return cacheMap.get(key);
+    }
+
     public void addWarning(String warning) {
         warnings.add(warning);
     }

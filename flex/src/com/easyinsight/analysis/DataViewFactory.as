@@ -1,4 +1,5 @@
 package com.easyinsight.analysis {
+import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -54,9 +55,23 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     private var pendingRequest:Boolean = false;
 
+    private var htmlView:Boolean;
+
     public function DataViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;        
+    }
+
+    public function hideReport():void {
+        if (htmlView) {
+            currentComponent.visible = false;
+        }
+    }
+
+    public function restoreReport():void {
+        if (htmlView) {
+            currentComponent.visible = true;
+        }
     }
 
     [Bindable(event="reportSelectionEnabledChanged")]
@@ -123,6 +138,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     public function set analysisDefinition(val:AnalysisDefinition):void {
         _analysisDefinition = val;
+        if (_analysisDefinition is TopoMapDefinition) {
+            htmlView = true;
+        } else {
+            htmlView = false;
+        }
     }
 
     public function get updatedReport():AnalysisDefinition {
@@ -675,6 +695,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
         target.cacheable = source.cacheable;
         target.addonReports = source.addonReports;
         target.baseDate = source.baseDate;
+        target.dayAggregation = source.dayAggregation;
+        target.enableLocalStorage = source.enableLocalStorage;
+        target.aggregateQueryIfPossible = source.aggregateQueryIfPossible;
+        target.publicWithKey = source.publicWithKey;
+        target.manualButRunFirst = source.manualButRunFirst;
+        target.adHocExecution = source.adHocExecution;
+        target.generalSizeLimit = source.generalSizeLimit;
 
         copyPropertyIfExists(source, target, "multiColors");
         copyPropertyIfExists(source, target, "labelPosition");
@@ -692,6 +719,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
         copyPropertyIfExists(source, target, "briefLabels");
         copyPropertyIfExists(source, target, "nowDate");
         copyPropertyIfExists(source, target, "previousDate");
+        copyPropertyIfExists(source, target, "summaryTextColor");
+        copyPropertyIfExists(source, target, "summaryBackgroundColor");
+        copyPropertyIfExists(source, target, "headerTextColor");
+        copyPropertyIfExists(source, target, "textColor");
+        copyPropertyIfExists(source, target, "rowColor1");
+        copyPropertyIfExists(source, target, "rowColor2");
+        copyPropertyIfExists(source, target, "colorScheme");
+        copyPropertyIfExists(source, target, "defaultColumnAlignment");
     }
 
     private static function copyPropertyIfExists(source:AnalysisDefinition, target:AnalysisDefinition, property:String):void {

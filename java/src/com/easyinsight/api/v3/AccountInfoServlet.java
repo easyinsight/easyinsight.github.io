@@ -3,6 +3,7 @@ package com.easyinsight.api.v3;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.*;
 import com.easyinsight.userupload.UserUploadService;
 import org.json.JSONObject;
@@ -27,6 +28,7 @@ public class AccountInfoServlet extends JSONServlet {
 
     @Override
     protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        SecurityUtil.authorizeAccountAdmin();
         JSONObject responseObject = new JSONObject();
         ExportMetadata md = ExportService.createExportMetadata(conn);
         AccountTransferObject uto = new UserService().retrieveAccount();

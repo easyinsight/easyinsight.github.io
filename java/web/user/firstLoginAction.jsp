@@ -1,6 +1,10 @@
 <%@ page import="com.easyinsight.users.UserService" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%
     String ipAddress  = request.getHeader("X-FORWARDED-FOR");
@@ -39,7 +43,27 @@
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp?error=true"));
             } else {
                 request.getSession().removeAttribute("resetPassword");
-                String redirectUrl = RedirectUtil.getURL(request, "/app/");
+
+                // is the account default to HTML?
+
+                String redirectUrl;
+
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement ps = conn.prepareStatement("SELECT ACCOUNT.use_html_version FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+                    ps.setLong(1, SecurityUtil.getAccountID());
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    if (rs.getBoolean(1)) {
+                        redirectUrl = RedirectUtil.getURL(request, "/app/html");
+                    } else {
+                        redirectUrl = RedirectUtil.getURL(request, "/app/");
+                    }
+                    ps.close();
+                } finally {
+                    Database.closeConnection(conn);
+                }
+
                 String urlHash = request.getParameter("urlhash");
                 if(session.getAttribute("loginRedirect") != null) {
                     redirectUrl = ((String) session.getAttribute("loginRedirect"));

@@ -80,7 +80,7 @@
         }
 
         private static function switched():void {
-            navigateToURL(new URLRequest("/app/html"), "_self");
+            navigateToURL(new URLRequest("/home"), "_self");
         }
         ]]></mx:Script>
     <mx:RemoteObject id="adminService" destination="admin">

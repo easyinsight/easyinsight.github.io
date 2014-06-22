@@ -74,7 +74,7 @@ public abstract class JSONServlet extends HttpServlet {
                 UserServiceResponse userResponse = null;
                 String authHeader = req.getHeader("Authorization");
                 if (authHeader == null) {
-                    if (isBasicAuth())
+                    if (req.getHeader("x-requested-with") == null || !"xmlhttprequest".equalsIgnoreCase(req.getHeader("x-requested-with")))
                         resp.addHeader("WWW-Authenticate", "Basic realm=\"Easy Insight\"");
                     sendError(401, "Your credentials were rejected.", resp);
                     return;

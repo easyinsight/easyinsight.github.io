@@ -151,7 +151,7 @@ public class InsightDescriptor extends EIDescriptor {
         JSONArray tags = new JSONArray();
         if(getTags() != null) {
             for(Tag t : getTags()) {
-                tags.put(t.toJSON());
+                tags.put(t.toJSON(md));
             }
         }
         jo.put("tags", tags);
