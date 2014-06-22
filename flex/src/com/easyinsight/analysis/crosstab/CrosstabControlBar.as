@@ -136,9 +136,9 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             measureGrouping.addAnalysisItem(analysisItem);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-            if (xAxisDefinition.columns.length == 0) {
+            if (xAxisDefinition.columns == null || xAxisDefinition.columns.length == 0) {
                 columnGrouping.addAnalysisItem(analysisItem);
-            } else if (xAxisDefinition.rows.length == 0) {
+            } else if (xAxisDefinition.rows == null || xAxisDefinition.rows.length == 0) {
                 rowGrouping.addAnalysisItem(analysisItem);
             } else {
                 columnGrouping.addAnalysisItem(analysisItem);
