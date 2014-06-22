@@ -106,7 +106,7 @@
                     <div class="col-md-7" style="text-align: left">
                         <div class="row">
                             <div class="col-md-12">
-                                <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;">
+                                <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;margin-bottom:40px">
                                     <% if (errorString != null) { %>
                                     <%= errorString %>
                                     <% } %>
