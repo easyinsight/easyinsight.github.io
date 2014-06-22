@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Set;
  * Date: 2/3/14
  * Time: 1:11 PM
  */
-public class FieldDataSourceOrigin {
+public class FieldDataSourceOrigin implements Serializable {
     private long report;
     private Set<Long> additionalReports;
 

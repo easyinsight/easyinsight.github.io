@@ -40,7 +40,7 @@
         }
         ]]></mx:Script>
     <mx:Form>
-		<mx:FormItem label="Oracle Sales Cloud Email: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="Oracle Sales Cloud User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
 		<mx:FormItem label="Oracle Sales Cloud Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
