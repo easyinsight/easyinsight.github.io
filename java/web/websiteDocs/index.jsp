@@ -59,7 +59,7 @@
             <ul class="nav navbar-nav navbar-right navbar-main-item">
                 <li><a href="/app/" class="fontA">Customer Login</a></li>
                 <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
-                <li><a href="/app/whatsnew.jsp" class="fontA">What's New</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
             </ul>
         </div>
     </div>
@@ -71,7 +71,7 @@
                 <li><a href="/product.html">Features</a></li>
                 <li><a href="/data.html">Connections</a></li>
                 <li><a href="/pricing.html">Pricing</a></li>
-                <li><a href="/documentation.html">Documentation</a></li>
+                <li><a href="/websiteDocs/">Documentation</a></li>
                 <li><a href="/contactus.html">Contact Us</a></li>
             </ul>
         </div>
@@ -132,7 +132,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <a href="/api.html">Developers</a>
+                    <a href="/api/">Developers</a>
                 </div>
             </div>
         </div>
