@@ -1820,7 +1820,7 @@ public class AnalysisService {
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_OF_YEAR_FLAT) {
                 format = "ww";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_FLAT) {
-                format = "MM";
+                format = "MMMM";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_OF_WEEK_FLAT) {
                 format = "EE";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_OF_YEAR_FLAT) {
@@ -1863,10 +1863,12 @@ public class AnalysisService {
                 } else {
                     try {
                         SimpleDateFormat sdf;
+
                         if (dateDimension.getOutputDateFormat() != null && !"".equals(dateDimension.getOutputDateFormat())) {
                             sdf = new SimpleDateFormat(dateDimension.getOutputDateFormat());
                         } else {
                             sdf = new SimpleDateFormat("yyyy-MM-dd");
+                            //sdf = new SimpleDateFormat(format);
                         }
 
 
