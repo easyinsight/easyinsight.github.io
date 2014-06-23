@@ -42,7 +42,7 @@ public class ConnectionInstalledServlet extends HttpServlet {
                 if (steps.getResult() != null) {
                     endURL = RedirectUtil.getURL(req, "/app/html/dashboard/" + steps.getResult().getUrlKey());
                 } else {
-                    endURL = RedirectUtil.getURL(req, "/app/html/reports/" + dataSource.getApiKey());
+                    endURL = RedirectUtil.getURL(req, "/data_sources/" + dataSource.getApiKey());
                 }
             }
             JSONObject jsonObject = new JSONObject();

@@ -45,7 +45,7 @@ eiAccounts.controller('UserBaseController', function ($scope, $http) {
 
 eiAccounts.controller('UsersController', function ($scope, $filter, $http, PageInfo, $location, $rootScope) {
     if(!$rootScope.user.admin)
-                $location.path("/account/profile");
+        $location.path("/account/profile");
     PageInfo.setTitle("Users")
     $scope.deleteSelected = function () {
         var usersToDelete = $filter('filter')($scope.users, {delete: true}, true);
@@ -83,15 +83,20 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
     $scope.new = false;
 
     $scope.submit = function () {
+        $scope.error = "";
+        $scope.success = false;
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user));
 
         $scope.save.then(function (c) {
+            $scope.success = c.data.success;
             if (c.data.success) {
                 var i = $scope.users.indexOf($scope.user);
                 if (i != -1) {
                     $scope.users[i] = c.data.user;
                 }
                 $location.path("/account/users");
+            } else {
+                $scope.error = c.data.error;
             }
         });
     }
@@ -117,11 +122,16 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
     };
     $scope.new = true;
     $scope.submit = function () {
+        $scope.error = "";
+        $scope.success = false;
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user));
         $scope.save.then(function (c) {
+            $scope.success = c.data.success;
             if (c.data.success) {
                 $scope.users.push(c.data.user);
                 $location.path("/account/users");
+            } else {
+                $scope.error = c.data.error;
             }
         });
     }
@@ -146,11 +156,16 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location,
     };
     $scope.new = true;
     $scope.submit = function () {
+        $scope.error = "";
+        $scope.success = false;
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user))
         $scope.save.then(function (c) {
+            $scope.success = c.data.success;
             if (c.data.success) {
                 $scope.users.push(c.data.user);
                 $location.path("/account/users");
+            } else {
+                $scope.error = c.data.error;
             }
         })
     }
@@ -159,11 +174,19 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location,
 eiAccounts.controller("UserProfileController", function($scope, $rootScope, $http) {
     $scope.user = angular.copy($rootScope.user);
     $scope.submit = function () {
+        $scope.error = "";
+        $scope.success = false;
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user));
-
         $scope.save.then(function (c) {
+            $scope.success = c.data.success;
             if (c.data.success) {
                 $rootScope.user = c.data.user;
+                $scope.user.old_password = "";
+                $scope.user.new_password = "";
+            } else {
+                $scope.error = c.data.error;
+                $scope.user.old_password = "";
+                $scope.user.new_password = "";
             }
         });
     }

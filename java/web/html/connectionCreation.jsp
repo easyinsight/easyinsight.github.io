@@ -41,7 +41,7 @@
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                existingURLKey = RedirectUtil.getURL(request, "/app/html/reports/" + rs.getString(1));
+                existingURLKey = RedirectUtil.getURL(request, "/data_sources/" + rs.getString(1));
             }
         } finally {
             Database.closeConnection(conn);
