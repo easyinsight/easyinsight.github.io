@@ -13,9 +13,12 @@ import mx.managers.PopUpManager;
 public class MultiColorReportFormItem extends ReportFormItem {
 
     public var button:LinkButton;
+    private var dependsOn:ComboBoxReportFormItem;
 
-    public function MultiColorReportFormItem(label:String = null, property:String = null, value:Object = null, report:Object = null, enabledProperty:String = null) {
+    public function MultiColorReportFormItem(label:String = null, property:String = null, value:Object = null, report:Object = null, enabledProperty:String = null,
+                                             dependsOn:ComboBoxReportFormItem = null) {
         super(label, property, value, report, enabledProperty);
+        this.dependsOn = dependsOn;
     }
 
     private var colors:ArrayCollection;
@@ -31,6 +34,21 @@ public class MultiColorReportFormItem extends ReportFormItem {
 
         if (this.value != null) colors = ArrayCollection(this.value);
         addChild(button);
+
+        if (dependsOn != null) {
+            dependsOn.addEventListener('schemeChange', onDependChange);
+        }
+        if (dependsOn != null && (dependsOn.value == "Primary" || dependsOn.value == "Secondary")) {
+            this.enabled = false;
+        }
+    }
+
+    private function onDependChange(event:Event):void {
+        if (dependsOn.value == "Primary" || dependsOn.value == "Secondary") {
+            this.enabled = false;
+        } else {
+            this.enabled = true;
+        }
     }
 
     private function onClick(event:MouseEvent):void {

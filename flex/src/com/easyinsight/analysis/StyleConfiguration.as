@@ -238,35 +238,35 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", TreeDefinition(report).summaryTextColor, report, null, colorSetFormItem, "Look and Feel"));
         }
         if (report is CrosstabDefinition) {
-            items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report));
-            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", CrosstabDefinition(report).headerTextColor, report));
-            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", CrosstabDefinition(report).summaryBackgroundColor, report));
-            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report));
+            items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report, null, colorSetFormItem));
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", CrosstabDefinition(report).headerTextColor, report, null, colorSetFormItem));
+            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", CrosstabDefinition(report).summaryBackgroundColor, report, null, colorSetFormItem));
+            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", CrosstabDefinition(report).summaryTextColor, report, null, colorSetFormItem));
         }
         if (report is LineChartDefinition) {
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", LineChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
         if (report is AreaChartDefinition) {
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", AreaChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
         if (report is PieChartDefinition) {
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
         if (report is ColumnChartDefinition) {
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report, "useChartColor"));
-            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report));
+            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report, "useChartColor", colorSetFormItem));
+            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report, null, colorSetFormItem));
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", ColumnChartDefinition(report).multiColors, report));
         }
         if (report is BarChartDefinition) {
-            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor"));
-            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", BarChartDefinition(report).multiColors, report));
+            items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", BarChartDefinition(report).chartColor, report, "useChartColor", colorSetFormItem));
+            items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", BarChartDefinition(report).gradientColor, report, null, colorSetFormItem));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", BarChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
         if (report is StackedColumnChartDefinition) {
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedColumnChartDefinition(report).multiColors, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedColumnChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
         if (report is StackedBarChartDefinition) {
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedBarChartDefinition(report).multiColors, report));
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedBarChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
         if (report is PlotChartDefinition) {
 
@@ -382,7 +382,7 @@ public class StyleConfiguration {
                     ["Linear", "Logarithmic"]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", BarChartDefinition(report).multiColors, report));
+
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", BarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", BarChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
@@ -406,7 +406,7 @@ public class StyleConfiguration {
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", ColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", ColumnChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", ColumnChartDefinition(report).multiColors, report));
+
         }
 
         if (report is StackedBarChartDefinition) {
@@ -438,7 +438,7 @@ public class StyleConfiguration {
                     ["none", "bold"]));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", StackedColumnChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", StackedColumnChartDefinition(report).legendMaxWidth, report, 10, 400));
-            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedColumnChartDefinition(report).multiColors, report));
+
         }
         if (report is FormReport) {
             items.addItem(new ComboBoxReportFormItem("Label Font Name", "labelFont", FormReport(report).labelFont, report, ["Arial", "Arial Black", "Comic Sans MS",
