@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.export.ExportService;
 import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -190,12 +191,13 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     public void renderConfig(ApplicationSkin applicationSkin) {
         if ("Primary".equals(getColorScheme())) {
             if (applicationSkin.isCrosstabHeaderBackgroundColorEnabled()) {
-                setHeaderBackgroundColor(applicationSkin.getHeaderBarBackgroundColor());
+                setHeaderBackgroundColor(applicationSkin.getCrosstabHeaderBackgroundColor());
             }
             if (applicationSkin.isCrosstabHeaderTextColorEnabled()) {
                 setHeaderTextColor(applicationSkin.getCrosstabHeaderTextColor());
             }
             if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                System.out.println(applicationSkin.getSummaryBackgroundColor() + " = " + ExportService.createHexString(applicationSkin.getSummaryBackgroundColor()));
                 setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
             }
             if (applicationSkin.isSummaryTextColorEnabled()) {
