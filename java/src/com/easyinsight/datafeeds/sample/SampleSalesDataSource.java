@@ -1,10 +1,7 @@
 package com.easyinsight.datafeeds.sample;
 
-import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -13,12 +10,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -29,13 +21,14 @@ import java.util.*;
 public class SampleSalesDataSource extends ServerDataSourceDefinition {
     public static final String CUSTOMER = "Sales Customer";
     public static final String PRODUCT = "Sales Product";
+    public static final String SALES_REP = "Sales Rep";
+    public static final String DEAL_SIZE = "Deal Size";
+    public static final String DATE_WON = "Date Won";
     public static final String QUANTITY = "Quantity";
-    public static final String ORDER_DATE = "Order Date";
-
-    private static final String[] customerNames = { "Bross Design", "Crestone Engineering", "Uncompahgre Systems",
-            "Sneffels Technology", "Sunlight Architecture", "Pyramid Research", "Little Bear Consulting", "Torreys Inc" };
-
-    private static final String[] productNames = { "Widget1", "Widget2", "Widget3", "Widget4", "Widget5"};
+    public static final String CREATION_DATE = "Date Created";
+    public static final String STAGE = "Current Stage";
+    public static final String OPPORTUNITY_ID = "Opportunity ID";
+    public static final String OPPORTUNITY_COUNT = "Opportunity Count";
 
     public SampleSalesDataSource() {
         setFeedName("Sales");
@@ -46,81 +39,42 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
         return FeedType.SAMPLE_SALES;
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(CUSTOMER, PRODUCT, QUANTITY, ORDER_DATE);
-    }
-
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        AnalysisDimension customer = new AnalysisDimension(keys.get(CUSTOMER));
-        customer.setHidden(true);
-        items.add(customer);
-        AnalysisDimension product = new AnalysisDimension(keys.get(PRODUCT));
-        product.setHidden(true);
-        items.add(product);
-        items.add(new AnalysisMeasure(keys.get(QUANTITY), AggregationTypes.SUM));
-        items.add(new AnalysisDateDimension(keys.get(ORDER_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        return items;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(CUSTOMER, new AnalysisDimension());
+        fieldBuilder.addField(PRODUCT, new AnalysisDimension());
+        fieldBuilder.addField(STAGE, new AnalysisDimension());
+        fieldBuilder.addField(SALES_REP, new AnalysisDimension());
+        fieldBuilder.addField(DEAL_SIZE, new AnalysisMeasure());
+        fieldBuilder.addField(QUANTITY, new AnalysisMeasure());
+        fieldBuilder.addField(OPPORTUNITY_COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(CREATION_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(DATE_WON, new AnalysisDateDimension());
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
-        long startTime = System.currentTimeMillis();
         try {
-            File file = new File(getDataFeedID() + ".csv");
-            FileOutputStream fos = new FileOutputStream(file);
-            BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            CsvWriter csvWriter = new CsvWriter(bos, ',', Charset.forName("UTF-8"));
-            String[] header = new String[keys.size()];
-            int j = 0;
-            for (Key key : keys.values()) {
-                header[j++] = "k" + key.getKeyID();
-            }
-            csvWriter.writeRecord(header);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            for (int i = 0; i < 1000000; i++) {
+            SampleDataSource sampleDataSource = (SampleDataSource) parentDefinition;
+            List<OpportunityData> opportunities = sampleDataSource.getOrCreateOpportunities();
+            for (OpportunityData opportunityData : opportunities) {
                 IRow row = dataSet.createRow();
-
-                row.addValue(keys.get(CUSTOMER), customerNames[i % customerNames.length]);
-                row.addValue(keys.get(PRODUCT), productNames[(int) (Math.random() * 5)]);
-                row.addValue(keys.get(QUANTITY), (int) (Math.random() * 3));
-                Calendar cal = Calendar.getInstance();
-                //cal.add(Calendar.YEAR, -1);
-                cal.add(Calendar.DAY_OF_YEAR, - (int) (Math.random() * 365));
-                row.addValue(keys.get(ORDER_DATE), cal.getTime());
-                String[] rowValues = new String[keys.size()];
-                j = 0;
-                for (Key key : keys.values()) {
-                    Value value = row.getValue(key);
-                    if (value.type() == Value.DATE) {
-                        rowValues[j++] = sdf.format(((DateValue) value).getDate());
-                    } else {
-                        rowValues[j++] = String.valueOf(value.toString());
-                    }
-                }
-                csvWriter.writeRecord(rowValues);
-
-                if (i % 1000 == 0) {
-                    //IDataStorage.insertData(dataSet);
-                    csvWriter.flush();
-                    dataSet = new DataSet();
-                }
+                row.addValue(keys.get(OPPORTUNITY_ID), opportunityData.getId());
+                row.addValue(keys.get(STAGE), opportunityData.getStage());
+                row.addValue(keys.get(CREATION_DATE), opportunityData.getDateCreated());
+                row.addValue(keys.get(DATE_WON), opportunityData.getDateWon());
+                row.addValue(keys.get(SALES_REP), opportunityData.getSalesRep());
+                row.addValue(keys.get(DEAL_SIZE), opportunityData.getDealSize());
+                row.addValue(keys.get(PRODUCT), opportunityData.getProduct());
+                row.addValue(keys.get(CUSTOMER), opportunityData.getCustomer());
+                row.addValue(keys.get(QUANTITY), Math.random() * 10);
+                row.addValue(keys.get(OPPORTUNITY_COUNT), 1);
             }
-            csvWriter.flush();
-            csvWriter.close();
-            fos.close();
-
-
-
-            //IDataStorage.insertData(dataSet);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Elapsed time = " + (endTime - startTime));
-        return null;
+        return dataSet;
     }
 }

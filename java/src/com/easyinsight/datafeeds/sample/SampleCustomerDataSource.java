@@ -22,6 +22,7 @@ public class SampleCustomerDataSource extends ServerDataSourceDefinition {
     public static final String CUSTOMER = "Customer";
     public static final String INDUSTRY = "Industry";
     public static final String POSTAL_CODE = "Postal Code";
+    public static final String STATE = "State";
 
     private static final String[] customerNames = { "Bross Design", "Crestone Engineering", "Uncompahgre Systems",
             "Sneffels Technology", "Sunlight Architecture", "Pyramid Research", "Little Bear Consulting", "Torreys Inc" };
@@ -39,33 +40,24 @@ public class SampleCustomerDataSource extends ServerDataSourceDefinition {
         return FeedType.SAMPLE_CUSTOMER;
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(CUSTOMER, INDUSTRY, POSTAL_CODE);
-    }
-
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
-        items.add(new AnalysisDimension(keys.get(CUSTOMER)));
-        items.add(new AnalysisDimension(keys.get(INDUSTRY)));
-        items.add(new AnalysisDimension(keys.get(POSTAL_CODE), true));
-        return items;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(CUSTOMER, new AnalysisDimension());
+        fieldBuilder.addField(INDUSTRY, new AnalysisDimension());
+        fieldBuilder.addField(POSTAL_CODE, new AnalysisDimension());
+        fieldBuilder.addField(STATE, new AnalysisDimension());
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         try {
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < customerNames.length; i++) {
                 IRow row = dataSet.createRow();
-                row.addValue(keys.get(CUSTOMER), String.valueOf(i));
+                row.addValue(keys.get(CUSTOMER), customerNames[i]);
                 row.addValue(keys.get(INDUSTRY), industries[i % industries.length]);
                 row.addValue(keys.get(POSTAL_CODE), postalCodes[i % postalCodes.length]);
-                if (i % 1000 == 0) {
-                    IDataStorage.insertData(dataSet);
-                    dataSet = new DataSet();
-                }
+                row.addValue(keys.get(STATE), "CO");
             }
             IDataStorage.insertData(dataSet);
         } catch (Exception e) {
