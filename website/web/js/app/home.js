@@ -49,6 +49,8 @@ easyInsight.run(function ($rootScope, $http, PageInfo) {
         else {
             $rootScope.bookmarks = d.bookmarks;
             $rootScope.user = d.user;
+            $rootScope.news_alert = d.news_alert;
+            console.log(d.news_alert);
         }
     }).error(function () {
         window.location = "/app/login.jsp";

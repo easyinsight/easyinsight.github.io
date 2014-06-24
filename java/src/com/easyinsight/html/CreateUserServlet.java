@@ -108,6 +108,9 @@ public class CreateUserServlet extends JSONServlet {
             ri = new ResponseInfo(200, jo.toString());
         } else {
             jo.put("success", false);
+            if(!jo.has("error")) {
+                jo.put("error", userCreationResponse.getFailureMessage());
+            }
             ri = new ResponseInfo(500, jo.toString());
         }
 
