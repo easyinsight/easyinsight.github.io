@@ -301,6 +301,7 @@ public class FeedType implements Serializable {
     public static final FeedType ORACLE_REVENUELINESET = new FeedType(272);
     public static final FeedType ORACLE_REVENUETERRITORY = new FeedType(273);
     public static final FeedType ORACLE_OPPORTUNITY_HISTORY = new FeedType(274);
+    public static final FeedType SALES_HISTORY = new FeedType(275);
 
     public FeedType() {
     }
