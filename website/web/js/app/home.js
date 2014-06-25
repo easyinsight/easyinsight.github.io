@@ -1,7 +1,11 @@
 var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
 easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentProvider) {
-    $locationProvider.html5Mode(true);
+    if(window.history && window.history.pushState) {
+        $locationProvider.html5Mode(true);
+    } else {
+        $locationProvider.html5Mode(false);
+    }
     $routeSegmentProvider.when("/missing", "missing").
         segment("missing", {
             templateUrl: '/angular_templates/missing.template.html',
@@ -94,4 +98,8 @@ easyInsight.directive("passwordVerify", function() {
         });
      }
    };
+});
+
+easyInsight.value('cgBusyDefaults',{
+    templateUrl: '/angular_templates/angular-busy.html'
 });

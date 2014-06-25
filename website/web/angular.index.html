@@ -15,7 +15,8 @@
     <script type="text/javascript" src="/js/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
     <script type="text/javascript" src="/js/angular/promise-tracker.js"></script>
     <script type="text/javascript" src="/js/angular/angular-busy.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-route-segment/1.3.0/angular-route-segment.js"></script>
+    <script type="text/javascript" src="/js/angular/route-segment.js"></script>
+    <script type="text/javascript" src="/js/angular/view-segment.js"></script>
     <script type="text/javascript" src="/js/app/home.js"></script>
     <script type="text/javascript" src="/js/app/data_sources/data_sources.js"></script>
     <script type="text/javascript" src="/js/app/account/account.js"></script>
@@ -33,7 +34,7 @@
     </div>
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav">
-            <li><a href="/a/home">Home</a></li>
+            <li><a href="#/home">Home</a></li>
             <li><a href="/app/html/connections.jsp" ng-click="$event.stopPropagation()">Connections</a></li>
             <li><a href="/app/embeddedScheduleManagement.jsp" ng-click="$event.stopPropagation()">Scheduling</a></li>
         </ul>
@@ -53,7 +54,7 @@
                     <i class="icon-user"></i>{{ user.username }} <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="/a/account/">Account Settings</a></li>
+                    <li><a href="#/account/">Account Settings</a></li>
                     <li class="divider"></li>
                     <li><a href="/app/logoutAction.jsp" ng-click="$event.stopPropagation()">Sign Out</a></li>
                 </ul>
