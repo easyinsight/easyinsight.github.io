@@ -104,8 +104,8 @@
                     // embed the Flash Content SWF when all tests are passed
                     AC_FL_RunContent(
                             "src", "<%=versionDir%>/<%=swf%>",
-                            "width", "100%",
-                            "height", "100%",
+                            "width", "1100",
+                            "height", "400",
                             "align", "middle",
                             "id", "<%=swf%>",
                             "quality", "high",
