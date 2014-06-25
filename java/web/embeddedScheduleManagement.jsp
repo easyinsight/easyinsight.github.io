@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
