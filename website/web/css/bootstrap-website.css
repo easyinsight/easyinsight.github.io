@@ -349,3 +349,9 @@ p.disclaimer {
 .sidedocs a {
     color: #333333;
 }
+
+.productHeader {
+    color: #333333;
+    font-size: 24px;
+    font-family: "Cabin",sans-serif;
+}

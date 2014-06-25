@@ -142,7 +142,6 @@ label {
     background-image: -moz-linear-gradient(top, #FFFFFF 0%, #FFFFFF 100%);
     background-image: linear-gradient(to bottom, #FFFFFF 0%, #FFFFFF 100%);
     background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffffffff', GradientType=0);
 }
 
 
