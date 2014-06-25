@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Comparator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,6 +31,16 @@ public class DataSourceListServlet extends JSONServlet {
         boolean zapierFilter = "zapier".equals(filter);
         boolean apiFilter = "api".equals(filter);
         java.util.List<DataSourceDescriptor> dataSources = new com.easyinsight.datafeeds.FeedService().searchForSubscribedFeeds();
+        dataSources.sort((o1, o2) -> {
+            if(o1 == null && o2 == null)
+                return 0;
+            if(o1 != null && o2 != null && o1.getName() == null && o2.getName() == null)
+                return 0;
+            if(o1 == null || o1.getName() == null)
+                return -1;
+
+            return o1.getName().compareToIgnoreCase(o2.getName());
+        });
         ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
         for (DataSourceDescriptor ds : dataSources) {
             if (zapierFilter) {
