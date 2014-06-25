@@ -7,7 +7,7 @@ eiAccounts.controller('AccountController', function ($scope) {
 
 eiAccounts.controller("AccountInfoController", function($scope, $http, PageInfo, $location, $rootScope) {
     if(!$rootScope.user.admin)
-                $location.path("/a/account/profile");
+        $location.path("/a/account/profile");
     PageInfo.setTitle("Account Info");
     $http.get("/app/account.json").success(function (d, r) {
         $scope.account = d.account;
@@ -67,7 +67,7 @@ eiAccounts.controller('UsersController', function ($scope, $filter, $http, PageI
     }
 })
 
-eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location, PageInfo, $location, $rootScope) {
+eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/a/account/profile");
     $scope.load.then(function () {
@@ -103,7 +103,7 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
 
 });
 
-eiAccounts.controller('NewDesignerController', function ($scope, $http, $location, PageInfo, $location, $rootScope) {
+eiAccounts.controller('NewDesignerController', function ($scope, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/a/account/profile");
     PageInfo.setTitle("New Designer");
@@ -137,7 +137,7 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
     }
 });
 
-eiAccounts.controller('NewViewerController', function ($scope, $http, $location, PageInfo, $location, $rootScope) {
+eiAccounts.controller('NewViewerController', function ($scope, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/a/account/profile");
     PageInfo.setTitle("New Viewer");
@@ -175,8 +175,12 @@ eiAccounts.controller("OverviewController", function() {
 
 });
 
-eiAccounts.controller("AccountSettingsController", function() {
-
+eiAccounts.controller("AccountSettingsController", function($scope, $http) {
+    $scope.loading = $http.get("/app/account_settings.json");
+    $scope.loading.then(function(c) {
+        $scope.settings = c.data.settings;
+        console.log($scope.settings)
+    })
 })
 
 eiAccounts.controller("UserProfileController", function($scope, $rootScope, $http) {
