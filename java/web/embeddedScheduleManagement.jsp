@@ -45,15 +45,6 @@
     <jsp:include page="html/bootstrapHeader.jsp"/>
 
     <style type="text/css">
-
-        .navBar {
-            margin-bottom: 0;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            position: absolute;
-            width: 100%;
-        }
     </style>
 
     <script language="JavaScript" type="text/javascript">
