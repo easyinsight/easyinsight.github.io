@@ -9,6 +9,9 @@ public class OracleSalesCloudCompositeSource extends CompositeServerDataSource {
     public var oracleUserName:String;
     public var oraclePassword:String;
     public var oracleAccount:String;
+    public var historyUserName:String;
+    public var historyPassword:String;
+    public var historyReport:String = "/Custom/Customer Relationship Management/OppHistory.xdo";
 
     public function OracleSalesCloudCompositeSource() {
         super();

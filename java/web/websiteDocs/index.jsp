@@ -9,6 +9,9 @@
     String main = null;
     if (doc != null && !"".equals(doc)) {
         main = DocReader.toHTML(null, request, DocReader.WEBSITE);
+    } else {
+        main = html;
+        html = DocReader.toHTML("DocWelcome", request, DocReader.WEBSITE);
     }
 %>
 <head>
@@ -71,7 +74,7 @@
                 <li><a href="/product.html">Features</a></li>
                 <li><a href="/data.html">Connections</a></li>
                 <li><a href="/pricing.html">Pricing</a></li>
-                <li><a href="/websiteDocs/">Documentation</a></li>
+                <li><a href="/app/websiteDocs/">Documentation</a></li>
                 <li><a href="/contactus.html">Contact Us</a></li>
             </ul>
         </div>
