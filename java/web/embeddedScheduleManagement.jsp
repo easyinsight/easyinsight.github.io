@@ -62,7 +62,7 @@
 </head>
 
 
-<body scroll="no">
+<body>
 <jsp:include page="header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.SCHEDULING %>"/>
