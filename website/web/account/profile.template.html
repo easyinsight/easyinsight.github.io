@@ -1,5 +1,8 @@
 <div cg-busy="save" />
 <form role="form" method="POST" name="userForm" ng-submit="submit()" novalidate>
+    <div class="form-group" ng-if="success">
+        <label class="alert alert-success">Your profile has been successfully updated.</label>
+    </div>
     <div class="form-group">
         <label for="user_name">User ID</label>
         <span id="user_name" class="form-control">{{user.username}}</span>
@@ -40,6 +43,9 @@
         <label>
             <input type="checkbox" name="newsletter" ng-model="user.newsletter"/> Send Newsletter
         </label>
+    </div>
+    <div class="form-group" ng-if="error">
+            <label class="alert alert-danger">Error: {{error}}</label>
     </div>
     <div class="form-group">
         <input type="submit" value="Update Profile" ng-disabled="userForm.$invalid" />

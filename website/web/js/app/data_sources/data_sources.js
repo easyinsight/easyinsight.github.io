@@ -20,7 +20,7 @@ eiDataSources.controller("dataSourceListController", function($scope, $http, Pag
     }
 })
 
-eiDataSources.controller("reportsListController", function($scope, $http, $routeParams, PageInfo) {
+eiDataSources.controller("reportsListController", function($scope, $http, $routeParams, $interval, $q, PageInfo) {
     $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json")
     $scope.load.then(function(d) {
         $scope.data_source = d.data.data_source;
@@ -29,6 +29,31 @@ eiDataSources.controller("reportsListController", function($scope, $http, $route
         $scope.folders = d.data.folders;
         $scope.current_folder = 1;
     });
+
+    $scope.refresh_data_source = function() {
+        $scope.refresh_status_line = "Starting the refresh...";
+        $http.get("/app/refreshDataSource?urlKey=" + $scope.data_source.url_key).then(function(d) {
+            if(d.data && d.data.callDataID) {
+                $scope.refresh_interval = $interval(function() {
+                    $http.get("/app/refreshStatus?callDataID=" + d.data.callDataID).then(function(a) {
+                        if(a.data.status == 4) {
+                            $scope.refresh_status_line = "";
+                            $interval.cancel($scope.refresh_interval);
+                            $scope.refresh_interval = null;
+                        }
+                        $scope.refresh_status_line = a.data.statusMessage;
+                    });
+                }, 5000);
+            }
+        });
+    }
+
+    $scope.$on("$destroy", function() {
+        if($scope.refresh_interval) {
+            $interval.cancel($scope.refresh_interval);
+            $scope.refresh_interval = null;
+        }
+    })
 
     $scope.switch_folder = function(folder) {
         $scope.current_folder = folder;

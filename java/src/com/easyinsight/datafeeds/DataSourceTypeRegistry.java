@@ -49,10 +49,7 @@ import com.easyinsight.datafeeds.redbooth.*;
 import com.easyinsight.datafeeds.redirect.RedirectDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.salesforce.SalesforceSObjectSource;
-import com.easyinsight.datafeeds.sample.SampleCustomerDataSource;
-import com.easyinsight.datafeeds.sample.SampleDataSource;
-import com.easyinsight.datafeeds.sample.SampleProductDataSource;
-import com.easyinsight.datafeeds.sample.SampleSalesDataSource;
+import com.easyinsight.datafeeds.sample.*;
 import com.easyinsight.datafeeds.sendgrid.SendGridDataSource;
 /*import com.easyinsight.datafeeds.solve360.Solve360ActivitiesSource;
 import com.easyinsight.datafeeds.solve360.Solve360CompositeSource;
@@ -438,6 +435,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.ORACLE_REVENUETERRITORY, OracleRevenueTerritorySource.class);
         registerType(FeedType.ORACLE_OPPORTUNITYCOMPETITOR, OracleOpportunityCompetitorSource.class);
         registerType(FeedType.ORACLE_OPPORTUNITY_HISTORY, OracleOpportunityHistorySource.class);
+        registerType(FeedType.SALES_HISTORY, SampleSalesHistorySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

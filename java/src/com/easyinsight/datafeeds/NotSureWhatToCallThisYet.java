@@ -36,7 +36,7 @@ public class NotSureWhatToCallThisYet {
     private class Yargh {
 
         private Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
-        private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
     }
 
     public DataSet yargh(InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> analysisItems, EIConnection conn,
@@ -55,7 +55,7 @@ public class NotSureWhatToCallThisYet {
             if (feed instanceof CompositeFeed) {
                 compositeFeedNodes = ((CompositeFeed) feed).getCompositeFeedNodes();
             } else {
-                compositeFeedNodes = new ArrayList<CompositeFeedNode>();
+                compositeFeedNodes = new ArrayList<>();
             }
 
 
@@ -78,10 +78,12 @@ public class NotSureWhatToCallThisYet {
 
                 if (onThisLevel) {
 
-                    if (insightRequestMetadata.getReportItems().contains(base) && base.hasType(AnalysisItemTypes.MEASURE)) {
+                    if (base.hasType(AnalysisItemTypes.MEASURE)) {
                         System.out.println("Base item = " + base.toDisplay() + " on " + getName());
                         AnalysisDateDimension itemDate = findDateDimension(base, baseDate.getDateLevel());
-                        insightRequestMetadata.addAudit(base, "Date comparison used date of " + itemDate.toDisplay());
+                        if (itemDate != null) {
+                            insightRequestMetadata.addAudit(base, "Date comparison used date of " + itemDate.toDisplay());
+                        }
                         List<AnalysisItem> items = base.getAnalysisItems(insightRequestMetadata.getAllItems(), analysisItems, false, true, new HashSet<AnalysisItem>(),
                                 insightRequestMetadata.getStructure());
                         for (AnalysisItem item : items) {
@@ -161,59 +163,69 @@ public class NotSureWhatToCallThisYet {
             }
 
             DataSet dataSet = new DataSet();
+            insightRequestMetadata.setOriginalDateItems(otherItems);
             for (Map.Entry<DateKey, Yargh> entry : nodeMap.entrySet()) {
-                AnalysisDateDimension dateDimension = entry.getKey().dateDimension;
-                Yargh yargh = entry.getValue();
-                yargh.analysisItems.addAll(otherItems);
-                for (FilterDefinition filterDefinition : dateFilters) {
-                    FilterDefinition clone = filterDefinition.clone();
-                    clone.setField(dateDimension);
-                    yargh.filters.add(clone);
+                long sourceID = 0;
+                boolean split = false;
+                for (AnalysisItem item : entry.getValue().analysisItems) {
+
+                    Key key = item.getKey();
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (sourceID == 0) {
+                            sourceID = derivedKey.getFeedID();
+                            split = true;
+                        } else if (sourceID != derivedKey.getFeedID()) {
+                            split = false;
+                        }
+                    }
                 }
 
-                DataSet childSet = feed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
-                for (IRow row : childSet.getRows()) {
-                    dataSet.addRow(row);
-                    Value value = row.getValue(dateDimension);
-                    row.addValue(baseDate.createAggregateKey(), value);
-                    dataSet.addRow(row);
+                boolean altPath = false;
+                if (split) {
+                    Feed childFeed = FeedRegistry.instance().getFeed(sourceID, conn);
+                    if (childFeed instanceof DistinctCachedSourceFeed) {
+                        System.out.println("We're able to split out " + entry.getValue().analysisItems);
+                        AnalysisDateDimension dateDimension = entry.getKey().dateDimension;
+                        altPath = true;
+                        Yargh yargh = entry.getValue();
+                        yargh.analysisItems.addAll(otherItems);
+                        DistinctCachedSourceFeed distinctCachedSourceFeed = (DistinctCachedSourceFeed) childFeed;
+                        WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(distinctCachedSourceFeed.getReportID(), conn);
+                        WSListDefinition list = (WSListDefinition) report;
+                        list.getColumns().addAll(otherItems);
+                        list.setAddonReports(report.getAddonReports());
+                        list.setAddedItems(report.getAddedItems());
+                        AnalysisBasedFeed reportFeed = new AnalysisBasedFeed();
+                        reportFeed.setAnalysisDefinition(report);
+
+                        DataSet childSet = reportFeed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
+                        for (IRow row : childSet.getRows()) {
+                            Value value = row.getValue(dateDimension);
+                            row.addValue(baseDate.createAggregateKey(), value);
+                            dataSet.addRow(row);
+                        }
+                    }
+                }
+                if (!altPath) {
+                    AnalysisDateDimension dateDimension = entry.getKey().dateDimension;
+                    Yargh yargh = entry.getValue();
+                    yargh.analysisItems.addAll(otherItems);
+                    for (FilterDefinition filterDefinition : dateFilters) {
+                        FilterDefinition clone = filterDefinition.clone();
+                        clone.setField(dateDimension);
+                        yargh.filters.add(clone);
+                    }
+                    DataSet childSet = feed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
+                    for (IRow row : childSet.getRows()) {
+                        Value value = row.getValue(dateDimension);
+                        row.addValue(baseDate.createAggregateKey(), value);
+                        dataSet.addRow(row);
+                    }
                 }
             }
 
             return dataSet;
-
-            /*for (AnalysisItem item : otherItems) {
-                   boolean found = false;
-                   for (QueryStateNode node : nodeMap.values()) {
-                       if (node.handles(item)) {
-                           found = true;
-                           node.addItem(item);
-                       }
-                   }
-                   if (!found) {
-                       // ARGH
-                   }
-               }
-
-               new Yargh();*/
-
-            /*DataSet dataSet = new DataSet();
-               for (Map.Entry<DateKey, QueryStateNode> entry : nodeMap.entrySet()) {
-                   AnalysisDateDimension dateDimension = entry.getKey().dateDimension;
-                   QueryStateNode queryStateNode = entry.getValue();
-                   for (FilterDefinition filterDefinition : dateFilters) {
-                       FilterDefinition clone = filterDefinition.clone();
-                       clone.setField(dateDimension);
-                       queryStateNode.addFilter(clone);
-                   }
-                   DataSet childSet = queryStateNode.produceDataSet(insightRequestMetadata);
-                   for (IRow row : childSet.getRows()) {
-                       Value value = row.getValue(dateDimension);
-                       row.addValue(baseDate.createAggregateKey(), value);
-                       dataSet.addRow(row);
-                   }
-               }
-               return dataSet;*/
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
@@ -300,6 +312,11 @@ public class NotSureWhatToCallThisYet {
                     clone.setDateLevel(dateLevel);
                     return clone;
                 }
+            }
+        }
+        for (AnalysisItem field : getFields()) {
+            if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                return (AnalysisDateDimension) field;
             }
         }
         return null;

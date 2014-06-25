@@ -114,7 +114,7 @@
             if (callData == null || callData.status == CallData.DONE) {
                 timer.stop();
                 var newFields:Boolean = false;
-                if (callData.result is DataSourceRefreshResult) {
+                if (callData != null && callData.result is DataSourceRefreshResult) {
                     newFields = DataSourceRefreshResult(callData.result).newFields;
                 }
                 var descriptor:DataSourceDescriptor = new DataSourceDescriptor();

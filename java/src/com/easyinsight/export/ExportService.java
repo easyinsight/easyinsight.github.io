@@ -3373,9 +3373,10 @@ public class ExportService {
         });
 
         WSTreeDefinition tree = (WSTreeDefinition) report;
-
-        sb.append("<table style=\"").append(tableStyle).append("\">");
-        sb.append("<tr style=\"").append(headerTRStyle).append("\">");
+        sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+        //sb.append("<table style=\"").append(tableStyle).append("\">");
+        sb.append("<thead>");
+        sb.append("<tr style=\"background-color:").append(createHexString(tree.getHeaderColor1())).append(";color:").append(createHexString(tree.getHeaderTextColor())).append("\">");
 
         AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) tree.getHierarchy();
         sb.append("<th style=\"").append(thStyle).append("\">");
@@ -3387,7 +3388,7 @@ public class ExportService {
             sb.append("</th>");
         }
         sb.append("</tr>");
-
+        sb.append("</thead>");
         TreeData treeData = new TreeData(tree, hierarchy, exportMetadata, dataSet);
         for (IRow row : dataSet.getRows()) {
             treeData.addRow(row);
