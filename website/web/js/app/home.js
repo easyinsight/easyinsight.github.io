@@ -4,7 +4,7 @@ easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentPro
     $locationProvider.html5Mode(true);
     $routeSegmentProvider.when("/missing", "missing").
         segment("missing", {
-            templateUrl: '/missing.template.html',
+            templateUrl: '/angular_templates/missing.template.html',
             controller: "MissingFileController"
         });
     $routeProvider.otherwise({ redirectTo: "/missing" });
@@ -50,7 +50,6 @@ easyInsight.run(function ($rootScope, $http, PageInfo) {
             $rootScope.bookmarks = d.bookmarks;
             $rootScope.user = d.user;
             $rootScope.news_alert = d.news_alert;
-            console.log(d.news_alert);
         }
     }).error(function () {
         window.location = "/app/login.jsp";

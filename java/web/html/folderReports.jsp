@@ -81,7 +81,7 @@
         <ul class="breadcrumb">
             <li><a href="../index.jsp">Data Sources</a> <span class="divider">/</span></li>
             <li>
-                <a href="/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
+                <a href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>
                 </a><span class="divider">/</span></li>
             <li class="active"><%= StringEscapeUtils.escapeHtml(folderName)%>
             </li>

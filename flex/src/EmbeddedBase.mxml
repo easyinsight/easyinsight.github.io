@@ -34,7 +34,7 @@
         private var openSansBold:Class;
 
         public function onClose(event:AnalysisCloseEvent):void {
-            navigateToURL(new URLRequest("/data_sources/" + event.urlKey), "_self");
+            navigateToURL(new URLRequest("/a/data_sources/" + event.urlKey), "_self");
         }
 
         public function onAnalyzeEvent(event:AnalyzeEvent):void {

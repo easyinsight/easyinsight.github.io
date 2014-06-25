@@ -94,7 +94,7 @@ public class UserService {
                     redirectUrl = redirectUrl + urlHash;
                 } else if (redirectUrl.equals(originalURL)) {
                     if (userServiceResponse.isDefaultHTML()) {
-                        response.sendRedirect(RedirectUtil.getURL(request, "/home"));
+                        response.sendRedirect(RedirectUtil.getURL(request, "/a/home"));
                         return;
                     }
                 }

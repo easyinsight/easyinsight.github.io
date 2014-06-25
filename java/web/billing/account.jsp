@@ -52,7 +52,7 @@
                     <a href="#">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="/account/users">Users</a>
+                    <a href="/a/account/users">Users</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
                     <a href="/app/html/profile.jsp">My Profile</a>

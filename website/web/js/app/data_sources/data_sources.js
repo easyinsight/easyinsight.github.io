@@ -105,18 +105,19 @@ eiDataSources.filter("tagged", function() {
 
 eiDataSources.config(function ($routeSegmentProvider) {
     $routeSegmentProvider.when("/home", "two_column.data_sources").
+        when("/", "two_column.data_sources").
         when("/data_sources/:id", "two_column.reports").
         segment("two_column", {
-            templateUrl: "/data_sources/home_base.template.html",
+            templateUrl: "/angular_templates/data_sources/home_base.template.html",
             controller: "homeBaseController"
         }).
         within().
         segment("data_sources", {
-            templateUrl: "/data_sources/data_sources.template.html",
+            templateUrl: "/angular_templates/data_sources/data_sources.template.html",
             controller: "dataSourceListController"
         }).
         segment("reports", {
-            templateUrl: "/data_sources/reports.template.html",
+            templateUrl: "/angular_templates/data_sources/reports.template.html",
             controller: "reportsListController",
             depends: ["id"]
         })

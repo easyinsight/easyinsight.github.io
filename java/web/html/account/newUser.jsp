@@ -45,13 +45,13 @@
         <div class="col-md-12">
             <div class="btn-toolbar pull-right topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
-                    <a href="<%= RedirectUtil.getURL(request, "/account")%>">Account Administration</a>
+                    <a href="<%= RedirectUtil.getURL(request, "/a/account")%>">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="/account/users">Users</a>
+                    <a href="/a/account/users">Users</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="/app/html/profile.jsp">My Profile</a>
+                    <a href="/a/account/profile">My Profile</a>
                 </div>
             </div>
         </div>

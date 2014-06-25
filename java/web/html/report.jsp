@@ -162,7 +162,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 reportBlah">
-                <a class="reportControl" href="/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
             <div class="col-md-8 reportControlToolbar">
                 <div class="btn-toolbar pull-right">
