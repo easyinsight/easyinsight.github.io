@@ -873,7 +873,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                 analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
 
-            table = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            if (!exportProperties.isEmailed()) {
+                table = ExportService.treeReportToHTMLTableWithActualCSS(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            } else {
+                table = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
+            }
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
             if (!exportProperties.isEmailed()) {
                 table = ExportService.compareYearsToHTMLTableWithActualCSS(analysisDefinition, conn, insightRequestMetadata, includeTitle);
