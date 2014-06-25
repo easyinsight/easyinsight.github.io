@@ -38,7 +38,6 @@
     <script src="history/history.js" language="javascript"></script>
     <!--  END Browser History required section -->
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Reports and Dashboards</title>
@@ -68,7 +67,6 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.SCHEDULING %>"/>
 </jsp:include>
-<div style="height:50px"></div>
     <div>
             <script language="JavaScript" type="text/javascript">
                 <!--
