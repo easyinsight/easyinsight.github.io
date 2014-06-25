@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <html lang="en">
@@ -28,23 +29,17 @@
         }*/
 
     %>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 
 
-    <script src="AC_OETags.js" language="javascript"></script>
+    <%--<script src="AC_OETags.js" language="javascript"></script>
 
-    <!--  BEGIN Browser History required section -->
-    <script src="history/history.js" language="javascript"></script>
-    <!--  END Browser History required section -->
+    <script src="history/history.js" language="javascript"></script>--%>
 
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Reports and Dashboards</title>
     <jsp:include page="html/bootstrapHeader.jsp"/>
-
-    <style type="text/css">
-    </style>
 
     <script language="JavaScript" type="text/javascript">
         <!--
