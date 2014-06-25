@@ -315,6 +315,10 @@ public class FunctionFactory {
             return new Interval();
         } else if (s.equals("pointintime")) {
             return new Pipeline();
+        } else if (s.equals("latitudefrompostal")) {
+            return new LatitudeFromPostal();
+        } else if (s.equals("longitudefrompostal")) {
+            return new LongitudeFromPostal();
         } else {
             return null;
         }
