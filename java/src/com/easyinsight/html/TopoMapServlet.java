@@ -89,8 +89,16 @@ public class TopoMapServlet extends HtmlServlet {
                 double doubleValue = row.getValue(pointMeasure).toDouble();
                 if (doubleValue > 0) {
                     point.put("pointValue", doubleValue);
-                    point.put("lat", Double.parseDouble(row.getValue(latitude).toString()));
-                    point.put("lon", Double.parseDouble(row.getValue(longitude).toString()));
+                    Value latitudeValue = row.getValue(latitude);
+                    Value longitudeValue = row.getValue(longitude);
+                    if (latitudeValue.type() == Value.EMPTY) {
+                        continue;
+                    }
+                    if (longitudeValue.type() == Value.EMPTY) {
+                        continue;
+                    }
+                    point.put("lat", Double.parseDouble(latitudeValue.toString()));
+                    point.put("lon", Double.parseDouble(longitudeValue.toString()));
                     points.put(point);
                 }
             }
