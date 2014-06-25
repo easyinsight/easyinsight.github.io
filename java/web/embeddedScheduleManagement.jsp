@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <html lang="en">
@@ -30,17 +29,23 @@
         }*/
 
     %>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 
 
-    <%--<script src="AC_OETags.js" language="javascript"></script>
+    <script src="AC_OETags.js" language="javascript"></script>
 
-    <script src="history/history.js" language="javascript"></script>--%>
+    <!--  BEGIN Browser History required section -->
+    <script src="history/history.js" language="javascript"></script>
+    <!--  END Browser History required section -->
 
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Easy Insight Reports and Dashboards</title>
     <jsp:include page="html/bootstrapHeader.jsp"/>
+
+    <style type="text/css">
+    </style>
 
     <script language="JavaScript" type="text/javascript">
         <!--
@@ -64,6 +69,80 @@
     <jsp:param name="headerActive" value="<%= HtmlConstants.SCHEDULING %>"/>
 </jsp:include>
     <div>
+            <script language="JavaScript" type="text/javascript">
+
+                var hasProductInstall = DetectFlashVer(6, 0, 65);
+                var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
+                if (hasProductInstall && !hasRequestedVersion) {
+
+                    var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
+                    var MMredirectURL = window.location;
+                    document.title = document.title.slice(0, 47) + " - Flash Player Installation";
+                    var MMdoctitle = document.title;
+
+                    AC_FL_RunContent(
+                            "src", "playerProductInstall",
+                            "FlashVars", "MMredirectURL=" + MMredirectURL + '&MMplayerType=' + MMPlayerType + '&MMdoctitle=' + MMdoctitle + "",
+                            "width", "100%",
+                            "height", "100%",
+                            "align", "middle",
+                            "id", "<%=swf%>",
+                            "quality", "high",
+                            "bgcolor", "#ffffff",
+                            "name", "<%=swf%>",
+                            "allowScriptAccess", "sameDomain",
+                            "type", "application/x-shockwave-flash",
+                            "pluginspage", "http://www.adobe.com/go/getflashplayer",
+                            "wmode", "window"
+                    );
+                } else if (hasRequestedVersion) {
+                    // if we've detected an acceptable version
+                    // embed the Flash Content SWF when all tests are passed
+                    AC_FL_RunContent(
+                            "src", "<%=versionDir%>/<%=swf%>",
+                            "width", "100%",
+                            "height", "100%",
+                            "align", "middle",
+                            "id", "<%=swf%>",
+                            "quality", "high",
+                            "bgcolor", "#ffffff",
+                            "name", "<%=swf%>",
+                            "flashvars", "<%=flashVars%>",
+                            "allowScriptAccess", "sameDomain",
+                            "type", "application/x-shockwave-flash",
+                            "pluginspage", "http://www.adobe.com/go/getflashplayer",
+                            "wmode", "window",
+                            "allowFullScreen", "true"
+                    );
+                } else {  // flash is too old or we can't detect the plugin
+                    var alternateContent = 'Alternate HTML content should be placed here. '
+                            + 'This content requires the Adobe Flash Player. '
+                            + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+                    document.write(alternateContent);  // insert non-flash content
+                }
+                // -->
+            </script>
+            <noscript>
+                <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+                        id="<%=swf%>" width="100%" height="100%"
+                        codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+                    <param name="movie" value="<%=swf%>.swf"/>
+                    <param name="quality" value="high"/>
+                    <param name="bgcolor" value="#ffffff"/>
+                    <param name="allowScriptAccess" value="sameDomain"/>
+                    <param name="allowFullScreen" value="true"/>
+                    <embed src="<%= versionDir%>/<%=swf%>.swf" quality="high" bgcolor="#ffffff"
+                           width="100%" height="100%" name="<%=swf%>" align="middle"
+                           play="true"
+                           loop="false"
+                           quality="high"
+                           flashvars="<%=flashVars%>"
+                           allowScriptAccess="sameDomain"
+                           type="application/x-shockwave-flash"
+                           pluginspage="http://www.adobe.com/go/getflashplayer">
+                    </embed>
+                </object>
+            </noscript>
 
     </div>
 </body>
