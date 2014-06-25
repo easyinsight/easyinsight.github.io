@@ -1,5 +1,9 @@
 package com.easyinsight.users;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * User: James Boe
  * Date: Apr 13, 2009
@@ -116,5 +120,17 @@ public class AccountSettings {
 
     public void setApiEnabled(boolean apiEnabled) {
         this.apiEnabled = apiEnabled;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("date_format", dateFormat);
+        jo.put("locale", locale);
+        jo.put("currency_symbol", currencySymbol);
+        jo.put("first_day_of_week", firstDayOfWeek);
+        jo.put("max_rows", maxResults);
+        jo.put("send_email", sendEmail);
+        jo.put("html_view", htmlView);
+        return jo;
     }
 }

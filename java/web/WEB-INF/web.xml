@@ -684,6 +684,11 @@
         <display-name>AccountInfo</display-name>
         <servlet-class>com.easyinsight.api.v3.AccountInfoServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AccountSettingsServlet</servlet-name>
+        <display-name>AccountSettings</display-name>
+        <servlet-class>com.easyinsight.api.v3.AccountSettingsServlet</servlet-class>
+    </servlet>
 
     <servlet>
         <servlet-name>DataSourceRefresh</servlet-name>
@@ -818,6 +823,10 @@
         <url-pattern>/html/account/deleteUsers</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>AccountSettingsServlet</servlet-name>
+        <url-pattern>/account_settings.json</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>AccountInfoServlet</servlet-name>
         <url-pattern>/account.json</url-pattern>

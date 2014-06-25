@@ -243,7 +243,7 @@
                         <li>None.</li>
                         <@ } else { @>
                         <@ _.each(data.data_sources, function(e, i, l) { @>
-                        <li><a href="/data_sources/<@= e.url_key @>"><@- e.name @></a></li>
+                        <li><a href="/a/data_sources/<@= e.url_key @>"><@- e.name @></a></li>
                         <@ }); @>
                         <@ } @>
                     </ul>

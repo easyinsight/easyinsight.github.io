@@ -1,0 +1,49 @@
+<form role="form" method="POST" name="userForm" ng-submit="submit()" novalidate>
+    <div class="form-group">
+        <label for="locale">Locale</label>
+        <select id="locale" class="form-control" name="locale">
+            <option>US/America</option>
+            <option>Spain</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="date_formatting">Date Formatting</label>
+        <select id="date_formatting" class="form-control">
+            <option>MM/DD/YYYY (04/26/2014)</option>
+            <option>YYYY-MM-DD (2014-04-26)</option>
+            <option>DD-MM-YYYY (26-04-2014)</option>
+            <option>DD/MM/YYYY (26/04/2014)</option>
+            <option>DD.MM.YYYY (26.04.2014)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="currency_symbol">Currency Symbol</label>
+        <input id="currency_symbol" type="text" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="first_day_of_week">First Day of Week</label>
+        <select class="form-control" id="first_day_of_week">
+            <option>Sunday</option>
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="max_rows">Default Max Rows for List Reports</label>
+        <input type="number" id="max_rows" class="form-control"/>
+    </div>
+    <div class="form-group">
+        <label for="new_user_email"><input type="checkbox" id="new_user_email" /> Send Email to New Users</label>
+    </div>
+    <div class="form-group">
+        <label for="html_view"><input type="checkbox" id="html_view" /> Default to HTML View</label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Save" ng-disabled="userForm.$invalid"/>
+    </div>
+</form>
