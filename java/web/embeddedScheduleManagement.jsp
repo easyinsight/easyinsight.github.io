@@ -68,8 +68,8 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.SCHEDULING %>"/>
 </jsp:include>
-    <div class="container-fluid">
-        <div class="col-md-12">
+<div style="height:50px"></div>
+    <div>
             <script language="JavaScript" type="text/javascript">
                 <!--
                 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
@@ -149,7 +149,7 @@
                     </embed>
                 </object>
             </noscript>
-        </div>
+
     </div>
 </body>
 <% } finally {
