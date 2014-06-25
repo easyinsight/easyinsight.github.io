@@ -13,6 +13,10 @@
         private var url:String;
         [Bindable]
         private var usernameInputText:String;
+        [Bindable]
+        private var historyUsername:String;
+        [Bindable]
+        private var historyReport:String;
 
         public function setupButton(button:Button):Function {
             return null;
@@ -26,6 +30,8 @@
             var ds:OracleSalesCloudCompositeSource = feedDefinition as OracleSalesCloudCompositeSource;
             usernameInputText = ds.oracleUserName;
             url = ds.oracleAccount;
+            historyUsername = ds.historyUserName;
+            historyReport = ds.historyReport;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -33,6 +39,15 @@
             ds.oracleUserName = userNameInput.text;
             ds.oraclePassword = passwordInput.text;
             ds.oracleAccount = urlInput.text;
+            if (oppHistoryCheckbox.selected) {
+                ds.historyUserName = historyNameInput.text;
+                ds.historyPassword = historyPasswordInput.text;
+                ds.historyReport = historyReportInput.text;
+            } else {
+                ds.historyUserName = null;
+                ds.historyPassword = null;
+                ds.historyReport = null;
+            }
         }
 
         public function validate():Boolean {
@@ -41,13 +56,29 @@
         ]]></mx:Script>
     <mx:Form>
 		<mx:FormItem label="Oracle Sales Cloud User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="400"/>
 		</mx:FormItem>
 		<mx:FormItem label="Oracle Sales Cloud Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true" width="400"/>
 		</mx:FormItem>
-        <mx:FormItem label="Oracle Sales URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-            <mx:TextInput id="urlInput" text="{url}"/>
+        <mx:FormItem label="Oracle Sales Cloud URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+            <mx:TextInput id="urlInput" text="{url}" width="400"/>
         </mx:FormItem>
 	</mx:Form>
+    <mx:Text maxWidth="400" text="The URL is the URL you use to connect to Oracle CRM Fusion."/>
+    <mx:Form>
+        <mx:CheckBox label="Pull Back Opportunity History Data" id="oppHistoryCheckbox"/>
+    </mx:Form>
+    <mx:Text maxWidth="400" text="In order to pull back opportunity history data, you'll need to follow the steps in the Tech Notes to create a report against the MOO_OPTY_STAGE_SNAPSHOTS data and expose it via WSDL. Once those are steps are complete, fill in the following form fields:"/>
+    <mx:Form enabled="{oppHistoryCheckbox.selected}">
+        <mx:FormItem label="User Name for History WSDL:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+            <mx:TextInput id="historyNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{historyUsername}" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="Password for History WSDL:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+            <mx:TextInput id="historyPasswordInput" displayAsPassword="true" width="400"/>
+        </mx:FormItem>
+        <mx:FormItem label="History Report Path:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+            <mx:TextInput id="historyReportInput" text="{historyReport}" width="400"/>
+        </mx:FormItem>
+    </mx:Form>
 </mx:VBox>
