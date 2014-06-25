@@ -45,14 +45,6 @@
     <jsp:include page="html/bootstrapHeader.jsp"/>
 
     <style type="text/css">
-        body {
-            margin: 0;
-            height: 100%;
-            min-height: 100%;
-            box-sizing: border-box;
-            padding-top:50px;
-            z-index: 1;
-        }
 
         .navBar {
             margin-bottom: 0;
