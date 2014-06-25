@@ -1,5 +1,6 @@
 package com.easyinsight.documentation;
 
+import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.logging.LogClass;
 import nu.xom.*;
@@ -27,13 +28,56 @@ public class DocReader {
     public static final int APP = 1;
     public static final int WEBSITE = 2;
 
+
     public static String toHTML(String page, HttpServletRequest request, int site) throws Exception {
-        if (page == null) {
+        if (page == null || "".equals(page)) {
             page = "Main_Page";
         }
-        Map<String, String> altToSrc = new HashMap<String, String>();
-        {
-            URL url = new URL("https://wiki.easy-insight.com/wiki/index.php/" + URLDecoder.decode(page, "UTF-8"));
+        String cacheKey = site + page;
+        String pageResults = (String) MemCachedManager.instance().get(cacheKey);
+        if (pageResults == null) {
+            Map<String, String> altToSrc = new HashMap<>();
+            {
+                URL url = new URL("https://wiki.easy-insight.com/wiki/index.php/" + URLDecoder.decode(page, "UTF-8"));
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+                BufferedReader in = null;
+                try {
+                    in = new BufferedReader(
+                            new InputStreamReader(
+                                    connection.getInputStream()));
+                } catch (IOException e) {
+                    in = new BufferedReader(
+                            new InputStreamReader(
+                                    connection.getErrorStream()));
+                }
+
+                StringBuilder result = new StringBuilder();
+
+                String line;
+
+                while ((line = in.readLine()) != null) {
+                    result.append(line).append("\n");
+                }
+                in.close();
+                //System.out.println(result);
+                ByteArrayInputStream bais = new ByteArrayInputStream(result.toString().getBytes());
+                Builder builder = new Builder();
+                Document doc = builder.build(bais);
+                Nodes nodes = doc.query("//img");
+                for (int i = 0; i < nodes.size(); i++) {
+                    Node node = nodes.get(i);
+                    if (node instanceof Element) {
+                        Element element = (Element) node;
+                        String alt = element.getAttribute("alt").getValue().toLowerCase().trim();
+                        String src = element.getAttribute("src").getValue();
+                        altToSrc.put(alt, src);
+                    }
+                }
+
+            }
+
+            URL url = new URL("https://wiki.easy-insight.com/wiki/index.php?title=" + URLDecoder.decode(page, "UTF-8") + "&action=edit");
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 
             BufferedReader in = null;
@@ -55,113 +99,97 @@ public class DocReader {
                 result.append(line).append("\n");
             }
             in.close();
-            //System.out.println(result);
             ByteArrayInputStream bais = new ByteArrayInputStream(result.toString().getBytes());
             Builder builder = new Builder();
             Document doc = builder.build(bais);
-            Nodes nodes = doc.query("//img");
-            for (int i = 0; i < nodes.size(); i++) {
-                Node node = nodes.get(i);
-                if (node instanceof Element) {
-                    Element element = (Element) node;
-                    String alt = element.getAttribute("alt").getValue().toLowerCase().trim();
-                    String src = element.getAttribute("src").getValue();
-                    altToSrc.put(alt, src);
+            Nodes nodes = doc.query("//textarea/text()");
+            if (nodes.size() == 0) {
+                LogClass.error("Empty node on " + page);
+                return "";
+                // no text found in the documentation
+            }
+            Text node = (Text) nodes.get(0);
+            String value = node.getValue();
+
+            Map<String, String> fileMap = new HashMap<String, String>();
+            Map<String, String> escapeMap = new HashMap<String, String>();
+            // find links
+            {
+                Map<String, String> gs = new HashMap<String, String>();
+                Pattern pattern = Pattern.compile("\\[(.*?)\\]");
+                Matcher matcher = pattern.matcher(value);
+                while (matcher.find()) {
+                    String g = matcher.group();
+                    if (g.charAt(1) != '[') {
+                        String escaped = g.replace("[", "|").replace("]", "^");
+                        gs.put(g, escaped);
+                        escapeMap.put(escaped, g);
+                    }
+                }
+                for (Map.Entry<String, String> entry : gs.entrySet()) {
+                    value = value.replace(entry.getKey(), entry.getValue());
                 }
             }
-
-        }
-        System.out.println(altToSrc);
-        URL url = new URL("https://wiki.easy-insight.com/wiki/index.php?title="+ URLDecoder.decode(page, "UTF-8")+"&action=edit");
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(
-                    new InputStreamReader(
-                            connection.getInputStream()));
-        } catch (IOException e) {
-            in = new BufferedReader(
-                    new InputStreamReader(
-                            connection.getErrorStream()));
-        }
-
-        StringBuilder result = new StringBuilder();
-
-        String line;
-
-        while ((line = in.readLine()) != null) {
-            result.append(line).append("\n");
-        }
-        in.close();
-        ByteArrayInputStream bais = new ByteArrayInputStream(result.toString().getBytes());
-        Builder builder = new Builder();
-        Document doc = builder.build(bais);
-        Nodes nodes = doc.query("//textarea/text()");
-        if (nodes.size() == 0) {
-            LogClass.error("Empty node on " + page);
-            return "";
-            // no text found in the documentation
-        }
-        Text node = (Text) nodes.get(0);
-        String value = node.getValue();
-
-        Map<String, String> fileMap = new HashMap<String, String>();
-        // find links
-        {
-            Pattern pattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
-            Matcher matcher = pattern.matcher(value);
-            Map<String, String> gs = new HashMap<String, String>();
-            while (matcher.find()) {
-                String g = matcher.group();
-                System.out.println(g);
-                if (g.startsWith("[[File")) {
-                    String substring = g.substring(2, g.length() - 2).split("\\:")[1].trim();
-                    if (substring.contains("|")) {
-                        String[] tokens = substring.split("\\|");
-                        substring = tokens[0].trim();
-                    }
-                    String target = altToSrc.get(substring.toLowerCase());
-                    if (target == null) {
-                        target = altToSrc.get(substring.replace("_", " ").toLowerCase());
+            {
+                Pattern pattern = Pattern.compile("\\[\\[(.*?)\\]\\]");
+                Matcher matcher = pattern.matcher(value);
+                Map<String, String> gs = new HashMap<String, String>();
+                while (matcher.find()) {
+                    String g = matcher.group();
+                    if (g.startsWith("[[File")) {
+                        String substring = g.substring(2, g.length() - 2).split("\\:")[1].trim();
+                        if (substring.contains("|")) {
+                            String[] tokens = substring.split("\\|");
+                            substring = tokens[0].trim();
+                        }
+                        String target = altToSrc.get(substring.toLowerCase());
                         if (target == null) {
-                            System.out.println("no luck at all...");
+                            target = altToSrc.get(substring.replace("_", " ").toLowerCase());
+                            if (target == null) {
+                                System.out.println("no luck at all...");
+                            }
+                        }
+                        gs.put(g, "AAA" + substring + "AAA");
+                        fileMap.put("AAA" + substring + "AAA", "<img src=\"https://wiki.easy-insight.com/" + target + "\" alt=\"" + substring + "\"/>");
+                        //fileMap.put("AAA" + substring + "AAA", "");
+                    } else {
+                        String substring = g.substring(2, g.length() - 2);
+                        if (substring.contains("|")) {
+                            substring = substring.split("\\|")[0];
+                        }
+                        String link = substring.replace(" ", "_");
+                        if (site == APP) {
+                            String blah = "[" + RedirectUtil.getURL(request, "/app/docs/" + link) + " " + substring + "]";
+                            gs.put(g, blah);
+                        } else if (site == WEBSITE) {
+                            String blah = "[" + RedirectUtil.getURL(request, "/app/websiteDocs/" + link) + " " + substring + "]";
+                            gs.put(g, blah);
                         }
                     }
-                    gs.put(g, "AAA" + substring + "AAA");
-                    fileMap.put("AAA" + substring + "AAA", "<img src=\"https://wiki.easy-insight.com/" + target +"\" alt=\"" + substring + "\"/>");
-                    //fileMap.put("AAA" + substring + "AAA", "");
-                } else {
-                    String substring = g.substring(2, g.length() - 2);
-                    if (substring.contains("|")) {
-                        substring = substring.split("\\|")[0];
-                    }
-                    String link = substring.replace(" ", "_");
-                    if (site == APP) {
-                        String blah = "[" + RedirectUtil.getURL(request, "/app/docs/" + link) + " " + substring + "]";
-                        gs.put(g, blah);
-                    } else if (site == WEBSITE) {
-                        String blah = "[" + RedirectUtil.getURL(request, "/app/websiteDocs/" + link) + " " + substring + "]";
-                        gs.put(g, blah);
-                    }
+
+                    //System.out.println();
                 }
 
-                //System.out.println();
+                for (Map.Entry<String, String> entry : gs.entrySet()) {
+                    value = value.replace(entry.getKey(), entry.getValue());
+                }
+                /*for (String g : gs) {
+                    value = value.replace(g, "");
+                }*/
+                value = value.replace("<br />", "\n");
             }
-            for (Map.Entry<String, String> entry : gs.entrySet()) {
-                value = value.replace(entry.getKey(), entry.getValue());
+            //System.out.println(value);
+            String html = parseMediaWiki(value);
+            for (Map.Entry<String, String> entry : escapeMap.entrySet()) {
+                html = html.replace(entry.getKey(), entry.getValue());
             }
-            /*for (String g : gs) {
-                value = value.replace(g, "");
-            }*/
-            value = value.replace("<br />", "\n");
+            for (Map.Entry<String, String> entry : fileMap.entrySet()) {
+                html = html.replace(entry.getKey(), entry.getValue());
+            }
+            pageResults = html;
+            MemCachedManager.instance().add(cacheKey, 500000, pageResults);
         }
-        //System.out.println(value);
-        String html = parseMediaWiki(value);
-        for (Map.Entry<String, String> entry : fileMap.entrySet()) {
-            html = html.replace(entry.getKey(), entry.getValue());
-        }
-        return html;
+        return pageResults;
     }
 
     public static final String NAME_TEXTILE = "Textile";
