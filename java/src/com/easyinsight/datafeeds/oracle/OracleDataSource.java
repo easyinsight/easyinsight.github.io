@@ -35,6 +35,9 @@ public class OracleDataSource extends CompositeServerDataSource {
     private String oracleUserName;
     private String oraclePassword;
     private String oracleAccount;
+    private String historyUserName;
+    private String historyPassword;
+    private String historyReport = "/Custom/Customer Relationship Management/OppHistory.xdo";
     private transient List<TransientAppointment> appointment;
     private transient List<Revenue> childRevenue;
     private transient List<SplitRevenue> splitRevenue;
@@ -84,6 +87,30 @@ public class OracleDataSource extends CompositeServerDataSource {
         );
     }
 
+    public String getHistoryReport() {
+        return historyReport;
+    }
+
+    public void setHistoryReport(String historyReport) {
+        this.historyReport = historyReport;
+    }
+
+    public String getHistoryUserName() {
+        return historyUserName;
+    }
+
+    public void setHistoryUserName(String historyUserName) {
+        this.historyUserName = historyUserName;
+    }
+
+    public String getHistoryPassword() {
+        return historyPassword;
+    }
+
+    public void setHistoryPassword(String historyPassword) {
+        this.historyPassword = historyPassword;
+    }
+
     public OracleDataSource() {
         setFeedName("Oracle Sales Cloud");
     }
@@ -119,7 +146,8 @@ public class OracleDataSource extends CompositeServerDataSource {
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
         deleteStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ORACLE_SALESCLOUD (DATA_SOURCE_ID, ORACLE_USERNAME, ORACLE_PASSWORD, ORACLE_URL) VALUES (?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ORACLE_SALESCLOUD (DATA_SOURCE_ID, ORACLE_USERNAME, ORACLE_PASSWORD, ORACLE_URL," +
+                "HISTORY_USERNAME, HISTORY_PASSWORD, HISTORY_REPORT) VALUES (?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, getOracleUserName());
         if (oraclePassword != null) {
@@ -128,6 +156,13 @@ public class OracleDataSource extends CompositeServerDataSource {
             insertStmt.setNull(3, Types.VARCHAR);
         }
         insertStmt.setString(4, oracleAccount);
+        insertStmt.setString(5, historyUserName);
+        if (historyPassword != null) {
+            insertStmt.setString(6, PasswordStorage.encryptString(historyPassword));
+        } else {
+            insertStmt.setNull(6, Types.VARCHAR);
+        }
+        insertStmt.setString(7, historyReport);
         insertStmt.execute();
         insertStmt.close();
     }
@@ -135,7 +170,8 @@ public class OracleDataSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT ORACLE_USERNAME, ORACLE_PASSWORD, ORACLE_URL FROM ORACLE_SALESCLOUD WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT ORACLE_USERNAME, ORACLE_PASSWORD, ORACLE_URL, HISTORY_USERNAME," +
+                "HISTORY_PASSWORD, HISTORY_REPORT FROM ORACLE_SALESCLOUD WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -145,9 +181,18 @@ public class OracleDataSource extends CompositeServerDataSource {
                 password = PasswordStorage.decryptString(password);
             }
             String url = rs.getString(3);
+            String historyName = rs.getString(4);
+            String historyPassword = rs.getString(5);
+            if (historyPassword != null) {
+                historyPassword = PasswordStorage.decryptString(historyPassword);
+            }
+            String historyReport = rs.getString(6);
             setOracleUserName(userName);
             setOraclePassword(password);
             setOracleAccount(url);
+            setHistoryUserName(historyName);
+            setHistoryReport(historyReport);
+            setHistoryPassword(historyPassword);
         }
         queryStmt.close();
     }

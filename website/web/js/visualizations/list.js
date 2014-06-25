@@ -49,6 +49,7 @@ List = {
                 List.createClasses(properties, targetDiv);
 
                 List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array })
+                //new $.fn.dataTable.FixedHeader(List.availableDataTables[targetDiv]);
                 $(".list_drillthrough").click(function (e) {
                     e.preventDefault();
                     var x = $(e.target);
@@ -74,6 +75,10 @@ List = {
             $("head").append(s);
             curStyleSheet = List.findDynamicStyleSheet();
         }
+
+        curStyleSheet.insertRule("#" + target + " a.paginate_active {background-color:"+ Color.numToStr(properties["summaryRowBackgroundColor"]) + "; color: "+ Color.numToStr(properties["summaryRowTextColor"]) +";}", 0);
+
+        curStyleSheet.insertRule("#" + target + " table.dataTable tr.even {background-color:"+ Color.numToStr(properties["rowColor2"]) + ";}", 0);
 
         // rowColor1
         curStyleSheet.insertRule("#" + target + " table.dataTable tr.odd {background-color:" + Color.numToStr(properties["rowColor1"]) + ";}", 0);

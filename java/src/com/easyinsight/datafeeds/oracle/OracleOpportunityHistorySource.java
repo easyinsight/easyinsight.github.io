@@ -55,13 +55,17 @@ public class OracleOpportunityHistorySource extends ServerDataSourceDefinition {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
+        OracleDataSource oracleDataSource = (OracleDataSource) parentDefinition;
+        if (oracleDataSource.getHistoryUserName() == null || "".equals(oracleDataSource.getHistoryUserName())) {
+            return dataSet;
+        }
         try {
-            ExternalReportWSSService opportunityService = new ExternalReportWSSService_Service(new URL("https://bcy.bi.ap1.oraclecloud.com//xmlpserver/services/ExternalReportWSSService?wsdl")).getExternalReportWSSService();
+            ExternalReportWSSService opportunityService = new ExternalReportWSSService_Service(new URL(oracleDataSource.getUrl() + "//xmlpserver/services/ExternalReportWSSService?wsdl")).getExternalReportWSSService();
             BindingProvider prov = (BindingProvider) opportunityService;
-            prov.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "bala.gupta");
-            prov.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "Welcome1");
+            prov.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, oracleDataSource.getHistoryUserName());
+            prov.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, oracleDataSource.getHistoryPassword());
             ReportRequest reportRequest = new ReportRequest();
-            reportRequest.setReportAbsolutePath("/Custom/Customer Relationship Management/OppHistory.xdo");
+            reportRequest.setReportAbsolutePath(oracleDataSource.getHistoryReport());
             reportRequest.setSizeOfDataChunkDownload(-1);
             ReportResponse response = opportunityService.runReport(reportRequest, "");
             byte[] bytes = response.getReportBytes();

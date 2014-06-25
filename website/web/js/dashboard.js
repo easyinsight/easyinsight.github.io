@@ -230,7 +230,7 @@ var toFilterString = function (f, store) {
     } else if (f.type == "pattern_filter") {
         return $.extend(c, {pattern: f.pattern});
     } else
-        return $.extend(c, {enabled: false})
+        return c;
 }
 
 var confirmRender = function (o, f) {
@@ -250,7 +250,7 @@ var confirmRender = function (o, f) {
 var toPDF = function (o, dashboardID, drillthroughID) {
     var obj = o.report.report;
     var id = o.report.id;
-    if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree") {
+    if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form") {
         var i;
         if ($("#" + id + " :visible").size() == 0) {
             o.rendered = false;
@@ -333,10 +333,11 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     beforeRefresh($("#" + id + " .loading"))();
     var embedComponent = typeof(userJSON.embedKey) != "undefined" ? ("&embedKey=" + userJSON.embedKey) : "";
     var embedded = typeof(userJSON.embedded) != "undefined" ? ("&embedded=true") : "";
+    var iframeKey = typeof(userJSON.iframeKey) != "undefined" ? ("&iframeKey=" + userJSON.iframeKey) : "";
     var dashboardComponent = dashboardID == -1 ? "" : ("&dashboardID=" + dashboardID);
     var drillthroughComponent = typeof(drillthroughID) != "undefined" ? ("&drillThroughKey=" + drillthroughID) : "";
     var postData = {
-        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent + embedded,
+        url: obj.metadata.url + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() + dashboardComponent + drillthroughComponent + embedComponent + embedded + iframeKey,
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify(fullFilters),
         error: function() {
@@ -377,9 +378,9 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "area") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3AreaCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
-    } else if (obj.metadata.type == "heatmap") {
-        //$("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+    } else if (obj.metadata.type == "topomap") {
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Map.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, iframeKey != ""))}));
     } else if (obj.metadata.type == "stacked_bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedBarChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
@@ -993,6 +994,7 @@ $(function () {
             $(".filter_enabled", target).change(function (e) {
                 var k = $(e.target).attr("id").replace(/_enabled$/g, "");
                 var f = filterMap[k];
+
 
                 f.filter.enabled = $(e.target).is(":checked");
 
