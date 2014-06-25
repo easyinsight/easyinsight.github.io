@@ -10,6 +10,7 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.sql.PreparedStatement;
@@ -29,6 +30,52 @@ import java.util.WeakHashMap;
 public class ZipGeocodeCache {
 
     private Map<String, Point> pointMap = new WeakHashMap<String, Point>();
+
+    @Nullable
+    public Double findLatitudeForZip(String zipCode, EIConnection conn) {
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT LATITUDE FROM ZIP_CODE_GEOCODE WHERE ZIP_CODE = ?");
+            zipCode = zipCode.trim();
+            if (zipCode.length() > 5) {
+                zipCode = zipCode.substring(0, 5);
+            }
+            queryStmt.setString(1, zipCode);
+            ResultSet rs = queryStmt.executeQuery();
+            Double result;
+            if (rs.next()) {
+                result = rs.getDouble(1);
+            } else {
+                result = null;
+            }
+            queryStmt.close();
+            return result;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Nullable
+    public Double findLongitudeForZip(String zipCode, EIConnection conn) {
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT LONGITUDE FROM ZIP_CODE_GEOCODE WHERE ZIP_CODE = ?");
+            zipCode = zipCode.trim();
+            if (zipCode.length() > 5) {
+                zipCode = zipCode.substring(0, 5);
+            }
+            queryStmt.setString(1, zipCode);
+            ResultSet rs = queryStmt.executeQuery();
+            Double result;
+            if (rs.next()) {
+                result = rs.getDouble(1);
+            } else {
+                result = null;
+            }
+            queryStmt.close();
+            return result;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void findLatLongForZips(DataSet dataSet, AnalysisItem zip) {
         EIConnection conn = Database.instance().getConnection();
