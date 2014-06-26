@@ -109,7 +109,7 @@
 <div class="nav nav-pills reportNav">
         <div class="container">
             <div class="col-md-6 reportBlah">
-                <a class="reportControl" href="/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
             <div class="col-md-6 reportControlToolbar">
                 <div class="btn-toolbar pull-right">

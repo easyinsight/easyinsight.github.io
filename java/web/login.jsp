@@ -98,7 +98,7 @@
                     redirectUrl = redirectUrl + urlHash;
                 } else if (!loginRedirectSet) {
                     if (userServiceResponse.isDefaultHTML()) {
-                        response.sendRedirect(RedirectUtil.getURL(request, "/home"));
+                        response.sendRedirect(RedirectUtil.getURL(request, "/a/home"));
                         return;
                     }
                 }
@@ -145,12 +145,12 @@
                 <label for="userName" class="promptLabel">
                     User Name or Email
                 </label>
-                <input type="text" class="form-control" name="userName" id="userName" style="width:100%;font-size:14px;height:28px" autocapitalize="off" autocorrect="off" autoFocus/>
+                <input type="text" class="form-control" name="userName" id="userName" style="width:100%;font-size:14px;height:32px" autocapitalize="off" autocorrect="off" autoFocus/>
 
                 <label for="password" class="promptLabel">
                     Password
                 </label>
-                <input type="password" class="form-control" name="password" id="password" style="width:100%;font-size:14px;height:28px"/>
+                <input type="password" class="form-control" name="password" id="password" style="width:100%;font-size:14px;height:32px"/>
                 <%
                     if (request.getParameter("error") != null) {
                 %>

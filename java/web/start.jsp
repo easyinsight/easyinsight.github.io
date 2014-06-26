@@ -13,7 +13,7 @@
         rs.next();
         boolean useHtmlVersion = rs.getBoolean(1);
         if (useHtmlVersion) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/home"));
+            response.sendRedirect(RedirectUtil.getURL(request, "/a/home"));
         } else {
             response.sendRedirect(RedirectUtil.getURL(request, "/app"));
         }

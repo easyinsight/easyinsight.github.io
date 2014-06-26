@@ -1,10 +1,14 @@
 var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
 easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentProvider) {
-    $locationProvider.html5Mode(true);
+    if(window.history && window.history.pushState) {
+        $locationProvider.html5Mode(true);
+    } else {
+        $locationProvider.html5Mode(false);
+    }
     $routeSegmentProvider.when("/missing", "missing").
         segment("missing", {
-            templateUrl: '/missing.template.html',
+            templateUrl: '/angular_templates/missing.template.html',
             controller: "MissingFileController"
         });
     $routeProvider.otherwise({ redirectTo: "/missing" });
@@ -50,7 +54,6 @@ easyInsight.run(function ($rootScope, $http, PageInfo) {
             $rootScope.bookmarks = d.bookmarks;
             $rootScope.user = d.user;
             $rootScope.news_alert = d.news_alert;
-            console.log(d.news_alert);
         }
     }).error(function () {
         window.location = "/app/login.jsp";
@@ -95,4 +98,8 @@ easyInsight.directive("passwordVerify", function() {
         });
      }
    };
+});
+
+easyInsight.value('cgBusyDefaults',{
+    templateUrl: '/angular_templates/angular-busy.html'
 });

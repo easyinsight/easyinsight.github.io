@@ -38,7 +38,7 @@
         <% if (loggedIn) { %>
         <ul class="nav navbar-nav">
             <li <%= headerActive == HtmlConstants.DATA_SOURCES_AND_REPORTS ? "class=\"active\"" : ""%>><a
-                    href="/home">Home</a></li>
+                    href="/a/home">Home</a></li>
             <li <%= headerActive == HtmlConstants.CONNECTIONS ? "class=\"active\"" : ""%>><a
                     href="/app/html/connections.jsp">Connections</a></li>
             <li <%= headerActive == HtmlConstants.SCHEDULING ? "class=\"active\"" : ""%>><a
@@ -50,7 +50,7 @@
                 if (!loggedIn) {
             %>
             <li><a href="http://www.easy-insight.com/">Main Website</a></li>
-            <li class="active"><a href="/home">Sign In</a></li>
+            <li class="active"><a href="/a/home">Sign In</a></li>
 
             <%
             } else { %>
@@ -118,7 +118,7 @@
                     <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="/account/">Account Settings</a></li>
+                    <li><a href="/a/account/">Account Settings</a></li>
                     <li class="divider"></li>
                     <% if(!phone) { %>
                     <li><a href="/app/html/flashAppAction.jsp">Switch to Full Interface</a></li>

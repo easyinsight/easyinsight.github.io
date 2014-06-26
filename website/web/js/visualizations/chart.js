@@ -363,6 +363,33 @@ Chart = {
         $("#d3Canvas"+target).attr('width', w);
     },
 
+    chartHeightWithIFrame:function (target, styleProps, iframedInUI) {
+        var height;
+        //alert("target height =  " + $('#'+target+"").height());
+        var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
+        if (customHeight > -1) {
+
+            if (customHeight > 0) {
+                height = customHeight;
+            } else {
+                var verticalMargin = styleProps["verticalMargin"];
+                height = $(document).height() - $('#filterRow').height() - $('#reportHeader').height() - verticalMargin;
+                if (height < 400) {
+                    height = 400;
+                }
+            }
+
+        } else {
+            var raHeight = $('#'+target+'ReportArea').height();
+            if (typeof(raHeight) != "undefined" && raHeight > 150) {
+                height = raHeight;
+            } else {
+                height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - (iframedInUI ? 100 : 250);
+            }
+        }
+        return height;
+    },
+
     chartHeight:function (target, styleProps) {
         var height;
         //alert("target height =  " + $('#'+target+"").height());
