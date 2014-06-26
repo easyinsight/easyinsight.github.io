@@ -182,10 +182,13 @@ eiAccounts.controller("AccountSettingsController", function($scope, $http) {
     })
 
     $scope.submit = function() {
+        $scope.saved = false;
         $scope.loading = $http.post("/app/account_settings.json", JSON.stringify($scope.settings));
         $scope.loading.then(function(c) {
-            if(c.data.success)
+            if(c.data.success) {
                 $scope.settings = c.data.settings;
+                $scope.saved = true;
+            }
         })
     }
 })
