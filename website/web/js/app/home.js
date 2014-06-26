@@ -64,6 +64,10 @@ easyInsight.run(function ($rootScope, $http, PageInfo) {
         return Object.keys(obj).length;
     }
     $rootScope.PageInfo = PageInfo;
+    $rootScope.mobile = function() {
+        return navigator && navigator.userAgent && navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
+    }
+
 });
 
 easyInsight.directive("passwordVerify", function() {
