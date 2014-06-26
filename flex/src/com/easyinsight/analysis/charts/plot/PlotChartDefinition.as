@@ -12,7 +12,7 @@ public class PlotChartDefinition extends ChartDefinition{
     public var iconGrouping:AnalysisItem;
     public var xaxisMeasure:AnalysisItem;
     public var yaxisMeasure:AnalysisItem;
-    public var showLabels:Boolean = true;
+    public var showLabels:Boolean = false;
     public var briefLabels:Boolean = true;
 
     public function PlotChartDefinition() {
