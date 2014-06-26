@@ -61,6 +61,7 @@ public class NewSolutionDetailRenderer extends EventDispatcher {
     }
 
     private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
+        event.currentTarget.removeEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured);
         if (event.requiresFieldSetup) {
             var bulkFieldWindow:BulkFieldWindow = new BulkFieldWindow();
             bulkFieldWindow.dataSourceID = event.descriptor.id;
