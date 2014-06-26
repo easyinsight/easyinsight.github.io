@@ -179,8 +179,15 @@ eiAccounts.controller("AccountSettingsController", function($scope, $http) {
     $scope.loading = $http.get("/app/account_settings.json");
     $scope.loading.then(function(c) {
         $scope.settings = c.data.settings;
-        console.log($scope.settings)
     })
+
+    $scope.submit = function() {
+        $scope.loading = $http.post("/app/account_settings.json", JSON.stringify($scope.settings));
+        $scope.loading.then(function(c) {
+            if(c.data.success)
+                $scope.settings = c.data.settings;
+        })
+    }
 })
 
 eiAccounts.controller("UserProfileController", function($scope, $rootScope, $http) {
