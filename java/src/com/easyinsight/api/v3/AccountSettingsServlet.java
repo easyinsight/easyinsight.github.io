@@ -26,12 +26,30 @@ public class AccountSettingsServlet extends JSONServlet {
     }
 
     @Override
-    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         SecurityUtil.authorizeAccountAdmin();
         JSONObject responseObject = new JSONObject();
         ExportMetadata md = ExportService.createExportMetadata(conn);
         AccountSettings settings = new UserAccountAdminService().getAccountSettings();
         responseObject.put("settings", settings.toJSON(md));
+
+        return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
+    }
+
+    @Override
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        SecurityUtil.authorizeAccountAdmin();
+        JSONObject responseObject = new JSONObject();
+        ExportMetadata md = ExportService.createExportMetadata(conn);
+        AccountSettings as = AccountSettings.fromJSON(jsonObject);
+        new UserAccountAdminService().saveAccountSettings(as);
+        responseObject.put("success", true);
+        responseObject.put("settings", as.toJSON(md));
 
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
     }

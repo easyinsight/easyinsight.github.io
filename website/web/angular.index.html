@@ -56,6 +56,8 @@
                 <ul class="dropdown-menu">
                     <li><a href="#/account/">Account Settings</a></li>
                     <li class="divider"></li>
+                    <li ng-if="!mobile()"><a href="/app/html/flashAppAction.jsp" ng-click="$event.stopPropagation()">Switch to Full Interface</a></li>
+                    <li ng-if="!mobile()" class="divider"></li>
                     <li><a href="/app/logoutAction.jsp" ng-click="$event.stopPropagation()">Sign Out</a></li>
                 </ul>
             </li>
