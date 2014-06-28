@@ -16,6 +16,7 @@
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
 
         private function updateFault(event:FaultEvent):void {
             Alert.show(event.fault.faultString);
@@ -112,6 +113,7 @@
         private function gotCallData():void {
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
             if (callData == null || callData.status == CallData.DONE) {
+                asyncService.getCallData.removeEventListener(ResultEvent.RESULT, gotCallData);
                 timer.stop();
                 var newFields:Boolean = false;
                 if (callData != null && callData.result is DataSourceRefreshResult) {
