@@ -179,6 +179,7 @@ public class DelayedSync extends EISlimWindow {
     private function gotCallData(event:ResultEvent):void {
         var callData:CallData = asyncService.getCallData.lastResult as CallData;
         if (callData == null || callData.status == CallData.DONE) {
+            asyncService.getCallData.removeEventListener(ResultEvent.RESULT, gotCallData);
             timer.stop();
             connectionInstalled();
         } else if (callData.status == CallData.FAILED) {

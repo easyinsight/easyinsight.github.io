@@ -42,6 +42,7 @@ public class SolutionService {
     public PostInstallSteps addKPIData(SolutionKPIData solutionKPIData) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            System.out.println("Invoking ADD KPI data on " + solutionKPIData.getDataSourceID());
             conn.setAutoCommit(false);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(solutionKPIData.getDataSourceID(), conn);
             dataSource.setAccountVisible(true);
