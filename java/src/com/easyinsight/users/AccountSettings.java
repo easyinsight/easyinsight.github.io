@@ -133,4 +133,16 @@ public class AccountSettings {
         jo.put("html_view", htmlView);
         return jo;
     }
+
+    public static AccountSettings fromJSON(net.minidev.json.JSONObject jo) {
+        AccountSettings as = new AccountSettings();
+        as.setDateFormat(Integer.valueOf(String.valueOf(jo.get("date_format"))));
+        as.setLocale(String.valueOf(jo.get("locale")));
+        as.setCurrencySymbol(String.valueOf(jo.get("currency_symbol")));
+        as.setFirstDayOfWeek((Integer.valueOf(String.valueOf(jo.get("first_day_of_week")))));
+        as.setMaxResults(Integer.valueOf(String.valueOf(jo.get("max_rows"))));
+        as.setSendEmail(Boolean.valueOf(String.valueOf(jo.get("send_email"))));
+        as.setHtmlView(Boolean.valueOf(String.valueOf(jo.get("html_view"))));
+        return as;
+    }
 }
