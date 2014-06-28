@@ -3,14 +3,14 @@ package com.easyinsight.scheduler;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.DataTypeMutex;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.logging.LogClass;
 
-import java.sql.Timestamp;
+import java.sql.*;
+import java.util.Date;
 import java.util.concurrent.*;
 import java.util.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 import org.hibernate.Session;
 import org.hibernate.Query;
@@ -34,6 +34,7 @@ public class Scheduler {
     public static final String TASK_LOCK = "TASK";
 
     private ThreadPoolExecutor executor;
+    private Map<FeedType, ThreadPoolExecutor> limitedExectutorMap = new HashMap<>();
     private Timer timer;
     private boolean running = false;
     private boolean taskRunning = false;
@@ -80,6 +81,9 @@ public class Scheduler {
         System.out.println("Stopping scheduler...");
         timer.cancel();
         executor.shutdown();
+        for (ThreadPoolExecutor tpe : limitedExectutorMap.values()) {
+            tpe.shutdown();
+        }
         running = false;
         if (thread != null) {
             thread.interrupt();
@@ -227,7 +231,39 @@ public class Scheduler {
                 Thread.sleep(60000);
             } else {
                 for (ScheduledTask task : tasks) {
-                    executor.execute(task);
+                    boolean rerouted = false;
+                    if (task instanceof DataSourceScheduledTask) {
+                        DataSourceScheduledTask dataSourceScheduledTask = (DataSourceScheduledTask) task;
+                        long dataSourceID = dataSourceScheduledTask.getDataSourceID();
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement query = conn.prepareStatement("SELECT DATA_FEED.FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                            query.setLong(1, dataSourceID);
+                            ResultSet rs = query.executeQuery();
+                            if (rs.next()) {
+                                int dataSourceType = rs.getInt(1);
+                                FeedType feedType = new FeedType(dataSourceType);
+                                Semaphore semaphore = DataTypeMutex.mutex().getMutexMap().get(feedType);
+                                if (semaphore != null) {
+                                    ThreadPoolExecutor executor = limitedExectutorMap.get(feedType);
+                                    if (executor == null) {
+                                        int limit = DataTypeMutex.mutex().getLockRequiredTypes().contains(feedType) ? 3 : 1;
+                                        executor = new ThreadPoolExecutor(limit, limit, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+                                        limitedExectutorMap.put(feedType, executor);
+                                    }
+                                    rerouted = true;
+                                    executor.execute(task);
+                                }
+                            }
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                    }
+                    if (!rerouted) {
+                        executor.execute(task);
+                    }
                 }
             }
             taskRunning = false;
