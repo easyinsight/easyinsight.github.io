@@ -24,7 +24,7 @@
         <tbody>
         <tr ng-repeat="data_source in data_sources | tagged:tags">
             <td class="header-tr">
-                <a href="#/data_sources/{{data_source.url_key}}">{{data_source.name}}</a>
+                <a href="data_sources/{{data_source.url_key}}">{{data_source.name}}</a>
             </td>
             <td>
                 {{data_source.last_refresh_time}}
