@@ -52,8 +52,8 @@
 
             String exists = new com.easyinsight.users.UserService().doesUserExist(user.getUserName(), user.getEmail(), account.getName());
             if (exists == null) {
-                String url = RedirectUtil.getURL(request, "/app/");
-                new com.easyinsight.users.UserService().createAccount(user, account, request.getParameter("password"), url);
+                String url = RedirectUtil.getURL(request, "/app/html/connections.jsp");
+                final long accountID = new com.easyinsight.users.UserService().createAccount(user, account, request.getParameter("password"), url);
 
 
                 UserServiceResponse userServiceResponse = new UserService().authenticate(email, password, false);
@@ -69,7 +69,7 @@
                     public void run() {
                         EIConnection conn = Database.instance().getConnection();
                         try {
-                            new AccountMemberInvitation().sendWelcomeEmail(curEmail, conn, userID, curFirstName);
+                            new AccountMemberInvitation().sendWelcomeEmail(curEmail, conn, userID, curFirstName, accountID);
                         } catch (Exception e) {
                             LogClass.error(e);
                         } finally {
