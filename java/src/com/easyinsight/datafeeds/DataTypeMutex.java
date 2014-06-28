@@ -43,6 +43,18 @@ public class DataTypeMutex {
         }
     }
 
+    public Set<FeedType> getLockRequiredTypes() {
+        return lockRequiredTypes;
+    }
+
+    public Set<FeedType> getSuperLockRequiredTypes() {
+        return superLockRequiredTypes;
+    }
+
+    public Map<FeedType, Semaphore> getMutexMap() {
+        return mutexMap;
+    }
+
     public static DataTypeMutex mutex() {
         return mutex;
     }
