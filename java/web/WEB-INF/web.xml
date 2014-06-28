@@ -273,12 +273,6 @@
     </servlet>
 
     <servlet>
-        <servlet-name>AccountActivation</servlet-name>
-        <display-name>AccountActivation</display-name>
-        <servlet-class>com.easyinsight.servlet.AccountActivationServlet</servlet-class>
-    </servlet>
-
-    <servlet>
         <servlet-name>Image</servlet-name>
         <display-name>Image</display-name>
         <servlet-class>com.easyinsight.export.ImageServlet</servlet-class>
@@ -633,6 +627,16 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ApproveSales</servlet-name>
+        <servlet-class>com.easyinsight.salesautomation.ApproveSalesEmailServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>GetSalesEmail</servlet-name>
+        <servlet-class>com.easyinsight.salesautomation.GetSalesEmailAccountServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>PlotChart</servlet-name>
         <display-name>PlotChart</display-name>
         <servlet-class>com.easyinsight.html.PlotChartServlet</servlet-class>
@@ -970,6 +974,16 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>ApproveSales</servlet-name>
+        <url-pattern>/approveSalesEmails</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>GetSalesEmail</servlet-name>
+        <url-pattern>/getSalesEmails</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>SendGridEmailEvent</servlet-name>
         <url-pattern>/sendGridEvent</url-pattern>
     </servlet-mapping>
@@ -1273,11 +1287,6 @@
     <servlet-mapping>
         <servlet-name>ExportPDF</servlet-name>
         <url-pattern>/exportPDF</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>AccountActivation</servlet-name>
-        <url-pattern>/accountactivation</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
