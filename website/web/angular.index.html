@@ -20,7 +20,7 @@
     <script type="text/javascript" src="/js/app/home.js"></script>
     <script type="text/javascript" src="/js/app/data_sources/data_sources.js"></script>
     <script type="text/javascript" src="/js/app/account/account.js"></script>
-    <base href="/a/"></base>
+    <base href="/a/" />
 </head>
 <body>
 <nav class="navbar_first navbar navbar-static-top navbar-inverse" role="navigation">
@@ -34,7 +34,7 @@
     </div>
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <ul class="nav navbar-nav">
-            <li><a href="home">Home</a></li>
+            <li><a href="#/home">Home</a></li>
             <li><a href="/app/html/connections.jsp" ng-click="$event.stopPropagation()">Connections</a></li>
             <li><a href="/app/embeddedScheduleManagement.jsp" ng-click="$event.stopPropagation()">Scheduling</a></li>
         </ul>
@@ -54,7 +54,7 @@
                     <i class="icon-user"></i>{{ user.username }} <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="account">Account Settings</a></li>
+                    <li><a href="#/account/">Account Settings</a></li>
                     <li class="divider"></li>
                     <li ng-if="!mobile()"><a href="/app/html/flashAppAction.jsp" ng-click="$event.stopPropagation()">Switch to Full Interface</a></li>
                     <li ng-if="!mobile()" class="divider"></li>
