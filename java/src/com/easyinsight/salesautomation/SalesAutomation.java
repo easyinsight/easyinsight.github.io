@@ -37,10 +37,10 @@ public class SalesAutomation {
 
                     // send email here
 
-                    String body = "Hi {0},\n\nI wanted to reach out with a quick email to make sure you were able to get up and going with Easy Insight. If you have any questions, encountered any issues, or just need a quick start, I''d be happy to jump on a call and/or screenshare with you to help make sure you''re able to get the reports and dashboards you need.\n\nThanks for your interest in Easy Insight!\n\n{1}\n{2}\nhttp://www.easy-insight.com/";
+                    String body = "Hi {0},\r\n\r\nI wanted to reach out with a quick email to make sure you were able to get up and going with Easy Insight. If you have any questions, encountered any issues, or just need a quick start, I''d be happy to jump on a call and/or screenshare with you to help make sure you''re able to get the reports and dashboards you need.\r\n\r\nThanks for your interest in Easy Insight!\r\n\r\n{1}\r\n{2}\r\nhttp://www.easy-insight.com/";
                     String formatted = MessageFormat.format(body, firstName, rep, "1-720-316-8174");
                     new SendGridEmail().sendEmail(email, "Welcoming you to Easy Insight", formatted, repEmail, false, rep);
-                    System.out.println(formatted);
+
                     updateEmailsStmt.setString(1, rep);
                     updateEmailsStmt.setBoolean(2, true);
                     updateEmailsStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
@@ -56,6 +56,12 @@ public class SalesAutomation {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public static void main(String[] args) {
+        String body = "Hi {0},\n\nI wanted to reach out with a quick email to make sure you were able to get up and going with Easy Insight. If you have any questions, encountered any issues, or just need a quick start, I''d be happy to jump on a call and/or screenshare with you to help make sure you''re able to get the reports and dashboards you need.\n\nThanks for your interest in Easy Insight!\n\n{1}\n{2}\nhttp://www.easy-insight.com/";
+        String formatted = MessageFormat.format(body, "Jim", "James Boe", "1-720-316-8174");
+        System.out.println(formatted);
     }
 
     public void noEmails(List<Long> accountIDs) {
