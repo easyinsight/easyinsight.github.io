@@ -35,6 +35,10 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         return getYaxis();
     }
 
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
+
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
         LimitsMetadata limitsMetadata = getLimitsMetadata();

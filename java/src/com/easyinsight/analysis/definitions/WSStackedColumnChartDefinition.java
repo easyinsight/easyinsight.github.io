@@ -46,6 +46,10 @@ public class WSStackedColumnChartDefinition extends WSXAxisDefinition {
         return getXaxis();
     }
 
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
+
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
         LimitsMetadata limitsMetadata = getLimitsMetadata();
