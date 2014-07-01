@@ -10,6 +10,7 @@ import mx.collections.ArrayCollection;
 public class PieChartDefinition extends XAxisDefinition{
 
     public var labelPosition:String = "outside";
+    public var labelType:String = "Value";
     public var multiColors:ArrayCollection = new ArrayCollection();
     public var legendMaxWidth:int = 200;
 

@@ -369,6 +369,8 @@ public class StyleConfiguration {
         if (report is PieChartDefinition) {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", PieChartDefinition(report).labelPosition,
                     report, ["callout", "insideWithCallout", "inside", "outside", "none"]));
+            items.addItem(new ComboBoxReportFormItem("Label Type", "labelType", PieChartDefinition(report).labelType,
+                    report, ["Value", "Label", "Percentage", "Value with Percentage"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", PieChartDefinition(report).legendMaxWidth, report, 10, 400));
 
 
