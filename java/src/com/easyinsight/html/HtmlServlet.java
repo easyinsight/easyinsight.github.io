@@ -473,7 +473,7 @@ public class HtmlServlet extends HttpServlet {
         object.put("showLegend", chart.isShowLegend());
     }
 
-    private org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure) throws JSONException {
+    protected org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure) throws JSONException {
         org.json.JSONObject object = new org.json.JSONObject();
         if (xaxisMeasure.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure measure = (AnalysisMeasure) xaxisMeasure;
