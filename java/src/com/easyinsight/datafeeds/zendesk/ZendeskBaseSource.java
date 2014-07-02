@@ -66,9 +66,9 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
         Map results = null;
         do {
             try {
-                System.out.println(queryString);
+                //System.out.println(queryString);
                 client.executeMethod(restMethod);
-                System.out.println("\t" + restMethod.getStatusText());
+                //System.out.println("\t" + restMethod.getStatusText());
                 if (restMethod.getStatusCode() == 401) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Authentication to Zendesk failed.", zendeskCompositeSource));
                 } else if (restMethod.getStatusCode() >= 500) {
