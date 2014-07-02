@@ -94,7 +94,7 @@
 
         private function validated():void {
             var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
-            if (validation.successful) {                
+            if (validation.successful) {
                 uploadService.completeInstallation.send(dataSourceDefinition);
             } else {
                 ready = true;
@@ -113,18 +113,21 @@
         private function gotCallData():void {
             var callData:CallData = asyncService.getCallData.lastResult as CallData;
             if (callData == null || callData.status == CallData.DONE) {
-                asyncService.getCallData.removeEventListener(ResultEvent.RESULT, gotCallData);
-                timer.stop();
-                var newFields:Boolean = false;
-                if (callData != null && callData.result is DataSourceRefreshResult) {
-                    newFields = DataSourceRefreshResult(callData.result).newFields;
+                try {
+                    asyncService.getCallData.removeEventListener(ResultEvent.RESULT, gotCallData);
+                    timer.stop();
+                    var newFields:Boolean = false;
+                    if (callData != null && callData.result is DataSourceRefreshResult) {
+                        newFields = DataSourceRefreshResult(callData.result).newFields;
+                    }
+                    var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
+                    descriptor.id = dataSourceDefinition.dataFeedID;
+                    descriptor.name = dataSourceDefinition.feedName;
+                    dispatchEvent(new DataSourceConfiguredEvent(descriptor, newFields && dataSourceDefinition.allowFieldEdit(), dataSourceDefinition.additionalSetup()));
+                    stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                    PopUpManager.removePopUp(this);
+                } catch (e:Error) {
                 }
-                var descriptor:DataSourceDescriptor = new DataSourceDescriptor();
-                descriptor.id = dataSourceDefinition.dataFeedID;
-                descriptor.name = dataSourceDefinition.feedName;
-                dispatchEvent(new DataSourceConfiguredEvent(descriptor, newFields && dataSourceDefinition.allowFieldEdit(), dataSourceDefinition.additionalSetup()));
-                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
-                PopUpManager.removePopUp(this);
             } else if (callData.status == CallData.FAILED) {
                 timer.stop();
                 progressBar.visible = false;
@@ -189,7 +192,6 @@
 
         [Bindable]
         private var showCreate:Boolean = true;
-
 
 
         [Bindable]
