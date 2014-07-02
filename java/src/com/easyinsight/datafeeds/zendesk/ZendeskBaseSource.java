@@ -32,6 +32,7 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
 
     public static HttpClient getHttpClient(ZendeskCompositeSource source) {
         HttpClient client = new HttpClient();
+        client.setTimeout(30000);
         client.getParams().setAuthenticationPreemptive(true);
         String username = source.getZdUserName() + ((source.getZdApiKey() == null || "".equals(source.getZdApiKey().trim())) ? "" : "/token");
         String password = (source.getZdApiKey() == null || "".equals(source.getZdApiKey().trim())) ? source.getZdPassword() : source.getZdApiKey();
