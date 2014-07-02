@@ -30,11 +30,11 @@ import java.util.Map;
  */
 public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
 
-    protected static HttpClient getHttpClient(ZendeskCompositeSource source) {
+    public static HttpClient getHttpClient(ZendeskCompositeSource source) {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);
-        String username = source.getZdUserName() + ((source.getZdApiKey() == null) ? "" : "/token");
-        String password = (source.getZdApiKey() == null) ? source.getZdPassword() : source.getZdApiKey();
+        String username = source.getZdUserName() + ((source.getZdApiKey() == null || "".equals(source.getZdApiKey().trim())) ? "" : "/token");
+        String password = (source.getZdApiKey() == null || "".equals(source.getZdApiKey().trim())) ? source.getZdPassword() : source.getZdApiKey();
         Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
         client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
         return client;
@@ -65,12 +65,16 @@ public abstract class ZendeskBaseSource extends ServerDataSourceDefinition {
         Map results = null;
         do {
             try {
+                System.out.println(queryString);
                 client.executeMethod(restMethod);
+                System.out.println("\t" + restMethod.getStatusText());
                 if (restMethod.getStatusCode() == 401) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Authentication to Zendesk failed.", zendeskCompositeSource));
                 } else if (restMethod.getStatusCode() >= 500) {
                     throw new RuntimeException("Zendesk server error--please try again later.");
-                }
+                } /*else if (restMethod.getStatusCode() == 404) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("The specified URL for your Zendesk account was not found.", zendeskCompositeSource));
+                }*/
                 Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                 if(o instanceof String) {
                     throw new RuntimeException((String) o);
