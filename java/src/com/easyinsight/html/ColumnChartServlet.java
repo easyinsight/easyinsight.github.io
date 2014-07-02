@@ -133,9 +133,9 @@ public class ColumnChartServlet extends HtmlServlet {
             blahArray.put(axisObject);
         }
         if (measures.size() == 1) {
-            configureAxes(object, chart, xAxisItem, measures.get(0));
+            configureAxes(object, chart, xAxisItem, measures.get(0), md);
         } else {
-            configureAxes(object, chart, xAxisItem, measures);
+            configureAxes(object, chart, xAxisItem, measures, md);
         }
         if (valueLabel) {
             object.put("valueLabel", true);

@@ -100,7 +100,7 @@ public class PieChartServlet extends HtmlServlet {
             points.put(point);
             i++;
         }
-        object.put("yFormat", createFormatObject(measureItem));
+        object.put("yFormat", createFormatObject(measureItem, md));
         object.put("values", points);
         object.put("pieLabelStyle", pieChart.getLabelType());
         response.setContentType("application/json");

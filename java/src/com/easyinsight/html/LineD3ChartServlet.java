@@ -142,9 +142,9 @@ public class LineD3ChartServlet extends HtmlServlet {
 
         object.put("values", blahArray);
         if (!twoAxisDefinition.isMultiMeasure()) {
-            configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasure());
+            configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasure(), md);
         } else {
-            configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasures());
+            configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasures(), md);
         }
 
         response.setContentType("application/json");
