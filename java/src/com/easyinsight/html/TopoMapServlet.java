@@ -144,7 +144,7 @@ public class TopoMapServlet extends HtmlServlet {
         } else if ("World".equals(wsMap.getMap())) {
             lookup = new WorldRegionLookup();
         } else {
-            throw new RuntimeException("Unknown map " + wsMap.getMap());
+            lookup = new NoOpLookup();
         }
 
         JSONArray geoData = new JSONArray();
@@ -761,6 +761,14 @@ public class TopoMapServlet extends HtmlServlet {
         @Override
         public String getValue(String string) {
             return lookups.get(string.toLowerCase());
+        }
+    }
+
+    private class NoOpLookup implements IRegionLookup {
+
+        @Override
+        public String getValue(String string) {
+            return string;
         }
     }
 
