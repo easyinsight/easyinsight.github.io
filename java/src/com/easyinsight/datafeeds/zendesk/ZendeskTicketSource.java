@@ -270,7 +270,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                         }
                     }
                     if (zendeskCompositeSource.isHackMethod()) {
-                        System.out.println(id);
+                        //System.out.println(id);
                         if (ticketIDs.contains(id)) {
 
                         } else {
@@ -305,7 +305,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     }
 
                     if (zendeskCompositeSource.isLoadComments()) {
-                        System.out.println(id);
+                        //System.out.println(id);
                         if (ticketIDs.contains(id)) {
 
                         } else {
