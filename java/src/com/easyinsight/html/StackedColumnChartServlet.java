@@ -254,7 +254,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         }*/
 
         object.put("values", blahs);
-        configureAxes(object, (WSChartDefinition) report, xAxisItem, measureItem);
+        configureAxes(object, (WSChartDefinition) report, xAxisItem, measureItem, md);
 
         response.setContentType("application/json");
         System.out.println(object.toString());

@@ -57,7 +57,7 @@ public class BubbleChartServlet extends HtmlServlet {
 
 
         object.put("values", arrays);
-        configureAxes(object, bubbleDefinition, bubbleDefinition.getXaxisMeasure(), bubbleDefinition.getYaxisMeasure());
+        configureAxes(object, bubbleDefinition, bubbleDefinition.getXaxisMeasure(), bubbleDefinition.getYaxisMeasure(), md);
 
         response.setContentType("application/json");
         String jsonString = object.toString();

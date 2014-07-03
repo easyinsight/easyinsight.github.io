@@ -156,6 +156,8 @@ public class HtmlServlet extends HttpServlet {
                     }
                 }
 
+
+
                 filters.addAll(drillthroughFilters);
 
                 String dashboardIDString = req.getParameter("dashboardID");
@@ -171,6 +173,29 @@ public class HtmlServlet extends HttpServlet {
                     FilterUtils.adjustFilters(filters, actualFilterObject, report.getName(), logReport);
                 } else {
                     FilterUtils.adjustFilters(filters, filterObject, report.getName(), logReport);
+                }
+
+                Object seleniumID = filterObject.get("seleniumID");
+                if (seleniumID != null) {
+                    List<FilterDefinition> seleniumFilters = new ArrayList<FilterDefinition>();
+
+                    org.hibernate.Session hibernateSession = Database.instance().createSession(conn);
+                    try {
+                        PreparedStatement query = conn.prepareStatement("SELECT filter_id FROM image_selenium_trigger_to_filter WHERE image_selenium_trigger_id = ?");
+                        query.setLong(1, Long.parseLong(seleniumID.toString()));
+                        ResultSet rs = query.executeQuery();
+                        while (rs.next()) {
+                            long filterID = rs.getLong(1);
+                            FilterDefinition filterDefinition = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list().get(0);
+                            filterDefinition.afterLoad();
+                            //filterDefinition.setShowOnReportView(false);
+                            seleniumFilters.add(filterDefinition);
+                        }
+                    } finally {
+                        hibernateSession.close();
+
+                    }
+                    report.setFilterDefinitions(seleniumFilters);
                 }
 
                 /*
@@ -382,11 +407,11 @@ public class HtmlServlet extends HttpServlet {
 
 
 
-    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, AnalysisItem yAxisItem) throws JSONException {
-        configureAxesBase(object, chart, xAxisItem, yAxisItem);
+    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
+        configureAxesBase(object, chart, xAxisItem, yAxisItem, exportMetadata);
     }
 
-    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, List<AnalysisItem> items) throws JSONException {
+    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, List<AnalysisItem> items, ExportMetadata exportMetadata) throws JSONException {
         int aggregation = 0;
         boolean aggChanged = true;
         for (AnalysisItem item : items) {
@@ -399,14 +424,14 @@ public class HtmlServlet extends HttpServlet {
             }
         }
         if (aggChanged) {
-            configureAxesBase(object, chart, xAxisItem, items.get(0));
+            configureAxesBase(object, chart, xAxisItem, items.get(0), exportMetadata);
         } else {
-            configureAxesBase(object, chart, xAxisItem, null);
+            configureAxesBase(object, chart, xAxisItem, null, exportMetadata);
         }
 
     }
 
-    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, List<AnalysisItem> items, AnalysisItem yAxisItem) throws JSONException {
+    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, List<AnalysisItem> items, AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
         int aggregation = 0;
         boolean aggChanged = true;
         for (AnalysisItem item : items) {
@@ -419,15 +444,15 @@ public class HtmlServlet extends HttpServlet {
             }
         }
         if (aggChanged) {
-            configureAxesBase(object, chart, items.get(0), yAxisItem);
+            configureAxesBase(object, chart, items.get(0), yAxisItem, exportMetadata);
         } else {
-            configureAxesBase(object, chart, null, yAxisItem);
+            configureAxesBase(object, chart, null, yAxisItem, exportMetadata);
         }
 
     }
 
     protected void configureAxesBase(org.json.JSONObject object, WSChartDefinition chart, @Nullable AnalysisItem xAxisItem,
-                                     @Nullable AnalysisItem yAxisItem) throws JSONException {
+                                     @Nullable AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
 
         if (chart.getxAxisLabel() != null && !"".equals(chart.getxAxisLabel())) {
             object.put("xTitle", chart.getxAxisLabel());
@@ -440,7 +465,7 @@ public class HtmlServlet extends HttpServlet {
         }
 
         if (xAxisItem != null) {
-            object.put("xFormat", createFormatObject(xAxisItem));
+            object.put("xFormat", createFormatObject(xAxisItem, exportMetadata));
         }
 
         if (chart.getyAxisLabel() != null && !"".equals(chart.getyAxisLabel())) {
@@ -454,7 +479,7 @@ public class HtmlServlet extends HttpServlet {
         }
 
         if (yAxisItem != null) {
-            object.put("yFormat", createFormatObject(yAxisItem));
+            object.put("yFormat", createFormatObject(yAxisItem, exportMetadata));
         }
 
         if (chart.isxAxisMaximumDefined()) {
@@ -473,14 +498,14 @@ public class HtmlServlet extends HttpServlet {
         object.put("showLegend", chart.isShowLegend());
     }
 
-    protected org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure) throws JSONException {
+    protected org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure, ExportMetadata exportMetadata) throws JSONException {
         org.json.JSONObject object = new org.json.JSONObject();
         if (xaxisMeasure.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure measure = (AnalysisMeasure) xaxisMeasure;
             object.put("type", "measure");
             object.put("precision", measure.getPrecision());
             object.put("numberFormat", measure.getFormattingType());
-            object.put("currencySymbol", "$");
+            object.put("currencySymbol", exportMetadata.currencySymbol);
             object.put("commaSeparator", ",");
             object.put("decimalSeperator", ".");
         } else {

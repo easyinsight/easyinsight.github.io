@@ -6,7 +6,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,7 +73,7 @@ public class PlotChartServlet extends HtmlServlet {
         object.put("point", true);
 
         object.put("values", arrays);
-        configureAxes(object, plotDefinition, plotDefinition.getXaxisMeasure(), plotDefinition.getYaxisMeasure());
+        configureAxes(object, plotDefinition, plotDefinition.getXaxisMeasure(), plotDefinition.getYaxisMeasure(), md);
 
 
         response.setContentType("application/json");
