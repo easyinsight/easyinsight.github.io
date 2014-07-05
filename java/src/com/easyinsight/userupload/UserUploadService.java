@@ -463,35 +463,6 @@ public class UserUploadService {
                 }
             }
 
-            conn.setAutoCommit(false);
-
-            PreparedStatement dsVisibleStmt = conn.prepareStatement("UPDATE DATA_FEED SET VISIBLE = ? WHERE DATA_FEED_ID = ?");
-            PreparedStatement reportVisibleStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE ANALYSIS_ID = ?");
-            PreparedStatement dashboardVisibleStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? WHERE DASHBOARD_ID = ?");
-
-            for (SolutionInstallInfo info : infos) {
-                if (info.isMakeVisible()) {
-                    dsVisibleStmt.setBoolean(1, true);
-                    dsVisibleStmt.setLong(2, info.getNewDataSource().getDataFeedID());
-                    dsVisibleStmt.executeUpdate();
-
-                    for (Long reportID : info.getReports()) {
-                        reportVisibleStmt.setBoolean(1, false);
-                        reportVisibleStmt.setLong(2, reportID);
-                        reportVisibleStmt.executeUpdate();
-                    }
-                    for (Long dashboardID : info.getDashboards()) {
-                        dashboardVisibleStmt.setBoolean(1, false);
-                        dashboardVisibleStmt.setLong(2, dashboardID);
-                        dashboardVisibleStmt.executeUpdate();
-                    }
-                }
-            }
-
-            dsVisibleStmt.close();
-            reportVisibleStmt.close();
-            dashboardVisibleStmt.close();
-
             if (newTag != null) {
                 PreparedStatement getTagStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID FROM ACCOUNT_TAG WHERE TAG_NAME = ?");
                 getTagStmt.setString(1, newTag);
@@ -1236,6 +1207,31 @@ public class UserUploadService {
         return uploadResponse;
     }
 
+    /*public UploadResponse createStubSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
+        UploadResponse uploadResponse;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, null);
+            PreparedStatement ps1 = conn.prepareStatement("SELECT URL_KEY FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            ps1.setLong(1, dataSourceID);
+            ResultSet urlRS = ps1.executeQuery();
+            urlRS.next();
+            String urlKey = urlRS.getString(1);
+            ps1.close();
+            conn.commit();
+            uploadResponse = new UploadResponse(dataSourceID, urlKey);
+        } catch (Throwable e) {
+            LogClass.error(e);
+            conn.rollback();
+            uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return uploadResponse;
+    }*/
+
     public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
         UploadResponse uploadResponse;
         EIConnection conn = Database.instance().getConnection();
@@ -1680,13 +1676,21 @@ public class UserUploadService {
                     ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) feedDefinition;
                     EIConnection conn = Database.instance().getConnection();
                     try {
+                        conn.setAutoCommit(false);
                         serverDataSourceDefinition.migrations(conn, null);
+                        feedDefinition.setVisible(true);
+                        feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+                        conn.commit();
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                        conn.rollback();
+                        throw new RuntimeException(e);
                     } finally {
+                        conn.setAutoCommit(true);
                         Database.closeConnection(conn);
                     }
                 }
-                feedDefinition.setVisible(true);
-                feedStorage.updateDataFeedConfiguration(feedDefinition);
+
                 credentialsResponse = new CredentialsResponse(true, feedID);
                 credentialsResponse.setEstimatedDuration(avgTime);
             }
