@@ -282,7 +282,7 @@ public class DashboardGrid extends DashboardElement {
         return grid;
     }
 
-    private DashboardGridItem findItem(int x, int y) {
+    public DashboardGridItem findItem(int x, int y) {
         for (DashboardGridItem e : gridItems) {
             if (e.getRowIndex() == x && e.getColumnIndex() == y) {
                 return e;
