@@ -480,7 +480,13 @@ public class Dashboard implements Cloneable, Serializable {
         }
     }
 
-    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource) throws CloneNotSupportedException {
+    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource)
+            throws CloneNotSupportedException {
+        return cloneDashboard(scorecardReplacmenetMap, changingDataSource, allFields, dataSource, new ReplacementMapFactory());
+    }
+
+    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource,
+                                    ReplacementMapFactory factory) throws CloneNotSupportedException {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
         dashboard.setAuthorName(SecurityUtil.getUserName());
@@ -490,54 +496,82 @@ public class Dashboard implements Cloneable, Serializable {
         dashboard.setRecommendedExchange(false);
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
 
-        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+
+
+        //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
 
         if (getDefaultDrillthrough() != null) {
             Link clone = getDefaultDrillthrough().clone();
             dashboard.setDefaultDrillthrough(clone);
         }
 
-        for (FilterDefinition persistableFilterDefinition : this.filters) {
-            filterDefinitions.add(persistableFilterDefinition.clone());
-            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
-            for (AnalysisItem item : filterItems) {
-                if (replacementMap.get(item.getAnalysisItemID()) == null) {
-                    AnalysisItem clonedItem = item.clone();
-                    cleanup(clonedItem, changingDataSource);
-                    replacementMap.put(item.getAnalysisItemID(), clonedItem);
+        if (factory instanceof TemplateReplacementMapFactory) {
+            ReplacementMap replacementMap = factory.createMap();
+            for (FilterDefinition persistableFilterDefinition : this.filters) {
+                filterDefinitions.add(persistableFilterDefinition.clone());
+                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+                for (AnalysisItem item : filterItems) {
+                    replacementMap.addField(item, changingDataSource);
                 }
             }
-        }
 
-        for (AnalysisItem analysisItem : replacementMap.values()) {
-            System.out.println("Looking for a match for " + analysisItem.toDisplay());
-            AnalysisItem parent = dataSource.findAnalysisItemByDisplayName(analysisItem.toDisplay());
-            if (parent != null) {
-                System.out.println("\tFound match by name of " + parent.toDisplay());
-                analysisItem.setKey(parent.getKey());
-            } else {
-                System.out.println("\tNo match, looking by key");
-                Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
-                if (key != null) {
-                    analysisItem.setKey(key);
+
+            for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                analysisItem.updateIDs(replacementMap);
+            }
+
+            for (FilterDefinition filter : filterDefinitions) {
+                filter.updateIDs(replacementMap);
+            }
+
+            dashboard.setFilters(filterDefinitions);
+        } else {
+            Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+            for (FilterDefinition persistableFilterDefinition : this.filters) {
+                filterDefinitions.add(persistableFilterDefinition.clone());
+                List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+                for (AnalysisItem item : filterItems) {
+                    if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                        AnalysisItem clonedItem = item.clone();
+                        cleanup(clonedItem, changingDataSource);
+                        replacementMap.put(item.getAnalysisItemID(), clonedItem);
+                    }
+                }
+            }
+
+
+
+            for (AnalysisItem analysisItem : replacementMap.values()) {
+                System.out.println("Looking for a match for " + analysisItem.toDisplay());
+                AnalysisItem parent = dataSource.findAnalysisItemByDisplayName(analysisItem.toDisplay());
+                if (parent != null) {
+                    System.out.println("\tFound match by name of " + parent.toDisplay());
+                    analysisItem.setKey(parent.getKey());
                 } else {
-                    Key clonedKey = analysisItem.getKey().clone();
-                    analysisItem.setKey(clonedKey);
+                    System.out.println("\tNo match, looking by key");
+                    Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
+                    if (key != null) {
+                        analysisItem.setKey(key);
+                    } else {
+                        Key clonedKey = analysisItem.getKey().clone();
+                        analysisItem.setKey(clonedKey);
+                    }
                 }
             }
+
+            ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+
+            for (AnalysisItem analysisItem : replacementMap.values()) {
+                analysisItem.updateIDs(replacements);
+            }
+
+            for (FilterDefinition filter : filterDefinitions) {
+                filter.updateIDs(replacements);
+            }
+
+            dashboard.setFilters(filterDefinitions);
         }
 
-        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
-
-        for (AnalysisItem analysisItem : replacementMap.values()) {
-            analysisItem.updateIDs(replacements);
-        }
-
-        for (FilterDefinition filter : filterDefinitions) {
-            filter.updateIDs(replacements);
-        }
-
-        dashboard.setFilters(filterDefinitions);
         //dashboard.getRootElement().updateReportIDs(reportReplacementMap);
         dashboard.getRootElement().updateScorecardIDs(scorecardReplacmenetMap);
         return dashboard;

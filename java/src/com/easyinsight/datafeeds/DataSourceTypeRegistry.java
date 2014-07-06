@@ -436,6 +436,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.ORACLE_OPPORTUNITYCOMPETITOR, OracleOpportunityCompetitorSource.class);
         registerType(FeedType.ORACLE_OPPORTUNITY_HISTORY, OracleOpportunityHistorySource.class);
         registerType(FeedType.SALES_HISTORY, SampleSalesHistorySource.class);
+        registerType(FeedType.BASECAMP_NEXT_COMMENT, BasecampNextCommentSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

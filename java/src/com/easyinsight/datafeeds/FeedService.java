@@ -321,6 +321,22 @@ public class FeedService {
         }
     }
 
+    public List<AnalysisItem> allFields(long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            List<AnalysisItem> fields = dataSource.allFields(conn);
+            Collections.sort(fields, (o1, o2) -> o1.toDisplay().compareTo(o2.toDisplay()));
+            return fields;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<AnalysisItemConfiguration> getAnalysisItemConfigurations(long dataSourceID, EIConnection conn, FeedDefinition dataSource) throws SQLException {
         List<AnalysisItemConfiguration> configurations = new ArrayList<AnalysisItemConfiguration>();
 

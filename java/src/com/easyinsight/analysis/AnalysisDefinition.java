@@ -466,13 +466,17 @@ public class AnalysisDefinition implements Cloneable {
     }
 
     public SaveMetadata clone(List<AnalysisItem> allFields, boolean changingDataSource, Map<Long, Tag> tagMap) throws CloneNotSupportedException {
+        return clone(allFields, changingDataSource, tagMap, new ReplacementMapFactory());
+    }
+
+    public SaveMetadata clone(List<AnalysisItem> allFields, boolean changingDataSource, Map<Long, Tag> tagMap, ReplacementMapFactory factory) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
 
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(allFields));
         analysisDefinition.setUrlKey(null);
         analysisDefinition.setAnalysisID(null);
         //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-        ReplacementMap replacementMap = new ReplacementMap();
+        ReplacementMap replacementMap = factory.createMap();
         replacementMap.setTagReplacementMap(tagMap);
 
         allFields = new ArrayList<AnalysisItem>(allFields);
@@ -666,27 +670,31 @@ public class AnalysisDefinition implements Cloneable {
         if (dataSourceItem.getOrigin() != null) {
             if (dataSourceItem.getOrigin().getReport() == analysisDefinition.getAnalysisID()) {
                 valid = false;
+            } else if (dataSourceItem.getOrigin().getAdditionalReports() != null &&
+                    dataSourceItem.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
+                valid = false;
             }
-        } else if (dataSourceItem.getOrigin() != null && dataSourceItem.getOrigin().getAdditionalReports() != null &&
-                dataSourceItem.getOrigin().getAdditionalReports().contains(analysisDefinition.getAnalysisID())) {
-            valid = false;
         }
         return valid;
+    }
+
+    public static void copyToAlternateType(FeedDefinition target, Map<String, AnalysisItem> targetFieldMap,
+                                           AnalysisDefinition analysisDefinition, ReplacementMap replacementMap) throws CloneNotSupportedException {
+
+        for (AnalysisItem analysisItem : replacementMap.getFields()) {
+            if (target != null) {
+                target.updateLinks(analysisItem);
+            }
+            analysisItem.updateIDs(replacementMap);
+        }
+        for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+            filter.updateIDs(replacementMap);
+        }
     }
 
     public static void updateFromMetadata(FeedDefinition target, ReplacementMap replacementMap,
                                           AnalysisDefinition analysisDefinition, List<AnalysisItem> allFields, List<AnalysisItem> added) throws CloneNotSupportedException {
         Map<String, AnalysisItem> clonedStructure = analysisDefinition.getReportStructure();
-        /*Map<String, AnalysisItem> set = new HashMap<String, AnalysisItem>();
-        if (additionalDataSourceFields != null) {
-            allFields.addAll(additionalDataSourceFields);
-            for (AnalysisItem analysisItem : additionalDataSourceFields) {
-                set.put(analysisItem.toDisplay(), analysisItem);
-            }
-        }*/
-        /*for (AnalysisItem add : added) {
-            set.put(add.toDisplay(), add);
-        }*/
 
         Map<String, List<AnalysisItem>> targetFieldMap = new HashMap<String, List<AnalysisItem>>();
         Map<String, List<AnalysisItem>> keyMap = new HashMap<String, List<AnalysisItem>>();

@@ -44,6 +44,7 @@ public class SalesAutomation {
                     long userID = rs.getLong(3);
 
                     findSourceStmt.setLong(1, userID);
+                    findSourceStmt.setBoolean(2, true);
                     ResultSet dataSourceRS = findSourceStmt.executeQuery();
 
                     int emailToSend = NO_DATA;

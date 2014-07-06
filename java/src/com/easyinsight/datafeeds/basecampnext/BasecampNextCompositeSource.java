@@ -8,6 +8,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.html.RedirectUtil;
@@ -42,6 +43,21 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     private String accessToken;
     private String refreshToken;
     private String endpoint;
+
+    private transient List<BasecampComment> comments;
+
+    public void addComment(BasecampComment comment) {
+        if (comments == null) {
+            comments = new LinkedList<>();
+        }
+        comments.add(comment);
+    }
+
+    public List<BasecampComment> getComments() {
+        return comments;
+    }
+
+
 
     @Override
     protected void beforeRefresh(Date lastRefreshTime) {
@@ -196,6 +212,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP_NEXT_TODOS);
         feedTypes.add(FeedType.BASECAMP_NEXT_CALENDAR);
         feedTypes.add(FeedType.BASECAMP_NEXT_PEOPLE);
+        feedTypes.add(FeedType.BASECAMP_NEXT_COMMENT);
         return feedTypes;
     }
 
@@ -205,6 +222,23 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
             return false;
         }
         return true;
+    }
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() != FeedType.BASECAMP_NEXT_COMMENT.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
     }
 
     @Override
@@ -225,7 +259,8 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.BASECAMP_NEXT_PROJECTS, FeedType.BASECAMP_NEXT_TODOS, BasecampNextProjectSource.PROJECT_ID, BasecampNextTodoSource.TODO_LIST_PROJECT_ID),
-                new ChildConnection(FeedType.BASECAMP_NEXT_PROJECTS, FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextProjectSource.PROJECT_ID, BasecampNextCalendarSource.CALENDAR_EVENT_PROJECT_ID));
+                new ChildConnection(FeedType.BASECAMP_NEXT_PROJECTS, FeedType.BASECAMP_NEXT_CALENDAR, BasecampNextProjectSource.PROJECT_ID, BasecampNextCalendarSource.CALENDAR_EVENT_PROJECT_ID),
+                new ChildConnection(FeedType.BASECAMP_NEXT_TODOS, FeedType.BASECAMP_NEXT_COMMENT, BasecampNextTodoSource.TODO_ID, BasecampNextCommentSource.COMMENT_TODO_ID));
     }
 
     private transient ProjectCache projectCache;
@@ -242,6 +277,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         projectCache = null;
+        comments = null;
     }
 
     public Collection<BasecampNextAccount> getBasecampAccounts() {

@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    creationComplete="onCreation()" width="800">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.Label;
+        import mx.managers.PopUpManager;
+
+        private function onCreation():void {
+            dashboardService.getDashboards.send();
+            feedService.searchForSubscribedFeeds.send();
+        }
+
+        [Bindable]
+        private var dashboards:ArrayCollection;
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+
+        private function gotDashboards():void {
+            dashboards = dashboardService.getDashboards.lastResult as ArrayCollection;
+        }
+
+        private function determineFields():void {
+            ProgressAlert.alert(this, "Determining fields...", null, solutionService.determineFields);
+            solutionService.determineFields.send(dashboardBox.selectedItem);
+            chooseDataSource();
+        }
+
+        [Bindable]
+        private var fieldAssignments:ArrayCollection;
+
+        [Bindable]
+        private var dataSourceFields:ArrayCollection;
+
+        private function chooseDataSource():void {
+            ProgressAlert.alert(this, "Getting data source...", null, feedService.allFields);
+            feedService.allFields.send(dataSourceTarget.selectedItem.id);
+        }
+
+        private var fields:ArrayCollection;
+
+        private function gotFields():void {
+            fields = solutionService.determineFields.lastResult as ArrayCollection;
+            blah();
+        }
+
+        private function blah():void {
+            if (fields != null && dataSourceFields != null) {
+                var fieldAssignments:ArrayCollection = new ArrayCollection();
+
+
+                for each (var f:AnalysisItem in fields) {
+                    var target:TargetFieldComboBox = new TargetFieldComboBox();
+                    target.width = 350;
+                    target.fields = dataSourceFields;
+                    var fieldAssignment:FieldAssignment = new FieldAssignment();
+                    fieldAssignment.sourceField = f;
+                    target.data = fieldAssignment;
+                    var hbox:HBox = new HBox();
+                    var l:Label = new Label();
+                    l.width = 300;
+                    l.text = f.display;
+                    hbox.addChild(l);
+                    hbox.addChild(target);
+                    this.target.addChild(hbox);
+
+                    fieldAssignments.addItem(fieldAssignment);
+                }
+                this.fieldAssignments = fieldAssignments;
+            }
+        }
+
+        [Bindable]
+        private var fieldFactory:ClassFactory;
+
+        private function gotDataSource():void {
+            dataSourceFields = feedService.allFields.lastResult as ArrayCollection;
+            blah();
+        }
+
+        private function gotDataSources():void {
+            dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+        }
+
+        private function doCopy():void {
+            for each (var f:FieldAssignment in fieldAssignments) {
+                if (f.targetField == null) {
+                    Alert.show("You must assign a field to " + f.sourceField.display);
+                    return;
+                }
+            }
+            ProgressAlert.alert(this, "Installing...", null, solutionService.installTemplate);
+            solutionService.installTemplate.send(dashboardBox.selectedItem, dataSourceTarget.selectedItem.id, fieldAssignments);
+        }
+
+        private function installed():void {
+
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="allFields" result="gotDataSource()"/>
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="dashboardService" destination="dashboardService">
+        <mx:method name="getDashboards" result="gotDashboards()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="solutionService" destination="solutionService">
+        <mx:method name="determineFields" result="gotFields()"/>
+        <mx:method name="installTemplate" result="installed()"/>
+    </mx:RemoteObject>
+    <mx:HBox>
+        <mx:VBox>
+            <util:TextInputWithArrow id="dashboardBox" dataProvider="{dashboards}" labelField="name"/>
+
+        </mx:VBox>
+        <mx:VBox>
+            <util:TextInputWithArrow id="dataSourceTarget" dataProvider="{dataSources}" labelField="name"/>
+
+        </mx:VBox>
+    </mx:HBox>
+    <util:SaveButton label="Determine Fields" click="determineFields()"/>
+
+
+    <mx:Box id="target" width="700" maxHeight="400"/>
+
+    <util:SaveButton label="Copy" click="doCopy()"/>
+
+    <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+</util:EITitleWindow>

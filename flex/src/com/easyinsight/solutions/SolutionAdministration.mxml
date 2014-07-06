@@ -34,6 +34,12 @@
             solutionService.getSolutions.send();
         }
 
+        private function dashboardCopy():void {
+            var window:DashboardCopy = new DashboardCopy();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         private function createSolution():void {
             var window:CreateSolutionWindow = CreateSolutionWindow(PopUpManager.createPopUp(this, CreateSolutionWindow, true));
             window.addEventListener(SolutionAdminEvent.SOLUTION_ADMIN, refreshRequest);
@@ -46,7 +52,8 @@
     </mx:RemoteObject>
     <mx:HBox>
         <mx:Button label="Add Connection..." click="createSolution()"/>
-        <mx:Button label="Refresh" click="refreshData()"/>        
+        <mx:Button label="Dashboard Copy..." click="dashboardCopy()"/>
+        <mx:Button label="Refresh" click="refreshData()"/>
     </mx:HBox>
     <mx:DataGrid dataProvider="{solutions}" height="100%">
         <mx:columns>

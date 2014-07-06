@@ -96,7 +96,7 @@ public class ReplacementMap {
         return returnItem;
     }
 
-    private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
+    protected void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
         if (changingDataSource) {
             // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
             analysisItem.setLookupTableID(null);
