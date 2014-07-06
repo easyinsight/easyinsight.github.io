@@ -80,7 +80,7 @@
             lfItems.addItem(new ColorReportFormItem("Crosstab Header Text Color", "crosstabHeaderTextColor", skin.crosstabHeaderTextColor, skin, "crosstabHeaderTextColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Header Start Background", "headerStart", skin.headerStart, skin, "headerStartEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Header End Background", "headerEnd", skin.headerEnd, skin, "headerEndEnabled"));
-            lfItems.addItem(new ColorReportFormItem("Grid Header Text Background", "reportHeaderTextColor", skin.reportHeaderTextColor, skin, "reportHeaderTextColorEnabled"));
+            lfItems.addItem(new ColorReportFormItem("Grid Header Text Color", "reportHeaderTextColor", skin.reportHeaderTextColor, skin, "reportHeaderTextColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 1", "tableColorStart", skin.tableColorStart, skin, "tableColorStartEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Row Background Color 2", "tableColorEnd", skin.tableColorEnd, skin, "tableColorEndEnabled"));
             lfItems.addItem(new ColorReportFormItem("Grid Text Color", "textColor", skin.textColor, skin, "textColorEnabled"));
