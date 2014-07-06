@@ -31,14 +31,6 @@ public class AnalysisDefinitionFactory {
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CHART)) {
             WSChartDefinition wsChart = (WSChartDefinition) wsAnalysisDefinition;
             ChartDefinitionState chartDefinition = new ChartDefinitionState();
-            if (Double.isNaN(wsChart.getElevationAngle())) {
-                wsChart.setElevationAngle(0);
-            }
-            if (Double.isNaN(wsChart.getRotationAngle())) {
-                wsChart.setRotationAngle(0);
-            }
-            chartDefinition.setElevationAngle(wsChart.getElevationAngle());
-            chartDefinition.setRotationAngle(wsChart.getRotationAngle());
             chartDefinition.setChartFamily(wsChart.getChartFamily());
             chartDefinition.setChartType(wsChart.getChartType());
             chartDefinition.setLimitsMetadata(wsChart.getLimitsMetadata());
