@@ -128,6 +128,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                         string = "";
                     } else {
                         string = String.valueOf(value.toString());
+                    }
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
                     }
