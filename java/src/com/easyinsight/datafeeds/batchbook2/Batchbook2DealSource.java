@@ -39,6 +39,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
     public static final String OWNER = "Deal Owner";
     public static final String CREATED_BY = "Deal Created By";
     public static final String COUNT = "Deal Count";
+    public static final String TITLE = "Deal Title";
 
 
 
@@ -55,6 +56,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
     @Override
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(TITLE, new AnalysisDimension());
         fieldBuilder.addField(DESCRIPTION, new AnalysisDimension());
         fieldBuilder.addField(STATUS, new AnalysisDimension());
         fieldBuilder.addField(ARCHIVED, new AnalysisDimension());
@@ -67,7 +69,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(ARCHIVED_AT, new AnalysisDateDimension());
-        fieldBuilder.addField(EXPECTED_CLOSE, new AnalysisDateDimension());
+        fieldBuilder.addField(EXPECTED_CLOSE, new AnalysisDateDimension(true));
         fieldBuilder.addField(AMOUNT, new AnalysisMeasure());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
@@ -133,6 +135,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
                     String stageID = getJSONValue(dealMap, "stage_id");
                     String stage = stageMap.get(stageID);
                     row.addValue(keys.get(STAGE), stage);
+                    row.addValue(keys.get(TITLE), getJSONValue(dealMap, "title"));
                     String ownedBy = getJSONValue(dealMap, "assigned_to_id");
                     row.addValue(keys.get(OWNER), userMap.get(ownedBy));
                     String creatorID = getJSONValue(dealMap, "creator_id");
