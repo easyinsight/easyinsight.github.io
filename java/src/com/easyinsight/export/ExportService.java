@@ -11,6 +11,7 @@ import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.calculations.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.dashboard.DashboardStackPositions;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -451,6 +452,37 @@ public class ExportService {
         return 0;
     }*/
 
+    public String htmlDashboardToPDFAlt(byte[] bytes, Dashboard dashboard, HttpServletRequest request) {
+        SecurityUtil.authorizeDashboard(dashboard.getId());
+        try {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                return toDatabase(dashboard.getName(), bytes, conn, request);
+            } finally {
+                Database.closeConnection(conn);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void exportDashboardToPDFAlt(Dashboard dashboard, DashboardStackPositions positions, Map<String, PDFImageData> images) {
+        SecurityUtil.authorizeDashboard(dashboard.getId());
+        try {
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images);
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                toDatabase(dashboard.getName(), bytes, conn);
+            } finally {
+                Database.closeConnection(conn);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void exportDashboardToPDF(Dashboard dashboard, List<Page> pages, boolean landscapeOrientation) {
         SecurityUtil.authorizeDashboard(dashboard.getId());
         EIConnection conn = Database.instance().getConnection();
@@ -473,7 +505,7 @@ public class ExportService {
         try {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
@@ -756,25 +788,28 @@ public class ExportService {
             LogClass.error(e);
         }
 
+        Element element;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
-            crosstabToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
+            element = crosstabToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
-            kpiReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
+            element = kpiReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition instanceof WSTreeDefinition) {
-            treeToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
+            element = treeToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition instanceof WSForm) {
-            formReportToPDF(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
+            element = formReportToPDF(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
+        } else if (analysisDefinition instanceof WSYTDDefinition) {
+            element = ytdToPDF(analysisDefinition, conn, insightRequestMetadata);
         } else {
-            listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, document, exportMetadata);
+            element = listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         }
-
+        document.add(element);
 
         document.close();
         return baos.toByteArray();
     }
 
-    private void listReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
-                                      ExportMetadata exportMetadata) throws DocumentException {
+    public Element listReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                        ExportMetadata exportMetadata) throws DocumentException {
 
         ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
 
@@ -980,11 +1015,11 @@ public class ExportService {
                 }
             }
         }
-        document.add(table);
+        return table;
     }
 
-    private void formReportToPDF(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
-                                 ExportMetadata exportMetadata) throws SQLException, DocumentException {
+    public Element formReportToPDF(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                   ExportMetadata exportMetadata) throws SQLException, DocumentException {
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         if (dataSet.getRows().size() > 0) {
             IRow row = dataSet.getRow(0);
@@ -997,7 +1032,9 @@ public class ExportService {
                 String string = createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true);
                 table.addCell(styleCell(string));
             }
-            document.add(table);
+            return table;
+        } else {
+            return new PdfPTable(1);
         }
     }
 
@@ -1017,8 +1054,8 @@ public class ExportService {
         return cell;
     }
 
-    private void kpiReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
-                                     ExportMetadata exportMetadata) throws SQLException, DocumentException {
+    public Element kpiReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                       ExportMetadata exportMetadata) throws SQLException, DocumentException {
         WSKPIDefinition kpiDefinition = (WSKPIDefinition) analysisDefinition;
 
 
@@ -1078,11 +1115,11 @@ public class ExportService {
             table.addCell(previousMeasureStyle);
             table.addCell(percentChangeDataCell);
         }
-        document.add(table);
+        return table;
     }
 
-    private void treeToPDFTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
-                                ExportMetadata exportMetadata) throws DocumentException {
+    public Element treeToPDFTable(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                  ExportMetadata exportMetadata) throws DocumentException {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         PipelineData pipelineData = dataSet.getPipelineData();
 
@@ -1126,10 +1163,10 @@ public class ExportService {
         for (TreeRow row : rows) {
             row.toPDF(tree, exportMetadata, table);
         }
-        document.add(table);
+        return table;
     }
 
-    private void crosstabToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Document document,
+    public Element crosstabToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
                                     ExportMetadata exportMetadata) throws DocumentException {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
@@ -1161,7 +1198,8 @@ public class ExportService {
                 table.addCell(cell);
             }
         }
-        document.add(table);
+        //document.add(table);
+        return table;
     }
 
     public void toImagePDFDatabase(WSAnalysisDefinition analysisDefinition, byte[] bytes, int width, int height, EIConnection conn) throws IOException, DocumentException, SQLException {
@@ -1533,6 +1571,7 @@ public class ExportService {
         insertStmt.setString(5, urlKey);
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
+        insertStmt.close();
         if (request == null) {
             FlexContext.getHttpRequest().getSession().setAttribute("imageID", id);
             FlexContext.getHttpRequest().getSession().setAttribute("anonID", anonID);
@@ -2216,6 +2255,195 @@ public class ExportService {
     }
 
     // sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+
+    public static Element ytdToPDF(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSYTDDefinition verticalList = (WSYTDDefinition) report;
+        if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
+            AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
+            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+        }
+        ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
+        YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());
+        boolean hasBenchmark = false;
+        for (AnalysisItem analysisItem : verticalList.getMeasures()) {
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) analysisItem.getReportFieldExtension();
+                if (ytdReportFieldExtension.getBenchmark() != null) {
+                    hasBenchmark = true;
+                }
+            }
+        }
+
+        AnalysisMeasure percentMeasure = new AnalysisMeasure();
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setMinPrecision(1);
+        percentMeasure.setPrecision(1);
+
+        int maxColumns = 0;
+        for (YTDValue ytdValue : ytdStuff.getValues()) {
+            if (ytdValue != null) {
+                if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                    int ctr = 0;
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        ctr++;
+                    }
+                    ctr += 2;
+                    maxColumns = Math.max(ctr, maxColumns);
+                }
+            }
+        }
+
+        PdfPTable table = new PdfPTable(maxColumns + 1);
+        table.setSpacingBefore(20);
+        table.getDefaultCell().setPadding(3);
+
+        int fontSize = 6;
+        int minimumSize = fontSize + 3;
+        Color headerTextColor = new Color(0xFFFFFF);
+        Color color = new Color(0x333333);
+
+        PdfPCell blank = ytdHeaderCell("", headerTextColor, color, minimumSize, fontSize);
+        table.addCell(blank);
+
+        for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), ytdStuff.getIntervals().get(i), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, "MMM");
+            table.addCell(ytdHeaderCell(date, headerTextColor, color, minimumSize, fontSize));
+        }
+        table.addCell(ytdHeaderCell("YTD", headerTextColor, color, minimumSize, fontSize));
+        table.addCell(ytdHeaderCell("Avg", headerTextColor, color, minimumSize, fontSize));
+        if (hasBenchmark) {
+            table.addCell(ytdHeaderCell("BK", headerTextColor, color, minimumSize, fontSize));
+            table.addCell(ytdHeaderCell("Variation", headerTextColor, color, minimumSize, fontSize));
+        }
+
+        table.setHeaderRows(1);
+
+        com.itextpdf.text.Font regFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+
+        for (YTDValue ytdValue : ytdStuff.getValues()) {
+            AnalysisMeasure baseMeasure = ytdValue.getAnalysisMeasure();
+            boolean alwaysShow = false;
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                }
+            }
+            boolean lineAbove = false;
+            if (alwaysShow || (ytdValue != null && ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0)) {
+                if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
+                    YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
+                    if (ytdReportFieldExtension.isLineAbove()) {
+                        //ytdTRStyle += "border-top: solid 2px #222222;";
+                        lineAbove = true;
+                    }
+                }
+
+                com.itextpdf.text.Font boldFont;
+                if (alwaysShow) {
+                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
+                } else {
+                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+                }
+                PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
+                rowHeaderCell.setBorderWidth(0f);
+                if (lineAbove) {
+                    rowHeaderCell.setBorderWidthTop(1f);
+                }
+                if (alwaysShow) {
+                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
+                } else {
+                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
+                }
+                table.addCell(rowHeaderCell);
+
+                if (ytdValue.getTimeIntervalValues().size() > 0 && ytdValue.getYtd().toDouble() != null && ytdValue.getYtd().toDouble() != 0) {
+                    Map<Value, TimeIntervalValue> map = new HashMap<Value, TimeIntervalValue>();
+                    for (int i = 0; i < ytdValue.getTimeIntervalValues().size(); i++) {
+                        TimeIntervalValue timeIntervalValue = ytdValue.getTimeIntervalValues().get(i);
+                        map.put(timeIntervalValue.getDateValue(), timeIntervalValue);
+                    }
+                    for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
+                        TimeIntervalValue timeIntervalValue = map.get(ytdStuff.getIntervals().get(i));
+                        if (timeIntervalValue != null) {
+                            Value value = timeIntervalValue.getValue();
+                            PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, baseMeasure, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                            dataCell.setBorderWidth(0f);
+                            if (lineAbove) {
+                                dataCell.setBorderWidthTop(1f);
+                            }
+                            table.addCell(dataCell);
+                        } else {
+                            PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
+                            emptyCell.setBorderWidth(0f);
+                            if (lineAbove) {
+                                emptyCell.setBorderWidthTop(1f);
+                            }
+                            table.addCell(emptyCell);
+                        }
+                    }
+                    PdfPCell ytdCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getYtd(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                    ytdCell.setBorderWidth(0f);
+                    if (lineAbove) {
+                        ytdCell.setBorderWidthTop(1f);
+                    }
+                    table.addCell(ytdCell);
+                    PdfPCell avgCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, baseMeasure, ytdValue.getAverage(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                    avgCell.setBorderWidth(0f);
+                    if (lineAbove) {
+                        avgCell.setBorderWidthTop(1f);
+                    }
+                    table.addCell(avgCell);
+
+                    /*if (hasBenchmark) {
+                        if (ytdValue.getBenchmarkMeasure() != null) {
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                        } else {
+                            sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                            sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                        }
+                    }*/
+                } else if (alwaysShow) {
+                    for (int i = 0; i < maxColumns; i++) {
+                        PdfPCell cell = new PdfPCell(new Phrase("", regFont));
+                        cell.setBorderWidth(0f);
+                        if (lineAbove) {
+                            cell.setBorderWidthTop(1f);
+                        }
+                        table.addCell(cell);
+                    }
+                    if (hasBenchmark) {
+                        PdfPCell cell = new PdfPCell(new Phrase("", regFont));
+                        cell.setBorderWidth(0f);
+                        if (lineAbove) {
+                            cell.setBorderWidthTop(1f);
+                        }
+                        table.addCell(cell);
+                        PdfPCell cell2 = new PdfPCell(new Phrase("", regFont));
+                        cell2.setBorderWidth(0f);
+                        if (lineAbove) {
+                            cell2.setBorderWidthTop(1f);
+                        }
+                        table.addCell(cell2);
+                    }
+                }
+            }
+        }
+
+        return table;
+    }
+
+    private static PdfPCell ytdHeaderCell(String content, Color headerTextColor, Color color, int minimumSize, int fontSize) {
+        com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD,
+                new BaseColor(headerTextColor.getRed(), headerTextColor.getGreen(), headerTextColor.getBlue()));
+        PdfPCell cell = new PdfPCell(new Phrase(content, boldFont));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setMinimumHeight(minimumSize);
+        cell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
+        return cell;
+    }
 
     public static String ytdToHTMLTableWithActualCSS(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
