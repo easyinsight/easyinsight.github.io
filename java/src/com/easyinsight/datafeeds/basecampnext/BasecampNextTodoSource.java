@@ -245,7 +245,6 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
                         for (int m = 0; m < comments.length(); m++) {
                             JSONObject comment = (JSONObject) comments.get(m);
-                            System.out.println(comment);
                             String createdAtString = comment.get("created_at").toString();
                             String commentID = comment.get("id").toString();
                             String commentCreator = comment.get("content").toString();
