@@ -24,9 +24,6 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private LimitsMetadata limitsMetadata;
     private boolean limitOther;
 
-    private double rotationAngle;
-    private double elevationAngle;
-
     private boolean showLegend;
 
     private String xAxisLabel;
@@ -119,22 +116,6 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         this.chartDefinitionID = chartDefinitionID;
     }
 
-    public double getRotationAngle() {
-        return rotationAngle;
-    }
-
-    public void setRotationAngle(double rotationAngle) {
-        this.rotationAngle = rotationAngle;
-    }
-
-    public double getElevationAngle() {
-        return elevationAngle;
-    }
-
-    public void setElevationAngle(double elevationAngle) {
-        this.elevationAngle = elevationAngle;
-    }
-
     public LimitsMetadata getLimitsMetadata() {
         return limitsMetadata;
     }
@@ -221,6 +202,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         showLegend = findBooleanProperty(properties, "showLegend", true);
+        hideNoData = findBooleanProperty(properties, "hideNoData", false);
         xAxisLabel = findStringProperty(properties, "xAxisLabel", "");
         yAxisLabel = findStringProperty(properties, "yAxisLabel", "");
         xAxisBaseAtZero = findBooleanProperty(properties, "xAxisBaseAtZero", true);
@@ -240,6 +222,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportBooleanProperty("showLegend", showLegend));
+        properties.add(new ReportBooleanProperty("hideNoData", hideNoData));
         properties.add(new ReportStringProperty("xAxisLabel", xAxisLabel));
         properties.add(new ReportStringProperty("yAxisLabel", yAxisLabel));
         properties.add(new ReportBooleanProperty("xAxisBaseAtZero", xAxisBaseAtZero));
