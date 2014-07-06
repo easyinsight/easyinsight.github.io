@@ -201,8 +201,7 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
             default:
                 throw new UnsupportedOperationException();
         }
-        wsChartDefinition.setRotationAngle(rotationAngle);
-        wsChartDefinition.setElevationAngle(elevationAngle);
+
         wsChartDefinition.setLimitsMetadata(limitsMetadata);
         wsChartDefinition.setChartDefinitionID(definitionID);
         return wsChartDefinition;
