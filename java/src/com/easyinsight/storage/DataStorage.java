@@ -919,7 +919,7 @@ public class DataStorage implements IDataStorage {
 
 
         if (keys == null) {
-            keys = new HashMap<Key, KeyMetadata>();
+            keys = new HashMap<>();
             Iterator<AnalysisItem> iter = reportItems.iterator();
             while (iter.hasNext()) {
                 AnalysisItem analysisItem = iter.next();
@@ -948,7 +948,14 @@ public class DataStorage implements IDataStorage {
                         countDistinct = true;
                         keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                     } else {
-                        keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                        AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
+                        KeyMetadata baseMetadata = this.keys.get(testKey);
+                        if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
+                            System.out.println("forcing to alt value");
+                            keys.put(key, baseMetadata);
+                        } else {
+                            keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                        }
                     }
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     keys.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
@@ -994,7 +1001,7 @@ public class DataStorage implements IDataStorage {
         } else {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
-        //System.out.println(queryBuilder.toString());
+        System.out.println(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
 
@@ -1261,24 +1268,32 @@ public class DataStorage implements IDataStorage {
             String columnName = analysisItem.toKeySQL();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                int aggregation = analysisMeasure.getQueryAggregation();
-                if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {
-                    columnName = "SUM(" + columnName + ")";
-                } else if (aggregation == AggregationTypes.AVERAGE) {
-                    columnName = "AVG(" + columnName + ")";
-                } else if (aggregation == AggregationTypes.COUNT) {
-                    columnName = "COUNT(DISTINCT " + columnName + ")";
-                } else if (aggregation == AggregationTypes.MAX) {
-                    columnName = "MAX(" + columnName + ")";
-                } else if (aggregation == AggregationTypes.MIN) {
-                    columnName = "MIN(" + columnName + ")";
-                } else {
-                    if (database.getDialect() == Database.MYSQL) {
-                        groupByBuilder.append("binary(" + columnName + ")");
-                    } else {
-                        groupByBuilder.append(columnName);
-                    }
+
+                AggregateKey testKey = new AggregateKey(analysisMeasure.createAggregateKey().toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
+                KeyMetadata baseMetadata = this.keys.get(testKey);
+                if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
+                    groupByBuilder.append(columnName);
                     groupByBuilder.append(",");
+                } else {
+                    int aggregation = analysisMeasure.getQueryAggregation();
+                    if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {
+                        columnName = "SUM(" + columnName + ")";
+                    } else if (aggregation == AggregationTypes.AVERAGE) {
+                        columnName = "AVG(" + columnName + ")";
+                    } else if (aggregation == AggregationTypes.COUNT) {
+                        columnName = "COUNT(DISTINCT " + columnName + ")";
+                    } else if (aggregation == AggregationTypes.MAX) {
+                        columnName = "MAX(" + columnName + ")";
+                    } else if (aggregation == AggregationTypes.MIN) {
+                        columnName = "MIN(" + columnName + ")";
+                    } else {
+                        if (database.getDialect() == Database.MYSQL) {
+                            groupByBuilder.append("binary(" + columnName + ")");
+                        } else {
+                            groupByBuilder.append(columnName);
+                        }
+                        groupByBuilder.append(",");
+                    }
                 }
                 selectBuilder.append(columnName);
                 selectBuilder.append(",");

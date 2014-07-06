@@ -123,7 +123,11 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                         rowValues[j++] = escape(string);
                     }
                 } else if (value.type() == Value.STRING) {
-                    String string = String.valueOf(value.toString());
+                    String string;
+                    if (value.toString() == null) {
+                        string = "";
+                    } else {
+                        string = String.valueOf(value.toString());
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
                     }
