@@ -176,11 +176,11 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
                     parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
-                            project.isArchived());
+                            project.isArchived(), httpClient);
 
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
                     parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
-                            project.isArchived());
+                            project.isArchived(), httpClient);
                 }
                 JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                 for (int j = 0; j < completedTodoListArray.length(); j++) {
@@ -206,11 +206,11 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
                     JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
                     parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
-                            project.isArchived());
+                            project.isArchived(), httpClient);
 
                     JSONArray completedArray = todoMasterObject.getJSONArray("completed");
                     parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
-                            project.isArchived());
+                            project.isArchived(), httpClient);
                 }
                 if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
                     IDataStorage.insertData(dataSet);
@@ -229,12 +229,33 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
     private void parseTodoList(Map<String, Key> keys, DataSet dataSet, String projectID, String todoListID, String todoListName,
                                String todoListDescription, String todoListURL, Date todoListUpdatedAt, JSONArray todoArray,
-                               BasecampNextCompositeSource parentSource, boolean projectArchived) throws JSONException {
+                               BasecampNextCompositeSource parentSource, boolean projectArchived, HttpClient httpClient) throws JSONException {
         for (int k = 0; k < todoArray.length(); k++) {
             JSONObject todoObject = todoArray.getJSONObject(k);
             IRow row = dataSet.createRow();
             String todoID = String.valueOf(todoObject.getInt("id"));
             String todoContent = todoObject.getString("content");
+            //if (todoContent.contains("Todo with Comment")) {
+                Object commentsCountObj = todoObject.get("comments_count");
+                if (commentsCountObj != null) {
+                    int commentCount = Integer.parseInt(commentsCountObj.toString());
+                    if (commentCount > 0) {
+                        JSONObject detail = runJSONRequestForObject("projects/" + projectID + "/todos/" + todoID + ".json", parentSource, httpClient);
+                        JSONArray comments = (JSONArray) detail.get("comments");
+
+                        for (int m = 0; m < comments.length(); m++) {
+                            JSONObject comment = (JSONObject) comments.get(m);
+                            System.out.println(comment);
+                            String createdAtString = comment.get("created_at").toString();
+                            String commentID = comment.get("id").toString();
+                            String commentCreator = comment.get("content").toString();
+                            String creator = ((JSONObject) comment.get("creator")).get("name").toString();
+                            Date date = parseDate(createdAtString);
+                            parentSource.addComment(new BasecampComment(commentID, date, todoID, creator, commentCreator, projectID));
+                        }
+                    }
+                }
+           // }
             String dueAtString = todoObject.getString("due_at");
             Date dueAt = parseDueDate(dueAtString);
             String completedAtString = todoObject.getString("completed_at");
