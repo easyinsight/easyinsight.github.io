@@ -69,11 +69,11 @@ public class OracleOpportunityReferenceSource extends OracleBaseSource {
 		fieldBuilder.addField(COMMENTS, new AnalysisDimension());
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(STATUSCODE, new AnalysisDimension());
 		fieldBuilder.addField(REFERENCERANKNUMBER, new AnalysisDimension());
 		fieldBuilder.addField(PARTYNAME1, new AnalysisDimension());
@@ -82,7 +82,7 @@ public class OracleOpportunityReferenceSource extends OracleBaseSource {
 		fieldBuilder.addField(NAME1, new AnalysisDimension());
 		fieldBuilder.addField(WINPROB, new AnalysisMeasure());
 		fieldBuilder.addField(REVNAMOUNTCURCYCODE, new AnalysisDimension());
-		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(TARGETPARTYNAME, new AnalysisDimension());
 		fieldBuilder.addField(TARGETPARTYID, new AnalysisDimension());
 		fieldBuilder.addField(PARTYNUMBER, new AnalysisDimension());

@@ -76,9 +76,9 @@ public class OracleOpportunityContactSource extends OracleBaseSource {
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
 		fieldBuilder.addField(CONTACTEDFLG, new AnalysisDimension());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(INFLUENCELVLCD, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
 		fieldBuilder.addField(OPTYCONID, new AnalysisDimension());
@@ -86,7 +86,7 @@ public class OracleOpportunityContactSource extends OracleBaseSource {
 		fieldBuilder.addField(PERPARTYID, new AnalysisDimension());
 		fieldBuilder.addField(RELATIONSHIPID, new AnalysisDimension());
 		fieldBuilder.addField(ROLECD, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(PRIMARYFLG, new AnalysisDimension());
 		fieldBuilder.addField(RELATIONSHIPCODE, new AnalysisDimension());
 		fieldBuilder.addField(JOBTITLE, new AnalysisDimension());

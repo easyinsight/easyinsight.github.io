@@ -63,8 +63,8 @@ public class OracleNoteSource extends OracleBaseSource {
 		fieldBuilder.addField(NOTEATTRIBUTEUID4, new AnalysisDimension());
 		fieldBuilder.addField(NOTEATTRIBUTEUID5, new AnalysisDimension());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(PARTYID, new AnalysisDimension());
 		fieldBuilder.addField(CORPCURRENCYCODE, new AnalysisDimension());
 		fieldBuilder.addField(CURCYCONVRATETYPE, new AnalysisDimension());

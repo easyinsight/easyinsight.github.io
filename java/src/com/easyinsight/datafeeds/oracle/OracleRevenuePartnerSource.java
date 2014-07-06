@@ -54,8 +54,8 @@ public class OracleRevenuePartnerSource extends OracleBaseSource {
 		fieldBuilder.addField(PARTTYPECD, new AnalysisDimension());
 		fieldBuilder.addField(REVNID, new AnalysisDimension());
 		fieldBuilder.addField(REVNPARTORGPARTYID, new AnalysisDimension());
-		fieldBuilder.addField(DEALESTCLOSEDATE, new AnalysisDateDimension());
-		fieldBuilder.addField(DEALEXPIRATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(DEALESTCLOSEDATE, new AnalysisDateDimension(true));
+		fieldBuilder.addField(DEALEXPIRATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(DEALTYPE, new AnalysisDimension());
 		fieldBuilder.addField(PRPARTRESOURCEPARTYID, new AnalysisDimension());
 		fieldBuilder.addField(REGISTRATIONNUMBER, new AnalysisDimension());
@@ -63,10 +63,10 @@ public class OracleRevenuePartnerSource extends OracleBaseSource {
 		fieldBuilder.addField(PARTYNAME, new AnalysisDimension());
 		fieldBuilder.addField(PARTYNAME1, new AnalysisDimension());
 		fieldBuilder.addField(REVNPARTNERNUMBER, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
 	}
 

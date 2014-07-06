@@ -61,17 +61,17 @@ public class OracleRevenueLineSetSource extends OracleBaseSource {
 		fieldBuilder.addField(OWNERRESOURCEORGID, new AnalysisDimension());
 		fieldBuilder.addField(OWNERORGTREESTRUCTCODE, new AnalysisDimension());
 		fieldBuilder.addField(OWNERORGTREECODE, new AnalysisDimension());
-		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(PRODGROUPID, new AnalysisDimension());
 		fieldBuilder.addField(REVNAMOUNTCURCYCODE, new AnalysisDimension());
 		fieldBuilder.addField(STATUSCODE, new AnalysisDimension());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(PRODGROUPNAME, new AnalysisDimension());
 		fieldBuilder.addField(SALESACCOUNTID, new AnalysisDimension());
 	}

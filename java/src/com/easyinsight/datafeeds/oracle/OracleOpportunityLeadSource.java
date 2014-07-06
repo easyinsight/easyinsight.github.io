@@ -50,20 +50,20 @@ public class OracleOpportunityLeadSource extends OracleBaseSource {
 		fieldBuilder.addField(OPTYID, new AnalysisDimension());
 		fieldBuilder.addField(LEADNUMBER, new AnalysisDimension());
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(REGISTRATIONNUMBER, new AnalysisDimension());
-		fieldBuilder.addField(DEALESTIMATEDCLOSEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(DEALESTIMATEDCLOSEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(DEALTYPE, new AnalysisDimension());
 		fieldBuilder.addField(PRDEALPARTORGPARTYID, new AnalysisDimension());
 		fieldBuilder.addField(PRDEALPARTRESOURCEPARTYID, new AnalysisDimension());
 		fieldBuilder.addField(DEALPARTPROGRAMID, new AnalysisDimension());
 		fieldBuilder.addField(PARTNERTYPECD, new AnalysisDimension());
-		fieldBuilder.addField(DEALEXPIRATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(DEALEXPIRATIONDATE, new AnalysisDateDimension(true));
 	}
 
 @Override

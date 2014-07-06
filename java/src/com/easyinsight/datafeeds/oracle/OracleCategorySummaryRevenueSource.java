@@ -1,10 +1,6 @@
 package com.easyinsight.datafeeds.oracle;
 
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.ReportException;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -51,7 +47,7 @@ public class OracleCategorySummaryRevenueSource extends OracleBaseSource {
 		fieldBuilder.addField(REVNNUMBER, new AnalysisDimension());
 		fieldBuilder.addField(OPTYID, new AnalysisDimension());
 		fieldBuilder.addField(BUORGID, new AnalysisDimension());
-		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(REVNCATEGORYCODE, new AnalysisDimension());
 		fieldBuilder.addField(REVNLINETYPECODE, new AnalysisDimension());
 		fieldBuilder.addField(REVNAMOUNTCURCYCODE, new AnalysisDimension());
@@ -59,13 +55,13 @@ public class OracleCategorySummaryRevenueSource extends OracleBaseSource {
 		fieldBuilder.addField(CRMCONVERSIONRATETYPE, new AnalysisDimension());
 		fieldBuilder.addField(CRMCONVERSIONRATE, new AnalysisMeasure());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
-		fieldBuilder.addField(CRMCATEGORYSUMMARYREVENUE, new AnalysisMeasure());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
+		fieldBuilder.addField(CRMCATEGORYSUMMARYREVENUE, new AnalysisMeasure(FormattingConfiguration.CURRENCY));
 	}
 
 @Override
