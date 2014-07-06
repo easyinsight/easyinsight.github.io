@@ -192,10 +192,59 @@ public class InstallMetadata {
         return validations;
     }
 
+    public static List<AnalysisItem> findFieldsForMapping(FeedDefinition originalSource, EIDescriptor needed, EIConnection conn, Session session) throws Exception {
+        InstallMetadata installMetadata = new InstallMetadata(originalSource, null, conn, session);
+        Map<Long, AnalysisDefinition.SaveMetadata> metadataMap = new HashMap<>();
+        installMetadata.determineDashboard((DashboardDescriptor) needed, metadataMap);
+        Set<AnalysisItem> allFields = new HashSet<>();
+        for (AnalysisDefinition.SaveMetadata metadata : metadataMap.values()) {
+            allFields.addAll(metadata.replacementMap.getFields());
+        }
+        for (AnalysisItem field : allFields) {
+            field.afterLoad();
+            System.out.println(field.toDisplay() + " - " + field.toUnqualifiedDisplay());
+        }
+        return new ArrayList<>(allFields);
+    }
+
+    public static EIDescriptor installAsTemplate(FeedDefinition originalSource, FeedDefinition targetDataSource, EIConnection conn, Session session, List<EIDescriptor> installing,
+                                                 Map<String, AnalysisItem> map) throws Exception {
+
+        InstallMetadata installMetadata = new InstallMetadata(originalSource, targetDataSource, conn, session);
+        installMetadata.templateCopyMap = map;
+        ReplacementMapFactory factory = new TemplateReplacementMapFactory(map);
+        installMetadata.populateFolderReplacements();
+
+        // copy all reports and dashboards
+
+        installMetadata.installAll(installing, factory);
+
+        installMetadata.copyReportTags();
+        installMetadata.copyDashboardTags();
+
+        // update all reports and dashboards to point to appropriate copied tags
+
+        installMetadata.template();
+
+        if (installing.size() == 1) {
+            for (EIDescriptor install : installing) {
+                if (install.getType() == EIDescriptor.REPORT) {
+                    AnalysisDefinition report = installMetadata.installedReportMap.get(install.getId());
+                    return new InsightDescriptor(report.getAnalysisID(), report.getTitle(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), Roles.OWNER, true);
+                } else if (install.getType() == EIDescriptor.DASHBOARD) {
+                    Dashboard dashboard = installMetadata.installedDashboardMap.get(install.getId());
+                    return new DashboardDescriptor(dashboard.getName(), dashboard.getId(), dashboard.getUrlKey(), dashboard.getDataSourceID(), Roles.OWNER, null, true);
+                }
+                install.getId();
+            }
+        }
+        return null;
+    }
+
     public static EIDescriptor install(FeedDefinition originalSource, FeedDefinition targetDataSource, EIConnection conn, Session session, List<EIDescriptor> installing) throws Exception {
 
         InstallMetadata installMetadata = new InstallMetadata(originalSource, targetDataSource, conn, session);
-
+        ReplacementMapFactory factory = new ReplacementMapFactory();
 
         installMetadata.populateFolderReplacements();
         installMetadata.copyTags();
@@ -207,7 +256,7 @@ public class InstallMetadata {
 
         List<InsightDescriptor> distinctAddons = installMetadata.findDistinctCachedAddons();
         for (InsightDescriptor reportID : distinctAddons) {
-            AnalysisDefinition report = installMetadata.installReport(reportID);
+            AnalysisDefinition report = installMetadata.installReport(reportID, factory);
             installMetadata.addReportToDataSource(report, reportID.getName());
         }
 
@@ -215,7 +264,7 @@ public class InstallMetadata {
 
         List<InsightDescriptor> dataSourceFieldReports = installMetadata.findDataSourceFieldReports();
         for (InsightDescriptor reportID : dataSourceFieldReports) {
-            installMetadata.installReport(reportID);
+            installMetadata.installReport(reportID, factory);
             // do we need to do anything here?
         }
 
@@ -224,12 +273,12 @@ public class InstallMetadata {
         installMetadata.copyAdditionalConnections();
         installMetadata.dataSourceChange();
         installMetadata.copyFieldTags();
-        installMetadata.copyFieldRules();
+        installMetadata.copyFieldRules(factory);
 
 
         // copy all reports and dashboards
 
-        installMetadata.installAll(installing);
+        installMetadata.installAll(installing, factory);
 
         installMetadata.copyReportTags();
         installMetadata.copyDashboardTags();
@@ -259,7 +308,35 @@ public class InstallMetadata {
         System.out.println(message);
     }
 
-    public AnalysisDefinition installReport(InsightDescriptor insightDescriptor) throws Exception {
+    public void determineReport(InsightDescriptor insightDescriptor, Map<Long, AnalysisDefinition.SaveMetadata> saveMetadataMap) throws Exception {
+        AnalysisDefinition.SaveMetadata metadata = saveMetadataMap.get(insightDescriptor.getId());
+        ReplacementMapFactory factory = new ReplacementMapFactory();
+        if (metadata == null) {
+            AnalysisDefinition fromReport = analysisStorage.getPersistableReport(insightDescriptor.getId(), session);
+            metadata = copyReportToDataSource(originalSource, fromReport, factory);
+            saveMetadataMap.put(insightDescriptor.getId(), metadata);
+            Set<EIDescriptor> ids = fromReport.containedReportIDs();
+            for (EIDescriptor descriptor : ids) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    determineReport((InsightDescriptor) descriptor, saveMetadataMap);
+                }
+            }
+        }
+    }
+
+    public void determineDashboard(DashboardDescriptor dashboardDescriptor, Map<Long, AnalysisDefinition.SaveMetadata> saveMetadataMap) throws Exception {
+        log("Installing " + dashboardDescriptor.getName());
+
+        Dashboard fromDashboard = dashboardStorage.getDashboard(dashboardDescriptor.getId(), conn);
+        Set<Long> ids = fromDashboard.containedReports();
+        for (long id : ids) {
+            InsightDescriptor report = new InsightDescriptor();
+            report.setId(id);
+            determineReport(report, saveMetadataMap);
+        }
+    }
+
+    public AnalysisDefinition installReport(InsightDescriptor insightDescriptor, ReplacementMapFactory factory) throws Exception {
         log("Installing " + insightDescriptor.getName());
         AnalysisDefinition report = installedReportMap.get(insightDescriptor.getId());
         if (report != null) {
@@ -281,7 +358,7 @@ public class InstallMetadata {
         if (report == null) {
             AnalysisDefinition fromReport = analysisStorage.getPersistableReport(insightDescriptor.getId(), session);
             log("\tInstalling a fresh version");
-            AnalysisDefinition.SaveMetadata metadata = copyReportToDataSource(targetSource, fromReport);
+            AnalysisDefinition.SaveMetadata metadata = copyReportToDataSource(targetSource, fromReport, factory);
             report = metadata.analysisDefinition;
             int folder = fromReport.getFolder();
             Integer folderID = folderReplacementMap.get(folder);
@@ -296,7 +373,7 @@ public class InstallMetadata {
             Set<EIDescriptor> ids = fromReport.containedReportIDs();
             for (EIDescriptor descriptor : ids) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
-                    installReport((InsightDescriptor) descriptor);
+                    installReport((InsightDescriptor) descriptor, factory);
                 }
             }
         }
@@ -304,7 +381,7 @@ public class InstallMetadata {
         return report;
     }
 
-    public Dashboard installDashboard(DashboardDescriptor dashboardDescriptor) throws Exception {
+    public Dashboard installDashboard(DashboardDescriptor dashboardDescriptor, ReplacementMapFactory factory) throws Exception {
         log("Installing " + dashboardDescriptor.getName());
         Dashboard dashboard = installedDashboardMap.get(dashboardDescriptor.getId());
         if (dashboard != null) {
@@ -326,7 +403,7 @@ public class InstallMetadata {
         if (dashboard == null) {
             Dashboard fromDashboard = dashboardStorage.getDashboard(dashboardDescriptor.getId(), conn);
             log("\tInstalling a fresh version");
-            dashboard = copyDashboardToDataSource(targetSource, fromDashboard);
+            dashboard = copyDashboardToDataSource(targetSource, fromDashboard, factory);
             dashboardStorage.saveDashboard(dashboard, conn);
             installedDashboardMap.put(dashboardDescriptor.getId(), dashboard);
             newOrUpdatedDashboards.add(dashboard);
@@ -335,15 +412,15 @@ public class InstallMetadata {
             for (long id : ids) {
                 InsightDescriptor report = new InsightDescriptor();
                 report.setId(id);
-                installReport(report);
+                installReport(report, factory);
             }
         }
 
         return dashboard;
     }
 
-    private AnalysisDefinition.SaveMetadata copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report) throws CloneNotSupportedException {
-        AnalysisDefinition.SaveMetadata metadata = report.clone(localDefinition.allFields(conn), true, tagReplacementMap);
+    private AnalysisDefinition.SaveMetadata copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, ReplacementMapFactory factory) throws CloneNotSupportedException {
+        AnalysisDefinition.SaveMetadata metadata = report.clone(localDefinition.allFields(conn), true, tagReplacementMap, factory);
         AnalysisDefinition clonedReport = metadata.analysisDefinition;
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
@@ -353,8 +430,8 @@ public class InstallMetadata {
         return metadata;
     }
 
-    private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard) throws CloneNotSupportedException {
-        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.allFields(conn), localDefinition);
+    private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard, ReplacementMapFactory factory) throws CloneNotSupportedException {
+        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.allFields(conn), localDefinition, factory);
         clonedDashboard.setExchangeVisible(false);
         clonedDashboard.setRecommendedExchange(false);
         clonedDashboard.setTemporary(false);
@@ -655,7 +732,7 @@ public class InstallMetadata {
         this.tagReplacementMap = tagReplacementMap;
     }
 
-    public void copyFieldRules() throws Exception {
+    public void copyFieldRules(ReplacementMapFactory factory) throws Exception {
         log("Copying field rules...");
         ReplacementMap replacementMap = new ReplacementMap();
         for (AnalysisItem item : targetSource.getFields()) {
@@ -719,11 +796,11 @@ public class InstallMetadata {
                     if (drillThrough.getReportID() != null && drillThrough.getReportID() > 0) {
                         InsightDescriptor report = new InsightDescriptor();
                         report.setId(drillThrough.getReportID());
-                        installReport(report);
+                        installReport(report, factory);
                     } else if (drillThrough.getDashboardID() != null && drillThrough.getDashboardID() > 0) {
                         DashboardDescriptor report = new DashboardDescriptor();
                         report.setId(drillThrough.getDashboardID());
-                        installDashboard(report);
+                        installDashboard(report, factory);
                     }
                 }
                 clone.updateReportIDs(installedReportMap, installedDashboardMap);
@@ -799,6 +876,65 @@ public class InstallMetadata {
         return targetFields;
     }
 
+    private Map<String, AnalysisItem> templateCopyMap = new HashMap<>();
+
+    public void template() throws SQLException, CloneNotSupportedException {
+        // update tags, etc
+        session.flush();
+
+        //
+
+        for (int i = 0; i < newOrUpdatedMetadatas.size(); i++) {
+            List<AnalysisItem> targetFields = createTargetFields();
+            AnalysisDefinition.SaveMetadata metadata = newOrUpdatedMetadatas.get(i);
+            AnalysisDefinition original = originReportList.get(i);
+            System.out.println("Updating metadata on " + original.getTitle());
+            AnalysisDefinition.copyToAlternateType(targetSource, templateCopyMap, metadata.analysisDefinition, metadata.replacementMap);
+            metadata.analysisDefinition.updateReportIDs(installedReportMap, installedDashboardMap, session);
+            analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
+        }
+
+        Set<Long> valids = validChildSources();
+        for (AnalysisDefinition report : newOrUpdatedReports) {
+            report.populateValidationIDs(valids);
+        }
+
+        session.flush();
+
+
+        for (Dashboard dashboard : newOrUpdatedDashboards) {
+            List<AnalysisItem> targetFields = createTargetFields();
+            dashboard.updateIDs(installedReportMap, targetFields, true, targetSource);
+        }
+
+        PreparedStatement originStmt = conn.prepareStatement("INSERT INTO report_install_info (origin_report_id, result_report_id, install_date, data_source_id) VALUES (?, ?, ?, ?)");
+        for (int i = 0; i < newOrUpdatedReports.size(); i++) {
+            AnalysisDefinition copiedReport = newOrUpdatedReports.get(i);
+            AnalysisDefinition originReport = originReportList.get(i);
+            new AnalysisStorage().saveAnalysis(copiedReport, session);
+            originStmt.setLong(1, originReport.getAnalysisID());
+            originStmt.setLong(2, copiedReport.getAnalysisID());
+            originStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            originStmt.setLong(4, targetSource.getDataFeedID());
+            originStmt.execute();
+        }
+        originStmt.close();
+
+        PreparedStatement originDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_install_info (origin_dashboard_id, result_dashboard_id, " +
+                "install_date, data_source_id) VALUES (?, ?, ?, ?)");
+        for (int i = 0; i < newOrUpdatedDashboards.size(); i++) {
+            Dashboard copiedDashboard = newOrUpdatedDashboards.get(i);
+            Dashboard originDashboard = originDashboardList.get(i);
+            new DashboardStorage().saveDashboard(copiedDashboard, conn);
+            originDashboardStmt.setLong(1, originDashboard.getId());
+            originDashboardStmt.setLong(2, copiedDashboard.getId());
+            originDashboardStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            originDashboardStmt.setLong(4, targetSource.getDataFeedID());
+            originDashboardStmt.execute();
+        }
+        originDashboardStmt.close();
+    }
+
     public void updateAllMetadata() throws SQLException, CloneNotSupportedException {
         // update tags, etc
         session.flush();
@@ -858,13 +994,13 @@ public class InstallMetadata {
 
 
 
-    public List<EIDescriptor> installAll(List<EIDescriptor> installing) throws Exception {
+    public List<EIDescriptor> installAll(List<EIDescriptor> installing, ReplacementMapFactory factory) throws Exception {
 
         for (EIDescriptor desc : installing) {
             if (desc.getType() == EIDescriptor.REPORT) {
-                installReport((InsightDescriptor) desc);
+                installReport((InsightDescriptor) desc, factory);
             } else if (desc.getType() == EIDescriptor.DASHBOARD) {
-                installDashboard((DashboardDescriptor) desc);
+                installDashboard((DashboardDescriptor) desc, factory);
             }
         }
 

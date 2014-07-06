@@ -39,6 +39,44 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
+    public List<AnalysisItem> determineFields(DashboardDescriptor dashboardDescriptor) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dashboardDescriptor.getDataSourceID(), conn);
+            List<AnalysisItem> fields = InstallMetadata.findFieldsForMapping(dataSource, dashboardDescriptor, conn, session);
+            Collections.sort(fields, (o1, o2) -> o1.toDisplay().compareTo(o2.toDisplay()));
+            System.out.println(fields);
+            return fields;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void installTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments) {
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            FeedDefinition originalSource = new FeedStorage().getFeedDefinitionData(dashboardDescriptor.getDataSourceID(), conn);
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(targetSource, conn);
+            Map<String, AnalysisItem> fieldAssignmentMap = new HashMap<>();
+            for (FieldAssignment fieldAssignment : fieldAssignments) {
+                fieldAssignmentMap.put(fieldAssignment.getSourceField().toDisplay(), fieldAssignment.getTargetField());
+            }
+            InstallMetadata.installAsTemplate(originalSource, dataSource, conn, session, Arrays.asList(dashboardDescriptor), fieldAssignmentMap);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.closeConnection(conn);
+        }
+    }
+
     public PostInstallSteps addKPIData(SolutionKPIData solutionKPIData) {
         EIConnection conn = Database.instance().getConnection();
         try {
