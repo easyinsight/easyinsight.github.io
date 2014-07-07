@@ -151,7 +151,12 @@ public class TopoMapServlet extends HtmlServlet {
         Map<String, Region> translatedMap = new HashMap<>();
         JSONArray geoData = new JSONArray();
         for (IRow row : regionSet.getRows()) {
-            String regionValue = row.getValue(region).toString();
+            Value rv = row.getValue(region);
+            if (rv.type() == Value.EMPTY) {
+                continue;
+            }
+            String regionValue = rv.toString();
+
             String original = regionValue;
             regionValue = lookup.getValue(regionValue);
 
