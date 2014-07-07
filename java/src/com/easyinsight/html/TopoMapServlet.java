@@ -768,6 +768,9 @@ public class TopoMapServlet extends HtmlServlet {
 
         @Override
         public String getValue(String string) {
+            if (string != null && string.length() > 5) {
+                return string.substring(0, 5);
+            }
             return string;
         }
     }

@@ -71,6 +71,10 @@ public class AnalysisMeasure extends AnalysisItem {
     public AnalysisMeasure() {
     }
 
+    public AnalysisMeasure(int formattingConfiguration) {
+        setFormattingType(formattingConfiguration);
+    }
+
     public AnalysisMeasure(String displayName) {
         setDisplayName(displayName);
     }
