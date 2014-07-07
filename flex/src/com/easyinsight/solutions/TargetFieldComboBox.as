@@ -3,6 +3,7 @@
  */
 package com.easyinsight.solutions {
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.util.SmartComboBox;
 import com.easyinsight.util.TextInputWithArrow;
 
 import flash.events.Event;
@@ -16,7 +17,7 @@ import mx.events.DropdownEvent;
 
 public class TargetFieldComboBox extends HBox {
 
-    private var comboBox:ComboBox;
+    private var comboBox:SmartComboBox;
     private var _fields:ArrayCollection;
 
     private var fieldAssignment:FieldAssignment;
@@ -26,7 +27,8 @@ public class TargetFieldComboBox extends HBox {
         setStyle("horizontalAlign", "center");
         setStyle("horizontalScrollPolicy", "off");
         setStyle("verticalScrollPolicy", "off");
-        comboBox = new ComboBox();
+        comboBox = new SmartComboBox();
+        comboBox.selectedProperty = "display";
         comboBox.width = 320;
         comboBox.labelField = "display";
         comboBox.addEventListener(Event.CHANGE, onChange);
@@ -42,7 +44,7 @@ public class TargetFieldComboBox extends HBox {
     override public function set data(val:Object):void {
         fieldAssignment = val as FieldAssignment;
         if (fieldAssignment.targetField != null) {
-            comboBox.selectedItem = fieldAssignment.targetField;
+            comboBox.selectedValue = fieldAssignment.targetField.display;
         }
     }
 

@@ -29,7 +29,7 @@
 
         private function determineFields():void {
             ProgressAlert.alert(this, "Determining fields...", null, solutionService.determineFields);
-            solutionService.determineFields.send(dashboardBox.selectedItem);
+            solutionService.determineFields.send(dashboardBox.selectedItem, dataSourceTarget.selectedItem.id);
             chooseDataSource();
         }
 
@@ -44,36 +44,34 @@
             feedService.allFields.send(dataSourceTarget.selectedItem.id);
         }
 
-        private var fields:ArrayCollection;
+        //private var fields:ArrayCollection;
 
         private function gotFields():void {
-            fields = solutionService.determineFields.lastResult as ArrayCollection;
+            fieldAssignments = solutionService.determineFields.lastResult as ArrayCollection;
             blah();
         }
 
         private function blah():void {
-            if (fields != null && dataSourceFields != null) {
-                var fieldAssignments:ArrayCollection = new ArrayCollection();
+            if (fieldAssignments != null && dataSourceFields != null) {
+                //var fieldAssignments:ArrayCollection = new ArrayCollection();
 
 
-                for each (var f:AnalysisItem in fields) {
+                for each (var fieldAssignment:FieldAssignment in fieldAssignments) {
                     var target:TargetFieldComboBox = new TargetFieldComboBox();
                     target.width = 350;
                     target.fields = dataSourceFields;
-                    var fieldAssignment:FieldAssignment = new FieldAssignment();
-                    fieldAssignment.sourceField = f;
                     target.data = fieldAssignment;
                     var hbox:HBox = new HBox();
                     var l:Label = new Label();
                     l.width = 300;
-                    l.text = f.display;
+                    l.text = fieldAssignment.sourceField.display;
                     hbox.addChild(l);
                     hbox.addChild(target);
                     this.target.addChild(hbox);
 
-                    fieldAssignments.addItem(fieldAssignment);
+                    //fieldAssignments.addItem(fieldAssignment);
                 }
-                this.fieldAssignments = fieldAssignments;
+                //this.fieldAssignments = fieldAssignments;
             }
         }
 
@@ -104,6 +102,15 @@
         private function installed():void {
 
         }
+
+        private function save():void {
+            ProgressAlert.alert(this, "Saving...", null, solutionService.saveTemplate);
+            solutionService.saveTemplate.send(dashboardBox.selectedItem, dataSourceTarget.selectedItem.id, fieldAssignments);
+        }
+
+        private function saved():void {
+
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="allFields" result="gotDataSource()"/>
@@ -115,6 +122,7 @@
     <mx:RemoteObject id="solutionService" destination="solutionService">
         <mx:method name="determineFields" result="gotFields()"/>
         <mx:method name="installTemplate" result="installed()"/>
+        <mx:method name="saveTemplate" result="saved()"/>
     </mx:RemoteObject>
     <mx:HBox>
         <mx:VBox>
@@ -133,6 +141,7 @@
     <mx:HBox>
         <mx:TextInput id="targetNameInput"/>
         <util:SaveButton label="Copy" click="doCopy()"/>
+        <util:SaveButton label="Save" click="save()"/>
     </mx:HBox>
 
 
