@@ -45,6 +45,11 @@ public class SolutionService {
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dashboardDescriptor.getDataSourceID(), conn);
             List<AnalysisItem> fields = InstallMetadata.findFieldsForMapping(dataSource, dashboardDescriptor, conn, session);
+            Map<String, AnalysisItem> distincts = new HashMap<>();
+            for (AnalysisItem field : fields) {
+                distincts.put(field.toDisplay(), field);
+            }
+            fields = new ArrayList<>(distincts.values());
             Collections.sort(fields, (o1, o2) -> o1.toDisplay().compareTo(o2.toDisplay()));
             System.out.println(fields);
             return fields;
@@ -57,22 +62,32 @@ public class SolutionService {
         }
     }
 
-    public void installTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments) {
+    public void installTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments, String targetName) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
+            conn.setAutoCommit(false);
             FeedDefinition originalSource = new FeedStorage().getFeedDefinitionData(dashboardDescriptor.getDataSourceID(), conn);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(targetSource, conn);
             Map<String, AnalysisItem> fieldAssignmentMap = new HashMap<>();
             for (FieldAssignment fieldAssignment : fieldAssignments) {
                 fieldAssignmentMap.put(fieldAssignment.getSourceField().toDisplay(), fieldAssignment.getTargetField());
             }
-            InstallMetadata.installAsTemplate(originalSource, dataSource, conn, session, Arrays.asList(dashboardDescriptor), fieldAssignmentMap);
+            DashboardDescriptor copied = (DashboardDescriptor) InstallMetadata.installAsTemplate(originalSource,
+                    dataSource, conn, session, Arrays.asList(dashboardDescriptor), fieldAssignmentMap);
+            PreparedStatement nameStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ? WHERE DASHBOARD_ID = ?");
+            nameStmt.setString(1, targetName);
+            nameStmt.setLong(2, copied.getId());
+            nameStmt.executeUpdate();
+            nameStmt.close();
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
