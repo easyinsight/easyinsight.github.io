@@ -82,6 +82,7 @@
 
         private function gotDataSource():void {
             dataSourceFields = feedService.allFields.lastResult as ArrayCollection;
+            dataSourceFields.addItemAt({display: "[ No Selection ]"}, 0);
             blah();
         }
 
@@ -97,7 +98,7 @@
                 }
             }
             ProgressAlert.alert(this, "Installing...", null, solutionService.installTemplate);
-            solutionService.installTemplate.send(dashboardBox.selectedItem, dataSourceTarget.selectedItem.id, fieldAssignments);
+            solutionService.installTemplate.send(dashboardBox.selectedItem, dataSourceTarget.selectedItem.id, fieldAssignments, targetNameInput.text);
         }
 
         private function installed():void {
@@ -129,8 +130,11 @@
 
 
     <mx:Box id="target" width="700" maxHeight="400"/>
+    <mx:HBox>
+        <mx:TextInput id="targetNameInput"/>
+        <util:SaveButton label="Copy" click="doCopy()"/>
+    </mx:HBox>
 
-    <util:SaveButton label="Copy" click="doCopy()"/>
 
     <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
 </util:EITitleWindow>
