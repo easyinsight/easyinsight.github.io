@@ -59,6 +59,9 @@ public class BasecampNextCommentSource extends BasecampNextBaseSource {
         try {
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             Map<String, List<BasecampComment>> map = new HashMap<>();
+            if (basecampNextCompositeSource.getComments() == null) {
+                return null;
+            }
             for (BasecampComment basecampComment : basecampNextCompositeSource.getComments()) {
                 String projectID = basecampComment.getProjectID();
                 List<BasecampComment> comments = map.get(projectID);

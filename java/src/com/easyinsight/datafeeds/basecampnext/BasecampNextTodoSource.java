@@ -236,6 +236,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             String todoID = String.valueOf(todoObject.getInt("id"));
             String todoContent = todoObject.getString("content");
             //if (todoContent.contains("Todo with Comment")) {
+            try {
                 Object commentsCountObj = todoObject.get("comments_count");
                 if (commentsCountObj != null) {
                     int commentCount = Integer.parseInt(commentsCountObj.toString());
@@ -254,7 +255,10 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                         }
                     }
                 }
-           // }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+            // }
             String dueAtString = todoObject.getString("due_at");
             Date dueAt = parseDueDate(dueAtString);
             String completedAtString = todoObject.getString("completed_at");
