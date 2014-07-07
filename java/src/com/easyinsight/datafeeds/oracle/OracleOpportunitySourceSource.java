@@ -42,12 +42,12 @@ public class OracleOpportunitySourceSource extends OracleBaseSource {
 		fieldBuilder.addField(OPTYID, new AnalysisDimension());
 		fieldBuilder.addField(SRCNUMBER, new AnalysisDimension());
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
 	}
 
 @Override

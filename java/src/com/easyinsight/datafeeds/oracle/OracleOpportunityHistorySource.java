@@ -49,7 +49,7 @@ public class OracleOpportunityHistorySource extends ServerDataSourceDefinition {
         fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
         fieldBuilder.addField(STAGE_NAME, new AnalysisDimension());
         fieldBuilder.addField(STAGE_ID, new AnalysisDimension());
-        fieldBuilder.addField(STAGE_ENTER_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(STAGE_ENTER_DATE, new AnalysisDateDimension(true));
     }
 
     @Override

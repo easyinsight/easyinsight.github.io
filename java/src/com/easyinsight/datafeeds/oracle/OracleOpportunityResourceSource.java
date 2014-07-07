@@ -66,8 +66,8 @@ public class OracleOpportunityResourceSource extends OracleBaseSource {
 		fieldBuilder.addField(RESOURCEID, new AnalysisDimension());
 		fieldBuilder.addField(PARTYNAME, new AnalysisDimension());
 		fieldBuilder.addField(ACCESSLEVELCODE, new AnalysisDimension());
-		fieldBuilder.addField(DEALPROTECTEDDATE, new AnalysisDateDimension());
-		fieldBuilder.addField(DEALEXPIRATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(DEALPROTECTEDDATE, new AnalysisDateDimension(true));
+		fieldBuilder.addField(DEALEXPIRATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(DEALPROTECTED, new AnalysisDimension());
 		fieldBuilder.addField(ORGTREECODE, new AnalysisDimension());
 		fieldBuilder.addField(ORGTREESTRUCTURECODE, new AnalysisDimension());
@@ -76,11 +76,11 @@ public class OracleOpportunityResourceSource extends OracleBaseSource {
 		fieldBuilder.addField(ASSIGNMENTTYPE, new AnalysisDimension());
 		fieldBuilder.addField(CONFLICTID, new AnalysisDimension());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
-		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(USERLASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(PERSONFIRSTNAME, new AnalysisDimension());
 		fieldBuilder.addField(PERSONLASTNAME, new AnalysisDimension());
 		fieldBuilder.addField(ORGANIZATIONNAME, new AnalysisDimension());

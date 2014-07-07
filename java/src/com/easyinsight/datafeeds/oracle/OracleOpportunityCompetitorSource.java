@@ -66,14 +66,14 @@ public class OracleOpportunityCompetitorSource extends OracleBaseSource {
 		fieldBuilder.addField(NAME1, new AnalysisDimension());
 		fieldBuilder.addField(STGID, new AnalysisDimension());
 		fieldBuilder.addField(WINPROB, new AnalysisMeasure());
-		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(EFFECTIVEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(PARTYUNIQUENAME, new AnalysisDimension());
 		fieldBuilder.addField(PARTYUNIQUENAME1, new AnalysisDimension());
 		fieldBuilder.addField(SALESACCOUNTID, new AnalysisDimension());
 		fieldBuilder.addField(SALESACCOUNTUNIQUENAME, new AnalysisDimension());
 		fieldBuilder.addField(CREATEDBY, new AnalysisDimension());
-		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension());
-		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension());
+		fieldBuilder.addField(CREATIONDATE, new AnalysisDateDimension(true));
+		fieldBuilder.addField(LASTUPDATEDATE, new AnalysisDateDimension(true));
 		fieldBuilder.addField(LASTUPDATELOGIN, new AnalysisDimension());
 		fieldBuilder.addField(LASTUPDATEDBY, new AnalysisDimension());
 	}
