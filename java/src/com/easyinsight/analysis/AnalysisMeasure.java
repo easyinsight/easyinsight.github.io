@@ -71,6 +71,11 @@ public class AnalysisMeasure extends AnalysisItem {
     public AnalysisMeasure() {
     }
 
+    public AnalysisMeasure(int aggregation, int formattingConfiguration) {
+        setAggregation(aggregation);
+        setFormattingType(formattingConfiguration);
+    }
+
     public AnalysisMeasure(int formattingConfiguration) {
         setFormattingType(formattingConfiguration);
     }

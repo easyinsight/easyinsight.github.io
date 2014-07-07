@@ -480,12 +480,12 @@ public class Dashboard implements Cloneable, Serializable {
         }
     }
 
-    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource)
+    public DashboardSaveMetadata cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource)
             throws CloneNotSupportedException {
         return cloneDashboard(scorecardReplacmenetMap, changingDataSource, allFields, dataSource, new ReplacementMapFactory());
     }
 
-    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource,
+    public DashboardSaveMetadata cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource,
                                     ReplacementMapFactory factory) throws CloneNotSupportedException {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
@@ -505,8 +505,10 @@ public class Dashboard implements Cloneable, Serializable {
             dashboard.setDefaultDrillthrough(clone);
         }
 
+        ReplacementMap targetMap;
         if (factory instanceof TemplateReplacementMapFactory) {
             ReplacementMap replacementMap = factory.createMap();
+            targetMap = replacementMap;
             for (FilterDefinition persistableFilterDefinition : this.filters) {
                 filterDefinitions.add(persistableFilterDefinition.clone());
                 List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
@@ -560,6 +562,7 @@ public class Dashboard implements Cloneable, Serializable {
             }
 
             ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+            targetMap = replacements;
 
             for (AnalysisItem analysisItem : replacementMap.values()) {
                 analysisItem.updateIDs(replacements);
@@ -574,7 +577,10 @@ public class Dashboard implements Cloneable, Serializable {
 
         //dashboard.getRootElement().updateReportIDs(reportReplacementMap);
         dashboard.getRootElement().updateScorecardIDs(scorecardReplacmenetMap);
-        return dashboard;
+
+        DashboardSaveMetadata saveMetadata = new DashboardSaveMetadata(dashboard, targetMap);
+
+        return saveMetadata;
     }
 
     public Set<Long> containedScorecards() {

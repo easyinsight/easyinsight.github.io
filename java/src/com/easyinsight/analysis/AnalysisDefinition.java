@@ -592,18 +592,22 @@ public class AnalysisDefinition implements Cloneable {
         }
         analysisDefinition.setFilterDefinitions(filterDefinitions);
 
-        if (getJoinOverrides() != null) {
-            List<JoinOverride> clones = new ArrayList<JoinOverride>();
-            if (joinOverrides.size() > 0) {
-                System.out.println("Copying multiple join overrides for " + getTitle());
+        if (factory instanceof TemplateReplacementMapFactory) {
+            analysisDefinition.setJoinOverrides(null);
+        } else {
+            if (getJoinOverrides() != null) {
+                List<JoinOverride> clones = new ArrayList<JoinOverride>();
+                if (joinOverrides.size() > 0) {
+                    System.out.println("Copying multiple join overrides for " + getTitle());
+                }
+                for (JoinOverride joinOverride : joinOverrides) {
+                    System.out.println("\t" + joinOverride.getSourceItem() + " to " + joinOverride.getTargetItem());
+                    replacementMap.addField(joinOverride.getSourceItem(), changingDataSource);
+                    replacementMap.addField(joinOverride.getTargetItem(), changingDataSource);
+                    clones.add(joinOverride.clone());
+                }
+                analysisDefinition.setJoinOverrides(clones);
             }
-            for (JoinOverride joinOverride : joinOverrides) {
-                System.out.println("\t" + joinOverride.getSourceItem() + " to " + joinOverride.getTargetItem());
-                replacementMap.addField(joinOverride.getSourceItem(), changingDataSource);
-                replacementMap.addField(joinOverride.getTargetItem(), changingDataSource);
-                clones.add(joinOverride.clone());
-            }
-            analysisDefinition.setJoinOverrides(clones);
         }
 
         /*
@@ -982,11 +986,13 @@ public class AnalysisDefinition implements Cloneable {
         for (AnalysisItem addedItem : getAddedItems()) {
             cleanupField(addedItem, reportReplacementMap, session);
         }
-        for (JoinOverride joinOverride : getJoinOverrides()) {
-            AnalysisItem sourceItem = joinOverride.getSourceItem();
-            AnalysisItem targetItem = joinOverride.getTargetItem();
-            cleanupField(sourceItem, reportReplacementMap, session);
-            cleanupField(targetItem, reportReplacementMap, session);
+        if (getJoinOverrides() != null) {
+            for (JoinOverride joinOverride : getJoinOverrides()) {
+                AnalysisItem sourceItem = joinOverride.getSourceItem();
+                AnalysisItem targetItem = joinOverride.getTargetItem();
+                cleanupField(sourceItem, reportReplacementMap, session);
+                cleanupField(targetItem, reportReplacementMap, session);
+            }
         }
         for (ReportStub reportStub : reportStubs) {
             if (reportReplacementMap.containsKey(reportStub.getReportID())) {

@@ -539,7 +539,7 @@ public class DashboardService {
             userStub.setUserID(SecurityUtil.getUserID());
             dashboard.setAdministrators(Arrays.asList((FeedConsumer) userStub));
 
-            Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), false, dataSource.getFields(), dataSource);
+            Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), false, dataSource.getFields(), dataSource).getDashboard();
             clonedDashboard.setUrlKey(RandomTextGenerator.generateText(15));
             clonedDashboard.setCreationDate(new Date());
             clonedDashboard.setAuthorName(SecurityUtil.getUserName());
