@@ -712,6 +712,7 @@ public class DataService {
                 }
                 measure.setPrecision(baseMeasure.getPrecision());
                 measure.setMinPrecision(baseMeasure.getMinPrecision());
+                measure.setDefaultDate(baseMeasure.getDefaultDate());
                 clone = measure;
             } else {
                 clone = new AnalysisDimension();
