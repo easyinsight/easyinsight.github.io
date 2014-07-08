@@ -6,6 +6,7 @@
     <mx:Script><![CDATA[
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
 
         [Bindable]
@@ -95,6 +96,10 @@
             analysisMeasure.precision = precisionInput.value;
             analysisMeasure.underline = underlineCheckbox.selected;
             analysisMeasure.minPrecision = minPrecisionInput.value;
+            if (dateComparisonBox.selectedItem is AnalysisItem) {
+                analysisMeasure.defaultDate = dateComparisonBox.selectedItem.display;
+            }
+
             var currencyField:AnalysisItem = currencyBox.selectedItem as AnalysisItem;
             if (currencyField != null) {
                 analysisMeasure.currencyField = currencyField;
@@ -109,9 +114,18 @@
             for each (var g:AnalysisItem in dimensionFields) {
                 fieldArray.push(g);
             }
+            var noDate:Object = { display: "[ No Date ]"};
+            var dateArray:Array = [ noDate ];
+            for each (var d:AnalysisItem in dateDimensionFields) {
+                dateArray.push(d);
+            }
             currencyBox.dataProvider = new ArrayCollection(fieldArray);
+            dateComparisonBox.dataProvider = new ArrayCollection(dateArray);
             if (analysisMeasure != null) {
                 currencyBox.selectedValue = analysisMeasure.currencyField != null ? analysisMeasure.currencyField.display : null;
+            }
+            if (analysisMeasure != null) {
+                dateComparisonBox.selectedValue = analysisMeasure.defaultDate;
             }
         }
 
@@ -148,7 +162,11 @@
         <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
     </mx:FormItem>
     <mx:FormItem label="Currency:">
-        <util:SmartComboBox dataProvider="{fields}" id="currencyBox" labelField="display"
-                            selectedValue="{sortDimension}" selectedProperty="display"/>
+        <util:SmartComboBox id="currencyBox" labelField="display"
+                            selectedProperty="display"/>
+    </mx:FormItem>
+    <mx:FormItem label="Date Comparison:">
+        <util:SmartComboBox id="dateComparisonBox" labelField="display"
+                            selectedProperty="display"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>
