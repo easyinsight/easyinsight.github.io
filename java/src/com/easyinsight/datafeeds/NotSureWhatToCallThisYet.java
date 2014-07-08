@@ -182,7 +182,7 @@ public class NotSureWhatToCallThisYet {
                 }
 
                 boolean altPath = false;
-                if (split) {
+                /*if (split) {
                     Feed childFeed = FeedRegistry.instance().getFeed(sourceID, conn);
                     if (childFeed instanceof DistinctCachedSourceFeed) {
                         System.out.println("We're able to split out " + entry.getValue().analysisItems);
@@ -206,21 +206,43 @@ public class NotSureWhatToCallThisYet {
                             dataSet.addRow(row);
                         }
                     }
-                }
+                }*/
                 if (!altPath) {
                     AnalysisDateDimension dateDimension = entry.getKey().dateDimension;
-                    Yargh yargh = entry.getValue();
-                    yargh.analysisItems.addAll(otherItems);
-                    for (FilterDefinition filterDefinition : dateFilters) {
-                        FilterDefinition clone = filterDefinition.clone();
-                        clone.setField(dateDimension);
-                        yargh.filters.add(clone);
-                    }
-                    DataSet childSet = feed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
-                    for (IRow row : childSet.getRows()) {
-                        Value value = row.getValue(dateDimension);
-                        row.addValue(baseDate.createAggregateKey(), value);
-                        dataSet.addRow(row);
+                    if (dateDimension instanceof DerivedAnalysisDateDimension) {
+                        Yargh yargh = entry.getValue();
+                        yargh.analysisItems.addAll(otherItems);
+                        //AnalysisBasedFeed distinctCachedSourceFeed = new AnalysisBasedFeed();
+                        WSListDefinition list = new WSListDefinition();
+                        list.setDataFeedID(feed.getFeedID());
+                        list.setColumns(new ArrayList<>(yargh.analysisItems));
+                        list.setFilterDefinitions(new ArrayList<>(yargh.filters));
+                        //list.getColumns().addAll(otherItems);
+                        /*list.setAddonReports(report.getAddonReports());
+                        list.setAddedItems(report.getAddedItems());*/
+                        AnalysisBasedFeed reportFeed = new AnalysisBasedFeed();
+                        reportFeed.setAnalysisDefinition(list);
+
+                        DataSet childSet = reportFeed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
+                        for (IRow row : childSet.getRows()) {
+                            Value value = row.getValue(dateDimension);
+                            row.addValue(baseDate.createAggregateKey(), value);
+                            dataSet.addRow(row);
+                        }
+                    } else {
+                        Yargh yargh = entry.getValue();
+                        yargh.analysisItems.addAll(otherItems);
+                        for (FilterDefinition filterDefinition : dateFilters) {
+                            FilterDefinition clone = filterDefinition.clone();
+                            clone.setField(dateDimension);
+                            yargh.filters.add(clone);
+                        }
+                        DataSet childSet = feed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
+                        for (IRow row : childSet.getRows()) {
+                            Value value = row.getValue(dateDimension);
+                            row.addValue(baseDate.createAggregateKey(), value);
+                            dataSet.addRow(row);
+                        }
                     }
                 }
             }
@@ -267,7 +289,9 @@ public class NotSureWhatToCallThisYet {
         if (item.getDefaultDate() != null && !"".equals(item.getDefaultDate())) {
             for (AnalysisItem field : getFields()) {
                 if (field.hasType(AnalysisItemTypes.DATE_DIMENSION) && item.getDefaultDate().equals(field.toOriginalDisplayName())) {
-                    return (AnalysisDateDimension) field;
+                    AnalysisDateDimension d = (AnalysisDateDimension) field;
+                    d.setDateLevel(dateLevel);
+                    return d;
                 }
             }
             throw new RuntimeException("Could not find " + item.getDefaultDate() + " for " + item.toDisplay() + ".");
