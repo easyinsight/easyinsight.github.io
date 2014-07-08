@@ -42,6 +42,7 @@ public class AnalysisItem {
     public var parentItemID:int;
     public var basedOnReportField:int;
     public var tags:ArrayCollection;
+    public var defaultDate:String;
 
     //public var fieldListField:Boolean;
 
