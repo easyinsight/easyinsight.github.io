@@ -7,6 +7,8 @@
  */
 package com.easyinsight.filtering {
 
+import com.easyinsight.analysis.AnalysisItemTypes;
+
 import mx.collections.ArrayCollection;
 import mx.utils.ObjectUtil;
 
@@ -16,6 +18,12 @@ public class MultiFlatDateFilterDefinition extends FilterDefinition {
 
     public var levels:ArrayCollection = new ArrayCollection();
     public var endDateProperty:String;
+    public var level:int = AnalysisItemTypes.MONTH_FLAT;
+    public var cachedValues:ArrayCollection;
+    public var unitsBack:int;
+    public var unitsForward:int;
+    public var includeRelative:Boolean;
+    public var allOption:Boolean;
 
     public function MultiFlatDateFilterDefinition() {
     }
@@ -43,63 +51,26 @@ public class MultiFlatDateFilterDefinition extends FilterDefinition {
 
     public function createLabel():String {
         var label:String;
-        var firstValue:int = 11;
-        var lastValue:int = 0;
+        var firstValue:int = 50000000;
+        var lastValue:int = -1;
+        var firstWrapper:DateLevelWrapper;
+        var lastWrapper:DateLevelWrapper;
         for each (var wrapper:DateLevelWrapper in levels) {
-            firstValue = Math.min(wrapper.dateLevel, firstValue);
-            lastValue = Math.max(wrapper.dateLevel, lastValue);
-            var firstLabel:String = toMonthLabel(firstValue);
-            var secondLabel:String = toMonthLabel(lastValue);
-            if (firstLabel == secondLabel) {
-                label = firstLabel;
-            } else {
-                label = firstLabel + " to " + secondLabel;
+            if (wrapper.dateLevel < firstValue) {
+                firstValue = wrapper.dateLevel;
+                firstWrapper = wrapper;
             }
+            if (wrapper.dateLevel > lastValue) {
+                lastValue = wrapper.dateLevel;
+                lastWrapper = wrapper;
+            }
+        }
+        if (firstWrapper == lastWrapper) {
+            label = firstWrapper.shortDisplay;
+        } else {
+            label = firstWrapper.shortDisplay + " to " + lastWrapper.shortDisplay;
         }
         return label;
     }
-
-    private function toMonthLabel(value:int):String {
-            var label:String;
-            switch (value) {
-                case 0:
-                    label = "Jan";
-                    break;
-                case 1:
-                    label = "Feb";
-                    break;
-                case 2:
-                    label = "Mar";
-                    break;
-                case 3:
-                    label = "Apr";
-                    break;
-                case 4:
-                    label = "May";
-                    break;
-                case 5:
-                    label = "Jun";
-                    break;
-                case 6:
-                    label = "Jul";
-                    break;
-                case 7:
-                    label = "Aug";
-                    break;
-                case 8:
-                    label = "Sep";
-                    break;
-                case 9:
-                    label = "Oct";
-                    break;
-                case 10:
-                    label = "Nov";
-                    break;
-                case 11:
-                    label = "Dec";
-                    break;
-            }
-            return label;
-        }
 }
 }

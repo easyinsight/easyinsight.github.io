@@ -2,6 +2,7 @@ package com.easyinsight.filtering
 {
 
 	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
@@ -12,6 +13,7 @@ import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Alert;
 
 import mx.controls.Button;
 import mx.controls.CheckBox;
@@ -20,12 +22,18 @@ import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
+import mx.rpc.events.FaultEvent;
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
 
-	public class MultiFlatDateFilter extends HBox implements IFilter
+public class MultiFlatDateFilter extends HBox implements IFilter
 	{
 		private var analysisItem:AnalysisItem;
 		private var _filterDefinition:MultiFlatDateFilterDefinition;
 		private var _analysisItems:ArrayCollection;
+        private var dataService:RemoteObject;
+    private var _reportID:int;
+    private var _dashboardID:int;
 
         private var _loadingFromReport:Boolean = false;
 
@@ -63,6 +71,7 @@ import mx.managers.PopUpManager;
 
         private function onClick(event:Event):void {
             var window:MultiFWindow = new MultiFWindow();
+            window.values = levels;
             window.dateFilter = _filterDefinition;
             window.addEventListener("updated", onWindowDone, false, 0, true);
             PopUpManager.addPopUp(window, this, true);
@@ -91,6 +100,8 @@ import mx.managers.PopUpManager;
         private var filterLabel:UIComponent;
 
         private var labelButton:LinkButton;
+
+    private var levels:ArrayCollection;
 
         override protected function createChildren():void {
             super.createChildren();
@@ -121,20 +132,8 @@ import mx.managers.PopUpManager;
 
             addChild(filterLabel);
 
-            var firstValue:int = 11;
-            var lastValue:int = 0;
-
-            for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
-                firstValue = Math.min(wrapper.dateLevel, firstValue);
-                lastValue = Math.max(wrapper.dateLevel, lastValue);
-            }
-
-            this.first = firstValue;
-            this.last = lastValue;
-
             labelButton = new LinkButton();
             labelButton.setStyle("fontSize", 12);
-            populateLabel();
 
             labelButton.setStyle("textDecoration", "underline");
             labelButton.addEventListener(MouseEvent.CLICK, onClick);
@@ -154,19 +153,55 @@ import mx.managers.PopUpManager;
                 addChild(deleteButton);
             }
 
-
-            if (_loadingFromReport) {
-                _loadingFromReport = false;
-                newFilter = false;
+            if (_filterDefinition == null || !_filterDefinition.cachedValues) {
+                dataService = new RemoteObject();
+                dataService.destination = "data";
+                dataService.getMultiDateOptions.addEventListener(ResultEvent.RESULT, gotMetadata);
+                dataService.getMultiDateOptions.addEventListener(FaultEvent.FAULT, onFault);
+                dataService.getMultiDateOptions.send(_filterDefinition);
             } else {
-			    if (newFilter) {
-                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
-                    newFilter = false;
-                } else {
-                    dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
-                }
+                processMetadata(_filterDefinition.cachedValues);
             }
         }
+
+    private function onFault(event:FaultEvent):void {
+        Alert.show(event.fault.faultDetail);
+    }
+
+    private function gotMetadata(event:ResultEvent):void {
+        var metadata:ArrayCollection = dataService.getMultiDateOptions.lastResult as ArrayCollection;
+        processMetadata(metadata);
+    }
+
+    private function processMetadata(values:ArrayCollection):void {
+
+        this.levels = values;
+        var firstValue:int = 11;
+        var lastValue:int = 0;
+
+        for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
+            firstValue = Math.min(wrapper.dateLevel, firstValue);
+            lastValue = Math.max(wrapper.dateLevel, lastValue);
+        }
+
+        this.first = firstValue;
+        this.last = lastValue;
+
+        populateLabel();
+
+
+        if (_loadingFromReport) {
+            _loadingFromReport = false;
+            newFilter = false;
+        } else {
+            if (newFilter) {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+                newFilter = false;
+            } else {
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, filterDefinition, this));
+            }
+        }
+    }
 
         private var first:int = -1;
         private var last:int = -1;
@@ -182,6 +217,7 @@ import mx.managers.PopUpManager;
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
             window.filterMetadata = filterMetadata;
+            window.detailClass = MultiDateFilterEditor;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
@@ -191,9 +227,11 @@ import mx.managers.PopUpManager;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
-            if (event.filterDefinition is FilterDateRangeDefinition) {
-
-            }
+            dataService = new RemoteObject();
+            dataService.destination = "data";
+            dataService.getMultiDateOptions.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.getMultiDateOptions.addEventListener(FaultEvent.FAULT, onFault);
+            dataService.getMultiDateOptions.send(_filterDefinition);
             if (filterLabel is LinkButton) {
                 LinkButton(filterLabel).label = FilterDefinition.getLabel(event.filterDefinition, analysisItem);
             }

@@ -11,6 +11,8 @@ package com.easyinsight.filtering {
 public class DateLevelWrapper {
 
     public var dateLevel:int;
+    public var display:String;
+    public var shortDisplay:String;
 
     public function DateLevelWrapper() {
     }
