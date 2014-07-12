@@ -5,6 +5,7 @@ import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
+import com.easyinsight.calculations.functions.DayOfQuarter;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
@@ -31,6 +32,11 @@ import java.io.ObjectOutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -449,6 +455,169 @@ public class DataService {
 
             });
             return items;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<DateLevelWrapper> getMultiDateOptions(MultiFlatDateFilter filterDefinition) {
+        try {
+            if (filterDefinition.getLevel() == AnalysisDateDimension.MONTH_FLAT) {
+                List<DateLevelWrapper> wrappers = new ArrayList<>();
+                for (int i = Calendar.JANUARY; i <= Calendar.DECEMBER; i++) {
+                    DateLevelWrapper wrapper = new DateLevelWrapper();
+                    wrapper.setDateLevel(i);
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.MONTH, i);
+                    String name = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+                    String shortName = cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+                    wrapper.setDisplay(name);
+                    wrapper.setShortDisplay(shortName);
+                    wrappers.add(wrapper);
+                }
+                if (filterDefinition.isIncludeRelative()) {
+                    DateLevelWrapper lastQuarter = new DateLevelWrapper();
+                    lastQuarter.setDisplay("Last Full Month");
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.MONTH, -1);
+                    lastQuarter.setShortDisplay(cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()));
+                    lastQuarter.setDateLevel(cal.get(Calendar.MONTH));
+                    wrappers.add(0, lastQuarter);
+                    DateLevelWrapper thisQuarter = new DateLevelWrapper();
+                    thisQuarter.setDisplay("This Month");
+                    cal.add(Calendar.MONTH, 1);
+                    thisQuarter.setShortDisplay(cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()));
+                    thisQuarter.setDateLevel(cal.get(Calendar.MONTH));
+                    wrappers.add(0, thisQuarter);
+                }
+                return wrappers;
+            } else {
+                List<DateLevelWrapper> wrappers = new ArrayList<>();
+
+                LocalDate localDate = LocalDate.now();
+                for (int i = 0; i < filterDefinition.getUnitsForward(); i++) {
+                    if (filterDefinition.getLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                        localDate = localDate.plusWeeks(1);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                        localDate = localDate.plusMonths(1);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                        localDate = localDate.plusYears(1);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                        localDate = localDate.plusMonths(3);
+                    } else {
+                        throw new RuntimeException();
+                    }
+                }
+                List<LocalDate> zdts = new ArrayList<>();
+                for (int i = 0; i < (filterDefinition.getUnitsBack() + filterDefinition.getUnitsForward()); i++) {
+                    zdts.add(localDate);
+                    if (filterDefinition.getLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                        localDate = localDate.minusWeeks(1);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                        localDate = localDate.minusMonths(1);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                        localDate = localDate.minusYears(1);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                        localDate = localDate.minusMonths(3);
+                    } else {
+                        throw new RuntimeException();
+                    }
+                }
+
+                String format = "yyyy-MM-dd";
+                if (filterDefinition.getLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                    format = "yyyy";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                    format = "yyyy-MM";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.DAY_LEVEL) {
+                    format = "yyyy-MM-dd";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.HOUR_LEVEL) {
+                    format = "yyyy-MM-dd HH";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                    format = "yyyy-MM-dd HH:mm";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                    format = "yyyy-ww";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.WEEK_OF_YEAR_FLAT) {
+                    format = "ww";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.MONTH_FLAT) {
+                    format = "MMMM";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.DAY_OF_WEEK_FLAT) {
+                    format = "EE";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.DAY_OF_YEAR_FLAT) {
+                    format = "DD";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                    format = "QQ";
+                } else if (filterDefinition.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
+                    format = "qq";
+                }
+                SimpleDateFormat simpleDateFormat = null;
+                if ("qq".equals(format) || "QQ".equals(format)) {
+
+                } else {
+                    simpleDateFormat = new SimpleDateFormat(format);
+                }
+                for (LocalDate zdt : zdts) {
+                    Instant instant = zdt.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
+                    Date date = Date.from(instant);
+                    String result;
+                    if ("QQ".equals(format)) {
+                        int quarter = DayOfQuarter.quarter(date);
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(date);
+                        int year = cal.get(Calendar.YEAR);
+                        result = "Q" + (quarter + 1) + "-" + year;
+                    } else if ("qq".equals(format)) {
+                        int quarter = DayOfQuarter.quarter(date);
+                        result = String.valueOf(quarter);
+                    } else {
+                        result = simpleDateFormat.format(date);
+                    }
+                    DateLevelWrapper dateLevelWrapper = new DateLevelWrapper();
+                    dateLevelWrapper.setDisplay(result);
+                    dateLevelWrapper.setShortDisplay(result);
+                    wrappers.add(dateLevelWrapper);
+                }
+
+
+                //Collections.reverse(wrappers);
+                for (int i = 0; i < wrappers.size(); i++) {
+                    wrappers.get(i).setDateLevel(wrappers.size() - i);
+                }
+                if (filterDefinition.isIncludeRelative()) {
+                    DateLevelWrapper lastQuarter = new DateLevelWrapper();
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.MONTH, -3);
+                    int quarter = DayOfQuarter.quarter(cal.getTime());
+                    int year = cal.get(Calendar.YEAR);
+                    String result = "Q" + (quarter + 1) + "-" + year;
+                    lastQuarter.setShortDisplay(result);
+                    for (DateLevelWrapper wrapper : wrappers) {
+                        if (wrapper.getShortDisplay().equals(result)) {
+                            lastQuarter.setDateLevel(wrapper.getDateLevel());
+                            break;
+                        }
+                    }
+                    lastQuarter.setDisplay("Last Full Quarter");
+                    wrappers.add(0, lastQuarter);
+                    DateLevelWrapper thisQuarter = new DateLevelWrapper();
+                    thisQuarter.setDisplay("This Quarter");
+
+                    cal.add(Calendar.MONTH, 3);
+                    quarter = DayOfQuarter.quarter(cal.getTime());
+                    year = cal.get(Calendar.YEAR);
+                    result = "Q" + (quarter + 1) + "-" + year;
+                    thisQuarter.setShortDisplay(result);
+                    for (DateLevelWrapper wrapper : wrappers) {
+                        if (wrapper.getShortDisplay().equals(result)) {
+                            thisQuarter.setDateLevel(wrapper.getDateLevel());
+                            break;
+                        }
+                    }
+                    wrappers.add(0, thisQuarter);
+                }
+                return wrappers;
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
