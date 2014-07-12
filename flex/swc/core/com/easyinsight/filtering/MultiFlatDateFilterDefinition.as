@@ -20,7 +20,7 @@ public class MultiFlatDateFilterDefinition extends FilterDefinition {
     public var endDateProperty:String;
     public var level:int = AnalysisItemTypes.MONTH_FLAT;
     public var cachedValues:ArrayCollection;
-    public var unitsBack:int;
+    public var unitsBack:int = 20;
     public var unitsForward:int;
     public var includeRelative:Boolean;
     public var allOption:Boolean;
