@@ -32,14 +32,7 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
         } else if (level == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
             valids = new HashSet<>();
             for (DateLevelWrapper wrapper : wrappers) {
-                if (wrapper.getDateLevel() == 0) {
-                    valids.add("Q3-2014");
-                } else if (wrapper.getDateLevel() == 1) {
-                    valids.add("Q2-2014");
-                }
-            }
-            for (DateLevelWrapper wrapper : wrappers) {
-                valids.add(wrapper.getDisplay());
+                valids.add(wrapper.getShortDisplay());
             }
         }
         System.out.println(valids);
