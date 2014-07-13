@@ -501,6 +501,7 @@ public class Dashboard implements Cloneable, Serializable {
             dashboard.setDefaultDrillthrough(clone);
         }
 
+        List<AnalysisItem> fields = new ArrayList<>();
         ReplacementMap targetMap;
         if (factory instanceof TemplateReplacementMapFactory) {
             ReplacementMap replacementMap = factory.createMap();
@@ -524,7 +525,9 @@ public class Dashboard implements Cloneable, Serializable {
 
             dashboard.setFilters(filterDefinitions);
 
-            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacementMap, allFields, changingDataSource, dataSource);
+            fields.addAll(replacementMap.getFields());
+
+            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacementMap, allFields, changingDataSource, dataSource, fields);
             dashboard.visit(visitor);
         } else {
             Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
@@ -573,14 +576,16 @@ public class Dashboard implements Cloneable, Serializable {
 
             dashboard.setFilters(filterDefinitions);
 
-            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacements, allFields, changingDataSource, dataSource);
+            fields.addAll(replacements.getFields());
+
+            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacements, allFields, changingDataSource, dataSource, fields);
             dashboard.visit(visitor);
         }
 
         //dashboard.getRootElement().updateReportIDs(reportReplacementMap);
         dashboard.getRootElement().updateScorecardIDs(scorecardReplacmenetMap);
 
-        DashboardSaveMetadata saveMetadata = new DashboardSaveMetadata(dashboard, targetMap);
+        DashboardSaveMetadata saveMetadata = new DashboardSaveMetadata(dashboard, targetMap, fields);
 
         return saveMetadata;
     }
@@ -591,12 +596,15 @@ public class Dashboard implements Cloneable, Serializable {
         private List<AnalysisItem> allFields;
         private boolean changingDataSource;
         private FeedDefinition dataSource;
+        private List<AnalysisItem> fields;
 
-        private FilterOverrideVisitor(ReplacementMap replacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource) {
+        private FilterOverrideVisitor(ReplacementMap replacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource,
+                                      List<AnalysisItem> fields) {
             this.replacementMap = replacementMap;
             this.allFields = allFields;
             this.changingDataSource = changingDataSource;
             this.dataSource = dataSource;
+            this.fields = fields;
         }
 
         @Override
@@ -604,8 +612,10 @@ public class Dashboard implements Cloneable, Serializable {
             try {
                 if (dashboardElement.getFilters() != null && dashboardElement.getFilters().size() > 0) {
                     if (replacementMap instanceof TemplateReplacementMap) {
+                        System.out.println("...");
                         List<FilterDefinition> filterDefinitions = new ArrayList<>();
                         for (FilterDefinition persistableFilterDefinition : dashboardElement.getFilters()) {
+                            System.out.println("\tinspecting " +persistableFilterDefinition.getField().toDisplay());
                             filterDefinitions.add(persistableFilterDefinition.clone());
                             List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
                             for (AnalysisItem item : filterItems) {
@@ -622,11 +632,15 @@ public class Dashboard implements Cloneable, Serializable {
                             filter.updateIDs(replacementMap);
                         }
 
+                        fields.addAll(replacementMap.getFields());
+
                         dashboardElement.setFilters(filterDefinitions);
                     } else {
+                        System.out.println("...");
                         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
                         List<FilterDefinition> filterDefinitions = new ArrayList<>();
                         for (FilterDefinition persistableFilterDefinition : dashboardElement.getFilters()) {
+                            System.out.println("\t" + persistableFilterDefinition.getField().toDisplay());
                             filterDefinitions.add(persistableFilterDefinition.clone());
                             List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
                             for (AnalysisItem item : filterItems) {
@@ -667,6 +681,8 @@ public class Dashboard implements Cloneable, Serializable {
                         for (FilterDefinition filter : filterDefinitions) {
                             filter.updateIDs(replacements);
                         }
+
+                        fields.addAll(replacements.getFields());
 
                         dashboardElement.setFilters(filterDefinitions);
                     }

@@ -203,7 +203,7 @@ public class InstallMetadata {
             allFields.addAll(metadata.replacementMap.getFields());
         }
         for (DashboardSaveMetadata metadata : dashboardMetadataMap.values()) {
-            allFields.addAll(metadata.getReplacementMap().getFields());
+            allFields.addAll(metadata.getFields());
         }
         for (AnalysisItem field : allFields) {
             field.afterLoad();
