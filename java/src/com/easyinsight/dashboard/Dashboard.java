@@ -496,10 +496,6 @@ public class Dashboard implements Cloneable, Serializable {
         dashboard.setRecommendedExchange(false);
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
 
-
-
-        //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-
         if (getDefaultDrillthrough() != null) {
             Link clone = getDefaultDrillthrough().clone();
             dashboard.setDefaultDrillthrough(clone);
@@ -527,6 +523,9 @@ public class Dashboard implements Cloneable, Serializable {
             }
 
             dashboard.setFilters(filterDefinitions);
+
+            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacementMap, allFields);
+            dashboard.visit(visitor);
         } else {
             Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
             for (FilterDefinition persistableFilterDefinition : this.filters) {
@@ -581,6 +580,46 @@ public class Dashboard implements Cloneable, Serializable {
         DashboardSaveMetadata saveMetadata = new DashboardSaveMetadata(dashboard, targetMap);
 
         return saveMetadata;
+    }
+
+    private static class FilterOverrideVisitor implements IDashboardVisitor {
+
+        private ReplacementMap replacementMap;
+        private List<AnalysisItem> allFields;
+
+        private FilterOverrideVisitor(ReplacementMap replacementMap, List<AnalysisItem> allFields) {
+            this.replacementMap = replacementMap;
+            this.allFields = allFields;
+        }
+
+        @Override
+        public void accept(DashboardElement dashboardElement) {
+            try {
+                if (dashboardElement.getFilters() != null && dashboardElement.getFilters().size() > 0) {
+                    List<FilterDefinition> filterDefinitions = new ArrayList<>();
+                    for (FilterDefinition persistableFilterDefinition : dashboardElement.getFilters()) {
+                        filterDefinitions.add(persistableFilterDefinition.clone());
+                        List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+                        for (AnalysisItem item : filterItems) {
+                            replacementMap.addField(item, true);
+                        }
+                    }
+
+
+                    for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                        analysisItem.updateIDs(replacementMap);
+                    }
+
+                    for (FilterDefinition filter : filterDefinitions) {
+                        filter.updateIDs(replacementMap);
+                    }
+
+                    dashboardElement.setFilters(filterDefinitions);
+                }
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public Set<Long> containedScorecards() {
