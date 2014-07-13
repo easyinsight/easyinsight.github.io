@@ -34,6 +34,9 @@ public class MultiFlatDateFilter extends FilterDefinition {
     @Column(name = "end_date_property")
     private String endDateProperty;
 
+    @Transient
+    private List<DateLevelWrapper> cachedValues;
+
     @Column(name="units_back")
     private int unitsBack;
     @Column(name="units_forward")
@@ -45,6 +48,14 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
     @Column(name = "level")
     private int level;
+
+    public List<DateLevelWrapper> getCachedValues() {
+        return cachedValues;
+    }
+
+    public void setCachedValues(List<DateLevelWrapper> cachedValues) {
+        this.cachedValues = cachedValues;
+    }
 
     public int getLevel() {
         return level;

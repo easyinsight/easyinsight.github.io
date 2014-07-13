@@ -871,7 +871,7 @@ public class DashboardService {
         DashboardTextVisitor textVisitor = new DashboardTextVisitor();
         dashboard.visit(textVisitor);
         if (dashboardStackPositions != null) {
-            Map<String, FilterDefinition> overriddenFilters = new HashMap<String, FilterDefinition>();
+            Map<String, FilterDefinition> overriddenFilters = new HashMap<>();
             for (FilterDefinition filter : dashboard.getFilters()) {
                 FilterPositionKey filterPositionKey = new FilterPositionKey(FilterPositionKey.DASHBOARD, filter.getFilterID(), null);
                 FilterDefinition overriddenFilter = dashboardStackPositions.getFilterMap().get(filterPositionKey.createURLKey());
@@ -1011,7 +1011,8 @@ public class DashboardService {
 
     private static class FilterVisitor implements IDashboardVisitor {
 
-        private Map<AnalysisItem, List<FlatDateFilter>> flatDateFilters = new HashMap<AnalysisItem, List<FlatDateFilter>>();
+        private Map<AnalysisItem, List<FlatDateFilter>> flatDateFilters = new HashMap<>();
+        private Map<AnalysisItem, List<MultiFlatDateFilter>> multiDateFilters = new HashMap<>();
 
         private long dataSourceID;
         private long dashboardID;
@@ -1028,6 +1029,11 @@ public class DashboardService {
                     filterDefinition.setCachedValues(metadata);
                 }
             }*/
+            for (Map.Entry<AnalysisItem, List<MultiFlatDateFilter>> entry : multiDateFilters.entrySet()) {
+                for (MultiFlatDateFilter filter : entry.getValue()) {
+                    filter.setCachedValues(new DataService().getMultiDateOptions(filter));
+                }
+            }
             for (Map.Entry<AnalysisItem, List<FlatDateFilter>> entry : flatDateFilters.entrySet()) {
                 int startYearFound = 0;
                 for (FlatDateFilter filterDefinition : entry.getValue()) {
@@ -1073,10 +1079,17 @@ public class DashboardService {
                     if (filter instanceof FlatDateFilter) {
                         List<FlatDateFilter> filters = flatDateFilters.get(filter.getField());
                         if (filters == null) {
-                            filters = new ArrayList<FlatDateFilter>();
+                            filters = new ArrayList<>();
                             flatDateFilters.put(filter.getField(), filters);
                         }
                         filters.add((FlatDateFilter) filter);
+                    } else if (filter instanceof MultiFlatDateFilter) {
+                        List<MultiFlatDateFilter> mfFilters = multiDateFilters.get(filter.getField());
+                        if (mfFilters == null) {
+                            mfFilters = new ArrayList<>();
+                            multiDateFilters.put(filter.getField(), mfFilters);
+                        }
+                        mfFilters.add((MultiFlatDateFilter) filter);
                     }
                 }
             }
@@ -1106,13 +1119,13 @@ public class DashboardService {
             this.feed = feed;
             this.dlsFilters = dlsFilters;
             this.conn = conn;
-            keyMap = new HashMap<String, List<AnalysisItem>>();
-            displayMap = new HashMap<String, List<AnalysisItem>>();
-            unqualifiedDisplayMap = new HashMap<String, List<AnalysisItem>>();
+            keyMap = new HashMap<>();
+            displayMap = new HashMap<>();
+            unqualifiedDisplayMap = new HashMap<>();
             for (AnalysisItem analysisItem : feed.getFields()) {
                 List<AnalysisItem> items = keyMap.get(analysisItem.getKey().toKeyString());
                 if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
+                    items = new ArrayList<>(1);
                     keyMap.put(analysisItem.getKey().toKeyString(), items);
                 }
                 items.add(analysisItem);
@@ -1122,7 +1135,7 @@ public class DashboardService {
             for (AnalysisItem analysisItem : feed.getFields()) {
                 List<AnalysisItem> items = displayMap.get(analysisItem.toDisplay());
                 if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
+                    items = new ArrayList<>(1);
                     displayMap.put(analysisItem.toDisplay(), items);
                 }
                 items.add(analysisItem);
@@ -1131,7 +1144,7 @@ public class DashboardService {
             for (AnalysisItem analysisItem : feed.getFields()) {
                 List<AnalysisItem> items = unqualifiedDisplayMap.get(analysisItem.toUnqualifiedDisplay());
                 if (items == null) {
-                    items = new ArrayList<AnalysisItem>(1);
+                    items = new ArrayList<>(1);
                     unqualifiedDisplayMap.put(analysisItem.toUnqualifiedDisplay(), items);
                 }
                 items.add(analysisItem);
