@@ -36,6 +36,11 @@ public class TemplateReplacementMap extends ReplacementMap {
                 throw new RuntimeException("Could not find " + analysisItem.toOriginalDisplayName());
             }
             exists = field.clone();
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                AnalysisDateDimension source = (AnalysisDateDimension) analysisItem;
+                AnalysisDateDimension target = (AnalysisDateDimension) exists;
+                target.setDateLevel(source.getDateLevel());
+            }
             //exists = analysisItem.clone();
             cleanup(exists, changingDataSource);
             map.put(analysisItem.toOriginalDisplayName(), exists);
@@ -45,16 +50,7 @@ public class TemplateReplacementMap extends ReplacementMap {
 
     @Override
     public AnalysisItem addField(AnalysisItem analysisItem, boolean changingDataSource, long analysisItemID) throws CloneNotSupportedException {
-        if (analysisItem == null) {
-            return null;
-        }
-        AnalysisItem exists = getField(analysisItem);
-        if (exists == null) {
-            exists = analysisItem.clone();
-            cleanup(exists, changingDataSource);
-            map.put(analysisItem.toOriginalDisplayName(), analysisItem);
-        }
-        return exists;
+        return addField(analysisItem, changingDataSource);
     }
 
     @Override
