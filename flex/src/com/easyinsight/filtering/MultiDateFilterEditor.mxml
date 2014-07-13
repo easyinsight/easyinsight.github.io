@@ -18,6 +18,8 @@
             //lastValueFilter.allOption = showAll;
             lastValueFilter.level = dateLevelBox.selectedItem.data;
             lastValueFilter.includeRelative = rollingCheckbox.selected;
+            lastValueFilter.unitsBack = startChooser.value;
+            lastValueFilter.unitsForward = endChooser.value;
             return lastValueFilter;
         }
 
@@ -25,6 +27,8 @@
             lastValueFilter = filterDefinition as MultiFlatDateFilterDefinition;
             dateLevel = lastValueFilter.level;
             rolling = lastValueFilter.includeRelative;
+            startValue = lastValueFilter.unitsBack;
+            endValue = lastValueFilter.unitsForward;
             /*showAll = lastValueFilter.allOption;
             if (lastValueFilter.startYear > 1900) {
                 startYear = String(lastValueFilter.startYear);
@@ -40,6 +44,12 @@
         private var rolling:Boolean;
 
         [Bindable]
+        private var startValue:int;
+
+        [Bindable]
+        private var endValue:int;
+
+        [Bindable]
         private var dateLevels:ArrayCollection = new ArrayCollection([ {label: "Month", data: AnalysisItemTypes.MONTH_FLAT},
             {label: "Quarter - Year", data: AnalysisItemTypes.QUARTER_OF_YEAR}]);
 
@@ -50,14 +60,20 @@
         }
         ]]></mx:Script>
     <mx:Form>
-        <mx:FormItem label="All Option:">
+        <!--<mx:FormItem label="All Option:">
             <mx:CheckBox id="allCheckbox" selected="{showAll}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Date Level:">
+        </mx:FormItem>-->
+        <mx:FormItem label="What date level should this filter use?">
             <util:SmartComboBox id="dateLevelBox" selectedProperty="data" selectedValue="{dateLevel}" dataProvider="{dateLevels}"/>
         </mx:FormItem>
-        <mx:FormItem label="Rolling Options:">
+        <mx:FormItem label="Should this filter include 'Last Full' and 'This' rolling options?">
             <mx:CheckBox id="rollingCheckbox" selected="{rolling}"/>
+        </mx:FormItem>
+        <mx:FormItem label="How many increments of the selected date level should this filter go back?">
+            <mx:NumericStepper id="startChooser" value="{startValue}" minimum="0" maximum="1000"/>
+        </mx:FormItem>
+        <mx:FormItem label="How many increments of the selected date level should this filter go forward?">
+            <mx:NumericStepper id="endChooser" value="{endValue}" minimum="0" maximum="1000"/>
         </mx:FormItem>
     </mx:Form>
 </mx:VBox>
