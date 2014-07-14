@@ -512,6 +512,7 @@ public class AnalysisDefinition implements Cloneable {
                         }
                         measure.setPrecision(baseMeasure.getPrecision());
                         measure.setMinPrecision(baseMeasure.getMinPrecision());
+                        measure.setDefaultDate(baseMeasure.getDefaultDate());
                         clone = measure;
                     } else {
                         clone = new AnalysisDimension();
@@ -788,7 +789,15 @@ public class AnalysisDefinition implements Cloneable {
                                         }
                                     }
                                 } else if (i > 1) {
-                                    throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay() + " by key of " + analysisItem.getKey().toKeyString());
+                                    for (AnalysisItem item : items) {
+                                        if (item.getOrigin() == null) {
+                                            dataSourceItem = item;
+                                            break;
+                                        }
+                                    }
+                                    if (dataSourceItem == null) {
+                                        throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay() + " by key of " + analysisItem.getKey().toKeyString());
+                                    }
                                 }
                                 if (dataSourceItem != null) {
                                     System.out.println("\t\tFound key for " + analysisItem.toDisplay() + " via key for " + analysisItem.getKey().toKeyString());
