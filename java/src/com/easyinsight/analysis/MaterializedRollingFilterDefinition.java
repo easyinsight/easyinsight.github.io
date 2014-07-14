@@ -491,6 +491,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             return true;
         }
         boolean allowed = false;
+        System.out.println("testing " + value.toString());
         if (interval == LAST_DAY) {
             allowed = true;
         } else if (value.type() == Value.DATE) {
