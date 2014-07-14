@@ -114,6 +114,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
                     }
                 }
             }
+            System.out.println("days duration on auto scale = " + daysDuration);
             if (daysDuration > (365 * 6)) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.YEAR_LEVEL) {
                     autoScaled = true;
