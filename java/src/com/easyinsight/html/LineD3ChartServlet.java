@@ -8,6 +8,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +32,7 @@ public class LineD3ChartServlet extends HtmlServlet {
         JSONObject object = new JSONObject();
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        DateFormat dFormat = new SimpleDateFormat("MM/dd/yyyy");
         // need series, need ticks
         WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
         JSONArray blahArray = new JSONArray();
@@ -50,7 +52,8 @@ public class LineD3ChartServlet extends HtmlServlet {
                         DateValue dateValue = (DateValue) v;
                         JSONObject point = new JSONObject();
                         pointList.add(point);
-                        point.put("x", dateValue.getDate().getTime());
+                        //point.put("x", dateValue.getDate().getTime());
+                        point.put("x", dFormat.format(dateValue.getDate()));
                         point.put("y", row.getValue(measure).toDouble());
                     }
                 }
@@ -127,7 +130,8 @@ public class LineD3ChartServlet extends HtmlServlet {
                     JSONObject point = new JSONObject();
                     String formattedDate = dateFormat.format(x);
                     point.put("label", formattedDate);
-                    point.put("x", x.getTime());
+                    //point.put("x", x.getTime());
+                    point.put("x", dFormat.format(x));
                     point.put("y", entry.getValue().get(x));
                     points.put(point);
                 }
@@ -141,6 +145,7 @@ public class LineD3ChartServlet extends HtmlServlet {
         }
 
         object.put("values", blahArray);
+        object.put("date_format", LineD3ChartServlet.getJSFormat(((AnalysisDateDimension) twoAxisDefinition.getXaxis()).getDateLevel(), md.dateFormat));
         if (!twoAxisDefinition.isMultiMeasure()) {
             configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasure(), md);
         } else {
@@ -151,5 +156,50 @@ public class LineD3ChartServlet extends HtmlServlet {
         String jsonString = object.toString();
         response.getOutputStream().write(jsonString.getBytes());
         response.getOutputStream().flush();
+    }
+
+    public static
+    @Nullable
+    String getJSFormat(int dateLevel, int dateFormat) {
+        String sdf = null;
+        if (dateLevel == AnalysisDateDimension.YEAR_LEVEL) {
+            sdf = "%Y";
+        } else if (dateLevel == AnalysisDateDimension.MONTH_LEVEL || dateLevel == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+            if (dateFormat == 0 || dateFormat == 3) {
+                sdf = "%m/%Y";
+            } else if (dateFormat == 1) {
+                sdf = "%Y-%m";
+            } else if (dateFormat == 2) {
+                sdf = "%m-%Y";
+            } else if (dateFormat == 4) {
+                sdf = "%m.%Y";
+            }
+        } else if (dateLevel == AnalysisDateDimension.HOUR_LEVEL ||
+                dateLevel == AnalysisDateDimension.MINUTE_LEVEL) {
+            if (dateFormat == 0) {
+                sdf = "%m/%d/%Y %H:%M";
+            } else if (dateFormat == 1) {
+                sdf = "%Y-%m-%d %H:%M";
+            } else if (dateFormat == 2) {
+                sdf = "%d-%m-%Y %H:%M";
+            } else if (dateFormat == 3) {
+                sdf = "%d/%m/%Y %H:%M";
+            } else if (dateFormat == 4) {
+                sdf = "%d.%m.%Y %H:%M";
+            }
+        } else {
+            if (dateFormat == 0) {
+                sdf = "%m/%d/%Y";
+            } else if (dateFormat == 1) {
+                sdf = "%Y-%m-%d";
+            } else if (dateFormat == 2) {
+                sdf = "%d-%m-%Y";
+            } else if (dateFormat == 3) {
+                sdf = "%d/%m/%Y";
+            } else if (dateFormat == 4) {
+                sdf = "%d.%m.%Y";
+            }
+        }
+        return sdf;
     }
 }
