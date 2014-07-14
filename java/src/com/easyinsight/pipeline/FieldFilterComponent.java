@@ -31,6 +31,7 @@ public class FieldFilterComponent implements IComponent {
             sb.deleteCharAt(sb.length() - 1);
             pipelineData.getInsightRequestMetadata().addAudit(filterPair.analysisItem, "Applied field filter on " + filterPair.filterDefinition.getField().toDisplay() + " with " + sb.toString() + " as other fields present.");
         }
+        System.out.println(dataSet.getRows());
         for (IRow row : dataSet.getRows()) {
             for (FilterPair filterPair : filterPairs) {
                 Value value = row.getValue(filterPair.filterDefinition.getField());
