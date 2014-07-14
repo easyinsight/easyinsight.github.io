@@ -46,6 +46,10 @@
             dashboardID = dashboardInfo.getDashboardID();
         }
 
+        boolean phone = Utils.isPhone(request);
+        boolean iPad = Utils.isTablet(request);
+        boolean designer = Utils.isDesigner();
+
         if(drillthroughKey != null) {
             DrillThroughData drillThroughData = Utils.drillThroughFiltersForDashboard(drillthroughKey);
             drillthroughFilters = drillThroughData.getFilters();
@@ -118,6 +122,19 @@
 
                     </div>
                     <div class="btn-group reportControlBtnGroup">
+                        <a class="reportControl" data-toggle="dropdown" href="#">
+                            Export the Dashboard
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="btn btn-inverse export_dashboard_pdf" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Export to PDF
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group reportControlBtnGroup">
                         <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
                             Refresh Data
                             <span class="caret"></span>
@@ -139,6 +156,12 @@
                     <div class="btn-group reportControlBtnGroup">
                         <a class="reportControl toggle-filters">Toggle Filters</a>
                     </div>
+                    <% if (designer && !iPad && !phone) { %>
+                    <div class="btn-group">
+                        <a href="<%= RedirectUtil.getURL(request, "/app/embeddedDashboardEditor.jsp?dashboardID=" + dashboard.getUrlKey())%>"
+                           class="reportControl">Edit Report</a>
+                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>
