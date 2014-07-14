@@ -35,7 +35,6 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
                 valids.add(wrapper.getShortDisplay());
             }
         }
-        System.out.println(valids);
     }
 
     @Override
@@ -67,7 +66,6 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
                 /*String quarter = String.valueOf(value.toString().charAt(1));
                 String year = value.toString().substring(value.toString().length() - 4);*/
                 String result = "Q" + quarter + "-" + year;
-                System.out.println(result);
                 if (valids.contains(result)) {
                     return true;
                 }
