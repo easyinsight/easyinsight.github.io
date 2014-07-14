@@ -491,12 +491,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             return true;
         }
         boolean allowed = false;
-        System.out.println("testing " + value.toString());
         if (interval == LAST_DAY) {
             allowed = true;
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            System.out.println("testing " + dateValue.getDate());
             if (mode == RollingFilterDefinition.AFTER) {
                 allowed = limitDate <= dateValue.getDate().getTime();
             } else if (mode == RollingFilterDefinition.BEFORE) {

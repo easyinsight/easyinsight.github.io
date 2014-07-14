@@ -2684,6 +2684,24 @@ public class DataService {
 
             feed.getDataSource().decorateLinks(new ArrayList<>(items));
 
+            Map<String, AnalysisItem> filterMap = new HashMap<>();
+            for (AnalysisItem reportItem : items) {
+                filterMap.put(reportItem.toOriginalDisplayName(), reportItem);
+            }
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (filter.getField() != null && filter.getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    AnalysisItem original = filterMap.get(filter.getField().toOriginalDisplayName());
+                    if (original != null && original.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                        AnalysisDateDimension source = (AnalysisDateDimension) original;
+                        AnalysisDateDimension target = (AnalysisDateDimension) filter.getField();
+                        if (source.getDateLevel() != target.getDateLevel()) {
+                            System.out.println("Setting date level on " + target.toDisplay() + " to " + source.getDateLevel());
+                        }
+                        target.setDateLevel(source.getDateLevel());
+                    }
+                }
+            }
+
             AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
             structure.setReport(analysisDefinition);
 
