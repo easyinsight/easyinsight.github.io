@@ -128,7 +128,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         } else {
             targetDayOfWeek = DayOfWeek.SATURDAY;
         }
-        System.out.println("looking for start date");
+
         if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift(insightRequestMetadata)) {
 
             ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
@@ -495,6 +495,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             allowed = true;
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
+            System.out.println("testing " + dateValue.getDate());
             if (mode == RollingFilterDefinition.AFTER) {
                 allowed = limitDate <= dateValue.getDate().getTime();
             } else if (mode == RollingFilterDefinition.BEFORE) {
