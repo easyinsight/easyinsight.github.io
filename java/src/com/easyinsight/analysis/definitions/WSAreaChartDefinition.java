@@ -5,6 +5,9 @@ import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -72,7 +75,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
         stackingType = findStringProperty(properties, "stackingType", "stacked");
-        autoScale = findBooleanProperty(properties, "autoScaled", false);
+        autoScale = findBooleanProperty(properties, "autoScale", false);
         multiColors = multiColorProperty(properties, "multiColors");
         legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
 
@@ -111,10 +114,32 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
                     } else if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
                         daysDuration = (int) ((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
+                    } else if (filterDefinition instanceof MultiFlatDateFilter) {
+                        MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filterDefinition;
+                        if (multiFlatDateFilter.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                            List<DateLevelWrapper> levelWrappers = multiFlatDateFilter.getLevels();
+                            int minConcat = Integer.MAX_VALUE;
+                            int maxConcat = Integer.MIN_VALUE;
+                            for (DateLevelWrapper wrapper : levelWrappers) {
+                                // find start date, find end date
+                                String shortDisplay = wrapper.getShortDisplay();
+                                int quarterNumber = Integer.parseInt(String.valueOf(shortDisplay.charAt(1)));
+                                int year = Integer.parseInt(shortDisplay.substring(3));
+                                int concatValue = year * 10 + quarterNumber;
+                                minConcat = Math.min(minConcat, concatValue);
+                                maxConcat = Math.max(maxConcat, concatValue);
+                            }
+                            int minYear = (int) Math.floor(minConcat / 10);
+                            int minQuarter = minConcat - (minYear * 10);
+                            int maxYear = (int) Math.floor(maxConcat / 10);
+                            int maxQuarter = maxConcat - (maxYear * 10);
+                            LocalDate minDate = LocalDate.of(minYear, ((minQuarter - 1) * 3) + 1, 1);
+                            LocalDate maxDate = LocalDate.of(maxYear, ((maxQuarter - 1) * 3) + 1, 1);
+                            daysDuration = (int) ChronoUnit.DAYS.between(minDate, maxDate);
+                        }
                     }
                 }
             }
-            System.out.println("days duration on auto scale = " + daysDuration);
             if (daysDuration > (365 * 6)) {
                 if (xAxis.getDateLevel() != AnalysisDateDimension.YEAR_LEVEL) {
                     autoScaled = true;
