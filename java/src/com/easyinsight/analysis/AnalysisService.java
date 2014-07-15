@@ -1845,13 +1845,13 @@ public class AnalysisService {
                 DateValue dateValue = (DateValue) value;
                 String result;
                 if ("QQ".equals(format)) {
-                    int quarter = DayOfQuarter.quarter(dateValue.getDate());
+                    int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(dateValue.getDate());
                     int year = cal.get(Calendar.YEAR);
                     result = quarter + "-" + year;
                 } else if ("qq".equals(format)) {
-                    int quarter = DayOfQuarter.quarter(dateValue.getDate());
+                    int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
                     result = String.valueOf(quarter);
                 } else {
                     result = new SimpleDateFormat(format).format(dateValue.getDate());
@@ -1872,18 +1872,22 @@ public class AnalysisService {
                         }
 
 
-                        Date date = sdf.parse(value.toString());
+                        /*Date date;
+                        if ("QQ".equals(format) || "qq".equals(format)) {
+                            date = sdf.parse(value.toString());
+                        } else {
+                            date = new SimpleDateFormat(format).parse(value.toString());
+                        }*/
                         String result;
                         if ("QQ".equals(format)) {
-                            int quarter = DayOfQuarter.quarter(date);
-                            Calendar cal = Calendar.getInstance();
-                            cal.setTime(date);
-                            int year = cal.get(Calendar.YEAR);
+                            String quarter = String.valueOf(value.toString().charAt(1));
+                            String year = value.toString().substring(value.toString().length() - 4);
                             result = quarter + "-" + year;
                         } else if ("qq".equals(format)) {
-                            int quarter = DayOfQuarter.quarter(date);
+                            int quarter = Integer.parseInt(String.valueOf(value.toString().charAt(1)));
                             result = String.valueOf(quarter);
                         } else {
+                            Date date = new SimpleDateFormat(format).parse(value.toString());
                             result = new SimpleDateFormat(format).format(date);
                         }
                         filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
