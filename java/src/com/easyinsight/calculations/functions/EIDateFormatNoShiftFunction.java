@@ -36,13 +36,15 @@ public class EIDateFormatNoShiftFunction extends Function implements IFunction {
         String string;
         String formatString = minusQuotes(getParameter(1)).toString();
         if (formatString.startsWith("QQ")) {
-            int quarter = DayOfQuarter.quarter(date);
+
+            int quarter = DayOfQuarter.quarter(date) + 1;
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             int year = cal.get(Calendar.YEAR);
             string = quarter + "-" + year;
+            System.out.println(date + " produced " + string);
         } else if ("qq".equals(formatString)) {
-            int quarter = DayOfQuarter.quarter(date);
+            int quarter = DayOfQuarter.quarter(date) + 1;
             string = String.valueOf(quarter);
         } else {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(formatString);
