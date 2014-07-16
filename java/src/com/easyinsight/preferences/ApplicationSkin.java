@@ -1,10 +1,17 @@
 package com.easyinsight.preferences;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * User: jamesboe
@@ -338,7 +345,6 @@ public class ApplicationSkin implements Serializable {
             properties.add(new ReportNumericProperty("headerBarDividerColor", headerBarDividerColor, headerBarDividerColorEnabled));
             properties.add(new ReportNumericProperty("centerCanvasBackgroundColor", centerCanvasBackgroundColor, centerCanvasBackgroundColorEnabled));
             properties.add(new ReportNumericProperty("centerCanvasBackgroundAlpha", centerCanvasBackgroundAlpha, centerCanvasBackgroundAlphaEnabled));
-            properties.add(new ReportStringProperty("coreAppBackgroundSize", coreAppBackgroundSize, coreAppBackgroundSizeEnabled));
             properties.add(new ReportNumericProperty("reportBackgroundColor", reportBackgroundColor, true));
             properties.add(new ReportNumericProperty("reportTextColor", reportTextColor, true));
             properties.add(new ReportBooleanProperty("reportHeader", reportHeader, true));
@@ -1022,5 +1028,122 @@ public class ApplicationSkin implements Serializable {
             }
         }
         return defaultValue;
+    }
+
+    private String toHex(int x) {
+        return String.format("#%06X", x & 0xFFFFFF);
+    }
+
+    public static JSONObject toJSONObject(String type, Object value) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("type", type);
+        jo.put("value", value);
+        return jo;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("primary_chart_color_enabled", customChartColorEnabled);
+        jo.put("primary_chart_color", toHex(customChartColor));
+        jo.put("primary_chart_color_gradient_enabled", gradientChartColorEnabled);
+        jo.put("primary_chart_color_gradient", toHex(gradientChartColor));
+        jo.put("secondary_chart_color_enabled", secondaryColorEnabled);
+        jo.put("secondary_chart_color", toHex(secondaryColor));
+        jo.put("summary_background_color_enabled", summaryBackgroundColorEnabled);
+        jo.put("summary_background_color", toHex(summaryBackgroundColor));
+        jo.put("summary_text_color_enabled", summaryTextColorEnabled);
+        jo.put("summary_text_color", toHex(summaryTextColor));
+        jo.put("crosstab_header_background_color_enabled", crosstabHeaderBackgroundColorEnabled);
+        jo.put("crosstab_header_background_color", toHex(crosstabHeaderBackgroundColor));
+        jo.put("crosstab_header_text_color_enabled", crosstabHeaderTextColorEnabled);
+        jo.put("crosstab_header_text_color", toHex(crosstabHeaderTextColor));
+        jo.put("grid_header_background_enabled", headerStartEnabled);
+        jo.put("grid_header_background", toHex(headerStart));
+        jo.put("grid_header_background_gradient_enabled", headerEndEnabled);
+        jo.put("grid_header_background_gradient", toHex(headerEnd));
+        jo.put("grid_header_text_color_enabled", reportHeaderTextColorEnabled);
+        jo.put("grid_header_text_color", toHex(reportHeaderTextColor));
+        jo.put("grid_row_background_color_1_enabled", tableColorStartEnabled);
+        jo.put("grid_row_background_color_1", toHex(tableColorStart));
+        jo.put("grid_row_background_color_2_enabled", tableColorEndEnabled);
+        jo.put("grid_row_background_color_2", toHex(tableColorEnd));
+        jo.put("grid_text_color_enabled", textColorEnabled);
+        jo.put("grid_text_color", toHex(textColor));
+        jo.put("stack_1_fill_color_enabled", dashboardStack1ColorStartEnabled);
+        jo.put("stack_1_fill_color", toHex(dashboardStack1ColorStart));
+        jo.put("stack_1_fill_color_gradient_end_enabled", dashboardStack1ColorEndEnabled);
+        jo.put("stack_1_fill_color_gradient_end", toHex(dashboardStack1ColorEnd));
+        jo.put("stack_2_fill_color_enabled", dashboardStackColor2StartEnabled);
+        jo.put("stack_2_fill_color", toHex(dashboardStackColor2Start));
+        jo.put("stack_2_fill_color_gradient_end_enabled", dashboardStackColor2EndEnabled);
+        jo.put("stack_2_fill_color_gradient_end", toHex(dashboardStackColor2End));
+        jo.put("report_title_background_color", toHex(dashboardReportHeaderBackgroundColor));
+        jo.put("report_title_text_color", toHex(dashboardReportHeaderTextColor));
+
+        Function<MultiColor, JSONObject> toJSON = a -> {
+                    try {
+                        return a.toJSON(md);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+        jo.put("multi_colors", new JSONArray(multiColors.stream().map(toJSON).collect(Collectors.toList())));
+        jo.put("secondary_multi_colors", new JSONArray(secondaryMultiColors.stream().map(toJSON).collect(Collectors.toList())));
+
+
+        return jo;
+    }
+
+    public static ApplicationSkin fromJSON(net.minidev.json.JSONObject jo) {
+        ApplicationSkin as = new ApplicationSkin();
+
+        as.setCustomChartColorEnabled(booleanValue(jo.get("primary_chart_color_enabled")));
+        as.setCustomChartColor(fromHex(jo.get("primary_chart_color")));
+        as.setGradientChartColorEnabled(booleanValue(jo.get("primary_chart_color_gradient_enabled")));
+        as.setGradientChartColor(fromHex(jo.get("primary_chart_color_gradient")));
+        as.setSecondaryColorEnabled(booleanValue(jo.get("secondary_chart_color_enabled")));
+        as.setSecondaryColor(fromHex(jo.get("secondary_chart_color")));
+        as.setSummaryBackgroundColorEnabled(booleanValue(jo.get("summary_background_color_enabled")));
+        as.setSummaryBackgroundColor(fromHex(jo.get("summary_background_color")));
+        as.setSummaryTextColorEnabled(booleanValue(jo.get("summary_text_color_enabled")));
+        as.setSummaryTextColor(fromHex(jo.get("summary_text_color")));
+        as.setCrosstabHeaderBackgroundColorEnabled(booleanValue("crosstab_header_background_color_enabled"));
+        as.setCrosstabHeaderBackgroundColor(fromHex(jo.get("crosstab_header_background_color")));
+        as.setCrosstabHeaderTextColorEnabled(booleanValue(jo.get("crosstab_header_text_color_enabled")));
+        as.setCrosstabHeaderTextColor(fromHex(jo.get("crosstab_header_text_color")));
+        as.setHeaderStartEnabled(booleanValue(jo.get("grid_header_background_enabled")));
+        as.setHeaderStart(fromHex(jo.get("grid_header_background")));
+        as.setHeaderEndEnabled(booleanValue(jo.get("grid_header_background_gradient_enabled")));
+        as.setHeaderEnd(fromHex(jo.get("grid_header_background_gradient")));
+        as.setReportHeaderTextColorEnabled(booleanValue(jo.get("grid_header_text_color_enabled")));
+        as.setReportHeaderTextColor(fromHex(jo.get("grid_header_text_color")));
+        as.setTableColorStartEnabled(booleanValue(jo.get("grid_row_background_color_1_enabled")));
+        as.setTableColorStart(fromHex(jo.get("grid_row_background_color_1")));
+        as.setTableColorEndEnabled(booleanValue(jo.get("grid_row_background_color_2_enabled")));
+        as.setTableColorEnd(fromHex(jo.get("grid_row_background_color_2")));
+        as.setTextColorEnabled(booleanValue(jo.get("grid_text_color_enabled")));
+        as.setTextColor(fromHex(jo.get("grid_text_color")));
+        as.setDashboardStack1ColorStartEnabled(booleanValue(jo.get("stack_1_fill_color_enabled")));
+        as.setDashboardStack1ColorStart(fromHex(jo.get("stack_1_fill_color")));
+        as.setDashboardStack1ColorEndEnabled(booleanValue(jo.get("stack_1_fill_color_gradient_end_enabled")));
+        as.setDashboardStack1ColorEnd(fromHex(jo.get("stack_1_fill_color_gradient_end")));
+        as.setDashboardStackColor2StartEnabled(booleanValue(jo.get("stack_2_fill_color_enabled")));
+        as.setDashboardStackColor2Start(fromHex(jo.get("stack_2_fill_color")));
+        as.setDashboardStackColor2EndEnabled(booleanValue(jo.get("stack_2_fill_color_gradient_end_enabled")));
+        as.setDashboardStackColor2End(fromHex(jo.get("stack_2_fill_color_gradient_end")));
+        as.setDashboardReportHeaderBackgroundColor(fromHex(jo.get("report_title_background_color")));
+        as.setDashboardReportHeaderTextColor(fromHex(jo.get("report_title_text_color")));
+        as.setMultiColors(((net.minidev.json.JSONArray)jo.get("multi_colors")).stream().map(a -> MultiColor.fromJSON((net.minidev.json.JSONObject) a)).collect(Collectors.toList()));
+        as.setSecondaryMultiColors(((net.minidev.json.JSONArray)jo.get("secondary_multi_colors")).stream().map(a -> MultiColor.fromJSON((net.minidev.json.JSONObject) a)).collect(Collectors.toList()));
+
+        return as;
+    }
+
+    private static boolean booleanValue(Object o) {
+        return Boolean.valueOf(String.valueOf(o));
+    }
+
+    private static int fromHex(Object color) {
+        return Color.decode(String.valueOf(color)).getRGB();
     }
 }

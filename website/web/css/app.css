@@ -301,3 +301,11 @@ a {
 .selected_folder {
     background-color: #e2d0d0;
 }
+
+.color_swatch {
+    display:inline-block;
+    height:20px;
+    width:20px;
+    margin-bottom: -5px;
+    border: solid 1px black;
+}
