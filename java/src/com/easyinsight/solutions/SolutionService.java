@@ -292,7 +292,7 @@ public class SolutionService {
                 settings.setAccountID(SecurityUtil.getAccountID());
                 session.save(settings);
                 session.flush();
-                ApplicationSkin applicationSkin = settings.override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).override(userSkin.toSkin().toSettings(ApplicationSkin.USER)).toSkin();
+                ApplicationSkin applicationSkin = settings.override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
                 postInstallSteps.setApplicationSkin(applicationSkin);
             }
             session.close();
