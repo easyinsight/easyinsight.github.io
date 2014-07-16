@@ -234,13 +234,15 @@ public class PreferencesService {
     }
 
     public ApplicationSkin getAccountSkin() {
+        ApplicationSkin globalSkin = getGlobalSkin();
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
             List results = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
             if (results.size() > 0) {
                 ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-                return settings.toSkin();
+                return globalSkin.toSettings(ApplicationSkin.APPLICATION).override(settings.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
+                //return settings.toSkin();
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -510,7 +512,7 @@ public class PreferencesService {
         return dls;
     }
 
-    private List<DataSourceDLS> getDataSourceDLS(long personaID, EIConnection conn) throws SQLException {
+    public List<DataSourceDLS> getDataSourceDLS(long personaID, EIConnection conn) throws SQLException {
         List<DataSourceDLS> dlsList = new ArrayList<DataSourceDLS>();
         PreparedStatement dlsStmt = conn.prepareStatement("SELECT DLS_ID, DATA_SOURCE_ID, FEED_NAME FROM DLS, data_feed WHERE PERSONA_ID = ? AND " +
                 "DATA_FEED.DATA_FEED_ID = dls.data_source_id");
