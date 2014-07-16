@@ -112,10 +112,10 @@
 </jsp:include>
 <div class="nav nav-pills reportNav">
         <div class="container">
-            <div class="col-md-6 reportBlah">
+            <div class="col-md-4 reportBlah">
                 <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
-            <div class="col-md-6 reportControlToolbar">
+            <div class="col-md-8 reportControlToolbar">
                 <div class="btn-toolbar pull-right">
                     <div id="configuration-dropdown" class="btn-group reportControlBtnGroup">
 
@@ -159,7 +159,7 @@
                     <% if (designer && !iPad && !phone) { %>
                     <div class="btn-group">
                         <a href="<%= RedirectUtil.getURL(request, "/app/embeddedDashboardEditor.jsp?dashboardID=" + dashboard.getUrlKey())%>"
-                           class="reportControl">Edit Report</a>
+                           class="reportControl">Edit Dashboard</a>
                     </div>
                     <% } %>
                 </div>
