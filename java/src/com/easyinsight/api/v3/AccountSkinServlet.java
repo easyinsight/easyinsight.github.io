@@ -49,9 +49,6 @@ public class AccountSkinServlet extends JSONServlet {
 
         JSONObject responseObject = new JSONObject();
         ApplicationSkin skin = ApplicationSkin.fromJSON(jsonObject);
-        ApplicationSkin as = new PreferencesService().getAccountSkin();
-        skin.setId(as.getId());
-
         new PreferencesService().saveAccountSkin(skin);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
 

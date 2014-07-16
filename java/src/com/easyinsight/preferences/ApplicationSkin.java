@@ -22,7 +22,6 @@ public class ApplicationSkin implements Serializable {
 
     public static final int APPLICATION = 1;
     public static final int ACCOUNT = 2;
-    public static final int USER = 3;
 
     private ImageDescriptor coreAppBackgroundImage;
     private boolean coreAppBackgroundImageEnabled;
@@ -117,8 +116,6 @@ public class ApplicationSkin implements Serializable {
     private List<MultiColor> multiColors;
     private List<MultiColor> secondaryMultiColors;
 
-    private long id;
-
     public boolean isDashboardStack1ColorStartEnabled() {
         return dashboardStack1ColorStartEnabled;
     }
@@ -181,14 +178,6 @@ public class ApplicationSkin implements Serializable {
 
     public void setDashboardReportHeaderTextColor(int dashboardReportHeaderTextColor) {
         this.dashboardReportHeaderTextColor = dashboardReportHeaderTextColor;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public int getReportHeaderTextColor() {
@@ -375,7 +364,7 @@ public class ApplicationSkin implements Serializable {
             properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
             properties.add(ReportMultiColorProperty.fromColors(secondaryMultiColors, "secondaryMultiColors"));
         }
-        if (mode == APPLICATION || mode == USER) {
+        if (mode == APPLICATION) {
             properties.add(new ReportBooleanProperty("myDataName", myDataName));
             properties.add(new ReportBooleanProperty("myDataSize", myDataSize));
             properties.add(new ReportBooleanProperty("myDataOwner", myDataOwner));
@@ -406,7 +395,6 @@ public class ApplicationSkin implements Serializable {
         reportPersistedCached = findBooleanProperty(properties, "reportPersistedCached", false);
              */
         }
-        settings.setSkinID(id);
         settings.setProperties(properties);
         return settings;
     }

@@ -91,7 +91,6 @@ public class ApplicationSkinSettings {
 
     public ApplicationSkin toSkin() {
         ApplicationSkin skin = new ApplicationSkin();
-        skin.setId(skinID);
         skin.populateProperties(properties);
         return skin;
     }
@@ -111,14 +110,7 @@ public class ApplicationSkinSettings {
         } else {
             accountSkin = new ApplicationSkinSettings();
         }
-        ApplicationSkinSettings userSkin;
-        results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, userID).list();
-        if (results.size() > 0) {
-            userSkin = (ApplicationSkinSettings) results.get(0);
-        } else {
-            userSkin = new ApplicationSkinSettings();
-        }
-        return globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).override(userSkin.toSkin().toSettings(ApplicationSkin.USER)).toSkin();
+        return globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
     }
 
     public ApplicationSkinSettings override(ApplicationSkinSettings settings) {

@@ -241,7 +241,7 @@ public class PreferencesService {
             List results = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
             if (results.size() > 0) {
                 ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-                return globalSkin.toSettings(ApplicationSkin.APPLICATION).override(settings.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
+                return globalSkin.toSettings(ApplicationSkin.ACCOUNT).override(settings.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
                 //return settings.toSkin();
             }
             session.getTransaction().commit();
@@ -291,34 +291,22 @@ public class PreferencesService {
         }
     }
 
-    public ApplicationSkin saveUserSkin(ApplicationSkin skin) {
-        ApplicationSkin result;
-        Session session = Database.instance().createSession();
-        try {
-            ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.USER);
-            settings.setUserID(SecurityUtil.getUserID());
-            session.getTransaction().begin();
-            session.saveOrUpdate(settings);
-            result = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return result;
-    }
-
     public ApplicationSkin saveAccountSkin(ApplicationSkin skin) {
         ApplicationSkin result;
         Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
+            List existing = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            if (existing.size() > 0) {
+                for (Object obj : existing) {
+                    session.delete(obj);
+                }
+            }
+            session.flush();
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.ACCOUNT);
             settings.setAccountID(SecurityUtil.getAccountID());
-            session.getTransaction().begin();
-            session.saveOrUpdate(settings);
+            session.save(settings);
+            session.flush();
             result = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
             session.getTransaction().commit();
         } catch (Exception e) {
