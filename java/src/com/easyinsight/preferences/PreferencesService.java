@@ -259,10 +259,18 @@ public class PreferencesService {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
+            List existing = session.createQuery("from ApplicationSkinSettings where globalSkin = ?").setBoolean(0, true).list();
+            if (existing.size() > 0) {
+                for (Object obj : existing) {
+                    session.delete(obj);
+                }
+            }
+            session.flush();
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.APPLICATION);
             settings.setGlobalSkin(true);
-            session.getTransaction().begin();
-            session.saveOrUpdate(settings);
+            session.save(settings);
+            session.flush();
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -277,9 +285,17 @@ public class PreferencesService {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
+            List existing = session.createQuery("from ApplicationSkinSettings where connectionType = ?").setInteger(0, connectionType).list();
+            if (existing.size() > 0) {
+                for (Object obj : existing) {
+                    session.delete(obj);
+                }
+            }
+            session.flush();
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.ACCOUNT);
             settings.setConnectionType(connectionType);
-            session.getTransaction().begin();
+
             session.saveOrUpdate(settings);
             session.getTransaction().commit();
         } catch (Exception e) {
