@@ -252,7 +252,7 @@ public class PreferencesService {
         } finally {
             session.close();
         }
-        return null;
+        return globalSkin.toSettings(ApplicationSkin.ACCOUNT).toSkin();
     }
 
     public void saveGlobalSkin(ApplicationSkin skin) {
