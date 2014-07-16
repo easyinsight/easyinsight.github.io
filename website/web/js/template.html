@@ -395,6 +395,7 @@
 <script type="text/template" id="flat_date_month_filter">
     <div class="filter <%= Filter.label(data, parent_id, type) %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id, type: type}) %>
+
         <select id="<%= Filter.label(data, parent_id, type) %>" class="month_select">
             <option value="0"<% if(data.selected == 0) { %> selected="selected"<% }%>>January</option>
             <option value="1"<% if(data.selected == 1) { %> selected="selected"<% }%>>February</option>
@@ -427,7 +428,7 @@
     <div class="filter filter<%= data.id %>">
         <%= Filter.base_filter({"data": data, "parent_id": typeof(parent_id) == "undefined" ? '' : parent_id, type: type}) %>
         <a href="#<%= Filter.label(data, parent_id, type) %>_modal" data-toggle="modal">
-            <button id="<%= Filter.label(data, parent_id, type) %>" class="btn btn-default multi_flat_month"><%- short_months[data.start] %> to <%- short_months[data.end] %>
+            <button id="<%= Filter.label(data, parent_id, type) %>" class="btn btn-default multi_flat_month"><%- data.startLabel %> to <%- data.endLabel %>
             </button>
         </a>
     </div>
@@ -438,32 +439,14 @@
         <div class="modal-body">
             <div class="control-group">
                 <select class="multi_flat_month_start">
-                    <option value="0"<% if(data.start == 0) { %> selected="selected"<% } %>>January</option>
-                    <option value="1"<% if(data.start == 1) { %> selected="selected"<% } %>>February</option>
-                    <option value="2"<% if(data.start == 2) { %> selected="selected"<% } %>>March</option>
-                    <option value="3"<% if(data.start == 3) { %> selected="selected"<% } %>>April</option>
-                    <option value="4"<% if(data.start == 4) { %> selected="selected"<% } %>>May</option>
-                    <option value="5"<% if(data.start == 5) { %> selected="selected"<% } %>>June</option>
-                    <option value="6"<% if(data.start == 6) { %> selected="selected"<% } %>>July</option>
-                    <option value="7"<% if(data.start == 7) { %> selected="selected"<% } %>>August</option>
-                    <option value="8"<% if(data.start == 8) { %> selected="selected"<% } %>>September</option>
-                    <option value="9"<% if(data.start == 9) { %> selected="selected"<% } %>>October</option>
-                    <option value="10"<% if(data.start == 10) { %> selected="selected"<% } %>>November</option>
-                    <option value="11"<% if(data.start == 11) { %> selected="selected"<% } %>>December</option>
+                    <% _.each(data.values, function(e, i , l) { %>
+                    <option value="<%= e.dateLevel%>" <%= data.startLevel == e.dateLevel ? ' selected="selected"' : ''%>><%- e.display %></option>
+                    <% }) %>
                 </select>
                 <select class="multi_flat_month_end">
-                    <option value="0"<% if(data.end == 0) { %> selected="selected"<% } %>>January</option>
-                    <option value="1"<% if(data.end == 1) { %> selected="selected"<% } %>>February</option>
-                    <option value="2"<% if(data.end == 2) { %> selected="selected"<% } %>>March</option>
-                    <option value="3"<% if(data.end == 3) { %> selected="selected"<% } %>>April</option>
-                    <option value="4"<% if(data.end == 4) { %> selected="selected"<% } %>>May</option>
-                    <option value="5"<% if(data.end == 5) { %> selected="selected"<% } %>>June</option>
-                    <option value="6"<% if(data.end == 6) { %> selected="selected"<% } %>>July</option>
-                    <option value="7"<% if(data.end == 7) { %> selected="selected"<% } %>>August</option>
-                    <option value="8"<% if(data.end == 8) { %> selected="selected"<% } %>>September</option>
-                    <option value="9"<% if(data.end == 9) { %> selected="selected"<% } %>>October</option>
-                    <option value="10"<% if(data.end == 10) { %> selected="selected"<% } %>>November</option>
-                    <option value="11"<% if(data.end == 11) { %> selected="selected"<% } %>>December</option>
+                    <% _.each(data.values, function(e, i , l) { %>
+                    <option value="<%= e.dateLevel%>" <%= data.endLevel == e.dateLevel ? ' selected="selected"' : ''%>><%- e.display %></option>
+                    <% }) %>
                 </select>
             </div>
 
