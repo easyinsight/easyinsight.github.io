@@ -34,8 +34,8 @@ public class OpportunityData {
 
     private static String[] stages = { "Lead", "Qualified", "Working", "Negotiation", "Closed - Won", "Closed - Lost" };
 
-    private static final String[] customerNames = { "Bross Design", "Crestone Engineering", "Uncompahgre Systems",
-            "Sneffels Technology", "Sunlight Architecture", "Pyramid Research", "Little Bear Consulting", "Torreys Inc" };
+    /*private static final String[] customerNames = { "Bross Design", "Crestone Engineering", "Uncompahgre Systems",
+            "Sneffels Technology", "Sunlight Architecture", "Pyramid Research", "Little Bear Consulting", "Torreys Inc" };*/
 
     private static final String[] productNames = { "Widget1", "Widget2", "Widget3", "Widget4", "Widget5"};
 
@@ -55,7 +55,7 @@ public class OpportunityData {
         this.salesRep = salesRep;
         this.dealSize = dealSize;
         this.dealChance = dealChance;
-        customer = customerNames[((int) (Math.random() * customerNames.length))];
+        customer = String.valueOf((int) (Math.random() * 5000));
         product = productNames[((int) (Math.random() * productNames.length))];
 
     }

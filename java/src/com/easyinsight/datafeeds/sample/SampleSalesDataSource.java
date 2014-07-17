@@ -20,6 +20,7 @@ import java.util.*;
  */
 public class SampleSalesDataSource extends ServerDataSourceDefinition {
     public static final String CUSTOMER = "Sales Customer";
+    public static final String DEAL_AUTHOR = "Deal Author";
     public static final String TITLE = "Deal Title";
     public static final String DESCRIPTION = "Deal Description";
     public static final String PRODUCT = "Sales Product";
@@ -48,6 +49,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
     @Override
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(CUSTOMER, new AnalysisDimension());
+        fieldBuilder.addField(DEAL_AUTHOR, new AnalysisDimension());
         fieldBuilder.addField(TITLE, new AnalysisDimension());
         fieldBuilder.addField(DESCRIPTION, new AnalysisDimension());
         fieldBuilder.addField(PRODUCT, new AnalysisDimension());
@@ -80,6 +82,7 @@ public class SampleSalesDataSource extends ServerDataSourceDefinition {
                 row.addValue(keys.get(TITLE), opportunityData.getCustomer());
                 row.addValue(keys.get(DESCRIPTION), opportunityData.getCustomer());
                 row.addValue(keys.get(SALES_REP), opportunityData.getSalesRep());
+                row.addValue(keys.get(DEAL_AUTHOR), opportunityData.getSalesRep());
                 row.addValue(keys.get(DEAL_SIZE), opportunityData.getDealSize());
                 row.addValue(keys.get(PRODUCT), opportunityData.getProduct());
                 row.addValue(keys.get(CUSTOMER), opportunityData.getCustomer());
