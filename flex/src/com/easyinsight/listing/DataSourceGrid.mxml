@@ -341,30 +341,6 @@
                 topReports.topItems = topItems;
                 addChildAt(topReports, 0);
             }
-            /*var dTip:DataSourcesTip = new DataSourcesTip();
-             if (topBox == null) {
-             topBox = new HBox();
-             addChildAt(dTip, 0);
-             }*/
-            if (User.getInstance().newsDate != null) {
-                if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
-                    if (getChildren().length > 0 && !(getChildAt(0) is NewsBar)) {
-                        var newsBar:NewsBar = new NewsBar();
-                        newsBar.addEventListener("dismissNews", onDismissed);
-                        if (topBox == null) {
-                            topBox = new HBox();
-                            addChildAt(topBox, 0);
-                        }
-                        topBox.addChildAt(newsBar, 0);
-                    }
-                }
-            }
-            /*var getHelp:GetHelp = new GetHelp();
-             if (topBox == null) {
-             topBox = new HBox();
-             addChildAt(topBox, 0);
-             }
-             topBox.addChild(getHelp);*/
 
             if (User.getInstance().accountOverSize) {
                 var mb:AccountMessageBar = new AccountMessageBar();
@@ -581,6 +557,7 @@
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
+    <mx:Text maxWidth="500" text="These data sources are the different systems you've connected Easy Insight to. Click on a data source name to navigate into the reports and dashboards built on this data source or to create new reports and dashboards."/>
     <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>
     <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)" verticalAlign="middle"/>
     <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>

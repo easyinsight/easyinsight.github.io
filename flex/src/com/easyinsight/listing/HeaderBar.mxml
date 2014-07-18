@@ -91,6 +91,7 @@
                             top="0" bottom="0" id="toggleBar">
         </mx:ToggleButtonBar>
         <mx:Spacer width="100%"/>
+        <listing:WhatsNewButton/>
         <listing:SearchButton/>
         <!--<easyinsight:NewLoggedOnStatus/>-->
         <easyinsight:AltLoggedOnStatus/>

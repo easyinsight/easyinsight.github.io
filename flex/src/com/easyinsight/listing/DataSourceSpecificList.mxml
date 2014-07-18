@@ -49,6 +49,7 @@
         import mx.collections.HierarchicalData;
         import mx.collections.ICollectionView;
         import mx.collections.Sort;
+        import mx.containers.Box;
 
         import mx.controls.Alert;
         import mx.controls.Text;
@@ -115,16 +116,13 @@
             dispatchEvent(new Event("showBackChanged"));
         }
 
-        protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
-        {
+        protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void {
             // resize the FlowBox manually, as the internal calculation doesn't work
 
             var fb:FlowBox = event.target as FlowBox;
 
-            if (fb != null)
-            {
-                if (fb.numChildren > 0)
-                {
+            if (fb != null) {
+                if (fb.numChildren > 0) {
                     // default the needed height to the top view metric
 
                     var maxBottom:int = fb.viewMetrics.top;
@@ -134,14 +132,12 @@
                     // If it's a UIComponent, include it if the includeInLayout property is true.
                     // If it's not a UIComponent, include it if the visible property is true.
 
-                    for (var idx:int = 0; idx < fb.numChildren; idx++)
-                    {
+                    for (var idx:int = 0; idx < fb.numChildren; idx++) {
                         var displayObject:DisplayObject = fb.getChildAt(idx);
 
                         if ((displayObject is UIComponent && (displayObject as
                                 UIComponent).includeInLayout) ||
-                                (!(displayObject is UIComponent) && displayObject.visible))
-                        {
+                                (!(displayObject is UIComponent) && displayObject.visible)) {
                             var thisBottom:int = fb.getChildAt(idx).y + fb.getChildAt(idx).height;
 
                             if (thisBottom > maxBottom)
@@ -152,8 +148,7 @@
                     fb.height = maxBottom + fb.viewMetrics.bottom +
                             fb.getStyle("paddingBottom") + 1;
                 }
-                else
-                {
+                else {
                     fb.height = fb.viewMetrics.top + fb.viewMetrics.bottom;
                 }
             }
@@ -345,7 +340,7 @@
                 }
 
 
-
+                setupConnLabel();
                 updateUI();
             }
         }
@@ -379,7 +374,7 @@
         }
 
         private function createDashboard():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { startDataSourceID:dataSourceID})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { startDataSourceID: dataSourceID})));
         }
 
         public function updateUI(event:Event = null):void {
@@ -711,7 +706,7 @@
 
         private function deleteSelf():void {
             Alert.show("Are you sure you want to delete this data source? You will not be able to undo this operation.", "Alert",
-                    Alert.OK | Alert.CANCEL, this, alertDataSourceListener, null, Alert.CANCEL);
+                            Alert.OK | Alert.CANCEL, this, alertDataSourceListener, null, Alert.CANCEL);
         }
 
         private function alertDataSourceListener(event:CloseEvent):void {
@@ -814,7 +809,7 @@
         }
 
         private function createScorecard():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, { startDataSourceID:dataSourceID})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_EDITOR, { startDataSourceID: dataSourceID})));
         }
 
         private function iconFunction(item:Object, depth:int):Class {
@@ -834,7 +829,7 @@
         }
 
         private function newFilterSet():void {
-            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, { dataSourceID:dataSourceID})));
+            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, { dataSourceID: dataSourceID})));
         }
 
         private function onAnalyze(event:AnalyzeEvent):void {
@@ -866,14 +861,14 @@
             } else if (selectedObject is LookupTableDescriptor) {
                 dispatchEvent(new AnalyzeEvent(new LookupTableSource(LookupTableDescriptor(selectedObject).id)));
             } else if (selectedObject is DashboardDescriptor) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(selectedObject).id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(selectedObject).id})));
             } else if (selectedObject is ScorecardDescriptor) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID:ScorecardDescriptor(selectedObject).id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID: ScorecardDescriptor(selectedObject).id})));
             } else if (selectedObject is InsightDescriptor) {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                 dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else if (selectedObject is FilterSetDescriptor) {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, {filterSetID:selectedObject.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.FILTER_SET_EDITOR, {filterSetID: selectedObject.id})));
             }
         }
 
@@ -920,13 +915,6 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            if (User.getInstance().newsDate != null) {
-                if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
-                    var newsBar:NewsBar = new NewsBar();
-                    newsBar.addEventListener("dismissNews", onDismissed);
-                    addChildAt(newsBar, 0);
-                }
-            }
 
             if (User.getInstance().accountOverSize) {
                 var mb:AccountMessageBar = new AccountMessageBar();
@@ -960,7 +948,7 @@
                 var str:String = "Are you sure you want to delete the selected?";
                 var thisObj:UIComponent = this;
                 Alert.show(str, "Alert", Alert.OK | Alert.CANCEL, this,
-                        function(closeEvent:CloseEvent):void {
+                        function (closeEvent:CloseEvent):void {
                             if (closeEvent.detail == Alert.OK) {
                                 ProgressAlert.alert(thisObj, "Deleting...", null, uploadService.deleteReports);
                                 uploadService.deleteReports.send(activityList);
@@ -1198,7 +1186,8 @@
         }
 
         [Bindable]
-        private var createOptions:ArrayCollection = new ArrayCollection([ {label: "New Report", data: "newReport"},
+        private var createOptions:ArrayCollection = new ArrayCollection([
+            {label: "New Report", data: "newReport"},
             {label: "New Dashboard", data: "newDashboard"},
             {label: "New Folder", data: "newFolder"},
             {label: "New Lookup Table", data: "newLookupTable"},
@@ -1206,7 +1195,8 @@
         ]);
 
         [Bindable]
-        private var customizeOptions:ArrayCollection = new ArrayCollection([ {label: "Organize Folders", data: "organizeFolders"},
+        private var customizeOptions:ArrayCollection = new ArrayCollection([
+            {label: "Organize Folders", data: "organizeFolders"},
             {label: "Page Settings", data: "tableColumns"}
         ]);
 
@@ -1216,6 +1206,49 @@
         private function tagChanges():void {
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
         }
+
+        private function setupConnLabel():void {
+            var reports:int = 0;
+            for each (var o:EIDescriptor in _dataSourceDescriptor.children) {
+                if (o.getType() == EIDescriptor.REPORT) {
+                    reports++;
+                }
+            }
+            if (reports == 0) {
+                /*
+                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                 <mx:Text text="You don't have any reports on this data source yet. Click on the 'Create' button and choose 'New Report' to get started!" fontSize="20"
+                 maxWidth="500"/>
+                 </mx:Box>
+                 */
+                if (gridBox == null) {
+                    gridBox = new VBox();
+                    gridBox.percentWidth = 100;
+                    gridBox.percentHeight = 100;
+                    gridBox.setStyle("backgroundColor", 0xFFFFFF);
+                    gridBox.setStyle("verticalAlign", "middle");
+                    gridBox.setStyle("horizontalAlign", "center");
+                    var text:Text = new Text();
+                    text.text = "You don't have any reports on this data source yet. Click on the 'Create' button and choose 'New Report' to get started!";
+                    text.setStyle("fontSize", 20);
+                    text.maxWidth = 500;
+                    gridBox.addChild(text);
+                }
+                gridCanvas.addChild(gridBox);
+                connLabel = "This data source is your connection to " + _dataSourceDescriptor.name + ". You can click on the \"Create\" button below and choose \"New Report\" to get started. You can click on \"Back to List\" to return to the data source list.";
+            } else {
+                if (gridBox != null) {
+                    gridCanvas.removeChild(gridBox);
+                    gridBox = null;
+                }
+                connLabel = "This data source is your connection to " + _dataSourceDescriptor.name + ". You can click on the \"Create\" button to create new reports and dashboards. You can open up existing reports and dashboards by clicking on their names in the table. You can click on \"Back to List\" to return to the data source list.";
+            }
+        }
+
+        private var gridBox:VBox;
+
+        [Bindable]
+        private var connLabel:String;
         ]]></mx:Script>
     <mx:Style>
         .myCustomPopUpStyleName {
@@ -1238,6 +1271,8 @@
          horizontalGap="20"
          backgroundColor="#FFFFFF" width="100%" horizontalAlign="center" verticalGap="5">
         <mx:Label text="{dataSourceName}" fontSize="20" maxWidth="300"/>
+        <mx:Text maxWidth="600" text="{connLabel}" styleName="fallThroughFonts"/>
+        <mx:HRule/>
         <mx:HBox verticalAlign="middle" width="100%">
             <mx:LinkButton label="Back to list" click="dispatchEvent(new Event('backToDataSources'))" fontSize="12"
                            visible="{showBack}" id="backToListButton"/>
@@ -1271,10 +1306,12 @@
 
         </containers:FlowBox>
         <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>
-        <util:PatchedAdvancedDataGrid id="uploadGrid" selectable="false"
-                                             fontSize="12"
-                                             headerStyleName="BlueHeader"
-                                             iconFunction="simpleIconFunction" width="100%" height="100%">
-        </util:PatchedAdvancedDataGrid>
+        <mx:Canvas width="100%" height="100%" id="gridCanvas">
+            <util:PatchedAdvancedDataGrid id="uploadGrid" selectable="false"
+                                          fontSize="12"
+                                          headerStyleName="BlueHeader"
+                                          iconFunction="simpleIconFunction" width="100%" height="100%">
+            </util:PatchedAdvancedDataGrid>
+        </mx:Canvas>
     </mx:VBox>
 </mx:VBox>
