@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.config.ConfigLoader;
@@ -147,9 +149,28 @@ public class Database {
         return sessionFactory.openStatelessSession();
     }
 
+    private static Map<Connection, StackTraceElement[]> map = new HashMap<>();
+
+    public static void outputStackElements() {
+        System.out.println("Map size = " + map.size());
+        for (StackTraceElement[] el : map.values()) {
+            for (StackTraceElement e : el) {
+                System.out.println(e.toString());
+            }
+            System.out.println();
+        }
+    }
+
     public EIConnection getConnection() {
         try {
-            return new EIConnection(dataSource.getConnection());
+            StackTraceElement[] cause = Thread.currentThread().getStackTrace();
+            EIConnection conn = new EIConnection(dataSource.getConnection());
+            try {
+                map.put(conn, cause);
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+            return conn;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -157,6 +178,11 @@ public class Database {
 
     public static void closeConnection(Connection conn) {
         try {
+            try {
+                map.remove(conn);
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
             conn.close();
         } catch (SQLException e) {
             LogClass.error(e);
