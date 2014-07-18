@@ -71,5 +71,8 @@ public class DashboardScorecardEditorComponent extends VBox implements IDashboar
 
     public function forceRetrieve():void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

@@ -82,5 +82,8 @@ public class DashboardScorecardViewComponent extends Canvas implements IDashboar
 
     public function forceRetrieve():void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

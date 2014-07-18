@@ -4,6 +4,7 @@ import com.easyinsight.analysis.EmbeddedControllerLookup;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
+import com.easyinsight.analysis.PDFImageData;
 import com.easyinsight.analysis.PopupMenuFactory;
 import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.filtering.FilterDefinition;
@@ -13,13 +14,19 @@ import com.easyinsight.report.EmbedReportContextMenuFactory;
 import com.easyinsight.report.EmbeddedReportExportWindow;
 import com.easyinsight.report.ReportSetupEvent;
 import com.easyinsight.solutions.InsightDescriptor;
+import com.easyinsight.util.PNGEnc;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.SaveButton;
+
+import flash.display.Bitmap;
+
+import flash.display.BitmapData;
 
 import flash.display.DisplayObject;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.utils.ByteArray;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
@@ -109,7 +116,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         } else if (getChildren().length != 0 && !labelBox && dashboardReport.showLabel) {
             var blah:Box = new Box();
             blah.height = 24;
-            blah.setStyle("backgroundColor", 0xDDDDDD);
+            blah.setStyle("backgroundColor", dashboardEditorMetadata.dashboard.reportHeaderBackgroundColor);
+            blah.setStyle("color", dashboardEditorMetadata.dashboard.reportHeaderTextColor);
             blah.setStyle("borderThickness", 1);
             blah.setStyle("borderStyle", "solid");
             blah.percentWidth = 100;
@@ -151,7 +159,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (dashboardReport.showLabel) {
             var blah:Box = new Box();
             blah.height = 28;
-            blah.setStyle("backgroundColor", 0xDDDDDD);
+            blah.setStyle("backgroundColor", dashboardEditorMetadata.dashboard.reportHeaderBackgroundColor);
+            blah.setStyle("color", dashboardEditorMetadata.dashboard.reportHeaderTextColor);
             blah.setStyle("borderThickness", 1);
             blah.setStyle("borderStyle", "solid");
             blah.percentWidth = 100;
@@ -240,7 +249,8 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
         if (dashboardReport.showLabel) {
             var blah:Box = new Box();
             blah.height = 28;
-            blah.setStyle("backgroundColor", 0xDDDDDD);
+            blah.setStyle("backgroundColor", dashboardEditorMetadata.dashboard.reportHeaderBackgroundColor);
+            blah.setStyle("color", dashboardEditorMetadata.dashboard.reportHeaderTextColor);
             blah.setStyle("borderThickness", 1);
             blah.setStyle("borderStyle", "solid");
             blah.percentWidth = 100;
@@ -545,5 +555,15 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     }
 
+    public function recordToPDF(imageMap:Object):void {
+        var bd:BitmapData = new BitmapData(viewFactory.width, viewFactory.height);
+        bd.draw(viewFactory);
+        var ba:ByteArray =  PNGEnc.encode(bd);
+        var imageData:PDFImageData = new PDFImageData();
+        imageData.bytes = ba;
+        imageData.width = viewFactory.width;
+        imageData.height = viewFactory.height;
+        imageMap[dashboardReport.urlKey] = imageData;
+    }
 }
 }

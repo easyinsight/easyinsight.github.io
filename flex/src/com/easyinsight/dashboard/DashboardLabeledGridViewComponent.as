@@ -96,7 +96,8 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
         var blah:Box = new Box();
         hb.addChild(blah);
         blah.height = 28;
-        blah.setStyle("backgroundColor", 0xDDDDDD);
+        blah.setStyle("backgroundColor", dashboardEditorMetadata.dashboard.reportHeaderBackgroundColor);
+        blah.setStyle("color", dashboardEditorMetadata.dashboard.reportHeaderTextColor);
         blah.setStyle("borderThickness", 1);
         blah.setStyle("borderStyle", "solid");
 
@@ -254,6 +255,12 @@ public class DashboardLabeledGridViewComponent extends VBox implements IDashboar
             reports.addAll(comp.reportCount());
         }
         return reports;
+    }
+
+    public function recordToPDF(imageMap:Object):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.recordToPDF(imageMap);
+        }
     }
 }
 }
