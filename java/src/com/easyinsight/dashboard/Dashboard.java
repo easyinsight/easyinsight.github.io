@@ -796,6 +796,8 @@ public class Dashboard implements Cloneable, Serializable {
         JSONObject styles = new JSONObject();
         styles.put("main_stack_start", String.format("#%06X", stackFill1Start & 0xFFFFFF));
         styles.put("alternative_stack_start", String.format("#%06X", stackFill2Start & 0xFFFFFF));
+        styles.put("report_header_background", String.format("#%06X", reportHeaderBackgroundColor & 0xFFFFFF));
+        styles.put("report_header_text", String.format("#%06X", reportHeaderTextColor & 0xFFFFFF));
 
         dashboard.put("styles", styles);
         return dashboard;

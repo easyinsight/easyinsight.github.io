@@ -839,7 +839,7 @@ public class DashboardService {
                         dashboard.setReportHeaderBackgroundColor(applicationSkin.getDashboardReportHeaderBackgroundColor());
                     }
                     if (applicationSkin.isDashboardReportHeaderTextColorEnabled()) {
-                        dashboard.setReportHeaderBackgroundColor(applicationSkin.getDashboardReportHeaderTextColor());
+                        dashboard.setReportHeaderTextColor(applicationSkin.getDashboardReportHeaderTextColor());
                     }
                 }
             }
