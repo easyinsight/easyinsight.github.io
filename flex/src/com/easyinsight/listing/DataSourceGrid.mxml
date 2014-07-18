@@ -557,7 +557,8 @@
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
-    <mx:Text maxWidth="500" text="These data sources are the different systems you've connected Easy Insight to. Click on a data source name to navigate into the reports and dashboards built on this data source or to create new reports and dashboards."/>
+    <mx:Text maxWidth="500" text="These data sources are the different systems you've connected Easy Insight to. Click on a data source name to navigate to the reports and dashboards built on this data source or to create new reports and dashboards."
+            styleName="fallThroughFonts"/>
     <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>
     <containers:FlowBox id="tagBox" width="100%" updateComplete="adapterFlowBoxUpdateCompleteHandler(event)" verticalAlign="middle"/>
     <mx:HRule id="tagLowerRule" width="100%" strokeColor="#CCCCCC"/>
