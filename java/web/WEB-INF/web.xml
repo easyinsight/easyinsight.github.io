@@ -339,6 +339,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>HtmlDashboardPDF</servlet-name>
+        <servlet-class>com.easyinsight.export.DashboardPDFServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>Lock</servlet-name>
         <display-name>Lock</display-name>
         <servlet-class>com.easyinsight.api.v3.LockServlet</servlet-class>
@@ -1037,6 +1042,11 @@
     <servlet-mapping>
         <servlet-name>BulkUpdateRows</servlet-name>
         <url-pattern>/xml/bulkUpdateRows</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HtmlDashboardPDF</servlet-name>
+        <url-pattern>/htmlDashboardPDF</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
