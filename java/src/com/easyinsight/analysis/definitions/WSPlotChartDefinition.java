@@ -18,6 +18,20 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     private AnalysisItem yaxisMeasure;
     private boolean briefLabels;
     private boolean showLabels;
+    private List<MultiColor> multiColors;
+
+    public List<MultiColor> getMultiColors() {
+        return multiColors;
+    }
+
+    public void setMultiColors(List<MultiColor> multiColors) {
+        this.multiColors = multiColors;
+    }
+
+    @Override
+    protected List<MultiColor> configuredMultiColors() {
+        return multiColors;
+    }
 
     public boolean isBriefLabels() {
         return briefLabels;
@@ -82,6 +96,7 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         super.populateProperties(properties);
         showLabels = findBooleanProperty(properties, "showLabels", true);
         briefLabels = findBooleanProperty(properties, "briefLabels", true);
+        multiColors = multiColorProperty(properties, "multiColors");
     }
 
     @Override
@@ -89,6 +104,7 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportBooleanProperty("showLabels", showLabels));
         properties.add(new ReportBooleanProperty("briefLabels", briefLabels));
+        properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
 
