@@ -2,6 +2,7 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
@@ -40,6 +41,7 @@ public class PlotChartServlet extends HtmlServlet {
 
         List<JSONObject> arrays = new ArrayList<JSONObject>();
         Map<String, JSONArray> pointMap = new HashMap<>();
+        Map<String, String> customColorMap = new HashMap<>();
         for (IRow row : dataSet.getRows()) {
 
 
@@ -47,7 +49,15 @@ public class PlotChartServlet extends HtmlServlet {
             if (plotDefinition.getIconGrouping() == null) {
                 key = "";
             } else {
-                key = row.getValue(plotDefinition.getIconGrouping()).toString();
+                Value value = row.getValue(plotDefinition.getIconGrouping());
+                key = value.toString();
+                if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                    TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                    if (textValueExtension.getColor() > 0) {
+                        String color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
+                        customColorMap.put(key, color);
+                    }
+                }
             }
 
             JSONArray points;
@@ -63,11 +73,18 @@ public class PlotChartServlet extends HtmlServlet {
             points.put(p1);
         }
 
+        List<String> colors = plotDefinition.createMultiColors();
+
+        int i = 0;
         for (Map.Entry<String, JSONArray> entry : pointMap.entrySet()) {
             JSONObject point = new JSONObject();
             point.put("values", entry.getValue());
             point.put("key", entry.getKey());
+            String customColor = customColorMap.get(entry.getKey());
+            String color = customColor != null ? customColor : colors.get(i % colors.size());
+            point.put("color", color);
             arrays.add(point);
+            i++;
         }
 
         object.put("point", true);
