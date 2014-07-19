@@ -252,6 +252,9 @@ public class StyleConfiguration {
         if (report is PieChartDefinition) {
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PieChartDefinition(report).multiColors, report, null, colorSetFormItem));
         }
+        if (report is PlotChartDefinition) {
+            items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", PlotChartDefinition(report).multiColors, report, null, colorSetFormItem));
+        }
         if (report is ColumnChartDefinition) {
             items.addItem(new ColorReportFormItem("Custom Chart Color", "chartColor", ColumnChartDefinition(report).chartColor, report, "useChartColor", colorSetFormItem));
             items.addItem(new ColorReportFormItem("Custom Chart Gradient", "gradientColor", ColumnChartDefinition(report).gradientColor, report, null, colorSetFormItem));
@@ -267,9 +270,6 @@ public class StyleConfiguration {
         }
         if (report is StackedBarChartDefinition) {
             items.addItem(new MultiColorReportFormItem("Multi Color Report", "multiColors", StackedBarChartDefinition(report).multiColors, report, null, colorSetFormItem));
-        }
-        if (report is PlotChartDefinition) {
-
         }
         if (report is BubbleChartDefinition) {
 
