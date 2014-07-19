@@ -13,27 +13,20 @@
                         <mx:HBox>
                             <mx:Button label="Thread Dump" click="dumpThreads()"/>
                             <mx:Button label="Update Zip Geocodes" click="updateZipCodes()"/>
-                            <mx:Button label="ACS Test" click="acstest()"/>
-                            <mx:Button label="ACS Copy" click="acscopy()"/>
                         </mx:HBox>
                         <mx:HBox>
-                            <mx:Button label="Apply Days" click="applyDays()"/>
                             <mx:Button label="Report Admin XML" click="reportAdminXML()"/>
                             <mx:Button label="Report Test" click="reportTest()"/>
+                            <mx:Button label="Move Source" click="moveSource()"/>
                         </mx:HBox>
                         <mx:HBox>
                             <mx:Button label="Global Skin" click="globalSkin()"/>
                             <mx:Button label="Header Logo" click="headerLogo()"/>
-                            <mx:Button label="Synchronize" click="sync()"/>
                         </mx:HBox>
                         <mx:Button label="Archive" click="archive()"/>
                         <mx:HBox>
-                            <mx:Button label="Fix Trial Accounts" click="fixTrialAccounts()"/>
-                            <mx:Button label="Force Trial Expire" click="forceTrialExpire()"/>
-                            <mx:Button label="Synchronize Invoices" click="syncInvoices()"/>
-                            <mx:Button label="Task Generators" click="taskGenerators()"/>
                             <mx:Button label="Flush Cache" click="flushCache()"/>
-                            <mx:Button label="Argh" click="argh()"/>
+                            <mx:Button label="Output Stack on Database" click="outputStackOnDatabase()"/>
                         </mx:HBox>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Connections">
@@ -52,6 +45,7 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.ArchiveWindow;
+        import com.easyinsight.administration.MoveSourceWindow;
         import com.easyinsight.administration.ReportAdminXMLWindow;
         import com.easyinsight.administration.ReportTestWindow;
         import com.easyinsight.administration.UpdateZipsWindow;
@@ -136,6 +130,12 @@
 
         private function archive():void {
             var window:ArchiveWindow = new ArchiveWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function moveSource():void {
+            var window:MoveSourceWindow = new MoveSourceWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -256,6 +256,11 @@
         private function offered():void {
 
         }
+
+        private function outputStackOnDatabase():void {
+            ProgressAlert.alert(this, "Outputting database stack...", null, adminService.outputStackOnDatabase);
+            adminService.outputStackOnDatabase.send();
+        }
 		]]>
     </mx:Script>
     <mx:RemoteObject id="authService" destination="login">
@@ -270,6 +275,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="threadDump"/>
+        <mx:method name="outputStackOnDatabase"/>
         <mx:method name="argh"/>
         <mx:method name="applyDays"/>
         <mx:method name="constantContactSync"/>

@@ -86,11 +86,22 @@ public class LineD3ChartServlet extends HtmlServlet {
 
             Set<Date> xAxisValues = new HashSet<Date>();
 
+            Map<String, String> customColorMap = new HashMap<>();
             for (IRow row : dataSet.getRows()) {
-                String yAxisValue = row.getValue(yAxis).toString();
+                Value yAxisValueObj = row.getValue(yAxis);
+                String yAxisValue = yAxisValueObj.toString();
+                String customColor;
+                if (yAxisValueObj.getValueExtension() != null && yAxisValueObj.getValueExtension() instanceof TextValueExtension) {
+                    TextValueExtension textValueExtension = (TextValueExtension) yAxisValueObj.getValueExtension();
+                    if (textValueExtension.getColor() > 0) {
+                        customColor = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
+                        customColorMap.put(yAxisValue, customColor);
+                    }
+                }
+
                 Map<Date, Double> array = series.get(yAxisValue);
                 if (array == null) {
-                    array = new HashMap<Date, Double>();
+                    array = new HashMap<>();
                     series.put(yAxisValue, array);
                 }
                 JSONArray values = new JSONArray();
@@ -137,7 +148,8 @@ public class LineD3ChartServlet extends HtmlServlet {
                 }
                 axisObject.put("values", points);
                 axisObject.put("key", entry.getKey());
-                String color = colors.get(i % colors.size());
+                String customColor = customColorMap.get(entry.getKey());
+                String color = customColor != null ? customColor : colors.get(i % colors.size());
                 axisObject.put("color", color);
                 i++;
                 blahArray.put(axisObject);

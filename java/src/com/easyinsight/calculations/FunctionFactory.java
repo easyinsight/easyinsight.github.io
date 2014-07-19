@@ -319,6 +319,8 @@ public class FunctionFactory {
             return new LatitudeFromPostal();
         } else if (s.equals("longitudefrompostal")) {
             return new LongitudeFromPostal();
+        } else if (s.equals("boundsset")) {
+            return new BoundsSet();
         } else {
             return null;
         }

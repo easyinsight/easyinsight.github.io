@@ -109,7 +109,6 @@ public class ColumnChartServlet extends HtmlServlet {
             for (IRow row : dataSet.getRows()) {
                 Value value = row.getValue(xAxisItem);
                 String x = ExportService.createValue(md, xAxisItem, value, false);
-                //String x = row.getValue(xAxisItem).toString();
                 JSONObject point = new JSONObject();
                 point.put("x", x);
                 Value measureValue = row.getValue(measureItem);
