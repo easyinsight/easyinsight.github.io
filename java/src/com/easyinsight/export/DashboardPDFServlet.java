@@ -88,12 +88,16 @@ public class DashboardPDFServlet extends HttpServlet {
                 String urlKey = entry.getKey();
                 JSONObject val = entry.getValue();
                 if (val != null) {
-                    int width = Integer.parseInt(val.get("width").toString());
-                    int height = Integer.parseInt(val.get("height").toString());
-                    PDFImageData pdfImageData = new PDFImageData();
-                    pdfImageData.setWidth(width);
-                    pdfImageData.setHeight(height);
-                    images.put(urlKey, pdfImageData);
+                    Object widthObj = val.get("width");
+                    Object heightObj = val.get("height");
+                    if (widthObj != null && heightObj != null) {
+                        int width = Integer.parseInt(val.get("width").toString());
+                        int height = Integer.parseInt(val.get("height").toString());
+                        PDFImageData pdfImageData = new PDFImageData();
+                        pdfImageData.setWidth(width);
+                        pdfImageData.setHeight(height);
+                        images.put(urlKey, pdfImageData);
+                    }
                 }
             }
             Dashboard dashboard = ds.getDashboard(dashboardID);
