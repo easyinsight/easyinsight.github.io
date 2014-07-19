@@ -25,6 +25,15 @@ public class WSMap extends WSAnalysisDefinition {
     private String map = "US States";
     private List<MultiColor> pointColors = new ArrayList<>();
     private long mapID;
+    private transient String[] boundSet;
+
+    public String[] getBoundSet() {
+        return boundSet;
+    }
+
+    public void setBoundSet(String[] boundSet) {
+        this.boundSet = boundSet;
+    }
 
     public int getNoDataFill() {
         return noDataFill;
