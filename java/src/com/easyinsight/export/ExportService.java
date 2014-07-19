@@ -1362,7 +1362,6 @@ public class ExportService {
                 int year = cal1.get(Calendar.YEAR);
 
                 valueString = "Q" + quarter + "-" + year;
-                System.out.println("got " + valueString + " for " + dateValue.getDate());
             } else if (dateDim.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
                 int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
                 valueString = "Q" + quarter;
