@@ -263,5 +263,8 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
 
     public function toggleFilters(showFilters:Boolean):void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

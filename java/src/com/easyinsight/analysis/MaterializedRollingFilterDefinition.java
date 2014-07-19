@@ -128,7 +128,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         } else {
             targetDayOfWeek = DayOfWeek.SATURDAY;
         }
-        System.out.println("looking for start date");
+
         if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift(insightRequestMetadata)) {
 
             ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));

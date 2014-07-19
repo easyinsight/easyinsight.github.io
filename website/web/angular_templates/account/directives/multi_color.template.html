@@ -1,0 +1,10 @@
+<div class="form-group" ng-init="show=false;">
+    <label ng-click="show=!show">{{ text }}</label> <span class='btn btn-default' ng-click="show=!show">{{ show ? "Hide" : "Show" }}</span>
+    <div class="row" ng-show="show">
+        <div class="col-md-4" ng-repeat="c in field">
+            <input type="checkbox" ng-model="c.color_start_enabled" />
+            <input id="summary_text_color" type="text" colorpicker="hex" style="width: 100px;" ng-model="c.color_start" />
+            <span class="color_swatch" ng-style="{ 'background-color': c.color_start }" />
+        </div>
+    </div>
+</div>

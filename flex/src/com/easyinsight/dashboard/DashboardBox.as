@@ -374,5 +374,8 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
 
     public function toggleFilters(showFilters:Boolean):void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

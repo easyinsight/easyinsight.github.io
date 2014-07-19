@@ -325,8 +325,8 @@ public class FeedService {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
-            FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            List<AnalysisItem> fields = dataSource.allFields(conn);
+            //FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            List<AnalysisItem> fields = FeedRegistry.instance().getFeed(dataSourceID, conn).getFields();
             Collections.sort(fields, (o1, o2) -> o1.toDisplay().compareTo(o2.toDisplay()));
             return fields;
         } catch (Exception e) {

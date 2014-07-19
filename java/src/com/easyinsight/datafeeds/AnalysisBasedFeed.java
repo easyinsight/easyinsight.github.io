@@ -72,6 +72,11 @@ public class AnalysisBasedFeed extends Feed {
         if (insightRequestMetadata.getFilters() != null) {
             reportFilters.addAll(insightRequestMetadata.getFilters());
         }
+        Set<AnalysisItem> originalItems = insightRequestMetadata.getOriginalDateItems();
+        if (originalItems != null && originalItems.size() > 0) {
+            WSListDefinition listDefinition = (WSListDefinition) analysisDefinition;
+            listDefinition.getColumns().addAll(originalItems);
+        }
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
         Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
         Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();

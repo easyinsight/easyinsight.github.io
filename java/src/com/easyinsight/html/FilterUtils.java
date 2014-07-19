@@ -109,16 +109,17 @@ public class FilterUtils {
             }
         } else if (filter instanceof MultiFlatDateFilter) {
             MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
+            List<DateLevelWrapper> wrappers = new DataService().getMultiDateOptions(multiFlatDateFilter);
             Integer startMonthString = curFilter != null ? (Integer) curFilter.get("start") : null;
             Integer endMonthString = curFilter != null ? (Integer) curFilter.get("end") : null;
             List<DateLevelWrapper> levels = new ArrayList<DateLevelWrapper>();
             if (startMonthString != null && endMonthString != null) {
                 int startMonth = startMonthString;
                 int endMonth = endMonthString;
-                for (int i = startMonth; i <= endMonth; i++) {
-                    DateLevelWrapper wrapper = new DateLevelWrapper();
-                    wrapper.setDateLevel(i);
-                    levels.add(wrapper);
+                for (DateLevelWrapper wrapper : wrappers) {
+                    if (wrapper.getDateLevel() >= startMonth && wrapper.getDateLevel() <= endMonth) {
+                        levels.add(wrapper);
+                    }
                 }
                 multiFlatDateFilter.setLevels(levels);
             }

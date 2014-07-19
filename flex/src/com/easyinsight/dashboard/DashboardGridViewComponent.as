@@ -176,6 +176,12 @@ public class DashboardGridViewComponent extends Grid implements IDashboardViewCo
         }
     }
 
+    public function recordToPDF(imageMap:Object):void {
+        for each (var comp:IDashboardViewComponent in viewChildren) {
+            comp.recordToPDF(imageMap);
+        }
+    }
+
     public function reportCount():ArrayCollection {
         var reports:ArrayCollection = new ArrayCollection();
         for each (var comp:IDashboardViewComponent in viewChildren) {

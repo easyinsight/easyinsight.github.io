@@ -40,7 +40,7 @@ public class DataSourceInfoServlet extends JSONServlet {
         ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
         JSONArray array;
         List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
-        array = new JSONArray(descriptors.stream().map(d -> {
+        array = new JSONArray(descriptors.stream().sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName())).map(d -> {
             try {
                 return d.toJSON(md);
             } catch (JSONException e) {

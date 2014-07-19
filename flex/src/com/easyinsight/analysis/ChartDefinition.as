@@ -9,8 +9,6 @@ public class ChartDefinition extends AnalysisDefinition {
     public var chartType:int;
     public var chartFamily:int;
     public var limitOther:Boolean = true;
-    public var rotationAngle:Number;
-    public var elevationAngle:Number;
 
     public var showLegend:Boolean = true;
     public var chartDefinitionID:Number;

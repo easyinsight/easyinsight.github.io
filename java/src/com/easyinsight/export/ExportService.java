@@ -9,6 +9,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.calculations.*;
+import com.easyinsight.calculations.functions.DayOfQuarter;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardStackPositions;
@@ -1353,19 +1354,34 @@ public class ExportService {
             }
         } else if (headerItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && value.type() == Value.DATE) {
             AnalysisDateDimension dateDim = (AnalysisDateDimension) headerItem;
-            DateFormat sdf = getDateFormatForAccount(dateDim.getDateLevel(), dateDim.getOutputDateFormat(), dateFormat);
-
-            if (sdf == null) {
-                throw new RuntimeException("No date format found.");
-            }
             DateValue dateValue = (DateValue) value;
+            if (dateDim.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
+                Calendar cal1 = Calendar.getInstance();
+                cal1.setTime(dateValue.getDate());
+                int year = cal1.get(Calendar.YEAR);
 
-            // todo: impl
+                valueString = "Q" + quarter + "-" + year;
+                System.out.println("got " + valueString + " for " + dateValue.getDate());
+            } else if (dateDim.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
+                int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
+                valueString = "Q" + quarter;
+            } else {
+                DateFormat sdf = getDateFormatForAccount(dateDim.getDateLevel(), dateDim.getOutputDateFormat(), dateFormat);
 
-            if (dateDim.isTimeshift(null)) {
-                sdf.setCalendar(cal);
+                if (sdf == null) {
+                    throw new RuntimeException("No date format found.");
+                }
+
+
+                // todo: impl
+
+                if (dateDim.isTimeshift(null)) {
+                    sdf.setCalendar(cal);
+                }
+                valueString = sdf.format(dateValue.getDate());
             }
-            valueString = sdf.format(dateValue.getDate());
+
         } else {
             if (value.type() == Value.NUMBER) {
                 int intValue = value.toDouble().intValue();

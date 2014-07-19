@@ -7,6 +7,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -106,7 +107,9 @@ public class ColumnChartServlet extends HtmlServlet {
             JSONArray points = new JSONArray();
             AnalysisItem measureItem = measures.get(i);
             for (IRow row : dataSet.getRows()) {
-                String x = row.getValue(xAxisItem).toString();
+                Value value = row.getValue(xAxisItem);
+                String x = ExportService.createValue(md, xAxisItem, value, false);
+                //String x = row.getValue(xAxisItem).toString();
                 JSONObject point = new JSONObject();
                 point.put("x", x);
                 Value measureValue = row.getValue(measureItem);

@@ -472,7 +472,7 @@ public class Dashboard implements Cloneable, Serializable {
         return reports;
     }
 
-    private void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
+    private static void cleanup(AnalysisItem analysisItem, boolean changingDataSource) {
         if (changingDataSource) {
             // TODO: validate calculations and lookup tables--if necessary to create, should emit something with the report
             analysisItem.setLookupTableID(null);
@@ -480,12 +480,12 @@ public class Dashboard implements Cloneable, Serializable {
         }
     }
 
-    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource)
+    public DashboardSaveMetadata cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource)
             throws CloneNotSupportedException {
         return cloneDashboard(scorecardReplacmenetMap, changingDataSource, allFields, dataSource, new ReplacementMapFactory());
     }
 
-    public Dashboard cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource,
+    public DashboardSaveMetadata cloneDashboard(Map<Long, Scorecard> scorecardReplacmenetMap, boolean changingDataSource, List<AnalysisItem> allFields, FeedDefinition dataSource,
                                     ReplacementMapFactory factory) throws CloneNotSupportedException {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
@@ -496,17 +496,16 @@ public class Dashboard implements Cloneable, Serializable {
         dashboard.setRecommendedExchange(false);
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
 
-
-
-        //Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-
         if (getDefaultDrillthrough() != null) {
             Link clone = getDefaultDrillthrough().clone();
             dashboard.setDefaultDrillthrough(clone);
         }
 
+        List<AnalysisItem> fields = new ArrayList<>();
+        ReplacementMap targetMap;
         if (factory instanceof TemplateReplacementMapFactory) {
             ReplacementMap replacementMap = factory.createMap();
+            targetMap = replacementMap;
             for (FilterDefinition persistableFilterDefinition : this.filters) {
                 filterDefinitions.add(persistableFilterDefinition.clone());
                 List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
@@ -525,6 +524,11 @@ public class Dashboard implements Cloneable, Serializable {
             }
 
             dashboard.setFilters(filterDefinitions);
+
+            fields.addAll(replacementMap.getFields());
+
+            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacementMap, allFields, changingDataSource, dataSource, fields);
+            dashboard.visit(visitor);
         } else {
             Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
             for (FilterDefinition persistableFilterDefinition : this.filters) {
@@ -560,6 +564,7 @@ public class Dashboard implements Cloneable, Serializable {
             }
 
             ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+            targetMap = replacements;
 
             for (AnalysisItem analysisItem : replacementMap.values()) {
                 analysisItem.updateIDs(replacements);
@@ -570,11 +575,122 @@ public class Dashboard implements Cloneable, Serializable {
             }
 
             dashboard.setFilters(filterDefinitions);
+
+            fields.addAll(replacements.getFields());
+
+            FilterOverrideVisitor visitor = new FilterOverrideVisitor(replacements, allFields, changingDataSource, dataSource, fields);
+            dashboard.visit(visitor);
         }
 
         //dashboard.getRootElement().updateReportIDs(reportReplacementMap);
         dashboard.getRootElement().updateScorecardIDs(scorecardReplacmenetMap);
-        return dashboard;
+
+        DashboardSaveMetadata saveMetadata = new DashboardSaveMetadata(dashboard, targetMap, fields);
+
+        return saveMetadata;
+    }
+
+    private static class FilterOverrideVisitor implements IDashboardVisitor {
+
+        private ReplacementMap replacementMap;
+        private List<AnalysisItem> allFields;
+        private boolean changingDataSource;
+        private FeedDefinition dataSource;
+        private List<AnalysisItem> fields;
+
+        private FilterOverrideVisitor(ReplacementMap replacementMap, List<AnalysisItem> allFields, boolean changingDataSource, FeedDefinition dataSource,
+                                      List<AnalysisItem> fields) {
+            this.replacementMap = replacementMap;
+            this.allFields = allFields;
+            this.changingDataSource = changingDataSource;
+            this.dataSource = dataSource;
+            this.fields = fields;
+        }
+
+        @Override
+        public void accept(DashboardElement dashboardElement) {
+            try {
+                if (dashboardElement.getFilters() != null && dashboardElement.getFilters().size() > 0) {
+                    if (replacementMap instanceof TemplateReplacementMap) {
+                        System.out.println("...");
+                        List<FilterDefinition> filterDefinitions = new ArrayList<>();
+                        for (FilterDefinition persistableFilterDefinition : dashboardElement.getFilters()) {
+                            System.out.println("\tinspecting " +persistableFilterDefinition.getField().toDisplay());
+                            filterDefinitions.add(persistableFilterDefinition.clone());
+                            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+                            for (AnalysisItem item : filterItems) {
+                                replacementMap.addField(item, true);
+                            }
+                        }
+
+
+                        for (AnalysisItem analysisItem : replacementMap.getFields()) {
+                            analysisItem.updateIDs(replacementMap);
+                        }
+
+                        for (FilterDefinition filter : filterDefinitions) {
+                            filter.updateIDs(replacementMap);
+                        }
+
+                        fields.addAll(replacementMap.getFields());
+
+                        dashboardElement.setFilters(filterDefinitions);
+                    } else {
+                        System.out.println("...");
+                        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+                        List<FilterDefinition> filterDefinitions = new ArrayList<>();
+                        for (FilterDefinition persistableFilterDefinition : dashboardElement.getFilters()) {
+                            System.out.println("\t" + persistableFilterDefinition.getField().toDisplay());
+                            filterDefinitions.add(persistableFilterDefinition.clone());
+                            List<AnalysisItem> filterItems = persistableFilterDefinition.getAnalysisItems(allFields, new ArrayList<AnalysisItem>(), true, true, new HashSet<AnalysisItem>(), new AnalysisItemRetrievalStructure(null));
+                            for (AnalysisItem item : filterItems) {
+                                if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                                    AnalysisItem clonedItem = item.clone();
+                                    cleanup(clonedItem, changingDataSource);
+                                    replacementMap.put(item.getAnalysisItemID(), clonedItem);
+                                }
+                            }
+                        }
+
+
+
+                        for (AnalysisItem analysisItem : replacementMap.values()) {
+                            System.out.println("Looking for a match for " + analysisItem.toDisplay());
+                            AnalysisItem parent = dataSource.findAnalysisItemByDisplayName(analysisItem.toDisplay());
+                            if (parent != null) {
+                                System.out.println("\tFound match by name of " + parent.toDisplay());
+                                analysisItem.setKey(parent.getKey());
+                            } else {
+                                System.out.println("\tNo match, looking by key");
+                                Key key = dataSource.getField(analysisItem.getKey().toDisplayName());
+                                if (key != null) {
+                                    analysisItem.setKey(key);
+                                } else {
+                                    Key clonedKey = analysisItem.getKey().clone();
+                                    analysisItem.setKey(clonedKey);
+                                }
+                            }
+                        }
+
+                        ReplacementMap replacements = ReplacementMap.fromMap(replacementMap);
+
+                        for (AnalysisItem analysisItem : replacementMap.values()) {
+                            analysisItem.updateIDs(replacements);
+                        }
+
+                        for (FilterDefinition filter : filterDefinitions) {
+                            filter.updateIDs(replacements);
+                        }
+
+                        fields.addAll(replacements.getFields());
+
+                        dashboardElement.setFilters(filterDefinitions);
+                    }
+                }
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public Set<Long> containedScorecards() {
@@ -680,6 +796,8 @@ public class Dashboard implements Cloneable, Serializable {
         JSONObject styles = new JSONObject();
         styles.put("main_stack_start", String.format("#%06X", stackFill1Start & 0xFFFFFF));
         styles.put("alternative_stack_start", String.format("#%06X", stackFill2Start & 0xFFFFFF));
+        styles.put("report_header_background", String.format("#%06X", reportHeaderBackgroundColor & 0xFFFFFF));
+        styles.put("report_header_text", String.format("#%06X", reportHeaderTextColor & 0xFFFFFF));
 
         dashboard.put("styles", styles);
         return dashboard;

@@ -51,7 +51,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Transient
     private List<Tag> tags;
 
-    @Transient
+    @Column(name="default_date")
     private String defaultDate;
 
     @Transient

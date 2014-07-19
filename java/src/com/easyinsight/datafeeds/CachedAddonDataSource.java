@@ -285,6 +285,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 measure.setAggregation(baseMeasure.getAggregation());
                 measure.setPrecision(baseMeasure.getPrecision());
                 measure.setMinPrecision(baseMeasure.getMinPrecision());
+                measure.setDefaultDate(baseMeasure.getDefaultDate());
                 clone = measure;
             } else {
                 clone = new AnalysisDimension();

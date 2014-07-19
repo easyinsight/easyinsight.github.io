@@ -112,5 +112,8 @@ public class DashboardTextViewComponent extends Box implements IDashboardViewCom
 
     public function forceRetrieve():void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

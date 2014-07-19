@@ -230,6 +230,7 @@ public class OracleOpportunitySource extends OracleBaseSource {
                 FindCriteria findCriteria = new FindCriteria();
                 findCriteria.setFetchSize(1000);
                 findCriteria.setFetchStart(start);
+                start += 1000;
                 FindControl findControl = new FindControl();
                 List<Opportunity> opportunities = opportunityService.findOpportunity(findCriteria, findControl);
                 for (Opportunity o : opportunities) {

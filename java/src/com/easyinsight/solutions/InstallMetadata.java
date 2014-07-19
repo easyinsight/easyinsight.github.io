@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardSaveMetadata;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -195,14 +196,17 @@ public class InstallMetadata {
     public static List<AnalysisItem> findFieldsForMapping(FeedDefinition originalSource, EIDescriptor needed, EIConnection conn, Session session) throws Exception {
         InstallMetadata installMetadata = new InstallMetadata(originalSource, null, conn, session);
         Map<Long, AnalysisDefinition.SaveMetadata> metadataMap = new HashMap<>();
-        installMetadata.determineDashboard((DashboardDescriptor) needed, metadataMap);
+        Map<Long, DashboardSaveMetadata> dashboardMetadataMap = new HashMap<>();
+        installMetadata.determineDashboard((DashboardDescriptor) needed, metadataMap, dashboardMetadataMap);
         Set<AnalysisItem> allFields = new HashSet<>();
         for (AnalysisDefinition.SaveMetadata metadata : metadataMap.values()) {
             allFields.addAll(metadata.replacementMap.getFields());
         }
+        for (DashboardSaveMetadata metadata : dashboardMetadataMap.values()) {
+            allFields.addAll(metadata.getFields());
+        }
         for (AnalysisItem field : allFields) {
             field.afterLoad();
-            System.out.println(field.toDisplay() + " - " + field.toUnqualifiedDisplay());
         }
         return new ArrayList<>(allFields);
     }
@@ -324,10 +328,13 @@ public class InstallMetadata {
         }
     }
 
-    public void determineDashboard(DashboardDescriptor dashboardDescriptor, Map<Long, AnalysisDefinition.SaveMetadata> saveMetadataMap) throws Exception {
+    public void determineDashboard(DashboardDescriptor dashboardDescriptor, Map<Long, AnalysisDefinition.SaveMetadata> saveMetadataMap,
+                                   Map<Long, DashboardSaveMetadata> dashboardMetadataMap) throws Exception {
         log("Installing " + dashboardDescriptor.getName());
-
+        ReplacementMapFactory factory = new ReplacementMapFactory();
         Dashboard fromDashboard = dashboardStorage.getDashboard(dashboardDescriptor.getId(), conn);
+        DashboardSaveMetadata metadata = copyDashboardToDataSource(originalSource, fromDashboard, factory);
+        dashboardMetadataMap.put(dashboardDescriptor.getId(), metadata);
         Set<Long> ids = fromDashboard.containedReports();
         for (long id : ids) {
             InsightDescriptor report = new InsightDescriptor();
@@ -403,7 +410,8 @@ public class InstallMetadata {
         if (dashboard == null) {
             Dashboard fromDashboard = dashboardStorage.getDashboard(dashboardDescriptor.getId(), conn);
             log("\tInstalling a fresh version");
-            dashboard = copyDashboardToDataSource(targetSource, fromDashboard, factory);
+            DashboardSaveMetadata metadata = copyDashboardToDataSource(targetSource, fromDashboard, factory);
+            dashboard = metadata.getDashboard();
             dashboardStorage.saveDashboard(dashboard, conn);
             installedDashboardMap.put(dashboardDescriptor.getId(), dashboard);
             newOrUpdatedDashboards.add(dashboard);
@@ -430,13 +438,14 @@ public class InstallMetadata {
         return metadata;
     }
 
-    private Dashboard copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard, ReplacementMapFactory factory) throws CloneNotSupportedException {
-        Dashboard clonedDashboard = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.allFields(conn), localDefinition, factory);
+    private DashboardSaveMetadata copyDashboardToDataSource(FeedDefinition localDefinition, Dashboard dashboard, ReplacementMapFactory factory) throws CloneNotSupportedException {
+        DashboardSaveMetadata metadata = dashboard.cloneDashboard(new HashMap<Long, Scorecard>(), true, localDefinition.allFields(conn), localDefinition, factory);
+        Dashboard clonedDashboard = metadata.getDashboard();
         clonedDashboard.setExchangeVisible(false);
         clonedDashboard.setRecommendedExchange(false);
         clonedDashboard.setTemporary(false);
         clonedDashboard.setDataSourceID(localDefinition.getDataFeedID());
-        return clonedDashboard;
+        return metadata;
     }
 
 

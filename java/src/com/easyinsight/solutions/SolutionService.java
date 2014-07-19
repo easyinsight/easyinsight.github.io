@@ -39,15 +39,47 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
-    public List<AnalysisItem> determineFields(DashboardDescriptor dashboardDescriptor) {
+    public List<FieldAssignment> determineFields(DashboardDescriptor dashboardDescriptor, long targetID) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dashboardDescriptor.getDataSourceID(), conn);
+            List<AnalysisItem> items = new FeedService().allFields(targetID);
+            Map<String, AnalysisItem> lookup = new HashMap<>();
+            for (AnalysisItem field : items) {
+                lookup.put(field.toDisplay(), field);
+            }
             List<AnalysisItem> fields = InstallMetadata.findFieldsForMapping(dataSource, dashboardDescriptor, conn, session);
+            Map<String, AnalysisItem> distincts = new HashMap<>();
+            for (AnalysisItem field : fields) {
+                distincts.put(field.toDisplay(), field);
+            }
+            fields = new ArrayList<>(distincts.values());
             Collections.sort(fields, (o1, o2) -> o1.toDisplay().compareTo(o2.toDisplay()));
+            PreparedStatement stmt = conn.prepareStatement("SELECT source_field, target_field from copy_template_to_field_assignment, copy_template where " +
+                    "copy_template_to_field_assignment.copy_template_id = copy_template.copy_template_id and " +
+                    "copy_template.dashboard_id = ? AND copy_template.target_source_id = ?");
+            stmt.setLong(1, dashboardDescriptor.getId());
+            stmt.setLong(2, targetID);
+            ResultSet rs = stmt.executeQuery();
+            Map<String, String> endMap = new HashMap<>();
+            while (rs.next()) {
+                String sourceField = rs.getString(1);
+                String targetField = rs.getString(2);
+                AnalysisItem source = distincts.get(sourceField);
+                if (source != null) {
+                    endMap.put(sourceField, targetField);
+                }
+            }
+            List<FieldAssignment> assignments = new ArrayList<>();
+            for (AnalysisItem field : distincts.values()) {
+                FieldAssignment fieldAssignment = new FieldAssignment();
+                fieldAssignment.setSourceField(field);
+                fieldAssignment.setTargetField(lookup.get(endMap.get(field.toDisplay())));
+                assignments.add(fieldAssignment);
+            }
             System.out.println(fields);
-            return fields;
+            return assignments;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -57,22 +89,62 @@ public class SolutionService {
         }
     }
 
-    public void installTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments) {
+    public void saveTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM copy_template WHERE dashboard_id = ? AND target_source_id = ?");
+            deleteStmt.setLong(1, dashboardDescriptor.getId());
+            deleteStmt.setLong(2, targetSource);
+            deleteStmt.executeUpdate();
+            deleteStmt.close();
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO copy_template (dashboard_id, target_source_id) values (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            saveStmt.setLong(1, dashboardDescriptor.getId());
+            saveStmt.setLong(2, targetSource);
+            saveStmt.execute();
+            long id = Database.instance().getAutoGenKey(saveStmt);
+            saveStmt.close();
+            PreparedStatement saveAssignmentStmt = conn.prepareStatement("INSERT INTO copy_template_to_field_assignment (copy_template_id, source_field, target_field) values (?, ?, ?)");
+            for (FieldAssignment fieldAssignment : fieldAssignments) {
+                saveAssignmentStmt.setLong(1, id);
+                saveAssignmentStmt.setString(2, fieldAssignment.getSourceField().toDisplay());
+                saveAssignmentStmt.setString(3, fieldAssignment.getTargetField().toDisplay());
+                saveAssignmentStmt.execute();
+            }
+            saveAssignmentStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void installTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments, String targetName) {
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
+            conn.setAutoCommit(false);
             FeedDefinition originalSource = new FeedStorage().getFeedDefinitionData(dashboardDescriptor.getDataSourceID(), conn);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(targetSource, conn);
             Map<String, AnalysisItem> fieldAssignmentMap = new HashMap<>();
+
             for (FieldAssignment fieldAssignment : fieldAssignments) {
                 fieldAssignmentMap.put(fieldAssignment.getSourceField().toDisplay(), fieldAssignment.getTargetField());
             }
-            InstallMetadata.installAsTemplate(originalSource, dataSource, conn, session, Arrays.asList(dashboardDescriptor), fieldAssignmentMap);
+            DashboardDescriptor copied = (DashboardDescriptor) InstallMetadata.installAsTemplate(originalSource,
+                    dataSource, conn, session, Arrays.asList(dashboardDescriptor), fieldAssignmentMap);
+            PreparedStatement nameStmt = conn.prepareStatement("UPDATE DASHBOARD SET DASHBOARD_NAME = ? WHERE DASHBOARD_ID = ?");
+            nameStmt.setString(1, targetName);
+            nameStmt.setLong(2, copied.getId());
+            nameStmt.executeUpdate();
+            nameStmt.close();
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -220,7 +292,7 @@ public class SolutionService {
                 settings.setAccountID(SecurityUtil.getAccountID());
                 session.save(settings);
                 session.flush();
-                ApplicationSkin applicationSkin = settings.override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).override(userSkin.toSkin().toSettings(ApplicationSkin.USER)).toSkin();
+                ApplicationSkin applicationSkin = settings.override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
                 postInstallSteps.setApplicationSkin(applicationSkin);
             }
             session.close();

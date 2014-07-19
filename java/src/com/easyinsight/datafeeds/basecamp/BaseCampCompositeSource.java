@@ -388,21 +388,23 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
         for (AnalysisItem analysisItem : analysisItems) {
-            if (analysisItem.getLinks() == null) {
-                analysisItem.setLinks(new ArrayList<Link>());
-            }
-            if (isProjectLinkable(analysisItem)) {
-                removeURLLinkIfExists("/projects/[" + BaseCampTodoSource.PROJECTID + "]", analysisItem);
-                URLLink urlLink = new URLLink();
-                urlLink.setUrl(getUrl() + "/projects/["+BaseCampTodoSource.PROJECTID+"]");
-                urlLink.setLabel("View Project in Basecamp...");
-                analysisItem.getLinks().add(urlLink);
-            } else if (isTodoListLinkable(analysisItem)) {
-                removeURLLinkIfExists("/projects/["+BaseCampTodoSource.PROJECTID+"]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]", analysisItem);
-                URLLink urlLink = new URLLink();
-                urlLink.setUrl(getUrl() + "/projects/["+BaseCampTodoSource.PROJECTID+"]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]");
-                urlLink.setLabel("View Todo List in Basecamp...");
-                analysisItem.getLinks().add(urlLink);
+            if (analysisItem != null) {
+                if (analysisItem.getLinks() == null) {
+                    analysisItem.setLinks(new ArrayList<Link>());
+                }
+                if (isProjectLinkable(analysisItem)) {
+                    removeURLLinkIfExists("/projects/[" + BaseCampTodoSource.PROJECTID + "]", analysisItem);
+                    URLLink urlLink = new URLLink();
+                    urlLink.setUrl(getUrl() + "/projects/[" + BaseCampTodoSource.PROJECTID + "]");
+                    urlLink.setLabel("View Project in Basecamp...");
+                    analysisItem.getLinks().add(urlLink);
+                } else if (isTodoListLinkable(analysisItem)) {
+                    removeURLLinkIfExists("/projects/[" + BaseCampTodoSource.PROJECTID + "]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]", analysisItem);
+                    URLLink urlLink = new URLLink();
+                    urlLink.setUrl(getUrl() + "/projects/[" + BaseCampTodoSource.PROJECTID + "]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]");
+                    urlLink.setLabel("View Todo List in Basecamp...");
+                    analysisItem.getLinks().add(urlLink);
+                }
             }
         }
     }

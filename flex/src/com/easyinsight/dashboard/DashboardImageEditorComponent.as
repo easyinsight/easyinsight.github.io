@@ -82,5 +82,8 @@ public class DashboardImageEditorComponent extends VBox implements IDashboardEdi
 
     public function forceRetrieve():void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

@@ -1,5 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.awt.*;
 import java.io.Serializable;
 
 /**
@@ -54,5 +59,24 @@ public class MultiColor implements Serializable {
 
     public void setColor1EndEnabled(boolean color1EndEnabled) {
         this.color1EndEnabled = color1EndEnabled;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("color_start_enabled", color1StartEnabled);
+        jo.put("color_start", String.format("#%06X", color1Start & 0xFFFFFF));
+        jo.put("color_end_enabled", color1EndEnabled);
+        jo.put("color_end", String.format("#%06X", color1End & 0xFFFFFF));
+        return jo;
+    }
+
+    public static MultiColor fromJSON(net.minidev.json.JSONObject jo) {
+        MultiColor mc = new MultiColor();
+        mc.setColor1StartEnabled(Boolean.valueOf(String.valueOf(jo.get("color_start_enabled"))));
+        mc.setColor1EndEnabled(Boolean.valueOf(String.valueOf(jo.get("color_end_enabled"))));
+        mc.setColor1Start(Color.decode(String.valueOf(jo.get("color_start"))).getRGB());
+
+        mc.setColor1End(Color.decode(String.valueOf(jo.get("color_end"))).getRGB());
+        return mc;
     }
 }

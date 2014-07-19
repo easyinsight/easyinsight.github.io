@@ -221,5 +221,14 @@ public class DashboardLightReportViewComponent extends Canvas implements IDashbo
         reports.addItem(report);
         return reports;
     }
+
+    public function stackPopulate(positions:DashboardStackPositions):void {
+    }
+
+    public function forceRetrieve():void {
+    }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

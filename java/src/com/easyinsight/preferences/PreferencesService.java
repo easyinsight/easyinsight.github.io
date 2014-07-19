@@ -234,13 +234,15 @@ public class PreferencesService {
     }
 
     public ApplicationSkin getAccountSkin() {
+        ApplicationSkin globalSkin = getGlobalSkin();
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
             List results = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
             if (results.size() > 0) {
                 ApplicationSkinSettings settings = (ApplicationSkinSettings) results.get(0);
-                return settings.toSkin();
+                return globalSkin.toSettings(ApplicationSkin.ACCOUNT).override(settings.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
+                //return settings.toSkin();
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -250,17 +252,25 @@ public class PreferencesService {
         } finally {
             session.close();
         }
-        return null;
+        return globalSkin.toSettings(ApplicationSkin.ACCOUNT).toSkin();
     }
 
     public void saveGlobalSkin(ApplicationSkin skin) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
+            List existing = session.createQuery("from ApplicationSkinSettings where globalSkin = ?").setBoolean(0, true).list();
+            if (existing.size() > 0) {
+                for (Object obj : existing) {
+                    session.delete(obj);
+                }
+            }
+            session.flush();
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.APPLICATION);
             settings.setGlobalSkin(true);
-            session.getTransaction().begin();
-            session.saveOrUpdate(settings);
+            session.save(settings);
+            session.flush();
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -275,29 +285,18 @@ public class PreferencesService {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
+            List existing = session.createQuery("from ApplicationSkinSettings where connectionType = ?").setInteger(0, connectionType).list();
+            if (existing.size() > 0) {
+                for (Object obj : existing) {
+                    session.delete(obj);
+                }
+            }
+            session.flush();
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.ACCOUNT);
             settings.setConnectionType(connectionType);
-            session.getTransaction().begin();
-            session.saveOrUpdate(settings);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
 
-    public ApplicationSkin saveUserSkin(ApplicationSkin skin) {
-        ApplicationSkin result;
-        Session session = Database.instance().createSession();
-        try {
-            ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.USER);
-            settings.setUserID(SecurityUtil.getUserID());
-            session.getTransaction().begin();
             session.saveOrUpdate(settings);
-            result = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -306,17 +305,24 @@ public class PreferencesService {
         } finally {
             session.close();
         }
-        return result;
     }
 
     public ApplicationSkin saveAccountSkin(ApplicationSkin skin) {
         ApplicationSkin result;
         Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
+            List existing = session.createQuery("from ApplicationSkinSettings where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list();
+            if (existing.size() > 0) {
+                for (Object obj : existing) {
+                    session.delete(obj);
+                }
+            }
+            session.flush();
             ApplicationSkinSettings settings = skin.toSettings(ApplicationSkin.ACCOUNT);
             settings.setAccountID(SecurityUtil.getAccountID());
-            session.getTransaction().begin();
-            session.saveOrUpdate(settings);
+            session.save(settings);
+            session.flush();
             result = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -510,7 +516,7 @@ public class PreferencesService {
         return dls;
     }
 
-    private List<DataSourceDLS> getDataSourceDLS(long personaID, EIConnection conn) throws SQLException {
+    public List<DataSourceDLS> getDataSourceDLS(long personaID, EIConnection conn) throws SQLException {
         List<DataSourceDLS> dlsList = new ArrayList<DataSourceDLS>();
         PreparedStatement dlsStmt = conn.prepareStatement("SELECT DLS_ID, DATA_SOURCE_ID, FEED_NAME FROM DLS, data_feed WHERE PERSONA_ID = ? AND " +
                 "DATA_FEED.DATA_FEED_ID = dls.data_source_id");

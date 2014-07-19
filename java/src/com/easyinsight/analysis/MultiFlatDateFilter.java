@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,9 +34,72 @@ public class MultiFlatDateFilter extends FilterDefinition {
     @Column(name = "end_date_property")
     private String endDateProperty;
 
+    @Transient
+    private List<DateLevelWrapper> cachedValues;
+
+    @Column(name="units_back")
+    private int unitsBack;
+    @Column(name="units_forward")
+    private int unitsForward;
+    @Column(name="include_relative")
+    private boolean includeRelative;
+    @Column(name="all_option")
+    private boolean allOption;
+
+    @Column(name = "level")
+    private int level;
+
+    public List<DateLevelWrapper> getCachedValues() {
+        return cachedValues;
+    }
+
+    public void setCachedValues(List<DateLevelWrapper> cachedValues) {
+        this.cachedValues = cachedValues;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     @Override
     public int type() {
         return FilterDefinition.MULTI_FLAT_DATE;
+    }
+
+    public boolean isAllOption() {
+        return allOption;
+    }
+
+    public void setAllOption(boolean allOption) {
+        this.allOption = allOption;
+    }
+
+    public int getUnitsBack() {
+        return unitsBack;
+    }
+
+    public void setUnitsBack(int unitsBack) {
+        this.unitsBack = unitsBack;
+    }
+
+    public int getUnitsForward() {
+        return unitsForward;
+    }
+
+    public void setUnitsForward(int unitsForward) {
+        this.unitsForward = unitsForward;
+    }
+
+    public boolean isIncludeRelative() {
+        return includeRelative;
+    }
+
+    public void setIncludeRelative(boolean includeRelative) {
+        this.includeRelative = includeRelative;
     }
 
     public void customFromXML(Element element, XMLImportMetadata xmlImportMetadata) {
@@ -92,7 +156,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
     @Override
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedMultiFlatDateFilter(getField(), levels);
+        return new MaterializedMultiFlatDateFilter(getField(), levels, level);
     }
 
     @Override
@@ -124,90 +188,44 @@ public class MultiFlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        StringBuilder sb = new StringBuilder();
-        String divID = "filter" + getFilterID() + "div";
-        String filterName = "filter" + getFilterID();
-        sb.append("<div id=\"").append(divID).append("\" class=\"modal hide\">");
-        sb.append("<div class=\"modal-body\">");
-        sb.append("<div class=\"control-group\">");
-        sb.append("<div class=\"controls\">");
-
-        int minLevel = Calendar.DECEMBER;
-        int maxLevel = Calendar.JANUARY;
-        for (DateLevelWrapper wrapper : getLevels()) {
-            minLevel = Math.min(minLevel, wrapper.getDateLevel());
-            maxLevel = Math.max(maxLevel, wrapper.getDateLevel());
-        }
-        Calendar calendar = Calendar.getInstance();
-        sb.append("<select id=\"" + filterName + "start\">");
-        for (int i = Calendar.JANUARY; i <= Calendar.DECEMBER; i++) {
-            calendar.set(Calendar.MONTH, i);
-            String displayName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
-            if (i == minLevel) {
-                sb.append("<option selected=\"selected\" value=\"").append(i).append("\">").append(displayName).append("</option>");
-            } else {
-                sb.append("<option value=\"").append(i).append("\">").append(displayName).append("</option>");
-            }
-        }
-        sb.append("</select>");
-        sb.append("<select id=\"" + filterName + "end\">");
-        for (int i = Calendar.JANUARY; i <= Calendar.DECEMBER; i++) {
-            calendar.set(Calendar.MONTH, i);
-            String displayName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
-            if (i == maxLevel) {
-                sb.append("<option selected=\"selected\" value=\"").append(i).append("\">").append(displayName).append("</option>");
-            } else {
-                sb.append("<option value=\"").append(i).append("\">").append(displayName).append("</option>");
-            }
-        }
-        sb.append("</select>");
-
-        sb.append("</div>");
-        sb.append("</div>");
-        sb.append("</div>");
-        sb.append("<div class=\"modal-footer\">\n" +
-                "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiMonth('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">Save</button>\n" +
-                "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
-                "    </div>");
-        sb.append("</div>");
-        sb.append("<div class=\"filterLabel\">");
-        if (!isToggleEnabled()) {
-            sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
-        }
-        /*String flatLabel;
-        if (getLevels().isEmpty()) {
-            flatLabel = "Click to Configure";
-        } else {
-            if (minLevel == maxLevel) {
-                calendar.set(Calendar.MONTH, minLevel);
-                flatLabel = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
-            } else {
-                calendar.set(Calendar.MONTH, minLevel);
-                String firstMonth = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
-                calendar.set(Calendar.MONTH, maxLevel);
-                String endMonth = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
-                flatLabel = firstMonth + " to " + endMonth;
-            }
-        }*/
-        sb.append("<a href=\"#" + divID + "\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
-        return sb.toString();
-    }
-
-    @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
-        JSONObject jo = super.toJSON(filterHTMLMetadata);    //To change body of overridden methods use File | Settings | File Templates.
+        JSONObject jo = super.toJSON(filterHTMLMetadata);
         jo.put("type", "multi_date");
 
-        int minLevel = Calendar.DECEMBER;
-        int maxLevel = Calendar.JANUARY;
-        for (DateLevelWrapper wrapper : getLevels()) {
-            minLevel = Math.min(minLevel, wrapper.getDateLevel());
-            maxLevel = Math.max(maxLevel, wrapper.getDateLevel());
+        List<DateLevelWrapper> wrappers = new DataService().getMultiDateOptions(this);
+
+        JSONArray values = new JSONArray();
+        JSONObject map = new JSONObject();
+        for (DateLevelWrapper dateLevelWrapper : wrappers) {
+            JSONObject o = new JSONObject();
+            o.put("display", dateLevelWrapper.getDisplay());
+            o.put("dateLevel", dateLevelWrapper.getDateLevel());
+            map.put(String.valueOf(dateLevelWrapper.getDateLevel()), dateLevelWrapper.getShortDisplay());
+            values.put(o);
         }
 
-        jo.put("start", minLevel);
-        jo.put("end", maxLevel);
+        int minLevel = Integer.MAX_VALUE;
+        int maxLevel = Integer.MIN_VALUE;
+        DateLevelWrapper startWrapper = null;
+        DateLevelWrapper endWrapper = null;
+        for (DateLevelWrapper wrapper : getLevels()) {
+            if (wrapper.getDateLevel() < minLevel) {
+                minLevel = wrapper.getDateLevel();
+                startWrapper = wrapper;
+            }
+            if (wrapper.getDateLevel() > maxLevel) {
+                maxLevel = wrapper.getDateLevel();
+                endWrapper = wrapper;
+            }
+
+        }
+
+        jo.put("lookup", map);
+        jo.put("values", values);
+        jo.put("startLevel", minLevel);
+        jo.put("startLabel", startWrapper.getShortDisplay());
+        jo.put("endLevel", maxLevel);
+        jo.put("endLabel", endWrapper.getShortDisplay());
 
         return jo;
     }

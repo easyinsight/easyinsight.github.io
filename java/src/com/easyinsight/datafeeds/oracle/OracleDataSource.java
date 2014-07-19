@@ -78,12 +78,45 @@ public class OracleDataSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected Set<FeedType> getFeedTypes() {
+        Set<FeedType> types = new HashSet<>();
+        types.add(FeedType.ORACLE_REVENUE);
+        types.add(FeedType.ORACLE_SPLITREVENUE);
+        types.add(FeedType.ORACLE_CATEGORYSUMMARYREVENUE);
+        types.add(FeedType.ORACLE_OPPORTUNITYLEAD);
+        types.add(FeedType.ORACLE_OPPORTUNITYSOURCE);
+        types.add(FeedType.ORACLE_OPPORTUNITYCONTACT);
+        types.add(FeedType.ORACLE_RECURRINGREVENUE);
+        types.add(FeedType.ORACLE_OPPORTUNITYRESPONSE);
+        types.add(FeedType.ORACLE_OPPORTUNITY_HISTORY);
+        types.add(FeedType.ORACLE_REVENUEPARTNER);
+        types.add(FeedType.ORACLE_NOTE);
+        types.add(FeedType.ORACLE_OPPORTUNITYRESOURCE);
+        types.add(FeedType.ORACLE_OPPORTUNITYCOMPETITOR);
+        types.add(FeedType.ORACLE_OPPORTUNITYREFERENCE);
+        types.add(FeedType.ORACLE_REVENUELINESET);
+        types.add(FeedType.ORACLE_REVENUETERRITORY);
+        return types;
+    }
+
+    @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
         return Arrays.asList(
                 new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYLEAD, OracleOpportunitySource.OPTYID, OracleOpportunityLeadSource.OPTYID),
+
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYRESPONSE, OracleOpportunitySource.OPTYID, OracleOpportunityResponseSource.OPTYID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_RECURRINGREVENUE, OracleOpportunitySource.OPTYID, OracleRecurringRevenueSource.OPTYID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_REVENUEPARTNER, OracleOpportunitySource.OPTYID, OracleRevenuePartnerSource.OPTYID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYRESOURCE, OracleOpportunitySource.OPTYID, OracleOpportunityResponseSource.OPTYID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYCOMPETITOR, OracleOpportunitySource.OPTYID, OracleOpportunityCompetitorSource.OPTYID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYREFERENCE, OracleOpportunitySource.OPTYID, OracleOpportunityReferenceSource.OPTYID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_REVENUELINESET, OracleOpportunitySource.OPTYID, OracleRevenueLineSetSource.OPTYID),
+
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYRESPONSE, OracleOpportunitySource.OPTYID, OracleOpportunityLeadSource.OPTYID),
                 new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITYCONTACT, OracleOpportunitySource.OPTYID, OracleOpportunityContactSource.OPTYID),
                 new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_NOTE, OracleOpportunitySource.OPTYID, OracleNoteSource.SOURCEOBJECTID),
-                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITY_HISTORY, OracleOpportunitySource.OPTYID, OracleOpportunityHistorySource.OPPORTUNITY_ID)
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_OPPORTUNITY_HISTORY, OracleOpportunitySource.OPTYID, OracleOpportunityHistorySource.OPPORTUNITY_ID),
+                new ChildConnection(FeedType.ORACLE_OPPORTUNITYSOURCE, FeedType.ORACLE_REVENUE, OracleOpportunitySource.OPTYID, OracleRevenueSource.OPTYID)
         );
     }
 
@@ -210,29 +243,6 @@ public class OracleDataSource extends CompositeServerDataSource {
             basecampUrl = basecampUrl + ".infusionsoft.com";
         }*/
         return basecampUrl;
-    }
-
-    @Override
-    protected Set<FeedType> getFeedTypes() {
-        Set<FeedType> types = new HashSet<>();
-        types.add(FeedType.ORACLE_REVENUE);
-        types.add(FeedType.ORACLE_SPLITREVENUE);
-        types.add(FeedType.ORACLE_CATEGORYSUMMARYREVENUE);
-        types.add(FeedType.ORACLE_OPPORTUNITYLEAD);
-        types.add(FeedType.ORACLE_OPPORTUNITYSOURCE);
-        types.add(FeedType.ORACLE_OPPORTUNITYCONTACT);
-        types.add(FeedType.ORACLE_RECURRINGREVENUE);
-        types.add(FeedType.ORACLE_OPPORTUNITYRESPONSE);
-        types.add(FeedType.ORACLE_OPPORTUNITY_HISTORY);
-        types.add(FeedType.ORACLE_REVENUEPARTNER);
-        types.add(FeedType.ORACLE_NOTE);
-        types.add(FeedType.ORACLE_OPPORTUNITYRESOURCE);
-        types.add(FeedType.ORACLE_OPPORTUNITYCOMPETITOR);
-        types.add(FeedType.ORACLE_OPPORTUNITYREFERENCE);
-        types.add(FeedType.ORACLE_REVENUELINESET);
-        types.add(FeedType.ORACLE_REVENUETERRITORY);
-        types.add(FeedType.ORACLE_OPPORTUNITYCOMPETITOR);
-        return types;
     }
 
     @Override
@@ -401,31 +411,5 @@ public class OracleDataSource extends CompositeServerDataSource {
 
     public List<OpportunityCompetitor> getOpportunityCompetitor2() {
         return opportunityCompetitor2;
-    }
-
-    public static void main(String[] args) throws Exception {
-        ExternalReportWSSService opportunityService = new ExternalReportWSSService_Service(new URL("https://bcy.bi.ap1.oraclecloud.com//xmlpserver/services/ExternalReportWSSService?wsdl")).getExternalReportWSSService();
-        BindingProvider prov = (BindingProvider) opportunityService;
-        prov.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, "bala.gupta");
-        prov.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, "Welcome1");
-        ReportRequest reportRequest = new ReportRequest();
-        reportRequest.setReportAbsolutePath("/Custom/Customer Relationship Management/OppHistory.xdo");
-        reportRequest.setSizeOfDataChunkDownload(-1);
-        ReportResponse response = opportunityService.runReport(reportRequest, "");
-        byte[] bytes = response.getReportBytes();
-        //byte[] decodedBytes = Base64.getDecoder().decode(bytes);
-        Document document = new Builder().build(new ByteArrayInputStream(bytes));
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        Nodes nodes = document.query("/DATA_DS/G_1");
-        for (int i = 0; i < nodes.size(); i++) {
-            Node node = nodes.get(i);
-            String optyID = node.query("OPTY_ID/text()").get(0).getValue();
-            String stageName = node.query("NAME_1/text()").get(0).getValue();
-            String stageID = node.query("STG_ID/text()").get(0).getValue();
-            String stageEnterDate = node.query("STG_ENTER_DATE/text()").get(0).getValue();
-            Date date = sdf.parse(stageEnterDate);
-            System.out.println(date);
-        }
-        //System.out.println(string);
     }
 }

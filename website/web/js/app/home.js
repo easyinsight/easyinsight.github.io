@@ -1,17 +1,14 @@
 var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
 easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentProvider) {
-    if(window.history && window.history.pushState) {
-        $locationProvider.html5Mode(true);
-    } else {
-        $locationProvider.html5Mode(false);
-    }
+
+    $locationProvider.html5Mode(true);
     $routeSegmentProvider.when("/missing", "missing").
         segment("missing", {
             templateUrl: '/angular_templates/missing.template.html',
             controller: "MissingFileController"
         });
-    $routeProvider.otherwise({ redirectTo: "/missing" });
+//    $routeProvider.otherwise({ redirectTo: "/missing" });
 })
 
 easyInsight.factory('PageInfo', function() {
@@ -67,6 +64,8 @@ easyInsight.run(function ($rootScope, $http, PageInfo) {
     $rootScope.mobile = function() {
         return navigator && navigator.userAgent && navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
     }
+
+
 
 });
 

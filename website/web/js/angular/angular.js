@@ -9812,11 +9812,14 @@ function $LocationProvider(){
       // The href should be a regular url e.g. /link/somewhere or link/somewhere or ../somewhere or
       // somewhere#anchor or http://example.com/somewhere
       if (LocationMode === LocationHashbangInHtml5Url) {
+
         // get the actual href attribute - see
         // http://msdn.microsoft.com/en-us/library/ie/dd347148(v=vs.85).aspx
         var href = elm.attr('href') || elm.attr('xlink:href');
-
         if (href.indexOf('://') < 0) {         // Ignore absolute URLs
+            if(href.indexOf(baseHref) == 0) {
+                href = href.slice(baseHref.length, href.length);
+            }
           var prefix = '#' + hashPrefix;
           if (href[0] == '/') {
             // absolute path - replace old path
@@ -9825,6 +9828,9 @@ function $LocationProvider(){
             // local anchor
             absHref = appBase + prefix + ($location.path() || '/') + href;
           } else {
+              if(baseHref) {
+                  absHref = appBase + prefix + href;
+              } else {
             // relative path - join with current path
             var stack = $location.path().split("/"),
               parts = href.split("/");
@@ -9837,12 +9843,11 @@ function $LocationProvider(){
                 stack.push(parts[i]);
             }
             absHref = appBase + prefix + stack.join('/');
+              }
           }
         }
       }
-
       var rewrittenUrl = $location.$$rewrite(absHref);
-
       if (absHref && !elm.attr('target') && rewrittenUrl && !event.isDefaultPrevented()) {
         event.preventDefault();
         if (rewrittenUrl != $browser.url()) {

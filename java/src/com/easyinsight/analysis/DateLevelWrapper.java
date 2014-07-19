@@ -18,6 +18,26 @@ public class DateLevelWrapper implements Serializable, Cloneable
     private long id;
     @Column(name="date_level")
     private int dateLevel;
+    @Column(name="display")
+    private String display;
+    @Column(name="short_display")
+    private String shortDisplay;
+
+    public String getShortDisplay() {
+        return shortDisplay;
+    }
+
+    public void setShortDisplay(String shortDisplay) {
+        this.shortDisplay = shortDisplay;
+    }
+
+    public String getDisplay() {
+        return display;
+    }
+
+    public void setDisplay(String display) {
+        this.display = display;
+    }
 
     public long getId() {
         return id;

@@ -716,5 +716,11 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             comp.toggleFilters(showFilters);
         }
     }
+
+    public function recordToPDF(imageMap:Object):void {
+        if (viewChildren != null && viewChildren.length > 0) {
+            IDashboardViewComponent(viewChildren.getItemAt(viewStack.selectedIndex)).recordToPDF(imageMap);
+        }
+    }
 }
 }

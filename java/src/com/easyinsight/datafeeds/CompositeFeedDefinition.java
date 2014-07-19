@@ -256,8 +256,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
     public void decorateFields(List<AnalysisItem> fields, EIConnection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement addonStmt = conn.prepareStatement("SELECT report_stub.report_id FROM report_to_report_stub, report_stub WHERE " +
+                "report_to_report_stub.report_id = ? AND report_to_report_stub.report_stub_id = report_stub.report_stub_id");
         Map<Long, CompositeFeedNode> nodeMap = new HashMap<Long, CompositeFeedNode>();
         Map<Long, Long> rMap = new HashMap<Long, Long>();
+        Map<Long, Set<Long>> addonMap = new HashMap<Long, Set<Long>>();
+
         for (CompositeFeedNode node : getCompositeFeedNodes()) {
             nodeMap.put(node.getDataFeedID(), node);
             if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
@@ -266,9 +270,21 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 while (rs.next()) {
                     long reportID = rs.getLong(1);
                     rMap.put(node.getDataFeedID(), reportID);
+                    addonStmt.setLong(1, reportID);
+                    ResultSet addonRS = addonStmt.executeQuery();
+                    while (addonRS.next()) {
+                        long addonReportID = addonRS.getLong(1);
+                        Set<Long> addons = addonMap.get(reportID);
+                        if (addons == null) {
+                            addons = new HashSet<Long>();
+                            addonMap.put(reportID, addons);
+                        }
+                        addons.add(addonReportID);
+                    }
                 }
             }
         }
+        addonStmt.close();
         stmt.close();
         for (AnalysisItem field : fields) {
             Key key = field.getKey();
@@ -282,6 +298,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
                             FieldDataSourceOrigin origin = new FieldDataSourceOrigin();
                             origin.setReport(reportID);
                             field.setOrigin(origin);
+                            origin.setAdditionalReports(addonMap.get(reportID));
                         }
                     }
                 }
@@ -721,9 +738,13 @@ public class CompositeFeedDefinition extends FeedDefinition {
     public void delete(Connection conn) throws SQLException {
         super.delete(conn);
         for (CompositeFeedNode node : getCompositeFeedNodes()) {
-            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), conn);
-            if (feedDefinition != null && !feedDefinition.isVisible()) {
-                feedDefinition.delete(conn);
+            try {
+                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), conn);
+                if (feedDefinition != null && !feedDefinition.isVisible()) {
+                    feedDefinition.delete(conn);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
             }
         }
     }

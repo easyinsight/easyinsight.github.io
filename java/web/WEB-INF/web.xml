@@ -277,6 +277,12 @@
         <display-name>Image</display-name>
         <servlet-class>com.easyinsight.export.ImageServlet</servlet-class>
     </servlet>
+    
+    <servlet>
+        <servlet-name>AccountSkin</servlet-name>
+        <display-name>AccountSkin</display-name>
+        <servlet-class>com.easyinsight.api.v3.AccountSkinServlet</servlet-class>
+    </servlet>
 
     <servlet>
         <servlet-name>FileUpload</servlet-name>
@@ -834,6 +840,10 @@
     <servlet-mapping>
         <servlet-name>AccountInfoServlet</servlet-name>
         <url-pattern>/account.json</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AccountSkin</servlet-name>
+        <url-pattern>/account_skin.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

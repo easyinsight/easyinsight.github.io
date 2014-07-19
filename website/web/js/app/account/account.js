@@ -1,4 +1,4 @@
-var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
+var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module']);
 
 eiAccounts.controller('AccountController', function ($scope) {
 
@@ -191,6 +191,20 @@ eiAccounts.controller("AccountSettingsController", function($scope, $http) {
             }
         })
     }
+});
+
+eiAccounts.controller("AccountSkinController", function($scope, $http) {
+    $scope.loading = $http.get("/app/account_skin.json");
+    $scope.loading.then(function(c) {
+        $scope.skin = c.data.skin;
+        console.log($scope.skin)
+    })
+    $scope.submit= function() {
+        $scope.saving = $http.post("/app/account_skin.json", JSON.stringify($scope.skin));
+        $scope.saving.then(function(c) {
+            console.log(c.data);
+        })
+    }
 })
 
 eiAccounts.controller("UserProfileController", function($scope, $rootScope, $http) {
@@ -212,7 +226,29 @@ eiAccounts.controller("UserProfileController", function($scope, $rootScope, $htt
             }
         });
     }
+});
+
+eiAccounts.directive("eimulticolorform", function() {
+    return {
+        templateUrl: "/angular_templates/account/directives/multi_color.template.html",
+        scope: {
+            text: "=text",
+            field: "=field"
+        }
+    };
 })
+
+eiAccounts.directive('eicolorform', function() {
+    return {
+        templateUrl: '/angular_templates/account/directives/color_form.template.html',
+        scope: {
+            field: "=field",
+            text: "=text",
+            enabled_field_disabled: "=enabledfielddisabled",
+            enabled_field: "=enabledfield"
+        }
+    }
+});
 
 eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
     $routeSegmentProvider.when("/account", "account.index.overview").
@@ -222,6 +258,7 @@ eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
         when("/account/users/designer/new", "account.user_base.new_designer").
         when("/account/users/viewer/new", "account.user_base.new_viewer").
         when("/account/profile", "account.profile").
+        when("/account/skin", "account.index.skin").
         segment("account", {
             templateUrl: '/angular_templates/account/base.template.html',
             controller: 'AccountController'
@@ -237,6 +274,10 @@ eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
         segment("settings", {
             templateUrl: "/angular_templates/account/settings.template.html",
             controller: "AccountSettingsController"
+        }).
+        segment("skin", {
+            templateUrl: "/angular_templates/account/skin.template.html",
+            controller: "AccountSkinController"
         }).
         up().
         segment("profile", {

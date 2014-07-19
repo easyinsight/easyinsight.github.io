@@ -309,5 +309,21 @@ public class DashboardOptimizedGridViewComponent extends Canvas implements IDash
     public function reportCount():ArrayCollection {
         return new ArrayCollection();
     }
+
+    public function obtainPreferredSizeInfo():SizeInfo {
+        return null;
+    }
+
+    public function toggleFilters(showFilters:Boolean):void {
+    }
+
+    public function stackPopulate(positions:DashboardStackPositions):void {
+    }
+
+    public function forceRetrieve():void {
+    }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

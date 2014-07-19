@@ -9,9 +9,7 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.UserThreadMutex;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
@@ -27,6 +25,7 @@ import java.util.Date;
 
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
@@ -43,6 +42,11 @@ import org.hibernate.Transaction;
 public class AdminService {
 
     private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
+
+    public void outputStackOnDatabase() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Database.outputStackElements();
+    }
 
     /*public void testUserPasswords() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
@@ -83,56 +87,80 @@ public class AdminService {
         }
     }*/
 
-    public void testUserPasswords() {
+    public void moveSource(long sourceID) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
-            conn.setAutoCommit(false);
-            PreparedStatement stmt = conn.prepareStatement("SELECT EMAIL, USERNAME, USER_ID FROM USER WHERE ACCOUNT_ID = ?");
-            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_ID, USERNAME FROM USER WHERE EMAIL = ? AND ACCOUNT_ID = ?");
-            //PreparedStatement updateNameStmt = conn.prepareStatement("UPDATE USER SET EMAIL = ?, USERNAME = ? WHERE USER_ID = ?");
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE USER SET USERNAME = ? WHERE USER_ID = ?");
-            stmt.setLong(1, 1917);
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE FEED_PERSISTENCE_METADATA SET DATABASE_NAME = ? WHERE FEED_ID = ?");
+            PreparedStatement dsStmt = conn.prepareStatement("UPDATE DATA_FEED SET LAST_REFRESH_START = NULL WHERE DATA_FEED_ID = ?");
+            dsStmt.setLong(1, sourceID);
+            dsStmt.executeUpdate();
+            dsStmt.close();
+            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(sourceID, conn);
+            if (dataSource instanceof CompositeFeedDefinition) {
+                CompositeFeedDefinition comp = (CompositeFeedDefinition) dataSource;
+                for (CompositeFeedNode node : comp.getCompositeFeedNodes()) {
+                    long id = node.getDataFeedID();
+                    updateStmt.setString(1, "storage5");
+                    updateStmt.setLong(2, id);
+                    updateStmt.executeUpdate();
+                }
+            } else {
 
-            ResultSet rs = stmt.executeQuery();
+                updateStmt.setString(1, "storage5");
+                updateStmt.setLong(2, sourceID);
+                updateStmt.executeUpdate();
+
+            }
+            updateStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void testUserPasswords() {
+
+        Database storageDatabase = DatabaseManager.instance().getDatabase("storage5");
+        EIConnection storageConn = storageDatabase.getConnection();
+        try {
+            PreparedStatement errorStmt = storageConn.prepareStatement("SELECT * FROM STL_LOAD_ERRORS");
+            ResultSet rs = errorStmt.executeQuery();
             while (rs.next()) {
-                String targetEmail = rs.getString(1);
-                String targetUserName = rs.getString(2);
-                long targetUserID = rs.getLong(3);
-                if (targetEmail.endsWith("copied")) {
-                    String searchEmail = targetEmail.substring(0, targetEmail.length() - "copied".length());
-                    targetUserName = targetUserName.substring(0, targetUserName.length() - "copied".length());
+                int columnCount = rs.getMetaData().getColumnCount();
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = rs.getMetaData().getColumnName(i);
+                    switch (rs.getMetaData().getColumnType(i)) {
+                        case Types.BIGINT:
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.NUMERIC:
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                        case Types.DECIMAL:
+                        case Types.REAL:
+                            System.out.println(columnName + " = " + rs.getDouble(i));
+                            break;
 
-                    userStmt.setString(1, searchEmail);
-                    userStmt.setLong(2, 6378);
-                    //System.out.println("looking for email " + searchEmail);
-                    ResultSet searchRS = userStmt.executeQuery();
-                    if (searchRS.next()) {
-                        long sourceUserID = searchRS.getLong(1);
-                        //String password = searchRS.getString(2);
-                        //String sourceEmail = searchRS.getString(3);
-                        String userName = searchRS.getString(2);
-                        if (userName.equals(targetUserName)) {
-                            continue;
-                        }
-                        System.out.println("Will copy the username of " + targetUserName + " from user ID " + targetUserID + " to " +
-                                sourceUserID + " with email  " + searchEmail + " who has username as is of " + userName);
-
-                        /*updateStmt.setString(1, targetUserName);
-                        updateStmt.setLong(2, sourceUserID);
-                        int rows2 = updateStmt.executeUpdate();
-                        System.out.println("rows2 = " + rows2);*/
+                        case Types.BOOLEAN:
+                        case Types.BIT:
+                        case Types.CHAR:
+                        case Types.NCHAR:
+                        case Types.NVARCHAR:
+                        case Types.VARCHAR:
+                        case Types.LONGVARCHAR:
+                            System.out.println(columnName + " = " + rs.getString(i));
+                            break;
                     }
                 }
             }
-            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
         } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
+            Database.closeConnection(storageConn);
         }
     }
 
@@ -843,7 +871,7 @@ public class AdminService {
     public static final int DATA_SOURCE = 2;
     public static final int DASHBOARD = 3;
 
-    private static class Argh {
+    private static class RecentActionInfo {
         int generalActionType;
         int actionType;
         Date actionDate;
@@ -851,7 +879,7 @@ public class AdminService {
         long reportID;
         long dashboardID;
 
-        private Argh(int generalActionType, int actionType, Date actionDate, long dataSourceID, long report, long dashboardID) {
+        private RecentActionInfo(int generalActionType, int actionType, Date actionDate, long dataSourceID, long report, long dashboardID) {
             this.generalActionType = generalActionType;
             this.actionType = actionType;
             this.actionDate = actionDate;
@@ -865,13 +893,13 @@ public class AdminService {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Argh argh = (Argh) o;
+            RecentActionInfo recentActionInfo = (RecentActionInfo) o;
 
-            if (actionType != argh.actionType) return false;
-            if (dashboardID != argh.dashboardID) return false;
-            if (dataSourceID != argh.dataSourceID) return false;
-            if (generalActionType != argh.generalActionType) return false;
-            if (reportID != argh.reportID) return false;
+            if (actionType != recentActionInfo.actionType) return false;
+            if (dashboardID != recentActionInfo.dashboardID) return false;
+            if (dataSourceID != recentActionInfo.dataSourceID) return false;
+            if (generalActionType != recentActionInfo.generalActionType) return false;
+            if (reportID != recentActionInfo.reportID) return false;
 
             return true;
         }
@@ -900,7 +928,7 @@ public class AdminService {
             PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             queryActionStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet rs = queryActionStmt.executeQuery();
-            Collection<Argh> arghs = new LinkedHashSet<Argh>();
+            Collection<RecentActionInfo> recentActionInfos = new LinkedHashSet<RecentActionInfo>();
             while (rs.next()) {
                 int generalActionType = rs.getInt(1);
                 int actionType = rs.getInt(2);
@@ -908,39 +936,39 @@ public class AdminService {
                 long dataSourceID = rs.getLong(4);
                 long reportID = rs.getLong(5);
                 long dashboardID = rs.getLong(6);
-                arghs.add(new Argh(generalActionType, actionType, actionDate, dataSourceID, reportID, dashboardID));
+                recentActionInfos.add(new RecentActionInfo(generalActionType, actionType, actionDate, dataSourceID, reportID, dashboardID));
             }
-            List<Argh> subsetArghs = new ArrayList<Argh>(arghs);
-            if (subsetArghs.size() > 10) {
-                subsetArghs = subsetArghs.subList(0, 10);
+            List<RecentActionInfo> subsetRecentActionInfos = new ArrayList<RecentActionInfo>(recentActionInfos);
+            if (subsetRecentActionInfos.size() > 10) {
+                subsetRecentActionInfos = subsetRecentActionInfos.subList(0, 10);
             }
             Collection<ActionLog> actions = new ArrayList<ActionLog>();
-            for (Argh argh : subsetArghs) {
-                if (argh.generalActionType == DASHBOARD) {
-                    dashboardStmt.setLong(1, argh.dashboardID);
+            for (RecentActionInfo recentActionInfo : subsetRecentActionInfos) {
+                if (recentActionInfo.generalActionType == DASHBOARD) {
+                    dashboardStmt.setLong(1, recentActionInfo.dashboardID);
                     ResultSet dsRS = dashboardStmt.executeQuery();
                     if (dsRS.next()) {
                         String dashboardName = dsRS.getString(1);
                         String urlKey = dsRS.getString(2);
                         long dsID = dsRS.getLong(3);
-                        actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, argh.dashboardID, urlKey, dsID, Roles.OWNER, null, false), argh.actionType, argh.actionDate));
+                        actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, recentActionInfo.dashboardID, urlKey, dsID, Roles.OWNER, null, false), recentActionInfo.actionType, recentActionInfo.actionDate));
                     }
-                } else if (argh.generalActionType == DATA_SOURCE) {
-                    dataSourceStmt.setLong(1, argh.dataSourceID);
+                } else if (recentActionInfo.generalActionType == DATA_SOURCE) {
+                    dataSourceStmt.setLong(1, recentActionInfo.dataSourceID);
                     ResultSet dsRS = dataSourceStmt.executeQuery();
                     if (dsRS.next()) {
                         String dataSourceName = dsRS.getString(1);
-                        actions.add(new ActionDataSourceLog(argh.dataSourceID, dataSourceName, argh.actionType, argh.actionDate));
+                        actions.add(new ActionDataSourceLog(recentActionInfo.dataSourceID, dataSourceName, recentActionInfo.actionType, recentActionInfo.actionDate));
                     }
-                } else if (argh.generalActionType == REPORT) {
-                    reportStmt.setLong(1, argh.reportID);
+                } else if (recentActionInfo.generalActionType == REPORT) {
+                    reportStmt.setLong(1, recentActionInfo.reportID);
                     ResultSet dsRS = reportStmt.executeQuery();
                     if (dsRS.next()) {
                         long dsID = dsRS.getLong(1);
                         int reportType = dsRS.getInt(2);
                         String reportName = dsRS.getString(3);
                         String urlKey = dsRS.getString(4);
-                        actions.add(new ActionReportLog(new InsightDescriptor(argh.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), argh.actionType, argh.actionDate));
+                        actions.add(new ActionReportLog(new InsightDescriptor(recentActionInfo.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), recentActionInfo.actionType, recentActionInfo.actionDate));
                     }
                 }
             }
@@ -974,7 +1002,7 @@ public class AdminService {
             queryActionStmt.setLong(1, SecurityUtil.getUserID());
             queryActionStmt.setInt(2, 2);
             ResultSet rs = queryActionStmt.executeQuery();
-            Collection<Argh> arghs = new LinkedHashSet<Argh>();
+            Collection<RecentActionInfo> recentActionInfos = new LinkedHashSet<RecentActionInfo>();
             while (rs.next()) {
                 int generalActionType = rs.getInt(1);
                 int actionType = rs.getInt(2);
@@ -982,39 +1010,39 @@ public class AdminService {
                 long dataSourceID = rs.getLong(4);
                 long reportID = rs.getLong(5);
                 long dashboardID = rs.getLong(6);
-                arghs.add(new Argh(generalActionType, actionType, actionDate, dataSourceID, reportID, dashboardID));
+                recentActionInfos.add(new RecentActionInfo(generalActionType, actionType, actionDate, dataSourceID, reportID, dashboardID));
             }
-            List<Argh> subsetArghs = new ArrayList<Argh>(arghs);
-            if (subsetArghs.size() > 10) {
-                subsetArghs = subsetArghs.subList(0, 10);
+            List<RecentActionInfo> subsetRecentActionInfos = new ArrayList<RecentActionInfo>(recentActionInfos);
+            if (subsetRecentActionInfos.size() > 10) {
+                subsetRecentActionInfos = subsetRecentActionInfos.subList(0, 10);
             }
             Collection<ActionLog> actions = new ArrayList<ActionLog>();
-            for (Argh argh : subsetArghs) {
-                if (argh.generalActionType == DASHBOARD) {
-                    dashboardStmt.setLong(1, argh.dashboardID);
+            for (RecentActionInfo recentActionInfo : subsetRecentActionInfos) {
+                if (recentActionInfo.generalActionType == DASHBOARD) {
+                    dashboardStmt.setLong(1, recentActionInfo.dashboardID);
                     ResultSet dsRS = dashboardStmt.executeQuery();
                     if (dsRS.next()) {
                         String dashboardName = dsRS.getString(1);
                         String urlKey = dsRS.getString(2);
                         long dsID = dsRS.getLong(3);
-                        actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, argh.dashboardID, urlKey, dsID, Roles.OWNER, null, false), argh.actionType, argh.actionDate));
+                        actions.add(new ActionDashboardLog(new DashboardDescriptor(dashboardName, recentActionInfo.dashboardID, urlKey, dsID, Roles.OWNER, null, false), recentActionInfo.actionType, recentActionInfo.actionDate));
                     }
-                } else if (argh.generalActionType == DATA_SOURCE) {
-                    dataSourceStmt.setLong(1, argh.dataSourceID);
+                } else if (recentActionInfo.generalActionType == DATA_SOURCE) {
+                    dataSourceStmt.setLong(1, recentActionInfo.dataSourceID);
                     ResultSet dsRS = dataSourceStmt.executeQuery();
                     if (dsRS.next()) {
                         String dataSourceName = dsRS.getString(1);
-                        actions.add(new ActionDataSourceLog(argh.dataSourceID, dataSourceName, argh.actionType, argh.actionDate));
+                        actions.add(new ActionDataSourceLog(recentActionInfo.dataSourceID, dataSourceName, recentActionInfo.actionType, recentActionInfo.actionDate));
                     }
-                } else if (argh.generalActionType == REPORT) {
-                    reportStmt.setLong(1, argh.reportID);
+                } else if (recentActionInfo.generalActionType == REPORT) {
+                    reportStmt.setLong(1, recentActionInfo.reportID);
                     ResultSet dsRS = reportStmt.executeQuery();
                     if (dsRS.next()) {
                         long dsID = dsRS.getLong(1);
                         int reportType = dsRS.getInt(2);
                         String reportName = dsRS.getString(3);
                         String urlKey = dsRS.getString(4);
-                        actions.add(new ActionReportLog(new InsightDescriptor(argh.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), argh.actionType, argh.actionDate));
+                        actions.add(new ActionReportLog(new InsightDescriptor(recentActionInfo.reportID, reportName, dsID, reportType, urlKey, Roles.OWNER, false), recentActionInfo.actionType, recentActionInfo.actionDate));
                     }
                 }
             }

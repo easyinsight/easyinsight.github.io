@@ -58,6 +58,7 @@
         JSONObject userObject = new JSONObject();
         try {
             userObject = SecurityUtil.getUserJSON(c, request);
+            userObject.put("embedded", true);
         } finally {
             c.close();
         }

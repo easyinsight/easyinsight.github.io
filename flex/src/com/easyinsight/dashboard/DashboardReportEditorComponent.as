@@ -88,5 +88,8 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
 
     public function toggleControls(show:Boolean):void {
     }
+
+    public function recordToPDF(imageMap:Object):void {
+    }
 }
 }

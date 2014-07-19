@@ -147,26 +147,44 @@ public class TopoMapServlet extends HtmlServlet {
             lookup = new NoOpLookup();
         }
 
+        AggregationFactory factory = new AggregationFactory((AnalysisMeasure) measure, false);
+        Map<String, Region> translatedMap = new HashMap<>();
         JSONArray geoData = new JSONArray();
         for (IRow row : regionSet.getRows()) {
-            JSONObject regionRow = new JSONObject();
-            String regionValue = row.getValue(region).toString();
+            Value rv = row.getValue(region);
+            if (rv.type() == Value.EMPTY) {
+                continue;
+            }
+            String regionValue = rv.toString();
+
             String original = regionValue;
             regionValue = lookup.getValue(regionValue);
+
+
             if (regionValue != null) {
-                regionRow.put("region", regionValue);
-                regionRow.put("originalRegion", original);
-                double doubleValue = row.getValue(measure).toDouble();
-                if (doubleValue > 0) {
-                    //regionRow.put("scaledValue", Math.log(doubleValue));
-                    double logValue = Math.log(doubleValue);
-                    if (logValue < 1) {
-                        logValue = 1;
-                    }
-                    regionRow.put("scaledValue", logValue);
-                    regionRow.put("value", doubleValue);
-                    geoData.put(regionRow);
+                Region regionObj = translatedMap.get(regionValue);
+                if (regionObj == null) {
+                    regionObj = new Region(regionValue, original, factory.getAggregation());
+                    translatedMap.put(regionValue, regionObj);
                 }
+                regionObj.aggregation.addValue(row.getValue(measure));
+
+            }
+        }
+        for (Region regionObj : translatedMap.values()) {
+            JSONObject regionRow = new JSONObject();
+            regionRow.put("region", regionObj.region);
+            regionRow.put("originalRegion", regionObj.originalRegion);
+            double doubleValue = regionObj.aggregation.getValue().toDouble();
+            if (doubleValue > 0) {
+                //regionRow.put("scaledValue", Math.log(doubleValue));
+                double logValue = Math.log(doubleValue);
+                if (logValue < 1) {
+                    logValue = 1;
+                }
+                regionRow.put("scaledValue", logValue);
+                regionRow.put("value", doubleValue);
+                geoData.put(regionRow);
             }
         }
 
@@ -208,6 +226,18 @@ public class TopoMapServlet extends HtmlServlet {
 
         object.put("colors", colorArray);
         object.put("noDataFill", ExportService.createHexString(wsMap.getNoDataFill()));
+    }
+
+    private static class Region {
+        private String region;
+        private String originalRegion;
+        private Aggregation aggregation;
+
+        private Region(String region, String originalRegion, Aggregation aggregation) {
+            this.region = region;
+            this.originalRegion = originalRegion;
+            this.aggregation = aggregation;
+        }
     }
 
     private interface IRegionLookup {

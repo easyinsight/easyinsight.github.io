@@ -24,23 +24,34 @@ var multi_value_results;
 var multi_field_value_results;
 
 var saveConfiguration;
+var startFullRenderPDF;
+
+function captureAndReturn(o) {
+    var obj = o.report.report;
+    if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
+        obj.metadata.type == "ytd_definition") {
+        return null;
+    } else {
+        var id = o.report.id;
+        var svg = $("#d3Div" + id);
+        var h = svg.height();
+        var w = svg.width();
+        var imageData = {};
+        imageData.height = h;
+        imageData.width = w;
+        return imageData;
+    }
+
+}
 
 function capture(id) {
     var svg = $("#d3Div" + id);
     var h = svg.height();
     var w = svg.width();
-    canvg("d3Canvas"+id, svg.html());
-    var canvas = document.getElementById("d3Canvas"+id);
-    var img = canvas.toDataURL("image/png");
-    $.ajax ( {
-        url: '/app/uploadExportImage?report=' + id + "&height=" + h + "&width=" + w,
-        data: {imgBase64: img},
-        success: function(data) {
-            window.location.href = "/app/pdf?urlKey="+data["urlKey"];
-        },
-        type: "POST"
-    });
-    //document.write('<img src="'+img+'"/>');
+    var imageData = {};
+    imageData.height = h;
+    imageData.width = w;
+    return imageData;
 }
 
 function drillThrough(params) {
@@ -311,6 +322,13 @@ var toExcel = function (o, dashboardID, drillthroughID) {
     });
 }
 
+var handleFullFilters = function (fullFilters) {
+
+    return function () {
+        return fullFilters;
+    }
+}
+
 var renderReport = function (o, dashboardID, drillthroughID, reload) {
     var obj = o.report.report;
     var id = o.report.id;
@@ -319,7 +337,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     if (!reload && o.rendered) {
         return;
     }
-    if ($("#" + id + " :visible").size() == 0) {
+    if( $("#" + id).offset().top <= 0 ) {
         o.rendered = false;
         return;
     }
@@ -330,6 +348,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     for (i = 0; i < curFilters.length; i++) {
         fullFilters[curFilters[i].id] = curFilters[i];
     }
+    fullFilters = handleFullFilters(fullFilters)();
     beforeRefresh($("#" + id + " .loading"))();
     var embedComponent = typeof(userJSON.embedKey) != "undefined" ? ("&embedKey=" + userJSON.embedKey) : "";
     var embedded = typeof(userJSON.embedded) != "undefined" ? ("&embedded=true") : "";
@@ -520,6 +539,18 @@ var renderReports = function (obj, dashboardID, drillthroughID, force) {
             renderReports(obj.children[i], dashboardID, drillthroughID, force);
         }
     }
+}
+
+var fullRenderPDF = function (obj, dashboardID, drillthroughID, pdfData) {
+
+    if (obj.type == "report") {
+        pdfData[obj.id] = captureAndReturn(obj);
+    } else if (obj.type != "text") {
+        for (var i = 0; i < obj.children.length; i++) {
+            fullRenderPDF(obj.children[i], dashboardID, drillthroughID, pdfData);
+        }
+    }
+
 }
 
 var renderExcel = function (obj, dashboardID, drillthroughID, force) {
@@ -912,7 +943,9 @@ $(function () {
                 var max = $(".multi_flat_month_end", a).val();
                 f.filter.start = parseInt(min);
                 f.filter.end = parseInt(max);
-                $("#" + a.attr("id").replace(/_modal$/g, "")).html(short_months[f.filter.start] + " to " + short_months[f.filter.end]);
+                var startLabel = f.filter.lookup[min];
+                var endLabel = f.filter.lookup[max];
+                $("#" + a.attr("id").replace(/_modal$/g, "")).html(startLabel + " to " + endLabel);
                 if (f.parent == null) {
                     renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
                 } else {
@@ -1252,6 +1285,39 @@ $(function () {
         $(".export_excel").click(function(e) {
             renderExcel(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
         })
+
+        startFullRenderPDF = function (obj, dashboardID, drillthroughID) {
+
+            var ac = _.reduce(reportMap, function(m, e, i) {
+                m[i] = e.report.report.id;
+                return m;
+            }, {});
+            var c = {"filters": _.reduce(filterMap, function (m, e, i) {
+                m[i] = toFilterString(e.filter, true);
+                return m;
+            }, {}), "stacks": _.reduce(stackMap, function(m, e, i) {
+                m[i] = e.data.selected;
+                return m;
+            }, {}), "reports": ac};
+            var pdfData = {};
+            fullRenderPDF(obj, dashboardID, drillthroughID, pdfData);
+            var postData = {dashboardID: dashboardID, configuration : c, reportImages: pdfData};
+            $.ajax ( {
+                url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID,
+                data: JSON.stringify(postData),
+                success: function(data) {
+                    var url = data["urlKey"];
+                    window.location.href = "/app/pdf?urlKey="+url;
+                },
+                contentType: "application/json; charset=UTF-8",
+                type: "POST"
+            });
+        }
+
+        $(".export_dashboard_pdf").click(function(e) {
+            startFullRenderPDF(graph, dashboardJSON["key"], dashboardJSON["drillthroughID"]);
+        })
+
 
         $(".export_pdf").click(function(e) {
             renderPDF(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
