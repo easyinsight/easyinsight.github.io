@@ -551,9 +551,9 @@
     <mx:HBox width="680" verticalAlign="middle">
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
-        <listing:ArghButton label="Actions..." styleName="grayButton" itemClick="onItemClick(event)" visible="{customizeVisible}" width="160" id="actionButton"
+        <listing:ArghButton label="Actions..." styleName="grayButton" itemClick="onItemClick(event)" width="160" id="actionButton"
                              labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onItemClick(event)" visible="{customizeVisible}" width="160" id="newButton"
+        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onItemClick(event)" width="160" id="newButton"
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
