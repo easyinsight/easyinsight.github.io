@@ -84,10 +84,15 @@ public class FileProcessUpdateScheduledTask {
                 metadata.insertData(form.toDataSet(rowCount));
             }
             metadata.commit();
+
         }
         catch(Exception se) {
             if (metadata != null) metadata.rollback();
             throw se;
+        } finally {
+            if (metadata != null) {
+                metadata.closeConnection();
+            }
         }
     }
 
