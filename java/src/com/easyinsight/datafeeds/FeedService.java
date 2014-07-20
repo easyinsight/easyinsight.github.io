@@ -1114,6 +1114,7 @@ public class FeedService {
     }
 
     public List<DataSourceDescriptor> addonDataSources(long dataSourceID) {
+        List<DataSourceDescriptor> sources = searchForSubscribedFeeds();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT data_feed.data_feed_id, data_feed.feed_name FROM distinct_cached_addon_report_source, analysis, data_feed WHERE " +
@@ -1121,9 +1122,16 @@ public class FeedService {
             queryStmt.setLong(1, dataSourceID);
             ResultSet rs = queryStmt.executeQuery();
             List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+            for (DataSourceDescriptor dsd : sources) {
+                if (dsd.getDataSourceType() == FeedType.STATIC.getType() || dsd.getDataSourceType() == FeedType.DEFAULT.getType() ||
+                        dsd.getDataSourceType() == FeedType.GOOGLE.getType()) {
+                    dataSources.add(dsd);
+                }
+            }
             while (rs.next()) {
                 dataSources.add(new DataSourceDescriptor(rs.getString(2), rs.getLong(1), 0, false, 0));
             }
+
             return dataSources;
         } catch (Exception e) {
             LogClass.error(e);
