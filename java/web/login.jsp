@@ -113,7 +113,7 @@
             throw e;
         } finally {
             hibernateSession.close();
-            conn.close();
+            Database.closeConnection(conn);
         }
     }
 
