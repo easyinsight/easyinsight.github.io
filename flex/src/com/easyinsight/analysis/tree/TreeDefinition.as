@@ -23,6 +23,9 @@ public class TreeDefinition extends AnalysisDefinition{
     public var headerMode:Boolean = false;
     public var summaryBackgroundColor:uint = 0xCCCCCC;
     public var summaryTextColor:uint;
+    public var defaultMeasureAlignment:String = "none";
+    public var defaultGroupingAlignnment:String = "none";
+    public var defaultDateAlignment:String = "none";
 
     public function TreeDefinition() {
         super();
