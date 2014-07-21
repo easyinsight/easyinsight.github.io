@@ -251,6 +251,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         List<Comment> commentList = new ArrayList<Comment>();
 
         Set<String> ticketIDs = new HashSet<>();
+        Set<String> commentIDs = new HashSet<>();
         int safeguard = 0;
         while (nextPage != null) {
             Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
@@ -306,7 +307,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
                     if (zendeskCompositeSource.isLoadComments()) {
                         //System.out.println(id);
-                        if (ticketIDs.contains(id)) {
+                        if (commentIDs.contains(id)) {
 
                         } else {
                             Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
@@ -328,7 +329,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
                                 row.addValue(DESCRIPTION, firstComment);
                             }
-                            ticketIDs.add(id);
+                            commentIDs.add(id);
                         }
                     }
                     if (lastStart != null) {

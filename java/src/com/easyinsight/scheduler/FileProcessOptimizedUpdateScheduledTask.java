@@ -148,6 +148,10 @@ public class FileProcessOptimizedUpdateScheduledTask {
         catch(Exception se) {
             if (tableDef != null) tableDef.rollback();
             throw se;
+        } finally {
+            if (tableDef != null) {
+                tableDef.closeConnection();
+            }
         }
     }
 
