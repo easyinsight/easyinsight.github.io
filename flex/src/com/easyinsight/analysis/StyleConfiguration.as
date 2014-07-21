@@ -377,6 +377,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Type", "labelType", PieChartDefinition(report).labelType,
                     report, ["Value", "Label", "Percentage", "Value with Percentage"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", PieChartDefinition(report).legendMaxWidth, report, 10, 400));
+            items.addItem(new NumericReportFormItem("Donut Ratio", "donutRatio", PieChartDefinition(report).donutRatio, report, 0, 1));
 
 
         }
