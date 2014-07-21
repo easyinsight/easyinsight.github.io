@@ -36,9 +36,36 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private int summaryRowTextColor = 0x000000;
     private int summaryRowBackgroundColor = 0x6699ff;
     private String defaultColumnAlignment;
+    private String defaultMeasureAlignment;
+    private String defaultGroupingAlignnment;
+    private String defaultDateAlignment;
     private boolean rolloverIcon;
     private boolean multiLineHeaders;
     private boolean async;
+
+    public String getDefaultMeasureAlignment() {
+        return defaultMeasureAlignment;
+    }
+
+    public void setDefaultMeasureAlignment(String defaultMeasureAlignment) {
+        this.defaultMeasureAlignment = defaultMeasureAlignment;
+    }
+
+    public String getDefaultGroupingAlignnment() {
+        return defaultGroupingAlignnment;
+    }
+
+    public void setDefaultGroupingAlignnment(String defaultGroupingAlignnment) {
+        this.defaultGroupingAlignnment = defaultGroupingAlignnment;
+    }
+
+    public String getDefaultDateAlignment() {
+        return defaultDateAlignment;
+    }
+
+    public void setDefaultDateAlignment(String defaultDateAlignment) {
+        this.defaultDateAlignment = defaultDateAlignment;
+    }
 
     public boolean isAsync() {
         return async;
@@ -417,6 +444,9 @@ public class WSListDefinition extends WSAnalysisDefinition {
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
         async = findBooleanProperty(properties, "async", false);
         defaultColumnAlignment = findStringProperty(properties, "defaultColumnAlignment", "left");
+        defaultMeasureAlignment = findStringProperty(properties, "defaultMeasureAlignment", "none");
+        defaultDateAlignment = findStringProperty(properties, "defaultDateAlignment", "none");
+        defaultGroupingAlignnment = findStringProperty(properties, "defaultGroupingAlignment", "none");
     }
 
     public JSONObject jsonProperties() {
@@ -449,6 +479,9 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("async", async));
         properties.add(new ReportBooleanProperty("multiLineHeaders", multiLineHeaders));
         properties.add(new ReportStringProperty("defaultColumnAlignment", defaultColumnAlignment));
+        properties.add(new ReportStringProperty("defaultMeasureAlignment", defaultMeasureAlignment));
+        properties.add(new ReportStringProperty("defaultDateAlignment", defaultDateAlignment));
+        properties.add(new ReportStringProperty("defaultGroupingAlignnment", defaultGroupingAlignnment));
         return properties;
     }
 
@@ -518,6 +551,48 @@ public class WSListDefinition extends WSAnalysisDefinition {
             }
             if (applicationSkin.isTextColorEnabled()) {
                 setTextColor(applicationSkin.getTextColor());
+            }
+        }
+        if (!"none".equals(defaultGroupingAlignnment)) {
+            for (AnalysisItem item : getColumns()) {
+                if (item.hasType(AnalysisItemTypes.DIMENSION) && !item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    if (item.getReportFieldExtension() == null) {
+                        TextReportFieldExtension textReportFieldExtension = new TextReportFieldExtension();
+                        textReportFieldExtension.setAlign(defaultGroupingAlignnment);
+                        item.setReportFieldExtension(textReportFieldExtension);
+                    } else if (item.getReportFieldExtension() instanceof TextReportFieldExtension && "Default".equals(((TextReportFieldExtension) item.getReportFieldExtension()).getAlign())) {
+                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) item.getReportFieldExtension();
+                        textReportFieldExtension.setAlign(defaultGroupingAlignnment);
+                    }
+                }
+            }
+        }
+        if (!"none".equals(defaultMeasureAlignment)) {
+            for (AnalysisItem item : getColumns()) {
+                if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                    if (item.getReportFieldExtension() == null) {
+                        TextReportFieldExtension textReportFieldExtension = new TextReportFieldExtension();
+                        textReportFieldExtension.setAlign(defaultMeasureAlignment);
+                        item.setReportFieldExtension(textReportFieldExtension);
+                    } else if (item.getReportFieldExtension() instanceof TextReportFieldExtension && "Default".equals(((TextReportFieldExtension) item.getReportFieldExtension()).getAlign())) {
+                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) item.getReportFieldExtension();
+                        textReportFieldExtension.setAlign(defaultMeasureAlignment);
+                    }
+                }
+            }
+        }
+        if (!"none".equals(defaultDateAlignment)) {
+            for (AnalysisItem item : getColumns()) {
+                if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    if (item.getReportFieldExtension() == null) {
+                        TextReportFieldExtension textReportFieldExtension = new TextReportFieldExtension();
+                        textReportFieldExtension.setAlign(defaultDateAlignment);
+                        item.setReportFieldExtension(textReportFieldExtension);
+                    } else if (item.getReportFieldExtension() instanceof TextReportFieldExtension && "Default".equals(((TextReportFieldExtension) item.getReportFieldExtension()).getAlign())) {
+                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) item.getReportFieldExtension();
+                        textReportFieldExtension.setAlign(defaultDateAlignment);
+                    }
+                }
             }
         }
     }
