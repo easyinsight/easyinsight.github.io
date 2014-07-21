@@ -2182,6 +2182,7 @@ public class DataService {
         results.setSuggestions(suggestions);
         results.setFieldEvents(insightRequestMetadata.getFieldAudits());
         results.setFilterEvents(insightRequestMetadata.getFilterAudits());
+        results.setReport(analysisDefinition);
 
         for (Map.Entry<String, List<String>> entry : insightRequestMetadata.getFieldAudits().entrySet()) {
             for (String audit : entry.getValue()) {
