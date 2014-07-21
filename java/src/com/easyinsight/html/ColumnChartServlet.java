@@ -120,6 +120,11 @@ public class ColumnChartServlet extends HtmlServlet {
                         if (textValueExtension.getColor() > 0) {
                             color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
                         }
+                    } else if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() > 0) {
+                            color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
+                        }
                     }
                     if (color == null) {
                         color = colors.get(0);
