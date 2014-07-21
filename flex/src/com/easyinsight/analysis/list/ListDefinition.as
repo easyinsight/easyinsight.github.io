@@ -27,6 +27,9 @@ import mx.collections.ArrayCollection;
         public var multiLineHeaders:Boolean = false;
         public var async:Boolean = false;
         public var defaultColumnAlignment:String = "left";
+        public var defaultMeasureAlignment:String = "none";
+        public var defaultGroupingAlignnment:String = "none";
+        public var defaultDateAlignment:String = "none";
 
 		public function ListDefinition()
 		{
