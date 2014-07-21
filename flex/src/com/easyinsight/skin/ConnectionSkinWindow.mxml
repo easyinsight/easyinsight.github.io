@@ -56,7 +56,7 @@
             lfItems.addItem(new ColorReportFormItem("Report Title Background Color", "dashboardReportHeaderBackgroundColor", skin.dashboardReportHeaderBackgroundColor, skin, "dashboardReportHeaderBackgroundColorEnabled"));
             lfItems.addItem(new ColorReportFormItem("Report Title Text Color", "dashboardReportHeaderTextColor", skin.dashboardReportHeaderTextColor, skin, "dashboardReportHeaderTextColorEnabled"));
             lfItems.addItem(new MultiColorReportFormItem("Primary Multi Color Report", "multiColors", skin.multiColors, skin));
-            lfItems.addItem(new MultiColorReportFormItem("Secondary Multi Color Report", "multiColors", skin.secondaryMultiColors, skin));
+            lfItems.addItem(new MultiColorReportFormItem("Secondary Multi Color Report", "secondaryMultiColors", skin.secondaryMultiColors, skin));
             var lastItem:ReportFormItem = lfItems.getItemAt(lfItems.length - 1) as ReportFormItem;
             lastItem.addEventListener(FlexEvent.CREATION_COMPLETE, onDone);
             for each (var item:ReportFormItem in lfItems) {
