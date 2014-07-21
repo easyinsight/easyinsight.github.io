@@ -726,7 +726,10 @@ public class DataViewFactory extends VBox implements IRetrievable {
         copyPropertyIfExists(source, target, "rowColor1");
         copyPropertyIfExists(source, target, "rowColor2");
         copyPropertyIfExists(source, target, "colorScheme");
-        copyPropertyIfExists(source, target, "defaultColumnAlignment");
+        copyPropertyIfExists(source, target, "defaultMeasureAlignment");
+        copyPropertyIfExists(source, target, "defaultGroupingAlignnment");
+        copyPropertyIfExists(source, target, "defaultDateAlignment");
+        copyPropertyIfExists(source, target, "hideNoData");
     }
 
     private static function copyPropertyIfExists(source:AnalysisDefinition, target:AnalysisDefinition, property:String):void {
