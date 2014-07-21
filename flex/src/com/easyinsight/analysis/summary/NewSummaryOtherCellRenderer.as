@@ -185,7 +185,7 @@ public class NewSummaryOtherCellRenderer extends UITextField implements IListIte
         if (treeRow.groupingField != null) {
             var rext:TextReportFieldExtension = treeRow.groupingField.reportFieldExtension as TextReportFieldExtension;
 
-            if (rext != null && rext.align != null) {
+            if (rext != null && rext.align != null && rext.align != "Default") {
                 align = rext.align.toLowerCase();
             }
         }

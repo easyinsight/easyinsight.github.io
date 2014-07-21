@@ -291,7 +291,9 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Show Line Numbers", "showLineNumbers", ListDefinition(report).showLineNumbers, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
-            items.addItem(new ComboBoxReportFormItem("Default Alignment", "defaultColumnAlignment", ListDefinition(report).defaultColumnAlignment, report, ["left", "center", "right"]));
+            items.addItem(new ComboBoxReportFormItem("Default Measure Alignment", "defaultMeasureAlignment", ListDefinition(report).defaultMeasureAlignment, report, ["none", "left", "center", "right"]));
+            items.addItem(new ComboBoxReportFormItem("Default Grouping Alignment", "defaultGroupingAlignnment", ListDefinition(report).defaultGroupingAlignnment, report, ["none", "left", "center", "right"]));
+            items.addItem(new ComboBoxReportFormItem("Default Date Alignment", "defaultDateAlignment", ListDefinition(report).defaultDateAlignment, report, ["none", "left", "center", "right"]));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
@@ -307,6 +309,9 @@ public class StyleConfiguration {
         if (report is TreeDefinition) {
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", TreeDefinition(report).summaryTotal, report));
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
+            items.addItem(new ComboBoxReportFormItem("Default Measure Alignment", "defaultMeasureAlignment", TreeDefinition(report).defaultMeasureAlignment, report, ["none", "left", "center", "right"]));
+            items.addItem(new ComboBoxReportFormItem("Default Grouping Alignment", "defaultGroupingAlignnment", TreeDefinition(report).defaultGroupingAlignnment, report, ["none", "left", "center", "right"]));
+            items.addItem(new ComboBoxReportFormItem("Default Date Alignment", "defaultDateAlignment", TreeDefinition(report).defaultDateAlignment, report, ["none", "left", "center", "right"]));
         }
         if (report is SummaryDefinition) {
             items.addItem(new CheckBoxReportFormItem("Separate Summary Line", "headerMode", SummaryDefinition(report).headerMode, report));

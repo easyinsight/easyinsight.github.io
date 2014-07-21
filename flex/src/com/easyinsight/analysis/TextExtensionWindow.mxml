@@ -38,7 +38,7 @@
         }
 
         [Bindable]
-        private var align:String = "Left";
+        private var align:String = "Default";
 
         [Bindable]
         private var fixedWidth:String;
@@ -63,6 +63,7 @@
             <mx:ComboBox id="alignComboBox" selectedItem="{align}">
                 <mx:dataProvider>
                     <mx:ArrayCollection>
+                        <mx:String>Default</mx:String>
                         <mx:String>Left</mx:String>
                         <mx:String>Center</mx:String>
                         <mx:String>Right</mx:String>
