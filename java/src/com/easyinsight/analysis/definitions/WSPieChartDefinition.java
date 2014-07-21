@@ -17,6 +17,15 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private int legendMaxWidth;
     private String labelType;
+    private double donutRatio;
+
+    public double getDonutRatio() {
+        return donutRatio;
+    }
+
+    public void setDonutRatio(double donutRatio) {
+        this.donutRatio = donutRatio;
+    }
 
     public String getLabelType() {
         return labelType;
@@ -65,6 +74,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         labelType = findStringProperty(properties, "labelType", "Value");
         legendMaxWidth = (int) findNumberProperty(properties, "legendMaxWidth", 200);
         multiColors = multiColorProperty(properties, "multiColors");
+        donutRatio = findNumberProperty(properties, "donutRatio", 0);
     }
 
     @Override
@@ -73,6 +83,7 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
         properties.add(new ReportStringProperty("labelType", labelType));
         properties.add(new ReportNumericProperty("legendMaxWidth", legendMaxWidth));
+        properties.add(new ReportNumericProperty("donutRatio", donutRatio));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
     }
