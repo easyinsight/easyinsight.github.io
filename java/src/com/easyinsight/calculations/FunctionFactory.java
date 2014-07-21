@@ -321,6 +321,10 @@ public class FunctionFactory {
             return new LongitudeFromPostal();
         } else if (s.equals("boundsset")) {
             return new BoundsSet();
+        } else if (s.equals("assigncolors")) {
+            return new AssignColors();
+        } else if (s.equals("assignbackgroundcolors")) {
+            return new AssignBackgroundColors();
         } else {
             return null;
         }
