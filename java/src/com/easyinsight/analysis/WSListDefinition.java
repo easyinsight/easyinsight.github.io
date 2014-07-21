@@ -481,7 +481,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportStringProperty("defaultColumnAlignment", defaultColumnAlignment));
         properties.add(new ReportStringProperty("defaultMeasureAlignment", defaultMeasureAlignment));
         properties.add(new ReportStringProperty("defaultDateAlignment", defaultDateAlignment));
-        properties.add(new ReportStringProperty("defaultGroupingAlignnment", defaultGroupingAlignnment));
+        properties.add(new ReportStringProperty("defaultGroupingAlignment", defaultGroupingAlignnment));
         return properties;
     }
 
