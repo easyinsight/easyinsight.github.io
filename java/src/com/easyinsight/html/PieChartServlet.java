@@ -109,6 +109,11 @@ public class PieChartServlet extends HtmlServlet {
         object.put("yFormat", createFormatObject(measureItem, md));
         object.put("values", points);
         object.put("pieLabelStyle", pieChart.getLabelType());
+        object.put("showLegend", pieChart.isShowLegend());
+        if (pieChart.getDonutRatio() > 0) {
+            object.put("donut", true);
+            object.put("donutRatio", pieChart.getDonutRatio());
+        }
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();
