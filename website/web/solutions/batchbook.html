@@ -1,173 +1,189 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/datatemplate.dwt" codeOutsideHTMLIsLocked="false" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- InstanceBeginEditable name="doctitle" -->
-<title>Easy Insight - Batchbook Reporting and Analytics</title>
-<!-- InstanceEndEditable -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Easy Insight - Batchbook Reporting and Analytics</title>
+    <meta name="description" content="Batchbook reporting and analysis on contacts, deals, cases, companies, and tasks done easily and quickly by Easy Insight." />
+    <meta name="keywords" content="batchbook, batchbook CRM, batchbook reporting, batchbook tools, batchbook reports, batchbook analytics, batchbook extras, batchbook addons" />
 
-<!-- InstanceBeginEditable name="head" -->
-<meta name="description" content="Batchbook reporting and analysis on contacts, deals, cases, companies, and tasks done easily and quickly by Easy Insight." />
-<meta name="keywords" content="batchbook, batchbook CRM, batchbook reporting, batchbook tools, batchbook reports, batchbook analytics, batchbook extras, batchbook addons" />
-<!-- InstanceEndEditable -->
+    <!-- font -->
+    <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
 
-    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-	<script type="text/javascript" src="/js/jquery.min.js"></script>
+    <!-- main includes -->
+
+    <script type="text/javascript" src="/js/modernizr.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <link href="/css/bootstrap-website.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+    <!-- lightbox -->
+
     <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
-    <script type="text/javascript">
-        $(function() {
-            $('#midContent a').lightBox();
-        });
-    </script>
 </head>
 <body>
-<div id="whiteDiv"></div>
-<div id="topMenuDiv"></div>
-<div id="blackIntroDiv"></div>
-<div id="trialDiv"></div>
-<div style="width:1000px;margin:0 auto;">
-    <div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<nav class="navbar navbar-static-top navbar-main website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
+                                                                    name="logo"/></a>
+        </div>
 
-        <div class="signupHeadline">
-            <a href="/app/">Customer Login</a>
-            <a href="/app/newaccount/">Free Trial</a>
-            <a href="/contactus.html">Contact Us</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right navbar-main-item">
+                <li><a href="/app/" class="fontA">Customer Login</a></li>
+                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
+            </ul>
         </div>
     </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/pricing.html">Pricing</a>
-        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
-        <a class="inactive" href="/api.html">Developers</a>
-    </div>
-    <div id="coreContent">
-        <div class="coreContentBlock" style="padding-top:20px;">
-            <h2 class="coreContentHeader">Batchbook Reporting and Analytics</h2>
-
-            <p class="coreContentParagraph">Want the ability to perform custom Batchbook reporting? Whether it's simple
-                reports on your sales pipeline or in depth CRM analysis, Easy Insight can get you that visibility in a
-                couple of clicks!</p>
-        </div>
-        <div style="margin-top:50px;margin-right:50px;float:right;background-color:#FFFFFF">
-            <img style="padding:30px" src="../images/batchbook_icon.gif" alt="Constant Contact Logo"/>
+</nav>
+<nav class="navbar navbar-subheader website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-subheader-item">
+                <li><a href="/product.html">Features</a></li>
+                <li><a href="/data.html">Connections</a></li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/app/websiteDocs/">Documentation</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
         </div>
     </div>
-    <div id="trialBar">
-        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
-        <a href="/app/newaccount" class="btn btn-primary btn-large" style="margin-top: 8px">Try Easy Insight Now!</a>
-        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+</nav>
+<div class="container-fluid screenshotDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                        <a href="../images/Highrise_DB_Overview_LG.png" rel="lightbox-highrise"
+                           title=""><img width="451" height="340" src="../images/Highrise_OV_450x340.png"
+                                         alt="CRM Dashboard"/></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dragDropDone">Drag. Drop. Done. Batchbook Reporting Made Easy.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="contentHeaderStart"></div>
-    <div id="midContent">
+</div>
+<div class="container-fluid trialDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
+                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
+                            Insight Now!</a>
 
-        <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:left">
-            <a href="../images/BatchbookDealBarChart.png"
-               title="From simple pie charts to far more sophisticated reports, Easy Insight gives you a wide range of visualization options."><img
-                    src="../images/BatchbookDealBarChart.jpg" alt="Batchbook pie chart"/></a>
-
-            <div align="center" style="font-size:12px;padding-top:10px;color:#353535">
-                Click Above to See Sample Batchbook Reports
+                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <h2>Answers to Your Batchbook Reporting Questions</h2>
-
-        <p>Need to build Batchbook reports on your companies, communications, deals, or todos? Easy Insight gives you
-            the ability to create simple lists of contact information, pie charts of deal dollars by company, line
-            charts of contact creation over time, and anything else you may want! Ad hoc report creation allows you to
-            drag in fields from any of the key Batchbook subject matters to create the reports you need to manage and
-            optimize your sales activities. You can apply dynamic filters to restrict the data down to a particular date
-            range, show only deals matching a certain tag, or only open cases.</p>
-
-        <div style="padding-top:35px;padding-left:10px;padding-right:30px;float:right">
-            <a href="../images/BatchbookDashboard.png"
-               title="Build full dashboards around your Batchbook data, combining multiple reports into a single seamless display of your prospect and task activities."><img
-                    src="../images/BatchbookDashboard.jpg" alt="Batchbook dashboard"/></a>
-
-            <div align="center" style="font-size:12px;padding-top:10px;color:#353535">
-                Click Above to See Sample Batchbook Reports
-            </div>
-        </div>
-        <h2 style="padding-top:100px">Prebuilt Reports to Get You Started</h2>
-
-        <p>Whether it's a pie chart showing your deal amounts by category, a tree giving you a hierarchical report on
-            your prospects, or a simple list of contacts with a variety of optional filters, our rich library of
-            prebuilt reports can help you get a quick start. You can take any of our prebuilt reports and modify them to
-            meet your specific business need, all within a rich web interface designed to be accessible to business
-            users. Build a particularly cool report? You can add it to help others with a single click.</p>
-
-        <div style="padding-top:60px;padding-left:10px;padding-right:30px;float:left">
-            <a href="../images/BatchbookReportEditor.png"
-               title="The Easy Insight report editor makes it easy for business users to build custom reports through drag and drop actions."><img
-                    src="../images/BatchbookReportEditor.jpg" alt="Easy Insight report editor"/></a>
-
-            <div align="center" style="font-size:12px;padding-top:10px;color:#353535">
-                Click Above to See Sample Batchbook Reports
-            </div>
-        </div>
-        <h2 style="padding-top:100px">Export and Extend</h2>
-
-        <p style="padding-bottom:80px">You can export your reports into Excel, PDFs, PNG, or simple HTML tables. Set up
-            recurring email delivery of reports so that you have the latest update on hot deal status waiting in your
-            mailbox every morning. Want to add probability of close to your deals? Industry to your contacts? Easy
-            Insight provides you with the functionality to easily extend your Batchbook reporting with custom fields.
-            Have Constant Contact too? Combine your Batchbook and Constant Contact data to create a single cohesive view
-            of prospect activity.</p>
-        <!-- InstanceEndEditable -->
     </div>
-    <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
+</div>
+<div class="container corePageWell">
+    <div class="row">
+        <h2 style="font-size: 20px;font-family: 'Helvetica Neue',Helvetica,Arial, sans-serif;padding-top: 0">How can I
+            improve my sales performance?</h2>
 
-    <div id="footer">
-        <div id="linkLine">
-            <div style="padding-left:15px;">
-                <a href="/company.html">Company</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/pricing.html">Pricing</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/api.html">Developers</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/privacy.html">Privacy Policy</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/terms.html">Terms of Service</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/partners.html">Partners</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/contactus.html">Contact Us</a>
+        <p style="font-size: 16px;color: #555555;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;padding-left: 20px;padding-right: 20px;line-height: 22px">
+            Easy Insight gives you the reporting power you need to maximize your sales performance. Keep track of what's in your pipeline so that you don't lose track of crucial deals. Keep track of vital metrics such as average deal size, time to close, and win rates.
+        </p>
+
+        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+        </div>
+        <h2 style="font-size: 20px;font-family: 'Helvetica Neue',Helvetica,Arial, sans-serif;padding-top: 0">Prebuilt
+            Reports to Get You Started</h2>
+
+
+        <p style="font-size: 16px;color: #555555;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;padding-left: 20px;padding-right: 20px;line-height: 22px">
+            As soon as you connect your Easy Insight account, you'll have dashboards and reports providing views into your sales data, your leads, your cases, and your tasks. You can export these reports into PDF and Excel, as well as setting them for recurring email delivery.</p>
+
+        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+        </div>
+        <h2 style="font-size: 20px;font-family: 'Helvetica Neue',Helvetica,Arial, sans-serif;padding-top: 0">Extend Your
+            Highrise Reporting With Custom Fields</h2>
+
+
+        <p style="font-size: 16px;color: #555555;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;padding-left: 20px;padding-right: 20px;line-height: 22px">
+            Need a field like Expected Close or Probability that Highrise doesn't have by default? Easy Insight provides mechanisms to support adding and reporting on these fields. You can even combine your Highrise data with other systems such as Basecamp and FreshBooks.</p>
+
+
+        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+        </div>
+        <div>
+            <a href="/app/newaccount" class="btn btn-primary btn-large">Try Easy Insight Now!</a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="newFooter">
+    <div class="row">
+        <div class="col-sm-2 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
             </div>
         </div>
-        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/pricing.html">Pricing</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/partners.html">Partners</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/api/">Developers</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 copyright">
+            Copyright ©2008-2014 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

@@ -1,70 +1,111 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/datatemplate.dwt" codeOutsideHTMLIsLocked="false" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- InstanceBeginEditable name="doctitle" -->
-<title>Easy Insight - Google Analytics</title>
-<!-- InstanceEndEditable -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Easy Insight - Google Analytics</title>
+    <!-- InstanceEndEditable -->
 
-<!-- InstanceBeginEditable name="head" -->
-<meta name="description" content="Visualize your Google Analytics data with on-demand reporting from Easy Insight." />
-<meta name="keywords" content="google analytics, google analytics reporting, google analytics tools, google analytics reports, google adwords, google adwords analytics, google adwords reporting, google adwords tools, google adwords reports, google adwords campaign analysis" />
-<!-- InstanceEndEditable -->
+    <!-- InstanceBeginEditable name="head" -->
+    <meta name="description" content="Visualize your Google Analytics data with on-demand reporting from Easy Insight." />
+    <meta name="keywords" content="google analytics, google analytics reporting, google analytics tools, google analytics reports, google adwords, google adwords analytics, google adwords reporting, google adwords tools, google adwords reports, google adwords campaign analysis" />
 
-    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-	<script type="text/javascript" src="/js/jquery.min.js"></script>
+    <!-- font -->
+    <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
+
+    <!-- main includes -->
+
+    <script type="text/javascript" src="/js/modernizr.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <link href="/css/bootstrap-website.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+    <!-- lightbox -->
+
     <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
-    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
 </head>
 <body>
-<div id="whiteDiv"></div>
-<div id="topMenuDiv"></div>
-<div id="blackIntroDiv"></div>
-<div id="trialDiv"></div>
-<div style="width:1000px;margin:0 auto;">
-    <div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<nav class="navbar navbar-static-top navbar-main website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
+                                                                    name="logo"/></a>
+        </div>
 
-        <div class="signupHeadline">
-            <a href="/app/">Customer Login</a>
-            <a href="/app/newaccount/">Free Trial</a>
-            <a href="/contactus.html">Contact Us</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right navbar-main-item">
+                <li><a href="/app/" class="fontA">Customer Login</a></li>
+                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
+            </ul>
         </div>
     </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/pricing.html">Pricing</a>
-        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
-        <a class="inactive" href="/api.html">Developers</a>
-    </div>
-    <div id="coreContent">
-        <div class="coreContentBlock" style="padding-top:20px;">
-            <h2 class="coreContentHeader">Google Analytics Reporting and Analysis</h2>
-
-            <p class="coreContentParagraph">Want the ability to augment your Google Analytics reporting? Want to track
-                your web metrics in combination with the rest of your business data? Whether it's simple reports on
-                visitors and AdWords or in depth business intelligence analysis, Easy Insight can get you that
-                visibility in a couple of clicks!</p>
-        </div>
-        <div style="margin-top:50px;margin-right:50px;float:right;background-color:#FFFFFF">
-            <img style="padding:30px" src="/images/logos/Google Analytics.png" alt="Google Analytics Logo"/>
+</nav>
+<nav class="navbar navbar-subheader website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-subheader-item">
+                <li><a href="/product.html">Features</a></li>
+                <li><a href="/data.html">Connections</a></li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/app/websiteDocs/">Documentation</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
         </div>
     </div>
-    <div id="trialBar">
-        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
-        <a href="/app/newaccount" class="btn btn-primary btn-large" style="margin-top: 8px">Try Easy Insight Now!</a>
-        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+</nav>
+<div class="container-fluid screenshotDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
+                        <a href="../images/Order_Fulfillment_Dashboard_Lg.png" rel="lightbox-highrise"
+                           title=""><img src="../images/Order_Fulfillment_Dashboard.png" alt="Basecamp Analysis"/></a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dragDropDone">Drag. Drop. Done. Google Analytics Reporting Made Easy.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="contentHeaderStart"></div>
-    <div id="midContent">
-        <img src="../images/GA2.png" style="float:left;padding:10px;"/>
+</div>
+<div class="container-fluid trialDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
+                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
+                            Insight Now!</a>
 
+                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container corePageWell">
+    <div class="row">
         <h2>Easy Data Exploration</h2>
 
         <p>The combination of Easy Insight and <a href="http://www.google.com/analytics/">Google Analytics</a> gives you
@@ -73,7 +114,7 @@
             robust filtering capabilities, finding meaningful insights within your visitor traffic, your advertising
             efforts, and everything else offered by Google Analytics. You can take advantage of reports built by other
             users in the community to quickly find whole new angles on your web data.</p>
-        <img src="../images/GA4.png" style="float:right;padding:10px;"/>
+
 
         <h2>Combined Insight</h2>
 
@@ -82,7 +123,7 @@
             sources. Have application data powering the rest of your website, like internal information about users? Use
             the Easy Insight database solution to make queries against that relational data and combine that data with
             your web traffic data to build out that full picture.</p>
-        <img src="../images/GA1.png" style="float:left;padding:30px 10px;"/>
+
 
         <h2>Improve your Sales and Marketing Strategy</h2>
 
@@ -92,53 +133,52 @@
             of choice, and whatever else may be needed, to create a full view of your sales and marketing activity,
             helping to guide successful campaigns. Make sure that you're applying the lessons from your insights
             correctly, to drive continuous business improvement towards more deals, more revenue, and more success!</p>
-        <!-- InstanceEndEditable -->
     </div>
-    <div id="contentHeaderEnd"></div>
-    <div id="footer">
-        <div id="linkLine">
-            <div style="padding-left:15px;">
-                <a href="/company.html">Company</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/pricing.html">Pricing</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/api.html">Developers</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/privacy.html">Privacy Policy</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/terms.html">Terms of Service</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/partners.html">Partners</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/contactus.html">Contact Us</a>
+</div>
+<div class="container-fluid" id="newFooter">
+    <div class="row">
+        <div class="col-sm-2 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
             </div>
         </div>
-        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/pricing.html">Pricing</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/partners.html">Partners</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/api/">Developers</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 copyright">
+            Copyright ©2008-2014 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>
