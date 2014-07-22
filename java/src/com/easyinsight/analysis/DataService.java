@@ -2712,22 +2712,26 @@ public class DataService {
             feed.getDataSource().decorateLinks(new ArrayList<>(items));
 
             try {
-                Map<String, AnalysisItem> filterMap = new HashMap<>();
-                for (AnalysisItem reportItem : items) {
-                    if (reportItem != null) {
-                        filterMap.put(reportItem.toOriginalDisplayName(), reportItem);
+                if (analysisDefinition instanceof WSAreaChartDefinition) {
+                    Map<String, AnalysisItem> filterMap = new HashMap<>();
+                    for (AnalysisItem reportItem : items) {
+                        if (reportItem != null) {
+                            filterMap.put(reportItem.toOriginalDisplayName(), reportItem);
+                        }
                     }
-                }
-                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-                    if (filter.getField() != null && filter.getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        AnalysisItem original = filterMap.get(filter.getField().toOriginalDisplayName());
-                        if (original != null && original.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            AnalysisDateDimension source = (AnalysisDateDimension) original;
-                            AnalysisDateDimension target = (AnalysisDateDimension) filter.getField();
-                            if (source.getDateLevel() != target.getDateLevel() && source.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL &&
-                                    target.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                                target.setDateLevel(source.getDateLevel());
-
+                    for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                        if (filter.getField() != null && filter.getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            AnalysisItem original = filterMap.get(filter.getField().toOriginalDisplayName());
+                            if (original != null && original.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                AnalysisDateDimension source = (AnalysisDateDimension) original;
+                                AnalysisDateDimension target = (AnalysisDateDimension) filter.getField();
+                                if (source.getDateLevel() == AnalysisDateDimension.DAY_LEVEL &&
+                                        (target.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL ||
+                                                target.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
+                                                target.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL ||
+                                                target.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                                    target.setDateLevel(source.getDateLevel());
+                                }
                             }
                         }
                     }
