@@ -57,6 +57,8 @@ function capture(id) {
 function drillThrough(params) {
     if(typeof(userJSON.embedKey) != "undefined")
         params["embedKey"] = userJSON.embedKey;
+    if(typeof(userJSON.embedded) != "undefined")
+        params["embedded"] = userJSON.embedded;
     $.ajax( {
         dataType: "json",
         url: '/app/drillThrough',
@@ -758,6 +760,8 @@ $(function () {
 
         $("#base").append(dashboard(dashboardJSON));
 
+        $(".dashboardReportHeader").css("background-color", dashboardJSON["styles"]["report_header_background"]);
+        $(".dashboardReportHeader").css("color", dashboardJSON["styles"]["report_header_text"]);
         $(".dashboardStackNav").css("background-color", dashboardJSON["styles"]["alternative_stack_start"]);
         $(".dashboardStackNav").addClass("dashboardStackPill");
         $(".dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills").css("background-color", dashboardJSON["styles"]["main_stack_start"]);
