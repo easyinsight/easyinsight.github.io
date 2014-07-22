@@ -3,7 +3,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.TrendOutcome;
-        import com.easyinsight.analysis.TrendReportFieldExtension;
+        import com.easyinsight.analysis.Value;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.Formatter;
@@ -30,8 +30,7 @@
                 }
                 for each (var updateOutcome:TrendOutcome in trends) {
                     updateOutcome.leftTextWidth = width + 10;
-                    if (previousString != null || (updateOutcome.measure.reportFieldExtension != null && updateOutcome.measure.reportFieldExtension is TrendReportFieldExtension &&
-                            TrendReportFieldExtension(updateOutcome.measure.reportFieldExtension).date)) {
+                    if (previousString != null && trendOutcome.historical != null && trendOutcome.historical.type() != Value.EMPTY) {
                         var r:AltTrendRenderer = new AltTrendRenderer();
                         r.trendDefinition = trendDef;
                         r.data = updateOutcome;
