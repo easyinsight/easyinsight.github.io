@@ -3906,11 +3906,11 @@ public class ExportService {
                                 if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                                     TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
                                     if (textReportFieldExtension.getAlign() != null) {
-                                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                        if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
                                             align = "left";
-                                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                        } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
                                             align = "center";
-                                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                        } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
                                             align = "right";
                                         }
                                     }
@@ -4033,11 +4033,11 @@ public class ExportService {
                     if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                         TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
                         if (textReportFieldExtension.getAlign() != null) {
-                            if ("Left".equals(textReportFieldExtension.getAlign())) {
+                            if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
                                 align = "left";
-                            } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                            } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
                                 align = "center";
-                            } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                            } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
                                 align = "right";
                             }
                         }
