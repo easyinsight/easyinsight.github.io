@@ -13,6 +13,7 @@ public class PieChartDefinition extends XAxisDefinition{
     public var labelType:String = "Value";
     public var multiColors:ArrayCollection = new ArrayCollection();
     public var legendMaxWidth:int = 200;
+    public var donutRatio:Number = 0;
 
     public function PieChartDefinition() {
         super();

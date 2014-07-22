@@ -138,9 +138,6 @@
             if (treeDefinition.useCustomFontFamily) {
                 coreGrid.setStyle("fontFamily", treeDefinition.getFont());
             }
-            /*if (eSet != null) {
-             eSet.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
-             }*/
             if (dataSet.length > 0) {
                 originalSet = dataSet;
                 treeDef = treeDefinition;
@@ -220,17 +217,8 @@
                 hierarchyColumn.headerText = hierarchy.unqualifiedDisplay;
                 hierarchyColumn.sortCompareFunction = doNothingSort;
                 var headerHierarchyFactor:ClassFactory = new ClassFactory(NewSummaryOtherCellRenderer);
-                headerHierarchyFactor.properties = { report:treeDef };
+                headerHierarchyFactor.properties = { report: treeDef };
                 hierarchyColumn.itemRenderer = headerHierarchyFactor;
-                /*hierarchyColumn.labelFunction = function (item:Object, column:AdvancedDataGridColumn):String {
-                 var treeRow:NewSummaryRow = item as NewSummaryRow;
-                 if (treeRow.groupingField != null) {
-                 var formatter:Formatter = treeRow.groupingField.getFormatter();
-                 return formatter.format(treeRow.groupingColumn);
-                 } else {
-                 return "";
-                 }
-                 };*/
                 hierarchyColumn.dataField = "groupingColumn";
                 var existingHierarchyIndex:int = findColumnIndex(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
                 if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension &&
@@ -247,12 +235,11 @@
                     hierarchyColumn.sortable = TextReportFieldExtension(hierarchy.reportFieldExtension).sortable;
                 }
                 var hierarchyHeaderFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
-                hierarchyHeaderFactory.properties = { eiColor:treeDefinition.headerTextColor };
+                hierarchyHeaderFactory.properties = { eiColor: treeDefinition.headerTextColor };
                 hierarchyColumn.headerRenderer = hierarchyHeaderFactory;
                 columns[0] = hierarchyColumn;
                 for (var k:int = 0; k < analysisItems.length; k++) {
                     var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
-
                     var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                     var existingIndex:int = findColumnIndex(myHeader.qualifiedName());
                     if (!fieldsChanged && existingIndex != -1) {
@@ -266,7 +253,7 @@
                     columnHeaderObject.headerText = myHeader.display;
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
-                    headerFactory.properties = { eiColor:treeDefinition.headerTextColor };
+                    headerFactory.properties = { eiColor: treeDefinition.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
 
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader));
@@ -283,29 +270,18 @@
                     if (treeDef.headerMode) {
                         columnHeaderObject.sortable = false;
                     }
-                    factory.properties = { analysisItem:myHeader, report:treeDef };
+                    factory.properties = { analysisItem: myHeader, report: treeDef };
                     columnHeaderObject.itemRenderer = factory;
 
 
                     columns[k + 1] = columnHeaderObject;
                 }
-                /*if (rendererProviders.length > 0) {
-                 coreGrid.rendererProviders = rendererProviders;
-                 }*/
 
                 myData = dataSet;
-                //endSet.refresh();
                 eSet = endSet;
-                //endSet.addEventListener(CollectionEvent.COLLECTION_CHANGE, onChange);
                 coreGrid.dataProvider = endSet;
-                /*groupingColl.refresh();
-                 coreGrid.dataProvider = groupingColl;*/
                 coreGrid.clearRenderers();
                 coreGrid.columns = columns;
-                /*if (treeDefinition.autoExpandAll) {
-                 coreGrid.validateNow();
-                 coreGrid.expandAll();
-                 }*/
             } else {
                 coreGrid.columns = [];
                 myData = new ArrayCollection();

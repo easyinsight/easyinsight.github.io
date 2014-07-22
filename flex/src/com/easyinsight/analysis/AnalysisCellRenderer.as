@@ -236,7 +236,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
         var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
-        if (rext != null && rext.align != null) {
+        if (rext != null && rext.align != null && rext.align != "Default") {
             align = rext.align.toLowerCase();
         }
         var fontName:String = _report.getFont();

@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.etl.LookupTable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * User: James Boe
@@ -30,14 +31,31 @@ public class StandardReportPipeline extends Pipeline {
 
         //components.add(new ReportPreHandleComponent());
 
+        Map<AnalysisItem, List<LookupTable>> lMap = new HashMap<>();
         for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+
+
+            if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
+                LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
+                if (lookupTable != null && lookupTable.getSourceField() != null && lookupTable.getSourceField().hasType(AnalysisItemTypes.LISTING)) {
+                    List<LookupTable> tables = lMap.get(lookupTable.getSourceField());
+                    if (tables == null) {
+                        tables = new ArrayList<>();
+                        lMap.put(lookupTable.getSourceField(), tables);
+                    }
+                    tables.add(lookupTable);
+                }
+            }
+
+
+
             if (analysisItem.getLookupTableID() != null && analysisItem.getLookupTableID() > 0) {
                 LookupTable lookupTable = new FeedService().getLookupTable(analysisItem.getLookupTableID());
                 if (lookupTable != null && lookupTable.getSourceField() != null) {
                     if (lookupTable.getSourceField().hasType(AnalysisItemTypes.LISTING)) {
-                        AnalysisList analysisList = (AnalysisList) lookupTable.getSourceField();
-                        if (analysisList.isMultipleTransform()) components.add(new TagTransformComponent(analysisList));
-                    } else if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
+                        continue;
+                    }
+                    if (lookupTable.getSourceField().hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
                         Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
                         analysisItems.add(lookupTable.getSourceField());
                         components.addAll(new CalcGraph().doFunGraphStuff(analysisItems, allItems, reportItems, Pipeline.BEFORE, getStructure(), insightRequestMetadata));
@@ -47,14 +65,7 @@ public class StandardReportPipeline extends Pipeline {
             }
         }
 
-        /*Set<AnalysisItem> items = new HashSet<AnalysisItem>(reportItems);
-        for (AnalysisItem item : allNeededAnalysisItems) {
-            if (item.hasType(AnalysisItemTypes.CALCULATION) || item.hasType(AnalysisItemTypes.DERIVED_DIMENSION) ||
-                    item.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                items.addAll(item.getAnalysisItems(allItems, reportItems, false, false, items, getStructure()));
-            }
-        }*/
-
+        components.addAll(lMap.entrySet().stream().map(entry -> new TagLookupTableComponent(entry.getValue(), (AnalysisList) entry.getKey())).collect(Collectors.toList()));
 
         for (AnalysisItem tag : items(AnalysisItemTypes.LISTING, reportItems)) {
             AnalysisList analysisList = (AnalysisList) tag;

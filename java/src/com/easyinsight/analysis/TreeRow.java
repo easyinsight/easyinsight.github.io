@@ -232,11 +232,11 @@ public class TreeRow {
                 if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                     TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
                     if (textReportFieldExtension.getAlign() != null) {
-                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                        if ("left".equals(textReportFieldExtension.getAlign()) || "Left".equals(textReportFieldExtension.getAlign())) {
                             align = "left";
-                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                        } else if ("center".equals(textReportFieldExtension.getAlign()) || "Center".equals(textReportFieldExtension.getAlign())) {
                             align = "center";
-                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                        } else if ("right".equals(textReportFieldExtension.getAlign()) || "Right".equals(textReportFieldExtension.getAlign())) {
                             align = "right";
                         }
                     }

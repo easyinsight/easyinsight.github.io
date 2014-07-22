@@ -36,7 +36,7 @@ public class TreeDataService extends EventDispatcher implements IReportDataServi
         var listData:TreeDataResults = dataRemoteSource.getTreeDataResults.lastResult as TreeDataResults;
         var props:Object = new Object();
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, listData.treeRows, listData.dataSourceInfo, props, listData.auditMessages,
-                listData.reportFault, false, 0, 0, listData.suggestions, listData.treeRows != null && listData.treeRows.length > 0));
+                listData.reportFault, false, 0, 0, listData.suggestions, listData.treeRows != null && listData.treeRows.length > 0, listData.report));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

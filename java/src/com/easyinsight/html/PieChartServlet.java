@@ -82,7 +82,8 @@ public class PieChartServlet extends HtmlServlet {
         nf.setMinimumFractionDigits(1);
 
         for (IRow row : dataSet.getRows()) {
-            String x = row.getValue(xAxisItem).toString();
+            Value dimValue = row.getValue(xAxisItem);
+            String x = dimValue.toString();
             JSONObject point = new JSONObject();
             Value value = row.getValue(measureItem);
             point.put("value", value.toDouble());
@@ -95,6 +96,11 @@ public class PieChartServlet extends HtmlServlet {
                 if (textValueExtension.getColor() > 0) {
                     color = ExportService.createHexString(textValueExtension.getColor());
                 }
+            } else if (dimValue.getValueExtension() != null && dimValue.getValueExtension() instanceof TextValueExtension) {
+                TextValueExtension textValueExtension = (TextValueExtension) dimValue.getValueExtension();
+                if (textValueExtension.getColor() > 0) {
+                    color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
+                }
             }
             point.put("color", color);
             points.put(point);
@@ -103,6 +109,11 @@ public class PieChartServlet extends HtmlServlet {
         object.put("yFormat", createFormatObject(measureItem, md));
         object.put("values", points);
         object.put("pieLabelStyle", pieChart.getLabelType());
+        object.put("showLegend", pieChart.isShowLegend());
+        if (pieChart.getDonutRatio() > 0) {
+            object.put("donut", true);
+            object.put("donutRatio", pieChart.getDonutRatio());
+        }
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();

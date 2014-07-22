@@ -15,7 +15,7 @@ public class OracleSalesCloudCompositeSource extends CompositeServerDataSource {
 
     public function OracleSalesCloudCompositeSource() {
         super();
-        this.feedName = "Oracle Salescloud";
+        this.feedName = "Oracle Sales Cloud";
     }
 
     override public function getFeedType():int {
@@ -24,6 +24,9 @@ public class OracleSalesCloudCompositeSource extends CompositeServerDataSource {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
+        var config:OracleConfiguration = new OracleConfiguration();
+        config.label = "Oracle Sales Cloud";
+        pages.addItem(config);
         return pages;
     }
 
