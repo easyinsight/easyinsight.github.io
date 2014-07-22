@@ -258,6 +258,7 @@
                     break;
             }
             customizeVisible = User.getInstance().accountAdmin;
+            actionsVisible = User.getInstance().analyst;
 
 
             var newColumns:Array = [];
@@ -419,6 +420,8 @@
 
         [Bindable]
         private var customizeVisible:Boolean;
+        [Bindable]
+        private var actionsVisible:Boolean;
 
         [Bindable]
         private var tagsVisible:Boolean;
@@ -552,9 +555,9 @@
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
         <listing:ArghButton label="Actions..." styleName="grayButton" itemClick="onItemClick(event)" width="160" id="actionButton"
-                             labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+                             labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}"/>
         <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onItemClick(event)" width="160" id="newButton"
-                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}"/>
         <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
     </mx:HBox>
     <mx:Text maxWidth="500" text="These data sources are the different systems you've connected Easy Insight to. Click on a data source name to navigate to the reports and dashboards built on this data source or to create new reports and dashboards."
