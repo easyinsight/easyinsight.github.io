@@ -269,8 +269,13 @@ a {
     padding-bottom: 10px;
 }
 
+.tag-select {
+    font-size: 12px;
+}
+
 .browse-by-tag {
     float:left;
+    font-size: 12px;
     font-weight:500;
     line-height: 32px;
     vertical-align: middle;
@@ -308,4 +313,47 @@ a {
     width:20px;
     margin-bottom: -5px;
     border: solid 1px black;
+}
+
+.noReports {
+    font-size: 18px;
+    padding-bottom: 20px;
+}
+
+.reportListControl {
+    font-size: 16px;
+}
+
+.reportListHR {
+    padding:0;
+    margin: 5px 0;
+}
+
+#reportsAndDashboards {
+    color: #333333;
+    font-size: 18px;
+    margin-top:10px;
+    margin-bottom: 10px;
+}
+
+#folderTable {
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.reportDashboardTable {
+    border-color: #1C5C76;
+}
+
+.reportDashboardTable > tbody > tr > td {
+    border-color: #1C5C76;
+}
+
+.reportDashboardTable > thead > tr {
+    background-color: #1C5C76;
+    color:#FFFFFF;
+}
+
+.reportDashboardTable > thead > tr > th {
+    border-color: #1C5C76;
 }

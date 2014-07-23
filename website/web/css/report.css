@@ -312,13 +312,17 @@ table.dataTable tfoot td {
     position: absolute;
 }
 
-.counties:hover{
-    stroke: #fff;
-    stroke-width: .7px;
-}
-
 .mapLegend rect {
     fill:white;
     stroke:black;
     opacity:0.8;
+}
+
+.counties:hover{
+    stroke: #000;
+    stroke-width: 1px;
+}
+
+.tabbable > .filters {
+    padding-top: 0;
 }

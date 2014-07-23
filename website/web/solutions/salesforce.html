@@ -1,131 +1,192 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/datatemplate.dwt" codeOutsideHTMLIsLocked="false" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- InstanceBeginEditable name="doctitle" -->
-<title>Easy Insight - Salesforce</title>
-<!-- InstanceEndEditable -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Easy Insight - Salesforce</title>
+    <meta name="description"
+          content="Salesforce reporting and analysis on contacts, deals, cases, companies, and tasks done easily and quickly by Easy Insight."/>
+    <meta name="keywords"
+          content="salesforce, highrise CRM, highrise reporting, highrise tools, highrise reports, highrise analytics, highrise extras, highrise addons"/>
 
-<!-- InstanceBeginEditable name="head" -->
-<!-- InstanceEndEditable -->
+    <!-- font -->
+    <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
 
-    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
-    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <!-- main includes -->
+
+    <script type="text/javascript" src="/js/modernizr.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <link href="/css/bootstrap-website.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+    <!-- lightbox -->
+
     <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
     <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
-    <script type="text/javascript">
-        $(function () {
-            $('#midContent a').lightBox();
-        });
-    </script>
 </head>
 <body>
-<div id="whiteDiv"></div>
-<div id="topMenuDiv"></div>
-<div id="blackIntroDiv"></div>
-<div id="trialDiv"></div>
-<div style="width:1000px;margin:0 auto;">
-    <div id="topBar">
-        <a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo"/></a>
+<nav class="navbar navbar-static-top navbar-main website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
+                                                                    name="logo"/></a>
+        </div>
 
-        <div class="signupHeadline">
-            <a href="/app/">Customer Login</a>
-            <a href="/app/newaccount/">Free Trial</a>
-            <a href="/contactus.html">Contact Us</a>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right navbar-main-item">
+                <li><a href="/app/" class="fontA">Customer Login</a></li>
+                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/news/" class="fontA">What's New</a></li>
+            </ul>
         </div>
     </div>
-    <div class="headline">
-        <a class="inactive" href="/product.html">Features</a>
-        <a class="inactive" href="/data.html">Connections</a>
-        <a class="inactive" href="/pricing.html">Pricing</a>
-        <a class="inactive" href="/screencasts.html">Screencasts and Docs</a>
-        <a class="inactive" href="/api.html">Developers</a>
-    </div>
-    <div id="coreContent">
-        <div class="coreContentBlock" style="padding-top:20px;">
-            <h2 class="coreContentHeader">Drag. Drop. Done. Salesforce Reporting Made Easy.</h2>
-
-            <p class="coreContentParagraph">Beautiful dashboards, easy report creation, full business intelligence--it's all here for you and your Salesforce data. Combine your pipeline metrics with your marketing, project, and support systems to capture full conversion rates, analyze customer acquisition costs, and visualize the process flow of your entire business.</p>
-        </div>
-        <div style="margin-top:10px;margin-right:5px;float:right;background-color:#FFFFFF">
-            <img style="padding:10px" src="/images/SFStackedChartSmall.png" alt="Salesforce Logo"/>
+</nav>
+<nav class="navbar navbar-subheader website-navbar" role="navigation">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-subheader-item">
+                <li><a href="/product.html">Features</a></li>
+                <li><a href="/data.html">Connections</a></li>
+                <li><a href="/pricing.html">Pricing</a></li>
+                <li><a href="/app/websiteDocs/">Documentation</a></li>
+                <li><a href="/contactus.html">Contact Us</a></li>
+            </ul>
         </div>
     </div>
-    <div id="trialBar">
-        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
-        <a href="/app/newaccount" class="btn btn-primary btn-large" style="margin-top: 8px">Try Easy Insight Now!</a>
-        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
-    </div>
-    <div id="contentHeaderStart"></div>
-    <div id="midContent">
-        <img src="../images/ExecutiveDashboardSmall.png" style="padding:40px 10px 30px;float:left"/>
+</nav>
+<div class="container-fluid screenshotDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="../images/Highrise_DB_Overview_LG.png" rel="lightbox-highrise"
+                           title=""><img
+                                src="../images/Highrise_DB_Overview.png" alt="Highrise Overview"/></a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="../images/Highrise_DB_QoQ_LG.png" rel="lightbox-highrise"
+                           title=""><img
+                                src="../images/Highrise_DB_QoQ.png" alt="Highrise Quarter over Quarter"/></a>
 
-        <h2 style="padding-top:80px">Keep an Eye on your Sales Pipeline</h2>
-
-        <p style="padding-right:10px">Enhance the power of Salesforce by creating beautiful charts and visualizations. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use.  Easy Insight allows creation of powerful visualizations and segmentation, to see growth of a pipeline stage over time, or watch growth of sold deals from a given salesperson. Adjustable filters allow multiple views of a given report, and visualizations make it easy to drill in to see a breakdown of a specific stage of the pipeline.</p>
-        <img src="../images/sfcacsmall.png" style="padding-right:10px;padding-top:70px;float:right"/>
-        <h2 style="padding-top:120px">View Marketing Campaign Results</h2>
-
-
-        <p style="padding-left:10px">Sales information is useful on its own, but by combining it with marketing campaign information you get a complete understanding of your marketing process. Tag different sales leads to associate them with marketing campaigns, import the marketing campaign information via another connection (such as a MySQL connection or an Excel Spreadsheet), and quickly segment sales based on the marketing campaign they came from or the cost of the campaign. Using this information you can improve your marketing process to improve your marketing ROI.</p>
-
-
-        <h2 style="padding-top:40px">Quickly See Your Whole Sales/Marketing View</h2>
-
-        <p style="padding-bottom:10px;padding-left:10px;padding-right:10px">While you can combine your CRM data with marketing data to get detailed information on specific marketing campaigns, it only incorporates campaigns and the sales associated with them. Most marketing involves improving web site traffic via both improving search engine rankings for specific keywords and simply increasing traffic via external links. By creating KPIs for your Salesforce sales data, and adding them to a goal tree along with KPIs for increased traffic and your target marketing costs, you quickly find trouble points inside of marketing, and can focus on those areas.</p>
-
-        <!-- InstanceEndEditable -->
-    </div>
-    <div id="contentHeaderEnd"></div>
-    <div id="footer">
-        <div id="linkLine">
-            <div style="padding-left:15px;">
-                <a href="/company.html">Company</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/pricing.html">Pricing</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/api.html">Developers</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/privacy.html">Privacy Policy</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/terms.html">Terms of Service</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/partners.html">Partners</a>
-            </div>
-            <div>
-                |
-            </div>
-            <div>
-                <a href="/contactus.html">Contact Us</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="dragDropDone">Drag. Drop. Done. Salesforce Reporting Made Easy.</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div style="width:100%;text-align:left;float:left;padding-left:10px;padding-top:8px">
-            Copyright ©2008-2012 Easy Insight, LLC. All rights reserved.
+    </div>
+</div>
+<div class="container-fluid trialDiv">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
+                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
+                            Insight Now!</a>
+
+                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container corePageWell">
+    <div class="row">
+        <h2 style="font-size: 20px;font-family: 'Helvetica Neue',Helvetica,Arial, sans-serif;padding-top: 0">Keep an Eye on your Sales Pipeline</h2>
+
+        <p style="font-size: 16px;color: #555555;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;padding-left: 20px;padding-right: 20px;line-height: 22px">
+            Enhance the power of Salesforce by creating beautiful charts and visualizations. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use.  Easy Insight allows creation of powerful visualizations and segmentation, to see growth of a pipeline stage over time, or watch growth of sold deals from a given salesperson. Adjustable filters allow multiple views of a given report, and visualizations make it easy to drill in to see a breakdown of a specific stage of the pipeline.
+        </p>
+
+        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+        </div>
+        <h2 style="font-size: 20px;font-family: 'Helvetica Neue',Helvetica,Arial, sans-serif;padding-top: 0">View Marketing Campaign Results</h2>
+
+
+        <p style="font-size: 16px;color: #555555;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;padding-left: 20px;padding-right: 20px;line-height: 22px">Sales information is useful on its own, but by combining it with marketing campaign information you get a complete understanding of your marketing process. Tag different sales leads to associate them with marketing campaigns, import the marketing campaign information via another connection (such as a MySQL connection or an Excel Spreadsheet), and quickly segment sales based on the marketing campaign they came from or the cost of the campaign. Using this information you can improve your marketing process to improve your marketing ROI.</p>
+
+        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+        </div>
+        <h2 style="font-size: 20px;font-family: 'Helvetica Neue',Helvetica,Arial, sans-serif;padding-top: 0">Quickly See Your Whole Sales/Marketing View</h2>
+
+
+        <p style="font-size: 16px;color: #555555;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;padding-left: 20px;padding-right: 20px;line-height: 22px">While you can combine your CRM data with marketing data to get detailed information on specific marketing campaigns, it only incorporates campaigns and the sales associated with them. Most marketing involves improving web site traffic via both improving search engine rankings for specific keywords and simply increasing traffic via external links. By creating KPIs for your Salesforce sales data, and adding them to a goal tree along with KPIs for increased traffic and your target marketing costs, you quickly find trouble points inside of marketing, and can focus on those areas.</p>
+
+
+        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+        </div>
+        <div>
+            <a href="/app/newaccount" class="btn btn-primary btn-large">Try Easy Insight Now!</a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="newFooter">
+    <div class="row">
+        <div class="col-sm-2 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/contactus.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/pricing.html">Pricing</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/partners.html">Partners</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/api/">Developers</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/privacy.html">Privacy Policy</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <a href="/terms.html">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 copyright">
+            Copyright ©2008-2014 Easy Insight, LLC. All rights reserved.
         </div>
     </div>
 </div>

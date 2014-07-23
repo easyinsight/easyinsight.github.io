@@ -2,6 +2,7 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.NumericValue;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
@@ -108,75 +109,9 @@ public class WSTrendDefinition extends WSKPIDefinition {
         return sb.toString();
     }
 
-    private String old(String fontColor, TextValueExtension e, String clickEvent, TrendOutcome outcome, TrendDataResults results, ExportMetadata md, double v) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<div style='width: 245px;");
-        if ("horizontal".equals(getDirection()))
-            sb.append("display:inline-block;");
-        sb.append("color:");
-        if (e != null) {
-            sb.append(String.format("#%06X", (0xFFFFFF & e.getColor())));
-        } else {
-            sb.append(fontColor);
-        }
-        sb.append(";'>");
-        sb.append("<div style='padding: 0px;'>");
-        if (results.getPreviousString() != null) {
-            sb.append("<div style='float: right; width: 80px;font-size:");
-            sb.append(getMinorFontSize());
-            sb.append("px;'>");
-            FormattingConfiguration c = new FormattingConfiguration();
-            c.setFormattingType(FormattingConfiguration.PERCENTAGE);
-            if (!clickEvent.isEmpty()) {
-                sb.append("<a href='#' class='trendDrillthrough' onclick='");
-                sb.append(clickEvent);
-                sb.append("'>");
-            }
-            sb.append(FormattingConfiguration.createFormatter(c.getFormattingType()).format(v));
-            if (!clickEvent.isEmpty()) {
-                sb.append("</a>");
-            }
-
-            sb.append("</div>");
-        }
-        sb.append("<div style='font-size:");
-        sb.append(getMajorFontSize());
-        sb.append("px;text-align:center'> ");
-        if (!clickEvent.isEmpty()) {
-            sb.append("<a href='#' class='trendDrillthrough' onclick='");
-            sb.append(clickEvent);
-            sb.append("'>");
-        }
-        sb.append(ExportService.createValue(0, outcome.getMeasure(), outcome.getNow(), md.cal, md.currencySymbol, md.locale, false));
-
-        if (!clickEvent.isEmpty()) {
-            sb.append("</a>");
-        }
-
-        sb.append("</div></div>");
-        sb.append("<div style='text-align:center;color:#000000;font-size:");
-
-        sb.append(getMinorFontSize());
-        sb.append("px;'>");
-        if (!clickEvent.isEmpty()) {
-            sb.append("<a href='#' class='trendDrillthrough' onclick='");
-            sb.append(clickEvent);
-            sb.append("'>");
-        }
-        sb.append(outcome.getMeasure().toDisplay());
-        if (!clickEvent.isEmpty()) {
-            sb.append("</a>");
-        }
-
-        sb.append("</div>");
-
-        sb.append("</div>");
-        return sb.toString();
-    }
-
     private String improved(String fontColor, TextValueExtension e, Map<String, Object> clickEvent, TrendOutcome outcome, TrendDataResults results, ExportMetadata md, double v) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<div style='text-align:center;margin-left:10px;margin-right:10px;");
+        sb.append("<div style='text-align:center;margin-left:30px;margin-right:30px;");
         sb.append("display:inline-block;");
         sb.append("color:");
         if (e != null) {
@@ -216,7 +151,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
         }
 
         sb.append("</div>");
-        if (results.getPreviousString() != null) {
+        if (results.getPreviousString() != null && outcome.getHistorical() != null && outcome.getHistorical().type() != Value.EMPTY) {
             sb.append("<div style='margin-left:10px;font-size:");
             sb.append(getMinorFontSize());
             sb.append("px;display: inline-block;'>");

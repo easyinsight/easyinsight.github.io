@@ -9,17 +9,25 @@ Chart = {
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
 
+                        var s1 = data["values"];
+                        var maxLabelSize = d3.max(s1, function(d) {
+                            return d3.max(d.values, function(e) { return e.x.length } );
+                        });
+                        var factorForRotate = nv.utils.windowSize().width / 30;
+                        var useRotate = maxLabelSize > factorForRotate;
+                        var charLimit = useRotate ? 15 : 0;
+
                         var chart = nv.models.multiBarChart()
                             //.width(width)
                             .height(height)
                             .reduceXTicks(false)
                             .showControls(false)
                             .stacked(true)
-                            .staggerLabels(true)
+                            .staggerLabels(!useRotate)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: 60, left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 110 : 60, left: 80});
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
@@ -33,10 +41,13 @@ Chart = {
                             });
                         }
 
-                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12);
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12, charLimit);
                         Chart.assignAxisMinMaxValues(chart, data, true);
 
-                        var s1 = data["values"];
+
+                        if (useRotate) {
+                            chart.xAxis.rotateLabels(-45);
+                        }
 
                         d3.select('#d3Div' + target)
                             //.attr('width', width)
@@ -63,7 +74,13 @@ Chart = {
                         var height = Chart.chartHeight(target, styleProps);
 
                         var chart = nv.models.multiBarHorizontalChart()
-                            //.width(width)
+                            .x(function(d) {
+                                if (d.x.length > 10) {
+                                    return d.x.substring(0, 10) + "...";
+                                } else {
+                                    return d.x;
+                                }
+                            })
                             .height(height)
                             .showControls(false)
                             .stacked(true)
@@ -110,21 +127,21 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
 
-                        //var height = Chart.chartHeight(target, styleProps);
-
                         var s1 = data["values"][0];
 
+                        var title = s1.title;
+                        var titleLength = title.length;
+                        if (titleLength > 15) {
+                            title = title.substring(0, 13) + "...";
+                            titleLength = title.length;
+                        }
+                        var leftMargin = titleLength * 10;
+
+
                         var chart = nv.models.bulletChart()
-                            //.width(width)
-                            //.height(height)
-                            .margin({top: 20, right: 20, bottom: 20, left: 40});
-
-
-
+                            .margin({top: 20, right: 20, bottom: 20, left: leftMargin});
 
                         d3.select('#d3Div' + target)
-                            //.attr('width', width)
-                            //.attr('height', height)
                             .datum(s1)
                             .call(chart);
 
@@ -158,6 +175,20 @@ Chart = {
                             colors.push(point.color);
                         }
 
+                        var labelType = data["pieLabelStyle"];
+                        var pieLabelType;
+                        if (labelType == "Label") {
+                            pieLabelType = "key";
+                        } else if (labelType == "Percentage") {
+                            pieLabelType = "percent";
+                        } else if (labelType == "Value with Percentage") {
+                            pieLabelType = "custom";
+                        } else {
+                            pieLabelType = "value";
+                        }
+
+                        var showLegend = data["showLegend"];
+
                         var chart = nv.models.pieChart()
                             //.width(width)
                             .x(function(d) { return d.label })
@@ -165,11 +196,22 @@ Chart = {
                             .showLabels(true)
                             .color(colors)
                             .height(height)
-                            .labelThreshold(0.05)
-                            .labelType("value")
+                            .showLegend(showLegend)
+                            .valueFormat(Chart.createFormat(data["yFormat"]))
+                            .labelThreshold(0.02)
+                            .labelType(pieLabelType)
                             /*.donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
                             .donutRatio(0.35)*/
-                            .margin({top: 20, right: 20, bottom: 20, left: 20});
+                            .margin({top: 20, right: 20, bottom: 20, left: 20})
+                            .tooltipContent(function(key, x, e, graph) {
+                                return '<h3>' + key + '</h3>' +
+                                    '<p><b>' +  x + '</b></p>' +
+                                    '<h4><b>' + e.point.percent + '%</b> of <b>' + e.point.total + '</b></h4>';
+                            });
+
+                        if (data["donut"]) {
+                            chart.donut(true).donutRatio(data["donutRatio"]);
+                        }
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
@@ -201,16 +243,22 @@ Chart = {
         };
     },
 
-    getD3ColumnChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3ColumnChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
                     generate: function() {
-
                         var height = Chart.chartHeight(target, styleProps);
                         var chart;
 
                         var s1 = data["values"];
+
+                        var maxLabelSize = d3.max(s1, function(d) {
+                            return d3.max(d.values, function(e) { return e.x.length } );
+                        });
+                        var factorForRotate = nv.utils.windowSize().width / 30;
+                        var useRotate = maxLabelSize > factorForRotate;
+                        var charLimit = useRotate ? 15 : 0;
 
                         if (data["oneMeasure"]) {
                             var colors = [];
@@ -225,7 +273,7 @@ Chart = {
                                 //.width(width)
                                 .height(height)
                                 .color(colors)
-                                .staggerLabels(true)
+                                .staggerLabels(!useRotate)
                                 .transitionDuration(350)  //how fast do you want the lines to transition?
                                 .tooltipContent(function(key, x, y, e, graph) {
                                     return '<b>' + x + '</b>' +
@@ -233,7 +281,7 @@ Chart = {
                                 })
                                 .showYAxis(true)        //Show the y-axis
                                 .showXAxis(true)        //Show the x-axis
-                                .margin({top: 20, right: 40, bottom: 80, left: 80});
+                                .margin({top: 20, right: 40, bottom: useRotate ? 110 : 80, left: 80});
                             if (data["valueLabel"]) {
                                 chart.showValues(true);
                                 if (data["yFormat"]) {
@@ -257,11 +305,11 @@ Chart = {
                             .height(height)
                             .reduceXTicks(false)
                             .showControls(false)
-                            .staggerLabels(true)
+                            .staggerLabels(!useRotate)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: 80, left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 110 : 80, left: 80});
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
                                 if (dtOptions["id"]) {
@@ -281,9 +329,11 @@ Chart = {
 
 
 
-                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12);
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, 12, charLimit);
 
-
+                        if (useRotate) {
+                            chart.xAxis.rotateLabels(-45);
+                        }
 
 
                         d3.select('#d3Div' + target)
@@ -310,13 +360,22 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
-
+                        var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         var chart = nv.models.multiBarHorizontalChart()
-                            //.width(width)
+                            .x(function(d) {
+                                if (d.x.length > 10) {
+                                    return d.x.substring(0, 10) + "...";
+                                } else {
+                                    return d.x;
+                                }
+                            })
                             .height(height)
                             .showControls(false)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .margin({top: 20, right: 30, bottom: 60, left: 130});
+                        if (customWidth > -1) {
+                            chart.width(customWidth);
+                        }
                         if (data["valueLabel"]) {
                             chart.showValues(true);
                             if (data["yFormat"]) {
@@ -345,7 +404,7 @@ Chart = {
                             .datum(s1)
                             .call(chart);
 
-                        Chart.canvasHeights(target);
+                        Chart.canvasHeights(target, styleProps);
 
                         nv.utils.windowResize(function() { chart.update() });
                         return chart;
@@ -356,16 +415,21 @@ Chart = {
         };
     },
 
-    canvasHeights:function (target) {
+    canvasHeights:function (target, styleProps) {
         var h = $("#d3Div"+ target).height();
-        var w = $("#d3Div"+ target).width();
+        var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
+        var w;
+        if (customWidth > -1) {
+            w = customWidth;
+        } else {
+            w = $("#d3Div" + target).width();
+        }
         $("#d3Canvas"+target).attr('height', h);
         $("#d3Canvas"+target).attr('width', w);
     },
 
     chartHeightWithIFrame:function (target, styleProps, iframedInUI) {
         var height;
-        //alert("target height =  " + $('#'+target+"").height());
         var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
         if (customHeight > -1) {
 
@@ -407,11 +471,16 @@ Chart = {
             }
 
         } else {
-            var raHeight = $('#'+target+'ReportArea').height();
-            if (typeof(raHeight) != "undefined" && raHeight > 150) {
-                height = raHeight;
+            var customPreferredHeight = styleProps != null ? styleProps["preferredHeight"] : -1;
+            if (customPreferredHeight > -1) {
+                height = customPreferredHeight;
             } else {
-                height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - 250;
+                var raHeight = $('#' + target + 'ReportArea').height();
+                if (typeof(raHeight) != "undefined" && raHeight > 150) {
+                    height = raHeight;
+                } else {
+                    height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - 250;
+                }
             }
         }
         return height;
@@ -474,15 +543,15 @@ Chart = {
         };
     },
 
-    assignAxisLabels:function (xAxis, yAxis, data, xLabelDistance, yLabelDistance) {
+    assignAxisLabels:function (xAxis, yAxis, data, xLabelDistance, yLabelDistance, limit) {
         xAxis.axisLabel(data["xTitle"]);
         if (typeof(data["xFormat"]) != "undefined") {
-            xAxis.tickFormat(Chart.createFormat(data["xFormat"]));
+            xAxis.tickFormat(Chart.createFormat(data["xFormat"], limit));
         }
         xAxis.axisLabelDistance(xLabelDistance);
         yAxis.axisLabel(data["yTitle"]);
         if (typeof(data["yFormat"]) != "undefined") {
-            yAxis.tickFormat(Chart.createFormat(data["yFormat"]));
+            yAxis.tickFormat(Chart.createFormat(data["yFormat"], limit));
         }
         yAxis.axisLabelDistance(yLabelDistance);
     },
@@ -509,7 +578,7 @@ Chart = {
         }
     },
 
-    createFormat:function (formatInfo) {
+    createFormat:function (formatInfo, limit) {
         return function(d) {
             if (formatInfo.type == "measure") {
                 var precision = formatInfo.precision;
@@ -528,8 +597,20 @@ Chart = {
 
                 }
                 return numberFormatter(d);
+            } else {
+                if (limit > 0) {
+                    return Chart.truncate(limit, d);
+                }
             }
             return d;
+        }
+    },
+
+    truncate:function(limit, val) {
+        if (val.length > limit) {
+            return val.substring(0, limit) + "...";
+        } else {
+            return val;
         }
     },
 
@@ -572,6 +653,18 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
 
+                        var s1 = data["values"];
+
+                        var format = d3.time.format("%m/%d/%Y");
+
+                        for (var i = 0; i < s1.length; i++) {
+                            var keyVals = s1[i];
+                            for (var j = 0; j < keyVals.values.length; j++) {
+                                var row = keyVals.values[j];
+                                row.x = format.parse(row.x);
+                            }
+                        }
+
                         var height = Chart.chartHeight(target, styleProps);
 
                         var chart = nv.models.lineChart()
@@ -590,11 +683,11 @@ Chart = {
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, 12);
                         Chart.assignAxisMinMaxValues(chart, data);
 
-                        chart.xAxis.tickFormat(function(d) {
-                            return d3.time.format('%x')(new Date(d))
-                        });
+                        var dateFormat = data["date_format"];
 
-                        var s1 = data["values"];
+                        chart.xAxis.tickFormat(function(d) {
+                            return d3.time.format(dateFormat)(new Date(d))
+                        });
 
                         d3.select('#d3Div' + target)
                             //.attr('width', width)
@@ -621,6 +714,18 @@ Chart = {
 
                         var height = Chart.chartHeight(target, styleProps);
 
+                        var s1 = data["values"];
+
+                        var format = d3.time.format("%m/%d/%Y");
+
+                        for (var i = 0; i < s1.length; i++) {
+                            var keyVals = s1[i];
+                            for (var j = 0; j < keyVals.values.length; j++) {
+                                var row = keyVals.values[j];
+                                row.x = format.parse(row.x);
+                            }
+                        }
+
                         var chart = nv.models.stackedAreaChart()
                             //.width(width)
                             //.height(height)
@@ -629,16 +734,18 @@ Chart = {
                             .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: 50, left: 70});
+                            .margin({top: 20, right: 40, bottom: 50, left: 76});
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, 12);
                         Chart.assignAxisMinMaxValues(chart, data);
 
+                        var dateFormat = data["date_format"];
+
                         chart.xAxis.tickFormat(function(d) {
-                            return d3.time.format('%x')(new Date(d))
+                            return d3.time.format(dateFormat)(new Date(d))
                         });
 
-                        var s1 = data["values"];
+
 
                         d3.select('#d3Div' + target)
                             //.attr('width', width)

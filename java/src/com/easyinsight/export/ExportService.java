@@ -3906,11 +3906,11 @@ public class ExportService {
                                 if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                                     TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
                                     if (textReportFieldExtension.getAlign() != null) {
-                                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                        if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
                                             align = "left";
-                                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                        } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
                                             align = "center";
-                                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                        } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
                                             align = "right";
                                         }
                                     }
@@ -3980,12 +3980,11 @@ public class ExportService {
                 append(".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(odd) > td,\n" +
                 ".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(odd) > th {\n" +
                 "  background-color: ").append(backgroundColor1).append(";\n" +
-                "}").append("}");
+                "}");
         sb.append(".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(even) > td,\n" +
                 ".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(even) > th {\n" +
                 "  background-color: ").append(backgroundColor2).append(";\n" +
-                "}").append("}");
-        /*sb.append(".reportTable").append(report.getAnalysisID()).append("{ font-size:").append(report.getFontSize()).append("px;\n").append("}");*/
+                "}");
         sb.append("</style>");
         sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
         sb.append("<thead>");
@@ -4026,133 +4025,135 @@ public class ExportService {
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr>");
             for (AnalysisItem analysisItem : headers) {
-                AnalysisItem headerItem = analysisItem;
-                if (headerItem == analysisItem) {
-                    StringBuilder styleString = new StringBuilder("text-align:");
-                    String align = "left";
-                    if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
-                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
-                        if (textReportFieldExtension.getAlign() != null) {
-                            if ("Left".equals(textReportFieldExtension.getAlign())) {
-                                align = "left";
-                            } else if ("Center".equals(textReportFieldExtension.getAlign())) {
-                                align = "center";
-                            } else if ("Right".equals(textReportFieldExtension.getAlign())) {
-                                align = "right";
-                            }
-                        }
-                        styleString.append(align);
-                        if (textReportFieldExtension.getFixedWidth() > 0) {
-                            styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
-                        }
-                    } else {
-                        styleString.append(align);
-                    }
-                    com.easyinsight.core.Value value = listRow.getValues()[unsortedHeaders.indexOf(analysisItem)];
-                    if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
-                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
-                        if (textValueExtension.getColor() != 0) {
-                            String hexString = createHexString(textValueExtension.getColor());
-                            styleString.append(";color:").append(hexString);
-                        }
-                        if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
-                            String hexString = createHexString(textValueExtension.getBackgroundColor());
-                            styleString.append(";background-color:").append(hexString);
-                        }
-                        if (textValueExtension.isBold()) {
-                            styleString.append(";font-weight:bold");
+
+                StringBuilder styleString = new StringBuilder("text-align:");
+                String align = "left";
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (textReportFieldExtension.getAlign() != null) {
+                        if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
+                            align = "left";
+                        } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
+                            align = "center";
+                        } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
+                            align = "right";
                         }
                     }
-
-                    sb.append("<td style=\"").append(styleString).append("\">");
-                    if (!exportProperties.isEmailed()) {
-                        sb.append("<span class='sortData'>");
-                        Value v = value;
-                        if (value.getSortValue() != null) {
-                            v = value.getSortValue();
-                        }
-                        sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
-                        sb.append("</span>");
+                    styleString.append(align);
+                    if (textReportFieldExtension.getFixedWidth() > 0) {
+                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
                     }
-
-                    Link defaultLink = linkMap.get(analysisItem);
-                    boolean showLink = false;
-                    if (defaultLink != null) {
-                        if (defaultLink instanceof URLLink) {
-                            showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(analysisItem.toDisplay()) != null;
-                            if (showLink) {
-                                sb.append("<a href=\"");
-                                sb.append(value.getLinks().get(analysisItem.toDisplay()));
-                                sb.append("\">");
-                            }
-                        } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
-                            StringBuilder paramBuilder = new StringBuilder();
-                            DrillThrough drillThrough = (DrillThrough) defaultLink;
-//                                paramBuilder.append("drillThrough('reportID=").append(report.getUrlKey()).append("&embedded=").append(exportProperties.isEmbedded()).append("&drillthroughID=").append(drillThrough.createID()).append("&").append("sourceField=").append(analysisItem.getAnalysisItemID()).append("&");
-//                                if (exportProperties.getEmbedKey() != null) {
-//                                    paramBuilder.append("&embedKey=" + exportProperties.getEmbedKey()+"&");
-//                                }
-                            sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
-                                                            sb.append(report.getUrlKey());
-                                                            sb.append("\" data-drillthroughid=\"");
-                                                            sb.append(drillThrough.createID());
-                                                            sb.append("\" data-embedded=\"");
-                                                            sb.append(exportProperties.isEmbedded());
-                                                            sb.append("\" data-source=\"");
-                                                            sb.append(analysisItem.getAnalysisItemID());
-                                                            sb.append("\"");
-                            if (drillThrough.isFilterRowGroupings()) {
-
-
-                                for (AnalysisItem dataItem : headers) {
-                                    if (dataItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                                        int k = unsortedHeaders.indexOf(dataItem);
-                                        AnalysisItem dataHeaderItem = listDataResults.getHeaders()[k];
-                                        String encodedValue;
-
-                                        try {
-                                            encodedValue = toDrillthroughValue(listRow.getValues()[k]);
-                                            sb.append(" data-drillthrough");
-                                            sb.append(dataItem.getAnalysisItemID());
-                                            sb.append("=\"");
-                                            sb.append(encodedValue);
-                                            sb.append("\"");
-                                        } catch (UnsupportedEncodingException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    }
-
-                                }
-                            } else {
-                                sb.append(" data-drillthrough");
-                                sb.append(headerItem.getAnalysisItemID());
-                                sb.append("=\"");
-
-                                try {
-                                    sb.append(toDrillthroughValue(value));
-                                } catch (UnsupportedEncodingException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                sb.append("\"");
-                            }
-                            sb.append(">");
-                            showLink = true;
-                        }
-                    }
-
-
-                        sb.append(createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
-                        if (showLink) {
-                            sb.append("</a>");
-                        }
-                        sb.append("</td>");
-                    }
-                    sb.append("</td>");
+                } else {
+                    styleString.append(align);
                 }
+                com.easyinsight.core.Value value = listRow.getValues()[unsortedHeaders.indexOf(analysisItem)];
+                String colorString = null;
+                if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                    TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                    if (textValueExtension.getColor() != 0) {
+                        String hexString = createHexString(textValueExtension.getColor());
+                        colorString = hexString;
+                        styleString.append(";color:").append(hexString);
+                    }
+                    if (textValueExtension.getBackgroundColor() != TextValueExtension.WHITE) {
+                        String hexString = createHexString(textValueExtension.getBackgroundColor());
+                        styleString.append(";background-color:").append(hexString);
+                    }
+                    if (textValueExtension.isBold()) {
+                        styleString.append(";font-weight:bold");
+                    }
+                }
+
+                sb.append("<td style=\"").append(styleString).append("\">");
+                if (!exportProperties.isEmailed()) {
+                    sb.append("<span class='sortData'>");
+                    Value v = value;
+                    if (value.getSortValue() != null) {
+                        v = value.getSortValue();
+                    }
+                    sb.append(StringEscapeUtils.escapeHtml(v.toHTMLString()));
+                    sb.append("</span>");
+                }
+
+                Link defaultLink = linkMap.get(analysisItem);
+                boolean showLink = false;
+                if (defaultLink != null) {
+                    if (defaultLink instanceof URLLink) {
+                        showLink = defaultLink != null && value.getLinks() != null && value.getLinks().get(analysisItem.toDisplay()) != null;
+                        if (showLink) {
+                            sb.append("<a ");
+                            if (colorString != null) {
+                                sb.append("style=\"color:").append(colorString).append("\"");
+                            }
+                            sb.append(" href=\"");
+                            sb.append(value.getLinks().get(analysisItem.toDisplay()));
+                            sb.append("\">");
+
+                        }
+                    } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
+                        DrillThrough drillThrough = (DrillThrough) defaultLink;
+                        sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
+                                                        sb.append(report.getUrlKey());
+                                                        sb.append("\" data-drillthroughid=\"");
+                                                        sb.append(drillThrough.createID());
+                                                        sb.append("\" data-embedded=\"");
+                                                        sb.append(exportProperties.isEmbedded());
+                                                        sb.append("\" data-source=\"");
+                                                        sb.append(analysisItem.getAnalysisItemID());
+                                                        sb.append("\"");
+                        if (drillThrough.isFilterRowGroupings()) {
+
+
+                            for (AnalysisItem dataItem : headers) {
+                                if (dataItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                    int k = unsortedHeaders.indexOf(dataItem);
+                                    String encodedValue;
+
+                                    try {
+                                        encodedValue = toDrillthroughValue(listRow.getValues()[k]);
+                                        sb.append(" data-drillthrough");
+                                        sb.append(dataItem.getAnalysisItemID());
+                                        sb.append("=\"");
+                                        sb.append(encodedValue);
+                                        sb.append("\"");
+                                    } catch (UnsupportedEncodingException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+
+                            }
+                        } else {
+                            sb.append(" data-drillthrough");
+                            sb.append(analysisItem.getAnalysisItemID());
+                            sb.append("=\"");
+
+                            try {
+                                sb.append(toDrillthroughValue(value));
+                            } catch (UnsupportedEncodingException e) {
+                                throw new RuntimeException(e);
+                            }
+                            sb.append("\"");
+                        }
+                        if (colorString != null) {
+                            sb.append(" style=\"color:").append(colorString).append("\"");
+                        }
+                        sb.append(">");
+                        showLink = true;
+                    }
+                }
+
+
+                sb.append(createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                if (showLink) {
+                    sb.append("</a>");
+                }
+                sb.append("</td>");
+            }
             sb.append("</tr>");
         }
 
         sb.append("</tbody>");
+
         if (report.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) report;
             if (list.isSummaryTotal()) {
@@ -4222,6 +4223,7 @@ public class ExportService {
         }
 
         sb.append("</table>");
+        System.out.println(sb.toString());
         return sb.toString();
     }
 

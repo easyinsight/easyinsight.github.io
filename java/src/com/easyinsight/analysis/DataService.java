@@ -1730,6 +1730,12 @@ public class DataService {
             allItems.addAll(analysisDefinition.getAddedItems());
         }
 
+        Map<AnalysisItem, Integer> positionMap = new HashMap<>();
+        int position = 0;
+        for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
+            positionMap.put(analysisItem, position++);
+        }
+
         for (AnalysisItem analysisItem : analysisDefinition.getMeasures()) {
 
             if (nowFilter != null) {
@@ -1750,24 +1756,31 @@ public class DataService {
                         }
                     }
                 }
-                if (date == null) {
+                /*if (date == null) {
                     for (AnalysisItem item : allItems) {
                         if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             date = (AnalysisDateDimension) item;
                             break;
                         }
                     }
-                }
+                }*/
                 if (date == null) {
-                    throw new ReportException(new GenericReportFault("You need to choose a date for " + analysisItem.toDisplay() + " for trend analysis to work."));
+                    List<AnalysisMeasure> measures = trendMap.get("");
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put("", measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
+                    //throw new ReportException(new GenericReportFault("You need to choose a date for " + analysisItem.toDisplay() + " for trend analysis to work."));
+                } else {
+                    dateMap.put(date.toDisplay(), date);
+                    List<AnalysisMeasure> measures = trendMap.get(date.toDisplay());
+                    if (measures == null) {
+                        measures = new ArrayList<AnalysisMeasure>();
+                        trendMap.put(date.toDisplay(), measures);
+                    }
+                    measures.add((AnalysisMeasure) analysisItem);
                 }
-                dateMap.put(date.toDisplay(), date);
-                List<AnalysisMeasure> measures = trendMap.get(date.toDisplay());
-                if (measures == null) {
-                    measures = new ArrayList<AnalysisMeasure>();
-                    trendMap.put(date.toDisplay(), measures);
-                }
-                measures.add((AnalysisMeasure) analysisItem);
             } else {
                 List<AnalysisMeasure> measures = trendMap.get("");
                 if (measures == null) {
@@ -1790,7 +1803,7 @@ public class DataService {
             if (analysisDefinition.getGroupings() != null) {
                 columns.addAll(analysisDefinition.getGroupings());
             }
-            if (nowFilter != null) {
+            if (nowFilter != null && !"".equals(key)) {
                 List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     if (filter != nowFilter && filter != previousFilter) {
@@ -1807,7 +1820,13 @@ public class DataService {
                 filters.add(nowFilterClone);
                 tempReport.setFilterDefinitions(filters);
             } else {
-                tempReport.setFilterDefinitions(analysisDefinition.getFilterDefinitions());
+                List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    if (filter != nowFilter && filter != previousFilter) {
+                        filters.add(filter);
+                    }
+                }
+                tempReport.setFilterDefinitions(filters);
             }
             tempReport.setColumns(columns);
             tempReport.setDataFeedID(analysisDefinition.getDataFeedID());
@@ -1858,7 +1877,7 @@ public class DataService {
                 }
             }
             DataSet pastSet;
-            if (previousFilter != null) {
+            if (previousFilter != null && !"".equals(key)) {
 
                 List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
@@ -1906,6 +1925,13 @@ public class DataService {
             }
             trendOutcomes.addAll(new Trend().calculateTrends(measures, analysisDefinition.getGroupings(), nowSet, pastSet));
         }
+        Collections.sort(trendOutcomes, new Comparator<TrendOutcome>() {
+
+            @Override
+            public int compare(TrendOutcome o1, TrendOutcome o2) {
+                return positionMap.get(o1.getMeasure()).compareTo(positionMap.get(o2.getMeasure()));
+            }
+        });
         return new TrendResult(new ArrayList<TrendOutcome>(trendOutcomes), dataSourceInfo, nowString, previousString);
     }
 
@@ -2686,22 +2712,26 @@ public class DataService {
             feed.getDataSource().decorateLinks(new ArrayList<>(items));
 
             try {
-                Map<String, AnalysisItem> filterMap = new HashMap<>();
-                for (AnalysisItem reportItem : items) {
-                    if (reportItem != null) {
-                        filterMap.put(reportItem.toOriginalDisplayName(), reportItem);
+                if (analysisDefinition instanceof WSAreaChartDefinition) {
+                    Map<String, AnalysisItem> filterMap = new HashMap<>();
+                    for (AnalysisItem reportItem : items) {
+                        if (reportItem != null) {
+                            filterMap.put(reportItem.toOriginalDisplayName(), reportItem);
+                        }
                     }
-                }
-                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-                    if (filter.getField() != null && filter.getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        AnalysisItem original = filterMap.get(filter.getField().toOriginalDisplayName());
-                        if (original != null && original.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            AnalysisDateDimension source = (AnalysisDateDimension) original;
-                            AnalysisDateDimension target = (AnalysisDateDimension) filter.getField();
-                            if (source.getDateLevel() != target.getDateLevel() && source.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL &&
-                                    target.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                                target.setDateLevel(source.getDateLevel());
-
+                    for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                        if (filter.getField() != null && filter.getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            AnalysisItem original = filterMap.get(filter.getField().toOriginalDisplayName());
+                            if (original != null && original.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                AnalysisDateDimension source = (AnalysisDateDimension) original;
+                                AnalysisDateDimension target = (AnalysisDateDimension) filter.getField();
+                                if (source.getDateLevel() == AnalysisDateDimension.DAY_LEVEL &&
+                                        (target.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL ||
+                                                target.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
+                                                target.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL ||
+                                                target.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                                    target.setDateLevel(source.getDateLevel());
+                                }
                             }
                         }
                     }
