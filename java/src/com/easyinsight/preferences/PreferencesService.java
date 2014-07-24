@@ -45,6 +45,25 @@ public class PreferencesService {
         return applicationSkin;
     }
 
+    public ImageDescriptor createImage(EIConnection conn, String imageName, String contentType, byte[] bytes, boolean publicImage) throws SQLException {
+        long userID = SecurityUtil.getUserID();
+        conn.setAutoCommit(false);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, public_visibility) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+        insertStmt.setBinaryStream(1, bis, bytes.length);
+        insertStmt.setString(2, imageName);
+        insertStmt.setLong(3, userID);
+        insertStmt.setBoolean(4, publicImage);
+        insertStmt.execute();
+        long id = Database.instance().getAutoGenKey(insertStmt);
+        ImageDescriptor image = new ImageDescriptor();
+        image.setId(id);
+        image.setName(imageName);
+        conn.commit();
+        return image;
+    }
+
     public long addImage(String imageName, byte[] bytes, boolean publicImage) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
@@ -656,4 +675,19 @@ public class PreferencesService {
     }
 
 
+    public ImageDescriptor getImageDescriptor(long l, EIConnection conn) throws SQLException {
+        long accountID = SecurityUtil.getAccountID();
+        ImageDescriptor image = new ImageDescriptor();
+        PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id FROM USER_IMAGE, USER WHERE USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID");
+        stmt.setLong(1, accountID);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            image.setName(rs.getString(1));
+            image.setId(rs.getLong(2));
+            return image;
+        } else {
+            return null;
+        }
+
+    }
 }
