@@ -23,14 +23,12 @@
                     var trendOutcome:TrendOutcome = dataSet.getItemAt(i) as TrendOutcome;
                     var mFormatter:Formatter = trendOutcome.measure.getFormatter();
                     var value:String = mFormatter.format(trendOutcome.now.getValue());
-                    /*width = Math.max(width,  uiComp.measureText(value).width);
-                     width += trendDef.majorFontSize;*/
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trends.addItem(trendOutcome);
                 }
                 for each (var updateOutcome:TrendOutcome in trends) {
                     updateOutcome.leftTextWidth = width + 10;
-                    if (previousString != null && trendOutcome.historical != null && trendOutcome.historical.type() != Value.EMPTY) {
+                    if (updateOutcome.historical != null && updateOutcome.historical.type() != Value.EMPTY) {
                         var r:AltTrendRenderer = new AltTrendRenderer();
                         r.trendDefinition = trendDef;
                         r.data = updateOutcome;
