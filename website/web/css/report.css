@@ -146,6 +146,10 @@
     margin-bottom: 10px;
 }
 
+.dashboard_base .nav-pills {
+    margin-bottom: 15px;
+}
+
 .dashboard_base > .row > .col-md-12 > .tabbable > .nav-pills {
     padding: 5px 19px 5px 19px;
     margin: -10px -20px 15px -20px;
