@@ -44,8 +44,8 @@ public class InfusionsoftCustomCache {
                 parameters.add("DataFormField");
                 parameters.add(1000);
                 parameters.add(page);
-                Map blah = new HashMap();
-                parameters.add(blah);
+                Map emptyMap = new HashMap();
+                parameters.add(emptyMap);
                 parameters.add(fields);
                 Object[] results = (Object[]) client.execute("DataService.query", parameters);
                 for (Object result : results) {

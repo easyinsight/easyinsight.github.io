@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -68,7 +69,15 @@ public class InfusionsoftLeadSourceSource extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("LeadSource", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            Map<String, String> map = new HashMap<>();
+            DataSet leadSet = query("LeadSource", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            for (IRow row : leadSet.getRows()) {
+                String sourceID = row.getValue(new NamedKey(ID)).toString();
+                String sourceName = row.getValue(new NamedKey(NAME)).toString();
+                map.put(sourceID, sourceName);
+            }
+            ((InfusionsoftCompositeSource) parentDefinition).setLeadSourceCache(map);
+            return leadSet;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
