@@ -7,6 +7,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.cfg.AnnotationConfiguration;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -268,6 +269,30 @@ public class Database {
 
     public int getMaxConnections() {
         return dataSource.getMaxPoolSize();
+    }
+
+    @FunctionalInterface
+    public interface VoidDatabaseFunction {
+        void apply(EIConnection conn) throws Exception;
+    }
+
+    public static void useConnection(VoidDatabaseFunction f) {
+        useConnection(false, f);
+    }
+
+    public static void useConnection(boolean autoCommit, VoidDatabaseFunction f) {
+        try {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                f.apply(conn);
+            } finally {
+                if(autoCommit)
+                    conn.setAutoCommit(true);
+                Database.closeConnection(conn);;
+            }
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Object deproxy(Object obj) {

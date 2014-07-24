@@ -80,6 +80,15 @@
         <from>^/reportHeader/([0-9]+)$</from>
         <to>/reportHeader?imageID=$1</to>
     </rule>
+    <rule>
+        <from>^/image/([0-9]+)$</from>
+        <to>/reportHeader?imageID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/image/?$</from>
+        <to>/reportHeader</to>
+    </rule>
 
     <rule>
         <from>^/html/report/drillthrough/([A-Za-z0-9]+)$</from>

@@ -1,5 +1,9 @@
 package com.easyinsight.preferences;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -30,5 +34,12 @@ public class ImageDescriptor implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", name);
+        jo.put("id", id);
+        return jo;
     }
 }
