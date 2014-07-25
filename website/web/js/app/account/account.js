@@ -7,7 +7,7 @@ eiAccounts.controller('AccountController', function ($scope) {
 
 eiAccounts.controller("AccountInfoController", function($scope, $http, PageInfo, $location, $rootScope) {
     if(!$rootScope.user.admin)
-        $location.path("/a/account/profile");
+        $location.path("/account/profile");
     PageInfo.setTitle("Account Info");
     $http.get("/app/account.json").success(function (d, r) {
         $scope.account = d.account;
@@ -69,7 +69,7 @@ eiAccounts.controller('UsersController', function ($scope, $filter, $http, PageI
 
 eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
-        $location.path("/a/account/profile");
+        $location.path("/account/profile");
     $scope.load.then(function () {
         var i;
         for (i in $scope.users) {
@@ -94,7 +94,7 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
                 if (i != -1) {
                     $scope.users[i] = c.data.user;
                 }
-                $location.path("/a/account/users");
+                $location.path("/account/users");
             } else {
                 $scope.error = c.data.error;
             }
@@ -105,7 +105,7 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
 
 eiAccounts.controller('NewDesignerController', function ($scope, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
-        $location.path("/a/account/profile");
+        $location.path("/account/profile");
     PageInfo.setTitle("New Designer");
     $scope.user = {
         "email": null,
@@ -129,7 +129,7 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
             $scope.success = c.data.success;
             if (c.data.success) {
                 $scope.users.push(c.data.user);
-                $location.path("/a/account/users");
+                $location.path("/account/users");
             } else {
                 $scope.error = c.data.error;
             }
@@ -139,7 +139,7 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
 
 eiAccounts.controller('NewViewerController', function ($scope, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
-        $location.path("/a/account/profile");
+        $location.path("/account/profile");
     PageInfo.setTitle("New Viewer");
     $scope.user = {
         "email": null,
@@ -163,7 +163,7 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location,
             $scope.success = c.data.success;
             if (c.data.success) {
                 $scope.users.push(c.data.user);
-                $location.path("/a/account/users");
+                $location.path("/account/users");
             } else {
                 $scope.error = c.data.error;
             }
@@ -208,6 +208,8 @@ eiAccounts.controller("AccountSkinController", function($scope, $http, $upload) 
         })
     }
     $scope.onFileSelect = function(files) {
+        if(!$scope.skin.report_header)
+            return;
         if(files.length > 0) {
             var file = files[0];
             if(file.size < 1024*1024*10 && file.type.match(/^image\//)) {

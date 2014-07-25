@@ -19,6 +19,7 @@ import java.io.Serializable;
 public class ImageDescriptor implements Serializable {
     private long id;
     private String name;
+    private String contentType;
 
     public long getId() {
         return id;
@@ -36,9 +37,18 @@ public class ImageDescriptor implements Serializable {
         this.name = name;
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("name", name);
+        jo.put("content_type", contentType);
         jo.put("id", id);
         return jo;
     }

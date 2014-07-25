@@ -11,10 +11,7 @@ import org.hibernate.Session;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -48,18 +45,20 @@ public class PreferencesService {
     public ImageDescriptor createImage(EIConnection conn, String imageName, String contentType, byte[] bytes, boolean publicImage) throws SQLException {
         long userID = SecurityUtil.getUserID();
         conn.setAutoCommit(false);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, public_visibility) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, content_type, public_visibility) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
         insertStmt.setBinaryStream(1, bis, bytes.length);
         insertStmt.setString(2, imageName);
         insertStmt.setLong(3, userID);
-        insertStmt.setBoolean(4, publicImage);
+        insertStmt.setString(4, contentType);
+        insertStmt.setBoolean(5, publicImage);
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
         ImageDescriptor image = new ImageDescriptor();
         image.setId(id);
         image.setName(imageName);
+        image.setContentType(contentType);
         conn.commit();
         return image;
     }
@@ -88,6 +87,18 @@ public class PreferencesService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+    }
+
+    public class ImageData {
+        public ImageDescriptor descriptor;
+        public byte[] data;
+    }
+
+    public ImageData getImageData(long imageID, EIConnection conn) throws SQLException {
+        ImageData id = new ImageData();
+        id.data = getImage(imageID);
+        id.descriptor = getImageDescriptor(imageID, conn);
+        return id;
     }
 
     public byte[] getImage(long imageID) {
@@ -678,7 +689,7 @@ public class PreferencesService {
     public ImageDescriptor getImageDescriptor(long l, EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
         ImageDescriptor image = new ImageDescriptor();
-        PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id FROM USER_IMAGE, USER WHERE USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID");
+        PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id, USER_IMAGE.content_type FROM USER_IMAGE, USER WHERE USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID");
         stmt.setLong(1, accountID);
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) {

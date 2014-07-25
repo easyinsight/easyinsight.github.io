@@ -67,7 +67,7 @@ public class ImageUploadServlet extends JSONServlet {
             org.json.JSONObject jo = new org.json.JSONObject();
             ImageDescriptor id = null;
             if(bytes != null && bytes.length > 0 && bytes.length < 1024 * 1024 * 10 && fileName != null && fileName.length() > 0 && isImage(contentType)) {
-                id = new PreferencesService().createImage(conn, fileName, "", bytes, false);
+                id = new PreferencesService().createImage(conn, fileName, contentType, bytes, false);
                 jo.put("image", id.toJSON(md));
             }
             ResponseInfo ri = new ResponseInfo(ResponseInfo.ALL_GOOD, jo.toString());
@@ -79,8 +79,14 @@ public class ImageUploadServlet extends JSONServlet {
     }
 
     private boolean isImage(String contentType) {
-        // TODO: Figure out if it's an image
-        return true;
+        /* image/gif: GIF image; Defined in RFC 2045 and RFC 2046
+        image/jpeg: JPEG JFIF image; Defined in RFC 2045 and RFC 2046
+        image/pjpeg: JPEG JFIF image; Associated with Internet Explorer; Listed in ms775147(v=vs.85) - Progressive JPEG, initiated before global browser support for progressive JPEGs (Microsoft and Firefox).
+        image/png: Portable Network Graphics; Registered,[12] Defined in RFC 2083
+        image/svg+xml: SVG vector image; Defined in SVG Tiny 1.2 Specification Appendix M
+        image/vnd.djvu: DjVu image and multipage document format.[13]
+        image/example: example in documentation, Defined in RFC 4735 */
+        return contentType != null && contentType.matches("^image/(gif|jpeg|pjpeg|png|svg\\+xml)$");
     }
 
     @Override
