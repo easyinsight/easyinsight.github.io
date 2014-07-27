@@ -38,8 +38,6 @@ public class AccountSkinServlet extends JSONServlet {
 
         ApplicationSkin as = new PreferencesService().getAccountSkin();
         responseObject.put("skin", as.toJSON(md));
-
-
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
     }
 
@@ -47,8 +45,13 @@ public class AccountSkinServlet extends JSONServlet {
     protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         SecurityUtil.authorizeAccountAdmin();
 
+        Long l = Long.parseLong(String.valueOf(jsonObject.get("background_image")));
+
         JSONObject responseObject = new JSONObject();
         ApplicationSkin skin = ApplicationSkin.fromJSON(jsonObject);
+        if(l != null && l > 0) {
+            skin.setReportHeaderImage(new PreferencesService().getImageDescriptor(l, conn));
+        }
         new PreferencesService().saveAccountSkin(skin);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
 

@@ -54,6 +54,7 @@ public class LineD3ChartServlet extends HtmlServlet {
                         pointList.add(point);
                         //point.put("x", dateValue.getDate().getTime());
                         point.put("x", dFormat.format(dateValue.getDate()));
+                        point.put("dx", dateValue.getDate().getTime());
                         point.put("y", row.getValue(measure).toDouble());
                     }
                 }
@@ -61,7 +62,7 @@ public class LineD3ChartServlet extends HtmlServlet {
 
                     public int compare(JSONObject jsonObject, JSONObject jsonObject1) {
                         try {
-                            return ((Long)jsonObject.getLong("x")).compareTo(jsonObject1.getLong("x"));
+                            return ((Long)jsonObject.getLong("dx")).compareTo(jsonObject1.getLong("dx"));
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }

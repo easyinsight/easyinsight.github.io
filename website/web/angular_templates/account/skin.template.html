@@ -1,6 +1,7 @@
 <div cg-busy="loading" />
+<div cg-busy="upload" />
 <div ng-if="saved" class="alert alert-success">Saved!</div>
-<form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate>
+<form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate ng-file-drop-available="dropSupported=true">
     <div eicolorform text="'Primary Chart Color'" enabledfield="skin.primary_chart_color_enabled" field="skin.primary_chart_color"></div>
     <div eicolorform text="'Primary Chart Color Gradient End'" enabledfield="skin.primary_chart_color_gradient_enabled" field="skin.primary_chart_color_gradient"></div>
     <div eicolorform text="'Secondary Chart Color'" enabledfield="skin.secondary_chart_color_enabled" field="skin.secondary_chart_color"></div>

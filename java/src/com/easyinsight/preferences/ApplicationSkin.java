@@ -1031,6 +1031,14 @@ public class ApplicationSkin implements Serializable {
 
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = new JSONObject();
+        if(reportHeaderImage != null) {
+            jo.put("background_image", reportHeaderImage.getId());
+        } else {
+            jo.put("background_image", 0);
+        }
+        jo.put("report_header", reportHeader);
+        jo.put("header_background_color", toHex(reportBackgroundColor));
+        jo.put("header_text_color", toHex(reportTextColor));
         jo.put("primary_chart_color_enabled", customChartColorEnabled);
         jo.put("primary_chart_color", toHex(customChartColor));
         jo.put("primary_chart_color_gradient_enabled", gradientChartColorEnabled);
@@ -1084,7 +1092,6 @@ public class ApplicationSkin implements Serializable {
 
     public static ApplicationSkin fromJSON(net.minidev.json.JSONObject jo) {
         ApplicationSkin as = new ApplicationSkin();
-
         as.setCustomChartColorEnabled(booleanValue(jo.get("primary_chart_color_enabled")));
         as.setCustomChartColor(fromHex(jo.get("primary_chart_color")));
         as.setGradientChartColorEnabled(booleanValue(jo.get("primary_chart_color_gradient_enabled")));
@@ -1123,7 +1130,8 @@ public class ApplicationSkin implements Serializable {
         as.setDashboardReportHeaderTextColor(fromHex(jo.get("report_title_text_color")));
         as.setMultiColors(((net.minidev.json.JSONArray)jo.get("multi_colors")).stream().map(a -> MultiColor.fromJSON((net.minidev.json.JSONObject) a)).collect(Collectors.toList()));
         as.setSecondaryMultiColors(((net.minidev.json.JSONArray)jo.get("secondary_multi_colors")).stream().map(a -> MultiColor.fromJSON((net.minidev.json.JSONObject) a)).collect(Collectors.toList()));
-
+        as.setReportBackgroundColor(fromHex(jo.get("header_background_color")));
+        as.setReportTextColor(fromHex(jo.get("header_text_color")));
         return as;
     }
 

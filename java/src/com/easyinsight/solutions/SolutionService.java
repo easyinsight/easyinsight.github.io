@@ -105,10 +105,12 @@ public class SolutionService {
             saveStmt.close();
             PreparedStatement saveAssignmentStmt = conn.prepareStatement("INSERT INTO copy_template_to_field_assignment (copy_template_id, source_field, target_field) values (?, ?, ?)");
             for (FieldAssignment fieldAssignment : fieldAssignments) {
-                saveAssignmentStmt.setLong(1, id);
-                saveAssignmentStmt.setString(2, fieldAssignment.getSourceField().toDisplay());
-                saveAssignmentStmt.setString(3, fieldAssignment.getTargetField().toDisplay());
-                saveAssignmentStmt.execute();
+                if (fieldAssignment.getSourceField() != null && fieldAssignment.getTargetField() != null) {
+                    saveAssignmentStmt.setLong(1, id);
+                    saveAssignmentStmt.setString(2, fieldAssignment.getSourceField().toDisplay());
+                    saveAssignmentStmt.setString(3, fieldAssignment.getTargetField().toDisplay());
+                    saveAssignmentStmt.execute();
+                }
             }
             saveAssignmentStmt.close();
         } catch (Exception e) {
@@ -280,13 +282,6 @@ public class SolutionService {
                     accountSkin = (ApplicationSkinSettings) results.get(0);
                 } else {
                     accountSkin = new ApplicationSkinSettings();
-                }
-                ApplicationSkinSettings userSkin;
-                results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
-                if (results.size() > 0) {
-                    userSkin = (ApplicationSkinSettings) results.get(0);
-                } else {
-                    userSkin = new ApplicationSkinSettings();
                 }
                 ApplicationSkinSettings settings = globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(connectionSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT));
                 settings.setAccountID(SecurityUtil.getAccountID());

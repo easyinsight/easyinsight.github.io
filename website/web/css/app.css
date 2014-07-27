@@ -357,3 +357,22 @@ a {
 .reportDashboardTable > thead > tr > th {
     border-color: #1C5C76;
 }
+
+.droppable_area {
+    border: 2px dashed #000000;
+    margin: 10px;
+    width: 150px;
+    height: 50px;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.droppable_files {
+    border-color: #FF0000;
+    background-color: #FFEEEE;
+}
+
+.disabled_drop {
+    border-color: #cccccc !important;
+    background-color: #ffffff !important;
+}

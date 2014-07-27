@@ -91,8 +91,8 @@ public class DashboardPDFServlet extends HttpServlet {
                     Object widthObj = val.get("width");
                     Object heightObj = val.get("height");
                     if (widthObj != null && heightObj != null) {
-                        int width = Integer.parseInt(val.get("width").toString());
-                        int height = Integer.parseInt(val.get("height").toString());
+                        int width = (int) Double.parseDouble(val.get("width").toString());
+                        int height = (int) Double.parseDouble(val.get("height").toString());
                         PDFImageData pdfImageData = new PDFImageData();
                         pdfImageData.setWidth(width);
                         pdfImageData.setHeight(height);
@@ -100,7 +100,7 @@ public class DashboardPDFServlet extends HttpServlet {
                     }
                 }
             }
-            Dashboard dashboard = ds.getDashboard(dashboardID);
+            Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
             byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images);
             String urlKey = new ExportService().htmlDashboardToPDFAlt(bytes, dashboard, req);
             JSONObject object = new JSONObject();

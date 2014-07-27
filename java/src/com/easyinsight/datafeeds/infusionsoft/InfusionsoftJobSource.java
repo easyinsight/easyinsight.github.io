@@ -2,6 +2,8 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -31,7 +33,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
     public static final String JOB_COUNT = "JobCount";
 
     public InfusionsoftJobSource() {
-        setFeedName("Job");
+        setFeedName("Order");
     }
 
     @Override
@@ -54,7 +56,17 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("Job", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(JOB_COUNT));
+            DataSet jobs = query("Job", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(JOB_COUNT));
+            for (IRow row : jobs.getRows()) {
+                Key orderStatusKey = new NamedKey(ORDER_STATUS);
+                Value orderStatus = row.getValue(orderStatusKey);
+                if ("0".equals(orderStatus.toString())) {
+                    row.addValue(orderStatusKey, "Paid");
+                } else {
+                    row.addValue(orderStatusKey, "Unpaid");
+                }
+            }
+            return jobs;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

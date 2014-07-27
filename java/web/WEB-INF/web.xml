@@ -229,6 +229,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ImageUpload</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.ImageUploadServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>CreateUser</servlet-name>
         <servlet-class>com.easyinsight.html.CreateUserServlet</servlet-class>
     </servlet>
@@ -831,6 +836,11 @@
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
         <url-pattern>/html/account/delete</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ImageUpload</servlet-name>
+        <url-pattern>/images</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

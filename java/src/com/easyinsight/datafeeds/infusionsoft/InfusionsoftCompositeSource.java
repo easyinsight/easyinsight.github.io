@@ -33,6 +33,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     private Map<String, String> userCache;
     private Map<String, String> leadStageCache;
+    private Map<String, String> leadSourceCache;
     private Map<String, String> leadStatusCache;
     private Map<String, String> contactCache;
     private Map<String, String> leadSourceCategoryCache;
@@ -44,7 +45,8 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         Set<Integer> set = new HashSet<Integer>();
         for (IServerDataSourceDefinition s : children) {
             if (s.getFeedType().getType() == FeedType.INFUSIONSOFT_STAGE.getType() ||
-                    s.getFeedType().getType() == FeedType.INFUSIONSOFT_USERS.getType()) {
+                    s.getFeedType().getType() == FeedType.INFUSIONSOFT_USERS.getType() ||
+                    s.getFeedType().getType() == FeedType.INFUSIONSOFT_LEAD_SOURCE.getType()) {
                 set.add(s.getFeedType().getType());
                 end.add(s);
             }
@@ -67,6 +69,14 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     public Map<String, String> getLeadStageCache() {
         return leadStageCache;
+    }
+
+    public Map<String, String> getLeadSourceCache() {
+        return leadSourceCache;
+    }
+
+    public void setLeadSourceCache(Map<String, String> leadSourceCache) {
+        this.leadSourceCache = leadSourceCache;
     }
 
     public void setLeadStageCache(Map<String, String> leadStageCache) {
@@ -205,6 +215,9 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         cache = null;
+        leadStageCache = null;
+        leadStatusCache = null;
+        leadSourceCache = null;
     }
 
     private InfusionsoftCustomCache cache;
@@ -249,37 +262,42 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     protected Collection<ChildConnection> getChildConnections() {
         List<ChildConnection> connections = new ArrayList<ChildConnection>();
 
+        // CRM (opportunities, contacts, companies)
+
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_STAGE_HISTORY, InfusionsoftLeadSource.LEAD_ID, InfusionsoftStageMoveSource.OPPORTUNITY_ID, IJoin.ONE, IJoin.ONE));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftLeadSource.CONTACT_ID, InfusionsoftContactSource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_PRODUCT_INTEREST, InfusionsoftLeadSource.LEAD_ID, InfusionsoftProductInterestSource.OBJECT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCT_INTEREST, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftProductInterestSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCTS, FeedType.INFUSIONSOFT_SUBSCRIPTIONS, InfusionsoftProductSource.PRODUCT_ID, InfusionsoftSubscriptionSource.PRODUCT_ID));
+
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_STAGE, InfusionsoftLeadSource.STAGE_ID, InfusionsoftStageSource.STAGE_ID, IJoin.ONE, IJoin.ONE));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_AFFILIATES, InfusionsoftLeadSource.AFFILIATE_ID, InfusionsoftAffiliateSource.AFFILIATE_ID, IJoin.ONE, IJoin.ONE));
+
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftAffiliateSource.CONTACT_ID, InfusionsoftContactSource.ID));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_AFFILIATES, FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftAffiliateSource.AFFILIATE_ID, InfusionsoftReferralSource.AFFILIATE_ID));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_REFERRAL, InfusionsoftContactSource.ID, InfusionsoftReferralSource.CONTACT_ID));
 
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
-
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_EXPENSES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftExpenseSource.CONTACT_ID, InfusionsoftContactSource.ID));
-
         // ecommerce
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_JOBS, InfusionsoftContactSource.ID, InfusionsoftJobSource.CONTACT_ID, IJoin.ONE, IJoin.MANY));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_JOBS, FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftJobSource.JOB_ID, InfusionsoftOrderItemSource.ORDER_ID, IJoin.ONE, IJoin.ONE));
-
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_ITEM, InfusionsoftInvoiceSource.ID, InfusionsoftInvoiceItemSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICE_ITEM, FeedType.INFUSIONSOFT_ORDER_ITEM, InfusionsoftInvoiceItemSource.ORDER_ITEM_ID, InfusionsoftOrderItemSource.ORDER_ITEM_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_JOBS, InfusionsoftInvoiceSource.JOB_ID, InfusionsoftJobSource.JOB_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_JOBS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftJobSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_ORDER_ITEM, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftOrderItemSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCT_INTEREST, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftProductInterestSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_SUBSCRIPTIONS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftSubscriptionSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_RECURRING_ORDERS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftRecurringOrderSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftInvoiceSource.ID, InfusionsoftInvoicePaymentSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PAYMENT, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftPaymentSource.PAYMENT_ID, InfusionsoftInvoicePaymentSource.PAYMENT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_JOBS, FeedType.INFUSIONSOFT_INVOICES, InfusionsoftJobSource.JOB_ID, InfusionsoftInvoiceSource.JOB_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_ITEM, InfusionsoftInvoiceSource.ID, InfusionsoftInvoiceItemSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_EXPENSES, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftExpenseSource.CONTACT_ID, InfusionsoftContactSource.ID));
 
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_AFFILIATES, InfusionsoftLeadSource.AFFILIATE_ID, InfusionsoftAffiliateSource.AFFILIATE_ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftLeadSource.CONTACT_ID, InfusionsoftContactSource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICES, FeedType.INFUSIONSOFT_INVOICE_PAYMENT, InfusionsoftInvoiceSource.ID, InfusionsoftInvoicePaymentSource.INVOICE_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_INVOICE_PAYMENT, FeedType.INFUSIONSOFT_PAYMENT, InfusionsoftInvoicePaymentSource.PAYMENT_ID, InfusionsoftPaymentSource.PAYMENT_ID,  IJoin.ONE, IJoin.ONE));
+
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_RECURRING_ORDERS, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftRecurringOrderSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
+
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_LEAD_SOURCE, InfusionsoftContactSource.LEAD_SOURCE_ID, InfusionsoftLeadSourceSource.ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_LEAD_SOURCE, InfusionsoftLeadSource.LEAD_SOURCE, InfusionsoftLeadSourceSource.ID, IJoin.ONE, IJoin.ONE));
-        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_STAGE, InfusionsoftLeadSource.STAGE_ID, InfusionsoftStageSource.STAGE_ID, IJoin.ONE, IJoin.ONE));
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_CONTACT_TO_TAG, InfusionsoftContactSource.ID, InfusionsoftContactToTag.CONTACT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACT_TO_TAG, FeedType.INFUSIONSOFT_TAG, InfusionsoftContactToTag.GROUP_ID, InfusionsoftTagSource.ID, IJoin.ONE, IJoin.ONE));

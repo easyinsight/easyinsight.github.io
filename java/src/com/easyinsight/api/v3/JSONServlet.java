@@ -59,11 +59,11 @@ public abstract class JSONServlet extends HttpServlet {
     }
 
     @FunctionalInterface
-    private interface VoidIOFunction {
+    protected interface VoidIOFunction {
         void apply() throws IOException;
     }
 
-    public void authProcessor(HttpServletRequest req, HttpServletResponse resp, VoidIOFunction f) throws IOException {
+    protected void authProcessor(HttpServletRequest req, HttpServletResponse resp, VoidIOFunction f) throws IOException {
         SecurityUtil.populateThreadLocalFromSession(req);
         if (SecurityUtil.getUserID(false) == 0) {
             SecurityUtil.clearThreadLocal();
@@ -115,10 +115,10 @@ public abstract class JSONServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        authProcessor(req, resp, () -> {
+        try {
+        authProcessor(req, resp, () ->
+            Database.useConnection((conn) -> {
             try {
-
-                EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
@@ -146,7 +146,14 @@ public abstract class JSONServlet extends HttpServlet {
             } catch (Exception e) {
                 sendError(400, "Your request was malformed.", resp);
             }
-        });
+        }));
+
+        } catch(RuntimeException e) {
+            if(e.getCause() instanceof IOException)
+                throw (IOException) e.getCause();
+            if(e.getCause() instanceof ServletException)
+                throw (ServletException) e.getCause();
+        }
 
 
     }

@@ -747,7 +747,15 @@ public class AnalysisDefinition implements Cloneable {
                     } else if (targetItems.size() == 1) {
                         dataSourceItem = targetItems.get(0);
                     } else if (targetItems.size() > 1) {
-                        throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay());
+                        for (AnalysisItem item : targetItems) {
+                            if (item.getOrigin() == null) {
+                                dataSourceItem = item;
+                                break;
+                            }
+                        }
+                        if (dataSourceItem == null) {
+                            throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay());
+                        }
                     }
 
                     if (dataSourceItem != null && originValid(dataSourceItem, analysisDefinition)) {
@@ -761,7 +769,15 @@ public class AnalysisDefinition implements Cloneable {
                         } else if (targetItems.size() == 1) {
                             dataSourceItem = targetItems.get(0);
                         } else if (targetItems.size() > 1) {
-                            LogClass.error("Ambiguous reference to " + analysisItem.toDisplay() + " by original display name of " + analysisItem.toOriginalDisplayName());
+                            for (AnalysisItem item : targetItems) {
+                                if (item.getOrigin() == null) {
+                                    dataSourceItem = item;
+                                    break;
+                                }
+                            }
+                            if (dataSourceItem == null) {
+                                throw new RuntimeException("Ambiguous reference to " + analysisItem.toDisplay() + " by original display name of " + analysisItem.toOriginalDisplayName());
+                            }
                         }
 
                         if (dataSourceItem != null && originValid(dataSourceItem, analysisDefinition)) {

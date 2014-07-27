@@ -1,0 +1,1 @@
+alter table user_image add column content_type varchar(255) default 'image/png';
