@@ -105,8 +105,8 @@ public class DashboardPDF {
         // send an SQS request
         try {
             //Thread.sleep(500000);
-            /*MessageQueue msgQueue = SQSUtils.connectToQueue(OUTBOUND_QUEUE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            msgQueue.sendMessage(url);*/
+            MessageQueue msgQueue = SQSUtils.connectToQueue(OUTBOUND_QUEUE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            msgQueue.sendMessage(url);
 
             PreparedStatement stmt = conn.prepareStatement("SELECT image_state FROM image_selenium_trigger WHERE image_selenium_trigger_id = ?");
 
@@ -174,7 +174,14 @@ public class DashboardPDF {
 
             try {
                 UIData uiData = Utils.createUIData(conn);
-                if (uiData.getApplicationSkin() != null && uiData.getApplicationSkin().isReportHeader() && uiData.getHeaderImageDescriptor() != null) {
+                DashboardUIProperties dashboardProps = dashboard.findHeaderImage();
+                if (dashboardProps.isImageFullHeader() && dashboardProps.getHeader() != null) {
+                    ImageDescriptor imageDescriptor = dashboardProps.getHeader();
+                    byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
+                    Image image = Image.getInstance(bytes);
+                    image.setAlignment(Element.ALIGN_CENTER);
+                    document.add(image);
+                } else if (uiData.getApplicationSkin() != null && uiData.getApplicationSkin().isReportHeader() && uiData.getHeaderImageDescriptor() != null) {
                     ImageDescriptor imageDescriptor = uiData.getHeaderImageDescriptor();
                     byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
                     Image image = Image.getInstance(bytes);
