@@ -371,3 +371,8 @@ a {
     border-color: #FF0000;
     background-color: #FFEEEE;
 }
+
+.disabled_drop {
+    border-color: #cccccc !important;
+    background-color: #ffffff !important;
+}

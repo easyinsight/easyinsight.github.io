@@ -16,7 +16,7 @@
         </div>
     </div>
     <input type="file" accept="image/*" capture="camera" ng-disabled="!skin.report_header"  ng-file-select="onFileSelect($files)">
-    <div ng-file-drop="onFileSelect($files)" ng-show="dropSupported" class="droppable_area" ng-file-drag-over-class="'droppable_files'">drop files here</div>
+    <div ng-file-drop="onFileSelect($files)" ng-class="{'disabled_drop': !skin.report_header}" ng-show="dropSupported" class="droppable_area" ng-file-drag-over-class="'droppable_files'">drop files here</div>
     <div eicolorform text="'Background Color'" enabledfielddisabled="true" field="skin.header_background_color" disabledfield="!skin.report_header"></div>
     <div eicolorform text="'Text Color'" enabledfielddisabled="true" field="skin.header_text_color" disabledfield="!skin.report_header"></div>
     <div class="form-group">
