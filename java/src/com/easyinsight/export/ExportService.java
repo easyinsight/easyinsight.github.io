@@ -506,7 +506,8 @@ public class ExportService {
         try {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD ||
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS || analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
@@ -800,6 +801,10 @@ public class ExportService {
             element = formReportToPDF(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition instanceof WSYTDDefinition) {
             element = ytdToPDF(analysisDefinition, conn, insightRequestMetadata);
+        } else if (analysisDefinition instanceof WSCompareYearsDefinition) {
+            element = compareYearsToPDF(analysisDefinition, conn, insightRequestMetadata);
+        } else if (analysisDefinition instanceof WSVerticalListDefinition) {
+            element = verticalListToPDF(analysisDefinition, conn, insightRequestMetadata);
         } else {
             element = listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         }
@@ -1654,6 +1659,106 @@ public class ExportService {
         return bytes;
     }
 
+    public static Element verticalListToPDF(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+
+        DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSVerticalListDefinition verticalList = (WSVerticalListDefinition) listDefinition;
+        VListInfo vListInfo = getVListInfo(verticalList, dataSet);
+
+
+        AnalysisMeasure percentMeasure = new AnalysisMeasure();
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setMinPrecision(1);
+        percentMeasure.setPrecision(1);
+
+
+
+        PdfPTable table = new PdfPTable(vListInfo.columns.size() + 1);
+        table.setSpacingBefore(20);
+        table.getDefaultCell().setPadding(3);
+
+        int fontSize = 6;
+        int minimumSize = fontSize + 3;
+        Color headerTextColor = new Color(0xFFFFFF);
+        Color color = new Color(0x333333);
+
+        PdfPCell blank = ytdHeaderCell("", headerTextColor, color, minimumSize, fontSize);
+        table.addCell(blank);
+
+        for (int i = 0; i < vListInfo.columns.size(); i++) {
+            String header = vListInfo.columns.get(i).label;
+            table.addCell(ytdHeaderCell(header, headerTextColor, color, minimumSize, fontSize));
+        }
+
+
+        table.setHeaderRows(1);
+
+        com.itextpdf.text.Font regFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+
+        for (Map<String, Object> map : vListInfo.dColl) {
+            AnalysisMeasure baseMeasure = (AnalysisMeasure) map.get("baseMeasure");
+            boolean alwaysShow = false;
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                }
+            }
+            boolean lineAbove = false;
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isLineAbove()) {
+                    lineAbove = true;
+                }
+                com.itextpdf.text.Font boldFont;
+                if (alwaysShow) {
+                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
+                } else {
+                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+                }
+
+                PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
+                rowHeaderCell.setBorderWidth(0f);
+                if (lineAbove) {
+                    rowHeaderCell.setBorderWidthTop(1f);
+                }
+                if (alwaysShow) {
+                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
+                } else {
+                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
+                }
+                table.addCell(rowHeaderCell);
+
+                for (SortInfo sortInfo : vListInfo.columns) {
+                    String columnName = sortInfo.label;
+
+                    if (alwaysShow) {
+                        PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
+                        emptyCell.setBorderWidth(0f);
+                        if (lineAbove) {
+                            emptyCell.setBorderWidthTop(1f);
+                        }
+                        table.addCell(emptyCell);
+                    } else {
+                        Value measureValue = (Value) map.get(columnName);
+                        String text;
+                        if (measureValue != null && measureValue.type() == Value.NUMBER) {
+                            text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+                        } else {
+                            text = "";
+                        }
+                        PdfPCell dataCell = new PdfPCell(new Phrase(text, regFont));
+                        dataCell.setBorder(0);
+                        table.addCell(dataCell);
+                    }
+                }
+            }
+        }
+
+        return table;
+    }
+
     private static String vListToTableWithActualCSS(VListInfo vListInfo, ExportMetadata exportMetadata, WSVerticalListDefinition verticalList) {
         StringBuilder sb = new StringBuilder();
         String cellStyle;
@@ -2079,6 +2184,117 @@ public class ExportService {
         }
     }
 
+    public static Element compareYearsToPDF(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
+        if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
+            AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
+            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+        }
+        ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
+        YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
+
+
+        AnalysisMeasure percentMeasure = new AnalysisMeasure();
+        percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+        percentMeasure.setMinPrecision(1);
+        percentMeasure.setPrecision(1);
+
+
+
+        PdfPTable table = new PdfPTable(ytdStuff.getHeaders().size() + 1);
+        table.setSpacingBefore(20);
+        table.getDefaultCell().setPadding(3);
+
+        int fontSize = 6;
+        int minimumSize = fontSize + 3;
+        Color headerTextColor = new Color(0xFFFFFF);
+        Color color = new Color(0x333333);
+
+        PdfPCell blank = ytdHeaderCell("", headerTextColor, color, minimumSize, fontSize);
+        table.addCell(blank);
+
+        for (int i = 0; i < ytdStuff.getHeaders().size(); i++) {
+            String header = ytdStuff.getHeaders().get(i);
+            String date = createValue(exportMetadata.dateFormat, verticalList.getTimeDimension(), new StringValue(header), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, "MMM");
+            table.addCell(ytdHeaderCell(date, headerTextColor, color, minimumSize, fontSize));
+        }
+
+
+        table.setHeaderRows(1);
+
+        com.itextpdf.text.Font regFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+
+        for (CompareYearsRow ytdValue : ytdStuff.getRows()) {
+            AnalysisMeasure baseMeasure = (AnalysisMeasure) ytdValue.getMeasure();
+            boolean alwaysShow = false;
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isAlwaysShow()) {
+                    alwaysShow = true;
+                }
+            }
+            boolean atLeastOneValue = false;
+            for (CompareYearsResult result : ytdValue.getResults().values()) {
+                if (result.getValue().toDouble() > 0) {
+                    atLeastOneValue = true;
+                }
+            }
+            if (!alwaysShow && !atLeastOneValue) {
+                continue;
+            }
+            boolean lineAbove = false;
+            if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof VerticalListReportExtension) {
+                VerticalListReportExtension ytdReportFieldExtension = (VerticalListReportExtension) baseMeasure.getReportFieldExtension();
+                if (ytdReportFieldExtension.isLineAbove()) {
+                    lineAbove = true;
+                }
+                com.itextpdf.text.Font boldFont;
+                if (alwaysShow) {
+                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
+                } else {
+                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+                }
+
+                PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
+                rowHeaderCell.setBorderWidth(0f);
+                if (lineAbove) {
+                    rowHeaderCell.setBorderWidthTop(1f);
+                }
+                if (alwaysShow) {
+                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
+                } else {
+                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
+                }
+                table.addCell(rowHeaderCell);
+
+                for (String header : ytdStuff.getHeaders()) {
+                    if (alwaysShow) {
+                        PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
+                        emptyCell.setBorderWidth(0f);
+                        if (lineAbove) {
+                            emptyCell.setBorderWidthTop(1f);
+                        }
+                        table.addCell(emptyCell);
+                    } else {
+                        CompareYearsResult compareYearsResult = ytdValue.getResults().get(header);
+                        if (compareYearsResult.isPercentChange()) {
+                            PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, percentMeasure, compareYearsResult.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                            dataCell.setBorder(0);
+                            table.addCell(dataCell);
+                        } else {
+                            PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, baseMeasure, compareYearsResult.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                            dataCell.setBorder(0);
+                            table.addCell(dataCell);
+                        }
+                    }
+                }
+            }
+        }
+
+        return table;
+    }
+
     public static String compareYearsToHTMLTableWithActualCSS(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
@@ -2269,8 +2485,6 @@ public class ExportService {
         return sb.toString();
     }
 
-    // sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
-
     public static Element ytdToPDF(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSYTDDefinition verticalList = (WSYTDDefinition) report;
@@ -2350,7 +2564,6 @@ public class ExportService {
                 if (baseMeasure.getReportFieldExtension() != null && baseMeasure.getReportFieldExtension() instanceof YTDReportFieldExtension) {
                     YTDReportFieldExtension ytdReportFieldExtension = (YTDReportFieldExtension) baseMeasure.getReportFieldExtension();
                     if (ytdReportFieldExtension.isLineAbove()) {
-                        //ytdTRStyle += "border-top: solid 2px #222222;";
                         lineAbove = true;
                     }
                 }

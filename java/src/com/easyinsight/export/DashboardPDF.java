@@ -1,7 +1,7 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSForm;
+import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -13,6 +13,8 @@ import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 import com.itextpdf.text.*;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -20,6 +22,7 @@ import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
 import org.hibernate.Session;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -83,7 +86,7 @@ public class DashboardPDF {
 
         String url = "/app/embed/seleniumReport.jsp?seleniumUserName={0}&seleniumPassword={1}&seleniumID={2}";
         String formatted = MessageFormat.format(url, u, p, String.valueOf(id));
-        System.out.println("https://localhost:4443" + formatted);
+        System.out.println("https://www.easy-insight.com" + formatted);
 
         PDFImageData imageData = launchAndWaitForRequest(formatted, conn, id);
 
@@ -96,7 +99,7 @@ public class DashboardPDF {
         return image;
     }
 
-    public static final String OUTBOUND_QUEUE = "EISeleniumDev";
+    public static final String OUTBOUND_QUEUE = "EISelenium";
 
     private PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
         // send an SQS request
@@ -194,7 +197,7 @@ public class DashboardPDF {
                 LogClass.error(e);
             }*/
 
-            Element object = populate(element, reportMap, conn, images);
+            Element object = populate(element, reportMap, conn, images, dashboard);
 
             document.add(object);
             document.close();
@@ -207,7 +210,12 @@ public class DashboardPDF {
         }
     }
 
-    private Element populate(DashboardElement element, Map<String, WSAnalysisDefinition> reportMap, EIConnection conn, Map<String, PDFImageData> images) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
+    private BaseColor fromColor(int colorNumber) {
+        Color color = new Color(colorNumber);
+        return new BaseColor(color.getRed(), color.getGreen(), color.getBlue());
+    }
+
+    private Element populate(DashboardElement element, Map<String, WSAnalysisDefinition> reportMap, EIConnection conn, Map<String, PDFImageData> images, Dashboard dashboard) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
         if (element instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) element;
             PdfPTable table = new PdfPTable(dashboardGrid.getColumns());
@@ -215,7 +223,7 @@ public class DashboardPDF {
             for (int j = 0; j < dashboardGrid.getRows(); j++) {
                 for (int i = 0; i < dashboardGrid.getColumns(); i++) {
                     DashboardElement child = dashboardGrid.findItem(j, i).getDashboardElement();
-                    Element e1 = populate(child, reportMap, conn, images);
+                    Element e1 = populate(child, reportMap, conn, images, dashboard);
                     if (e1 instanceof PdfPTable) {
                         PdfPTable t1 = (PdfPTable) e1;
                         PdfPCell cell = new PdfPCell(t1);
@@ -235,22 +243,48 @@ public class DashboardPDF {
             return table;
         } else if (element instanceof DashboardReport) {
             DashboardReport dashboardReport = (DashboardReport) element;
-            // if it's just a report, it's comparatively easier (if it's something we can translate easily to PDF)
-            // if it's a chart, we have to
+            PdfPTable table = null;
+            PdfPTable stupidIText = null;
+            if (dashboardReport.isShowLabel()) {
+                table = new PdfPTable(1);
+                table.setHeaderRows(0);
+
+                com.itextpdf.text.Font font = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, Font.BOLD, fromColor(dashboard.getReportHeaderTextColor()));
+                PdfPCell cell = new PdfPCell(new Phrase(dashboardReport.getReport().getName(), font));
+                cell.setPaddingBottom(5);
+                cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+                cell.setBackgroundColor(fromColor(dashboard.getReportHeaderBackgroundColor()));
+                cell.setBorder(PdfPCell.NO_BORDER);
+                table.addCell(cell);
+
+                stupidIText = new PdfPTable(1);
+                stupidIText.setHeaderRows(0);
+                PdfPCell phCell = new PdfPCell(stupidIText);
+                phCell.setPaddingTop(5);
+                phCell.setBorder(PdfPCell.NO_BORDER);
+                table.addCell(phCell);
+            }
             WSAnalysisDefinition report = reportMap.get(dashboardReport.getUrlKey());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             ExportMetadata exportMetadata = ExportService.createExportMetadata(conn);
-            // set time zone on irm
             Element result;
             if (report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 result = new ExportService().crosstabToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             } else if (report.getReportType() == WSAnalysisDefinition.TREND_GRID) {
                 result = new ExportService().kpiReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
+            } else if (report.getReportType() == WSAnalysisDefinition.YTD) {
+                result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSTreeDefinition) {
                 result = new ExportService().treeToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             } else if (report instanceof WSForm) {
                 result = new ExportService().formReportToPDF(report, conn, insightRequestMetadata, exportMetadata);
-            } else if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition) {
+            } else if (report instanceof WSYTDDefinition) {
+                result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
+            } else if (report instanceof WSCompareYearsDefinition) {
+                result = ExportService.compareYearsToPDF(report, conn, insightRequestMetadata);
+            } else if (report instanceof WSVerticalListDefinition) {
+                result = ExportService.verticalListToPDF(report, conn, insightRequestMetadata);
+            } else if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition || report instanceof WSMap) {
                 // do we have the chart data as is?
                 // if not, we'll need to retrieve via selenium or phantomjs
                 PDFImageData imageData = images.get(dashboardReport.getUrlKey());
@@ -269,7 +303,26 @@ public class DashboardPDF {
             } else {
                 result = new ExportService().listReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             }
-            return result;
+            if (table == null) {
+                return result;
+            } else {
+                if (result instanceof PdfPTable) {
+                    PdfPTable t1 = (PdfPTable) result;
+                    PdfPCell cell = new PdfPCell(t1);
+                    cell.setBorder(PdfPCell.NO_BORDER);
+                    cell.setPaddingBottom(20);
+                    stupidIText.addCell(cell);
+                } else if (result instanceof Image) {
+                    PdfPCell cell = new PdfPCell((Image) result, true);
+                    cell.setBorder(PdfPCell.NO_BORDER);
+                    cell.setPaddingBottom(20);
+                    stupidIText.addCell(cell);
+                } else {
+                    throw new RuntimeException("not yet implemented");
+                }
+                return table;
+            }
+
         } else {
             throw new RuntimeException();
         }
