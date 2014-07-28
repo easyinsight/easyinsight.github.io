@@ -51,6 +51,13 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
         fieldBuilder.addField(JOB_STATUS, new AnalysisDimension("Job Status"));
         fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension("Date Created"));
         fieldBuilder.addField(JOB_COUNT, new AnalysisMeasure("Number of Jobs"));
+        InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+        List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-9);
+        if (customFields != null) {
+            for (CustomField customField : customFields) {
+                fieldBuilder.addField(customField.key(), customField.createAnalysisItem());
+            }
+        }
     }
 
     @Override

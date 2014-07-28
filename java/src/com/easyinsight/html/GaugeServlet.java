@@ -65,9 +65,10 @@ public class GaugeServlet extends HtmlServlet {
                 jsonObject.put("formattedValue", string);
                 if (gaugeDefinition.getBenchmarkMeasure() != null) {
                     Value benchmarkValue = dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure());
-                    jsonObject.put("benchmark", "Benchmark: " + ExportService.createValue(0, analysisMeasure, benchmarkValue, Calendar.getInstance(), exportMetadata.currencySymbol,
-                            exportMetadata.locale, false));
+                    jsonObject.put("benchmark", "Benchmark: <b>" + ExportService.createValue(0, analysisMeasure, benchmarkValue, Calendar.getInstance(), exportMetadata.currencySymbol,
+                            exportMetadata.locale, false) + "</b>");
                 }
+                jsonObject.put("gaugePrecision", ((AnalysisMeasure) gaugeDefinition.getMeasure()).getPrecision());
             }
         } else {
             if (dataSet.getRows().size() > 0) {

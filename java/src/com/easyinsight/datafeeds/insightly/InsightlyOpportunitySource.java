@@ -6,6 +6,7 @@ import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -44,40 +45,36 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
     public static final String OPPORTUNITY_COUNT = "Opportunity Count";
     public static final String LINKED_ORGANIZATION = "Linked Organization";
     public static final String LINKED_CONTACT = "Linked Contact";
+    public static final String OPPORTUNITY_URL = "Opportunity URL";
 
     public InsightlyOpportunitySource() {
         setFeedName("Opportunities");
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(OPPORTUNITY_ID, NAME, DETAILS, DATE_CREATED, DATE_UPDATED, OPPORTUNITY_COUNT, BID_CURRENCY, BID_AMOUNT, BID_TYPE,
-                BID_DURATION, FORECAST_CLOSE_DATE, ACTUAL_CLOSE_DATE, CATEGORY, STAGE, STATE, RESPONSIBLE_USER, RESPONSIBLE_CREATOR, PROBABILITY);
-    }
-
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID)));
-        fields.add(new AnalysisDimension(keys.get(NAME)));
-        fields.add(new AnalysisDimension(keys.get(CATEGORY)));
-        fields.add(new AnalysisDimension(keys.get(STAGE)));
-        fields.add(new AnalysisDimension(keys.get(STATE)));
-        fields.add(new AnalysisDimension(keys.get(RESPONSIBLE_USER)));
-        fields.add(new AnalysisDimension(keys.get(RESPONSIBLE_CREATOR)));
-        fields.add(new AnalysisDimension(keys.get(BID_TYPE)));
-        fields.add(new AnalysisDimension(keys.get(BID_CURRENCY)));
-        fields.add(new AnalysisDimension(keys.get(DETAILS)));
-        Key linkedKey = keys.get(LINKED_ORGANIZATION);
-        if (linkedKey == null) {
-            linkedKey = new NamedKey(LINKED_ORGANIZATION);
-        }
-        fields.add(new AnalysisDimension(linkedKey));
-        Key linkedContact = keys.get(LINKED_CONTACT);
-        if (linkedContact == null) {
-            linkedContact = new NamedKey(LINKED_CONTACT);
-        }
-        fields.add(new AnalysisDimension(linkedContact));
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
+        fieldBuilder.addField(NAME, new AnalysisDimension());
+        fieldBuilder.addField(DETAILS, new AnalysisDimension());
+        fieldBuilder.addField(BID_CURRENCY, new AnalysisDimension());
+        fieldBuilder.addField(LINKED_CONTACT, new AnalysisDimension());
+        fieldBuilder.addField(LINKED_ORGANIZATION, new AnalysisDimension());
+        fieldBuilder.addField(OPPORTUNITY_URL, new AnalysisDimension());
+        fieldBuilder.addField(BID_TYPE, new AnalysisDimension());
+        fieldBuilder.addField(CATEGORY, new AnalysisDimension());
+        fieldBuilder.addField(PIPELINE, new AnalysisDimension());
+        fieldBuilder.addField(STAGE, new AnalysisDimension());
+        fieldBuilder.addField(STATE, new AnalysisDimension());
+        fieldBuilder.addField(RESPONSIBLE_USER, new AnalysisDimension());
+        fieldBuilder.addField(RESPONSIBLE_CREATOR, new AnalysisDimension());
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension());
+        fieldBuilder.addField(DATE_UPDATED, new AnalysisDateDimension());
+        fieldBuilder.addField(FORECAST_CLOSE_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(ACTUAL_CLOSE_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(OPPORTUNITY_COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(BID_AMOUNT, new AnalysisMeasure(FormattingConfiguration.CURRENCY));
+        fieldBuilder.addField(BID_DURATION, new AnalysisMeasure());
+        fieldBuilder.addField(PROBABILITY, new AnalysisMeasure(FormattingConfiguration.PERCENTAGE));
         InsightlyCompositeSource insightlyCompositeSource = (InsightlyCompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(insightlyCompositeSource.getInsightlyApiKey(), "x");
         List customFields = runJSONRequest("customFields", insightlyCompositeSource, httpClient);
@@ -86,38 +83,14 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
             String fieldFor = customFieldMap.get("FIELD_FOR").toString();
             if ("OPPORTUNITY".equals(fieldFor)) {
                 String customFieldID = customFieldMap.get("CUSTOM_FIELD_ID").toString();
-                Key key = keys.get(customFieldID);
-                if (key == null) {
-                    key = new NamedKey(customFieldID);
-                }
-
                 String fieldType = customFieldMap.get("FIELD_TYPE").toString();
                 if ("DATE".equals(fieldType)) {
-                    fields.add(new AnalysisDateDimension(key, customFieldMap.get("FIELD_NAME").toString(), AnalysisDateDimension.DAY_LEVEL));
+                    fieldBuilder.addField(customFieldID, new AnalysisDateDimension(customFieldMap.get("FIELD_NAME").toString()));
                 } else {
-                    fields.add(new AnalysisDimension(key, customFieldMap.get("FIELD_NAME").toString()));
+                    fieldBuilder.addField(customFieldID, new AnalysisDimension(customFieldMap.get("FIELD_NAME").toString()));
                 }
             }
-
         }
-        fields.add(new AnalysisDateDimension(keys.get(DATE_CREATED), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(DATE_UPDATED), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(FORECAST_CLOSE_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(ACTUAL_CLOSE_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisMeasure(keys.get(OPPORTUNITY_COUNT), AggregationTypes.SUM));
-        Key probabilityKey = keys.get(PROBABILITY);
-        if (probabilityKey == null) {
-            probabilityKey = new NamedKey(PROBABILITY);
-        }
-        Key pipelineKey = keys.get(PIPELINE);
-        if (pipelineKey == null) {
-            pipelineKey = new NamedKey(PIPELINE);
-        }
-        fields.add(new AnalysisDimension(pipelineKey, true));
-        fields.add(new AnalysisMeasure(probabilityKey, PROBABILITY, AggregationTypes.AVERAGE, true, FormattingConfiguration.PERCENTAGE));
-        fields.add(new AnalysisMeasure(keys.get(BID_DURATION), AggregationTypes.SUM));
-        fields.add(new AnalysisMeasure(keys.get(BID_AMOUNT), BID_AMOUNT, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        return fields;
     }
 
     private Value getValue(Map map, String param) {
@@ -234,6 +207,7 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                     opportunityState = new StringValue("Won");
                 }
                 row.addValue(keys.get(STATE), opportunityState);
+                row.addValue(keys.get(OPPORTUNITY_URL), "https://googleapps.insight.ly/opportunities/details/" + contactMap.get("OPPORTUNITY_ID").toString());
                 row.addValue(keys.get(PROBABILITY), getValue(contactMap, "PROBABILITY"));
                 row.addValue(keys.get(BID_CURRENCY), getValue(contactMap, "BID_CURRENCY"));
                 row.addValue(keys.get(BID_AMOUNT), getValue(contactMap, "BID_AMOUNT"));

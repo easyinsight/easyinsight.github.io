@@ -99,7 +99,7 @@ public class DashboardPDF {
         return image;
     }
 
-    public static final String OUTBOUND_QUEUE = "EISelenium";
+    public static final String OUTBOUND_QUEUE = "EISeleniumDev";
 
     private PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
         // send an SQS request
@@ -146,7 +146,7 @@ public class DashboardPDF {
         throw new RuntimeException("Timeout");
     }
 
-    public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images) {
+    public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images, int timezoneOffset) {
         // have to find the underlying grid of reports
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -163,7 +163,7 @@ public class DashboardPDF {
                 dashboard.setFilters(replaceFilters);
             }
             DashboardElement root = dashboard.getRootElement();
-            DashboardElement element = findElementToRender(root, selected);
+            DashboardElement element = findElementToRender(root, selected, replaceFilters);
             populateReportData(element, conn, selected, reportMap, replaceFilters);
             Document document;
             document = new Document(PageSize.A4.rotate(), 0, 0, 5, 5);
@@ -179,6 +179,12 @@ public class DashboardPDF {
                     ImageDescriptor imageDescriptor = dashboardProps.getHeader();
                     byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
                     Image image = Image.getInstance(bytes);
+                    float width = image.getPlainWidth();
+                    if (width > 800) {
+                        float ratio = 800 / width;
+                        float adjustedHeight = ratio * image.getPlainHeight();
+                        image.scaleAbsolute(800, adjustedHeight);
+                    }
                     image.setAlignment(Element.ALIGN_CENTER);
                     document.add(image);
                 } else if (uiData.getApplicationSkin() != null && uiData.getApplicationSkin().isReportHeader() && uiData.getHeaderImageDescriptor() != null) {
@@ -204,7 +210,7 @@ public class DashboardPDF {
                 LogClass.error(e);
             }*/
 
-            Element object = populate(element, reportMap, conn, images, dashboard);
+            Element object = populate(element, reportMap, conn, images, dashboard, timezoneOffset);
 
             document.add(object);
             document.close();
@@ -222,7 +228,8 @@ public class DashboardPDF {
         return new BaseColor(color.getRed(), color.getGreen(), color.getBlue());
     }
 
-    private Element populate(DashboardElement element, Map<String, WSAnalysisDefinition> reportMap, EIConnection conn, Map<String, PDFImageData> images, Dashboard dashboard) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
+    private Element populate(DashboardElement element, Map<String, WSAnalysisDefinition> reportMap, EIConnection conn, Map<String, PDFImageData> images,
+                             Dashboard dashboard, int timezoneOffset) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
         if (element instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) element;
             PdfPTable table = new PdfPTable(dashboardGrid.getColumns());
@@ -230,7 +237,7 @@ public class DashboardPDF {
             for (int j = 0; j < dashboardGrid.getRows(); j++) {
                 for (int i = 0; i < dashboardGrid.getColumns(); i++) {
                     DashboardElement child = dashboardGrid.findItem(j, i).getDashboardElement();
-                    Element e1 = populate(child, reportMap, conn, images, dashboard);
+                    Element e1 = populate(child, reportMap, conn, images, dashboard, timezoneOffset);
                     if (e1 instanceof PdfPTable) {
                         PdfPTable t1 = (PdfPTable) e1;
                         PdfPCell cell = new PdfPCell(t1);
@@ -254,6 +261,8 @@ public class DashboardPDF {
             PdfPTable stupidIText = null;
             if (dashboardReport.isShowLabel()) {
                 table = new PdfPTable(1);
+                table.setSplitLate(false);
+                table.setSplitRows(true);
                 table.setHeaderRows(0);
 
                 com.itextpdf.text.Font font = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, Font.BOLD, fromColor(dashboard.getReportHeaderTextColor()));
@@ -262,10 +271,13 @@ public class DashboardPDF {
                 cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
                 cell.setBackgroundColor(fromColor(dashboard.getReportHeaderBackgroundColor()));
                 cell.setBorder(PdfPCell.NO_BORDER);
+                cell.setFixedHeight(20f);
                 table.addCell(cell);
 
                 stupidIText = new PdfPTable(1);
                 stupidIText.setHeaderRows(0);
+                stupidIText.setSplitLate(false);
+                stupidIText.setSplitRows(true);
                 PdfPCell phCell = new PdfPCell(stupidIText);
                 phCell.setPaddingTop(5);
                 phCell.setBorder(PdfPCell.NO_BORDER);
@@ -273,6 +285,7 @@ public class DashboardPDF {
             }
             WSAnalysisDefinition report = reportMap.get(dashboardReport.getUrlKey());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setUtcOffset(timezoneOffset);
             ExportMetadata exportMetadata = ExportService.createExportMetadata(conn);
             Element result;
             if (report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
@@ -335,7 +348,7 @@ public class DashboardPDF {
         }
     }
 
-    private DashboardElement findElementToRender(DashboardElement root, DashboardStackPositions selected) {
+    private DashboardElement findElementToRender(DashboardElement root, DashboardStackPositions selected, List<FilterDefinition> recurseFilters) {
         if (root instanceof DashboardStack) {
             DashboardStack dashboardStack = (DashboardStack) root;
             Integer index = selected.getPositions().get(dashboardStack.getUrlKey());
@@ -351,16 +364,17 @@ public class DashboardPDF {
                     }
                     dashboardStack.setFilters(replaceFilters);
                 }
+                recurseFilters.addAll(dashboardStack.getFilters());
             }
             if (index != null) {
-                return findElementToRender(dashboardStack.getGridItems().get(index).getDashboardElement(), selected);
+                return findElementToRender(dashboardStack.getGridItems().get(index).getDashboardElement(), selected, recurseFilters);
             } else {
-                return findElementToRender(dashboardStack.getGridItems().get(0).getDashboardElement(), selected);
+                return findElementToRender(dashboardStack.getGridItems().get(0).getDashboardElement(), selected, recurseFilters);
             }
         } else if (root instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) root;
             if (dashboardGrid.getColumns() == 1 && dashboardGrid.getRows() == 1) {
-                return findElementToRender(dashboardGrid.getGridItems().get(0).getDashboardElement(), selected);
+                return findElementToRender(dashboardGrid.getGridItems().get(0).getDashboardElement(), selected, recurseFilters);
             }
         }
         return root;

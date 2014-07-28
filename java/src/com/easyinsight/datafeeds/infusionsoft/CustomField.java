@@ -40,25 +40,23 @@ class CustomField {
         return label;
     }
 
-    public AnalysisItem createAnalysisItem(Map<String, Key> keys) {
-        String field = String.valueOf(getId());
-        Key key = keys.get(field);
-        if (key == null) {
-            key = new NamedKey(field);
-            keys.put(field, key);
-        }
+    public String key() {
+        return String.valueOf(getId());
+    }
+
+    public AnalysisItem createAnalysisItem() {
         if (getType() == 11 || getType() == 12) {
-            return new AnalysisMeasure(key, name, AggregationTypes.SUM);
+            return new AnalysisMeasure(name, AggregationTypes.SUM, FormattingConfiguration.NUMBER);
         } else if (getType() == 3) {
-            return new AnalysisMeasure(key, name, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY);
+            return new AnalysisMeasure(name, AggregationTypes.SUM, FormattingConfiguration.CURRENCY);
         } else if (getType() == 4) {
-            return new AnalysisMeasure(key, name, AggregationTypes.SUM, true, FormattingConfiguration.PERCENTAGE);
+            return new AnalysisMeasure(name, AggregationTypes.SUM, FormattingConfiguration.PERCENTAGE);
         } else if (getType() == 13) {
-            return new AnalysisDateDimension(key, name, AnalysisDateDimension.DAY_LEVEL, true);
+            return new AnalysisDateDimension(name);
         } else if (getType() == 14) {
-            return new AnalysisDateDimension(key, name, AnalysisDateDimension.DAY_LEVEL, true);
+            return new AnalysisDateDimension(name);
         } else {
-            return new AnalysisDimension(key, name);
+            return new AnalysisDimension(name);
         }
     }
 }

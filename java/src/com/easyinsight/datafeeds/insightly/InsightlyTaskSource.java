@@ -6,6 +6,7 @@ import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -30,6 +31,8 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
     public static final String PERCENT_COMPLETE = "Task Percent Complete";
     public static final String PROJECT_ID = "Task Project ID";
     public static final String OPPORTUNITY_ID = "Task Opportunity ID";
+    public static final String CONTACT_ID = "Task Contact ID";
+    public static final String ORGANIZATION_ID = "Task Organization ID";
     public static final String DETAILS = "Task Details";
     public static final String STATUS = "Task Status";
     public static final String PRIORITY = "Task Priority";
@@ -45,38 +48,28 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
         setFeedName("Tasks");
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(DATE_CREATED, DATE_UPDATED, TASK_ID, TITLE, CATEGORY, DUE_DATE, COMPLETED, PERCENT_COMPLETE,
-                PROJECT_ID, DETAILS, STATUS, PRIORITY, START_DATE, ASSIGNED_BY, RECURRENCE, RESPONSIBLE_USER, TASK_COUNT, OPPORTUNITY_ID);
-    }
-
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(TASK_ID)));
-        fields.add(new AnalysisDimension(keys.get(TITLE)));
-        fields.add(new AnalysisDimension(keys.get(CATEGORY)));
-        fields.add(new AnalysisDimension(keys.get(COMPLETED)));
-        fields.add(new AnalysisDimension(keys.get(PROJECT_ID)));
-        fields.add(new AnalysisDimension(keys.get(DETAILS)));
-        fields.add(new AnalysisDimension(keys.get(STATUS)));
-        fields.add(new AnalysisDimension(keys.get(PRIORITY)));
-        fields.add(new AnalysisDimension(keys.get(ASSIGNED_BY)));
-        fields.add(new AnalysisDimension(keys.get(RECURRENCE)));
-        fields.add(new AnalysisDimension(keys.get(RESPONSIBLE_USER)));
-        Key opportunityIDKey = keys.get(OPPORTUNITY_ID);
-        if (opportunityIDKey == null) {
-            opportunityIDKey = new NamedKey(OPPORTUNITY_ID);
-        }
-        fields.add(new AnalysisDimension(opportunityIDKey));
-        fields.add(new AnalysisDateDimension(keys.get(DATE_CREATED), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(DATE_UPDATED), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(START_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(DUE_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisMeasure(keys.get(TASK_COUNT), AggregationTypes.SUM));
-        fields.add(new AnalysisMeasure(keys.get(PERCENT_COMPLETE), AggregationTypes.SUM));
-        return fields;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(TASK_ID, new AnalysisDimension());
+        fieldBuilder.addField(TITLE, new AnalysisDimension());
+        fieldBuilder.addField(CATEGORY, new AnalysisDimension());
+        fieldBuilder.addField(COMPLETED, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_ID, new AnalysisDimension());
+        fieldBuilder.addField(DETAILS, new AnalysisDimension());
+        fieldBuilder.addField(STATUS, new AnalysisDimension());
+        fieldBuilder.addField(PRIORITY, new AnalysisDimension());
+        fieldBuilder.addField(ASSIGNED_BY, new AnalysisDimension());
+        fieldBuilder.addField(RECURRENCE, new AnalysisDimension());
+        fieldBuilder.addField(RESPONSIBLE_USER, new AnalysisDimension());
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
+        fieldBuilder.addField(ORGANIZATION_ID, new AnalysisDimension());
+        fieldBuilder.addField(CONTACT_ID, new AnalysisDimension());
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension());
+        fieldBuilder.addField(DATE_UPDATED, new AnalysisDateDimension());
+        fieldBuilder.addField(START_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(DUE_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(TASK_COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(PERCENT_COMPLETE, new AnalysisMeasure(FormattingConfiguration.PERCENTAGE));
     }
 
     private Value getValue(Map map, String param) {
@@ -132,14 +125,27 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
                 row.addValue(keys.get(TASK_ID), contactMap.get("TASK_ID").toString());
                 Object taskLinks = contactMap.get("TASKLINKS");
                 if (taskLinks != null) {
-                    List taskLinkList = (List) taskLinks;
-                    if (taskLinkList.size() > 0) {
-                        Map taskLinkMap = (Map) taskLinkList.get(0);
+                    List<Map> taskLinkList = (List<Map>) taskLinks;
+                    String opportunityID = null;
+                    String organizationID = null;
+                    String contactID = null;
+                    for (Map taskLinkMap : taskLinkList) {
                         Object opportunityIDObj = taskLinkMap.get("OPPORTUNITY_ID");
-                        if (opportunityIDObj != null) {
-                            row.addValue(keys.get(OPPORTUNITY_ID), opportunityIDObj.toString());
+                        if (opportunityID == null && opportunityIDObj != null) {
+                            opportunityID = opportunityIDObj.toString();
+                        }
+                        Object contactIDObj = taskLinkMap.get("CONTACT_ID");
+                        if (contactID == null && contactIDObj != null) {
+                            contactID = contactIDObj.toString();
+                        }
+                        Object organizationIDObj = taskLinkMap.get("ORGANISATION_ID");
+                        if (organizationID == null && organizationIDObj != null) {
+                            organizationID = organizationIDObj.toString();
                         }
                     }
+                    row.addValue(keys.get(OPPORTUNITY_ID), opportunityID);
+                    row.addValue(keys.get(ORGANIZATION_ID), organizationID);
+                    row.addValue(keys.get(CONTACT_ID), contactID);
                 }
                 row.addValue(keys.get(TITLE), getValue(contactMap, "Title"));
                 row.addValue(keys.get(PROJECT_ID), getValue(contactMap, "PROJECT_ID"));

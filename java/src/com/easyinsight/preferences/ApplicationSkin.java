@@ -1092,6 +1092,7 @@ public class ApplicationSkin implements Serializable {
 
     public static ApplicationSkin fromJSON(net.minidev.json.JSONObject jo) {
         ApplicationSkin as = new ApplicationSkin();
+        as.setReportHeader(booleanValue(jo.get("report_header")));
         as.setCustomChartColorEnabled(booleanValue(jo.get("primary_chart_color_enabled")));
         as.setCustomChartColor(fromHex(jo.get("primary_chart_color")));
         as.setGradientChartColorEnabled(booleanValue(jo.get("primary_chart_color_gradient_enabled")));

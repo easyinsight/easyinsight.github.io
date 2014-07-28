@@ -39,6 +39,11 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
     public static final String PROJECTED_REVENUE_HIGH = "ProjectedRevenueHigh";
     public static final String DATE_CREATED = "DateCreated";
     public static final String OPPORTUNITY_COUNT = "OpportunityCount";
+    public static final String OPPORTUNITY_URL = "Opportunity URL";
+    public static final String OPPORTUNITY_AUTHOR = "CreatedBy";
+    public static final String EXPECTED_CLOSE_DATE = "EstimatedCloseDate";
+    public static final String OPPORTUNITY_NOTES = "OpportunityNotes";
+    public static final String OBJECTION = "Objection";
 
     public InfusionsoftLeadSource() {
         setFeedName("Opportunities");
@@ -60,10 +65,22 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
         fieldBuilder.addField(STAGE_NAME, new AnalysisDimension("Opportunity Stage Name"));
         fieldBuilder.addField(STATUS_ID, new AnalysisDimension("Opportunity Status ID"));
         fieldBuilder.addField(LEAD_SOURCE, new AnalysisDimension("Opportunity Source"));
+        fieldBuilder.addField(OBJECTION, new AnalysisDimension("Objection"));
         fieldBuilder.addField(PROJECTED_REVENUE_HIGH, new AnalysisDimension("Projected Revenue High"));
         fieldBuilder.addField(PROJECTED_REVENUE_LOW, new AnalysisDimension("Projected Revenue Low"));
         fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension("Opportunity Created At"));
+        fieldBuilder.addField(EXPECTED_CLOSE_DATE, new AnalysisDateDimension("Estimated Close Date"));
+        fieldBuilder.addField(OPPORTUNITY_AUTHOR, new AnalysisDimension("Opportunity Author"));
+        fieldBuilder.addField(OPPORTUNITY_NOTES, new AnalysisDimension("Opportunity Notes"));
         fieldBuilder.addField(OPPORTUNITY_COUNT, new AnalysisMeasure("Number of Opportunities"));
+        fieldBuilder.addField(OPPORTUNITY_URL, new AnalysisDimension("Opportunity URL"));
+        InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+        List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-4);
+        if (customFields != null) {
+            for (CustomField customField : customFields) {
+                fieldBuilder.addField(customField.key(), customField.createAnalysisItem());
+            }
+        }
     }
 
     public List<AnalysisItem> createStageItems() {
@@ -80,11 +97,13 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
             Map<String, String> stages = infusionsoftCompositeSource.getLeadStageCache();
             Map<String, String> users = infusionsoftCompositeSource.getUserCache();
             DataSet leads = query("Lead", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(STAGE_NAME, USER_NAME,
-                    STATUS_NAME, OPPORTUNITY_COUNT));
+                    STATUS_NAME, OPPORTUNITY_COUNT, OPPORTUNITY_URL));
             for (IRow row : leads.getRows()) {
                 row.addValue(keys.get(STAGE_NAME), stages.get(row.getValue(keys.get(STAGE_ID)).toString()));
                 row.addValue(keys.get(USER_NAME), users.get(row.getValue(keys.get(USER_ID)).toString()));
                 row.addValue(keys.get(OPPORTUNITY_COUNT), 1);
+                row.addValue(keys.get(OPPORTUNITY_URL), infusionsoftCompositeSource.getUrl() + "/Opportunity/manageOpportunity.jsp?view=edit&id=" + row.getValue(keys.get(LEAD_ID)));
+                row.addValue(keys.get(OPPORTUNITY_AUTHOR), users.get(row.getValue(keys.get(OPPORTUNITY_AUTHOR)).toString()));
             }
             return leads;
         } catch (Exception e) {

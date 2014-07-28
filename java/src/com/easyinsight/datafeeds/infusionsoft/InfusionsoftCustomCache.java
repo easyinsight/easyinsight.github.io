@@ -55,6 +55,7 @@ public class InfusionsoftCustomCache {
                     int formID = (Integer) resultMap.get("FormId");
                     String name = (String) resultMap.get("Name");
                     String label = (String) resultMap.get("Label");
+                    System.out.println("name = " + name + " with formID = " + formID);
                     CustomField customField = new CustomField(id, dataType, name, label);
                     List<CustomField> customFields = customFieldMap.get(formID);
                     if (customFields == null) {

@@ -223,9 +223,13 @@ public class MultiFlatDateFilter extends FilterDefinition {
         jo.put("lookup", map);
         jo.put("values", values);
         jo.put("startLevel", minLevel);
-        jo.put("startLabel", startWrapper.getShortDisplay());
+        if (startWrapper != null) {
+            jo.put("startLabel", startWrapper.getShortDisplay());
+        }
         jo.put("endLevel", maxLevel);
-        jo.put("endLabel", endWrapper.getShortDisplay());
+        if (endWrapper != null) {
+            jo.put("endLabel", endWrapper.getShortDisplay());
+        }
 
         return jo;
     }

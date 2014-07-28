@@ -268,6 +268,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
             list.put("type", "gauge");
         }
         list.put("key", getUrlKey());
+        list.put("benchmark", getBenchmarkMeasure() != null ? true : null);
         list.put("url", "/app/gauge");
         list.put("max", maxValue);
         return list;

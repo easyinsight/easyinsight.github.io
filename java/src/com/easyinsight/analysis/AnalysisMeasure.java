@@ -113,6 +113,12 @@ public class AnalysisMeasure extends AnalysisItem {
         this.aggregation = aggregation;
     }
 
+    public AnalysisMeasure(String displayName, int aggregation, int formattingType) {
+        this(displayName);
+        setAggregation(aggregation);
+        setFormattingType(formattingType);
+    }
+
     public AnalysisMeasure(Key key, String displayName, int aggregation, boolean highIsGood, int formattingType) {
         this(key, displayName, aggregation, highIsGood);
         this.aggregation = aggregation;

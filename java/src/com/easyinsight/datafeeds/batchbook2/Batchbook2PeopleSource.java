@@ -6,6 +6,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -29,29 +30,23 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
     public static final String TAGS = "Person Tags";
     public static final String COMPANY_ID = "Person Company ID";
     public static final String COUNT = "Person Count";
+    public static final String PERSON_URL = "Person URL";
 
     public Batchbook2PeopleSource() {
         setFeedName("People");
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, ABOUT, FIRST_NAME, LAST_NAME, NAME, COUNT, TAGS, COMPANY_ID);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(ID)));
-        fields.add(new AnalysisDimension(keys.get(ABOUT)));
-        fields.add(new AnalysisDimension(keys.get(FIRST_NAME)));
-        fields.add(new AnalysisDimension(keys.get(COMPANY_ID)));
-        fields.add(new AnalysisDimension(keys.get(LAST_NAME)));
-        fields.add(new AnalysisDimension(keys.get(NAME)));
-        fields.add(new AnalysisList(keys.get(TAGS), true, ","));
-        fields.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
-        return fields;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(ABOUT, new AnalysisDimension());
+        fieldBuilder.addField(FIRST_NAME, new AnalysisDimension());
+        fieldBuilder.addField(LAST_NAME, new AnalysisDimension());
+        fieldBuilder.addField(NAME, new AnalysisDimension());
+        fieldBuilder.addField(TAGS, new AnalysisList());
+        fieldBuilder.addField(COMPANY_ID, new AnalysisDimension());
+        fieldBuilder.addField(PERSON_URL, new AnalysisDimension());
+        fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
 
     @Override
@@ -69,6 +64,7 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
             for (Person person : people) {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(ID), person.getId());
+                row.addValue(keys.get(PERSON_URL), batchbook2CompositeSource.getUrl() + "/contacts/" + person.getId());
                 for (Stuff stuff : person.getCompanies()) {
                     if ("true".equals(stuff.getPart2())) {
                         row.addValue(keys.get(COMPANY_ID), stuff.getPart1());
@@ -77,7 +73,15 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
                 row.addValue(keys.get(FIRST_NAME), person.getFirstName());
                 row.addValue(keys.get(LAST_NAME), person.getLastName());
                 row.addValue(keys.get(ABOUT), person.getAbout());
-                row.addValue(keys.get(NAME), person.getFirstName() + " " + person.getLastName());
+                String name;
+                if (person.getLastName() == null) {
+                    name = person.getFirstName();
+                } else if (person.getFirstName() == null) {
+                    name = person.getLastName();
+                } else {
+                    name = person.getFirstName() + " " + person.getLastName();
+                }
+                row.addValue(keys.get(NAME), name);
                 row.addValue(keys.get(COUNT), 1);
                 StringBuilder sb = new StringBuilder();
                 for (String tag : person.getTags()) {

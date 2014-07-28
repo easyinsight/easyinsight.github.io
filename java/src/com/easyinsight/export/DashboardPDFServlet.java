@@ -101,7 +101,11 @@ public class DashboardPDFServlet extends HttpServlet {
                 }
             }
             Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images);
+            int timezoneOffset = 0;
+            if (req.getParameter("timezoneOffset") != null) {
+                timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
+            }
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, timezoneOffset);
             String urlKey = new ExportService().htmlDashboardToPDFAlt(bytes, dashboard, req);
             JSONObject object = new JSONObject();
             object.put("urlKey", urlKey);

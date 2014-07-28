@@ -147,7 +147,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
                     row.addValue(keys.get(COUNT), 1);
                     row.addValue(keys.get(AMOUNT), getJSONValue(dealMap, "amount"));
                     row.addValue(keys.get(ARCHIVED), getJSONValue(dealMap, "archived"));
-                    row.addValue(keys.get(URL), getJSONValue(dealMap, "url"));
+                    row.addValue(keys.get(URL), batchbook2CompositeSource.getUrl() + "/filter-deals/deals/deal-" + id);
                     String dealWith = getJSONValue(dealMap, "deal_with_id");
                     row.addValue(keys.get(DEAL_COMPANY_ID), dealWith);
                 }
