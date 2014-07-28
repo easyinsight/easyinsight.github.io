@@ -471,7 +471,8 @@ public class ExportService {
     public void exportDashboardToPDFAlt(Dashboard dashboard, DashboardStackPositions positions, Map<String, PDFImageData> images) {
         SecurityUtil.authorizeDashboard(dashboard.getId());
         try {
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images);
+            // todo: fix
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0);
             EIConnection conn = Database.instance().getConnection();
             try {
                 toDatabase(dashboard.getName(), bytes, conn);
@@ -4436,7 +4437,6 @@ public class ExportService {
         }
 
         sb.append("</table>");
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
