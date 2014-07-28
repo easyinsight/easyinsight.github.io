@@ -357,8 +357,10 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         Map<String, SalesforceSObjectSource> map = new HashMap<String, SalesforceSObjectSource>();
 
         for (IServerDataSourceDefinition child : defaultChildren) {
-            SalesforceSObjectSource source = (SalesforceSObjectSource) child;
-            map.put(source.getSobjectName(), source);
+            if (child instanceof SalesforceSObjectSource) {
+                SalesforceSObjectSource source = (SalesforceSObjectSource) child;
+                map.put(source.getSobjectName(), source);
+            }
         }
 
         if (sobjectNodes == null) {
@@ -429,31 +431,32 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
             }
         }
 
-        for (SFConnection connection : connectionList) {
-            if (connection.source.equals(connection.target)) {
-                continue;
+        boolean connectionsExists = getConnections() != null && getConnections().size() > 0;
+        if (connectionsExists) {
+            for (SFConnection connection : connectionList) {
+                if (connection.source.equals(connection.target)) {
+                    continue;
+                }
+                SalesforceSObjectSource source = map.get(connection.source);
+                SalesforceSObjectSource target = map.get(connection.target);
+                if (source != null & target != null) {
+                    AnalysisItem sourceItem = source.findAnalysisItem(connection.sourceField);
+                    AnalysisItem targetItem = target.findAnalysisItem(connection.targetField);
+                    if (sourceItem == null) {
+                        System.out.println("Could not find field " + connection.sourceField + " on " + connection.source);
+                    }
+                    if (targetItem == null) {
+                        System.out.println("Could not find field " + connection.targetField + " on " + connection.target);
+                    }
+                    System.out.println("Connecting " + connection.source + " to " + connection.target);
+                    if (sourceItem != null && targetItem != null) {
+                        connections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceItem, targetItem,
+                                source.getFeedName(), target.getFeedName(), false, false, false, false));
+                    }
+                }
             }
-            SalesforceSObjectSource source = map.get(connection.source);
-            SalesforceSObjectSource target = map.get(connection.target);
-            if (source != null & target != null) {
-                AnalysisItem sourceItem = source.findAnalysisItem(connection.sourceField);
-                AnalysisItem targetItem = target.findAnalysisItem(connection.targetField);
-                if (sourceItem == null) {
-                    System.out.println("Could not find field " + connection.sourceField + " on " + connection.source);
-                }
-                if (targetItem == null) {
-                    System.out.println("Could not find field " + connection.targetField + " on " + connection.target);
-                }
-                System.out.println("Connecting " + connection.source + " to " + connection.target);
-                if (sourceItem != null && targetItem != null) {
-                    connections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceItem, targetItem,
-                            source.getFeedName(), target.getFeedName(), false, false, false, false));
-                }
-            }
+            setConnections(connections);
         }
-        //if (getConnections() == null || getConnections().size() == 0) {
-        setConnections(connections);
-        //}
         return defaultChildren;
     }
 
