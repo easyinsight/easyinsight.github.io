@@ -137,6 +137,11 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return getChildConnections();
+    }
+
+    @Override
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_PROJECTS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyProjectSource.OPPORTUNITY_ID),
             new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_ORGANIZATIONS, InsightlyOpportunitySource.LINKED_ORGANIZATION, InsightlyOrganisationSource.ORGANIZATION_ID),
@@ -147,6 +152,8 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
             new ChildConnection(FeedType.INSIGHTLY_CONTACTS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyContactSource.CONTACT_ID, InsightlyNoteLinkSource.CONTACT_ID),
             new ChildConnection(FeedType.INSIGHTLY_OPPORTUNITIES, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyOpportunitySource.OPPORTUNITY_ID, InsightlyNoteLinkSource.OPPORTUNITY_ID),
             new ChildConnection(FeedType.INSIGHTLY_PROJECTS, FeedType.INSIGHTLY_NOTE_LINKS, InsightlyProjectSource.PROJECT_ID, InsightlyNoteLinkSource.PROJECT_ID),
-            new ChildConnection(FeedType.INSIGHTLY_NOTE_LINKS, FeedType.INSIGHTLY_NOTES, InsightlyNoteLinkSource.NOTE_ID, InsightlyNoteSource.NOTE_ID));
+            new ChildConnection(FeedType.INSIGHTLY_NOTE_LINKS, FeedType.INSIGHTLY_NOTES, InsightlyNoteLinkSource.NOTE_ID, InsightlyNoteSource.NOTE_ID),
+            new ChildConnection(FeedType.INSIGHTLY_TASKS, FeedType.INSIGHTLY_CONTACTS, InsightlyTaskSource.CONTACT_ID, InsightlyContactSource.CONTACT_ID),
+            new ChildConnection(FeedType.INSIGHTLY_TASKS, FeedType.INSIGHTLY_ORGANIZATIONS, InsightlyTaskSource.ORGANIZATION_ID, InsightlyOrganisationSource.ORGANIZATION_ID));
     }
 }
