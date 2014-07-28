@@ -86,8 +86,8 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
             fieldBuilder.addField(CREATED, new AnalysisDateDimension());
             fieldBuilder.addField(UPDATED, new AnalysisDateDimension());
             fieldBuilder.addField(CLOSING_DATE, new AnalysisDateDimension());
-            fieldBuilder.addField(DOLLARS, new AnalysisMeasure());
-            fieldBuilder.addField(PROBABILITY, new AnalysisMeasure());
+            fieldBuilder.addField(DOLLARS, new AnalysisMeasure(FormattingConfiguration.CURRENCY));
+            fieldBuilder.addField(PROBABILITY, new AnalysisMeasure(FormattingConfiguration.PERCENTAGE));
             fieldBuilder.addField(COUNT, new AnalysisMeasure());
         } catch (Exception e) {
             throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), parentDefinition));
