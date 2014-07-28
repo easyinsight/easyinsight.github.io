@@ -77,7 +77,21 @@ public class Trend {
                     } else {
                         direction = KPIOutcome.NO_DIRECTION;
                     }
-                    int outcome = populateOutcome(KPI.GOOD, delta, newValue, 0);
+                    ReportFieldExtension extension = analysisMeasure.getReportFieldExtension();
+                    int highIsGood;
+                    if (extension != null && extension instanceof TrendReportFieldExtension) {
+                        TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) extension;
+                        if (trendReportFieldExtension.getHighLow() == 0) {
+                            highIsGood = KPI.GOOD;
+                        } else if (trendReportFieldExtension.getHighLow() == 1) {
+                            highIsGood = KPI.BAD;
+                        } else {
+                            highIsGood = 0;
+                        }
+                    } else {
+                        highIsGood = KPI.GOOD;
+                    }
+                    int outcome = populateOutcome(highIsGood, delta, newValue, 0);
                     trendOutcome.setDirection(direction);
                     trendOutcome.setOutcome(outcome);
                 }
