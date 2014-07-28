@@ -5,6 +5,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -25,26 +26,20 @@ public class Batchbook2CompanySource extends Batchbook2BaseSource {
     public static final String NAME = "Company Name";
     public static final String TAGS = "Company Tags";
     public static final String COUNT = "Company Count";
+    public static final String URL = "Company URL";
 
     public Batchbook2CompanySource() {
         setFeedName("Companies");
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, ABOUT, NAME, COUNT, TAGS);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(ID)));
-        fields.add(new AnalysisDimension(keys.get(ABOUT)));
-        fields.add(new AnalysisDimension(keys.get(NAME)));
-        fields.add(new AnalysisList(keys.get(TAGS), true, ","));
-        fields.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
-        return fields;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(ABOUT, new AnalysisDimension());
+        fieldBuilder.addField(NAME, new AnalysisDimension());
+        fieldBuilder.addField(URL, new AnalysisDimension());
+        fieldBuilder.addField(TAGS, new AnalysisList());
+        fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
 
     @Override
@@ -62,6 +57,7 @@ public class Batchbook2CompanySource extends Batchbook2BaseSource {
             for (Company company : companies) {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(ID), company.getId());
+                row.addValue(keys.get(URL), batchbook2CompositeSource.getUrl() + "/contacts/" + company.getId());
                 row.addValue(keys.get(ABOUT), company.getAbout());
                 row.addValue(keys.get(NAME), company.getName());
                 row.addValue(keys.get(COUNT), 1);
