@@ -2725,11 +2725,7 @@ public class DataService {
                             if (original != null && original.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                                 AnalysisDateDimension source = (AnalysisDateDimension) original;
                                 AnalysisDateDimension target = (AnalysisDateDimension) filter.getField();
-                                if (source.getDateLevel() == AnalysisDateDimension.DAY_LEVEL &&
-                                        (target.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL ||
-                                                target.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
-                                                target.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL ||
-                                                target.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL)) {
+                                if (dateValid(source) && dateValid(target)) {
                                     target.setDateLevel(source.getDateLevel());
                                 }
                             }
@@ -2898,5 +2894,13 @@ public class DataService {
             }
             return this;
         }
+    }
+
+    private static boolean dateValid(AnalysisDateDimension target) {
+        return (target.getDateLevel() == AnalysisDateDimension.DAY_LEVEL ||
+                target.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL ||
+                target.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL ||
+                target.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL ||
+                target.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL);
     }
 }
