@@ -10,6 +10,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,27 +50,31 @@ public class CampaignCache extends ConstantContactBaseSource {
                     String id = node.get("id").toString();
                     String name = node.get("name").toString();
                     String status = node.get("status").toString();
-                    Map xyz = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/"+id+"?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
-                    List clickthroughDetails = (List) xyz.get("click_through_details");
-                    List<CCCampaignLink> links = new ArrayList<CCCampaignLink>();
-                    if (clickthroughDetails != null) {
-                        for (Object clickObj : clickthroughDetails) {
-                            Map clickthroughMap = (Map) clickObj;
-                            String clickID = clickthroughMap.get("url_uid").toString();
-                            String url = clickthroughMap.get("url").toString();
-                            CCCampaignLink link = new CCCampaignLink();
-                            link.setId(clickID);
-                            link.setUrl(url);
-                            links.add(link);
+                    try {
+                        Map xyz = query("https://api.constantcontact.com/v2/emailmarketing/campaigns/"+id+"?api_key=" + ConstantContactCompositeSource.KEY, ccSource, client);
+                        List clickthroughDetails = (List) xyz.get("click_through_details");
+                        List<CCCampaignLink> links = new ArrayList<CCCampaignLink>();
+                        if (clickthroughDetails != null) {
+                            for (Object clickObj : clickthroughDetails) {
+                                Map clickthroughMap = (Map) clickObj;
+                                String clickID = clickthroughMap.get("url_uid").toString();
+                                String url = clickthroughMap.get("url").toString();
+                                CCCampaignLink link = new CCCampaignLink();
+                                link.setId(clickID);
+                                link.setUrl(url);
+                                links.add(link);
+                            }
                         }
+                        Date lastRun;
+                        if (node.get("modified_date") != null) {
+                            lastRun = DATE_FORMAT.parse(node.get("modified_date").toString());
+                        } else {
+                            lastRun = new Date(1);
+                        }
+                        this.campaigns.add(new Campaign(name, id, status, lastRun, null, links));
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    Date lastRun;
-                    if (node.get("modified_date") != null) {
-                        lastRun = DATE_FORMAT.parse(node.get("modified_date").toString());
-                    } else {
-                        lastRun = new Date(1);
-                    }
-                    this.campaigns.add(new Campaign(name, id, status, lastRun, null, links));
                 }
                 if (nextLink != null) {
                     try {
