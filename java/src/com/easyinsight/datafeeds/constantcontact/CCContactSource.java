@@ -238,6 +238,7 @@ public class CCContactSource extends ConstantContactBaseSource {
                     row.addValue(CONTACT_JOB_TITLE, node.get("job_title").toString());
                     row.addValue(CONTACT_HOME_PHONE, node.get("home_phone").toString());
                     row.addValue(CONTACT_WORK_PHONE, node.get("work_phone").toString());
+                    row.addValue(CONTACT_STATUS, node.get("status").toString());
                     List addresses = (List) node.get("addresses");
                     if (addresses != null && addresses.size() > 0) {
                         Map addressNode = (Map) addresses.get(0);
