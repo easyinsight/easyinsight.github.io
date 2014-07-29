@@ -107,8 +107,11 @@ public class FreshbooksExpenseSource extends FreshbooksBaseSource {
                         String vendor = queryField(invoice, "vendor/text()");
                         String amountString = queryField(invoice, "amount/text()");
                         String invoiceDateString = queryField(invoice, "date/text()");
-                        Date invoiceDate = df.parse(invoiceDateString);
                         IRow row = dataSet.createRow();
+                        if (invoiceDateString != null) {
+                            Date invoiceDate = df.parse(invoiceDateString);
+                            addValue(row, FreshbooksExpenseSource.DATE, invoiceDate, keys);
+                        }
                         addValue(row, FreshbooksExpenseSource.STAFF_ID, staffID, keys);
                         addValue(row, FreshbooksExpenseSource.EXPENSE_ID, expenseID, keys);
                         addValue(row, FreshbooksExpenseSource.CLIENT_ID, clientID, keys);
@@ -119,7 +122,7 @@ public class FreshbooksExpenseSource extends FreshbooksBaseSource {
                         if (amountString != null) {
                             addValue(row, FreshbooksExpenseSource.AMOUNT, Double.parseDouble(amountString), keys);
                         }
-                        addValue(row, FreshbooksExpenseSource.DATE, invoiceDate, keys);
+
                         addValue(row, FreshbooksExpenseSource.COUNT, 1, keys);
                     }
                 } else {
