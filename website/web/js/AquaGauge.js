@@ -136,7 +136,8 @@ function AquaGauge(target) {
 
                 x = getX(cvs.cX, textRadius, currentAngle);
                 y = getY(cvs.cY, textRadius, currentAngle);
-                drawValue(cvs, x, y, currentAngle, roundToDecimal(currentVal, 2), true, props);
+                var str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                drawValue(cvs, x, y, currentAngle, str, true, props);
             } else {
                 var x = getX(cvs.cX, minorRadius, currentAngle);
                 var y = getY(cvs.cY, minorRadius, currentAngle);
@@ -145,7 +146,8 @@ function AquaGauge(target) {
                 if (props.showMinorScaleValue) {
                     x = getX(cvs.cX, textMinorRadious, currentAngle);
                     y = getY(cvs.cY, textMinorRadious, currentAngle);
-                    drawValue(cvs, x, y, currentAngle, roundToDecimal(currentVal, 2), false, props);
+                    var str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                    drawValue(cvs, x, y, currentAngle, str, false, props);
                 }
             }
         }
@@ -405,6 +407,7 @@ function GaugeParams(cvs) {
     this.dialSubTitleTextColor = "#757575";    
     this.dialSubTitle = "By Ambalavanar";
     this.showGlossiness = true;
+    this.gaugePrecision = 0;
 
     //Scale
     this.minValue = 0.0;
@@ -425,7 +428,7 @@ function GaugeParams(cvs) {
 
     //Scale - Text
     this.dialScaleFont = "bold " + getRelVal(cvs, 17) + "px Helvetica Neue";
-    this.dialSubScaleFont = "bold " + getRelVal(cvs, 12) + "px Helvetica Neue";
+    this.dialSubScaleFont = "bold " + getRelVal(cvs, 8) + "px Helvetica Neue";
     this.dialScaleTextShadowColor = "#f1f1f1";
     this.dialScaleTextColor = "#EFEFEF";
     this.dialSubScaleTextColor = "#555555";

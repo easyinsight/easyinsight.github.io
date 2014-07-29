@@ -29,7 +29,7 @@ var startFullRenderPDF;
 function captureAndReturn(o) {
     var obj = o.report.report;
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
-        obj.metadata.type == "ytd_definition") {
+        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years") {
         return null;
     } else {
         var id = o.report.id;
@@ -263,7 +263,8 @@ var confirmRender = function (o, f) {
 var toPDF = function (o, dashboardID, drillthroughID) {
     var obj = o.report.report;
     var id = o.report.id;
-    if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form") {
+    if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
+        obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition") {
         var i;
         if ($("#" + id + " :visible").size() == 0) {
             o.rendered = false;
@@ -412,7 +413,7 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBulletChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
     } else if (obj.metadata.type == "gauge") {
-        $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: null }));
+        $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: obj.metadata.benchmark }));
         $.ajax($.extend(postData, {success: confirmRender(o, Gauge.getCallback(id + "ReportArea", id))}));
     } else {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
@@ -1307,7 +1308,7 @@ $(function () {
             fullRenderPDF(obj, dashboardID, drillthroughID, pdfData);
             var postData = {dashboardID: dashboardID, configuration : c, reportImages: pdfData};
             $.ajax ( {
-                url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID,
+                url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID + "&timezoneOffset=" + new Date().getTimezoneOffset(),
                 data: JSON.stringify(postData),
                 success: function(data) {
                     var url = data["urlKey"];
