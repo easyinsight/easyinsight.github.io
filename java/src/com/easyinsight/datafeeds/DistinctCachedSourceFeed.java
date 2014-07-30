@@ -7,9 +7,7 @@ import com.easyinsight.logging.LogClass;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -34,7 +32,14 @@ public class DistinctCachedSourceFeed extends Feed {
             PreparedStatement stmt = conn.prepareStatement("SELECT data_source_id FROM cached_addon_report_source WHERE report_id = ?");
             stmt.setLong(1, reportID);
             ResultSet rs = stmt.executeQuery();
-
+            Collection<FilterDefinition> filterCopy = new ArrayList<>(filters);
+            Iterator<FilterDefinition> iter = filterCopy.iterator();
+            while (iter.hasNext()) {
+                FilterDefinition filter = iter.next();
+                if (filter instanceof AnalysisItemFilterDefinition || filter instanceof MultiFieldFilterDefinition) {
+                    iter.remove();
+                }
+            }
             WSAnalysisDefinition report;
             try {
                 report = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
@@ -54,7 +59,7 @@ public class DistinctCachedSourceFeed extends Feed {
                 feed = cachedFeed;
             }
             stmt.close();
-            return feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, conn);
+            return feed.getAggregateDataSet(analysisItems, filterCopy, insightRequestMetadata, allAnalysisItems, adminMode, conn);
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

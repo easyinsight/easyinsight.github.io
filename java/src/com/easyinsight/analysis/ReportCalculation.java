@@ -316,11 +316,11 @@ public class ReportCalculation {
     }
 
     public void applyAfterReport(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
-                                 Map<String, List<AnalysisItem>> unqualifiedDisplayMap, IRow row, Map<String, UniqueKey> namespaceMap) throws RecognitionException {
+                                 Map<String, List<AnalysisItem>> unqualifiedDisplayMap, IRow row, Map<String, UniqueKey> namespaceMap,
+                                 CalculationMetadata calculationMetadata) throws RecognitionException {
 
-            CalculationMetadata calculationMetadata = new CalculationMetadata();
-            calculationMetadata.setReport(report);
-            calculationMetadata.setDataSourceFields(allFields);
+
+
             CalculationTreeNode calculationTreeNode;
             ICalculationTreeVisitor visitor;
             calculationTreeNode = CalculationHelper.createTree(code, false);

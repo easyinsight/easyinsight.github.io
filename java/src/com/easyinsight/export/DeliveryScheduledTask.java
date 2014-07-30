@@ -889,7 +889,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
                 return null;
             }
-            table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+            if (!exportProperties.isEmailed()) {
+                table = ExportService.crosstabReportToHTMLTableWithActualCSS(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+            } else {
+                table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+            }
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.TREND) {
             table = analysisDefinition.toExportHTML(conn, insightRequestMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||

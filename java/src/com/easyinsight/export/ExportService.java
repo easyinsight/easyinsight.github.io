@@ -508,7 +508,8 @@ public class ExportService {
             if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS || analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS || analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST ||
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
@@ -669,7 +670,7 @@ public class ExportService {
                         sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                     } else {
                         sb.append("<td style=\"" + headerCell + "\">");
-                        sb.append(crosstabValue.getValue());
+                        sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                     }
                     sb.append("</td>");
                 }
@@ -677,6 +678,85 @@ public class ExportService {
             sb.append("</tr>\r\n");
         }
         sb.append("</table>\r\n");
+        return sb.toString();
+    }
+
+    public static String crosstabReportToHTMLTableWithActualCSS(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
+        ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
+        WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
+        Crosstab crosstab = new Crosstab();
+        crosstab.crosstab(crosstabDefinition, dataSet);
+        CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
+        StringBuilder sb = new StringBuilder();
+        AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
+        String headerBackgroundColor = createHexString(crosstabDefinition.getHeaderBackgroundColor());
+        String headerTextColor = createHexString(crosstabDefinition.getHeaderTextColor());
+        String summaryBackgroundColor = createHexString(crosstabDefinition.getSummaryBackgroundColor());
+        String summaryTextColor = createHexString(crosstabDefinition.getSummaryTextColor());
+        String headerCell = "padding-left:10px;padding-right:10px;font-weight:bold;min-width:70px;background: " + headerBackgroundColor + ";color: " + headerTextColor + ";text-align:left";
+        String summaryCell = "padding-left:10px;padding-right:10px;font-weight:bold;min-width:70px;background: " + summaryBackgroundColor + ";color: " + summaryTextColor + ";text-align:right";
+        String dataCell = "text-align:right;padding-left:10px;padding-right:10px;min-width:70px";
+        if (includeTitle && analysisDefinition.getName() != null) {
+            sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(analysisDefinition.getName()).append("</h0>").append("</div>");
+        }
+        sb.append("<div style=\"width:100%;text-align:center\">");
+        sb.append("<table style=\"margin-left:auto;margin-right:auto;font-size:").append(analysisDefinition.getFontSize()).append("px;width:auto;min-width:0").append("\" class=\"table ").append(" table-bordered table-hover table-condensed\">");
+        boolean simple = crosstabDefinition.getMeasures().size() == 1 && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1;
+        int rowOffset = crosstabDefinition.getMeasures().size() > 1 ? 3 : 2;
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + rowOffset); j++) {
+            if (j < crosstabDefinition.getColumns().size()) {
+                sb.append("<tr>");
+            } else {
+                sb.append("<tr>");
+            }
+            int columnSize = ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1);
+            for (int i = 0; i < columnSize; i++) {
+                CrosstabValue crosstabValue = values[j][i];
+                if (crosstabValue == null) {
+                    if (simple) {
+                        boolean headerConditions = (i == 0) || (j == 0 && i == (columnSize - 1)) || (j == 1 && i == (columnSize - 1));
+                        if (headerConditions) {
+                            sb.append("<td style=\"" + headerCell + "\"></td>");
+                        } else if (i == crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() &&
+                                j == crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 1) {
+                            sb.append("<td style=\"" + summaryCell + "\"></td>");
+                        } else {
+                            //sb.append("<td style=\"" + headerCell + "\"></td>");
+                        }
+                    } else {
+                        if (i == 0 || j < 2) {
+                            sb.append("<td style=\"" + headerCell + "\"></td>");
+                        } else if (i == crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() &&
+                                j == crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 1) {
+                            sb.append("<td style=\"" + summaryCell + "\"></td>");
+                        } else {
+                            sb.append("<td style=\"" + headerCell + "\"></td>");
+                        }
+                    }
+                } else {
+                    if (crosstabValue.getHeader() == null) {
+                        if (crosstabValue.isSummaryValue()) {
+                            sb.append("<td style=\"" + summaryCell + "\">");
+                        } else {
+                            sb.append("<td style=\"" + dataCell + "\">");
+                        }
+                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                    } else {
+                        if (simple && j == 0) {
+                            sb.append("<td style=\"").append(headerCell).append("\"");
+                            sb.append(" colspan=\"").append(columnSize - 2).append("\">");
+                            sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                        } else {
+                            sb.append("<td style=\"" + headerCell + "\">");
+                            sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                        }
+                    }
+                    sb.append("</td>");
+                }
+            }
+            sb.append("</tr>\r\n");
+        }
+        sb.append("</table></div>\r\n");
         return sb.toString();
     }
 
@@ -796,6 +876,9 @@ public class ExportService {
             element = crosstabToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
             element = kpiReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND) {
+            WSTrendDefinition trendDefinition = (WSTrendDefinition) analysisDefinition;
+            element = trendDefinition.kpiReportToPDFTable(conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition instanceof WSTreeDefinition) {
             element = treeToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition instanceof WSForm) {
@@ -1190,18 +1273,49 @@ public class ExportService {
             for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1); i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 String cellValue;
+                BaseColor backgroundColor = new BaseColor(0xFFFFFF);
+                BaseColor textColor = new BaseColor(0x0);
+                int fontSize = 8;
+                int fontWeight = com.itextpdf.text.Font.NORMAL;
                 if (crosstabValue == null) {
+                    if (i == 0 || j < 2) {
+                        backgroundColor = DashboardPDF.fromColor(crosstabDefinition.getHeaderBackgroundColor());
+                        textColor = DashboardPDF.fromColor(crosstabDefinition.getHeaderTextColor());
+                    } else if (i == crosstab.getColumnSections().size() + crosstabDefinition.getRows().size() &&
+                            j == crosstab.getRowSections().size() + crosstabDefinition.getColumns().size() + 1) {
+                        backgroundColor = DashboardPDF.fromColor(crosstabDefinition.getSummaryBackgroundColor());
+                        textColor = DashboardPDF.fromColor(crosstabDefinition.getSummaryTextColor());
+                    } else {
+                        backgroundColor = DashboardPDF.fromColor(crosstabDefinition.getHeaderBackgroundColor());
+                        textColor = DashboardPDF.fromColor(crosstabDefinition.getHeaderTextColor());
+                    }
                     cellValue = "";
                 } else {
                     if (crosstabValue.getHeader() == null) {
-                        Value value = crosstabValue.getValue();
-                        cellValue = createValue(exportMetadata.dateFormat, measure, value, exportMetadata.cal,
-                                exportMetadata.currencySymbol, exportMetadata.locale,  false);
+                        if (crosstabValue.isSummaryValue()) {
+                            backgroundColor = DashboardPDF.fromColor(crosstabDefinition.getSummaryBackgroundColor());
+                            textColor = DashboardPDF.fromColor(crosstabDefinition.getSummaryTextColor());
+                            fontWeight = com.itextpdf.text.Font.BOLD;
+                            Value value = crosstabValue.getValue();
+                            cellValue = createValue(exportMetadata.dateFormat, measure, value, exportMetadata.cal,
+                                    exportMetadata.currencySymbol, exportMetadata.locale, false);
+                        } else {
+                            Value value = crosstabValue.getValue();
+                            cellValue = createValue(exportMetadata.dateFormat, measure, value, exportMetadata.cal,
+                                    exportMetadata.currencySymbol, exportMetadata.locale, false);
+                        }
                     } else {
-                        cellValue = crosstabValue.getValue().toString();
+                        backgroundColor = DashboardPDF.fromColor(crosstabDefinition.getHeaderBackgroundColor());
+                        textColor = DashboardPDF.fromColor(crosstabDefinition.getHeaderTextColor());
+                        fontWeight = com.itextpdf.text.Font.BOLD;
+                        cellValue = createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal,
+                                exportMetadata.currencySymbol, exportMetadata.locale, false);
                     }
                 }
-                PdfPCell cell = new PdfPCell(new Phrase(cellValue));
+                com.itextpdf.text.Font font = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, fontWeight, textColor);
+                PdfPCell cell = new PdfPCell(new Phrase(cellValue, font));
+                cell.setBackgroundColor(backgroundColor);
+                cell.setFixedHeight(fontSize + 5);
                 table.addCell(cell);
             }
         }

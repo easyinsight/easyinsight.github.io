@@ -7,11 +7,17 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
+import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.security.SecurityUtil;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
 import java.util.*;
+import java.util.List;
 
 /**
  * User: jamesboe
@@ -203,5 +209,68 @@ public class WSTrendDefinition extends WSKPIDefinition {
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");
         return list;
+    }
+
+    public Element kpiReportToPDFTable(EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                       ExportMetadata exportMetadata) throws SQLException, DocumentException {
+
+        TrendDataResults trendDataResults = DataService.getTrendDataResults(this, insightRequestMetadata, conn);
+        PdfPTable table = new PdfPTable(getMeasures().size());
+        for (TrendOutcome outcome : trendDataResults.getTrendOutcomes()) {
+            AnalysisMeasure analysisMeasure = outcome.getMeasure();
+            PdfPTable cellTable = new PdfPTable(1);
+            PdfPCell baseCell = new PdfPCell();
+            baseCell.setBorder(0);
+
+            Font labelFont = new Font(Font.FontFamily.HELVETICA, 12);
+            TextValueExtension e = (TextValueExtension) outcome.getNow().getValueExtension();
+            BaseColor color;
+            if (e != null) {
+                color = new BaseColor(e.getColor());
+            } else {
+                switch (outcome.getOutcome()) {
+                    case KPIOutcome.EXCEEDING_GOAL:
+                    case KPIOutcome.POSITIVE:
+                        color = new BaseColor(0x009900);
+                        break;
+                    case KPIOutcome.NEGATIVE:
+                        color = new BaseColor(0x990000);
+                        break;
+                    default:
+                        color = new BaseColor(0x0);
+                }
+            }
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 24, Font.NORMAL, color);
+            PdfPCell valueCell = new PdfPCell(new Phrase(ExportService.createValue(exportMetadata, analysisMeasure, outcome.getNow(), false), headerFont));
+            valueCell.setBorder(0);
+            valueCell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+            if (outcome.getHistorical() != null && outcome.getHistorical().type() != Value.EMPTY) {
+                double v = ((outcome.getNow().toDouble() / outcome.getHistorical().toDouble()) - 1.0) * 100.0;
+                FormattingConfiguration c = new FormattingConfiguration();
+                c.setFormattingType(FormattingConfiguration.PERCENTAGE);
+                String trend = FormattingConfiguration.createFormatter(c.getFormattingType()).format(v);
+                Font trendFont = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL, color);
+                PdfPCell trendCell = new PdfPCell(new Phrase(trend, trendFont));
+                trendCell.setVerticalAlignment(PdfPCell.ALIGN_MIDDLE);
+                trendCell.setBorder(0);
+                PdfPTable topTable = new PdfPTable(2);
+                topTable.addCell(valueCell);
+                topTable.addCell(trendCell);
+                PdfPCell ph = new PdfPCell(topTable);
+                ph.setBorder(0);
+                cellTable.addCell(ph);
+            } else {
+                cellTable.addCell(valueCell);
+            }
+
+            PdfPCell labelCell = new PdfPCell(new Phrase(analysisMeasure.toUnqualifiedDisplay(), labelFont));
+            labelCell.setBorder(0);
+            labelCell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
+
+            cellTable.addCell(labelCell);
+            baseCell.addElement(cellTable);
+            table.addCell(baseCell);
+        }
+        return table;
     }
 }

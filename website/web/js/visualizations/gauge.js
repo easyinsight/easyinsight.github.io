@@ -13,6 +13,7 @@ Gauge = {
                 var aGauge = Gauge.gauges[gaugeKey];
                 aGauge.props.maxValue = data["maxValue"];
                 aGauge.props.rangeSegments = data["colorBands"];
+                aGauge.props.gaugePrecision = data["gaugePrecision"];
                 aGauge.refresh(data["value"], data["formattedValue"]);
                 $('#benchmark' + gaugeKey).html(data['benchmark']);
             }, null, gaugeKey);

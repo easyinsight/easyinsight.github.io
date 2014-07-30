@@ -223,7 +223,7 @@ public class DashboardPDF {
         }
     }
 
-    private BaseColor fromColor(int colorNumber) {
+    public static BaseColor fromColor(int colorNumber) {
         Color color = new Color(colorNumber);
         return new BaseColor(color.getRed(), color.getGreen(), color.getBlue());
     }
@@ -302,6 +302,9 @@ public class DashboardPDF {
                 result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSCompareYearsDefinition) {
                 result = ExportService.compareYearsToPDF(report, conn, insightRequestMetadata);
+            } else if (report instanceof WSTrendDefinition) {
+                WSTrendDefinition trend = (WSTrendDefinition) report;
+                result = trend.kpiReportToPDFTable(conn, insightRequestMetadata, exportMetadata);
             } else if (report instanceof WSVerticalListDefinition) {
                 result = ExportService.verticalListToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition || report instanceof WSMap) {
@@ -400,7 +403,7 @@ public class DashboardPDF {
             }
         } else if (element instanceof DashboardReport) {
             DashboardReport dashboardReport = (DashboardReport) element;
-            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(dashboardReport.getReport().getId(), conn);
+            WSAnalysisDefinition report = AnalysisService.openAnalysisDefinitionWithConn(dashboardReport.getReport().getId(), conn);
             List<FilterDefinition> replaceFilters = new ArrayList<>(filters);
             if (report.getFilterDefinitions() != null) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
