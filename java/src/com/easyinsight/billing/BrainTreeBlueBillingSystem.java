@@ -6,13 +6,9 @@ import com.easyinsight.email.SendGridEmail;
 import com.easyinsight.export.InvoiceUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.AccountActivityStorage;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
 import com.easyinsight.users.User;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -278,47 +274,59 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
             }
             if (dc != null) {
                 for (Subscription ss : dc.getSubscriptions()) {
-                    for (Transaction t : ss.getTransactions()) {
-                        if (!transactions.contains(t.getId())) {
-                            System.out.println("\tCreating new record for transaction " + t.getId() + " with amount " +
-                                    t.getAmount().toString() + " for account " + account.getAccountID() + ".");
-                            AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
-                            info.setAccountId(account.getAccountID());
-                            info.setResponse(t.getProcessorAuthorizationCode());
-                            info.setResponseCode(t.getProcessorResponseCode());
-                            info.setResponseString(t.getProcessorResponseText());
-                            info.setTransactionID(t.getId());
-                            info.setSuccessful(t.getProcessorResponseCode().equals("1000"));
-                            info.setTransactionTime(t.getCreatedAt().getTime());
-                            info.setAmount(t.getAmount().toString());
-                            account.getBillingInfo().add(info);
-                            transactions.add(t.getId());
-                            String invoiceBody = info.toInvoiceText(account);
-                            if (account.isNewPricingModelInvoice()) {
-                                for (User user : account.getUsers()) {
-                                    if (user.isInvoiceRecipient()) {
-                                        System.out.println("Sending out invoice email to " + user.getEmail());
-                                        try {
-                                            byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
-                                            new SendGridEmail().sendAttachmentEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, bytes, "invoice.pdf", false, "support@easy-insight.com", "Easy Insight",
-                                                    "application/pdf");
-                                        } catch (Exception e) {
-                                            LogClass.error(e);
-                                        }
-                                    }
+                    ss.getTransactions().stream().filter(t -> !transactions.contains(t.getId())).forEach(t -> {
+                        System.out.println("\tCreating new record for transaction " + t.getId() + " with amount " +
+                                t.getAmount().toString() + " for account " + account.getAccountID() + ".");
+                        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+                        info.setAccountId(account.getAccountID());
+                        info.setResponse(t.getProcessorAuthorizationCode());
+                        info.setResponseCode(t.getProcessorResponseCode());
+                        info.setResponseString(t.getProcessorResponseText());
+                        info.setTransactionID(t.getId());
+                        info.setSuccessful(t.getProcessorResponseCode().equals("1000"));
+                        info.setTransactionTime(t.getCreatedAt().getTime());
+                        info.setAmount(t.getAmount().toString());
+                        account.getBillingInfo().add(info);
+                        transactions.add(t.getId());
+                        String invoiceBody = info.toInvoiceText(account);
+                        if (account.isNewPricingModelInvoice()) {
+                            account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
+                                try {
+                                    byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
+                                    new SendGridEmail().sendAttachmentEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, bytes, "invoice.pdf", false, "support@easy-insight.com", "Easy Insight",
+                                            "application/pdf");
+                                } catch (Exception e) {
+                                    LogClass.error(e);
                                 }
-                            }
+                            });
                         }
-                    }
+                    });
                     account.setNextBillAmount(ss.getNextBillingPeriodAmount().doubleValue());
                     account.setNextBillDate(ss.getNextBillingDate().getTime());
                     if (ss.getStatus() == Subscription.Status.ACTIVE) {
                         account.setAccountState(Account.ACTIVE);
                     } else if (ss.getStatus() == Subscription.Status.PAST_DUE) {
-                        //account.setAccountState(Account.BILLING_FAILED);
-
-                        // don't update to billing failed just yet, but do send error email
-
+                        account.setBillingFailures(account.getBillingFailures() + 1);
+                        if (account.getBillingFailures() == 1) {
+                            String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                            account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
+                                try {
+                                    new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
+                                } catch (Exception e) {
+                                    LogClass.error(e);
+                                }
+                            });
+                        } else if (account.getBillingFailures() == 7) {
+                            account.setAccountState(Account.BILLING_FAILED);
+                            String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
+                            account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
+                                try {
+                                    new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
+                                } catch (Exception e) {
+                                    LogClass.error(e);
+                                }
+                            });
+                        }
                     } else if (ss.getStatus() == Subscription.Status.EXPIRED) {
                         account.setAccountState(Account.BILLING_FAILED);
                     } else if (ss.getStatus() == Subscription.Status.CANCELED) {
