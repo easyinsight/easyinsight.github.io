@@ -149,7 +149,9 @@ public class Batchbook2CompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.BATCHBOOK2_COMPANIES, FeedType.BATCHBOOK2_PEOPLE, Batchbook2CompanySource.ID, Batchbook2PeopleSource.COMPANY_ID),
+        return Arrays.asList(
+                new ChildConnection(FeedType.BATCHBOOK2_DEALS, FeedType.BATCHBOOK2_COMPANIES, Batchbook2DealSource.DEAL_COMPANY_ID, Batchbook2CompanySource.ID),
+                new ChildConnection(FeedType.BATCHBOOK2_COMPANIES, FeedType.BATCHBOOK2_PEOPLE, Batchbook2CompanySource.ID, Batchbook2PeopleSource.COMPANY_ID),
                 new ChildConnection(FeedType.BATCHBOOK2_COMPANIES, FeedType.BATCHBOOK2_ADDRESSES, Batchbook2CompanySource.ID, Batchbook2AddressSource.COMPANY_ID),
                 new ChildConnection(FeedType.BATCHBOOK2_COMPANIES, FeedType.BATCHBOOK2_EMAILS, Batchbook2CompanySource.ID, Batchbook2EmailSource.COMPANY_ID),
                 new ChildConnection(FeedType.BATCHBOOK2_COMPANIES, FeedType.BATCHBOOK2_PHONES, Batchbook2CompanySource.ID, Batchbook2PhoneSource.COMPANY_ID),
