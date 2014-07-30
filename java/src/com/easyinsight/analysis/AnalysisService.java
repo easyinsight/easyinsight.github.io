@@ -2904,6 +2904,40 @@ public class AnalysisService {
         return new FilterSetStorage().getFilterSet(filterSetDescriptor.getId());
     }
 
+    private static FilterSet loadFilterSet(FilterSetDescriptor filterSetDescriptor, EIConnection conn) {
+        return new FilterSetStorage().getFilterSet(filterSetDescriptor.getId(), conn);
+    }
+
+    public static WSAnalysisDefinition openAnalysisDefinitionWithConn(long analysisID, EIConnection conn) {
+        try {
+            int role = SecurityUtil.authorizeInsight(analysisID);
+            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
+            if (role == Roles.SUBSCRIBER) {
+                report.setCanSave(false);
+            } else {
+                report.setCanSave(true);
+            }
+            try {
+                if (report.getFilterSets() != null) {
+                    for (FilterSetDescriptor filterSetDescriptor : report.getFilterSets()) {
+                        FilterSet filterSet = loadFilterSet(filterSetDescriptor, conn);
+                        for (FilterDefinition filterDefinition : filterSet.getFilters()) {
+                            FilterDefinition clone = filterDefinition.clone();
+                            clone.setFromFilterSet(filterSetDescriptor.getId());
+                            report.getFilterDefinitions().add(clone);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+            return report;
+        } catch (Exception e) {
+            LogClass.error(e);
+            return null;
+        }
+    }
+
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
         try {
             int role = SecurityUtil.authorizeInsight(analysisID);
