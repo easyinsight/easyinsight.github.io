@@ -118,6 +118,20 @@
         <DownloadJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
     </target>
 
+    <target name="cleanGZ">
+        <exec executable="bash" dir="../website">
+            <arg value="-c" />
+            <arg value="find . -name &quot;*.gz&quot; -print0 | xargs -0 rm" />
+        </exec>
+    </target>
+
+    <target name="compressFiles" depends="cleanGZ">
+        <exec executable="gzip" dir="../website">
+            <arg value="-rfkv9" />
+            <arg value="." />
+        </exec>
+    </target>
+
     <target name="updateDatabase">
         <UpdateDB/>
     </target>
