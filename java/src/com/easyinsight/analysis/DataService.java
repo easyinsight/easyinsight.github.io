@@ -469,6 +469,7 @@ public class DataService {
                     DateLevelWrapper wrapper = new DateLevelWrapper();
                     wrapper.setDateLevel(i);
                     Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
                     cal.set(Calendar.MONTH, i);
                     String name = cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
                     String shortName = cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
@@ -480,12 +481,14 @@ public class DataService {
                     DateLevelWrapper lastQuarter = new DateLevelWrapper();
                     lastQuarter.setDisplay("Last Full Month");
                     Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
                     cal.add(Calendar.MONTH, -1);
                     lastQuarter.setShortDisplay(cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()));
                     lastQuarter.setDateLevel(cal.get(Calendar.MONTH));
                     wrappers.add(0, lastQuarter);
                     DateLevelWrapper thisQuarter = new DateLevelWrapper();
                     thisQuarter.setDisplay("This Month");
+                    cal.set(Calendar.DAY_OF_MONTH, 1);
                     cal.add(Calendar.MONTH, 1);
                     thisQuarter.setShortDisplay(cal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()));
                     thisQuarter.setDateLevel(cal.get(Calendar.MONTH));
