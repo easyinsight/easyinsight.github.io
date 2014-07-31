@@ -68,6 +68,19 @@ public class BillingScheduledTask extends ScheduledTask {
         }
         selectStmt.close();
 
+        PreparedStatement closeStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_ID = ?");
+        PreparedStatement closeNewStmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM ACCOUNT WHERE ACCOUNT_STATE = ? AND NEXT_BILL_DATE <= ?");
+        closeNewStmt.setInt(1, Account.CLOSING);
+        closeNewStmt.setTimestamp(2, new java.sql.Timestamp(System.currentTimeMillis()));
+        ResultSet accountsClosing = closeNewStmt.executeQuery();
+        while (accountsClosing.next()) {
+            long accountID = accountsClosing.getLong(1);
+            closeStmt.setInt(1, Account.CLOSED);
+            closeStmt.setLong(2, accountID);
+            closeStmt.executeUpdate();
+        }
+        closeNewStmt.close();
+        closeStmt.close();
 
         PreparedStatement newAccountStmt = conn.prepareStatement("SELECT ACCOUNT_ID, BILLING_INFORMATION_GIVEN FROM ACCOUNT WHERE  " +
                 "ACCOUNT_STATE = ? AND PRICING_MODEL = ? AND " +
@@ -85,12 +98,13 @@ public class BillingScheduledTask extends ScheduledTask {
                 Session hibernateSession = Database.instance().createSession(conn);
                 try {
                     Account account = (Account) hibernateSession.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-                    if (account.getBillingMonthOfYear() != null && account.getBillingMonthOfYear() == 1)
+                    if (account.getBillingMonthOfYear() != null && account.getBillingMonthOfYear() == 1) {
                         new BrainTreeBlueBillingSystem().subscribeYearly(account, account.getAddonDesigners(),
                                 account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
-                    else
+                    } else {
                         new BrainTreeBlueBillingSystem().subscribeMonthly(account, account.getAddonDesigners(),
                                 account.getAddonStorageUnits(), account.getAddonSmallBizConnections());
+                    }
                 } finally {
                     hibernateSession.close();
                 }
