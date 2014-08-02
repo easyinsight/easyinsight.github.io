@@ -1490,7 +1490,7 @@
 
         private function onViewInHTML():void {
             if (analysisDefinition.analysisID == 0) {
-                if (!User.getInstance().accountReports && !analysisDefinition.canSave) {
+                if (User.getInstance().accountReports && !analysisDefinition.canSave) {
                     createNoDiscardPromptWindow("You have unsaved changes to this report.", function ():void {
                         navigateToURL(new URLRequest("/app/html/report/" + analysisDefinition.urlKey), "_blank");
                     });

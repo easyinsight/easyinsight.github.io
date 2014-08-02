@@ -245,7 +245,7 @@
             _definition.publiclyVisible = publiclyVisibleCheckbox.selected;
             _definition.publicWithKey = publicWithKeyCheckbox.selected;
             _definition.enableLocalStorage = localStorageCheckbox.selected;
-            dispatchEvent(new ReportPreferencesEvent(refreshNecessary));
+            dispatchEvent(new ReportPreferencesEvent(true));
             PopUpManager.removePopUp(this);
         }
 

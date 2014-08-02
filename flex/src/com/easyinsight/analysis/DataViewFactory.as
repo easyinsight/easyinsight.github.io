@@ -1,4 +1,8 @@
 package com.easyinsight.analysis {
+import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
+import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartDefinition;
+import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
+import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
 import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.summary.MultiSummaryDefinition;
 import com.easyinsight.customupload.ProblemDataEvent;
@@ -731,11 +735,28 @@ public class DataViewFactory extends VBox implements IRetrievable {
         copyPropertyIfExists(source, target, "defaultGroupingAlignnment");
         copyPropertyIfExists(source, target, "defaultDateAlignment");
         copyPropertyIfExists(source, target, "hideNoData");
+        if ((source is ColumnChartDefinition || source is BarChartDefinition) && (target is StackedColumnChartDefinition || target is StackedBarChartDefinition)) {
+            copyPropertyBetween(source, target, "labelPosition", "labelPosition", ["none", "none", "auto", "inside"]);
+        }
+        if ((target is ColumnChartDefinition || target is BarChartDefinition) && (source is StackedColumnChartDefinition || source is StackedBarChartDefinition)) {
+            copyPropertyBetween(source, target, "labelPosition", "labelPosition", ["none", "none", "inside", "auto"]);
+        }
     }
 
     private static function copyPropertyIfExists(source:AnalysisDefinition, target:AnalysisDefinition, property:String):void {
         if (source.hasOwnProperty(property) && target.hasOwnProperty(property)) {
             target[property] = source[property];
+        }
+    }
+
+    private static function copyPropertyBetween(source:AnalysisDefinition, target:AnalysisDefinition, sourceProperty:String, targetProperty:String,
+                values:Array):void {
+        if (source.hasOwnProperty(sourceProperty) && target.hasOwnProperty(targetProperty)) {
+            var sourceIndex:int = values.indexOf(source[sourceProperty]);
+            if (sourceIndex != -1) {
+                var targetIndex:int = sourceIndex + 1;
+                target[targetProperty] = values[targetIndex];
+            }
         }
     }
 
