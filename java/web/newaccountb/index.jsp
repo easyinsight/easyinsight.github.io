@@ -26,7 +26,7 @@
 
     <script type="text/javascript" src="/js/modernizr.js"></script>
     <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/jquery-ui.css" rel="stylesheet">
     <link href="/css/bootstrap-website.css" rel="stylesheet"/>
@@ -34,9 +34,9 @@
 
     <!-- lightbox -->
 
-    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
+    <script type="text/javascript" src="/js/jqvideobox.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
-    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.lightbox-0.5.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>

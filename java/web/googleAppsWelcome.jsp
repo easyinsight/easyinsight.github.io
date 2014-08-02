@@ -37,7 +37,7 @@
 
                 <input type="hidden" name='OWASP_CSRFTOKEN' value="<%= session.getAttribute("OWASP_CSRFTOKEN")%>" />
                 <div style="width:100%;text-align: center">
-                    <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                    <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                 </div>
                 <div style="width:100%;text-align: center">
                     <h1 style="padding-top:40px">Welcome to Easy Insight!</h1>

@@ -1,15 +1,18 @@
 <div class="container">
     <div class="row" ng-if="user.admin">
         <div class="col-md-12">
-            <div class="btn-toolbar pull-right topControlToolbar">
+            <div class="btn-toolbar topControlToolbar">
                 <div class="btn-group topControlBtnGroup">
-                    <a href="/a/account">Account Administration</a>
+                    <a ng-class="{'active_link': ('account.index' | routeSegmentStartsWith) }" href="/a/account">Account Administration</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="/a/account/users">Users</a>
+                    <a ng-class="{'active_link': ('account.user_base' | routeSegmentStartsWith) }" href="/a/account/users">Users</a>
                 </div>
                 <div class="btn-group topControlBtnGroup">
-                    <a href="/a/account/profile">Profile</a>
+                    <a ng-class="{'active_link': ('account.group_base' | routeSegmentStartsWith) }" href="/a/account/groups">Groups</a>
+                </div>
+                <div class="btn-group topControlBtnGroup">
+                    <a ng-class="{'active_link': ('account.profile' | routeSegmentStartsWith )}" href="/a/account/profile">Profile</a>
                 </div>
             </div>
         </div>

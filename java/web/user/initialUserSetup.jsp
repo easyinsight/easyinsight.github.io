@@ -45,7 +45,7 @@
                     <%
                     } else {
                     %>
-                    <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                    <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                     <%
                         }
                     %>

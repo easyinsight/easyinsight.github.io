@@ -1,6 +1,7 @@
 <project default="compileFlex" basedir="." name="Production">
     <property file="local.build.properties"/>
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
+    <taskdef resource="yuicompressor.tasks" classpath="${flex.sdk.dir}/ant/lib/yuicompressor-taskdef-1.0.jar"/>
 
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
     <taskdef name="StopInstances" classname="com.easyinsight.watchdog.updatetask.ShutdownAppInstanceTask"/>
@@ -29,6 +30,7 @@
     <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
 
     <taskdef name="migration" classname="com.easyinsight.database.ant.DatabaseMigrationTask"/>
+
 
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
 
@@ -124,8 +126,32 @@
             <arg value="find . -name &quot;*.gz&quot; -print0 | xargs -0 rm" />
         </exec>
     </target>
+    <target name="cleanMin">
+            <exec executable="bash" dir="../website">
+                <arg value="-c" />
+                <arg value="find . -name &quot;*.min.css&quot; -print0 | xargs -0 rm" />
+            </exec>
+            <exec executable="bash" dir="../website">
+                <arg value="-c" />
+                <arg value="find . -name &quot;*.min.js&quot; -print0 | xargs -0 rm" />
+            </exec>
+        </target>
+    <target name="minify" depends="cleanMin">
+        <yuicompressor todir="../website">
+                <fileset dir="../website" includes="**/**.css,**/**.js">
+                    <exclude name="**/**/angular.js" />
+                    <exclude name="**/**/route-segment.js" />
+                    <exclude name="**/**/intro.js" />
+                    <exclude name="**/**/outro.js" />
+                </fileset>
+                <mapper>
+                      <globmapper from="*.css" to="*.min.css"/>
+                      <globmapper from="*.js" to="*.min.js"/>
+                </mapper>
+        </yuicompressor>
+    </target>
 
-    <target name="compressFiles" depends="cleanGZ">
+    <target name="compressFiles" depends="minify,cleanGZ">
         <exec executable="gzip" dir="../website">
             <arg value="-rfkv9" />
             <arg value="." />

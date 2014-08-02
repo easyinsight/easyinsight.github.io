@@ -376,3 +376,7 @@ a {
     border-color: #cccccc !important;
     background-color: #ffffff !important;
 }
+
+.active_link {
+    text-decoration: underline;
+}

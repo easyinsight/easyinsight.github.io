@@ -91,7 +91,7 @@
         [Bindable]
         private var _additionalInfo:String;
 
-        [Embed(source='../../../../assets/logo2.PNG')]
+        [Embed(source='../../../../assets/logo2.png')]
         private var embeddedLoginImage:Class;
 
         [Bindable]
