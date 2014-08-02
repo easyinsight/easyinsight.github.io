@@ -75,7 +75,8 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
                 }
                 if (value.links != null) {
                     for (var linkKey:String in value.links) {
-                        endObject[linkKey + "_link"] = value.links[linkKey];
+                        var str:String = linkKey + "_link";
+                        endObject[str] = value.links[linkKey];
                     }
                 }
                 /*if (value.drillThroughValue != null) {

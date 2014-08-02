@@ -10,6 +10,7 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.WindowManagement;
         import com.easyinsight.dashboard.DashboardContextWindow;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.framework.PerspectiveInfo;
@@ -54,6 +55,7 @@
 
             window.x = this.x - 300;
             window.y = this.y + 10;
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this);
         }
 
@@ -74,7 +76,8 @@
                         PopUpManager.addPopUp(dashboardWindow, this, false);
                         PopUpUtil.centerPopUp(dashboardWindow);
                     } else {
-                        User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id})));
+                        User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.eiDescriptor.id,
+                            urlKey:event.eiDescriptor.urlKey})));
                     }
                 } else if (event.eiDescriptor.getType() == EIDescriptor.SCORECARD) {
                     User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.SCORECARD_VIEW, {scorecardID:event.eiDescriptor.id})));

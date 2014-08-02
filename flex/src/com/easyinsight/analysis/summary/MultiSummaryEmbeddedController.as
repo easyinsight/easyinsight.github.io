@@ -1,17 +1,13 @@
 /**
- * Created with IntelliJ IDEA.
- * User: jamesboe
- * Date: 3/20/13
- * Time: 1:36 PM
- * To change this template use File | Settings | File Templates.
+ * Created by jamesboe on 7/31/14.
  */
-package com.easyinsight.analysis.text {
+package com.easyinsight.analysis.summary {
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.analysis.service.EmbeddedHTMLDataService;
 
-public class TopoEmbeddedController implements IEmbeddedReportController {
-    public function TopoEmbeddedController() {
+public class MultiSummaryEmbeddedController implements IEmbeddedReportController {
+    public function MultiSummaryEmbeddedController() {
     }
 
     public function createEmbeddedView():EmbeddedViewFactory {

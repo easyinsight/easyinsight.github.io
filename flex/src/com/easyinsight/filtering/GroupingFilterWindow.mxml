@@ -1,39 +1,57 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
-        borderStyle="solid">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="8" dropShadowEnabled="true"
+        borderStyle="solid" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
 
         import mx.managers.PopUpManager;
 
+        private function onMouseDown(event:MouseEvent):void {
+            var point:Point = localToGlobal(new Point(event.localX, event.localY));
+            var result:Boolean = hitTestPoint(point.x, point.y);
+            if (!result) {
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        }
+
         private function addPatternMatch():void {
             var patternFilter:PatternFilter = new PatternFilter(_feedID, _item, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(patternFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addMultiValue():void {
             var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item, 0, null, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(multiValFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addNewMultiValue():void {
             var multiValFilter:NewMultiValueFilter = new NewMultiValueFilter(_feedID, _item, 0, 0, _report, null, null, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(multiValFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addComboBox():void {
             var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report, null, null, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(comboBoxFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addAutoComplete():void {
             var autoCompleteFilter:AutoCompleteFilter = new AutoCompleteFilter(_feedID, _item, 0, 0, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(autoCompleteFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
@@ -60,68 +78,68 @@
             _item = value;
         }
         ]]></mx:Script>
-    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10">
-        <mx:Label text="What type of filter do you want to create?" fontSize="16"/>
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10"
+             styleName="fallThroughFonts">
+        <mx:Label text="What type of filter do you want to create?" fontSize="16" color="#333333"/>
         <mx:HBox width="100%">
-            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addComboBox()" mouseChildren="false"
-                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+            <mx:VBox borderStyle="solid" click="addComboBox()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true"
                     id="singleValueBox"
                     rollOver="singleValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                    mouseOut="singleValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                <mx:Label text="Single Value" fontSize="14"/>
-                <mx:TextArea text="Restrict this field to a single value, with a dropdown box to choose the value"
-                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                        textAlign="center"/>
+                    mouseOut="singleValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                <mx:Label text="Single Value" fontSize="14" styleName="filterChoiceButtonText" fontWeight="bold"/>
+                <mx:Text text="Restrict this field to a single value, with a dropdown box to choose the value"
+                        selectable="false" width="200" height="50"
+                        textAlign="center" styleName="filterChoiceButtonText"/>
             </mx:VBox>
-            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addNewMultiValue()" mouseChildren="false"
-                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+            <mx:VBox borderStyle="solid" click="addNewMultiValue()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true"
                     id="multiValueBox"
                     rollOver="multiValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                    mouseOut="multiValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                <mx:Label text="Multi Value" fontSize="14"/>
-                <mx:TextArea text="Restrict this field to a set of multiple values"
-                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                        textAlign="center"/>
+                    mouseOut="multiValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                <mx:Label text="Multi Value" fontSize="14" styleName="filterChoiceButtonText" fontWeight="bold"/>
+                <mx:Text text="Restrict this field to a set of multiple values"
+                        selectable="false" width="200" height="50"
+                        textAlign="center" styleName="filterChoiceButtonText"/>
             </mx:VBox>
 
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
             <mx:Box>
-                <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1"/>
+                <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1" styleName="flatSaveButton"/>
             </mx:Box>
             <mx:HBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addPatternMatch()" mouseChildren="false"
-                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                <mx:VBox borderStyle="solid" click="addPatternMatch()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true"
                     id="patternValueBox"
                     rollOver="patternValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                    mouseOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                <mx:Label text="Pattern Match" fontSize="14"/>
-                <mx:TextArea text="Restrict this field by text patterns using wildcards or regular expressions"
-                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                        textAlign="center"/>
+                    mouseOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                <mx:Label text="Pattern Match" fontSize="14" styleName="filterChoiceButtonText" fontWeight="bold"/>
+                <mx:Text  text="Restrict this field by text patterns using wildcards or regular expressions"
+                        selectable="false" width="200" height="50"
+                        textAlign="center" styleName="filterChoiceButtonText"/>
                 </mx:VBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addAutoComplete()" mouseChildren="false"
-                        buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                <mx:VBox borderStyle="solid" click="addAutoComplete()" mouseChildren="false"
+                        buttonMode="true" useHandCursor="true"
                         id="autoCompleteBox"
                         rollOver="autoCompleteBox.setStyle('backgroundColor', 0xDDDDDD)"
-                        rollOut="autoCompleteBox.setStyle('backgroundColor', 0xFFFFFF)">
-                    <mx:Label text="Auto Completion" fontSize="14"/>
-                    <mx:TextArea text="Restrict this field to a single value, with an autocompletion text input"
-                            borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                            textAlign="center"/>
+                        rollOut="autoCompleteBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                    <mx:Label text="Auto Completion" fontSize="14" styleName="filterChoiceButtonText" fontWeight="bold"/>
+                    <mx:Text text="Restrict this field to a single value, with an autocompletion text input"
+                            selectable="false" width="200" height="50"
+                            textAlign="center" styleName="filterChoiceButtonText"/>
                 </mx:VBox>
-                <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addMultiValue()" mouseChildren="false"
-                         buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                <mx:VBox borderStyle="solid" click="addMultiValue()" mouseChildren="false"
+                         buttonMode="true" useHandCursor="true"
                          id="oldMultiValueBox"
                          rollOver="oldMultiValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                         mouseOut="oldMultiValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                    <mx:Label text="Multi Value" fontSize="14"/>
-                    <mx:TextArea text="Restrict this field to a set of multiple values (previous version)"
-                                 borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                 textAlign="center"/>
+                         mouseOut="oldMultiValueBox.setStyle('backgroundColor', 0xFFFFFF)"  styleName="filterChoiceButton">
+                    <mx:Label text="Multi Value" fontSize="14" styleName="filterChoiceButtonText" fontWeight="bold"/>
+                    <mx:Text  text="Restrict this field to a set of multiple values (previous version)"
+                                 selectable="false" width="200" height="50"
+                                 textAlign="center" styleName="filterChoiceButtonText"/>
                 </mx:VBox>
             </mx:HBox>
         </mx:ViewStack>
-        <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
     </mx:VBox>
 </mx:Canvas>

@@ -15,6 +15,7 @@ import com.easyinsight.analysis.gantt.GanttController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
+import com.easyinsight.analysis.summary.MultiSummaryController;
 import com.easyinsight.analysis.summary.SummaryController;
 import com.easyinsight.analysis.text.TextController;
 import com.easyinsight.analysis.text.TopoMapController;
@@ -126,6 +127,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.TOPO:
                 controller = TopoMapController;
+                break;
+            case AnalysisDefinition.MULTI_SUMMARY:
+                controller = MultiSummaryController;
                 break;
         }
         return controller;

@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.WindowManagement;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -177,6 +178,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         window.dataSourceID = dashboardEditorMetadata.dataSourceID;
         window.allFields = dashboardEditorMetadata.allFields;
         window.addEventListener(GridDimensionEvent.GRID_DIMENSION, onDimensions, false, 0, true);
+        WindowManagement.manager.addWindow(window);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);
     }

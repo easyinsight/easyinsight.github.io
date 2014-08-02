@@ -21,6 +21,7 @@ import java.util.*;
 public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
     public static final String ID = "ID";
+    public static final String DISPLAY_ID = "Display ID";
     public static final String DESCRIPTION = "Description";
     public static final String REQUESTER_NAME ="Requester";
     public static final String DUE_BY = "Due By";
@@ -45,8 +46,11 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         setFeedName("Tickets");
     }
 
+    private transient List<String> customFields;
+
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(DISPLAY_ID, new AnalysisDimension());
         fieldBuilder.addField(DESCRIPTION, new AnalysisText());
         fieldBuilder.addField(STATUS, new AnalysisDimension());
         fieldBuilder.addField(PRIORITY, new AnalysisDimension());
@@ -65,6 +69,30 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
+
+        customFields = new ArrayList<>();
+
+        FreshdeskCompositeSource freshdeskCompositeSource = (FreshdeskCompositeSource) parentDefinition;
+        HttpClient client = getHttpClient(freshdeskCompositeSource.getFreshdeskApiKey());
+        List<Map> ticketFields = runRestRequestForListNoHelp("ticket_fields.json", client, freshdeskCompositeSource);
+        for (Map ticketField : ticketFields) {
+            Map ticketFieldData = (Map) ticketField.get("ticket_field");
+            String fieldType = ticketFieldData.get("field_type").toString();
+            String label = ticketFieldData.get("label").toString();
+            String name = ticketFieldData.get("name").toString();
+            if (fieldType.startsWith("custom")) {
+                if ("custom_paragraph".equals(fieldType)) {
+                    AnalysisText text = new AnalysisText();
+                    text.setDisplayName(label);
+                    fieldBuilder.addField(name, text);
+                } else if ("custom_number".equals(fieldType)) {
+                    fieldBuilder.addField(name, new AnalysisMeasure(label));
+                } else {
+                    fieldBuilder.addField(name, new AnalysisDimension(label));
+                }
+                customFields.add(name);
+            }
+        }
     }
 
     @Override
@@ -96,6 +124,11 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
     private void createTicket(Map<String, Key> keys, Map map, String id, IRow row) {
         row.addValue(keys.get(ID), id);
+
+        row.addValue(keys.get(DISPLAY_ID), getJSONValue(map, "display_id"));
+        if ("31".equals(getJSONValue(map, "display_id"))) {
+            System.out.println("...");
+        }
         row.addValue(keys.get(DESCRIPTION), getJSONValue(map, "description"));
         row.addValue(keys.get(REQUESTER_NAME), getJSONValue(map, "requester_name"));
         row.addValue(keys.get(DUE_BY), getDate(map, "due_by"));
@@ -113,6 +146,12 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         row.addValue(keys.get(RESPONDER_NAME), getJSONValue(map, "responder_name"));
         row.addValue(keys.get(SPAM), getValue(map, "spam"));
         row.addValue(keys.get(COUNT), 1);
+        Map customFieldMap = (Map) map.get("custom_field");
+        if (customFieldMap != null) {
+            for (String customField : customFields) {
+                row.addValue(keys.get(customField), getJSONValue(customFieldMap, customField));
+            }
+        }
     }
 
     @Override

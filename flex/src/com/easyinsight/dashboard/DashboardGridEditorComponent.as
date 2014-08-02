@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.WindowManagement;
 import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.util.PopUpUtil;
 
@@ -226,6 +227,7 @@ public class DashboardGridEditorComponent extends Grid implements IDashboardEdit
         var window:GridEditWindow = new GridEditWindow();
         window.dashboardElement = dashboardGrid;
         window.addEventListener(Event.CHANGE, onChange, false, 0, true);
+        WindowManagement.manager.addWindow(window);
         PopUpManager.addPopUp(window, this, true);
     }
 

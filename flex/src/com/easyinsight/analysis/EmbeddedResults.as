@@ -12,6 +12,7 @@ public class EmbeddedResults {
     public var dataSourceInfo:DataSourceInfo;
     public var reportFault:ReportFault;
     public var additionalProperties:Object;
+    public var cacheForHTMLKey:String;
 
     public function EmbeddedResults() {
     }

@@ -1,6 +1,7 @@
 package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSMultiSummaryDefinition;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
 import com.easyinsight.config.ConfigLoader;
@@ -878,6 +879,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
             } else {
                 table = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
             }
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
+            WSMultiSummaryDefinition multiSummaryDefinition = (WSMultiSummaryDefinition) analysisDefinition;
+            table = multiSummaryDefinition.toExportHTML(conn, insightRequestMetadata, exportProperties.isEmailed());
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
             if (!exportProperties.isEmailed()) {
                 table = ExportService.compareYearsToHTMLTableWithActualCSS(analysisDefinition, conn, insightRequestMetadata, includeTitle);
@@ -895,7 +899,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
             }
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.TREND) {
-            table = analysisDefinition.toExportHTML(conn, insightRequestMetadata);
+            table = analysisDefinition.toExportHTML(conn, insightRequestMetadata, true);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
                 analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
             if (exportProperties.isEmailed()) {

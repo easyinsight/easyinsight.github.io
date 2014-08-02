@@ -1,10 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.kpi.KPIOutcome;
@@ -85,7 +83,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
     }
 
     @Override
-    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
         StringBuilder sb = new StringBuilder();
 
         try {

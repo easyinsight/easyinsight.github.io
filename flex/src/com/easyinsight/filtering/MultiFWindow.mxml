@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.events.ListEvent;
@@ -13,6 +13,12 @@
 
         public function set values(values:ArrayCollection):void {
             _values = values;
+        }
+
+        private function onCreation():void {
+            if (_values == null || _values.length == 0) {
+                dataService.getMultiDateOptions.send(_dateFilter);
+            }
         }
 
         [Bindable]
@@ -69,14 +75,21 @@
 
         [Bindable]
         private var index:int;
+
+        private function gotLevels():void {
+            _values = dataService.getMultiDateOptions.lastResult as ArrayCollection;
+        }
         ]]></mx:Script>
+    <mx:RemoteObject id="dataService" destination="data">
+        <mx:method name="getMultiDateOptions" result="gotLevels()"/>
+    </mx:RemoteObject>
     <mx:ViewStack selectedIndex="{index}" resizeToContent="true">
         <mx:VBox>
-            <mx:Label text="Please click on a start month." fontSize="14"/>
+            <mx:Label text="Please click on a start value." fontSize="14"/>
             <mx:List rowCount="12" labelField="display" id="startList" itemClick="startItem(event)" dataProvider="{_values}" width="100%"/>
         </mx:VBox>
         <mx:VBox>
-            <mx:Label text="Please click on an end month." fontSize="14"/>
+            <mx:Label text="Please click on an end value." fontSize="14"/>
             <mx:List rowCount="12" labelField="display" id="endList" itemClick="endItem(event)" dataProvider="{endValues}" width="100%"/>
         </mx:VBox>
     </mx:ViewStack>

@@ -6,6 +6,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import com.easyinsight.logging.LogClass;
 import net.minidev.json.parser.JSONParser;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
@@ -83,6 +84,31 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
 
     protected static List runRestRequestForList(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
         String url = parentDefinition.generateURL(parentDefinition.getUrl(), "freshdesk.com") + "/helpdesk/";
+        HttpMethod restMethod = new GetMethod(url + path);
+        restMethod.setRequestHeader("Accept", "application/json");
+        restMethod.setRequestHeader("Content-Type", "application/json");
+
+        try {
+            client.executeMethod(restMethod);
+            if (restMethod.getStatusCode() == 404) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
+            } else if (restMethod.getStatusCode() == 401) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
+            }
+            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            if (!(o instanceof List)) {
+                LogClass.error(o.toString());
+            }
+            return (List) o;
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected static List runRestRequestForListNoHelp(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
+        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "freshdesk.com") + "/";
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");

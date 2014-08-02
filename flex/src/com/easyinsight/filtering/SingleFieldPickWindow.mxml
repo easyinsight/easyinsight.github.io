@@ -192,7 +192,8 @@
         public function makeUpdates():FilterDefinition {
             var valueFilter:AnalysisItemFilterDefinition = _filterValueDefinition as AnalysisItemFilterDefinition;
             //var a:Array = realValues.toArray().concat();
-
+            valueFilter.selectedFQN = null;
+            valueFilter.selectedName = null;
             valueFilter.targetItem = FilterStringRadioButton(radioGroup.selection.parent).data.analysisItem;
             /*for each (var o:Object in a) {
              if (o.selected) {

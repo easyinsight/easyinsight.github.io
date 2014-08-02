@@ -27,8 +27,8 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:ListDefinition;
 
-    [Embed(source="../../../../../assets/find.png")]
-    public var findIcon:Class;
+    /*[Embed(source="../../../../../assets/find.png")]
+    public var findIcon:Class;*/
 
     [Embed(source="../../../../../assets/tables_x16.png")]
     public var lookupTableIcon:Class;
@@ -51,11 +51,11 @@ public class ListControlBar extends ReportControlBar implements IReportControlBa
             lookupTableButton.addEventListener(MouseEvent.CLICK, editLookupTables);
             addChild(lookupTableButton);
         }
-        var findButton:Button = new Button();
+        /*var findButton:Button = new Button();
         findButton.setStyle("icon", findIcon);
         findButton.toolTip = "Search Keyword...";
         findButton.addEventListener(MouseEvent.CLICK, startFind);
-        addChild(findButton);
+        addChild(findButton);*/
         listViewGrouping.report = listDefinition;
         addDropAreaGrouping(listViewGrouping);
         var columns:ArrayCollection = listDefinition.columns;

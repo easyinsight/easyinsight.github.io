@@ -11,7 +11,7 @@
                 filterValueDefinition = new FilterValueDefinition();
                 filterValueDefinition.applyBeforeAggregation = _filterDefinition.applyBeforeAggregation;
                 filterValueDefinition.field = _filterDefinition.field;
-                filterValueDefinition.singleValue = true;
+                filterValueDefinition.singleValue = false;
                 filterValueDefinition.autoComplete = false;
                 filterValueDefinition.newType = true;
                 _filterDefinition = filterValueDefinition;

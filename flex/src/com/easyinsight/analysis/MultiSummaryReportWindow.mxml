@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="10" paddingLeft="10"
+        paddingRight="10" paddingTop="10">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.summary.MultiSummaryDefinition;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var addonReports:ArrayCollection;
+
+        private var removedReports:ArrayCollection = new ArrayCollection();
+
+        private function save():void {
+            var newAddons:ArrayCollection = new ArrayCollection();
+            for each (var addon:InsightDescriptor in addonReports) {
+                if (report.addonReports.getItemIndex(addon) == -1) {
+                    newAddons.addItem(addon);
+                }
+            }
+            report.reports = addonReports;
+            dispatchEvent(new AddonReportEvent(AddonReportEvent.NEW_ADDONS, null, newAddons, removedReports));
+            PopUpManager.removePopUp(this);
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            addonReports = new ArrayCollection(report.reports.toArray());
+        }
+
+        public var report:MultiSummaryDefinition;
+
+        private function addReport():void {
+            var window:AddonReportChoiceWindow = new AddonReportChoiceWindow();
+            window.dataSourceID = report.dataFeedID;
+            window.reportFrom = report.analysisID;
+            window.addEventListener(AddonReportEvent.ADD_REPORT, onAdd);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAdd(event:AddonReportEvent):void {
+            addonReports.addItem(event.report);
+        }
+
+        private function deleteSelected():void {
+            for each (var activity:InsightDescriptor in addonReports) {
+                if (activity.selected) {
+                    addonReports.removeItemAt(addonReports.getItemIndex(activity));
+                    removedReports.addItem(activity);
+                }
+            }
+        }
+        ]]></mx:Script>
+    <mx:Text width="330" text="You can add the fields of another report to this report through this window. For example, you might have a report with a set of complex calculations. Rather than trying to replicate the same calculations inside this report, you can refer directly to the other report and reuse the same fields."/>
+    <mx:HBox>
+        <util:SaveButton label="Add Report..." click="addReport()" fontSize="12"/>
+        <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{addonReports}">
+        <mx:columns>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false" fontSize="12"/>
+            <mx:DataGridColumn headerText="Report" dataField="reportName" width="300" fontSize="12"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EISlimWindow>

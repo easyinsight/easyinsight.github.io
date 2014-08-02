@@ -7,6 +7,7 @@
  */
 package com.easyinsight.framework {
 
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.charts.bubble.BubbleChartModule;
 import com.easyinsight.analysis.charts.plot.PlotChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartModule;
@@ -22,8 +23,9 @@ import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gantt.GanttModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
 import com.easyinsight.analysis.heatmap.HeatMapModule;
-import com.easyinsight.analysis.heatmap.TopoMapModule;
+import com.easyinsight.analysis.heatmap.HTMLIFrameModule;
 import com.easyinsight.analysis.list.ListModule;
+import com.easyinsight.analysis.summary.MultiSummaryModule;
 import com.easyinsight.analysis.summary.NewSummaryModule;
 import com.easyinsight.analysis.text.TextModule;
 import com.easyinsight.analysis.tree.TreeModule;
@@ -43,17 +45,22 @@ import mx.core.UIComponent;
 public class ReportModuleLoader extends EventDispatcher {
 
     private var moduleName:String;
+    private var report:AnalysisDefinition;
 
     public function ReportModuleLoader() {
     }
 
     public function loadReportRenderer(_reportRendererModule:String, container:Container):void {
         moduleName = _reportRendererModule;
+        report = null;
         dispatchEvent(new Event("moduleLoaded"));
     }
 
     public function create():Object {
         var module:UIComponent;
+        if (report != null && report.useHTMLInFlash()) {
+            return new HTMLIFrameModule();
+        }
         switch (moduleName) {
             case "ListModule.swf":
                 module = new ListModule();
@@ -143,7 +150,10 @@ public class ReportModuleLoader extends EventDispatcher {
                 module = new TextModule();
                 break;
             case "TopoModule.swf":
-                module = new TopoMapModule();
+                module = new HTMLIFrameModule();
+                break;
+            case "MultiSummaryModule.swf":
+                module = new MultiSummaryModule();
                 break;
         }
         return module;

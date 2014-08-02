@@ -43,6 +43,7 @@ import mx.collections.ArrayCollection;
         public static const SUMMARY:int = 40;
         public static const TEXT:int = 41;
         public static const TOPO:int = 42;
+        public static const MULTI_SUMMARY:int = 43;
 
 		public var dataFeedID:int;
         public var urlKey:String;
@@ -108,6 +109,7 @@ import mx.collections.ArrayCollection;
     public var filterSets:ArrayCollection;
     public var exportString:String;
     public var dayAggregation:Boolean;
+    public var htmlInFlash:Boolean;
 
     public var fieldEvents:Object;
     public var filterEvents:Object;
@@ -123,6 +125,10 @@ import mx.collections.ArrayCollection;
 
     public function renderConfig():void {
 
+    }
+
+    public function useHTMLInFlash():Boolean {
+        return htmlInFlash;
     }
 
         public function newFilters(filterDefinitions:ArrayCollection):Object {

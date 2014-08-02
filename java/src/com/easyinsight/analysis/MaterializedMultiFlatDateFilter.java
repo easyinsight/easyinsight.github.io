@@ -5,6 +5,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
     private Set<Integer> months;
     private Set<String> valids;
     private int level;
+    private SimpleDateFormat sdf;
 
     public MaterializedMultiFlatDateFilter(AnalysisItem key, Collection<DateLevelWrapper> wrappers, int level) {
         super(key);
@@ -29,10 +31,18 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
             for (DateLevelWrapper wrapper : wrappers) {
                 months.add(wrapper.getDateLevel());
             }
-        } else if (level == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+        } else if (level == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL || level == AnalysisDateDimension.WEEK_LEVEL ||
+                level == AnalysisDateDimension.MONTH_LEVEL || level == AnalysisDateDimension.YEAR_LEVEL) {
             valids = new HashSet<>();
             for (DateLevelWrapper wrapper : wrappers) {
                 valids.add(wrapper.getShortDisplay());
+            }
+            if (level == AnalysisDateDimension.YEAR_LEVEL) {
+                sdf = new SimpleDateFormat("yyyy");
+            } else if (level == AnalysisDateDimension.MONTH_LEVEL) {
+                sdf = new SimpleDateFormat("yyyy-MM");
+            } else if (level == AnalysisDateDimension.WEEK_LEVEL) {
+                sdf = new SimpleDateFormat("yyyy-ww");
             }
         }
     }
@@ -66,6 +76,17 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
                 /*String quarter = String.valueOf(value.toString().charAt(1));
                 String year = value.toString().substring(value.toString().length() - 4);*/
                 String result = "Q" + quarter + "-" + year;
+                if (valids.contains(result)) {
+                    return true;
+                }
+            }
+        } else if (level == AnalysisDateDimension.YEAR_LEVEL || level == AnalysisDateDimension.MONTH_LEVEL ||
+                level == AnalysisDateDimension.WEEK_LEVEL) {
+            DateValue dateValue = findDateValue(value);
+            if (dateValue != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dateValue.getDate());
+                String result = sdf.format(cal.getTime());
                 if (valids.contains(result)) {
                     return true;
                 }

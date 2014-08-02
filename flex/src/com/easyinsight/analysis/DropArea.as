@@ -1,5 +1,6 @@
 package com.easyinsight.analysis
 {
+import com.easyinsight.WindowManagement;
 import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.skin.ImageConstants;
 
@@ -167,6 +168,7 @@ public class DropArea extends HBox
             analysisItemEditor.x = g.x;
             analysisItemEditor.y = g.y;
         }
+        WindowManagement.manager.addWindow(analysisItemEditor);
         PopUpManager.addPopUp(analysisItemEditor, UIComponent(Application.application));
         dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_OPENED, analysisItemEditor));
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
