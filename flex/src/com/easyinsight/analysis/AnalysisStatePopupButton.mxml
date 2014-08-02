@@ -71,7 +71,6 @@
 
         private function setLabelXML(parent:XML, type:int):void {
             for each (var xmlNode:XML in parent.children()) {
-                //Alert.show(xmlNode.@label + " - " + getQualifiedClassName(xmlNode));
                 if (xmlNode.@type == type) {
                     reportLabel = xmlNode.@label;
                 } else {
@@ -81,19 +80,13 @@
         }
 
         private function setLabel(parent:XMLList, type:int):void {
-            //var nodes:XMLList = parent.children();
             for each (var xmlNode:XML in parent) {
-                //Alert.show(xmlNode.@label + " - " + getQualifiedClassName(xmlNode));
                 if (xmlNode.@type == type) {
                     reportLabel = xmlNode.@label;
                 } else {
                     setLabelXML(xmlNode, type);
                 }
             }
-            /*for (var i:int = 0; i < nodes.length(); i++) {
-                var node:XMLList = XMLList(nodes[i]);
-
-            }*/
         }
 
         public function openPopup():void {
@@ -107,6 +100,7 @@
         	<node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
         	<node label="Tree" type="{AnalysisDefinition.TREE}"/>
         	<node label="Summary" type="{AnalysisDefinition.SUMMARY}"/>
+            <node label="Multi Summary" type="{AnalysisDefinition.MULTI_SUMMARY}"/>
         </node>
         <node label="Chart" icon="">
             <node label="Column" type="{AnalysisDefinition.COLUMN}"/>
@@ -143,6 +137,7 @@
             <node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
             <node label="Tree" type="{AnalysisDefinition.TREE}"/>
             <node label="Summary" type="{AnalysisDefinition.SUMMARY}"/>
+            <node label="Multi Summary" type="{AnalysisDefinition.MULTI_SUMMARY}"/>
         </node>
         <node label="Chart" icon="">
             <node label="Column" type="{AnalysisDefinition.COLUMN}"/>

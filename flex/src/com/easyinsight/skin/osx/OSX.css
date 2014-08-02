@@ -211,7 +211,7 @@ ToggleButtonBar {
 }
 
 .grayButton {
-    cornerRadius: 5;
+    cornerRadius: 2;
     highlightAlphas: 0.5, 0.1;
     fillColors: #333333, #333333, #333333, #333333;
     fillAlphas: 1, 1, 1, 1;
@@ -220,7 +220,7 @@ ToggleButtonBar {
     textSelectedColor: #dddddd;
     borderColor: #333333;
     dropShadow: true;
-    shadowDistance: 3;
+    shadowDistance: 0;
     fontSize: 11;
     fontWeight: normal;
 }
@@ -320,6 +320,25 @@ SaveButton {
     shadowDistance: 3;
     fontSize: 14;
     fontWeight: normal;
+}
+
+.flatSaveButton {
+    cornerRadius: 5;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #333333, #333333, #333333, #333333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
 }
 
 CancelButton {
@@ -745,4 +764,30 @@ TransformContainer {
     font-family: "Helvetica Neue", "Helvetica";
     color: #000088;
     font-size: 14px;
+}
+
+.propTabBarStyle {
+    tabHeight: 28;
+    cornerRadius: 0;
+    horizontalGap: 0;
+    horizontalAlign: right;
+    backgroundAlpha: 1;
+    borderStyle: solid;
+    borderThickness: 1;
+    dropShadowEnabled: false;
+}
+
+.filterChoiceButton {
+    borderColor: #000000;
+    paddingTop: 8px;
+    paddingBottom: 8px;
+    horizontalAlign: center;
+    dropShadowEnabled: false;
+    cornerRadius: 2px;
+    borderThickness: 1px;
+    backgroundColor: #FFFFFF;
+}
+
+.filterChoiceButtonText {
+    color: #333333;
 }

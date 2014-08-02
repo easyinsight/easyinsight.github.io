@@ -1730,10 +1730,7 @@
                         <mx:Label text="{reportName}" includeInLayout="{reportName != null}" maxWidth="275"/>
                     </mx:HBox>
                     <mx:Spacer width="100%"/>
-                    <!--<util:SaveButton label="Run Report" click="runReport()" fontSize="12" id="runReportButton"/>
-                    <mx:Spacer width="100%" id="runReportSpacer"/>-->
-
-                    <mx:Label text="Report Type:" fontWeight="bold"/>
+                    <mx:Label text="Report Type:" fontWeight="bold" fontSize="13"/>
                     <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)"
                                                        id="analysisState"
                                                        mode="{reportMode}" x="91" y="0"/>

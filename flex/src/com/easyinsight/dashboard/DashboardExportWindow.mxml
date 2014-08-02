@@ -1,13 +1,11 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
     <mx:Script><![CDATA[
-
         import com.easyinsight.analysis.DashboardPDFWindow;
         import com.easyinsight.analysis.EmbedDashboardWindow;
         import com.easyinsight.report.DashboardURLWindow;
 
         import com.easyinsight.util.PopUpUtil;
-
 
 
         import mx.core.UIComponent;
@@ -19,10 +17,16 @@
         private var _dashboardName:String;
         private var _coreView:DisplayObject;
         private var _rootView:IDashboardViewComponent;
+        private var _stackPositions:DashboardStackPositions;
 
         private var _dashboardRenderer:DashboardRenderer;
 
         private var _dashboard:Dashboard;
+
+
+        public function set stackPositions(value:DashboardStackPositions):void {
+            _stackPositions = value;
+        }
 
         public function set dashboardRenderer(value:DashboardRenderer):void {
             _dashboardRenderer = value;
@@ -54,6 +58,8 @@
 
         private function pdf():void {
             var window:DashboardPDFWindow = new DashboardPDFWindow();
+            window.rootElement = _rootView;
+            window.stackPositions = _stackPositions;
             window.content = UIComponent(_coreView);
             window.headerArea = _headerArea;
             window.dashboard = _dashboard;

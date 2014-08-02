@@ -6,6 +6,7 @@
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%" creationComplete="populateData()"
          verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
+        import com.easyinsight.WindowManagement;
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
         import com.easyinsight.analysis.AnalysisItem;
@@ -33,6 +34,8 @@
 
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.util.UserAudit;
+
+        import com.easyinsight.WindowManagement;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
@@ -87,6 +90,7 @@
                 var saveDialog:DashboardSaveAsDialog = new DashboardSaveAsDialog();
                 saveDialog.dashboard = _dashboard;
                 saveDialog.addEventListener(SavedDashboardEvent.SAVED_DASHBOARD, saveAsDashboard);
+                WindowManagement.manager.addWindow(saveDialog);
                 PopUpManager.addPopUp(saveDialog, this, true);
                 PopUpUtil.centerPopUp(saveDialog);
             } else {
@@ -255,6 +259,7 @@
                 window.addEventListener(DashboardSaveEvent.DASHBOARD_SAVE, saveHandler, false, 0, true);
                 window.exchangeSave = exchangeSave;
                 window.dashboard = _dashboard;
+                WindowManagement.manager.addWindow(window);
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else {
@@ -298,6 +303,7 @@
             window.dashboard = _dashboard;
             window.reports = availableReports;
             window.addEventListener(Event.CHANGE, onDashboardChange, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -377,6 +383,7 @@
             var window:MarmotScriptWindow = new MarmotScriptWindow();
             window.script = _dashboard.marmotScript;
             window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -433,6 +440,7 @@
                     doneHandler.call();
                 });
             }, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
@@ -448,6 +456,7 @@
             window.addEventListener(PromptEvent.PROMPT_DISCARD, function (event:PromptEvent):void {
                 doneHandler.call();
             }, false, 0, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }

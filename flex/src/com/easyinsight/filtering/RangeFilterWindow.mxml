@@ -1,0 +1,90 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF"
+           borderThickness="1" cornerRadius="8" dropShadowEnabled="true"
+           borderStyle="solid" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+
+        import mx.managers.PopUpManager;
+
+        public var filterMetadata:FilterMetadata;
+
+        private function onMouseDown(event:MouseEvent):void {
+            var point:Point = localToGlobal(new Point(event.localX, event.localY));
+            var result:Boolean = hitTestPoint(point.x, point.y);
+            if (!result) {
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        }
+
+        private function quarter():void {
+            var f:MultiFlatDateFilterDefinition = new MultiFlatDateFilterDefinition();
+            f.field = _item;
+            f.level = AnalysisItemTypes.QUARTER_OF_YEAR;
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
+            filter.filterDefinition = f;
+            dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function monthFlat():void {
+            var f:MultiFlatDateFilterDefinition = new MultiFlatDateFilterDefinition();
+            f.field = _item;
+            f.level = AnalysisItemTypes.MONTH_FLAT;
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
+            filter.filterDefinition = f;
+            dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function monthLevel():void {
+            var f:MultiFlatDateFilterDefinition = new MultiFlatDateFilterDefinition();
+            f.field = _item;
+            f.level = AnalysisItemTypes.MONTH_LEVEL;
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
+            filter.filterDefinition = f;
+            dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function year():void {
+            var f:MultiFlatDateFilterDefinition = new MultiFlatDateFilterDefinition();
+            f.field = _item;
+            f.level = AnalysisItemTypes.YEAR_LEVEL;
+            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
+            filter.filterDefinition = f;
+            dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            PopUpManager.removePopUp(this);
+        }
+
+        private var _item:AnalysisItem;
+        private var _feedID:int;
+
+        public function set feedID(value:int):void {
+            _feedID = value;
+        }
+
+        public function set item(value:AnalysisItem):void {
+            _item = value;
+        }
+        ]]></mx:Script>
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10">
+        <mx:Label text="What range do you want to use?" fontSize="16"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <util:SaveButton label="Month" click="monthFlat()"/>
+            <util:SaveButton label="Month - Year" click="monthLevel()"/>
+            <util:SaveButton label="Quarter" click="quarter()"/>
+            <util:SaveButton label="Year" click="year()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:Canvas>

@@ -1,8 +1,10 @@
 package com.easyinsight.analysis {
 
+import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
+import com.easyinsight.analysis.summary.MultiSummaryDefinition;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.framework.Constants;
@@ -33,6 +35,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
     private var _additionalFilterDefinitions:ArrayCollection;
     private var _reportType:int;
     private var _adHocMode:Boolean = true;
+    private var htmlView:Boolean = false;
 
     private var _reportRendererModule:String;
     //private var _newDefinition:Class;
@@ -256,6 +259,18 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         dispatchEvent(event);
     }
 
+    public function hideReport():void {
+        if (htmlView) {
+            currentComponent.visible = false;
+        }
+    }
+
+    public function restoreReport():void {
+        if (htmlView) {
+            currentComponent.visible = true;
+        }
+    }
+
     private var analysisService:RemoteObject;
 
     public function setup():void {
@@ -394,6 +409,11 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
             overlayIndex = 0;
             try {
                 _report = event.analysisDefinition;
+                if (_report is TopoMapDefinition || _report is MultiSummaryDefinition) {
+                    htmlView = true;
+                } else {
+                    htmlView = false;
+                }
                 postProcess(_report);
                 if (event.hasData) {
                     showReport();

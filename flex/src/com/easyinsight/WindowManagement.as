@@ -3,8 +3,11 @@
  */
 package com.easyinsight {
 import com.easyinsight.analysis.DataViewFactory;
+import com.easyinsight.analysis.EmbeddedViewFactory;
 
 import flash.events.Event;
+
+import mx.collections.ArrayCollection;
 
 import mx.controls.Alert;
 
@@ -13,6 +16,7 @@ import mx.core.UIComponent;
 public class WindowManagement {
 
     public var factory:DataViewFactory;
+    public var endUserFactories:ArrayCollection = new ArrayCollection();
     public var openWindow:UIComponent;
 
     public static var manager:WindowManagement = new WindowManagement();
@@ -22,22 +26,43 @@ public class WindowManagement {
 
     public function clearFactory():void {
         this.factory = null;
+        endUserFactories = new ArrayCollection();
     }
 
     public function registerFactory(factory:DataViewFactory):void {
-        if (this.factory != null) {
+        if (this.factory != null || this.endUserFactories.length > 0) {
             Alert.show("more than one factory registered");
         } else {
             this.factory = factory;
         }
     }
 
+    public function registerEndUserFactory(factory:EmbeddedViewFactory):void {
+        if (this.factory != null) {
+            Alert.show("more than one factory registered");
+        } else {
+            endUserFactories.addItem(factory);
+        }
+    }
+
     public function hideReport():void {
-        factory.hideReport();
+        if (factory != null) {
+            factory.hideReport();
+        } else if (endUserFactories.length > 0) {
+            for each (var f:EmbeddedViewFactory in endUserFactories) {
+                f.hideReport();
+            }
+        }
     }
 
     public function restoreReport():void {
-        factory.restoreReport();
+        if (factory != null) {
+            factory.restoreReport();
+        } else if (endUserFactories.length > 0) {
+            for each (var f:EmbeddedViewFactory in endUserFactories) {
+                f.restoreReport();
+            }
+        }
     }
 
     public function addWindow(window:UIComponent):void {
@@ -47,7 +72,13 @@ public class WindowManagement {
         }
 
         openWindow = window;
-        factory.hideReport();
+        if (factory != null) {
+            factory.hideReport();
+        } else if (endUserFactories.length > 0) {
+            for each (var f:EmbeddedViewFactory in endUserFactories) {
+                f.hideReport();
+            }
+        }
         window.addEventListener(Event.REMOVED_FROM_STAGE, onEvent);
 
     }
@@ -59,6 +90,11 @@ public class WindowManagement {
         }
         if (factory != null) {
             factory.restoreReport();
+        }
+        else if (endUserFactories.length > 0) {
+            for each (var f:EmbeddedViewFactory in endUserFactories) {
+                f.restoreReport();
+            }
         }
     }
 }

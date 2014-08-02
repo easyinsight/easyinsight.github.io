@@ -1,5 +1,6 @@
 package com.easyinsight.analysis {
 import com.easyinsight.analysis.heatmap.TopoMapDefinition;
+import com.easyinsight.analysis.summary.MultiSummaryDefinition;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -138,7 +139,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
 
     public function set analysisDefinition(val:AnalysisDefinition):void {
         _analysisDefinition = val;
-        if (_analysisDefinition is TopoMapDefinition) {
+        if (_analysisDefinition is TopoMapDefinition || _analysisDefinition is MultiSummaryDefinition) {
             htmlView = true;
         } else {
             htmlView = false;

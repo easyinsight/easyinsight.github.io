@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
-        borderStyle="solid">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF"
+           borderThickness="1" cornerRadius="8" dropShadowEnabled="true"
+           borderStyle="solid" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
@@ -12,42 +13,59 @@
         private function addLastValue():void {
             var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addFirstValue():void {
             var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.FIRST_VALUE, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addNullValue():void {
             var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.NULL_VALUE, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addFlatValue():void {
             var filter:FlatDateFilter = new FlatDateFilter(_feedID, _item, 0, 0, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addFlatMonthValue():void {
             var filter:FlatMonthDateFilter = new FlatMonthDateFilter(_feedID, _item, 0, 0, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addMultiFlatValue():void {
-            var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
+            var w:RangeFilterWindow = new RangeFilterWindow();
+            w.addEventListener(FilterCreationEvent.FILTER_CREATION, passThrough);
+            w.x = this.x;
+            w.y = this.y;
+            PopUpManager.addPopUp(w, this, true);
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
+            /*var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
+            dispatchEvent(new FilterCreationEvent(filter));
+            PopUpManager.removePopUp(this);*/
+        }
+
+        private function passThrough(event:FilterCreationEvent):void {
+            dispatchEvent(event);
         }
 
         private function addCutoffFilter():void {
             var filter:MonthCutoffFilter = new MonthCutoffFilter(_feedID, _item, 0, 0);
             dispatchEvent(new FilterCreationEvent(filter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
@@ -71,114 +89,130 @@
         private function addAbsolute():void {
             var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0, null, filterMetadata, _report);
             dispatchEvent(new FilterCreationEvent(sliderDateFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
         }
 
         private function addRolling():void {
             var rollingFilter:RollingRangeFilter = new RollingRangeFilter(_feedID, _item, null, filterMetadata);
             dispatchEvent(new FilterCreationEvent(rollingFilter));
+            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
+        }
+
+        private function onMouseDown(event:MouseEvent):void {
+            var point:Point = localToGlobal(new Point(event.localX, event.localY));
+            var result:Boolean = hitTestPoint(point.x, point.y);
+            if (!result) {
+                stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        private function onCreation():void {
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
         }
 
         [Bindable]
         private var stackIndex:int;
         ]]></mx:Script>
-    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10">
-        <mx:Label text="What type of filter do you want to create?" fontSize="16"/>
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10"
+            styleName="fallThroughFonts">
+        <mx:Label text="What type of filter do you want to create?" fontSize="16" color="#333333"/>
         <mx:HBox width="100%" horizontalAlign="center">
-
-            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addAbsolute()" mouseChildren="false"
-                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                    id="singleValueBox"
-                    rollOver="singleValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                    rollOut="singleValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                <mx:Label text="Absolute" fontSize="14"/>
-                <mx:TextArea text="Restrict this field to a date within a certain fixed time range"
-                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                        textAlign="center"/>
-            </mx:VBox>
-            <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addRolling()" mouseChildren="false"
-                    buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+            <mx:VBox borderStyle="solid" click="addRolling()" mouseChildren="false"
+                    buttonMode="true" useHandCursor="true"
                     id="multiValueBox"
-                    rollOver="multiValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                    rollOut="multiValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                <mx:Label text="Rolling" fontSize="14"/>
-                <mx:TextArea text="Restrict this field to a rolling time window"
-                        borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                        textAlign="center"/>
+                    rollOver="multiValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                    rollOut="multiValueBox.setStyle('backgroundColor', 0xFFFFFF)"
+                    styleName="filterChoiceButton">
+                <mx:Label text="Rolling" fontSize="14" fontWeight="bold" styleName="filterChoiceButtonText"/>
+                <mx:Text text="Restrict this field to a rolling time window"
+                        selectable="false" width="200" height="50"
+                        textAlign="center" styleName="filterChoiceButtonText"/>
+            </mx:VBox>
+
+            <mx:VBox borderStyle="solid" click="addMultiFlatValue()" mouseChildren="false"
+                     buttonMode="true" useHandCursor="true"
+                     id="multiFlatValueBox"
+                     rollOver="multiFlatValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                     rollOut="multiFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                <mx:Label text="Range" fontSize="14" fontWeight="bold" styleName="filterChoiceButtonText"/>
+                <mx:Text text="Restrict this field to a range of weeks, months, quarters, or years"
+                             selectable="false" width="200" height="50"
+                             textAlign="center" styleName="filterChoiceButtonText"/>
+            </mx:VBox>
+            <mx:VBox borderStyle="solid" dropShadowEnabled="false" click="addAbsolute()" mouseChildren="false"
+                     buttonMode="true" useHandCursor="true"
+                     id="singleValueBox"
+                     rollOver="singleValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                     rollOut="singleValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                <mx:Label text="Absolute" fontSize="14" fontWeight="bold" styleName="filterChoiceButtonText"/>
+                <mx:Text text="Restrict this field to a date within a certain fixed time range"
+                             selectable="false" width="200" height="50"
+                             textAlign="center" styleName="filterChoiceButtonText"/>
             </mx:VBox>
         </mx:HBox>
         <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}" creationPolicy="all">
             <mx:Box>
-                <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1"/>
+                <mx:Button label="Show Me More Types of Filters" click="stackIndex = 1" styleName="flatSaveButton"/>
             </mx:Box>
             <mx:VBox>
                 <mx:HBox>
-                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addLastValue()" mouseChildren="false"
-                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                    <mx:VBox borderStyle="solid" click="addLastValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" 
                             id="patternValueBox"
-                            rollOver="patternValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                            rollOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Newest Date" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to the most recent date"
-                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                textAlign="center"/>
+                            rollOver="patternValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                            rollOut="patternValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                        <mx:Label text="Newest Date" fontWeight="bold" fontSize="14"/>
+                        <mx:Text text="Restrict this field to the most recent date"
+                                selectable="false" width="200" height="50"
+                                textAlign="center" styleName="filterChoiceButtonText"/>
                     </mx:VBox>
-                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFirstValue()" mouseChildren="false"
-                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                    <mx:VBox borderStyle="solid" click="addFirstValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" 
                             id="firstValueBox"
-                            rollOver="firstValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                            rollOut="firstValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Oldest Date" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to the oldest date"
-                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                textAlign="center"/>
+                            rollOver="firstValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                            rollOut="firstValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                        <mx:Label text="Oldest Date" fontWeight="bold" fontSize="14"/>
+                        <mx:Text text="Restrict this field to the oldest date"
+                                selectable="false" width="200" height="50"
+                                textAlign="center" styleName="filterChoiceButtonText"/>
                     </mx:VBox>
-                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addNullValue()" mouseChildren="false"
+                    <mx:VBox borderStyle="solid" click="addNullValue()" mouseChildren="false"
                             buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
                             id="nullValueBox"
-                            rollOver="nullValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                            rollOut="nullValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="No Date" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to values where this date is not set"
-                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                textAlign="center"/>
+                            rollOver="nullValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                            rollOut="nullValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                        <mx:Label text="No Date" fontSize="14" fontWeight="bold" styleName="filterChoiceButtonText"/>
+                        <mx:Text text="Restrict this field to values where this date is not set"
+                                selectable="false" width="200" height="50"
+                                textAlign="center" styleName="filterChoiceButtonText"/>
                     </mx:VBox>
                 </mx:HBox>
                 <mx:HBox width="100%" horizontalAlign="center" id="bottomBox">
-                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFlatValue()" mouseChildren="false"
-                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
+                    <mx:VBox borderStyle="solid" click="addFlatValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" 
                             id="flatValueBox"
-                            rollOver="flatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                            rollOut="flatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Year" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to a single year"
-                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                textAlign="center"/>
+                            rollOver="flatValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                            rollOut="flatValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                        <mx:Label text="Year" fontSize="14" fontWeight="bold" styleName="filterChoiceButtonText"/>
+                        <mx:Text text="Restrict this field to a single year"
+                                selectable="false" width="200" height="50"
+                                textAlign="center" styleName="filterChoiceButtonText"/>
                     </mx:VBox>
-                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addFlatMonthValue()" mouseChildren="false"
-                                                buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                                                id="singleMonthFlatValueBox"
-                                                rollOver="singleMonthFlatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                                                rollOut="singleMonthFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                                            <mx:Label text="Single Month" fontSize="14"/>
-                                            <mx:TextArea text="Restrict this field to one month"
-                                                    borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                                    textAlign="center"/>
-                                        </mx:VBox>
-                    <mx:VBox borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" click="addMultiFlatValue()" mouseChildren="false"
-                            buttonMode="true" useHandCursor="true" borderColor="#000000" horizontalAlign="center"
-                            id="multiFlatValueBox"
-                            rollOver="multiFlatValueBox.setStyle('backgroundColor', 0xDDDDDD)"
-                            rollOut="multiFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)">
-                        <mx:Label text="Multiple Month" fontSize="14"/>
-                        <mx:TextArea text="Restrict this field to one or more months"
-                                borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="200" height="50"
-                                textAlign="center"/>
+                    <mx:VBox borderStyle="solid" click="addFlatMonthValue()" mouseChildren="false"
+                            buttonMode="true" useHandCursor="true" 
+                            id="singleMonthFlatValueBox"
+                            rollOver="singleMonthFlatValueBox.setStyle('backgroundColor', 0x00C4F4)"
+                            rollOut="singleMonthFlatValueBox.setStyle('backgroundColor', 0xFFFFFF)" styleName="filterChoiceButton">
+                        <mx:Label text="Single Month" fontWeight="bold" fontSize="14" styleName="filterChoiceButtonText"/>
+                        <mx:Text text="Restrict this field to one month"
+                                selectable="false" width="200" height="50"
+                                textAlign="center" styleName="filterChoiceButtonText"/>
                     </mx:VBox>
                 </mx:HBox>
             </mx:VBox>
         </mx:ViewStack>
-        <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
     </mx:VBox>
 </mx:Canvas>
