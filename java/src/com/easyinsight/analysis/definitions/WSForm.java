@@ -126,27 +126,50 @@ public class WSForm extends WSAnalysisDefinition {
         return list;
     }
 
-    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
         DataSet dataSet = DataService.listDataSet(this, insightRequestMetadata, conn);
-        if (dataSet.getRows().size() > 0) {
-            IRow row = dataSet.getRow(0);
-            StringBuilder sb = new StringBuilder();
-            sb.append("<form class=\"form-horizontal\">\n");
-            for (AnalysisItem analysisItem : columns) {
-                sb.append("<fieldset>\n");
-                sb.append("<div class=\"form-group\">\n");
-                String inputName = String.valueOf(analysisItem.getAnalysisItemID());
-                sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toUnqualifiedDisplay()).append("</label>");
-                sb.append("<div class=\"col-md-6\">");
-                sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
-                sb.append("</div>");
-                sb.append("</div>\n");
-                sb.append("</fieldset>\n");
+        if (email) {
+            if (dataSet.getRows().size() > 0) {
+                IRow row = dataSet.getRow(0);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<form class=\"form-horizontal\">\n");
+                for (AnalysisItem analysisItem : columns) {
+                    sb.append("<fieldset>\n");
+                    sb.append("<div class=\"form-group\">\n");
+                    String inputName = String.valueOf(analysisItem.getAnalysisItemID());
+                    sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toUnqualifiedDisplay()).append("</label>");
+                    sb.append("<div class=\"col-md-6\">");
+                    sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
+                    sb.append("</div>");
+                    sb.append("</div>\n");
+                    sb.append("</fieldset>\n");
+                }
+                sb.append("</form>");
+                return sb.toString();
+            } else {
+                return "";
             }
-            sb.append("</form>");
-            return sb.toString();
         } else {
-            return "";
+            if (dataSet.getRows().size() > 0) {
+                IRow row = dataSet.getRow(0);
+                StringBuilder sb = new StringBuilder();
+                sb.append("<form class=\"form-horizontal\">\n");
+                for (AnalysisItem analysisItem : columns) {
+                    sb.append("<fieldset>\n");
+                    sb.append("<div class=\"form-group\">\n");
+                    String inputName = String.valueOf(analysisItem.getAnalysisItemID());
+                    sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toUnqualifiedDisplay()).append("</label>");
+                    sb.append("<div class=\"col-md-6\">");
+                    sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
+                    sb.append("</div>");
+                    sb.append("</div>\n");
+                    sb.append("</fieldset>\n");
+                }
+                sb.append("</form>");
+                return sb.toString();
+            } else {
+                return "";
+            }
         }
     }
 }

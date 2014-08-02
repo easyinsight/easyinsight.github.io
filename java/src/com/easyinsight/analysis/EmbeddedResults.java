@@ -11,11 +11,20 @@ import java.util.Map;
  */
 public class EmbeddedResults implements Serializable, Cloneable {
     protected WSAnalysisDefinition definition;
+    private String cacheForHTMLKey;
     private boolean dataSourceAccessible;
     protected DataSourceInfo dataSourceInfo;
     private ReportFault reportFault;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
     private long time = System.currentTimeMillis();
+
+    public String getCacheForHTMLKey() {
+        return cacheForHTMLKey;
+    }
+
+    public void setCacheForHTMLKey(String cacheForHTMLKey) {
+        this.cacheForHTMLKey = cacheForHTMLKey;
+    }
 
     public long getTime() {
         return time;

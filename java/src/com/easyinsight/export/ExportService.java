@@ -509,7 +509,7 @@ public class ExportService {
                     analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD ||
                     analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS || analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND) {
+                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND || analysisDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
@@ -889,6 +889,14 @@ public class ExportService {
             element = compareYearsToPDF(analysisDefinition, conn, insightRequestMetadata);
         } else if (analysisDefinition instanceof WSVerticalListDefinition) {
             element = verticalListToPDF(analysisDefinition, conn, insightRequestMetadata);
+        } else if (analysisDefinition instanceof WSMultiSummaryDefinition) {
+            WSMultiSummaryDefinition summary = (WSMultiSummaryDefinition) analysisDefinition;
+            try {
+                MultiSummaryData multiSummaryData = DataService.getMultiSummaryDataResults(summary, insightRequestMetadata, conn);
+                element = multiSummaryData.toPDF(insightRequestMetadata, conn);
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             element = listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         }
@@ -900,8 +908,14 @@ public class ExportService {
 
     public Element listReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
                                         ExportMetadata exportMetadata) throws DocumentException {
-
         ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+        return listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata, listDataResults);
+    }
+
+    public Element listReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                        ExportMetadata exportMetadata, ListDataResults listDataResults) throws DocumentException {
+
+
 
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) analysisDefinition;
@@ -4314,7 +4328,7 @@ public class ExportService {
                 "  background-color: ").append(backgroundColor2).append(";\n" +
                 "}");
         sb.append("</style>");
-        sb.append("<table style=\"font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
+        sb.append("<table style=\"margin-bottom:0;font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
         sb.append("<thead>");
         sb.append("<tr>");
         Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();

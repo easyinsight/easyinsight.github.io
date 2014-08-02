@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.analysis.gauge.GaugeDefinitionState;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,6 +131,18 @@ public class AnalysisDefinitionFactory {
             TextDefinitionState textDefinitionState = new TextDefinitionState();
             textDefinitionState.setTextReportID(wsTextDefinition.getTextReportID());
             analysisDefinitionState = textDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.MULTI_SUMMARY)) {
+            WSMultiSummaryDefinition wsMultiSummaryDefinition = (WSMultiSummaryDefinition) wsAnalysisDefinition;
+            MultiSummaryDefinitionState multiSummaryDefinitionState = new MultiSummaryDefinitionState();
+            multiSummaryDefinitionState.setMultiSummaryID(wsMultiSummaryDefinition.getMultiSummaryID());
+            List<ReportStub> stubs = new ArrayList<>();
+            for (InsightDescriptor insightDescriptor : wsMultiSummaryDefinition.getReports()) {
+                ReportStub reportStub = new ReportStub();
+                reportStub.setReportID(insightDescriptor.getId());
+                stubs.add(reportStub);
+            }
+            multiSummaryDefinitionState.setSummaryReports(stubs);
+            analysisDefinitionState = multiSummaryDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }
