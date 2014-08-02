@@ -83,6 +83,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int COMPARE_YEARS = 39;
     public static final int SUMMARY = 40;
     public static final int TEXT = 41;
+    public static final int TOPO = 42;
+    public static final int MULTI_SUMMARY = 43;
 
     private String name;
     private boolean persistedCache;
@@ -121,6 +123,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean lookupTableOptimization;
     private boolean adHocExecution;
     private int headerFontSize = 24;
+    private boolean htmlInFlash;
     private List<AnalysisItem> fieldsForDrillthrough;
     private int maxHeaderWidth = 600;
     private int cacheMinutes;
@@ -247,6 +250,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setExportString(String exportString) {
         this.exportString = exportString;
+    }
+
+    public boolean isHtmlInFlash() {
+        return htmlInFlash;
+    }
+
+    public void setHtmlInFlash(boolean htmlInFlash) {
+        this.htmlInFlash = htmlInFlash;
     }
 
     public List<AnalysisItem> getFieldsForDrillthrough() {
@@ -757,7 +768,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 if (filter.isEnabled() && !filter.isTemplateFilter()) {
                     if (filter instanceof FilterValueDefinition) {
                         FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
-                        if (filterValueDefinition.isAllOption() && filterValueDefinition.getFilteredValues().size() == 1 &&
+                        if (filterValueDefinition.isAllOption() && filterValueDefinition.getFilteredValues() != null &&
+                                filterValueDefinition.getFilteredValues().size() == 1 &&
+                                filterValueDefinition.getFilteredValues().get(0) != null &&
                                 "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
                             continue;
                         }
@@ -1076,6 +1089,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         fetchSize = (int) findNumberProperty(properties, "fetchSize", 0);
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
+        htmlInFlash = findBooleanProperty(properties, "htmlInFlash", false);
         cacheFilters = findBooleanProperty(properties, "cacheFilters", false);
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
@@ -1114,6 +1128,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportNumericProperty("fetchSize", fetchSize));
         properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
         properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
+        properties.add(new ReportBooleanProperty("htmlInFlash", htmlInFlash));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
         properties.add(new ReportStringProperty("reportColorScheme", colorScheme));
@@ -1259,7 +1274,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return "";
     }
 
-    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
         throw new UnsupportedOperationException();
     }
 
@@ -1614,6 +1629,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
                 if (exchangeAuthor) {
                     applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                    if (applicationSkin == null) {
+                        applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                    }
                 } else {
                     applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
                 }
@@ -1659,6 +1677,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     int dataSourceType = typeRS.getInt(1);
                     typeStmt.close();
                     applicationSkin = new PreferencesService().getConnectionSkin(dataSourceType);
+                    if (applicationSkin == null) {
+                        applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
+                    }
                 } else {
                     applicationSkin = ApplicationSkinSettings.retrieveSkin(SecurityUtil.getUserID(), session, SecurityUtil.getAccountID());
                 }

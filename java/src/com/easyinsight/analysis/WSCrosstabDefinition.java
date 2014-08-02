@@ -197,7 +197,6 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
                 setHeaderTextColor(applicationSkin.getCrosstabHeaderTextColor());
             }
             if (applicationSkin.isSummaryBackgroundColorEnabled()) {
-                System.out.println(applicationSkin.getSummaryBackgroundColor() + " = " + ExportService.createHexString(applicationSkin.getSummaryBackgroundColor()));
                 setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
             }
             if (applicationSkin.isSummaryTextColorEnabled()) {
