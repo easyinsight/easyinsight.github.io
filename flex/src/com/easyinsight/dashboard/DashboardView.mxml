@@ -375,7 +375,7 @@
             window.rootView = rootView;
             var stackPositions:DashboardStackPositions = new DashboardStackPositions();
             dashboardRenderer.positionsPopulate(stackPositions);
-            window.stackPositions = stackPositions;
+            //window.stackPositions = stackPositions;
             PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
