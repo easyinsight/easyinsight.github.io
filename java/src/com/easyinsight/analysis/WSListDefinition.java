@@ -419,7 +419,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private JSONObject getSyncAnalysisItemMap() throws JSONException {
         JSONObject analysisItemMap = new JSONObject();
         for (AnalysisItem i : columns) {
-            if (i.getSortSequence() > 0) {
+            if (i.getSortSequence() > 0 && i.getSort() > 0) {
                 JSONArray array = new JSONArray();
                 array.put(String.valueOf(i.getItemPosition()));
                 array.put(i.getSort() == 2 ? "desc" : "asc");
