@@ -425,7 +425,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
                 array.put(i.getSort() == 2 ? "desc" : "asc");
                 analysisItemMap.put(String.valueOf(i.getSortSequence()), array);
                 if (isLogReport()) {
-                    System.out.println(i.toDisplay() + " - " + i.getItemPosition() + " - " + i.getSort());
+                    System.out.println(i.toDisplay() + " - " + i.getItemPosition() + " - " + i.getSort() + " - " + i.getSortSequence());
                 }
             }
         }
