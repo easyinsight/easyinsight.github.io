@@ -309,23 +309,25 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                         account.setBillingFailures(account.getBillingFailures() + 1);
                         if (account.getBillingFailures() == 1) {
                             String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information within the next seven days.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
-                            account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
+                            System.out.println("Emailing " + failureBody + " to users on " + account.getName());
+                            /*account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
                                 try {
                                     new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                                 } catch (Exception e) {
                                     LogClass.error(e);
                                 }
-                            });
+                            });*/
                         } else if (account.getBillingFailures() == 7) {
                             account.setAccountState(Account.BILLING_FAILED);
                             String failureBody = "We were unable to successfully bill your Easy Insight account because of difficulties with the credit card on file. You will need to log in and update your billing information to resume service.\r\n\r\nIf you have any questions, please contact support at support@easy-insight.com.";
-                            account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
+                            System.out.println("Emailing " + failureBody + " to users on " + account.getName());
+                            /*account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
                                 try {
                                     new SendGridEmail().sendEmail(user.getEmail(), "Easy Insight - Failed Recurring Billing", failureBody, "support@easy-insight.com", false, "Easy Insight");
                                 } catch (Exception e) {
                                     LogClass.error(e);
                                 }
-                            });
+                            });*/
                         }
                     } else if (ss.getStatus() == Subscription.Status.EXPIRED) {
                         account.setAccountState(Account.BILLING_FAILED);
