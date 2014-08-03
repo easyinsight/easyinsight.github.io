@@ -8,10 +8,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.AnalysisItem;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -22,13 +19,15 @@ public class SortComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         final List<AnalysisItem> sortItems = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
 
-        boolean needToSort = false;
-        for (AnalysisItem analysisItem : sortItems) {
-            if (analysisItem.getSortSequence() != 0) {
-                needToSort = true;
-                break;
+        Iterator<AnalysisItem> iter = sortItems.iterator();
+        while (iter.hasNext()) {
+            AnalysisItem item = iter.next();
+            if (item.getSortSequence() == 0) {
+                iter.remove();
             }
         }
+
+        boolean needToSort = !sortItems.isEmpty();
 
         if (!needToSort) {
             return dataSet;
@@ -67,15 +66,6 @@ public class SortComponent implements IComponent {
                 return comparison;
             }
         });
-        /*for (AnalysisItem analysisItem : sortItems) {
-            if (analysisItem.getSort() > 0) {
-                if (analysisItem.getSort() == 1) {
-                    dataSet.sort(analysisItem, false);
-                } else if (analysisItem.getSort() == 2) {
-                    dataSet.sort(analysisItem, true);
-                }
-            }
-        }*/
         return dataSet;
     }
 
