@@ -28,4 +28,5 @@ public interface AnalysisTypes {
     public static final String SUMMARY = "Summary";
     public static final String TEXT = "Text";
     public static final String TOPO = "Topo";
+    public static final String MULTI_SUMMARY = "MultiSummary";
 }

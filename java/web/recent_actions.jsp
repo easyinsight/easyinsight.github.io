@@ -6,7 +6,7 @@
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <div class="col-md-3">
-    <img src="/images/logo2.PNG"/>
+    <img src="/images/logo2.png"/>
 
     <div class="well sidebar-nav">
         <ul class="nav nav-list">

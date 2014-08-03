@@ -14,6 +14,8 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.CacheableDataSet;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTable;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.export.MultiSummaryData;
 import com.easyinsight.export.TreeData;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.logging.LogClass;
@@ -588,37 +590,123 @@ public class DataService {
                     wrappers.get(i).setDateLevel(wrappers.size() - i);
                 }
                 if (filterDefinition.isIncludeRelative()) {
-                    DateLevelWrapper lastQuarter = new DateLevelWrapper();
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.MONTH, -3);
-                    int quarter = DayOfQuarter.quarter(cal.getTime());
-                    int year = cal.get(Calendar.YEAR);
-                    String result = "Q" + (quarter + 1) + "-" + year;
-                    lastQuarter.setShortDisplay(result);
-                    for (DateLevelWrapper wrapper : wrappers) {
-                        if (wrapper.getShortDisplay().equals(result)) {
-                            lastQuarter.setDateLevel(wrapper.getDateLevel());
-                            break;
+                    if (filterDefinition.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                        DateLevelWrapper lastQuarter = new DateLevelWrapper();
+                        Calendar cal = Calendar.getInstance();
+                        cal.add(Calendar.MONTH, -3);
+                        int quarter = DayOfQuarter.quarter(cal.getTime());
+                        int year = cal.get(Calendar.YEAR);
+                        String result = "Q" + (quarter + 1) + "-" + year;
+                        lastQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                lastQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
                         }
-                    }
-                    lastQuarter.setDisplay("Last Full Quarter");
-                    wrappers.add(0, lastQuarter);
-                    DateLevelWrapper thisQuarter = new DateLevelWrapper();
-                    thisQuarter.setDisplay("This Quarter");
+                        lastQuarter.setDisplay("Last Full Quarter");
+                        wrappers.add(0, lastQuarter);
+                        DateLevelWrapper thisQuarter = new DateLevelWrapper();
+                        thisQuarter.setDisplay("This Quarter");
 
-                    cal.add(Calendar.MONTH, 3);
-                    quarter = DayOfQuarter.quarter(cal.getTime());
-                    year = cal.get(Calendar.YEAR);
-                    result = "Q" + (quarter + 1) + "-" + year;
-                    thisQuarter.setShortDisplay(result);
-                    for (DateLevelWrapper wrapper : wrappers) {
-                        if (wrapper.getShortDisplay().equals(result)) {
-                            thisQuarter.setDateLevel(wrapper.getDateLevel());
-                            break;
+                        cal.add(Calendar.MONTH, 3);
+                        quarter = DayOfQuarter.quarter(cal.getTime());
+                        year = cal.get(Calendar.YEAR);
+                        result = "Q" + (quarter + 1) + "-" + year;
+                        thisQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                thisQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
                         }
+                        wrappers.add(0, thisQuarter);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                        DateLevelWrapper lastQuarter = new DateLevelWrapper();
+                        Calendar cal = Calendar.getInstance();
+                        cal.add(Calendar.MONTH, -1);
+                        String result = simpleDateFormat.format(cal.getTime());
+                        lastQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                lastQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
+                        }
+                        lastQuarter.setDisplay("Last Full Month");
+                        wrappers.add(0, lastQuarter);
+                        DateLevelWrapper thisQuarter = new DateLevelWrapper();
+                        thisQuarter.setDisplay("This Month");
+
+                        cal.add(Calendar.MONTH, 1);
+                        result = simpleDateFormat.format(cal.getTime());
+                        thisQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                thisQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
+                        }
+                        wrappers.add(0, thisQuarter);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.WEEK_LEVEL) {
+                        DateLevelWrapper lastQuarter = new DateLevelWrapper();
+                        Calendar cal = Calendar.getInstance();
+                        cal.add(Calendar.WEEK_OF_YEAR, -1);
+                        String result = simpleDateFormat.format(cal.getTime());
+                        lastQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                lastQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
+                        }
+                        lastQuarter.setDisplay("Last Full Week");
+                        wrappers.add(0, lastQuarter);
+                        DateLevelWrapper thisQuarter = new DateLevelWrapper();
+                        thisQuarter.setDisplay("This Week");
+
+                        cal.add(Calendar.WEEK_OF_YEAR, 1);
+                        result = simpleDateFormat.format(cal.getTime());
+                        thisQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                thisQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
+                        }
+                        wrappers.add(0, thisQuarter);
+                    } else if (filterDefinition.getLevel() == AnalysisDateDimension.YEAR_LEVEL) {
+                        DateLevelWrapper lastQuarter = new DateLevelWrapper();
+                        Calendar cal = Calendar.getInstance();
+                        cal.add(Calendar.YEAR, -1);
+                        String result = simpleDateFormat.format(cal.getTime());
+                        lastQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                lastQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
+                        }
+                        lastQuarter.setDisplay("Last Full Year");
+                        wrappers.add(0, lastQuarter);
+                        DateLevelWrapper thisQuarter = new DateLevelWrapper();
+                        thisQuarter.setDisplay("This Year");
+
+                        cal.add(Calendar.YEAR, 1);
+                        result = simpleDateFormat.format(cal.getTime());
+                        thisQuarter.setShortDisplay(result);
+                        for (DateLevelWrapper wrapper : wrappers) {
+                            if (wrapper.getShortDisplay().equals(result)) {
+                                thisQuarter.setDateLevel(wrapper.getDateLevel());
+                                break;
+                            }
+                        }
+                        wrappers.add(0, thisQuarter);
+                    } else {
+                        throw new RuntimeException();
                     }
-                    wrappers.add(0, thisQuarter);
                 }
+
                 return wrappers;
             }
         } catch (Exception e) {
@@ -1362,6 +1450,7 @@ public class DataService {
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, results, analysisDefinition.getCacheMinutes());
             }
+
             boolean tooManyResults = false;
             if (results instanceof EmbeddedDataResults) {
                 EmbeddedDataResults listDataResults = (EmbeddedDataResults) results;
@@ -1373,6 +1462,15 @@ public class DataService {
                 cacheEmbeddedReportResults(analysisDefinition.getAnalysisID(), (EmbeddedDataResults) results);
                 results = truncateEmbeddedResults((EmbeddedDataResults) results, analysisDefinition.getGeneralSizeLimit());
                 results.getAdditionalProperties().put("cappedResults", ((EmbeddedDataResults) results).getUid());
+            }
+            if (insightRequestMetadata.isCacheForHTML()) {
+                String req = String.valueOf("chtml" + System.currentTimeMillis());
+                results.setCacheForHTMLKey(req);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(analysisDefinition);
+                oos.flush();
+                MemCachedManager.add(req, 50000, baos.toByteArray());
             }
             conn.commit();
             long elapsed = System.currentTimeMillis() - startTime;
@@ -1475,6 +1573,32 @@ public class DataService {
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
         trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
         return trendDataResults;
+    }
+
+    public static MultiSummaryData getMultiSummaryDataResults(WSMultiSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn)
+            throws SQLException, CloneNotSupportedException {
+        ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+
+        Map<InsightDescriptor, DataSet> childSets = new HashMap<>();
+        Map<InsightDescriptor, WSListDefinition> reportMap = new HashMap<>();
+        DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        for (InsightDescriptor childReport : analysisDefinition.getReports()) {
+            WSListDefinition child = (WSListDefinition) AnalysisService.openAnalysisDefinitionWithConn(childReport.getId(), conn);
+            AnalysisItem childKeyItem = null;
+            for (AnalysisItem item : child.getColumns()) {
+                if (item.toDisplay().equals(analysisDefinition.getKey().toDisplay())) {
+                    childKeyItem = item;
+                }
+            }
+            if (childKeyItem == null) {
+                child.getColumns().add(analysisDefinition.getKey().clone());
+            }
+            ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, child, conn);
+            DataSet childSet = childRetrieval.getPipeline().toDataSet(childRetrieval.getDataSet());
+            childSets.put(childReport, childSet);
+            reportMap.put(childReport, (WSListDefinition) child);
+        }
+        return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn), dataSet, childSets, reportMap);
     }
 
     public EmbeddedTreeDataResults getEmbeddedTreeResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
@@ -1976,6 +2100,53 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             TrendDataResults embeddedDataResults = new TrendDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
+            Database.closeConnection(conn);
+        }
+    }
+
+    public MultiSummaryDataResults getMultiSummaryDataResults(WSMultiSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long start = System.currentTimeMillis();
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+
+            Map<InsightDescriptor, DataSet> childSets = new HashMap<>();
+            Map<InsightDescriptor, WSListDefinition> reportMap = new HashMap<>();
+            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            for (InsightDescriptor childReport : analysisDefinition.getReports()) {
+                WSAnalysisDefinition child = AnalysisService.openAnalysisDefinitionWithConn(childReport.getId(), conn);
+                ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, child, conn);
+                DataSet childSet = reportRetrieval.getPipeline().toDataSet(childRetrieval.getDataSet());
+                childSets.put(childReport, childSet);
+                reportMap.put(childReport, (WSListDefinition) child);
+            }
+            MultiSummaryData treeData = new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn), dataSet, childSets, reportMap);
+
+            List<MultiSummaryRow> rows = treeData.toTreeRows(reportRetrieval.getPipeline().getPipelineData());
+            MultiSummaryDataResults crossTabDataResults = new MultiSummaryDataResults();
+            crossTabDataResults.setTreeRows(rows);
+            decorateResults(analysisDefinition, insightRequestMetadata, conn, reportRetrieval, reportRetrieval.getDataSet().getAudits(), crossTabDataResults);
+            crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            if (!insightRequestMetadata.isNoLogging()) {
+                reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
+            }
+            return crossTabDataResults;
+        } catch (ReportException dae) {
+            MultiSummaryDataResults embeddedDataResults = new MultiSummaryDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+            MultiSummaryDataResults embeddedDataResults = new MultiSummaryDataResults();
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
@@ -2551,7 +2722,7 @@ public class DataService {
                 }
             }
 
-            for (FilterDefinition filter : new ArrayList<FilterDefinition>(analysisDefinition.getFilterDefinitions())) {
+            for (FilterDefinition filter : new ArrayList<>(analysisDefinition.getFilterDefinitions())) {
                 String obj = filter.getParentChildLabel();
                 if (obj != null) {
                     Iterator<FilterDefinition> iter = analysisDefinition.getFilterDefinitions().iterator();

@@ -69,7 +69,7 @@ public class MultiFlatDateFilter extends HBox implements IFilter
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 
-        private function onClick(event:Event):void {
+        public function onClick(event:Event):void {
             var window:MultiFWindow = new MultiFWindow();
             window.values = levels;
             window.dateFilter = _filterDefinition;

@@ -87,10 +87,10 @@
     <link type="text/css" rel="stylesheet" media="screen" href="../../css/base.css"/>
     <link href='https://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'/>
     <link href='https://fonts.googleapis.com/css?family=Cabin:regular' rel='stylesheet' type='text/css'>
-    <script type="text/javascript" src="/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/jqvideobox.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
-    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.lightbox-0.5.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
@@ -118,7 +118,7 @@
         <div id="midContent">
             <div style="height:350px;padding-left:50px;padding-top:20px;padding-right:50px">
                 <div style="font-size:20px;font-family:'Cabin',arial,serif;color:#333333;height:40px;align:center">
-                    <div style="margin-top:0px;float:left;"><img src="/images/EI32.PNG" alt=""/></div>
+                    <div style="margin-top:0px;float:left;"><img src="/images/EI32.png" alt=""/></div>
                     <div style="margin-top:5px;margin-left:20px;float:left;">Your ticket has been created!</div>
                 </div>
                 <div style="font-size:18px;font-family:'Cabin',arial,serif;color:#333333">

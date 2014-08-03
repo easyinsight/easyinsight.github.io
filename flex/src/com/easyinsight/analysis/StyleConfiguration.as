@@ -24,6 +24,7 @@ import com.easyinsight.analysis.gauge.GaugeDefinition;
 import com.easyinsight.analysis.heatmap.HeatMapDefinition;
 import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.list.ListDefinition;
+import com.easyinsight.analysis.summary.MultiSummaryDefinition;
 import com.easyinsight.analysis.summary.SummaryDefinition;
 import com.easyinsight.analysis.text.TextReport;
 import com.easyinsight.analysis.tree.TreeDefinition;
@@ -236,6 +237,13 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", TreeDefinition(report).headerColor2, report, null, colorSetFormItem, "Look and Feel"));
             items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", TreeDefinition(report).summaryBackgroundColor, report, null, colorSetFormItem, "Look and Feel"));
             items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", TreeDefinition(report).summaryTextColor, report, null, colorSetFormItem, "Look and Feel"));
+        }
+        if (report is MultiSummaryDefinition) {
+
+            items.addItem(new ColorReportFormItem("Header Text Color", "headerTextColor", MultiSummaryDefinition(report).headerTextColor, report, null, colorSetFormItem, "Look and Feel"));
+
+            items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", MultiSummaryDefinition(report).headerColor1, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", MultiSummaryDefinition(report).headerColor2, report, null, colorSetFormItem, "Look and Feel"));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report, null, colorSetFormItem));

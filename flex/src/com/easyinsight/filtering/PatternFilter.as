@@ -22,7 +22,6 @@ import mx.controls.LinkButton;
 import mx.controls.TextInput;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
-	import mx.rpc.remoting.RemoteObject;
 
 	public class PatternFilter extends HBox implements IFilter
 	{
@@ -30,7 +29,6 @@ import mx.managers.PopUpManager;
 		private var _analysisItem:AnalysisItem;
 		private var _feedID:int;		
 		private var deleteButton:Button;
-		private var editButton:Button;
 		private var labelText:UIComponent;
 		private var _analysisItems:ArrayCollection;
 
@@ -110,6 +108,7 @@ import mx.managers.PopUpManager;
             if (_filterEditable) {
                 labelText = new LinkButton();
                 labelText.styleName = "filterLabel";
+                labelText.addEventListener(MouseEvent.CLICK, edit);
                 LinkButton(labelText).label = FilterDefinition.getLabel(_filterDefinition, _analysisItem);
             } else {
                 labelText = new Label();
@@ -126,13 +125,6 @@ import mx.managers.PopUpManager;
             valueLabel.text = _filterDefinition.pattern;
             addChild(valueLabel);
             if (_filterEditable) {
-                if (editButton == null) {
-                    editButton = new Button();
-                    editButton.addEventListener(MouseEvent.CLICK, edit);
-                    editButton.setStyle("icon", ImageConstants.EDIT_ICON);
-                    editButton.toolTip = "Edit";
-                }
-                addChild(editButton);
                 if (deleteButton == null) {
                     deleteButton = new Button();
                     deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);

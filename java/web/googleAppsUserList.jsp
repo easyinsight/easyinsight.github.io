@@ -50,7 +50,7 @@
             <form class="well" method="post" action="/app/google/addUsers.jsp" id="loginForm">
 
                 <div style="width:100%;text-align: center">
-                    <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                    <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                 </div>
                 <div style="width:100%;text-align: center">
                     <h1 style="padding-top:20px">Import Users</h1>

@@ -21,7 +21,7 @@ import com.easyinsight.analysis.crosstab.CrosstabModule;
 import com.easyinsight.analysis.diagram.DiagramModule;
 import com.easyinsight.analysis.form.FormModule;
 import com.easyinsight.analysis.gauge.GaugeModule;
-import com.easyinsight.analysis.heatmap.TopoMapModule;
+import com.easyinsight.analysis.heatmap.HTMLIFrameModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.summary.NewSummaryModule;
 import com.easyinsight.analysis.text.TextModule;
@@ -147,7 +147,7 @@ public class ReportModuleLoader extends EventDispatcher {
             } else if (moduleName == "TextModule.swf") {
                 return new TextModule();
             } else if (moduleName == "TopoModule.swf") {
-                return new TopoMapModule();
+                return new HTMLIFrameModule();
             }
         }
         return moduleInfo.factory.create();

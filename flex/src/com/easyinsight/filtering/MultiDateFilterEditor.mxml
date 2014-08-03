@@ -51,7 +51,8 @@
 
         [Bindable]
         private var dateLevels:ArrayCollection = new ArrayCollection([ {label: "Month", data: AnalysisItemTypes.MONTH_FLAT},
-            {label: "Quarter - Year", data: AnalysisItemTypes.QUARTER_OF_YEAR}]);
+            {label: "Quarter - Year", data: AnalysisItemTypes.QUARTER_OF_YEAR}, {label: "Month - Year", data: AnalysisItemTypes.MONTH_LEVEL},
+            {label: "Week - Year", data: AnalysisItemTypes.WEEK_LEVEL}, {label: "Year", data: AnalysisItemTypes.YEAR_LEVEL}]);
 
         public function set feedID(feedID:int):void {
         }

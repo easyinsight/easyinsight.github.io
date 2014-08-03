@@ -29,7 +29,7 @@
 
             <div class="well">
                 <div style="width:100%;text-align: center">
-                    <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                    <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                 </div>
 
                 <h2>Domain Already Linked</h2>

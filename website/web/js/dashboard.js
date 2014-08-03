@@ -29,7 +29,7 @@ var startFullRenderPDF;
 function captureAndReturn(o) {
     var obj = o.report.report;
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
-        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years") {
+        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend") {
         return null;
     } else {
         var id = o.report.id;

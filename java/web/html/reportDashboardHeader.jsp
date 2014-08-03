@@ -1,7 +1,7 @@
 <link href="/css/nv.d3.css" rel="stylesheet" type="text/css">
 <script src="/js/d3.js"></script>
 <script src="/js/nv/nv.d3.js"></script>
-<script src="/js/topojson.v1.min.js"></script>
+<script src="/js/topojson.v1.js"></script>
 
 <script src="/js/nv/core.js"></script>
 <script src="/js/nv/tooltip.js"></script>
@@ -12,7 +12,7 @@
 <script type="text/javascript" src="/js/jquery.dataTables.js"></script>
 <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
 <link href="/css/datePicker.css" rel="stylesheet" />
-<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.min.js"></script><![endif]-->
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->
 <link href="/css/diagram.css" rel="stylesheet" />
 <script type="text/javascript" src="/js/diagram.js"></script>
 <script type="text/javascript" src="/js/filters.js"></script>

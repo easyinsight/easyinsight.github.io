@@ -1,11 +1,13 @@
 var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
 
-eiAccounts.controller('AccountController', function ($scope) {
+eiAccounts.controller('AccountController', ["$scope", function ($scope) {
 
 
-});
+}]);
 
-eiAccounts.controller("AccountInfoController", function($scope, $http, PageInfo, $location, $rootScope) {
+eiAccounts.controller("AccountInfoController", ["$scope", "$http", "PageInfo", "$location",
+    "$rootScope",
+    function($scope, $http, PageInfo, $location, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/account/profile");
     PageInfo.setTitle("Account Info");
@@ -35,20 +37,21 @@ eiAccounts.controller("AccountInfoController", function($scope, $http, PageInfo,
 
         return $scope.account.account_type == "enterprise" || $scope.account.account_type == "premium";
     }
-})
+}])
 
-eiAccounts.controller('UserBaseController', function ($scope, $http) {
+eiAccounts.controller('UserBaseController', ["$scope", "$http", function ($scope, $http) {
     $scope.load = $http.get("/app/json/getUsers").success(function (d, r) {
         $scope.users = d.users;
     })
-})
+}])
 
-eiAccounts.controller('UsersController', function ($scope, $filter, $http, PageInfo, $location, $rootScope) {
+eiAccounts.controller('UsersController', ["$scope", "$filter", "$http", "PageInfo", "$location", "$rootScope",
+    function ($scope, $filter, $http, PageInfo, $location, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/account/profile");
     PageInfo.setTitle("Users")
     $scope.deleteSelected = function () {
-        var usersToDelete = $filter('filter')($scope.users, {delete: true}, true);
+        var usersToDelete = $filter('filter')($scope.users, {"delete": true}, true);
         var usersToDeleteIDs = usersToDelete.map(function (e, i, l) {
             return e.id;
         });
@@ -65,9 +68,10 @@ eiAccounts.controller('UsersController', function ($scope, $filter, $http, PageI
             });
         }
     }
-})
+}])
 
-eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $location, PageInfo, $rootScope) {
+eiAccounts.controller('UserController', ["$scope", "$routeParams", "$http", "$location", "PageInfo", "$rootScope",
+    function ($scope, $routeParams, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/account/profile");
     $scope.load.then(function () {
@@ -80,9 +84,9 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
         }
     })
     PageInfo.setTitle($scope.user.first_name + " " + $scope.user.last_name);
-    $scope.new = false;
+    $scope['new'] = false;
 
-    $scope.submit = function () {
+    $scope['submit'] = function () {
         $scope.error = "";
         $scope.success = false;
         $scope.save = $http.post("/app/html/account/createUser", JSON.stringify($scope.user));
@@ -101,9 +105,10 @@ eiAccounts.controller('UserController', function ($scope, $routeParams, $http, $
         });
     }
 
-});
+}]);
 
-eiAccounts.controller('NewDesignerController', function ($scope, $http, $location, PageInfo, $rootScope) {
+eiAccounts.controller('NewDesignerController', ["$scope", "$http", "$location", "PageInfo", "$rootScope",
+    function ($scope, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/account/profile");
     PageInfo.setTitle("New Designer");
@@ -120,7 +125,7 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
         "admin": false,
         "change_password": false
     };
-    $scope.new = true;
+    $scope['new'] = true;
     $scope.submit = function () {
         $scope.error = "";
         $scope.success = false;
@@ -135,9 +140,10 @@ eiAccounts.controller('NewDesignerController', function ($scope, $http, $locatio
             }
         });
     }
-});
+}]);
 
-eiAccounts.controller('NewViewerController', function ($scope, $http, $location, PageInfo, $rootScope) {
+eiAccounts.controller('NewViewerController', ["$scope", "$http", "$location", "PageInfo", "$rootScope",
+    function ($scope, $http, $location, PageInfo, $rootScope) {
     if(!$rootScope.user.admin)
         $location.path("/account/profile");
     PageInfo.setTitle("New Viewer");
@@ -154,7 +160,7 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location,
         "admin": false,
         "change_password": false
     };
-    $scope.new = true;
+    $scope['new'] = true;
     $scope.submit = function () {
         $scope.error = "";
         $scope.success = false;
@@ -169,13 +175,13 @@ eiAccounts.controller('NewViewerController', function ($scope, $http, $location,
             }
         })
     }
-});
+}]);
 
-eiAccounts.controller("OverviewController", function() {
+eiAccounts.controller("OverviewController", [function() {
 
-});
+}]);
 
-eiAccounts.controller("AccountSettingsController", function($scope, $http) {
+eiAccounts.controller("AccountSettingsController", ["$scope", "$http", function($scope, $http) {
     $scope.loading = $http.get("/app/account_settings.json");
     $scope.loading.then(function(c) {
         $scope.settings = c.data.settings;
@@ -191,9 +197,9 @@ eiAccounts.controller("AccountSettingsController", function($scope, $http) {
             }
         })
     }
-});
+}]);
 
-eiAccounts.controller("AccountSkinController", function($scope, $http, $upload) {
+eiAccounts.controller("AccountSkinController", ["$scope", "$http", "$upload", function($scope, $http, $upload) {
     $scope.loading = $http.get("/app/account_skin.json");
     $scope.loading.then(function(c) {
         $scope.skin = c.data.skin;
@@ -227,9 +233,9 @@ eiAccounts.controller("AccountSkinController", function($scope, $http, $upload) 
             }
         }
     }
-})
+}]);
 
-eiAccounts.controller("UserProfileController", function($scope, $rootScope, $http) {
+eiAccounts.controller("UserProfileController", ["$scope", "$rootScope", "$http", function($scope, $rootScope, $http) {
     $scope.user = angular.copy($rootScope.user);
     $scope.submit = function () {
         $scope.error = "";
@@ -248,7 +254,15 @@ eiAccounts.controller("UserProfileController", function($scope, $rootScope, $htt
             }
         });
     }
-});
+}]);
+
+eiAccounts.controller("GroupBaseController", ["$scope", function($scope) {
+
+}]);
+
+eiAccounts.controller("GroupIndexController", ["$scope", function($scope) {
+
+}]);
 
 eiAccounts.directive("eimulticolorform", function() {
     return {
@@ -273,7 +287,7 @@ eiAccounts.directive('eicolorform', function() {
     }
 });
 
-eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
+eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($locationProvider, $routeSegmentProvider) {
     $routeSegmentProvider.when("/account", "account.index.overview").
         when("/account/settings", "account.index.settings").
         when("/account/users", "account.user_base.index").
@@ -283,6 +297,7 @@ eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
         when("/account/profile", "account.profile").
         when("/account/skin", "account.index.skin").
         when("/account/report_header", "account.index.report_header").
+        when("/account/groups", "account.group.index").
         segment("account", {
             templateUrl: '/angular_templates/account/base.template.html',
             controller: 'AccountController'
@@ -330,5 +345,14 @@ eiAccounts.config(function ($locationProvider, $routeSegmentProvider) {
         }).segment("new_viewer", {
             templateUrl: '/angular_templates/account/user.template.html',
             controller: 'NewViewerController'
+        }).up().
+        segment("group", {
+            templateUrl: '/angular_templates/account/group_base.template.html',
+            controller: 'GroupBaseController'
+        }).within().
+        segment("index", {
+            template_url: '/angular_templates/account/groups.template.html',
+            controller: 'GroupIndexController'
         });
-})
+    ;
+}])

@@ -674,6 +674,8 @@ public class TransformContainer extends HBox
                 MultiValueFilter(filter).edit(null);
             } else if (filter is NewMultiValueFilter) {
                 NewMultiValueFilter(filter).showFilter(null);
+            } else if (filter is MultiFlatDateFilter) {
+                MultiFlatDateFilter(filter).onClick(null);
             }
         }
         if (filter is ComboBoxFilter) {

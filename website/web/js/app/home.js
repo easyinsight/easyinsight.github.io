@@ -1,6 +1,6 @@
 var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
-easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentProvider) {
+easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
 
     $locationProvider.html5Mode(true);
     $routeSegmentProvider.when("/missing", "missing").
@@ -8,8 +8,8 @@ easyInsight.config(function ($routeProvider, $locationProvider, $routeSegmentPro
             templateUrl: '/angular_templates/missing.template.html',
             controller: "MissingFileController"
         });
-//    $routeProvider.otherwise({ redirectTo: "/missing" });
-})
+    $routeProvider.otherwise({ redirectTo: "/missing" });
+}])
 
 easyInsight.factory('PageInfo', function() {
     var title = '';
@@ -25,22 +25,23 @@ easyInsight.factory('PageInfo', function() {
     }
 })
 
-easyInsight.controller('MissingFileController', function(PageInfo) {
+easyInsight.controller('MissingFileController', ["PageInfo", function(PageInfo) {
     PageInfo.setTitle("Not Found");
-})
+}])
 
-easyInsight.config(function($httpProvider) {
-    $httpProvider.interceptors.push(function($q) {
+easyInsight.config(["$httpProvider", function($httpProvider) {
+    $httpProvider.interceptors.push(["$q", function($q) {
         return {
             'request': function(config) {
                 config.headers["X-REQUESTED-WITH"] = "XmlHttpRequest";
                 return config;
             }
         }
-    })
-})
+    }])
+}])
 
-easyInsight.run(function ($rootScope, $http, PageInfo) {
+easyInsight.run(["$rootScope", "$http", "$location", "PageInfo",
+    function ($rootScope, $http, $location, PageInfo) {
     $rootScope.user = {
         "username": "..."
     };
@@ -65,9 +66,7 @@ easyInsight.run(function ($rootScope, $http, PageInfo) {
         return navigator && navigator.userAgent && navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
     }
 
-
-
-});
+}]);
 
 easyInsight.directive("passwordVerify", function() {
    return {

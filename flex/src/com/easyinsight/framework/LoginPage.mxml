@@ -130,7 +130,7 @@
         }
 
         [Bindable]
-        [Embed(source="../../../../assets/logo2.PNG")]
+        [Embed(source="../../../../assets/logo2.png")]
         private var logo:Class;
 
         [Bindable]

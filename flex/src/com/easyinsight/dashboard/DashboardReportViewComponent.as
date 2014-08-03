@@ -1,4 +1,5 @@
 package com.easyinsight.dashboard {
+import com.easyinsight.WindowManagement;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.EmbeddedControllerLookup;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
@@ -79,7 +80,6 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
                 height = dashboardReport.preferredHeight;
             }
         }
-        //Alert.show("size for " + dashboardReport.report.name + " = " + height);
         return new SizeInfo(dashboardReport.preferredWidth, height, dashboardReport.autoCalculateHeight);
     }
 
@@ -411,7 +411,7 @@ public class DashboardReportViewComponent extends VBox implements IDashboardView
 
     private function onReportSetup(event:ReportSetupEvent):void {
         viewFactory.registerPostProcessor(new ReportDashboardPostProcessor(dashboardEditorMetadata));
-
+        WindowManagement.manager.registerEndUserFactory(viewFactory);
         var filterDefinitions:ArrayCollection = event.reportInfo.report.filterDefinitions;
         //viewFactory.filterDefinitions = filterDefinitions;
         if (event.reportInfo.report.filterDefinitions.length > 0) {

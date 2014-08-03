@@ -15,6 +15,7 @@ import com.easyinsight.analysis.gantt.GanttEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
+import com.easyinsight.analysis.summary.MultiSummaryEmbeddedController;
 import com.easyinsight.analysis.summary.SummaryEmbeddedController;
 import com.easyinsight.analysis.text.TextEmbeddedController;
 import com.easyinsight.analysis.text.TopoEmbeddedController;
@@ -111,6 +112,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.TOPO:
                 controller = TopoEmbeddedController;
+                break;
+            case AnalysisDefinition.MULTI_SUMMARY:
+                controller = MultiSummaryEmbeddedController;
                 break;
         }
         return controller;

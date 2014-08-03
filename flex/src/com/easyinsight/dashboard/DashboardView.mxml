@@ -44,6 +44,7 @@
         import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.util.ActionDashboardLog;
         import com.easyinsight.util.UserAudit;
+        import com.easyinsight.WindowManagement;
 
         import mx.collections.ArrayCollection;
         import mx.managers.BrowserManager;
@@ -372,7 +373,9 @@
             window.headerArea = headerArea;
             window.coreView = dashboardRenderer;
             window.rootView = rootView;
-
+            var stackPositions:DashboardStackPositions = new DashboardStackPositions();
+            dashboardRenderer.positionsPopulate(stackPositions);
+            //window.stackPositions = stackPositions;
             PopUpManager.addPopUp(window, this, true);
             window.x = exportButton.x - 20;
             window.y = exportButton.y + exportButton.height + 10;
@@ -414,6 +417,7 @@
 
         public function cleanup():void {
             stage.removeEventListener(Event.RESIZE, onResize);
+            WindowManagement.manager.clearFactory();
         }
 
         override protected function generateState():void {

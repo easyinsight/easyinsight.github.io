@@ -83,7 +83,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-2">
-                        <img src="/images/logo2.PNG" alt="Easy Insight Logo"/>
+                        <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                     </div>
                 </div>
                 <div class="row">

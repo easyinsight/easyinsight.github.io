@@ -1,5 +1,7 @@
 package com.easyinsight.dashboard {
 
+import com.easyinsight.WindowManagement;
+
 import flash.events.Event;
 
 import mx.collections.ArrayCollection;
@@ -60,6 +62,7 @@ public class DashboardReportEditorComponent extends VBox implements IDashboardEd
         window.filterDefinitions = dashboardEditorMetadata.transformContainer.getFilterDefinitions();
         window.dashboardElement = report;
         window.addEventListener(Event.CHANGE, onChange, false, 0, true);
+        WindowManagement.manager.addWindow(window);
         PopUpManager.addPopUp(window, this, true);
     }
 

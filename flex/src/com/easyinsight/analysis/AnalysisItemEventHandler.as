@@ -1,5 +1,6 @@
 package com.easyinsight.analysis {
 import com.easyinsight.AnalysisItemDeleteEvent;
+import com.easyinsight.WindowManagement;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
@@ -86,6 +87,7 @@ public class AnalysisItemEventHandler extends UIComponent {
         analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, handler, false, 0, true);
+        WindowManagement.manager.addWindow(analysisItemEditor);
         PopUpManager.addPopUp(analysisItemEditor, this.parent);
     }
 

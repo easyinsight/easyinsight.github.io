@@ -124,8 +124,14 @@
             PopUpManager.removePopUp(this);
         }
 
+        private function onPreferences(event:ReportPreferencesEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _dataView.refresh();
+        }
+
         private function editReportProperties(index:int = 0):void {
             var window:GenericDefinitionEditWindow = new GenericDefinitionEditWindow();
+            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, onPreferences, false, 0, true);
             window.definition = _analysisDefinition;
             window.allFields = _wrappers;
             window.startIndex = index;

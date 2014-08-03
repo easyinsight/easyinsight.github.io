@@ -372,7 +372,7 @@ Chart = {
                             .height(height)
                             .showControls(false)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
-                            .margin({top: 20, right: 30, bottom: 60, left: 130});
+                            .margin({top: 10, right: 30, bottom: 60, left: 130});
                         if (customWidth > -1) {
                             chart.width(customWidth);
                         }

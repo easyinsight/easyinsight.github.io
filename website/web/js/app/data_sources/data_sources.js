@@ -1,12 +1,12 @@
 var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy']);
 
-eiDataSources.controller("homeBaseController", function($scope, $http) {
+eiDataSources.controller("homeBaseController", ["$scope", "$http", function($scope, $http) {
     $http.get("/app/recentActions.json").then(function(d) {
         $scope.actions = d.data.actions;
     })
-})
+}])
 
-eiDataSources.controller("dataSourceListController", function($scope, $http, PageInfo) {
+eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", function($scope, $http, PageInfo) {
     PageInfo.setTitle("Data Sources");
     $scope.load = $http.get("/app/dataSources.json");
     $scope.load.then(function(d) {
@@ -18,9 +18,10 @@ eiDataSources.controller("dataSourceListController", function($scope, $http, Pag
     $scope.toggleTag = function(tag) {
         tag.enabled = !tag.enabled;
     }
-})
+}])
 
-eiDataSources.controller("reportsListController", function($scope, $http, $routeParams, $interval, $q, PageInfo) {
+eiDataSources.controller("reportsListController", ["$scope", "$http", "$routeParams", "$interval", "PageInfo",
+    function($scope, $http, $routeParams, $interval, PageInfo) {
     $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json")
     $scope.load.then(function(d) {
         $scope.data_source = d.data.data_source;
@@ -70,7 +71,7 @@ eiDataSources.controller("reportsListController", function($scope, $http, $route
     $scope.toggleTag = function(tag) {
         tag.enabled = !tag.enabled;
     };
-});
+}]);
 
 eiDataSources.filter("tagged", function() {
     return function(input, tags, folder) {
@@ -103,7 +104,7 @@ eiDataSources.filter("tagged", function() {
     }
 })
 
-eiDataSources.config(function ($routeSegmentProvider) {
+eiDataSources.config(["$routeSegmentProvider", function ($routeSegmentProvider) {
     $routeSegmentProvider.when("/home", "two_column.data_sources").
         when("/", "two_column.data_sources").
         when("/data_sources/:id", "two_column.reports").
@@ -121,7 +122,7 @@ eiDataSources.config(function ($routeSegmentProvider) {
             controller: "reportsListController",
             depends: ["id"]
         })
-})
+}])
 
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
