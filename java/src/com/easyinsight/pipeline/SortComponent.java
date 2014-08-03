@@ -22,7 +22,7 @@ public class SortComponent implements IComponent {
         Iterator<AnalysisItem> iter = sortItems.iterator();
         while (iter.hasNext()) {
             AnalysisItem item = iter.next();
-            if (item.getSortSequence() == 0 && item.getSort() != 0) {
+            if (item.getSortSequence() == 0 || item.getSort() == 0) {
                 iter.remove();
             }
         }
