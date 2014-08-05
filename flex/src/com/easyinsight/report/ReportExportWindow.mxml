@@ -3,6 +3,7 @@
                    xmlns:report="com.easyinsight.report.*"
                    creationComplete="onCreation()" horizontalAlign="center">
     <mx:Script><![CDATA[
+        import com.easyinsight.WindowManagement;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.EmailReportWindow;
         import com.easyinsight.analysis.EmbedReportWindow;
@@ -93,6 +94,7 @@
             embedReportWindow.dataSourceID = _dataSourceID;
             embedReportWindow.reportType = _reportType;
             PopUpManager.addPopUp(embedReportWindow, this, true);
+            WindowManagement.manager.addWindow(embedReportWindow);
             PopUpUtil.centerPopUp(embedReportWindow);
             PopUpManager.removePopUp(this);
         }
@@ -111,6 +113,7 @@
             window.x = this.x;
             window.y = this.y;
             PopUpManager.addPopUp(window, this, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.removePopUp(this);
         }
 
@@ -121,6 +124,7 @@
             window.x = this.x;
             window.y = this.y;
             PopUpManager.addPopUp(window, this, true);
+            WindowManagement.manager.addWindow(window);
             PopUpManager.removePopUp(this);
         }
 
@@ -128,6 +132,7 @@
             var window:JSONReportWindow = new JSONReportWindow();
             window.urlKey = _report.urlKey;
             PopUpManager.addPopUp(window, this, true);
+            WindowManagement.manager.addWindow(window);
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);
         }
