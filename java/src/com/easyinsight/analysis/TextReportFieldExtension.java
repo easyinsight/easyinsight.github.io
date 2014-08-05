@@ -22,6 +22,12 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     @Column(name="font_size")
     private int size;
 
+    @Column(name="fixed_sort")
+    private String fixedSort = "Default";
+
+    @Column(name="fixed_sort_order")
+    private int fixedSortOrder;
+
     @Column(name="fixed_width")
     private int fixedWidth;
 
@@ -43,6 +49,22 @@ public class TextReportFieldExtension extends ReportFieldExtension {
 
     public void setForceToSummary(boolean forceToSummary) {
         this.forceToSummary = forceToSummary;
+    }
+
+    public String getFixedSort() {
+        return fixedSort;
+    }
+
+    public void setFixedSort(String fixedSort) {
+        this.fixedSort = fixedSort;
+    }
+
+    public int getFixedSortOrder() {
+        return fixedSortOrder;
+    }
+
+    public void setFixedSortOrder(int fixedSortOrder) {
+        this.fixedSortOrder = fixedSortOrder;
     }
 
     @Override
