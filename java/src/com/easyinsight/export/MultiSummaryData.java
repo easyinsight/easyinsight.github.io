@@ -158,10 +158,9 @@ public class MultiSummaryData {
 
     public String toHTMLForEmail(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table>");
+        sb.append("<table style=\"border-collapse:collapse;border-spacing:0\">");
         sb.append("<thead>");
         sb.append("<tr style=\"font-size:").append(report.getFontSize()).append("px;background-color:").append(ExportService.createHexString(report.getHeaderColor1())).append("\">");
-        sb.append("<th style=\"text-align:left;width:100px\"></th>");
         for (AnalysisItem item : report.getCoreItems()) {
             sb.append("<th style=\"text-align:center;color:").append(ExportService.createHexString(report.getHeaderTextColor())).append("\">").append(item.toUnqualifiedDisplay()).append("</th>");
         }
