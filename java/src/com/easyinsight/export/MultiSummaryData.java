@@ -45,9 +45,12 @@ public class MultiSummaryData {
 
     private List<HigherLevel> higherLevels;
 
+    private boolean addedJoinColumn;
+
     public MultiSummaryData(WSMultiSummaryDefinition report, ExportMetadata exportMetadata, DataSet dataSet, Map<InsightDescriptor, DataSet> childSets,
-                            Map<InsightDescriptor, WSListDefinition> reportMap) {
+                            Map<InsightDescriptor, WSListDefinition> reportMap, boolean addedJoinColumn) {
         this.report = report;
+        this.addedJoinColumn = addedJoinColumn;
         this.exportMetadata = exportMetadata;
         this.dataSet = dataSet;
         this.childSets = childSets;
@@ -82,6 +85,10 @@ public class MultiSummaryData {
         }
         this.higherLevels = higherLevels;
         this.rows = rows;
+    }
+
+    public void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+
     }
 
     public Element toPDF(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws DocumentException, SQLException {
@@ -296,11 +303,22 @@ public class MultiSummaryData {
             }
         }
 
+        @Override
+        public void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+
+        }
+
         public String toHTML(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
 
+            boolean atLeastOneRow = false;
+            for (List<IRow> rows : map.values()) {
+                if (rows.size() > 0) {
+                    atLeastOneRow = true;
+                }
+            }
             StringBuilder sb = new StringBuilder();
             sb.append("<tr>");
-            if (map.size() > 0) {
+            if (atLeastOneRow) {
                 sb.append("<td><button type=\"button\" style=\"padding: 2px 4px;font-size:10px\" class=\"btn btn-info\" data-toggle=\"collapse\" data-target=\"#collapse" + rowID + "\">Details</button>");
             } else {
                 sb.append("<td></td>");
@@ -346,17 +364,25 @@ public class MultiSummaryData {
 
 
             for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
-                if (report.isNestedReportTitles()) {
-                    sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size()).append("\">").append(entry.getKey().getName()).append("</td></tr>");
-                }
-                sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
+                if (entry.getValue().size() > 0) {
+                    WSListDefinition childReport = reportMap.get(entry.getKey());
+                    if (report.isNestedReportTitles()) {
+                        sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">").append(childReport.getName()).append("</td></tr>");
+                    }
+                    sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
 
-                sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse collapse\">");
-                WSListDefinition childReport = reportMap.get(entry.getKey());
-                LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
-                sb.append(lowerLevel.toHTML(insightRequestMetadata, conn));
-                sb.append("</div>");
-                sb.append("</td></tr>");
+                    if (report.isDefaultToExpanded()) {
+                        sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse\">");
+                    } else {
+                        sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse collapse\">");
+                    }
+
+
+                    LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
+                    sb.append(lowerLevel.toHTML(insightRequestMetadata, conn));
+                    sb.append("</div>");
+                    sb.append("</td></tr>");
+                }
             }
 
             return sb.toString();
@@ -394,6 +420,11 @@ public class MultiSummaryData {
             spanCell.addElement(element);
         }
 
+        @Override
+        public void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+
+        }
+
         public String toHTML(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
             DataSet pseudoSet = new DataSet();
             for (IRow row : rows) {
@@ -401,7 +432,7 @@ public class MultiSummaryData {
             }
             List<AnalysisItem> items = new ArrayList<>();
             for (AnalysisItem item : childDefinition.getColumns()) {
-                if (!item.toDisplay().equals(report.getKey().toDisplay())) {
+                if (!addedJoinColumn || !item.toDisplay().equals(report.getKey().toDisplay())) {
                     items.add(item);
                 }
             }
@@ -420,7 +451,7 @@ public class MultiSummaryData {
             }
             List<AnalysisItem> items = new ArrayList<>();
             for (AnalysisItem item : childDefinition.getColumns()) {
-                if (!item.toDisplay().equals(report.getKey().toDisplay())) {
+                if (!addedJoinColumn || !item.toDisplay().equals(report.getKey().toDisplay())) {
                     items.add(item);
                 }
             }
@@ -455,6 +486,8 @@ public class MultiSummaryData {
     private abstract class AbstractTreeRow {
 
         public abstract void toElement(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Element parent) throws SQLException, DocumentException;
+
+        public abstract void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException;
 
         public abstract String toHTML(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException;
 

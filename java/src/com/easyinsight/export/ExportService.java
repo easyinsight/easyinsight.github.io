@@ -505,11 +505,7 @@ public class ExportService {
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
-            if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS || analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND || analysisDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
+            if (toDirectPDF(analysisDefinition.getReportType())) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
@@ -564,39 +560,13 @@ public class ExportService {
                 new SendGridEmail().sendAttachmentEmail(email, subject, body, exportResponse.getBytes(), name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                         "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
-                String html;
-                if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
-                    DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
-                    html = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
-                    html = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
-                    html = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
-                    DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-                    html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
-                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
-                    html = ExportService.formReportToHtml(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else {
-                    ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true, null));
-                }
+                ExportProperties exportProperties = new ExportProperties();
+                String html = DeliveryScheduledTask.createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, includeTitle, exportProperties);
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
             } else if (format == ReportDelivery.PDF) {
                 byte[] result;
-                if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
+                if (toDirectPDF(analysisDefinition.getReportType())) {
                     analysisDefinition.updateMetadata();
                     result = toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                 } else {
@@ -621,6 +591,14 @@ public class ExportService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    private boolean toDirectPDF(int reportType) {
+        return (reportType == WSAnalysisDefinition.LIST || reportType == WSAnalysisDefinition.TREE ||
+                reportType == WSAnalysisDefinition.CROSSTAB || reportType == WSAnalysisDefinition.SUMMARY ||
+                reportType == WSAnalysisDefinition.FORM || reportType == WSAnalysisDefinition.YTD ||
+                reportType == WSAnalysisDefinition.COMPARE_YEARS || reportType == WSAnalysisDefinition.VERTICAL_LIST ||
+                reportType == WSAnalysisDefinition.TREND || reportType == WSAnalysisDefinition.MULTI_SUMMARY);
     }
 
     public static String crosstabReportToHTMLTable(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
