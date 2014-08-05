@@ -277,7 +277,7 @@ public class MultiSummaryData {
                 if (report.isNestedReportTitles()) {
                     sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size()).append("\">").append(entry.getKey().getName()).append("</td></tr>");
                 }
-                sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
+                sb.append("<tr style=\"min-height:0\"><td style=\"border-width:0;border-style:none;min-height:0\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
                 WSListDefinition childReport = reportMap.get(entry.getKey());
                 LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
                 sb.append(lowerLevel.toHTMLForEmail(insightRequestMetadata, conn));
