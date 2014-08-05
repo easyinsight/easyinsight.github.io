@@ -235,7 +235,7 @@ public class MultiSummaryData {
             sb.append("<tr>");
 
             for (AnalysisItem analysisItem : report.getCoreItems()) {
-                StringBuilder styleString = new StringBuilder("border-width:0;border-style:none;text-align:");
+                StringBuilder styleString = new StringBuilder("text-align:");
                 String align = "left";
                 if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                     TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
