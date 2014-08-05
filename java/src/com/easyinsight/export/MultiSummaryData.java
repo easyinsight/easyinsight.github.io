@@ -168,7 +168,7 @@ public class MultiSummaryData {
         sb.append("</tr>");
         sb.append("</thead>");
         for (HigherLevel higherLevel : higherLevels) {
-            sb.append(higherLevel.toHTML(insightRequestMetadata, conn));
+            sb.append(higherLevel.toHTMLForEmail(insightRequestMetadata, conn));
         }
         sb.append("</table>");
         return sb.toString();
