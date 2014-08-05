@@ -533,6 +533,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             currentComponent = notConfigured;
             reportCanvas.addChildAt(notConfigured, 0);
         }
+        notConfigured.updateText(analysisDefinition);
     }
 
     private var _lastProperties:Object;

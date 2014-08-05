@@ -17,6 +17,8 @@
             ext.sortable = sortableCheckbox.selected;
             ext.ignoreOnSummary = ignoreSummaryCheckBox.selected;
             ext.forceToSummary = forceSummaryCheckbox.selected;
+            ext.fixedSort = fixedSortComboBox.selectedItem as String;
+            ext.fixedSortOrder = fixedSortStepper.value;
             analysisItem.reportFieldExtension = ext;
         }
 
@@ -31,6 +33,8 @@
                 sortable = ext.sortable;
                 ignoreOnSummary = ext.ignoreOnSummary;
                 forceToSummary = ext.forceToSummary;
+                fixedSort = ext.fixedSort;
+                fixedSortOrder = ext.fixedSortOrder;
             }
         }
 
@@ -48,6 +52,12 @@
 
         [Bindable]
         private var customFontSize:String;
+
+        [Bindable]
+        private var fixedSortOrder:int;
+
+        [Bindable]
+        private var fixedSort:String = "Default";
 
         [Bindable]
         private var ignoreOnSummary:Boolean;
@@ -71,9 +81,20 @@
                 </mx:dataProvider>
             </mx:ComboBox>
         </mx:FormItem>
-        <!--<mx:FormItem label="Font Size:">
-            <mx:TextInput id="fontSizeInput" text="{customFontSize}"/>
-        </mx:FormItem>-->
+        <mx:FormItem label="Fixed Sort:">
+            <mx:ComboBox id="fixedSortComboBox" selectedItem="{fixedSort}">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:String>Default</mx:String>
+                        <mx:String>Ascending</mx:String>
+                        <mx:String>Descending</mx:String>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:FormItem>
+        <mx:FormItem label="Fixed Sort Order:">
+            <mx:NumericStepper id="fixedSortStepper" value="{fixedSortOrder}"/>
+        </mx:FormItem>
         <mx:FormItem label="Fixed Width:">
             <mx:TextInput id="fixedWidthInput" text="{fixedWidth}"/>
         </mx:FormItem>
