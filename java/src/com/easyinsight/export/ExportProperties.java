@@ -9,6 +9,7 @@ public class ExportProperties {
     private boolean embedded;
     private boolean emailed;
     private String embedKey;
+    private boolean includeHeaders = true;
 
     public ExportProperties() {
 
@@ -18,6 +19,14 @@ public class ExportProperties {
         this.emailed = emailed;
         this.embedded = embedded;
         this.embedKey = embedKey;
+    }
+
+    public boolean isIncludeHeaders() {
+        return includeHeaders;
+    }
+
+    public void setIncludeHeaders(boolean includeHeaders) {
+        this.includeHeaders = includeHeaders;
     }
 
     public String getEmbedKey() {

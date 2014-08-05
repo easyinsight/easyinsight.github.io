@@ -13,7 +13,7 @@ public class MultiSummaryEmbeddedController implements IEmbeddedReportController
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportDataService = EmbeddedHTMLDataService;
-        factory.reportRenderer = "TopoModule.swf";
+        factory.reportRenderer = "MultiSummaryModule.swf";
         return factory;
     }
 }

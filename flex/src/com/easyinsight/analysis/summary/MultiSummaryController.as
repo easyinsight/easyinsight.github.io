@@ -14,7 +14,7 @@ public class MultiSummaryController implements IReportController {
         var factory:DataViewFactory = new DataViewFactory();
         factory.reportDataService = HTMLDataService;
         factory.reportControlBar = MultiSummaryControlBar;
-        factory.reportRenderer = "TopoModule.swf";
+        factory.reportRenderer = "MultiSummaryModule.swf";
         factory.newDefinition = MultiSummaryDefinition;
         return factory;
     }

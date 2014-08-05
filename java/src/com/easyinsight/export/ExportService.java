@@ -3836,7 +3836,7 @@ public class ExportService {
     }
 
     public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException{
-        return createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
+        return createExportMetadata(SecurityUtil.getAccountID(false), conn, new InsightRequestMetadata());
     }
 
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
@@ -4078,44 +4078,75 @@ public class ExportService {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
         }
 
+        Map<AnalysisItem, Link> linkMap;
         sb.append("<table style=\"").append(tableStyle).append("\">");
-        sb.append("<thead>");
-        sb.append("<tr style=\"").append(headerTRStyle).append("\">");
-        Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
-        for (AnalysisItem analysisItem : items) {
-            if (analysisItem.getLinks() != null) {
-                Link defaultLink = null;
-                if (includeTitle) {
-                    for (Link link : analysisItem.getLinks()) {
-                        if (link.isDefaultLink() && link instanceof URLLink) {
-                            defaultLink = link;
-                        } else if (defaultLink == null && link instanceof URLLink) {
-                            defaultLink = link;
+        if (exportProperties.isIncludeHeaders()) {
+            sb.append("<thead>");
+            sb.append("<tr style=\"").append(headerTRStyle).append("\">");
+
+            linkMap = new HashMap<AnalysisItem, Link>();
+            for (AnalysisItem analysisItem : items) {
+                if (analysisItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && analysisItem.getLinks().size() == 1) {
+                            defaultLink = analysisItem.getLinks().get(0);
                         }
                     }
-                } else {
-                    for (Link link : analysisItem.getLinks()) {
-                        if (link.isDefaultLink()) {
-                            defaultLink = link;
-                        }
-                    }
-                    if (defaultLink == null && analysisItem.getLinks().size() == 1) {
-                        defaultLink = analysisItem.getLinks().get(0);
+
+                    linkMap.put(analysisItem, defaultLink);
+                }
+                for (AnalysisItem headerItem : listDataResults.getHeaders()) {
+                    if (headerItem == analysisItem) {
+                        sb.append("<th style=\"").append(thStyle).append("\">");
+                        sb.append(headerItem.toUnqualifiedDisplay());
+                        sb.append("</th>");
                     }
                 }
-
-                linkMap.put(analysisItem, defaultLink);
             }
-            for (AnalysisItem headerItem : listDataResults.getHeaders()) {
-                if (headerItem == analysisItem) {
-                    sb.append("<th style=\"").append(thStyle).append("\">");
-                    sb.append(headerItem.toUnqualifiedDisplay());
-                    sb.append("</th>");
+            sb.append("</tr>");
+            sb.append("</thead>");
+        } else {
+            linkMap = new HashMap<AnalysisItem, Link>();
+            for (AnalysisItem analysisItem : items) {
+                if (analysisItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && analysisItem.getLinks().size() == 1) {
+                            defaultLink = analysisItem.getLinks().get(0);
+                        }
+                    }
+
+                    linkMap.put(analysisItem, defaultLink);
                 }
             }
         }
-        sb.append("</tr>");
-        sb.append("</thead>");
         sb.append("<tbody>");
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr style=\"").append(trStyle).append("\">");
@@ -4329,36 +4360,68 @@ public class ExportService {
                 "}");
         sb.append("</style>");
         sb.append("<table style=\"margin-bottom:0;font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
-        sb.append("<thead>");
-        sb.append("<tr>");
+
+
         Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
 
-        for (AnalysisItem headerItem : headers) {
-            sb.append("<th style=\"text-align:center\">");
-            sb.append(headerItem.toUnqualifiedDisplay());
-            sb.append("</th>");
-            if (headerItem.getLinks() != null) {
-                Link defaultLink = null;
-                if (includeTitle) {
-                    for (Link link : headerItem.getLinks()) {
-                        if (link.isDefaultLink() && link instanceof URLLink) {
-                            defaultLink = link;
-                        } else if (defaultLink == null && link instanceof URLLink) {
-                            defaultLink = link;
-                        }
-                    }
-                } else {
-                    for (Link link : headerItem.getLinks()) {
-                        if (link.isDefaultLink()) {
-                            defaultLink = link;
-                        }
-                    }
-                    if (defaultLink == null && headerItem.getLinks().size() == 1) {
-                        defaultLink = headerItem.getLinks().get(0);
-                    }
-                }
+        if (exportProperties.isIncludeHeaders()) {
+            sb.append("<thead>");
+            sb.append("<tr>");
 
-                linkMap.put(headerItem, defaultLink);
+
+            for (AnalysisItem headerItem : headers) {
+                sb.append("<th style=\"text-align:center\">");
+                sb.append(headerItem.toUnqualifiedDisplay());
+                sb.append("</th>");
+                if (headerItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && headerItem.getLinks().size() == 1) {
+                            defaultLink = headerItem.getLinks().get(0);
+                        }
+                    }
+
+                    linkMap.put(headerItem, defaultLink);
+                }
+            }
+        } else {
+            for (AnalysisItem headerItem : headers) {
+                if (headerItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && headerItem.getLinks().size() == 1) {
+                            defaultLink = headerItem.getLinks().get(0);
+                        }
+                    }
+
+                    linkMap.put(headerItem, defaultLink);
+                }
             }
         }
         sb.append("</tr>");

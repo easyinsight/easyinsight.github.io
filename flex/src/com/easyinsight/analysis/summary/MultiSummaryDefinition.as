@@ -18,9 +18,13 @@ public class MultiSummaryDefinition extends AnalysisDefinition {
     public var coreItems:ArrayCollection = new ArrayCollection();
     public var key:AnalysisItem;
     public var reports:ArrayCollection = new ArrayCollection();
-    public var headerColor1:int;
-    public var headerColor2:int;
+    public var headerColor1:int = 0xFFFFFF;
+    public var headerColor2:int = 0xEEEEEE;
     public var headerTextColor:int;
+    public var defaultToExpanded:Boolean;
+    public var nestedReportHeaders:Boolean;
+    public var nestedReportTitles:Boolean;
+    public var nestedFontSize:int;
     public var defaultMeasureAlignment:String;
     public var defaultGroupingAlignnment:String;
     public var defaultDateAlignment:String;
