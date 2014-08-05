@@ -13,7 +13,6 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 
-import java.awt.*;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
@@ -154,7 +153,7 @@ public class MultiSummaryData {
         StringBuilder sb = new StringBuilder();
         sb.append("<table>");
         sb.append("<thead>");
-        sb.append("<tr style=\"background-color:").append(ExportService.createHexString(report.getHeaderColor1())).append("\">");
+        sb.append("<tr style=\"font-size:").append(report.getFontSize()).append("px;background-color:").append(ExportService.createHexString(report.getHeaderColor1())).append("\">");
         sb.append("<th style=\"text-align:left;width:100px\"></th>");
         for (AnalysisItem item : report.getCoreItems()) {
             sb.append("<th style=\"text-align:center;color:").append(ExportService.createHexString(report.getHeaderTextColor())).append("\">").append(item.toUnqualifiedDisplay()).append("</th>");
@@ -268,7 +267,7 @@ public class MultiSummaryData {
 
 
             for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
-                if (report.isIncludeSubHeaders()) {
+                if (report.isNestedReportTitles()) {
                     sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size()).append("\">").append(entry.getKey().getName()).append("</td></tr>");
                 }
                 sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
@@ -347,7 +346,7 @@ public class MultiSummaryData {
 
 
             for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
-                if (report.isIncludeSubHeaders()) {
+                if (report.isNestedReportTitles()) {
                     sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size()).append("\">").append(entry.getKey().getName()).append("</td></tr>");
                 }
                 sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
@@ -400,9 +399,17 @@ public class MultiSummaryData {
             for (IRow row : rows) {
                 pseudoSet.addRow(row);
             }
-            ListDataResults results = (ListDataResults) pseudoSet.toListDataResults(childDefinition.getColumns(), new HashMap<>(), childDefinition);
+            List<AnalysisItem> items = new ArrayList<>();
+            for (AnalysisItem item : childDefinition.getColumns()) {
+                if (!item.toDisplay().equals(report.getKey().toDisplay())) {
+                    items.add(item);
+                }
+            }
+            ListDataResults results = (ListDataResults) pseudoSet.toListDataResults(items, new HashMap<>(), childDefinition);
             childDefinition.setFontSize(10);
-            return ExportService.listReportToHTMLTableWithActualCSS(childDefinition, results, conn, insightRequestMetadata, false, new ExportProperties());
+            ExportProperties exportProperties = new ExportProperties();
+            exportProperties.setIncludeHeaders(report.isNestedReportHeaders());
+            return ExportService.listReportToHTMLTableWithActualCSS(childDefinition, results, conn, insightRequestMetadata, false, exportProperties);
         }
 
         @Override
@@ -411,9 +418,17 @@ public class MultiSummaryData {
             for (IRow row : rows) {
                 pseudoSet.addRow(row);
             }
-            ListDataResults results = (ListDataResults) pseudoSet.toListDataResults(childDefinition.getColumns(), new HashMap<>(), childDefinition);
-            childDefinition.setFontSize(10);
-            return ExportService.listReportToHTMLTable(childDefinition, results, conn, insightRequestMetadata, false, new ExportProperties());
+            List<AnalysisItem> items = new ArrayList<>();
+            for (AnalysisItem item : childDefinition.getColumns()) {
+                if (!item.toDisplay().equals(report.getKey().toDisplay())) {
+                    items.add(item);
+                }
+            }
+            ListDataResults results = (ListDataResults) pseudoSet.toListDataResults(items, new HashMap<>(), childDefinition);
+            childDefinition.setFontSize(report.getNestedFontSize());
+            ExportProperties exportProperties = new ExportProperties();
+            exportProperties.setIncludeHeaders(report.isNestedReportHeaders());
+            return ExportService.listReportToHTMLTable(childDefinition, results, conn, insightRequestMetadata, false, exportProperties);
         }
 
         @Override
