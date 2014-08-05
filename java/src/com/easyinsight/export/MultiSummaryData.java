@@ -459,6 +459,7 @@ public class MultiSummaryData {
             childDefinition.setFontSize(report.getNestedFontSize());
             ExportProperties exportProperties = new ExportProperties();
             exportProperties.setIncludeHeaders(report.isNestedReportHeaders());
+            exportProperties.setEmailed(true);
             return ExportService.listReportToHTMLTable(childDefinition, results, conn, insightRequestMetadata, false, exportProperties);
         }
 
