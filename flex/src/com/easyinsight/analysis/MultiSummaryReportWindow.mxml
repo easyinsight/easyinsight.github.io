@@ -55,7 +55,7 @@
             }
         }
         ]]></mx:Script>
-    <mx:Text width="330" text="You can add the fields of another report to this report through this window. For example, you might have a report with a set of complex calculations. Rather than trying to replicate the same calculations inside this report, you can refer directly to the other report and reuse the same fields."/>
+    <mx:Text width="330" text="These nested reports will be displayed under each row in the multi summary report, joined by the field you've specified as the key."/>
     <mx:HBox>
         <util:SaveButton label="Add Report..." click="addReport()" fontSize="12"/>
         <util:SaveButton label="Delete Selected" click="deleteSelected()" fontSize="12"/>
@@ -63,7 +63,7 @@
     <mx:DataGrid dataProvider="{addonReports}">
         <mx:columns>
             <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.util.GenericGridCheckbox" width="30" sortable="false" fontSize="12"/>
-            <mx:DataGridColumn headerText="Report" dataField="reportName" width="300" fontSize="12"/>
+            <mx:DataGridColumn headerText="Report" dataField="name" width="300" fontSize="12"/>
         </mx:columns>
     </mx:DataGrid>
     <mx:HBox width="100%" horizontalAlign="center">
