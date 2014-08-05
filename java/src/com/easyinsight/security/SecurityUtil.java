@@ -686,8 +686,12 @@ public class SecurityUtil {
     public static int authorizeGroup(long groupID, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if(userPrincipal == null) {
+                throw new SecurityException();
+            }
         }
+
         int role = getRoleForGroup(userPrincipal.getUserID(), groupID);
         if (role > requiredRole) {
             throw new SecurityException();
