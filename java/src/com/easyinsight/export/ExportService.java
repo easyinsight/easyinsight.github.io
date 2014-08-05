@@ -561,6 +561,7 @@ public class ExportService {
                         "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
                 ExportProperties exportProperties = new ExportProperties();
+                exportProperties.setEmailed(true);
                 String html = DeliveryScheduledTask.createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, includeTitle, exportProperties);
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
