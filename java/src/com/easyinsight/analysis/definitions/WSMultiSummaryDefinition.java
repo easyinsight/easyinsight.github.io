@@ -3,6 +3,7 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,14 +30,41 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
     private String defaultMeasureAlignment;
     private String defaultGroupingAlignnment;
     private String defaultDateAlignment;
-    private boolean includeSubHeaders;
+    private boolean nestedReportTitles;
+    private boolean nestedReportHeaders;
+    private int nestedFontSize;
+    private boolean defaultToExpanded;
 
-    public boolean isIncludeSubHeaders() {
-        return includeSubHeaders;
+    public boolean isNestedReportHeaders() {
+        return nestedReportHeaders;
     }
 
-    public void setIncludeSubHeaders(boolean includeSubHeaders) {
-        this.includeSubHeaders = includeSubHeaders;
+    public void setNestedReportHeaders(boolean nestedReportHeaders) {
+        this.nestedReportHeaders = nestedReportHeaders;
+    }
+
+    public int getNestedFontSize() {
+        return nestedFontSize;
+    }
+
+    public void setNestedFontSize(int nestedFontSize) {
+        this.nestedFontSize = nestedFontSize;
+    }
+
+    public boolean isDefaultToExpanded() {
+        return defaultToExpanded;
+    }
+
+    public void setDefaultToExpanded(boolean defaultToExpanded) {
+        this.defaultToExpanded = defaultToExpanded;
+    }
+
+    public boolean isNestedReportTitles() {
+        return nestedReportTitles;
+    }
+
+    public void setNestedReportTitles(boolean nestedReportTitles) {
+        this.nestedReportTitles = nestedReportTitles;
     }
 
     public String getDefaultMeasureAlignment() {
@@ -185,12 +213,17 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         super.populateProperties(properties);
         headerColor1 = (int) findNumberProperty(properties, "headerColor1", 0xffffff);
         headerColor2 = (int) findNumberProperty(properties, "headerColor2", 0xEFEFEF);
+
         headerTextColor = (int) findNumberProperty(properties, "headerTextColor", 0x000000);
         summaryTextColor = (int) findNumberProperty(properties, "summaryTextColor", 0);
         summaryBackgroundColor = (int) findNumberProperty(properties, "summaryBackgroundColor", 0xaaaaaa);
         defaultMeasureAlignment = findStringProperty(properties, "defaultMeasureAlignment", "none");
         defaultDateAlignment = findStringProperty(properties, "defaultDateAlignment", "none");
         defaultGroupingAlignnment = findStringProperty(properties, "defaultGroupingAlignment", "none");
+
+        nestedReportTitles = findBooleanProperty(properties, "nestedReportTitles", false);
+        nestedReportHeaders = findBooleanProperty(properties, "nestedReportHeaders", true);
+        defaultToExpanded = findBooleanProperty(properties, "defaultToExpanded", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -203,6 +236,23 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         properties.add(new ReportStringProperty("defaultMeasureAlignment", defaultMeasureAlignment));
         properties.add(new ReportStringProperty("defaultDateAlignment", defaultDateAlignment));
         properties.add(new ReportStringProperty("defaultGroupingAlignment", defaultGroupingAlignnment));
+        properties.add(new ReportBooleanProperty("nestedReportTitles", nestedReportTitles));
+        properties.add(new ReportBooleanProperty("nestedReportHeaders", nestedReportHeaders));
+        properties.add(new ReportBooleanProperty("defaultToExpanded", defaultToExpanded));
         return properties;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            if (applicationSkin.isHeaderStartEnabled()) {
+                setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isHeaderEndEnabled()) {
+                setHeaderColor2(applicationSkin.getHeaderEnd());
+            }
+            if (applicationSkin.isReportHeaderTextColorEnabled()) {
+                setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
+            }
+        }
     }
 }
