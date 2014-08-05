@@ -2,6 +2,7 @@ package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.TextReportFieldExtension;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
@@ -19,18 +20,41 @@ public class SortComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         final List<AnalysisItem> sortItems = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
 
+        int fixedSequenceMax = 0;
+        Set<AnalysisItem> setByFixed = new HashSet<>();
+        for (AnalysisItem test : sortItems) {
+            if (test.getReportFieldExtension() != null && test.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                TextReportFieldExtension ext = (TextReportFieldExtension) test.getReportFieldExtension();
+                if (!"Default".equals(ext.getFixedSort())) {
+                    test.setSortSequence(ext.getFixedSortOrder() + 1);
+                    fixedSequenceMax = Math.max(ext.getFixedSortOrder(), fixedSequenceMax);
+                    test.setSort("Ascending".equals(ext.getFixedSort()) ? 1 : 2);
+                    setByFixed.add(test);
+                }
+            }
+        }
+
         Iterator<AnalysisItem> iter = sortItems.iterator();
         while (iter.hasNext()) {
             AnalysisItem item = iter.next();
+
             if (item.getSortSequence() == 0 || item.getSort() == 0) {
                 iter.remove();
             }
         }
 
+
+
         boolean needToSort = !sortItems.isEmpty();
 
         if (!needToSort) {
             return dataSet;
+        }
+
+        for (AnalysisItem item : sortItems) {
+            if (!setByFixed.contains(item)) {
+                item.setSortSequence(item.getSortSequence() + fixedSequenceMax);
+            }
         }
 
         Collections.sort(sortItems, new Comparator<AnalysisItem>() {
