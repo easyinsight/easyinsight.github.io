@@ -726,10 +726,18 @@ public class ExportService {
                         if (simple && j == 0) {
                             sb.append("<td style=\"").append(headerCell).append("\"");
                             sb.append(" colspan=\"").append(columnSize - 2).append("\">");
-                            sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                            if (crosstabValue.getHeader() instanceof AnalysisMeasure) {
+                                sb.append(crosstabValue.getValue().toString());
+                            } else {
+                                sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                            }
                         } else {
                             sb.append("<td style=\"" + headerCell + "\">");
-                            sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                            if (crosstabValue.getHeader() instanceof AnalysisMeasure) {
+                                sb.append(crosstabValue.getValue().toString());
+                            } else {
+                                sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                            }
                         }
                     }
                     sb.append("</td>");
@@ -4054,11 +4062,13 @@ public class ExportService {
     public static String listReportToHTMLTable(WSAnalysisDefinition report, ListDataResults listDataResults, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle,
                                                ExportProperties exportProperties) throws SQLException {
 
+        boolean lineNumbers = false;
         if (report.getReportType() == WSAnalysisDefinition.LIST) {
             WSListDefinition list = (WSListDefinition) report;
             if (list.isSummaryTotal()) {
                 listDataResults.summarize();
             }
+            lineNumbers = list.isShowLineNumbers();
         }
 
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
@@ -4085,6 +4095,10 @@ public class ExportService {
             sb.append("<tr style=\"").append(headerTRStyle).append("\">");
 
             linkMap = new HashMap<AnalysisItem, Link>();
+            if (lineNumbers) {
+                sb.append("<th style=\"").append(thStyle).append("\">");
+                sb.append("</th>");
+            }
             for (AnalysisItem analysisItem : items) {
                 if (analysisItem.getLinks() != null) {
                     Link defaultLink = null;
@@ -4148,8 +4162,12 @@ public class ExportService {
             }
         }
         sb.append("<tbody>");
+        int rowCount = 1;
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr style=\"").append(trStyle).append("\">");
+            if (lineNumbers) {
+                sb.append("<td style=\""+tdStyle+"center;width:60px\">").append(String.valueOf(rowCount++)).append("</td>");
+            }
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < listDataResults.getHeaders().length; i++) {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
@@ -4344,10 +4362,12 @@ public class ExportService {
         }
         String backgroundColor1 = "#f9f9f9";
         String backgroundColor2 = "#ffffff";
+        boolean lineNumbers = false;
         if (report instanceof WSListDefinition) {
             WSListDefinition list = (WSListDefinition) report;
             backgroundColor1 = createHexString(list.getRowColor1());
             backgroundColor2 = createHexString(list.getRowColor2());
+            lineNumbers = list.isShowLineNumbers();
         }
         sb.append("<style type=\"text/css\">").
                 append(".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(odd) > td,\n" +
@@ -4367,7 +4387,9 @@ public class ExportService {
         if (exportProperties.isIncludeHeaders()) {
             sb.append("<thead>");
             sb.append("<tr>");
-
+            if (lineNumbers) {
+                sb.append("<th></th>");
+            }
 
             for (AnalysisItem headerItem : headers) {
                 sb.append("<th style=\"text-align:center\">");
@@ -4427,8 +4449,12 @@ public class ExportService {
         sb.append("</tr>");
         sb.append("</thead>");
         sb.append("<tbody>");
+        int rowCount = 1;
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr>");
+            if (lineNumbers) {
+                sb.append("<td style=\"width:60px\">").append(String.valueOf(rowCount++)).append("</td>");
+            }
             for (AnalysisItem analysisItem : headers) {
 
                 StringBuilder styleString = new StringBuilder("text-align:");

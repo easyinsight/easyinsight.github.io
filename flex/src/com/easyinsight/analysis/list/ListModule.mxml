@@ -98,7 +98,7 @@
             } catch (e:Error) {
 
             }
-            return "0";
+            return "";
         }
 
         private function onKeywordState(event:FlexEvent):void {
@@ -296,7 +296,7 @@
                 var initColumn:int = 0;
                 if (def.showLineNumbers) {
                     var lineNumberColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                    lineNumberColumn.width = 30;
+                    lineNumberColumn.width = 50;
                     lineNumberColumn.sortable = false;
                     lineNumberColumn.labelFunction = rowNumber;
                     columns[0] = lineNumberColumn;
