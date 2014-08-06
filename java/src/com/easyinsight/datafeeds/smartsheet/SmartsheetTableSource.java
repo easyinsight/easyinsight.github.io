@@ -67,18 +67,20 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
         }
         if (rebuildFields) {
             if (getDataFeedID() != 0) {
-                List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-                Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
+                List<AnalysisItem> fields = new ArrayList<>();
+                Map<String, AnalysisItem> map = new HashMap<>();
                 for (AnalysisItem analysisItem : getFields()) {
                     fields.add(analysisItem);
                     map.put(analysisItem.getKey().toKeyString(), analysisItem);
                 }
                 boolean discoveryRequired = false;
-                Map<String, AnalysisItem> newFields = new HashMap<String, AnalysisItem>();
+                Map<String, AnalysisItem> newFields = new HashMap<>();
                 List columns = (List) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table + "/columns");
+                Set<String> keys = new HashSet<>();
                 for (Object o : columns) {
                     Map column = (Map) o;
                     String id = column.get("id").toString();
+                    keys.add(id);
                     AnalysisItem analysisItem = map.get(id);
                     if (analysisItem == null) {
                         String title = column.get("title").toString();
@@ -121,12 +123,20 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                         //for (AnalysisItem item : newFields.values()) {
                         List<AnalysisItem> generatedFields = guesser.createFeedItems();
                         for (AnalysisItem item : generatedFields) {
+                            keys.remove(item.getKey().toKeyString());
                             AnalysisItem existing = newFields.get(item.getKey().toKeyString());
                             item.setDisplayName(existing.getDisplayName());
                         }
                         fields.addAll(generatedFields);
                         //}
                     }
+                    List<AnalysisItem> others = new ArrayList<>();
+                    for (Map.Entry<String, AnalysisItem> entry : newFields.entrySet()) {
+                        if (keys.contains(entry.getKey())) {
+                            others.add(entry.getValue());
+                        }
+                    }
+                    fields.addAll(others);
                 } else if (newFields.size() > 0) {
                     fields.addAll(newFields.values());
                 }
@@ -150,28 +160,56 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        Map results = (Map) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table);
-        List rows = (List) results.get("rows");
-
-        DataSet dataSet = new DataSet();
-
-        for (int i = 0; i < rows.size(); i++ ){
-            Object obj = rows.get(i);
-            IRow row = dataSet.createRow();
-            Map rowMap = (Map) obj;
-            List cells = (List) rowMap.get("cells");
-            for (Object cellObj : cells) {
-                Map cell = (Map) cellObj;
-                String columnID = cell.get("columnId").toString();
-                Key key = keys.get(columnID);
-                Object valueObj = cell.get("value");
-                if (key != null && valueObj != null) {
-                    row.addValue(key, valueObj.toString());
+        try {
+            Map results = (Map) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table);
+            Map<String, AnalysisItem> fieldMap = new HashMap<>();
+            for (AnalysisItem field : getFields()) {
+                if (field.isConcrete()) {
+                    fieldMap.put(field.getKey().toKeyString(), field);
                 }
             }
-        }
+            List rows = (List) results.get("rows");
 
-        return dataSet;
+            DataSet dataSet = new DataSet();
+
+            for (int i = 0; i < rows.size(); i++ ){
+                Object obj = rows.get(i);
+                IRow row = dataSet.createRow();
+                Map rowMap = (Map) obj;
+                List cells = (List) rowMap.get("cells");
+                for (Object cellObj : cells) {
+                    Map cell = (Map) cellObj;
+                    String columnID = cell.get("columnId").toString();
+                    Key key = keys.get(columnID);
+                    Object valueObj = cell.get("value");
+                    if (key != null && valueObj != null) {
+                        AnalysisItem item = fieldMap.get(columnID);
+                        if (item != null && item.hasType(AnalysisItemTypes.DIMENSION)) {
+                            try {
+                                double dVal = Double.parseDouble(valueObj.toString());
+                                int asInt = (int) dVal;
+                                double asDAgain = (double) asInt;
+                                if ((asDAgain - asInt) < .0001) {
+                                    System.out.println(asInt);
+                                    row.addValue(key, new StringValue(String.valueOf(asInt)));
+                                } else {
+                                    row.addValue(key, valueObj.toString());
+                                }
+                            } catch (NumberFormatException e) {
+                                row.addValue(key, valueObj.toString());
+                            }
+                        } else {
+                            row.addValue(key, valueObj.toString());
+                        }
+                    }
+                }
+            }
+
+            return dataSet;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -273,8 +311,6 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     postMethod.setParameter("code", code);
                     postMethod.setParameter("redirect_uri", "https://www.easy-insight.com/app/oauth");
                     httpClient.executeMethod(postMethod);
-                    String responseBody = new String(postMethod.getResponseBody());
-                    System.out.println("blah");
                     Map result = (Map) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(postMethod.getResponseBodyAsStream());
                     accessToken = result.get("access_token").toString();
                     refreshToken = result.get("refresh_token").toString();
@@ -288,7 +324,7 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     public Collection<BasecampNextAccount> getTables() {
@@ -376,15 +412,6 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
             throw new RuntimeException("Smartsheet could not be reached due to a large number of current users, please try again in a bit.");
         }
         return jsonObject;
-    }
-
-    public void beforeSave(EIConnection conn) throws Exception {
-        super.beforeSave(conn);
-        //setRebuildFields(false);
-    }
-
-    public boolean rebuildFieldWindow() {
-        return true;
     }
 
     protected boolean otherwiseChanged() {
