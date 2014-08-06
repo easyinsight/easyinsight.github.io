@@ -4,9 +4,11 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.preferences.ApplicationSkin;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -195,6 +197,14 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
                 return DataService.getMultiSummaryDataResults(this, insightRequestMetadata, conn).toHTML(insightRequestMetadata, conn);
             }
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Workbook toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        try {
+            return DataService.getMultiSummaryDataResults(this, insightRequestMetadata, conn).toExcel(insightRequestMetadata, conn, true);
+        } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
     }

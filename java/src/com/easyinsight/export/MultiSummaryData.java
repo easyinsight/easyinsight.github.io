@@ -12,6 +12,10 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -87,8 +91,52 @@ public class MultiSummaryData {
         this.rows = rows;
     }
 
-    public void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+    public Workbook toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, boolean format2007) throws SQLException {
+        Workbook workbook;
+        if (format2007) {
+            workbook = new XSSFWorkbook();
+        } else {
+            workbook = new HSSFWorkbook();
+        }
+        Sheet sheet = workbook.createSheet();
+        workbook.setSheetName(0, "Data");
 
+        Map<ExportService.StyleKey, ExportService.Style> styleMap = new HashMap<>();
+
+
+        org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(0);
+        int i = 0;
+        for (AnalysisItem analysisItem : report.getCoreItems()) {
+
+            TextReportFieldExtension textReportFieldExtension = null;
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+            }
+
+            int width;
+            if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
+                width = textReportFieldExtension.getFixedWidth() / 15 * 256;
+            } else if (analysisItem.getWidth() > 0) {
+                width = Math.max((analysisItem.getWidth() / 15 * 256), 5000);
+            } else {
+                width = 5000;
+            }
+
+            sheet.setColumnWidth(i, width);
+
+            Cell headerCell = headerRow.createCell(i++);
+            headerCell.setCellValue(ExportService.createRichTextString(analysisItem.toUnqualifiedDisplay(), headerCell));
+            Font font = workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFont(font);
+            headerCell.setCellStyle(cellStyle);
+        }
+        int rowCount = 1;
+        for (HigherLevel higherLevel : higherLevels) {
+            rowCount = higherLevel.toExcel(insightRequestMetadata, conn, sheet, styleMap, workbook, rowCount);
+        }
+        return workbook;
     }
 
     public Element toPDF(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws DocumentException, SQLException {
@@ -162,7 +210,7 @@ public class MultiSummaryData {
         sb.append("<thead>");
         sb.append("<tr style=\"font-size:").append(report.getFontSize()).append("px;background-color:").append(ExportService.createHexString(report.getHeaderColor1())).append("\">");
         for (AnalysisItem item : report.getCoreItems()) {
-            sb.append("<th style=\"text-align:center;color:").append(ExportService.createHexString(report.getHeaderTextColor())).append("\">").append(item.toUnqualifiedDisplay()).append("</th>");
+            sb.append("<th style=\"border-style:solid;padding:3px;border-width:1px;text-align:center;color:").append(ExportService.createHexString(report.getHeaderTextColor())).append("\">").append(item.toUnqualifiedDisplay()).append("</th>");
         }
         sb.append("</tr>");
         sb.append("</thead>");
@@ -230,11 +278,34 @@ public class MultiSummaryData {
 
         @Override
         public String toHTMLForEmail(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+            boolean atLeastOneRow = false;
+            for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
+                WSListDefinition childReport = reportMap.get(entry.getKey());
+                List<AnalysisItem> items = new ArrayList<>();
+                for (AnalysisItem item : childReport.getColumns()) {
+                    if (!addedJoinColumn || !item.toDisplay().equals(report.getKey().toDisplay())) {
+                        items.add(item);
+                    }
+                }
+
+                for (IRow row : entry.getValue()) {
+                    for (AnalysisItem item : items) {
+                        Value value = row.getValue(item);
+                        if (value.type() != Value.EMPTY) {
+                            atLeastOneRow = true;
+                            break;
+                        }
+                    }
+                    if (atLeastOneRow) {
+                        break;
+                    }
+                }
+            }
             StringBuilder sb = new StringBuilder();
             sb.append("<tr>");
 
             for (AnalysisItem analysisItem : report.getCoreItems()) {
-                StringBuilder styleString = new StringBuilder("text-align:");
+                StringBuilder styleString = new StringBuilder("border-style:solid;padding:3px;border-width:1px;text-align:");
                 String align = "left";
                 if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                     TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
@@ -272,15 +343,18 @@ public class MultiSummaryData {
             sb.append("</tr>");
 
 
-            for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
-                if (report.isNestedReportTitles()) {
-                    sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size()).append("\">").append(entry.getKey().getName()).append("</td></tr>");
+            if (atLeastOneRow) {
+                for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
+                    if (report.isNestedReportTitles()) {
+                        WSListDefinition childReport = reportMap.get(entry.getKey());
+                        sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size()).append("\">").append(childReport.getName()).append("</td></tr>");
+                    }
+                    sb.append("<tr style=\"min-height:0\"><td style=\"padding-left:10px;border-width:0;border-style:none;min-height:0\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
+                    WSListDefinition childReport = reportMap.get(entry.getKey());
+                    LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
+                    sb.append(lowerLevel.toHTMLForEmail(insightRequestMetadata, conn));
+                    sb.append("</td></tr>");
                 }
-                sb.append("<tr style=\"min-height:0\"><td style=\"border-width:0;border-style:none;min-height:0\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
-                WSListDefinition childReport = reportMap.get(entry.getKey());
-                LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
-                sb.append(lowerLevel.toHTMLForEmail(insightRequestMetadata, conn));
-                sb.append("</td></tr>");
             }
 
             return sb.toString();
@@ -303,16 +377,64 @@ public class MultiSummaryData {
         }
 
         @Override
-        public void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        public int toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Sheet sheet, Map<ExportService.StyleKey, ExportService.Style> styleMap,
+                            Workbook workbook, int rowCount) throws SQLException {
+            Row row = sheet.createRow(rowCount);
+            int rowIndex = rowCount;
+            int cellIndex = 0;
+            for (AnalysisItem analysisItem : report.getCoreItems()) {
+                Value value = this.row.getValue(analysisItem);
+                new ExportService().getStyle(styleMap, analysisItem, workbook, exportMetadata, value).format(row, cellIndex, value, analysisItem, exportMetadata.cal, insightRequestMetadata);
+                cellIndex++;
+            }
+            rowIndex++;
+            for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
+                if (entry.getValue().size() > 0) {
+                    WSListDefinition childReport = reportMap.get(entry.getKey());
+                    /*if (report.isNestedReportTitles()) {
+                        sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">").append(childReport.getName()).append("</td></tr>");
+                    }*/
+                    /*sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
 
+                    if (report.isDefaultToExpanded()) {
+                        sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse\">");
+                    } else {
+                        sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse collapse\">");
+                    }*/
+
+
+                    LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
+
+                    lowerLevel.toExcel(insightRequestMetadata, conn, sheet, new HashMap<>(), workbook, rowIndex);
+                    rowIndex += entry.getValue().size();
+                }
+            }
+            return rowIndex;
         }
 
         public String toHTML(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
 
             boolean atLeastOneRow = false;
-            for (List<IRow> rows : map.values()) {
-                if (rows.size() > 0) {
-                    atLeastOneRow = true;
+            for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
+                WSListDefinition childReport = reportMap.get(entry.getKey());
+                List<AnalysisItem> items = new ArrayList<>();
+                for (AnalysisItem item : childReport.getColumns()) {
+                    if (!addedJoinColumn || !item.toDisplay().equals(report.getKey().toDisplay())) {
+                        items.add(item);
+                    }
+                }
+
+                for (IRow row : entry.getValue()) {
+                    for (AnalysisItem item : items) {
+                        Value value = row.getValue(item);
+                        if (value.type() != Value.EMPTY) {
+                            atLeastOneRow = true;
+                            break;
+                        }
+                    }
+                    if (atLeastOneRow) {
+                        break;
+                    }
                 }
             }
             StringBuilder sb = new StringBuilder();
@@ -420,9 +542,28 @@ public class MultiSummaryData {
         }
 
         @Override
-        public void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
-
+        public int toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Sheet sheet, Map<ExportService.StyleKey, ExportService.Style> styleMap, Workbook workbook, int rowCount) throws SQLException {
+            for (IRow dataRow : rows) {
+                Row row = sheet.createRow(rowCount);
+                int cellIndex = 0;
+                for (AnalysisItem analysisItem : childDefinition.getColumns()) {
+                    if (!addedJoinColumn || !analysisItem.toDisplay().equals(report.getKey().toDisplay())) {
+                        Value value = dataRow.getValue(analysisItem);
+                        TextValueExtension ext = (TextValueExtension) value.getValueExtension();
+                        if (ext == null) {
+                            ext = new TextValueExtension();
+                            ext.setBackgroundColor(0xEEEEEE);
+                            value.setValueExtension(ext);
+                        }
+                        new ExportService().getStyle(styleMap, analysisItem, workbook, exportMetadata, value).format(row, cellIndex, value, analysisItem, exportMetadata.cal, insightRequestMetadata);
+                        cellIndex++;
+                    }
+                }
+                rowCount++;
+            }
+            return rowCount;
         }
+
 
         public String toHTML(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
             DataSet pseudoSet = new DataSet();
@@ -487,7 +628,8 @@ public class MultiSummaryData {
 
         public abstract void toElement(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Element parent) throws SQLException, DocumentException;
 
-        public abstract void toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException;
+        public abstract int toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Sheet sheet, Map<ExportService.StyleKey, ExportService.Style> styleMap,
+                            Workbook workbook, int rowCount) throws SQLException;
 
         public abstract String toHTML(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException;
 
