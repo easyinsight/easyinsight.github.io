@@ -19,6 +19,7 @@ import mx.collections.ArrayCollection;
         public var excludeZero:Boolean;
         public var maxColumns:int;
         public var maxRows:int;
+        public var sortByRowSummaries:Boolean;
 
 		public function CrosstabDefinition()
 		{			
