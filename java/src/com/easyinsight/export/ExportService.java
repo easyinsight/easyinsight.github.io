@@ -49,6 +49,8 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.Nullable;
@@ -505,11 +507,7 @@ public class ExportService {
         else SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         try {
-            if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.FORM || analysisDefinition.getReportType() == WSAnalysisDefinition.YTD ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS || analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST ||
-                    analysisDefinition.getReportType() == WSAnalysisDefinition.TREND || analysisDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
+            if (toDirectPDF(analysisDefinition.getReportType())) {
                 analysisDefinition.updateMetadata();
                 toListPDFInDatabase(analysisDefinition, conn, insightRequestMetadata);
             } else {
@@ -564,39 +562,14 @@ public class ExportService {
                 new SendGridEmail().sendAttachmentEmail(email, subject, body, exportResponse.getBytes(), name + ".xls", false, "reports@easy-insight.com", "Easy Insight",
                         "application/excel");
             } else if (format == ReportDelivery.HTML_TABLE) {
-                String html;
-                if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
-                    DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.verticalListToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.YTD) {
-                    html = ExportService.ytdToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
-                    html = ExportService.treeReportToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
-                    html = ExportService.compareYearsToHTMLTable(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
-                    DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.DIAGRAM) {
-                    html = ExportService.kpiReportToHtmlTable(analysisDefinition, conn, insightRequestMetadata, true, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TEXT) {
-                    html = ExportService.textReportToHtml(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
-                    html = ExportService.formReportToHtml(analysisDefinition, conn, insightRequestMetadata, includeTitle);
-                } else {
-                    ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
-                    html = ExportService.listReportToHTMLTable(analysisDefinition, listDataResults, conn, insightRequestMetadata, includeTitle, new ExportProperties(true, true, null));
-                }
+                ExportProperties exportProperties = new ExportProperties();
+                exportProperties.setEmailed(true);
+                String html = DeliveryScheduledTask.createHTMLTable(conn, analysisDefinition, insightRequestMetadata, true, includeTitle, exportProperties);
                 String htmlBody = body + html;
                 new SendGridEmail().sendNoAttachmentEmail(email, subject, htmlBody, true, "reports@easy-insight.com", "Easy Insight");
             } else if (format == ReportDelivery.PDF) {
                 byte[] result;
-                if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST || analysisDefinition.getReportType() == WSAnalysisDefinition.TREE ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB || analysisDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
-                        analysisDefinition.getReportType() == WSAnalysisDefinition.FORM) {
+                if (toDirectPDF(analysisDefinition.getReportType())) {
                     analysisDefinition.updateMetadata();
                     result = toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                 } else {
@@ -621,6 +594,14 @@ public class ExportService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    private boolean toDirectPDF(int reportType) {
+        return (reportType == WSAnalysisDefinition.LIST || reportType == WSAnalysisDefinition.TREE ||
+                reportType == WSAnalysisDefinition.CROSSTAB || reportType == WSAnalysisDefinition.SUMMARY ||
+                reportType == WSAnalysisDefinition.FORM || reportType == WSAnalysisDefinition.YTD ||
+                reportType == WSAnalysisDefinition.COMPARE_YEARS || reportType == WSAnalysisDefinition.VERTICAL_LIST ||
+                reportType == WSAnalysisDefinition.TREND || reportType == WSAnalysisDefinition.MULTI_SUMMARY);
     }
 
     public static String crosstabReportToHTMLTable(WSAnalysisDefinition analysisDefinition, DataSet dataSet, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean includeTitle) throws SQLException {
@@ -3106,7 +3087,7 @@ public class ExportService {
             workbook = new HSSFWorkbook();
         }
 
-        Map<AnalysisItem, Style> styleMap = new HashMap<AnalysisItem, Style>();
+        Map<StyleKey, Style> styleMap = new HashMap<>();
 
         Sheet sheet = workbook.createSheet();
         workbook.setSheetName(0, "Data");
@@ -3124,6 +3105,9 @@ public class ExportService {
             hasData = listYTD(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.COMPARE_YEARS) {
             hasData = listCompareYears(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
+            WSMultiSummaryDefinition multiSummaryDefinition = (WSMultiSummaryDefinition) listDefinition;
+            return multiSummaryDefinition.toExcel(insightRequestMetadata, conn);
         } else {
             hasData = listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
         }
@@ -3133,7 +3117,7 @@ public class ExportService {
         return workbook;
     }
 
-    private static RichTextString createRichTextString(String string, Cell cell) {
+    public static RichTextString createRichTextString(String string, Cell cell) {
         if (cell instanceof HSSFCell) {
             return new HSSFRichTextString(string);
         } else {
@@ -3141,7 +3125,7 @@ public class ExportService {
         }
     }
 
-    private boolean listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
+    private boolean listTrends(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                                InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSKPIDefinition crosstabDefinition = (WSKPIDefinition) report;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(crosstabDefinition, insightRequestMetadata, conn);
@@ -3197,7 +3181,7 @@ public class ExportService {
         return trendDataResults.getTrendOutcomes().size() > 0;
     }
 
-    private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
+    private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
@@ -3205,8 +3189,8 @@ public class ExportService {
         crosstab.crosstab(crosstabDefinition, dataSet);
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
-        NumericStyle measureStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata);
-        NumericStyle summaryStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata);
+        NumericStyle measureStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata, null);
+        NumericStyle summaryStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata, null);
         Font font = workbook.createFont();
         font.setColor(IndexedColors.WHITE.getIndex());
         summaryStyle.cellStyle1.setFillForegroundColor(IndexedColors.BLACK.getIndex());
@@ -3261,7 +3245,7 @@ public class ExportService {
         }
     }
 
-    private boolean listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
+    private boolean listCompareYears(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                                      InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
@@ -3302,7 +3286,7 @@ public class ExportService {
         return dataSet.getDataSet().getRows().size() > 0;
     }
 
-    private boolean listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
+    private boolean listYTD(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                             InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSYTDDefinition verticalList = (WSYTDDefinition) report;
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
@@ -3399,7 +3383,7 @@ public class ExportService {
         return audits;
     }
 
-    private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<AnalysisItem, Style> styleMap, Sheet sheet, Workbook workbook,
+    private boolean listVerticalList(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                                      InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         WSVerticalListDefinition verticalList = (WSVerticalListDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
@@ -3446,7 +3430,7 @@ public class ExportService {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
-        Map<AnalysisItem, Style> styleMap = new HashMap<AnalysisItem, Style>();
+        Map<StyleKey, Style> styleMap = new HashMap<>();
         for (short i = 0; i < items.size(); i++) {
             AnalysisItem analysisItem = items.get(i);
             positionMap.put(analysisItem, i);
@@ -3520,7 +3504,7 @@ public class ExportService {
         return listDataResults.getRows().length > 0;
     }
 
-    private static class NumericStyle extends Style {
+    public static class NumericStyle extends Style {
         private CellStyle cellStyle1;
         private CellStyle cellStyle2;
         private boolean flexibleFormatting;
@@ -3599,7 +3583,7 @@ public class ExportService {
         }
     }
 
-    private static class DateStyle extends Style {
+    public static class DateStyle extends Style {
 
         private CellStyle cellStyle1;
 
@@ -3630,7 +3614,7 @@ public class ExportService {
         }
     }
 
-    private static class StringStyle extends Style {
+    public static class StringStyle extends Style {
 
         private CellStyle cellStyle1;
 
@@ -3695,24 +3679,24 @@ public class ExportService {
         }
     }
 
-    private abstract static class Style {
-        private AnalysisItem analysisItem;
+    public abstract static class Style {
 
         public abstract void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal, InsightRequestMetadata insightRequestMetadata);
     }
 
-    private Style createStyle(AnalysisItem analysisItem, Workbook workbook, ExportMetadata exportMetadata) {
+    private Style createStyle(AnalysisItem analysisItem, Workbook workbook, ExportMetadata exportMetadata, TextValueExtension valueExt) {
         Style style;
         TextReportFieldExtension textExtension = null;
         if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
             textExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
         }
+        CellStyle cellStyle;
         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
 
             switch (analysisMeasure.getFormattingType()) {
                 case FormattingConfiguration.CURRENCY:
-                    CellStyle currencyStyle = workbook.createCellStyle();
+                    cellStyle = workbook.createCellStyle();
                     String formatString = exportMetadata.currencySymbol + "##,##0";
                     if (analysisMeasure.getPrecision() > 0) {
                         formatString += ".";
@@ -3720,16 +3704,16 @@ public class ExportService {
                     for (int i = 0; i < analysisMeasure.getPrecision(); i++) {
                         formatString += "0";
                     }
-                    currencyStyle.setDataFormat(workbook.createDataFormat().getFormat(formatString));
-                    style = new NumericStyle(currencyStyle);
+                    cellStyle.setDataFormat(workbook.createDataFormat().getFormat(formatString));
+                    style = new NumericStyle(cellStyle);
                     break;
                 case FormattingConfiguration.MILLISECONDS:
-                    CellStyle genericStyle = workbook.createCellStyle();
-                    genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
-                    style = new NumericStyle(genericStyle);
+                    cellStyle = workbook.createCellStyle();
+                    cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
+                    style = new NumericStyle(cellStyle);
                     break;
                 case FormattingConfiguration.PERCENTAGE:
-                    CellStyle percentageStyle = workbook.createCellStyle();
+                    cellStyle = workbook.createCellStyle();
                     String percentFormatString = "0";
                     if (analysisMeasure.getPrecision() > 0) {
                         percentFormatString += ".";
@@ -3737,12 +3721,12 @@ public class ExportService {
                     for (int i = 0; i < analysisMeasure.getPrecision(); i++) {
                         percentFormatString += "0";
                     }
-                    percentageStyle.setDataFormat(workbook.createDataFormat().getFormat(percentFormatString + "%"));
-                    style = new NumericStyle(percentageStyle);
+                    cellStyle.setDataFormat(workbook.createDataFormat().getFormat(percentFormatString + "%"));
+                    style = new NumericStyle(cellStyle);
                     break;
                 default:
-                    CellStyle style1 = workbook.createCellStyle();
-                    style1.setDataFormat(workbook.createDataFormat().getFormat("0"));
+                    cellStyle = workbook.createCellStyle();
+                    cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
                     CellStyle style2 = workbook.createCellStyle();
                     String decimalFormatString = "0";
                     if (analysisMeasure.getPrecision() > 0) {
@@ -3752,12 +3736,12 @@ public class ExportService {
                         decimalFormatString += "0";
                     }
                     style2.setDataFormat(workbook.createDataFormat().getFormat(decimalFormatString));
-                    style = new NumericStyle(style1, style2);
+                    style = new NumericStyle(cellStyle, style2);
                     break;
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int dateFormat = exportMetadata.dateFormat;
-            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle = workbook.createCellStyle();
             CreationHelper createHelper = workbook.getCreationHelper();
             AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
             if (dateDim.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
@@ -3803,7 +3787,7 @@ public class ExportService {
             }
             style = new DateStyle(cellStyle);
         } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
-            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle = workbook.createCellStyle();
             cellStyle.setWrapText(true);
             style = new StringStyle(cellStyle, analysisItem, workbook);
         } else {
@@ -3812,35 +3796,51 @@ public class ExportService {
                 DerivedAnalysisDimension dim = (DerivedAnalysisDimension) analysisItem;
                 wordWrap = dim.isWordWrap();
             }
-            CellStyle genericStyle = workbook.createCellStyle();
-            genericStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
+            cellStyle = workbook.createCellStyle();
+            cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0"));
             if (textExtension != null) {
                 wordWrap = textExtension.isWordWrap() || wordWrap;
             }
-            genericStyle.setWrapText(wordWrap);
-            style = new StringStyle(genericStyle, analysisItem, workbook);
+            cellStyle.setWrapText(wordWrap);
+            style = new StringStyle(cellStyle, analysisItem, workbook);
         }
-
+        if (valueExt != null && cellStyle != null && cellStyle instanceof XSSFCellStyle && valueExt.getBackgroundColor() == 0xEEEEEE) {
+            XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
+            //xssfCellStyle.setFillBackgroundColor(new XSSFColor(new java.awt.Color(valueExt.getBackgroundColor())));
+            //xssfCellStyle.setFillBackgroundColor(new XSSFColor(Color.LIGHT_GRAY));
+            xssfCellStyle.setFillForegroundColor(new XSSFColor(Color.LIGHT_GRAY));
+            xssfCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        }
 
         return style;
     }
 
 
-    private Style getStyle(Map<AnalysisItem, Style> styleMap, AnalysisItem analysisItem, Workbook wb, ExportMetadata exportMetadata, Value value) {
-        Style style = styleMap.get(analysisItem);
+    public Style getStyle(Map<StyleKey, Style> styleMap, AnalysisItem analysisItem, Workbook wb, ExportMetadata exportMetadata, Value value) {
+        StyleKey styleKey;
+        TextValueExtension ext = null;
+        if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+
+            ext = (TextValueExtension) value.getValueExtension();
+            styleKey = new StyleKey(analysisItem, ext.getBackgroundColor(), ext.isBold(), ext.getColor());
+        } else {
+            styleKey = new StyleKey(analysisItem, 0, false, 0);
+        }
+        Style style = styleMap.get(styleKey);
         if (style == null) {
-            style = createStyle(analysisItem, wb, exportMetadata);
-            styleMap.put(analysisItem, style);
+            style = createStyle(analysisItem, wb, exportMetadata, ext);
+            styleMap.put(styleKey, style);
         }
         return style;
     }
 
     public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException{
-        return createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
+        return createExportMetadata(SecurityUtil.getAccountID(false), conn, new InsightRequestMetadata());
     }
 
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         long userID = SecurityUtil.getUserID(false);
+        // 707-845-9597
         int dateFormat;
         String currencySymbol;
         String locale;
@@ -4078,44 +4078,75 @@ public class ExportService {
             sb.append("<div style=\"").append(headerLabelStyle).append("\">").append("<h0>").append(report.getName()).append("</h0>").append("</div>");
         }
 
+        Map<AnalysisItem, Link> linkMap;
         sb.append("<table style=\"").append(tableStyle).append("\">");
-        sb.append("<thead>");
-        sb.append("<tr style=\"").append(headerTRStyle).append("\">");
-        Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
-        for (AnalysisItem analysisItem : items) {
-            if (analysisItem.getLinks() != null) {
-                Link defaultLink = null;
-                if (includeTitle) {
-                    for (Link link : analysisItem.getLinks()) {
-                        if (link.isDefaultLink() && link instanceof URLLink) {
-                            defaultLink = link;
-                        } else if (defaultLink == null && link instanceof URLLink) {
-                            defaultLink = link;
+        if (exportProperties.isIncludeHeaders()) {
+            sb.append("<thead>");
+            sb.append("<tr style=\"").append(headerTRStyle).append("\">");
+
+            linkMap = new HashMap<AnalysisItem, Link>();
+            for (AnalysisItem analysisItem : items) {
+                if (analysisItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && analysisItem.getLinks().size() == 1) {
+                            defaultLink = analysisItem.getLinks().get(0);
                         }
                     }
-                } else {
-                    for (Link link : analysisItem.getLinks()) {
-                        if (link.isDefaultLink()) {
-                            defaultLink = link;
-                        }
-                    }
-                    if (defaultLink == null && analysisItem.getLinks().size() == 1) {
-                        defaultLink = analysisItem.getLinks().get(0);
+
+                    linkMap.put(analysisItem, defaultLink);
+                }
+                for (AnalysisItem headerItem : listDataResults.getHeaders()) {
+                    if (headerItem == analysisItem) {
+                        sb.append("<th style=\"").append(thStyle).append("\">");
+                        sb.append(headerItem.toUnqualifiedDisplay());
+                        sb.append("</th>");
                     }
                 }
-
-                linkMap.put(analysisItem, defaultLink);
             }
-            for (AnalysisItem headerItem : listDataResults.getHeaders()) {
-                if (headerItem == analysisItem) {
-                    sb.append("<th style=\"").append(thStyle).append("\">");
-                    sb.append(headerItem.toUnqualifiedDisplay());
-                    sb.append("</th>");
+            sb.append("</tr>");
+            sb.append("</thead>");
+        } else {
+            linkMap = new HashMap<AnalysisItem, Link>();
+            for (AnalysisItem analysisItem : items) {
+                if (analysisItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : analysisItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && analysisItem.getLinks().size() == 1) {
+                            defaultLink = analysisItem.getLinks().get(0);
+                        }
+                    }
+
+                    linkMap.put(analysisItem, defaultLink);
                 }
             }
         }
-        sb.append("</tr>");
-        sb.append("</thead>");
         sb.append("<tbody>");
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr style=\"").append(trStyle).append("\">");
@@ -4329,36 +4360,68 @@ public class ExportService {
                 "}");
         sb.append("</style>");
         sb.append("<table style=\"margin-bottom:0;font-size:").append(report.getFontSize()).append("px").append("\" class=\"table ").append("reportTable").append(report.getAnalysisID()).append(" table-bordered table-hover table-condensed\">");
-        sb.append("<thead>");
-        sb.append("<tr>");
+
+
         Map<AnalysisItem, Link> linkMap = new HashMap<AnalysisItem, Link>();
 
-        for (AnalysisItem headerItem : headers) {
-            sb.append("<th style=\"text-align:center\">");
-            sb.append(headerItem.toUnqualifiedDisplay());
-            sb.append("</th>");
-            if (headerItem.getLinks() != null) {
-                Link defaultLink = null;
-                if (includeTitle) {
-                    for (Link link : headerItem.getLinks()) {
-                        if (link.isDefaultLink() && link instanceof URLLink) {
-                            defaultLink = link;
-                        } else if (defaultLink == null && link instanceof URLLink) {
-                            defaultLink = link;
-                        }
-                    }
-                } else {
-                    for (Link link : headerItem.getLinks()) {
-                        if (link.isDefaultLink()) {
-                            defaultLink = link;
-                        }
-                    }
-                    if (defaultLink == null && headerItem.getLinks().size() == 1) {
-                        defaultLink = headerItem.getLinks().get(0);
-                    }
-                }
+        if (exportProperties.isIncludeHeaders()) {
+            sb.append("<thead>");
+            sb.append("<tr>");
 
-                linkMap.put(headerItem, defaultLink);
+
+            for (AnalysisItem headerItem : headers) {
+                sb.append("<th style=\"text-align:center\">");
+                sb.append(headerItem.toUnqualifiedDisplay());
+                sb.append("</th>");
+                if (headerItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && headerItem.getLinks().size() == 1) {
+                            defaultLink = headerItem.getLinks().get(0);
+                        }
+                    }
+
+                    linkMap.put(headerItem, defaultLink);
+                }
+            }
+        } else {
+            for (AnalysisItem headerItem : headers) {
+                if (headerItem.getLinks() != null) {
+                    Link defaultLink = null;
+                    if (includeTitle) {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink() && link instanceof URLLink) {
+                                defaultLink = link;
+                            } else if (defaultLink == null && link instanceof URLLink) {
+                                defaultLink = link;
+                            }
+                        }
+                    } else {
+                        for (Link link : headerItem.getLinks()) {
+                            if (link.isDefaultLink()) {
+                                defaultLink = link;
+                            }
+                        }
+                        if (defaultLink == null && headerItem.getLinks().size() == 1) {
+                            defaultLink = headerItem.getLinks().get(0);
+                        }
+                    }
+
+                    linkMap.put(headerItem, defaultLink);
+                }
             }
         }
         sb.append("</tr>");
@@ -4608,7 +4671,7 @@ public class ExportService {
                 }
             }
             HSSFWorkbook workbook = new HSSFWorkbook();
-            Map<AnalysisItem, Style> styleMap = new HashMap<AnalysisItem, Style>();
+            Map<StyleKey, Style> styleMap = new HashMap<>();
 
             HSSFSheet sheet = workbook.createSheet();
             workbook.setSheetName(0, "Data");
@@ -4750,5 +4813,43 @@ public class ExportService {
         }
         sb.append("</table>");
         return sb.toString();
+    }
+
+    public static class StyleKey {
+        private AnalysisItem analysisItem;
+        private int textColor;
+        private boolean bold;
+        private int backgroundColor;
+
+        public StyleKey(AnalysisItem analysisItem, int textColor, boolean bold, int backgroundColor) {
+            this.analysisItem = analysisItem;
+            this.textColor = textColor;
+            this.bold = bold;
+            this.backgroundColor = backgroundColor;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StyleKey styleKey = (StyleKey) o;
+
+            if (backgroundColor != styleKey.backgroundColor) return false;
+            if (bold != styleKey.bold) return false;
+            if (textColor != styleKey.textColor) return false;
+            if (!analysisItem.equals(styleKey.analysisItem)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = analysisItem.hashCode();
+            result = 31 * result + textColor;
+            result = 31 * result + (bold ? 1 : 0);
+            result = 31 * result + backgroundColor;
+            return result;
+        }
     }
 }

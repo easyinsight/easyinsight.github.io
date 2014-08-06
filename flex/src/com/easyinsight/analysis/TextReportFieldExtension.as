@@ -17,6 +17,8 @@ public class TextReportFieldExtension extends ReportFieldExtension {
     public var sortable:Boolean = true;
     public var ignoreOnSummary:Boolean = false;
     public var forceToSummary:Boolean = false;
+    public var fixedSort:String = "Default";
+    public var fixedSortOrder:int = 0;
 
     public function TextReportFieldExtension() {
     }

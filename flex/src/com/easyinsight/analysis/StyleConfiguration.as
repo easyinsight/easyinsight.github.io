@@ -303,6 +303,12 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Default Grouping Alignment", "defaultGroupingAlignnment", ListDefinition(report).defaultGroupingAlignnment, report, ["none", "left", "center", "right"]));
             items.addItem(new ComboBoxReportFormItem("Default Date Alignment", "defaultDateAlignment", ListDefinition(report).defaultDateAlignment, report, ["none", "left", "center", "right"]));
         }
+        if (report is MultiSummaryDefinition) {
+            items.addItem(new CheckBoxReportFormItem("Default to Expanded", "defaultToExpanded", MultiSummaryDefinition(report).defaultToExpanded, report, null, true));
+            items.addItem(new CheckBoxReportFormItem("Nested Report Headers", "nestedReportHeaders", MultiSummaryDefinition(report).nestedReportHeaders, report, null, true));
+            items.addItem(new CheckBoxReportFormItem("Nested Report Titles", "nestedReportTitles", MultiSummaryDefinition(report).nestedReportTitles, report, null, true));
+            items.addItem(new NumericReportFormItem("Nested Font Size", "nestedFontSize", MultiSummaryDefinition(report).nestedFontSize, report, 8, 48));
+        }
         if (report is CrosstabDefinition) {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new ComboBoxReportFormItem("Align", "align", CrosstabDefinition(report).align, report, ["left", "center", "right"]));

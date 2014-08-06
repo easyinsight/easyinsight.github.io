@@ -67,13 +67,10 @@ public class MultiSummaryControlBar extends ReportControlBar implements IReportC
     override protected function createChildren():void {
         super.createChildren();
 
-        var reportsButton:SaveButton = new SaveButton();
-        reportsButton.label = "Configure Reports...";
-        reportsButton.addEventListener(MouseEvent.CLICK, configureReports);
-        addChild(reportsButton);
+
 
         var groupingLabel:Label = new Label();
-        groupingLabel.text = "Key:";
+        groupingLabel.text = "Join Field:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
         keyGrouping.report = treeDefinition;
@@ -84,6 +81,10 @@ public class MultiSummaryControlBar extends ReportControlBar implements IReportC
         addChild(areaMeasureLabel);
         itemGrouping.report = treeDefinition;
         addDropAreaGrouping(itemGrouping);
+        var reportsButton:SaveButton = new SaveButton();
+        reportsButton.label = "Choose Nested Reports...";
+        reportsButton.addEventListener(MouseEvent.CLICK, configureReports);
+        addChild(reportsButton);
 
         if (treeDefinition.key != null) {
             keyGrouping.addAnalysisItem(treeDefinition.key);

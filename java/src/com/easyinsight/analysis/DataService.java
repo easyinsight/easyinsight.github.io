@@ -1582,6 +1582,7 @@ public class DataService {
         Map<InsightDescriptor, DataSet> childSets = new HashMap<>();
         Map<InsightDescriptor, WSListDefinition> reportMap = new HashMap<>();
         DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        boolean addedJoinColumn = false;
         for (InsightDescriptor childReport : analysisDefinition.getReports()) {
             WSListDefinition child = (WSListDefinition) AnalysisService.openAnalysisDefinitionWithConn(childReport.getId(), conn);
             AnalysisItem childKeyItem = null;
@@ -1591,14 +1592,15 @@ public class DataService {
                 }
             }
             if (childKeyItem == null) {
+                addedJoinColumn = true;
                 child.getColumns().add(analysisDefinition.getKey().clone());
             }
             ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, child, conn);
             DataSet childSet = childRetrieval.getPipeline().toDataSet(childRetrieval.getDataSet());
             childSets.put(childReport, childSet);
-            reportMap.put(childReport, (WSListDefinition) child);
+            reportMap.put(childReport, child);
         }
-        return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn), dataSet, childSets, reportMap);
+        return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn), dataSet, childSets, reportMap, addedJoinColumn);
     }
 
     public EmbeddedTreeDataResults getEmbeddedTreeResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
@@ -2100,53 +2102,6 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             TrendDataResults embeddedDataResults = new TrendDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
-            return embeddedDataResults;
-        } finally {
-            if (success) {
-                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
-            }
-            Database.closeConnection(conn);
-        }
-    }
-
-    public MultiSummaryDataResults getMultiSummaryDataResults(WSMultiSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            long start = System.currentTimeMillis();
-            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-
-            Map<InsightDescriptor, DataSet> childSets = new HashMap<>();
-            Map<InsightDescriptor, WSListDefinition> reportMap = new HashMap<>();
-            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
-            for (InsightDescriptor childReport : analysisDefinition.getReports()) {
-                WSAnalysisDefinition child = AnalysisService.openAnalysisDefinitionWithConn(childReport.getId(), conn);
-                ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, child, conn);
-                DataSet childSet = reportRetrieval.getPipeline().toDataSet(childRetrieval.getDataSet());
-                childSets.put(childReport, childSet);
-                reportMap.put(childReport, (WSListDefinition) child);
-            }
-            MultiSummaryData treeData = new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn), dataSet, childSets, reportMap);
-
-            List<MultiSummaryRow> rows = treeData.toTreeRows(reportRetrieval.getPipeline().getPipelineData());
-            MultiSummaryDataResults crossTabDataResults = new MultiSummaryDataResults();
-            crossTabDataResults.setTreeRows(rows);
-            decorateResults(analysisDefinition, insightRequestMetadata, conn, reportRetrieval, reportRetrieval.getDataSet().getAudits(), crossTabDataResults);
-            crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-            if (!insightRequestMetadata.isNoLogging()) {
-                reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
-            }
-            return crossTabDataResults;
-        } catch (ReportException dae) {
-            MultiSummaryDataResults embeddedDataResults = new MultiSummaryDataResults();
-            embeddedDataResults.setReportFault(dae.getReportFault());
-            return embeddedDataResults;
-        } catch (Throwable e) {
-            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
-            MultiSummaryDataResults embeddedDataResults = new MultiSummaryDataResults();
             embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
             return embeddedDataResults;
         } finally {
