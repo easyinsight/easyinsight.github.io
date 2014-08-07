@@ -42,6 +42,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private boolean rolloverIcon;
     private boolean multiLineHeaders;
     private boolean async;
+    private boolean lockHeaders;
+
+    public boolean isLockHeaders() {
+        return lockHeaders;
+    }
+
+    public void setLockHeaders(boolean lockHeaders) {
+        this.lockHeaders = lockHeaders;
+    }
 
     public String getDefaultMeasureAlignment() {
         return defaultMeasureAlignment;
@@ -446,6 +455,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         rolloverIcon = findBooleanProperty(properties, "rolloverIcon", false);
         multiLineHeaders = findBooleanProperty(properties, "multiLineHeaders", false);
         async = findBooleanProperty(properties, "async", false);
+        lockHeaders = findBooleanProperty(properties, "lockHeaders", false);
         defaultColumnAlignment = findStringProperty(properties, "defaultColumnAlignment", "left");
         defaultMeasureAlignment = findStringProperty(properties, "defaultMeasureAlignment", "none");
         defaultDateAlignment = findStringProperty(properties, "defaultDateAlignment", "none");
@@ -462,6 +472,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
                 if (property instanceof ReportNumericProperty)
                     p.put(property.getPropertyName(), ((ReportNumericProperty) property).getValue());
             }
+            p.put("lockHeaders", lockHeaders);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -481,6 +492,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
         properties.add(new ReportBooleanProperty("async", async));
         properties.add(new ReportBooleanProperty("multiLineHeaders", multiLineHeaders));
+        properties.add(new ReportBooleanProperty("lockHeaders", lockHeaders));
         properties.add(new ReportStringProperty("defaultColumnAlignment", defaultColumnAlignment));
         properties.add(new ReportStringProperty("defaultMeasureAlignment", defaultMeasureAlignment));
         properties.add(new ReportStringProperty("defaultDateAlignment", defaultDateAlignment));
