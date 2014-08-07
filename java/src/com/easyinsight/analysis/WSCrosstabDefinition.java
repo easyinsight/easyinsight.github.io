@@ -26,6 +26,15 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     private boolean excludeZero;
     private int maxColumns;
     private int maxRows;
+    private boolean sortByRowSummaries;
+
+    public boolean isSortByRowSummaries() {
+        return sortByRowSummaries;
+    }
+
+    public void setSortByRowSummaries(boolean sortByRowSummaries) {
+        this.sortByRowSummaries = sortByRowSummaries;
+    }
 
     public int getMaxColumns() {
         return maxColumns;
@@ -164,12 +173,14 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         maxColumns = (int) findNumberProperty(properties, "maxColumns", 0);
         maxRows = (int) findNumberProperty(properties, "maxRows", 0);
         align = findStringProperty(properties, "align", "left");
+        sortByRowSummaries = findBooleanProperty(properties, "sortByRowSummaries", false);
     }
 
     public List<ReportProperty> createProperties() {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
         properties.add(new ReportBooleanProperty("excludeZero", excludeZero));
+        properties.add(new ReportBooleanProperty("sortByRowSummaries", sortByRowSummaries));
         properties.add(new ReportNumericProperty("headerBackgroundColor", headerBackgroundColor));
         properties.add(new ReportNumericProperty("summaryTextColor", summaryTextColor));
         properties.add(new ReportNumericProperty("maxColumns", maxColumns));
