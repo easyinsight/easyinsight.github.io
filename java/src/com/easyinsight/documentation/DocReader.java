@@ -187,6 +187,21 @@ public class DocReader {
                 html = html.replace(entry.getKey(), entry.getValue());
             }
             pageResults = html;
+
+            if ("Main_Page".equals(page)) {
+                String target = "<ol>";
+                int insertPoint = pageResults.indexOf(target) + target.length();
+                String insertContent;
+                if (site == DocReader.WEBSITE) {
+                    insertContent = "<li><a href=\"/app/screencasts.jsp\">Screencasts</a></li>";
+                } else if (site == DocReader.APP) {
+                    insertContent = "<li><a href=\"/app/docsScreencast.jsp\">Screencasts</a></li>";
+                } else {
+                    insertContent = "";
+                }
+                pageResults = pageResults.substring(0, insertPoint) + insertContent + pageResults.substring(insertPoint);
+            }
+
             MemCachedManager.instance().add(cacheKey, 500000, pageResults);
         }
         return pageResults;
