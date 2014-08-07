@@ -16,9 +16,7 @@ import com.easyinsight.datafeeds.constantcontact.*;
 import com.easyinsight.datafeeds.database.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.freshbooks.*;
-import com.easyinsight.datafeeds.freshdesk.FreshdeskCompositeSource;
-import com.easyinsight.datafeeds.freshdesk.FreshdeskTicketSource;
-import com.easyinsight.datafeeds.freshdesk.FreshdeskTimeEntrySource;
+import com.easyinsight.datafeeds.freshdesk.*;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.datafeeds.github.GithubCompositeSource;
 import com.easyinsight.datafeeds.github.GithubRepositorySource;
@@ -437,6 +435,10 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.ORACLE_OPPORTUNITY_HISTORY, OracleOpportunityHistorySource.class);
         registerType(FeedType.SALES_HISTORY, SampleSalesHistorySource.class);
         registerType(FeedType.BASECAMP_NEXT_COMMENT, BasecampNextCommentSource.class);
+        registerType(FeedType.FRESHDESK_ACTIVITY, FreshdeskActivitySource.class);
+        registerType(FeedType.FRESHDESK_NOTE, FreshdeskNoteSource.class);
+        registerType(FeedType.FRESHDESK_ASSIGNMENT, FreshdeskAssignmentSource.class);
+        registerType(FeedType.FRESHDESK_STATUS, FreshdeskStatusSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

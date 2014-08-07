@@ -303,6 +303,10 @@ public class FeedType implements Serializable {
     public static final FeedType ORACLE_OPPORTUNITY_HISTORY = new FeedType(274);
     public static final FeedType SALES_HISTORY = new FeedType(275);
     public static final FeedType BASECAMP_NEXT_COMMENT = new FeedType(276);
+    public static final FeedType FRESHDESK_ACTIVITY = new FeedType(277);
+    public static final FeedType FRESHDESK_NOTE = new FeedType(278);
+    public static final FeedType FRESHDESK_ASSIGNMENT = new FeedType(279);
+    public static final FeedType FRESHDESK_STATUS = new FeedType(280);
 
     public FeedType() {
     }
