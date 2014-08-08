@@ -47,6 +47,9 @@
 
         private function addMultiFlatValue():void {
             var w:RangeFilterWindow = new RangeFilterWindow();
+            w.item = _item;
+            w.feedID = _feedID;
+            w.filterMetadata = filterMetadata;
             w.addEventListener(FilterCreationEvent.FILTER_CREATION, passThrough);
             w.x = this.x;
             w.y = this.y;
