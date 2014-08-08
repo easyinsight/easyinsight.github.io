@@ -1577,6 +1577,7 @@ public class DataService {
 
     public static MultiSummaryData getMultiSummaryDataResults(WSMultiSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn)
             throws SQLException, CloneNotSupportedException {
+        System.out.println("irm utc offset = " + insightRequestMetadata.getUtcOffset());
         ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
 
         Map<InsightDescriptor, DataSet> childSets = new HashMap<>();
@@ -1595,7 +1596,9 @@ public class DataService {
                 addedJoinColumn = true;
                 child.getColumns().add(analysisDefinition.getKey().clone());
             }
-            ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, child, conn);
+            InsightRequestMetadata childIRM = new InsightRequestMetadata();
+            childIRM.setUtcOffset(insightRequestMetadata.getUtcOffset());
+            ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(childIRM, child, conn);
             DataSet childSet = childRetrieval.getPipeline().toDataSet(childRetrieval.getDataSet());
             childSets.put(childReport, childSet);
             reportMap.put(childReport, child);
