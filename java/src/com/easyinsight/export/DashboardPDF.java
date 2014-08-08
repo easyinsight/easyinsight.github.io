@@ -233,6 +233,8 @@ public class DashboardPDF {
         if (element instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) element;
             PdfPTable table = new PdfPTable(dashboardGrid.getColumns());
+            table.setSplitLate(false);
+            table.setSplitRows(true);
             table.setHeaderRows(0);
             for (int j = 0; j < dashboardGrid.getRows(); j++) {
                 for (int i = 0; i < dashboardGrid.getColumns(); i++) {
