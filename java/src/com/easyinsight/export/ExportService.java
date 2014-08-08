@@ -1499,7 +1499,10 @@ public class ExportService {
                 // todo: impl
 
                 if (dateDim.isTimeshift(null)) {
+                    System.out.println("setting cal on " + dateDim.toDisplay());
                     sdf.setCalendar(cal);
+                } else {
+                    System.out.println("no cal " + dateDim.toDisplay());
                 }
                 valueString = sdf.format(dateValue.getDate());
             }
@@ -3868,6 +3871,10 @@ public class ExportService {
 
     public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException{
         return createExportMetadata(SecurityUtil.getAccountID(false), conn, new InsightRequestMetadata());
+    }
+
+    public static ExportMetadata createExportMetadata(EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException{
+        return createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
     }
 
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {

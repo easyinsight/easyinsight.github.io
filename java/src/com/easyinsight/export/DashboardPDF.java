@@ -288,7 +288,7 @@ public class DashboardPDF {
             WSAnalysisDefinition report = reportMap.get(dashboardReport.getUrlKey());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(timezoneOffset);
-            ExportMetadata exportMetadata = ExportService.createExportMetadata(conn);
+            ExportMetadata exportMetadata = ExportService.createExportMetadata(conn, insightRequestMetadata);
             Element result;
             if (report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 result = new ExportService().crosstabToPDFTable(report, conn, insightRequestMetadata, exportMetadata);

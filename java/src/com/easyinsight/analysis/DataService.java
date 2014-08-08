@@ -1603,7 +1603,7 @@ public class DataService {
             childSets.put(childReport, childSet);
             reportMap.put(childReport, child);
         }
-        return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn), dataSet, childSets, reportMap, addedJoinColumn);
+        return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn, insightRequestMetadata), dataSet, childSets, reportMap, addedJoinColumn);
     }
 
     public EmbeddedTreeDataResults getEmbeddedTreeResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
