@@ -1,5 +1,5 @@
 <link href="/css/nv.d3.css" rel="stylesheet" type="text/css">
-<script src="/js/d3.min.js"></script>
+<script src="/js/d3.js"></script>
 <script src="/js/nv/nv.d3.js"></script>
 <script src="/js/topojson.v1.js"></script>
 
