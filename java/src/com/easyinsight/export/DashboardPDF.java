@@ -413,22 +413,29 @@ public class DashboardPDF {
             }
         } else if (element instanceof DashboardReport) {
             DashboardReport dashboardReport = (DashboardReport) element;
-            if (dashboardReport.getOverridenFilters() != null && dashboardReport.getOverridenFilters().size()> 0) {
-                Set<String> k = new HashSet<>();
-                for (String filterID : dashboardReport.getOverridenFilters().keySet()) {
-                    System.out.println("report overrides " + filterID);
-                    k.add(filterID);
+            if (dashboardReport.getDashboardFilterOverrides() != null && dashboardReport.getDashboardFilterOverrides().size()> 0) {
+
+                for (DashboardFilterOverride dashboardFilterOverride : dashboardReport.getDashboardFilterOverrides()) {
+                    System.out.println("override applies to " + dashboardFilterOverride.getFilterID() + " - " + dashboardFilterOverride.isHideFilter());
                 }
+
                 Iterator<FilterDefinition> iter = filters.iterator();
                 while (iter.hasNext()) {
                     FilterDefinition filter = iter.next();
-                    String sid = String.valueOf(filter.getFilterID());
+                    for (DashboardFilterOverride dashboardFilterOverride : dashboardReport.getDashboardFilterOverrides()) {
+                        if (dashboardFilterOverride.isHideFilter() && filter.getFilterID() == dashboardFilterOverride.getFilterID()) {
+                            System.out.println("removing overriden filter " + filter.getFilterID());
+                            iter.remove();
+                        }
+
+                    }
+                    /*String sid = String.valueOf(filter.getFilterID());
                     if (k.contains(sid)) {
                         System.out.println("suppressing filter " + sid);
                         filter.override(dashboardReport.getOverridenFilters().get(sid));
                         filter.setEnabled(dashboardReport.getOverridenFilters().get(sid).isEnabled());
                         //iter.remove();
-                    }
+                    }*/
                 }
             }
             WSAnalysisDefinition report = AnalysisService.openAnalysisDefinitionWithConn(dashboardReport.getReport().getId(), conn);
