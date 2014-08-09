@@ -60,4 +60,9 @@ public class DateLevelWrapper implements Serializable, Cloneable
         wrapper.setId(0);
         return wrapper;
     }
+
+    @Override
+    public String toString() {
+        return display + " - " + shortDisplay + " - " + dateLevel;
+    }
 }
