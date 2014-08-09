@@ -200,10 +200,7 @@
                 "allowFullScreen", "true"
         );
     } else {  // flash is too old or we can't detect the plugin
-        var alternateContent = 'Alternate HTML content should be placed here. '
-                + 'This content requires the Adobe Flash Player. '
-                + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-        document.write(alternateContent);  // insert non-flash content
+        window.location = "/a/home";
     }
     // -->
 </script>
