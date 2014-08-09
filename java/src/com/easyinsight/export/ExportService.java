@@ -2636,12 +2636,13 @@ public class ExportService {
                     for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
                         ctr++;
                     }
-                    if (hasBenchmark) {
-                        ctr += 2;
-                    }
                     maxColumns = Math.max(ctr, maxColumns);
                 }
             }
+        }
+
+        if (hasBenchmark) {
+            maxColumns += 2;
         }
 
         PdfPTable table = new PdfPTable(maxColumns + 1);
@@ -2783,7 +2784,7 @@ public class ExportService {
                         }
                         table.addCell(cell);
                     }
-                    if (hasBenchmark) {
+                    /*if (hasBenchmark) {
                         PdfPCell cell = new PdfPCell(new Phrase("", regFont));
                         cell.setBorderWidth(0f);
                         if (lineAbove) {
@@ -2796,7 +2797,7 @@ public class ExportService {
                             cell2.setBorderWidthTop(1f);
                         }
                         table.addCell(cell2);
-                    }
+                    }*/
                 }
             }
         }
