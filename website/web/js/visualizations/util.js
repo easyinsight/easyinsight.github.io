@@ -20,7 +20,6 @@ Utils = {
     },
 
     noDataD3:function (data, f, cleanup, target) {
-
         if ((data instanceof Array && data.length > 0)) {
             $("#" + target + " .reportArea").show();
             $("#" + target + " .noData").hide();
@@ -30,7 +29,9 @@ Utils = {
             $("#" + target + " .noData").show();
         }
         if(typeof(afterRefresh) != "undefined") {
-            if(afterRefresh.length > 0) {
+            if (afterRefresh.length > 1) {
+                afterRefresh($("#" + target + " .loading"), target)();
+            } else if(afterRefresh.length > 0) {
                 afterRefresh($("#" + target + " .loading"))();
             } else {
                 afterRefresh();
