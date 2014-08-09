@@ -8,7 +8,7 @@
 %>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Easy Insight &mdash; SaaS Business Intelligence, Reporting, and Analytics</title>
+    <title>Easy Insight Screencasts</title>
     <meta name="description"
           content="Easy Insight provides a self service, business user friendly solution for quick, easy, and affordable business intelligence over the cloud."/>
     <meta name="keywords"
@@ -108,8 +108,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <!-- 1.67 -->
-                    <iframe width="600" height="359" src="//www.youtube.com/embed/gnqhnJN_xtE" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/gnqhnJN_xtE?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
             <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
@@ -120,7 +119,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <iframe width="600" height="359" src="//www.youtube.com/embed/XCzydb2eyrs" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/XCzydb2eyrs?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
             <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
@@ -131,7 +130,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <iframe width="600" height="359" src="//www.youtube.com/embed/sIN5tGyWI1Y" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/sIN5tGyWI1Y?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>

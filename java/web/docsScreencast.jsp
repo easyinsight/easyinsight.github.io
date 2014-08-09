@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Easy Insight Documentation</title>
+    <title>Easy Insight Screencasts</title>
     <jsp:include page="html/bootstrapHeader.jsp"/>
 </head>
 <body>
@@ -44,8 +44,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <!-- 1.67 -->
-                    <iframe width="600" height="359" src="//www.youtube.com/embed/gnqhnJN_xtE" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/gnqhnJN_xtE?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
             <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
@@ -56,7 +55,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <iframe width="600" height="359" src=//www.youtube.com/embed/XCzydb2eyrs" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/XCzydb2eyrs?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
             <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
@@ -67,7 +66,7 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <iframe width="600" height="359" src="//www.youtube.com/embed/sIN5tGyWI1Y" frameborder="0" allowfullscreen></iframe>
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/sIN5tGyWI1Y?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
