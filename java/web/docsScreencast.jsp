@@ -28,7 +28,7 @@
 </jsp:include>
 <div class="container corePageWell">
     <div class="row">
-        <div class="col-md-7 col-md-offset-1">
+        <div class="col-md-8 col-md-offset-1">
             <div class="row">
                 <h2 class="productHeader">Screencasts</h2>
                 <ul>
