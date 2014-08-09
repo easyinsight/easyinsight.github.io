@@ -1,3 +1,8 @@
+$.holdReady(true);
+Modernizr.load({ complete: function () {
+    $.holdReady(false);
+}});
+
 var seleniumID;
 
 $(function () {
