@@ -152,6 +152,7 @@ public class DashboardPDF {
             List<FilterDefinition> replaceFilters = new ArrayList<>();
             for (FilterDefinition filter : dashboard.getFilters()) {
                 long filterID = filter.getFilterID();
+                System.out.println("dashboard filter ID = " + filterID);
                 FilterDefinition overrideFilter = selected.getFilterMap().get(1 + "|" + filterID);
                 if (overrideFilter != null) {
                     replaceFilters.add(overrideFilter);
@@ -294,7 +295,7 @@ public class DashboardPDF {
                 result = new ExportService().kpiReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             } else if (report.getReportType() == WSAnalysisDefinition.YTD) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
-                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.isEnabled());
+                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.getFilterID() + " - " + filter.isEnabled());
                     if (filter instanceof FlatDateFilter) {
                         FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
                         System.out.println("\t" + flatDateFilter.getValue());
