@@ -312,6 +312,16 @@ public class DashboardPDF {
             } else if (report instanceof WSYTDDefinition) {
                 result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSCompareYearsDefinition) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.getFilterID() + " - " + filter.isEnabled());
+                    if (filter instanceof FlatDateFilter) {
+                        FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
+                        System.out.println("\t" + flatDateFilter.getValue());
+                    } else if (filter instanceof MultiFlatDateFilter) {
+                        MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
+                        System.out.println(multiFlatDateFilter.getLevels());
+                    }
+                }
                 result = ExportService.compareYearsToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSTrendDefinition) {
                 WSTrendDefinition trend = (WSTrendDefinition) report;
