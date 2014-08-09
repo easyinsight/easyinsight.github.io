@@ -198,7 +198,8 @@
                     diagramEditor.analysisItem = _analysisItem;
                     diagramEditor.analysisItems = _analysisItems;
                     tabNavigator.addChild(diagramEditor);
-                } else if (_reportType == AnalysisDefinition.LIST || _reportType == AnalysisDefinition.TREE || _reportType == AnalysisDefinition.SUMMARY) {
+                } else if (_reportType == AnalysisDefinition.LIST || _reportType == AnalysisDefinition.TREE || _reportType == AnalysisDefinition.SUMMARY
+                        || _reportType == AnalysisDefinition.MULTI_SUMMARY) {
                     var textEditor:TextExtensionWindow = new TextExtensionWindow();
                     _reportEditor = textEditor;
                     textEditor.analysisItem = _analysisItem;

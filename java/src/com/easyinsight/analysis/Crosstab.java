@@ -132,6 +132,33 @@ public class Crosstab {
             applyRowLimits(crosstabDefinition, columnSections, rowSections);
         }
 
+        if (crosstabDefinition.getMeasures().size() == 1 && crosstabDefinition.isSortByRowSummaries()) {
+            AnalysisMeasure analysisMeasure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
+            Map<Section, Double> lookupMap = new HashMap<>();
+            for (Section rowSection : rowSections) {
+                Map<AnalysisItem, Aggregation> sumMap = new HashMap<>();
+                sumMap.put(analysisMeasure, new AggregationFactory(analysisMeasure, false).getAggregation());
+                for (Section columnSection : columnSections) {
+                    Map<AnalysisItem, Value> map = intersectionMap.get(new Intersection(rowSection, columnSection));
+                    if (map != null) {
+                        Value value = map.get(analysisMeasure);
+                        if (value != null) {
+                            sumMap.get(analysisMeasure).addValue(value);
+                        }
+                    }
+                }
+                double sum = 0;
+                Double sumValue = sumMap.get(analysisMeasure).toDouble();
+                if (sumValue != null) {
+                    sum = sumValue;
+                }
+                lookupMap.put(rowSection, sum);
+            }
+            List<Section> sorted = new ArrayList<>(rowSections);
+            Collections.sort(sorted, (o1, o2) -> lookupMap.get(o2).compareTo(lookupMap.get(o1)));
+            rowSections = sorted;
+        }
+
         if (baseMeasure.getAggregation() == AggregationTypes.AVERAGE && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1 &&
                 crosstabDefinition.getMeasures().size() == 1) {
 

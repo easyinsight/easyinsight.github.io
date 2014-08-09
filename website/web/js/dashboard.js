@@ -16,7 +16,6 @@ var reportListTemplate;
 
 var dashboard;
 var email_modal;
-var short_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 var currentReport;
 
@@ -25,6 +24,22 @@ var multi_field_value_results;
 
 var saveConfiguration;
 var startFullRenderPDF;
+
+var busyIndicator;
+busyIndicator = busyIndicator || (function () {
+
+    return {
+        showPleaseWait: function() {
+            $("#pleaseWaitProcessingMessage").html("Generating PDF...");
+            $("#pleaseWaitDialog").modal(true, true, true);
+        },
+        hidePleaseWait: function () {
+            $("#pleaseWaitDialog").modal('hide');
+            $("#pleaseWaitProcessingMessage").html("Processing...");
+        }
+
+    };
+})();
 
 function captureAndReturn(o) {
     var obj = o.report.report;
@@ -294,6 +309,8 @@ var toPDF = function (o, dashboardID, drillthroughID) {
         capture(id);
     }
 }
+
+
 
 var toExcel = function (o, dashboardID, drillthroughID) {
     var obj = o.report.report;
@@ -1121,6 +1138,18 @@ $(function () {
 
             })
 
+            $("#embedDashboardWidth").change(function(e) {
+                var width = $("#embedDashboardWidth").val();
+                var height = $("#embedDashboardHeight").val();
+
+                $("#embedDashboardURL").text("<iframe width=\""+width+"\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
+            });
+
+            $("#embedDashboardHeight").change(function(e) {
+                var width = $("#embedDashboardWidth").val();
+                var height = $("#embedDashboardHeight").val();
+                $("#embedDashboardURL").text("<iframe width=\""+width+"\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
+            });
 
             $(".report-emailReportButton", target).click(function (e) {
                 $("#emailReportWindow").modal(true, true, true);
@@ -1217,6 +1246,11 @@ $(function () {
             currentReport = f;
         })
 
+        $(".embed_dashboard").click(function(e) {
+            $("#embedDashboardURL").text("<iframe width=\"500\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
+            $("#embedDashboardWindow").modal(true, true, true);
+        })
+
         $(".embedReportButton").click(function (e) {
             $("#embedReportWindow").modal(true, true, true);
             var f = $(e.target).attr("data-key");
@@ -1307,12 +1341,17 @@ $(function () {
             var pdfData = {};
             fullRenderPDF(obj, dashboardID, drillthroughID, pdfData);
             var postData = {dashboardID: dashboardID, configuration : c, reportImages: pdfData};
+            busyIndicator.showPleaseWait();
             $.ajax ( {
                 url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID + "&timezoneOffset=" + new Date().getTimezoneOffset(),
                 data: JSON.stringify(postData),
                 success: function(data) {
                     var url = data["urlKey"];
+                    busyIndicator.hidePleaseWait();
                     window.location.href = "/app/pdf?urlKey="+url;
+                },
+                error: function(a, b, c) {
+                    busyIndicator.hidePleaseWait();
                 },
                 contentType: "application/json; charset=UTF-8",
                 type: "POST"

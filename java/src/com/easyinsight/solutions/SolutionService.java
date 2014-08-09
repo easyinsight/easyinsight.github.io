@@ -167,7 +167,7 @@ public class SolutionService {
                 queryStmt.setInt(1, dataSource.getFeedType().getType());
                 queryStmt.setLong(2, SecurityUtil.getAccountID());
                 ResultSet rs = queryStmt.executeQuery();
-                if (!rs.next()) {
+                if (!rs.next() || dataSource.getFeedType().getType() != FeedType.SMARTSHEET_TABLE.getType()) {
                     new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
                 }
             }

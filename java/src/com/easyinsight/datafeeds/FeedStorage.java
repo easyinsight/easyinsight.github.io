@@ -1020,6 +1020,7 @@ public class FeedStorage {
 
             DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SUBSCRIBER, feedType, lastDataTime, null, null, rs.getBoolean(5), rs.getString(6),
                     rs.getInt(7));
+            feedDescriptor.setInRequestedGroup(true);
             dataSources.add(feedDescriptor);
         }
         queryStmt.close();

@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#000000" backgroundAlpha=".1">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
+        import com.easyinsight.analysis.summary.MultiSummaryDefinition;
+
+        import mx.collections.ArrayCollection;
+
         /*import mx.controls.Label;
         import mx.core.Container;
         import mx.core.UIComponent;
@@ -46,10 +52,40 @@
                 }
             }
         }*/
+
+        public function updateText(report:AnalysisDefinition):void {
+            if (report is ColumnChartDefinition) {
+                if (ColumnChartDefinition(report).xaxis != null && !hasCount(ColumnChartDefinition(report).measures)) {
+                    text = "Now that you have an X axis defined, drag a Measure from the left hand list into the report to form the Y axis of the report.";
+                } else if (ColumnChartDefinition(report).xaxis == null && hasCount(ColumnChartDefinition(report).measures)) {
+                    text = "Now that you have an measure defined, drag a Grouping from the left hand list into the report to form the X axis of the report.";
+                } else {
+                    text = defaultTextString;
+                }
+            } else if (report is BarChartDefinition) {
+                if (BarChartDefinition(report).yaxis != null && !hasCount(BarChartDefinition(report).measures)) {
+                    text = "Now that you have a Y axis defined, drag a Measure from the left hand list into the report to form the X axis of the report.";
+                } else if (BarChartDefinition(report).yaxis == null && hasCount(BarChartDefinition(report).measures)) {
+                    text = "Now that you have an measure defined, drag a Grouping from the left hand list into the report to form the Y axis of the report.";
+                } else {
+                    text = defaultTextString;
+                }
+            } else if (report is MultiSummaryDefinition) {
+                text = "For a multi summary report, you'll need to specify the main columns and one or more nested reports. The Join Field should be a unique identifier (such as Todo ID) that you use to join the main columns to the nested reports.";
+            }
+        }
+
+        private static function hasCount(vals:ArrayCollection, size:int = 1):Boolean {
+            return (vals != null && vals.length >= size);
+        }
+
+        private var defaultTextString:String = "You haven't set up a report yet. You can drag the fields from the left into this canvas or into the drop areas above to get started!";
+
+        [Bindable]
+        private var text:String = defaultTextString;
         ]]></mx:Script>
     <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="10" horizontalAlign="center" verticalAlign="middle"
             backgroundColor="#FFFFFF" paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
-        <mx:TextArea fontSize="22" text="You haven't set up a report yet. You can drag the fields from the left into this canvas or into the drop areas above to get started!"
-                     borderStyle="none" backgroundAlpha="0" width="500" height="95" editable="false" selectable="false" focusEnabled="false"/>
+        <mx:Text fontSize="22" text="{text}" width="500" selectable="false"/>
     </mx:Box>
 </mx:Box>

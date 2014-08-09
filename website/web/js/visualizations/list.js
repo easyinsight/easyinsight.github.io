@@ -46,9 +46,15 @@ List = {
 
                 var paging = properties["generalSizeLimit"] > 0;
 
+                var lockHeaders = properties["lockHeaders"];
+
                 List.createClasses(properties, targetDiv);
 
-                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array })
+                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array });
+                //new $.fn.dataTable.FixedHeader(List.availableDataTables[targetDiv]);
+                if (lockHeaders) {
+                    $('#' + targetDiv + ' .reportArea table').floatThead();
+                }
                 //new $.fn.dataTable.FixedHeader(List.availableDataTables[targetDiv]);
                 $(".list_drillthrough").click(function (e) {
                     e.preventDefault();

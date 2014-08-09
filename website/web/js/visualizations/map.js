@@ -28,16 +28,16 @@ Map = {
             var featureProp;
             var scale;
             if (mapType == "US States") {
-                sHeight = height / 480;
-                sWidth = width / 735;
+                sHeight = height / 490;
+                sWidth = width / 755;
 
                 if (sHeight < sWidth) {
                     scale = 1000 * sHeight;
                 } else {
                     scale = 1000 * sWidth;
                 }
-                projection = d3.geo.albersUsa()
-                    .scale(scale).translate([width / 2, height / 2]);
+                projection = d3.geo.albers()
+                    .scale(scale).translate([width / 2, (height / 2) + 10]);
                 targetJSON = "/js/us-named3.json";
 
                 featureProp = "states";
@@ -55,9 +55,33 @@ Map = {
                 targetJSON = "/js/maps/world-topo.json";
 
                 featureProp = "countries";
+            } else if (mapType == "TN") {
+                var baseScale = 8000;
+                sHeight = height / 480;
+                sWidth = width / 735;
+                if (sHeight < sWidth) {
+                    scale = baseScale * sHeight;
+                } else {
+                    scale = baseScale * sWidth;
+                }
+                projection = d3.geo.albers().scale(1)
+                    .translate([0, 0]).rotate([86.7489, 0])
+                    .center([0, 35.7449]);
+                /*projection = d3.geo.albers()
+                    .translate([width / 2, height / 2])
+                    .scale(scale)
+                    .rotate([86.7489, 0])
+                    .center([0, 35.7449]);*/
+                targetJSON = "/js/maps/tn.json";
+                featureProp = "tnzip";
             }
 
+
+
+
             var path = d3.geo.path().projection(projection);
+
+            var  active = d3.select(null);
 
             var jData = data.regions;
             var lookup = {};
@@ -68,6 +92,11 @@ Map = {
                 d3.min(jData, function(d) { return d.scaledValue; }),
                 d3.max(jData, function(d) { return d.scaledValue; })
             ]);
+
+            var formatPercent = d3.format(".0%"),
+                formatNumber = d3.format(".0f");
+
+
 
             for (var i = 0; i < jData.length; i++) {
                 var jD = jData[i];
@@ -86,7 +115,35 @@ Map = {
                 var feature = topojson.feature(topology, topology.objects[featureProp]);
                 var country = g.selectAll(".counties").data(feature.features);
 
-                country.enter().insert("path").attr("class", "counties").attr("d", path).style("fill",
+                if (mapType == "TN") {
+                    var boundsSet = data["bounds_set"];
+                    var targetData;
+                    if (typeof(boundsSet) != "undefined") {
+                        /*var selected = d3.set([ "Bedford", "Bledsoe", "Bradley", "Coffee", "Franklin", "Grundy", "Hamilton", "Lincoln", "Marion",
+                            "McMinn", "Meigs", "Moore", "Polk", "Rhea", "Sequatchie"]);*/
+                        var selected = d3.set(boundsSet);
+
+                        targetData = topojson.merge(topology, topology.objects.tncounties.geometries.filter(function(d) { return selected.has(d.properties.name) }));
+                        var h = height - 20;
+                        var b = path.bounds(targetData),
+                            s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / h),
+                            t = [(width - s * (b[1][0] + b[0][0])) / 2, ((h - s * (b[1][1] + b[0][1])) / 2) + 30];
+
+                        projection
+                            .scale(s)
+                            .translate(t);
+                    } else {
+                        targetData = topology.objects.tncounties;
+                    }
+
+                    svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.tncounties, function (a, b) {
+                        return a !== b;
+                    })).style("fill", "none").style("stroke", "#AAAAAA").attr("d", path);
+
+                    svg.append("path").datum(targetData).style("fill", "none").style("stroke-width", "3px").style("stroke", "#000000").attr("d", path);
+                }
+
+                country.enter().append("path").attr("class", "counties").attr("d", path).style("fill",
                     function(d) {
                         var value = lookup[d.properties.name];
                         if (value) {
@@ -140,68 +197,125 @@ Map = {
                         var pointColor = pointData.color;
                         var points = pointData.points;
 
-                        var radiusMin = d3.min(points, function(d) { return d.pointValue; });
-                        var radiusMax = d3.max(points, function(d) { return d.pointValue; });
-                        var radius = d3.scale.log().range([4, 18]).domain([
-                            radiusMin, radiusMax
-                        ]);
+                        var radius;
+                        if (mapType == "TN") {
+                            svg.selectAll("circle").data(points).enter().append("circle").
+                                attr("cx", function(d) {
+                                    var cx = projection([d.lon, d.lat]);
+                                    if (cx != null) {
+                                        return cx[0];
+                                    }
+                                    return -50000;
+                                }).
+                                attr("cy", function(d) {
+                                    var cy = projection([d.lon, d.lat]);
+                                    if (cy != null) {
+                                        return cy[1];
+                                    }
+                                    return -50000;
+                                }).attr("r", 6).attr("data-legend", Map.getFillName(pointData)).attr("data-legend-color", Map.getFillColor(pointData))
+                                .style("fill", pointColor);
+                        } else {
+                            var radiusMin = d3.min(points, function(d) { return d.pointValue; });
+                            var radiusMax = d3.max(points, function(d) { return d.pointValue; });
+                            radius = d3.scale.log().range([4, 18]).domain([
+                                radiusMin, radiusMax
+                            ]);
+                            var gradient = svg.append("svg:defs")
+                                .append("svg:radialGradient")
+                                .attr("id", "gradient" + j)
+                                .attr("cx", "50%")
+                                .attr("cy", "50%")
+                                .attr("r", "30%")
+                                .attr("fx", "50%")
+                                .attr("fy", "50%");
 
-                        var gradient = svg.append("svg:defs")
-                            .append("svg:radialGradient")
-                            .attr("id", "gradient" + j)
-                            .attr("cx", "50%")
-                            .attr("cy", "50%")
-                            .attr("r", "50%")
-                            .attr("fx", "50%")
-                            .attr("fy", "50%");
+                            gradient.append("svg:stop")
+                                .attr("offset", "0%")
+                                .attr("stop-color", pointColor)
+                                .attr("stop-opacity", 1);
 
-                        gradient.append("svg:stop")
-                            .attr("offset", "0%")
-                            .attr("stop-color", pointColor)
-                            .attr("stop-opacity", 1);
+                            gradient.append("svg:stop")
+                                .attr("offset", "30%")
+                                .attr("stop-color", pointColor)
+                                .attr("stop-opacity", 1);
 
-                        gradient.append("svg:stop")
-                            .attr("offset", "20%")
-                            .attr("stop-color", pointColor)
-                            .attr("stop-opacity", 1);
+                            gradient.append("svg:stop")
+                                .attr("offset", "60%")
+                                .attr("stop-color", pointColor)
+                                .attr("stop-opacity", .3);
 
-                        gradient.append("svg:stop")
-                            .attr("offset", "40%")
-                            .attr("stop-color", pointColor)
-                            .attr("stop-opacity", .3);
+                            gradient.append("svg:stop")
+                                .attr("offset", "100%")
+                                .attr("stop-color", pointColor)
+                                .attr("stop-opacity", .1);
 
-                        gradient.append("svg:stop")
-                            .attr("offset", "100%")
-                            .attr("stop-color", pointColor)
-                            .attr("stop-opacity", .1);
 
-                        svg.selectAll("circle").data(points).enter().append("circle").
-                            attr("cx", function(d) {
-                                var cx = projection([d.lon, d.lat]);
-                                if (cx != null) {
-                                    return cx[0];
-                                }
-                                return -50000;
-                            }).
-                            attr("cy", function(d) {
-                                var cy = projection([d.lon, d.lat]);
-                                if (cy != null) {
-                                    return cy[1];
-                                }
-                                return -50000;
-                            }).attr("r", Map.getRadius(radius)).attr("data-legend", Map.getFillName(pointData)).attr("data-legend-color", Map.getFillColor(pointData))
-                            .style("fill", "url(#gradient" + j +")");
+                            svg.selectAll("circle").data(points).enter().append("circle").
+                                attr("cx", function(d) {
+                                    var cx = projection([d.lon, d.lat]);
+                                    if (cx != null) {
+                                        return cx[0];
+                                    }
+                                    return -50000;
+                                }).
+                                attr("cy", function(d) {
+                                    var cy = projection([d.lon, d.lat]);
+                                    if (cy != null) {
+                                        return cy[1];
+                                    }
+                                    return -50000;
+                                }).attr("r", Map.getRadius(radius)).attr("data-legend", Map.getFillName(pointData)).attr("data-legend-color", Map.getFillColor(pointData))
+                                .style("fill", "url(#gradient" + j +")");
+                        }
                     }
 
-                    var legend = svg.append("g")
-                        .attr("class","mapLegend")
-                        .attr("transform","translate(50,30)")
-                        .style("font-size","12px")
-                        .call(d3.legend)
+                    if (data.pointDatas.length > 1) {
+                        var legend = svg.append("g")
+                            .attr("class", "mapLegend")
+                            .attr("transform", "translate(50,50)")
+                            .style("font-size", "12px")
+                            .call(d3.legend)
+                    }
                 }
 
+                var xMin = d3.min(jData, function(d) { return d.scaledValue; });
+                var xMax = d3.max(jData, function(d) { return d.scaledValue; });
+                var xActualMin = d3.min(jData, function(d) { return d.value; });
+                var xActualMax = d3.max(jData, function(d) { return d.value; });
+                var x = d3.scale.linear()
+                    .domain([xMin,
+                        xMax])
+                    .range([0, 240]);
+
+                svg.append("rect").attr("height", 25).attr("width", width + 30).style("fill", "#FFFFFF");
+                svg.selectAll("rect")
+                    .data(color.range().map(function(c) {
+                        var d = color.invertExtent(c);
+                        if (d[0] == null) d[0] = x.domain()[0];
+                        if (d[1] == null) d[1] = x.domain()[1];
+                        return d;
+                    }))
+                    .enter().append("rect")
+                    .attr("height", 8)
+                    .attr("x", function(d) { return x(d[0]); })
+                    .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+                    .style("fill", function(d) { return color(d[0]); });
+                svg.append("text").attr("y", 20).attr("x", 10).text(xActualMin);
+                svg.append("text").attr("y", 20).attr("x", 230).text(xActualMax);
+
+                if(typeof(afterRefresh) != "undefined") {
+                    if (afterRefresh.length > 1) {
+                        afterRefresh($("#" + target + " .loading"), target)();
+                    } else if(afterRefresh.length > 0) {
+                        afterRefresh($("#" + target + " .loading"))();
+                    } else {
+                        afterRefresh();
+                    }
+                }
 
             });
+
         }
     },
 

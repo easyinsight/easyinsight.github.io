@@ -233,20 +233,23 @@ h2 {
 }
 
 #trialBarLeft {
-    float:left;
     font-size: 18px;
     padding-left: 15px;
     color: #FFFFFF;
     margin-top: 10px;
 }
 
+#trialBarDiv {
+    font-size:24px;
+    color:#FFFFFF;
+}
+
 .trialBarRight {
-    float:right;
     font-size: 18px;
     padding-right: 15px;
-    margin-left:40px;
     color: #FFFFFF;
     margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .trialBarRight > a {
@@ -304,6 +307,20 @@ h2 {
 .copyright {
     text-align: center;
     padding-top: 15px;
+}
+
+@media (max-width: 768px) {
+    .img-fit-responsive,
+    .thumbnail > img,
+    .thumbnail a > img,
+    .carousel-inner > .item > img,
+    .carousel-inner > .item > a > img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin-top:10px;
+        margin-bottom:10px;
+    }
 }
 
 @media (max-width: 768px) {
