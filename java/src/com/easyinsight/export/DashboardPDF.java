@@ -30,10 +30,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jamesboe
@@ -86,7 +84,7 @@ public class DashboardPDF {
 
         String url = "/app/embed/seleniumReport.jsp?seleniumUserName={0}&seleniumPassword={1}&seleniumID={2}";
         String formatted = MessageFormat.format(url, u, p, String.valueOf(id));
-        System.out.println("https://www.easy-insight.com" + formatted);
+        System.out.println("https://localhost:4443" + formatted);
 
         PDFImageData imageData = launchAndWaitForRequest(formatted, conn, id);
 
@@ -295,6 +293,9 @@ public class DashboardPDF {
             } else if (report.getReportType() == WSAnalysisDefinition.TREND_GRID) {
                 result = new ExportService().kpiReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             } else if (report.getReportType() == WSAnalysisDefinition.YTD) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.isEnabled());
+                }
                 result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSTreeDefinition) {
                 result = new ExportService().treeToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
@@ -405,6 +406,21 @@ public class DashboardPDF {
             }
         } else if (element instanceof DashboardReport) {
             DashboardReport dashboardReport = (DashboardReport) element;
+            if (dashboardReport.getOverridenFilters() != null && dashboardReport.getOverridenFilters().size()> 0) {
+                Set<String> k = new HashSet<>();
+                for (String filterID : dashboardReport.getOverridenFilters().keySet()) {
+                    k.add(filterID);
+                }
+                Iterator<FilterDefinition> iter = filters.iterator();
+                while (iter.hasNext()) {
+                    FilterDefinition filter = iter.next();
+                    String sid = String.valueOf(filter.getFilterID());
+                    if (k.contains(sid)) {
+                        System.out.println("suppressing filter " + sid);
+                        iter.remove();
+                    }
+                }
+            }
             WSAnalysisDefinition report = AnalysisService.openAnalysisDefinitionWithConn(dashboardReport.getReport().getId(), conn);
             List<FilterDefinition> replaceFilters = new ArrayList<>(filters);
             if (report.getFilterDefinitions() != null) {
@@ -416,7 +432,6 @@ public class DashboardPDF {
                     } else {
                         replaceFilters.add(filter);
                     }
-
                 }
             }
             report.setFilterDefinitions(replaceFilters);
