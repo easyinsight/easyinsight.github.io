@@ -99,7 +99,7 @@ public class DashboardPDF {
         return image;
     }
 
-    public static final String OUTBOUND_QUEUE = "EISeleniumDev";
+    public static final String OUTBOUND_QUEUE = "EISelenium";
 
     private PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
         // send an SQS request
