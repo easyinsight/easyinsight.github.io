@@ -2640,14 +2640,12 @@ public class ExportService {
                     for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
                         ctr++;
                     }
-                    ctr += 2;
+                    if (hasBenchmark) {
+                        ctr += 2;
+                    }
                     maxColumns = Math.max(ctr, maxColumns);
                 }
             }
-        }
-
-        if (hasBenchmark) {
-            maxColumns += 2;
         }
 
         PdfPTable table = new PdfPTable(maxColumns + 1);
