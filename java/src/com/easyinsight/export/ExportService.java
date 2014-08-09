@@ -2308,10 +2308,6 @@ public class ExportService {
     public static Element compareYearsToPDF(WSAnalysisDefinition report, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
         WSCompareYearsDefinition verticalList = (WSCompareYearsDefinition) report;
-        if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
-            AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
-            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
-        }
         ExtendedDataSet dataSet = DataService.extendedListDataSet(report, insightRequestMetadata, conn);
         YearStuff ytdStuff = YTDUtil.getYearStuff(verticalList, dataSet.getDataSet(), dataSet.getPipelineData(), dataSet.getReportItems());
 
@@ -2640,14 +2636,12 @@ public class ExportService {
                     for (int i = 0; i < ytdStuff.getIntervals().size(); i++) {
                         ctr++;
                     }
-                    ctr += 2;
+                    if (hasBenchmark) {
+                        ctr += 2;
+                    }
                     maxColumns = Math.max(ctr, maxColumns);
                 }
             }
-        }
-
-        if (hasBenchmark) {
-            maxColumns += 2;
         }
 
         PdfPTable table = new PdfPTable(maxColumns + 1);
