@@ -1,6 +1,5 @@
 package com.easyinsight.filtering {
 
-import com.easyinsight.WindowManagement;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
@@ -230,7 +229,6 @@ public class NewMultiValueFilter extends UIComponent implements IFilter {
         window2.otherFilters = _otherFilters;
         window2.dashboard = _dashboard;
         window2.addEventListener("updated", onUpdated, false, 0, true);
-        WindowManagement.manager.addWindow(window2);
         PopUpManager.addPopUp(window2, this, true);
         PopUpUtil.centerPopUpWithY(window2, 40);
     }
