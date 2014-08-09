@@ -2642,6 +2642,8 @@ public class ExportService {
         }
 
         if (hasBenchmark) {
+            maxColumns += 4;
+        } else {
             maxColumns += 2;
         }
 
@@ -2784,20 +2786,6 @@ public class ExportService {
                         }
                         table.addCell(cell);
                     }
-                    /*if (hasBenchmark) {
-                        PdfPCell cell = new PdfPCell(new Phrase("", regFont));
-                        cell.setBorderWidth(0f);
-                        if (lineAbove) {
-                            cell.setBorderWidthTop(1f);
-                        }
-                        table.addCell(cell);
-                        PdfPCell cell2 = new PdfPCell(new Phrase("", regFont));
-                        cell2.setBorderWidth(0f);
-                        if (lineAbove) {
-                            cell2.setBorderWidthTop(1f);
-                        }
-                        table.addCell(cell2);
-                    }*/
                 }
             }
         }
