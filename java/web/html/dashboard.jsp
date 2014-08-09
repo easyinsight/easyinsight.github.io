@@ -132,6 +132,11 @@
                                         style="padding:5px;margin:5px;width:150px">Export to PDF
                                 </button>
                             </li>
+                            <li>
+                                <button class="btn btn-inverse embed_dashboard" type="button"
+                                        style="padding:5px;margin:5px;width:150px">Embed the Dashboard
+                                </button>
+                            </li>
                         </ul>
                     </div>
                     <div class="btn-group reportControlBtnGroup">
@@ -170,6 +175,8 @@
 <div class="container">
 <%--    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>--%>
     <jsp:include page="refreshingDataSource.jsp"/>
+    <jsp:include page="embedDashboardWindow.jsp"/>
+    <jsp:include page="modalIndicator.jsp"/>
     <div id="base"/>
 </div>
 
