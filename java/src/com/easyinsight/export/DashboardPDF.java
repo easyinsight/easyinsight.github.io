@@ -152,13 +152,14 @@ public class DashboardPDF {
             List<FilterDefinition> replaceFilters = new ArrayList<>();
             for (FilterDefinition filter : dashboard.getFilters()) {
                 long filterID = filter.getFilterID();
+                System.out.println("dashboard filter ID = " + filterID);
                 FilterDefinition overrideFilter = selected.getFilterMap().get(1 + "|" + filterID);
                 if (overrideFilter != null) {
                     replaceFilters.add(overrideFilter);
                 } else {
                     replaceFilters.add(filter);
                 }
-                dashboard.setFilters(replaceFilters);
+                //dashboard.setFilters(replaceFilters);
             }
             DashboardElement root = dashboard.getRootElement();
             DashboardElement element = findElementToRender(root, selected, replaceFilters);
@@ -294,7 +295,14 @@ public class DashboardPDF {
                 result = new ExportService().kpiReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             } else if (report.getReportType() == WSAnalysisDefinition.YTD) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
-                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.isEnabled());
+                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.getFilterID() + " - " + filter.isEnabled());
+                    if (filter instanceof FlatDateFilter) {
+                        FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
+                        System.out.println("\t" + flatDateFilter.getValue());
+                    } else if (filter instanceof MultiFlatDateFilter) {
+                        MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
+                        System.out.println(multiFlatDateFilter.getLevels());
+                    }
                 }
                 result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSTreeDefinition) {
@@ -359,18 +367,17 @@ public class DashboardPDF {
             DashboardStack dashboardStack = (DashboardStack) root;
             Integer index = selected.getPositions().get(dashboardStack.getUrlKey());
             if (dashboardStack.getFilters() != null) {
-                List<FilterDefinition> replaceFilters = new ArrayList<>();
                 for (FilterDefinition filter : dashboardStack.getFilters()) {
                     long filterID = filter.getFilterID();
                     FilterDefinition overrideFilter = selected.getFilterMap().get(4 + "|" + filterID + "|" + dashboardStack.getUrlKey());
                     if (overrideFilter != null) {
-                        replaceFilters.add(overrideFilter);
+                        recurseFilters.add(overrideFilter);
                     } else {
-                        replaceFilters.add(filter);
+                        recurseFilters.add(filter);
                     }
-                    dashboardStack.setFilters(replaceFilters);
+                    //dashboardStack.setFilters(replaceFilters);
                 }
-                recurseFilters.addAll(dashboardStack.getFilters());
+                //recurseFilters.addAll(dashboardStack.getFilters());
             }
             if (index != null) {
                 return findElementToRender(dashboardStack.getGridItems().get(index).getDashboardElement(), selected, recurseFilters);
@@ -409,6 +416,7 @@ public class DashboardPDF {
             if (dashboardReport.getOverridenFilters() != null && dashboardReport.getOverridenFilters().size()> 0) {
                 Set<String> k = new HashSet<>();
                 for (String filterID : dashboardReport.getOverridenFilters().keySet()) {
+                    System.out.println("report overrides " + filterID);
                     k.add(filterID);
                 }
                 Iterator<FilterDefinition> iter = filters.iterator();
@@ -417,7 +425,9 @@ public class DashboardPDF {
                     String sid = String.valueOf(filter.getFilterID());
                     if (k.contains(sid)) {
                         System.out.println("suppressing filter " + sid);
-                        iter.remove();
+                        filter.override(dashboardReport.getOverridenFilters().get(sid));
+                        filter.setEnabled(dashboardReport.getOverridenFilters().get(sid).isEnabled());
+                        //iter.remove();
                     }
                 }
             }
