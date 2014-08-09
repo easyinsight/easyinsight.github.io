@@ -330,3 +330,8 @@ table.dataTable tfoot td {
 .tabbable > .filters {
     padding-top: 0;
 }
+
+#embedDashboardURL {
+    font-size:12px;
+    font-family: 'Courier',serif;
+}

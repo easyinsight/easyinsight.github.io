@@ -18,11 +18,11 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
 
     public var columnSort:String = ChartDefinition.SORT_UNSORTED;
     public var stackItem:AnalysisItem;
-    public var labelPosition:String = "none";
+    public var labelPosition:String = "inside";
     public var labelInsideFontColor:int = 0x222222;
     public var useInsideLabelFontColor:Boolean = true;
     public var labelFontSize:int = 12;
-    public var labelFontWeight:String = "none";
+    public var labelFontWeight:String = "bold";
     public var legendMaxWidth:int = 200;
     public var multiColors:ArrayCollection = new ArrayCollection();
     public var stackSort:String = ChartDefinition.SORT_UNSORTED;

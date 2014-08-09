@@ -1499,7 +1499,10 @@ public class ExportService {
                 // todo: impl
 
                 if (dateDim.isTimeshift(null)) {
+
                     sdf.setCalendar(cal);
+                } else {
+
                 }
                 valueString = sdf.format(dateValue.getDate());
             }
@@ -2367,44 +2370,44 @@ public class ExportService {
                 if (ytdReportFieldExtension.isLineAbove()) {
                     lineAbove = true;
                 }
-                com.itextpdf.text.Font boldFont;
-                if (alwaysShow) {
-                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
-                } else {
-                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
-                }
+            }
+            com.itextpdf.text.Font boldFont;
+            if (alwaysShow) {
+                boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
+            } else {
+                boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+            }
 
-                PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
-                rowHeaderCell.setBorderWidth(0f);
-                if (lineAbove) {
-                    rowHeaderCell.setBorderWidthTop(1f);
-                }
-                if (alwaysShow) {
-                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
-                } else {
-                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
-                }
-                table.addCell(rowHeaderCell);
+            PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
+            rowHeaderCell.setBorderWidth(0f);
+            if (lineAbove) {
+                rowHeaderCell.setBorderWidthTop(1f);
+            }
+            if (alwaysShow) {
+                rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
+            } else {
+                rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
+            }
+            table.addCell(rowHeaderCell);
 
-                for (String header : ytdStuff.getHeaders()) {
-                    if (alwaysShow) {
-                        PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
-                        emptyCell.setBorderWidth(0f);
-                        if (lineAbove) {
-                            emptyCell.setBorderWidthTop(1f);
-                        }
-                        table.addCell(emptyCell);
+            for (String header : ytdStuff.getHeaders()) {
+                if (alwaysShow) {
+                    PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
+                    emptyCell.setBorderWidth(0f);
+                    if (lineAbove) {
+                        emptyCell.setBorderWidthTop(1f);
+                    }
+                    table.addCell(emptyCell);
+                } else {
+                    CompareYearsResult compareYearsResult = ytdValue.getResults().get(header);
+                    if (compareYearsResult.isPercentChange()) {
+                        PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, percentMeasure, compareYearsResult.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                        dataCell.setBorder(0);
+                        table.addCell(dataCell);
                     } else {
-                        CompareYearsResult compareYearsResult = ytdValue.getResults().get(header);
-                        if (compareYearsResult.isPercentChange()) {
-                            PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, percentMeasure, compareYearsResult.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
-                            dataCell.setBorder(0);
-                            table.addCell(dataCell);
-                        } else {
-                            PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, baseMeasure, compareYearsResult.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
-                            dataCell.setBorder(0);
-                            table.addCell(dataCell);
-                        }
+                        PdfPCell dataCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, baseMeasure, compareYearsResult.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                        dataCell.setBorder(0);
+                        table.addCell(dataCell);
                     }
                 }
             }
@@ -2641,6 +2644,10 @@ public class ExportService {
             }
         }
 
+        if (hasBenchmark) {
+            maxColumns += 2;
+        }
+
         PdfPTable table = new PdfPTable(maxColumns + 1);
         table.setSpacingBefore(20);
         table.getDefaultCell().setPadding(3);
@@ -2742,15 +2749,35 @@ public class ExportService {
                     }
                     table.addCell(avgCell);
 
-                    /*if (hasBenchmark) {
+                    if (hasBenchmark) {
                         if (ytdValue.getBenchmarkMeasure() != null) {
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
-                            sb.append("<td style=\"").append(cellStyle).append("\">").append(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)).append("</td>");
+                            PdfPCell bkCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, ytdValue.getBenchmarkMeasure(), ytdValue.getBenchmarkValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                            bkCell.setBorderWidth(0f);
+                            if (lineAbove) {
+                                bkCell.setBorderWidthTop(1f);
+                            }
+                            table.addCell(bkCell);
+                            PdfPCell variationCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, percentMeasure, ytdValue.getVariation(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), regFont));
+                            variationCell.setBorderWidth(0f);
+                            if (lineAbove) {
+                                variationCell.setBorderWidthTop(1f);
+                            }
+                            table.addCell(variationCell);
                         } else {
-                            sb.append("<td style=\"").append(cellStyle).append("\"></td>");
-                            sb.append("<td style=\"").append(cellStyle).append("\"></td>");
+                            PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
+                            emptyCell.setBorderWidth(0f);
+                            if (lineAbove) {
+                                emptyCell.setBorderWidthTop(1f);
+                            }
+                            table.addCell(emptyCell);
+                            PdfPCell emptyCell2 = new PdfPCell(new Phrase("", regFont));
+                            emptyCell2.setBorderWidth(0f);
+                            if (lineAbove) {
+                                emptyCell2.setBorderWidthTop(1f);
+                            }
+                            table.addCell(emptyCell2);
                         }
-                    }*/
+                    }
                 } else if (alwaysShow) {
                     for (int i = 0; i < maxColumns; i++) {
                         PdfPCell cell = new PdfPCell(new Phrase("", regFont));
@@ -3844,6 +3871,10 @@ public class ExportService {
 
     public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException{
         return createExportMetadata(SecurityUtil.getAccountID(false), conn, new InsightRequestMetadata());
+    }
+
+    public static ExportMetadata createExportMetadata(EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException{
+        return createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
     }
 
     public static ExportMetadata createExportMetadata(long accountID, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {

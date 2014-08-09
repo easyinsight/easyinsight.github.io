@@ -22,6 +22,7 @@ import mx.collections.ArrayCollection;
         public var summaryRowTextColor:uint = 0x000000;
         public var rolloverIcon:Boolean;
         public var horizontalGridLines:Boolean = false;
+        public var lockHeaders:Boolean = false;
         public var verticalGridLines:Boolean = false;
         public var borderStyle:String = "none";
         public var multiLineHeaders:Boolean = false;

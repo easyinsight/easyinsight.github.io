@@ -10,6 +10,7 @@
 
 <script type="text/javascript" src="/js/date.js"></script>
 <script type="text/javascript" src="/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="/js/jquery.floatThead-slim.js"></script>
 <script type="text/javascript" src="/js/jquery.datePicker.js"></script>
 <link href="/css/datePicker.css" rel="stylesheet" />
 <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/js/excanvas.js"></script><![endif]-->

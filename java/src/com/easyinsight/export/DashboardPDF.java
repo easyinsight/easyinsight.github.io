@@ -233,6 +233,8 @@ public class DashboardPDF {
         if (element instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) element;
             PdfPTable table = new PdfPTable(dashboardGrid.getColumns());
+            table.setSplitLate(false);
+            table.setSplitRows(true);
             table.setHeaderRows(0);
             for (int j = 0; j < dashboardGrid.getRows(); j++) {
                 for (int i = 0; i < dashboardGrid.getColumns(); i++) {
@@ -286,7 +288,7 @@ public class DashboardPDF {
             WSAnalysisDefinition report = reportMap.get(dashboardReport.getUrlKey());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(timezoneOffset);
-            ExportMetadata exportMetadata = ExportService.createExportMetadata(conn);
+            ExportMetadata exportMetadata = ExportService.createExportMetadata(conn, insightRequestMetadata);
             Element result;
             if (report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 result = new ExportService().crosstabToPDFTable(report, conn, insightRequestMetadata, exportMetadata);

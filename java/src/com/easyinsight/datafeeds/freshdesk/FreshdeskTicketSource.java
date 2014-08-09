@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.freshdesk;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -41,6 +42,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
     public static final String RESPONDER_NAME = "Responder Name";
     public static final String SPAM = "Spam";
     public static final String COUNT = "Ticket Count";
+    public static final String TICKET_URL = "Ticket URL";
 
     public FreshdeskTicketSource() {
         setFeedName("Tickets");
@@ -51,6 +53,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
         fieldBuilder.addField(DISPLAY_ID, new AnalysisDimension());
+        fieldBuilder.addField(TICKET_URL, new AnalysisDimension());
         fieldBuilder.addField(DESCRIPTION, new AnalysisText());
         fieldBuilder.addField(STATUS, new AnalysisDimension());
         fieldBuilder.addField(PRIORITY, new AnalysisDimension());
@@ -102,6 +105,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         HttpClient client = getHttpClient(freshdeskCompositeSource.getFreshdeskApiKey());
         int ctr;
         int page = 1;
+        List<String> ticketIDs = new ArrayList<>();
         do {
             ctr = 0;
             List responseList;
@@ -114,28 +118,32 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                 ctr++;
                 Map map = (Map) obj;
                 String id = map.get("id").toString();
+                String displayID = getJSONValue(map, "display_id");
                 IRow row = dataSet.createRow();
-                createTicket(keys, map, id, row);
+                Date updatedAt = createTicket(keys, map, id, row, freshdeskCompositeSource);
+                //if (lastRefreshDate == null || lastRefreshDate.before(updatedAt)) {
+                    ticketIDs.add(displayID);
+                //}
             }
             page++;
         } while (ctr == 30);
+        freshdeskCompositeSource.setTicketIDs(ticketIDs);
         return dataSet;
     }
 
-    private void createTicket(Map<String, Key> keys, Map map, String id, IRow row) {
+    private Date createTicket(Map<String, Key> keys, Map map, String id, IRow row, FreshdeskCompositeSource freshdeskCompositeSource) {
         row.addValue(keys.get(ID), id);
 
         row.addValue(keys.get(DISPLAY_ID), getJSONValue(map, "display_id"));
-        if ("31".equals(getJSONValue(map, "display_id"))) {
-            System.out.println("...");
-        }
         row.addValue(keys.get(DESCRIPTION), getJSONValue(map, "description"));
         row.addValue(keys.get(REQUESTER_NAME), getJSONValue(map, "requester_name"));
         row.addValue(keys.get(DUE_BY), getDate(map, "due_by"));
         row.addValue(keys.get(STATUS), getJSONValue(map, "status_name"));
         row.addValue(keys.get(PRIORITY), getJSONValue(map, "priority_name"));
         row.addValue(keys.get(CREATED_AT), getDate(map, "created_at"));
-        row.addValue(keys.get(UPDATED_AT), getDate(map, "updated_at"));
+        DateValue updatedAtValue = (DateValue) getDate(map, "updated_at");
+        Date updatedAt = updatedAtValue.getDate();
+        row.addValue(keys.get(UPDATED_AT), updatedAtValue);
         row.addValue(keys.get(SOURCE_NAME), getJSONValue(map, "source_name"));
         row.addValue(keys.get(TRAINED), getJSONValue(map, "trained"));
         row.addValue(keys.get(TICKET_TYPE), getJSONValue(map, "ticket_type"));
@@ -145,6 +153,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         row.addValue(keys.get(OWNER_ID), getJSONValue(map, "owner_id"));
         row.addValue(keys.get(RESPONDER_NAME), getJSONValue(map, "responder_name"));
         row.addValue(keys.get(SPAM), getValue(map, "spam"));
+        row.addValue(keys.get(TICKET_URL), freshdeskCompositeSource.getUrl() + "/helpdesk/tickets/" + getJSONValue(map, "display_id"));
         row.addValue(keys.get(COUNT), 1);
         Map customFieldMap = (Map) map.get("custom_field");
         if (customFieldMap != null) {
@@ -152,6 +161,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                 row.addValue(keys.get(customField), getJSONValue(customFieldMap, customField));
             }
         }
+        return updatedAt;
     }
 
     @Override

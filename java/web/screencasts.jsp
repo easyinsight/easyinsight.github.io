@@ -1,14 +1,18 @@
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="com.easyinsight.documentation.DocReader" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+<%
+    String main = DocReader.toHTML(null, request, DocReader.WEBSITE);
+%>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Easy Insight - Excel and CSV Reporting and Analytics</title>
-    <!-- InstanceEndEditable -->
-
-    <!-- InstanceBeginEditable name="head" -->
-    <meta name="description" content="Excel and CSV reporting done easily and quickly by Easy Insight." />
-    <meta name="keywords" content="excel, csv, excel reporting, excel tools, excel reports, excel analytics, csv reporting, csv tools, csv reports, csv analytics" />
+    <title>Easy Insight &mdash; SaaS Business Intelligence, Reporting, and Analytics</title>
+    <meta name="description"
+          content="Easy Insight provides a self service, business user friendly solution for quick, easy, and affordable business intelligence over the cloud."/>
+    <meta name="keywords"
+          content="business intelligence, bi, saas bi, saas business intelligence, saas reporting, saas analytics, saas analysis, google analytics, salesforce, basecamp, highrise, ec2, mysql, sql server, saas, software as a service"/>
 
     <!-- font -->
     <link href='https://fonts.googleapis.com/css?family=Cabin:regular,bold' rel='stylesheet' type='text/css'>
@@ -17,7 +21,7 @@
 
     <script type="text/javascript" src="/js/modernizr.js"></script>
     <script type="text/javascript" src="/js/jquery-1.10.2.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/js/jquery-ui.js"></script>
     <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/jquery-ui.css" rel="stylesheet">
     <link href="/css/bootstrap-website.css" rel="stylesheet"/>
@@ -25,9 +29,9 @@
 
     <!-- lightbox -->
 
-    <script type="text/javascript" src="/js/jqvideobox.min.js"></script>
+    <script type="text/javascript" src="/js/jqvideobox.js"></script>
     <script type="text/javascript" src="/js/swfobject.js"></script>
-    <script type="text/javascript" src="/js/jquery.lightbox-0.5.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.lightbox-0.5.js"></script>
     <script type="text/javascript" src="/js/startup.js"></script>
     <link rel="stylesheet" href="/css/jquery.lightbox-0.5.css" type="text/css" media="screen"/>
     <link rel="stylesheet" href="/css/jqvideobox.css" type="text/css" media="screen"/>
@@ -42,7 +46,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand eiBrand" href="/index.html"><img class="img-fit-responsive"  src="/images/logo.jpg" alt="Easy Insight Logo"
+            <a class="navbar-brand eiBrand" href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo"
                                                                     name="logo"/></a>
         </div>
 
@@ -73,78 +77,71 @@
         <div class="col-sm-12">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-6">
-                        <a href="../images/Order_Fulfillment_Dashboard_Lg.png" rel="lightbox-highrise"
-                           title=""><img class="img-fit-responsive"  src="../images/Order_Fulfillment_Dashboard.png" alt="Basecamp Analysis"/></a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="../images/PCharts_OFDB_Lg.png" rel="lightbox-highrise"
-                           title=""><img class="img-fit-responsive"  src="../images/PCharts_OFDB.png" alt="Basecamp Overview"/></a>
-
+                    <div class="col-sm-12">
+                        <div class="dragDropDone" style="padding-top:0">Beautiful dashboards in a few clicks!</div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="dragDropDone">Drag. Drop. Done. Business Intelligence Made Easy.</div>
+                        <div class="dragDropDone" style="padding-top:0;font-size:16px">Drag. Drop. Done. Business Intelligence Made Easy.</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div class="container-fluid trialDiv">
+<div class="container corePageWell" style="text-align: left">
     <div class="row">
-        <div class="col-sm-12">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div id="trialBarLeft">30 Day Free Trial, No Credit Card Required</div>
-                        <a href="/app/newaccount" class="btn btn-primary btn-large trialTryEasyInsightNow">Try Easy
-                            Insight Now!</a>
-
-                        <div class="trialBarRight">Need More Info? <a href="/contactus.html">Contact Us</a></div>
-                    </div>
+        <div class="col-md-9">
+            <div class="row">
+                <h2 class="productHeader">Screencasts</h2>
+                <ul>
+                    <li><a href="#creatingConnection">Creating a Connection in Easy Insight</a></li>
+                    <li><a href="#navigating">Navigating the Easy Insight user interface</a></li>
+                    <li><a href="#basicReportEditing">Basic Report Editing</a></li>
+                </ul>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="productHeader" id="creatingConnection">Creating a Connection in Easy Insight</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- 1.67 -->
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/gnqhnJN_xtE" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="productHeader" id="navigating">Navigating the Easy Insight user interface</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/XCzydb2eyrs" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="productHeader" id="basicReportEditing">Basic Report Editing</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/sIN5tGyWI1Y" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
+        <% if (main != null) { %>
+        <div class="col-md-3 sidedocs well">
+            <%= main %>
+        </div>
+        <% } %>
     </div>
-</div>
-<div class="container corePageWell">
-    <div class="row">
-        <h2 class="connectionH1">Stop Waiting on Reports</h2>
 
-        <p class="connectionP">
-            You don't need to wait months for developers to build reports for you! Easy Insight gives you a business
-            user-friendly interface for building your own reports and dashboards on top and across your relational data.
-        </p>
-
-        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
-            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
-        </div>
-        <h2 class="connectionH1">Affordable Business Intelligence Power</h2>
-
-        <p class="connectionP">
-            Easy Insight gives you full business intelligence power without the time and cost of traditional BI vendors.
-            Beautiful executive dashboards can drill down into detailed pivot tables and grids of the actionable data. A
-            wide variety of robust filters make it easy to slice and dice your way to answers.
-        </p>
-
-        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
-            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
-        </div>
-        <h2 class="connectionH1">Process Visualization</h2>
-
-        <p class="connectionP">
-            Build out visualizations across your business data to track volume, velocity, and errors across the
-            different steps in the process. Identify bottlenecks in the process--are you losing dollars because orders
-            are holding up at a key step?
-        </p>
-
-        <div style="padding-left: 20px;padding-right: 20px;padding-top: 10px">
-            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
-        </div>
-        <a href="/app/newaccount" class="btn btn-primary btn-large">Try Easy Insight Now!</a>
-    </div>
 </div>
 <div class="container-fluid" id="newFooter">
     <div class="row">
