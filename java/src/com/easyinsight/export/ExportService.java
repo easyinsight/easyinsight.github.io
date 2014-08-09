@@ -2614,7 +2614,9 @@ public class ExportService {
             date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
         }
         ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
+        System.out.println("ytd data set had size " + dataSet.getDataSet().getRows().size());
         YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());
+        System.out.println("ytd stuff = " + ytdStuff.getIntervals().size());
         boolean hasBenchmark = false;
         for (AnalysisItem analysisItem : verticalList.getMeasures()) {
             if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof YTDReportFieldExtension) {
