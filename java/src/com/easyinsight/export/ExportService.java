@@ -1499,10 +1499,10 @@ public class ExportService {
                 // todo: impl
 
                 if (dateDim.isTimeshift(null)) {
-                    System.out.println("setting cal on " + dateDim.toDisplay());
+
                     sdf.setCalendar(cal);
                 } else {
-                    System.out.println("no cal " + dateDim.toDisplay());
+
                 }
                 valueString = sdf.format(dateValue.getDate());
             }
