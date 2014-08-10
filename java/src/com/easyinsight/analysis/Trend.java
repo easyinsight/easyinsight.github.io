@@ -63,7 +63,7 @@ public class Trend {
                 }
                 if (trendOutcome.getHistorical() == null) {
                     trendOutcome.setHistorical(new EmptyValue());
-                } else if (trendOutcome.getHistorical().toDouble() == 0) {
+                } else if (trendOutcome.getHistorical().toDouble() == 0 || trendOutcome.getHistorical().equals(trendOutcome.getNow())) {
                     trendOutcome.setHistorical(new EmptyValue());
                 }
 
