@@ -26,6 +26,7 @@ public abstract class InsightlyBaseSource extends ServerDataSourceDefinition {
 
     protected static HttpClient getHttpClient(String username, String password) {
         HttpClient client = new HttpClient();
+        client.setTimeout(30000);
         client.getParams().setAuthenticationPreemptive(true);
 
         Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
