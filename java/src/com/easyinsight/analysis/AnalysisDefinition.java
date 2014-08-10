@@ -755,7 +755,7 @@ public class AnalysisDefinition implements Cloneable {
                         }
                         if (dataSourceItem == null) {
                             dataSourceItem = targetItems.get(0);
-                            LogClass.error("Ambiguous reference to " + analysisItem.toDisplay());
+                            LogClass.error("Ambiguous reference to " + analysisItem.toDisplay() + ", items contained " + targetItems);
                         }
                     }
 
