@@ -127,7 +127,7 @@ public class BillingScheduledTask extends ScheduledTask {
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         int monthOfYear = c.get(Calendar.MONTH);
         LogClass.info("Finding all accounts with day of month on " + dayOfMonth);
-        String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR + " AND manualInvoicing = ? AND (billing_month_of_year is null OR billing_month_of_year = ? or billingFailures > 0) ";
+        String queryString = "from Account where (pricingModel = ? AND accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR + " AND manualInvoicing = ? AND (billing_month_of_year is null OR billing_month_of_year = ? or billingFailures > 0) ";
 
         if(dayOfMonth == c.getActualMaximum(Calendar.DAY_OF_MONTH)) {
             queryString += " and (billingDayOfMonth >= ? OR billingFailures > 0)";
@@ -136,7 +136,7 @@ public class BillingScheduledTask extends ScheduledTask {
             queryString += " and (billingDayOfMonth = ? OR billingFailures > 0)";
         }
         Session s = Database.instance().createSession(conn);
-        List results = s.createQuery(queryString).setBoolean(0, false).setInteger(1, monthOfYear).setInteger(2, dayOfMonth).list();        
+        List results = s.createQuery(queryString).setInteger(0, Account.TIERED).setBoolean(1, false).setInteger(2, monthOfYear).setInteger(3, dayOfMonth).list();
         LogClass.info("Found " + results.size() + " billing results.");
         AccountActivityStorage as = new AccountActivityStorage();
         for(Object o : results) {
