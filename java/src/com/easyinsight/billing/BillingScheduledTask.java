@@ -127,7 +127,7 @@ public class BillingScheduledTask extends ScheduledTask {
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         int monthOfYear = c.get(Calendar.MONTH);
         LogClass.info("Finding all accounts with day of month on " + dayOfMonth);
-        String queryString = "from Account where (pricingModel = ? AND accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR + " AND manualInvoicing = ? AND (billing_month_of_year is null OR billing_month_of_year = ? or billingFailures > 0) ";
+        String queryString = "from Account where pricingModel = ? AND (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR + " AND manualInvoicing = ? AND (billing_month_of_year is null OR billing_month_of_year = ? or billingFailures > 0) ";
 
         if(dayOfMonth == c.getActualMaximum(Calendar.DAY_OF_MONTH)) {
             queryString += " and (billingDayOfMonth >= ? OR billingFailures > 0)";
@@ -141,6 +141,10 @@ public class BillingScheduledTask extends ScheduledTask {
         AccountActivityStorage as = new AccountActivityStorage();
         for(Object o : results) {
             Account a = (Account) o;
+            // safety check
+            if (a.getPricingModel() != Account.TIERED) {
+                continue;
+            }
             if(a.getAccountState() == Account.CLOSING)
                 a.setAccountState(Account.CLOSED);
             else {
