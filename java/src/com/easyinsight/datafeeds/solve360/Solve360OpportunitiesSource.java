@@ -30,7 +30,7 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
     public static final String RELATED_TO = "Opportunity Related To";
     public static final String CLOSING_DATE = "Opportunity Closing Date";
     public static final String PROBABILITY = "Opportunity Probability";
-    public static final String STAGE = "Opportunity Probability";
+    public static final String STAGE = "Opportunity Stage";
     public static final String CREATED = "Opportunity Created On";
     public static final String UPDATED = "Opportunity Updated On";
     public static final String COUNT = "Opportunity Count";
@@ -87,7 +87,7 @@ public class Solve360OpportunitiesSource extends Solve360BaseSource {
             fieldBuilder.addField(UPDATED, new AnalysisDateDimension());
             fieldBuilder.addField(CLOSING_DATE, new AnalysisDateDimension());
             fieldBuilder.addField(DOLLARS, new AnalysisMeasure(FormattingConfiguration.CURRENCY));
-            fieldBuilder.addField(PROBABILITY, new AnalysisMeasure(FormattingConfiguration.PERCENTAGE));
+            fieldBuilder.addField(PROBABILITY, new AnalysisMeasure(AggregationTypes.AVERAGE, FormattingConfiguration.PERCENTAGE));
             fieldBuilder.addField(COUNT, new AnalysisMeasure());
         } catch (Exception e) {
             throw new ReportException(new DataSourceConnectivityReportFault(e.getMessage(), parentDefinition));

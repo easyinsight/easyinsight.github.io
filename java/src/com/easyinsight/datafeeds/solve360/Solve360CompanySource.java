@@ -32,6 +32,7 @@ public class Solve360CompanySource extends Solve360BaseSource {
     private static final String RESPONSIBLE_PARTY = "Responsible Party";
     private static final String WEBSITE = "Website";
     private static final String CATEGORIES = "Company Categories";
+    private static final String COUNT = "Company Count";
 
     public Solve360CompanySource() {
         setFeedName("Companies");
@@ -64,6 +65,11 @@ public class Solve360CompanySource extends Solve360BaseSource {
         analysisItems.add(new AnalysisList(keys.get(CATEGORIES), false, ","));
         List<AnalysisItem> customFields = solve360CompositeSource.createCustomCompanyFields(keys);
         analysisItems.addAll(customFields);
+        Key countKey = keys.get(COUNT);
+        if (countKey == null) {
+            countKey = new NamedKey(COUNT);
+        }
+        analysisItems.add(new AnalysisMeasure(countKey, AggregationTypes.SUM));
         return analysisItems;
     }
 
@@ -97,6 +103,7 @@ public class Solve360CompanySource extends Solve360BaseSource {
                         row.addValue(entry.getKey(), (String) entry.getValue());
                     }
                 }
+                row.addValue(keys.get(COUNT), 1);
             }
             return dataSet;
         } catch (ReportException re) {
