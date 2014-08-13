@@ -92,7 +92,7 @@
         request.getSession().setAttribute("firstName", firstName);
         request.getSession().setAttribute("lastName", lastName);
         request.getSession().setAttribute("email", email);
-        response.sendRedirect(RedirectUtil.getURL(request, "/app/newaccount/index.jsp"));
+        response.sendRedirect(RedirectUtil.getURL(request, "/app/newaccountb/index.jsp"));
         return;
     }
 %>
