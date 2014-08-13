@@ -648,11 +648,7 @@ public class ExportService {
                         } else {
                             sb.append("<td style=\"" + dataCell + "\">");
                         }
-                        if (crosstabValue.getHeader() instanceof AnalysisMeasure) {
-                            sb.append(crosstabValue.getValue().toString());
-                        } else {
-                            sb.append(createValue(exportMetadata.dateFormat, crosstabValue.getHeader(), crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
-                        }
+                        sb.append(createValue(exportMetadata.dateFormat, measure, crosstabValue.getValue(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                     } else {
                         sb.append("<td style=\"" + headerCell + "\">");
                         if (crosstabValue.getHeader() instanceof AnalysisMeasure) {
