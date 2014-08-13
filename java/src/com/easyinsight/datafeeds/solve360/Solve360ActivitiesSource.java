@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.solve360;
 import com.easyinsight.analysis.*;
 import com.easyinsight.api.v3.MeasureFormattingType;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -32,7 +33,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
     private static final String COMMENTS = "Comments";
     private static final String DURATION = "Duration";
     private static final String LOCATION = "Location";
-    private static final String DATE_OCCURED = "Date Occured";
+    private static final String DATE_OCCURRED = "Date Occurred";
     private static final String TIME_START = "Start Time";
     private static final String TIME_END = "End Time";
     private static final String EVENT_TYPE = "Event Type";
@@ -44,6 +45,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
     public static final String PARENT_COMPANY = "Parent Company";
     public static final String PARENT_CONTACT = "Parent Contact";
     private static final String DETAILS = "Details";
+    private static final String COUNT = "Activity Count";
 
     public Solve360ActivitiesSource() {
         setFeedName("Activities");
@@ -57,7 +59,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
     @NotNull
     @Override
     protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ID, TYPE, COMMENTS, DURATION, LOCATION, DATE_OCCURED, TIME_START, TIME_END, EVENT_TYPE, REMIND_STATUS, PRIORITY, TITLE, COMPLETED, REPEAT_INTERVAL, PARENT_COMPANY, PARENT_CONTACT, DETAILS);
+        return Arrays.asList(ID, TYPE, COMMENTS, DURATION, LOCATION, DATE_OCCURRED, TIME_START, TIME_END, EVENT_TYPE, REMIND_STATUS, PRIORITY, TITLE, COMPLETED, REPEAT_INTERVAL, PARENT_COMPANY, PARENT_CONTACT, DETAILS);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
@@ -67,7 +69,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(COMMENTS)));
         analysisItems.add(new AnalysisMeasure(keys.get(DURATION), DURATION, AggregationTypes.SUM, true, FormattingConfiguration.MILLISECONDS));
         analysisItems.add(new AnalysisDimension(keys.get(LOCATION)));
-        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_OCCURED), true, AnalysisDateDimension.MINUTE_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_OCCURRED), true, AnalysisDateDimension.MINUTE_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(TIME_START), true, AnalysisDateDimension.MINUTE_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(TIME_END), true, AnalysisDateDimension.MINUTE_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(EVENT_TYPE)));
@@ -79,6 +81,11 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(PARENT_COMPANY)));
         analysisItems.add(new AnalysisDimension(keys.get(PARENT_CONTACT)));
         analysisItems.add(new AnalysisDimension(keys.get(DETAILS)));
+        Key countKey = keys.get(COUNT);
+        if (countKey == null) {
+            countKey = new NamedKey(COUNT);
+        }
+        analysisItems.add(new AnalysisMeasure(countKey, AggregationTypes.SUM));
         return analysisItems;
     }
 
@@ -107,10 +114,33 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
             Nodes oppNodes = doc.query("/response/activities/activity");
             for (int i = 0; i < oppNodes.size(); i++) {
                 Node activityNode = oppNodes.get(i);
+                System.out.println(activityNode.toXML());
                 IRow row = dataSet.createRow();
                 String id =  queryField(activityNode, "id/text()");
                 row.addValue(keys.get(ID), id);
-                row.addValue(keys.get(TYPE), queryField(activityNode, "typeid/text()"));
+                String type = queryField(activityNode, "typeid/text()");
+                if ("3".equals(type)) {
+                    type = "Note";
+                } else if ("4".equals(type)) {
+                    type = "Event";
+                } else if ("6".equals(type)) {
+                    type = "Followup";
+                } else if ("14".equals(type)) {
+                    type = "Task";
+                } else if ("23".equals(type)) {
+                    type = "File";
+                } else if ("24".equals(type)) {
+                    type = "Photo";
+                } else if ("32".equals(type)) {
+                    type = "Opportunity";
+                } else if ("61".equals(type)) {
+                    type = "Event (non-linked)";
+                } else if ("73".equals(type)) {
+                    type = "Call Log";
+                } else if ("88".equals(type)) {
+                    type = "Scheduled Email";
+                }
+                row.addValue(keys.get(TYPE), type);
                 row.addValue(keys.get(COMMENTS), queryField(activityNode, "comments/text()"));
                 String durationStr = queryField(activityNode, "fields/duration/text()");
                 if(durationStr != null && !"?".equals(durationStr))
@@ -120,7 +150,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
                 row.addValue(keys.get(DETAILS), queryField(activityNode, "fields/details/text()"));
                 String dateOccured = queryField(activityNode, "fields/dateoccured/text()");
                 if(dateOccured != null) {
-                    row.addValue(keys.get(DATE_OCCURED), df.parse(dateOccured));
+                    row.addValue(keys.get(DATE_OCCURRED), df.parse(dateOccured));
                 }
 
                 String parentType = queryField(activityNode, "parenttypeid/text()");
@@ -143,6 +173,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
                 row.addValue(keys.get(TITLE), queryField(activityNode, "fields/title/text()"));
                 row.addValue(keys.get(COMPLETED), queryField(activityNode, "fields/completed/text()"));
                 row.addValue(keys.get(REPEAT_INTERVAL), queryField(activityNode, "fields/repeatinterval/text()"));
+                row.addValue(keys.get(COUNT), 1);
                 if(lastRefreshDate != null) {
                     StringWhere userWhere = new StringWhere(keys.get(ID), id);
                     dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));

@@ -290,7 +290,6 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
                     for (int i = 0; i < response.getChildCount(); i++) {
                         Element contactNode = (Element) response.getChild(i);
-                        System.out.println(contactNode.toXML());
                         if (!"count".equals(contactNode.getLocalName()) && !"status".equals(contactNode.getLocalName())) {
                             count++;
                             Contact c = new Contact();

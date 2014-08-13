@@ -39,6 +39,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
     public static final String RESPONSIBLE_USER = "Responsible User";
     public static final String WEBSITE = "Website";
     public static final String CATEGORIES = "Contact Categories";
+    public static final String COUNT = "Contact Count";
 
     public Solve360ContactsSource() {
         setFeedName("Contacts");
@@ -83,6 +84,11 @@ public class Solve360ContactsSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisList(categoryKey, false, ","));
         List<AnalysisItem> customFields = solve360CompositeSource.createCustomContactFields(keys);
         analysisItems.addAll(customFields);
+        Key countKey = keys.get(COUNT);
+        if (countKey == null) {
+            countKey = new NamedKey(COUNT);
+        }
+        analysisItems.add(new AnalysisMeasure(countKey, AggregationTypes.SUM));
         return analysisItems;
     }
 
@@ -111,6 +117,7 @@ public class Solve360ContactsSource extends Solve360BaseSource {
                 row.addValue(keys.get(PERSONAL_EMAIL), c.getPersonalEmail());
                 row.addValue(keys.get(RESPONSIBLE_USER), c.getResponsibleUser());
                 row.addValue(keys.get(WEBSITE), c.getWebsite());
+                row.addValue(keys.get(COUNT), 1);
                 for (Map.Entry<Key, Object> entry : c.getCustomFieldValues().entrySet()) {
                     if (entry.getValue() instanceof Date) {
                         row.addValue(entry.getKey(), (Date) entry.getValue());
