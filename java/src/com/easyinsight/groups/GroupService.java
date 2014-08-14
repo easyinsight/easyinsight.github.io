@@ -155,7 +155,7 @@ public class GroupService {
                 groupStorage.removeUserFromGroup(user.getUserID(), groupID, conn);
             }
             for (GroupUser user : users) {
-                groupStorage.addUserToGroup(user.getUserID(), groupID, user.getRole(), conn);
+                groupStorage.addOrUpdateUser(user.getUserID(), groupID, user.getRole(), conn);
             }
             Group group = groupStorage.getGroup(groupID, conn);
             group.setDataSourcesAutoIncludeChildren(reportMode);

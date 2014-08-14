@@ -87,13 +87,13 @@ public class SecurityUtil {
         SecurityUtil.securityProvider = securityProvider;
     }
 
-    public static ISecurityProvider getSecurityProvider(){
+    public static ISecurityProvider getSecurityProvider() {
         return SecurityUtil.securityProvider;
     }
 
     public static int getFirstDayOfWeek() {
         UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
+        if (userPrincipal == null)
             userPrincipal = threadLocal.get();
         if (userPrincipal == null) {
             return Calendar.SUNDAY;
@@ -123,14 +123,14 @@ public class SecurityUtil {
 
     public static boolean isAccountAdmin() {
         UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
+        if (userPrincipal == null)
             userPrincipal = threadLocal.get();
         return userPrincipal.isAccountAdmin();
     }
 
     public static String getUserName() {
         UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
+        if (userPrincipal == null)
             userPrincipal = threadLocal.get();
         return userPrincipal.getUserName();
     }
@@ -141,7 +141,7 @@ public class SecurityUtil {
         }
     }
 
-    public static long authenticate(String userName, String password){
+    public static long authenticate(String userName, String password) {
         UserServiceResponse userServiceResponse = new UserService().authenticateWithEncrypted(userName, password);
         if (userServiceResponse.isSuccessful()) {
             return userServiceResponse.getUserID();
@@ -167,7 +167,7 @@ public class SecurityUtil {
                     throw new SecurityException();
                 }
                 Account account = user.getAccount();
-                if(!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
+                if (!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
                     return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
                 }
                 userServiceResponse = UserServiceResponse.createResponse(user, session, conn);
@@ -211,8 +211,7 @@ public class SecurityUtil {
                 if (required) {
                     SecurityLogger.error("Could not retrieve user principal.");
                     throw new SecurityException(SecurityException.LOGIN_REQUIRED);
-                }
-                else
+                } else
                     return 0;
             } else {
                 return userPrincipal.getUserID();
@@ -226,7 +225,7 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             userPrincipal = threadLocal.get();
-            if(userPrincipal == null) {
+            if (userPrincipal == null) {
                 SecurityLogger.error("Could not retrieve user principal.");
                 throw new SecurityException();
             }
@@ -287,7 +286,7 @@ public class SecurityUtil {
         long userID = getUserID(false);
         String embedKey = request.getParameter("embedKey");
         JSONObject jo = new JSONObject();
-        if(userID > 0) {
+        if (userID > 0) {
             Session session = Database.instance().createSession(conn);
 
             try {
@@ -315,7 +314,7 @@ public class SecurityUtil {
             // HOW DO I DO THIS
             PreparedStatement queryStmt = conn.prepareStatement("SELECT OWNER " +
                     "FROM KPI_ROLE WHERE " +
-                "KPI_ROLE.kpi_id = ? AND KPI_ROLE.USER_ID = ?");
+                    "KPI_ROLE.kpi_id = ? AND KPI_ROLE.USER_ID = ?");
 
             queryStmt.setLong(1, kpiID);
             queryStmt.setLong(2, userID);
@@ -341,7 +340,7 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             userPrincipal = threadLocal.get();
-            if(userPrincipal == null) {
+            if (userPrincipal == null) {
                 SecurityLogger.error("Could not retrieve user principal.");
                 throw new SecurityException();
             } else {
@@ -407,8 +406,8 @@ public class SecurityUtil {
             if (rs.next()) {
                 role = Roles.OWNER;
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from group_to_insight, group_to_user_join where " +
-                        "group_to_user_join.group_id = group_to_insight.group_id and group_to_user_join.user_id = ? and group_to_insight.insight_id = ?");
+                PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM group_to_insight, group_to_user_join WHERE " +
+                        "group_to_user_join.group_id = group_to_insight.group_id AND group_to_user_join.user_id = ? AND group_to_insight.insight_id = ?");
                 groupQueryStmt.setLong(1, userID);
                 groupQueryStmt.setLong(2, insightID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
@@ -418,7 +417,7 @@ public class SecurityUtil {
                     PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID FROM ANALYSIS, group_to_user_join," +
                             "community_group, upload_policy_groups WHERE " +
                             "analysis.analysis_id = ? AND analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
-                            "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ?");
+                            "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
                     lastChanceStmt.setLong(1, insightID);
                     lastChanceStmt.setBoolean(2, true);
                     lastChanceStmt.setLong(3, userID);
@@ -454,17 +453,17 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from upload_policy_groups, group_to_user_join where " +
-                        "group_to_user_join.group_id = upload_policy_groups.group_id and group_to_user_join.user_id = ? and upload_policy_groups.feed_id = ?");
+                PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM upload_policy_groups, group_to_user_join WHERE " +
+                        "group_to_user_join.group_id = upload_policy_groups.group_id AND group_to_user_join.user_id = ? AND upload_policy_groups.feed_id = ?");
                 groupQueryStmt.setLong(1, userID);
                 groupQueryStmt.setLong(2, feedID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
                     return groupRS.getInt(1);
                 } else {
-                    PreparedStatement accountQueryStmt = conn.prepareStatement("select role from upload_policy_users, user, data_feed where " +
-                            "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id and " +
-                            "data_feed.account_visible = ? and upload_policy_users.user_id = user.user_id and " +
+                    PreparedStatement accountQueryStmt = conn.prepareStatement("SELECT role FROM upload_policy_users, user, data_feed WHERE " +
+                            "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id AND " +
+                            "data_feed.account_visible = ? AND upload_policy_users.user_id = user.user_id AND " +
                             "user.account_id = ?");
                     accountQueryStmt.setLong(1, feedID);
                     accountQueryStmt.setBoolean(2, true);
@@ -473,8 +472,8 @@ public class SecurityUtil {
                     if (accountRS.next()) {
                         return Roles.OWNER;
                     } else {
-                        PreparedStatement forTimeBeingStmt = conn.prepareStatement("select account_id from user, data_feed, upload_policy_users where " +
-                                "data_feed.data_feed_id = ? and data_feed.data_feed_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id");
+                        PreparedStatement forTimeBeingStmt = conn.prepareStatement("SELECT account_id FROM user, data_feed, upload_policy_users WHERE " +
+                                "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id AND upload_policy_users.user_id = user.user_id");
                         forTimeBeingStmt.setLong(1, feedID);
                         ResultSet hackRS = forTimeBeingStmt.executeQuery();
                         if (hackRS.next()) {
@@ -562,7 +561,7 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             userPrincipal = threadLocal.get();
-            if(userPrincipal == null) {
+            if (userPrincipal == null) {
                 if (!publicVisibility) {
                     throw new SecurityException();
                 } else {
@@ -619,7 +618,7 @@ public class SecurityUtil {
     public static int authorizeDashboard(long dashboardID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.ACCOUNT_VISIBLE, DASHBOARD.PUBLIC_VISIBLE FROM DASHBOARD where " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.ACCOUNT_VISIBLE, DASHBOARD.PUBLIC_VISIBLE FROM DASHBOARD WHERE " +
                     "dashboard.dashboard_id = ?");
             queryStmt.setLong(1, dashboardID);
 
@@ -637,7 +636,7 @@ public class SecurityUtil {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
                 userPrincipal = threadLocal.get();
-                if(userPrincipal == null) {
+                if (userPrincipal == null) {
                     if (!publicVisible) {
                         throw new SecurityException();
                     } else {
@@ -647,7 +646,7 @@ public class SecurityUtil {
             }
 
             PreparedStatement userStmt = conn.prepareStatement("SELECT USER_TO_DASHBOARD.USER_ID, USER.ACCOUNT_ID FROM " +
-                    "user_to_dashboard, user where user_to_dashboard.user_id = user.user_id and user_to_dashboard.dashboard_id = ?");
+                    "user_to_dashboard, user WHERE user_to_dashboard.user_id = user.user_id AND user_to_dashboard.dashboard_id = ?");
             userStmt.setLong(1, dashboardID);
             ResultSet userRS = userStmt.executeQuery();
             int role = Roles.NONE;
@@ -656,15 +655,15 @@ public class SecurityUtil {
                 long accountID = userRS.getLong(2);
                 if (userID == SecurityUtil.getUserID()) {
                     role = Math.min(Roles.OWNER, role);
-                } else if ((accountVisible  || isAccountReports()) && accountID == SecurityUtil.getAccountID()) {
+                } else if ((accountVisible || isAccountReports()) && accountID == SecurityUtil.getAccountID()) {
                     role = Math.min(Roles.SUBSCRIBER, role);
                 }
             }
             if (role != Roles.NONE) {
                 return role;
             }
-            PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_user_join.binding_type from group_to_dashboard, group_to_user_join where " +
-                        "group_to_user_join.group_id = group_to_dashboard.group_id and group_to_user_join.user_id = ? and group_to_dashboard.dashboard_id = ?");
+            PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM group_to_dashboard, group_to_user_join WHERE " +
+                    "group_to_user_join.group_id = group_to_dashboard.group_id AND group_to_user_join.user_id = ? AND group_to_dashboard.dashboard_id = ?");
             groupQueryStmt.setLong(1, SecurityUtil.getUserID());
             groupQueryStmt.setLong(2, dashboardID);
             ResultSet groupRS = groupQueryStmt.executeQuery();
@@ -703,7 +702,7 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             userPrincipal = threadLocal.get();
-            if(userPrincipal == null) {
+            if (userPrincipal == null) {
                 throw new SecurityException();
             }
         }
@@ -783,7 +782,7 @@ public class SecurityUtil {
                 UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
                 if (userPrincipal == null) {
                     userPrincipal = threadLocal.get();
-                    if(userPrincipal == null) {
+                    if (userPrincipal == null) {
                         throw new SecurityException(SecurityException.LOGIN_REQUIRED);
                     }
                 }
@@ -846,7 +845,7 @@ public class SecurityUtil {
                 UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
                 if (userPrincipal == null) {
                     userPrincipal = threadLocal.get();
-                    if(userPrincipal == null) {
+                    if (userPrincipal == null) {
                         throw new SecurityException(SecurityException.LOGIN_REQUIRED);
                     }
                 }
@@ -865,7 +864,7 @@ public class SecurityUtil {
 
     public static String getPersonaName() {
         UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
-        if(userPrincipal == null)
+        if (userPrincipal == null)
             userPrincipal = threadLocal.get();
         return userPrincipal.getPersonaName();
     }

@@ -35,7 +35,7 @@ public class GroupStorage {
         insertGroupStmt.setBoolean(5, group.isDataSourcesAutoIncludeChildren());
         insertGroupStmt.execute();
         long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
-        addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
+        addOrUpdateUser(userID, groupID, GroupToUserBinding.OWNER, conn);
         return groupID;
     }
 
@@ -184,13 +184,13 @@ public class GroupStorage {
     public void addUserToGroup(long userID, long groupID, int userRole) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
-            addUserToGroup(userID, groupID, userRole, conn);
+            addOrUpdateUser(userID, groupID, userRole, conn);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public void addUserToGroup(long userID, long groupID, int userRole, Connection conn) throws SQLException {
+    public void addOrUpdateUser(long userID, long groupID, int userRole, Connection conn) throws SQLException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GROUP_TO_USER_JOIN_ID FROM GROUP_TO_USER_JOIN WHERE " +
                 "GROUP_ID = ? AND USER_ID = ?");
         queryStmt.setLong(1, groupID);

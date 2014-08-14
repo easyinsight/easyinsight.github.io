@@ -1,6 +1,9 @@
 package com.easyinsight.groups;
 
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * User: James Boe
@@ -68,5 +71,13 @@ public class GroupDescriptor extends FeedConsumer {
         int result = super.hashCode();
         result = 31 * result + (int) (groupID ^ (groupID >>> 32));
         return result;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("id", groupID);
+        jo.put("name", getName());
+        jo.put("description", description);
+        return jo;
     }
 }
