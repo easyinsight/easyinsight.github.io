@@ -58,7 +58,7 @@
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav navbar-right navbar-main-item">
                 <li><a href="/app/" class="fontA">Customer Login</a></li>
-                <li><a href="/app/newaccount/" class="fontA">Free Trial</a></li>
+                <li><a href="/app/newaccountb/" class="fontA">Free Trial</a></li>
                 <li><a href="/app/news/" class="fontA">What's New</a></li>
             </ul>
         </div>
@@ -103,16 +103,18 @@
                 <input type="hidden" id="tier" name="tier" value="<%=StringEscapeUtils.escapeHtml(request.getParameter("tier"))%>"/>
                 <input type="hidden" id="wasSubmit" name="wasSubmit" value="1"/>
                 <div class="row">
-                    <div class="col-md-7" style="text-align: left">
+                    <div class="col-md-6 col-md-offset-1" style="text-align: left">
+                        <% if (errorString != null) { %>
                         <div class="row">
                             <div class="col-md-12">
                                 <div style="color:red; font-size:16px;height:25px;padding-top:10px;padding-bottom:10px;;margin-bottom:40px">
-                                    <% if (errorString != null) { %>
+
                                     <%= errorString %>
-                                    <% } %>
+
                                 </div>
                             </div>
                         </div>
+                        <% } %>
                         <div class="row">
                             <label for="firstName" class="promptLabel" style="font-size:14px;color:#333333;font-family:'Cabin',sans-serif">
                                 First Name

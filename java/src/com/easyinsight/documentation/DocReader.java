@@ -157,13 +157,22 @@ public class DocReader {
                         if (substring.contains("|")) {
                             substring = substring.split("\\|")[0];
                         }
-                        String link = substring.replace(" ", "_");
-                        if (site == APP) {
-                            String blah = "[" + RedirectUtil.getURL(request, "/app/docs/" + link) + " " + substring + "]";
-                            gs.put(g, blah);
-                        } else if (site == WEBSITE) {
-                            String blah = "[" + RedirectUtil.getURL(request, "/app/websiteDocs/" + link) + " " + substring + "]";
-                            gs.put(g, blah);
+                        System.out.println(substring);
+                        if (substring.contains("screencasts.jsp")) {
+                            String link = "[" + RedirectUtil.getURL(request, "/app/screencasts.jsp") + " Screencasts ]";
+                            gs.put(g, link);
+                        } else if (substring.contains("docScreencasts.jsp")) {
+                            String link = "[" + RedirectUtil.getURL(request, "/app/docScreencasts.jsp") + " Screencasts ]";
+                            gs.put(g, link);
+                        } else {
+                            String link = substring.replace(" ", "_");
+                            if (site == APP) {
+                                String blah = "[" + RedirectUtil.getURL(request, "/app/docs/" + link) + " " + substring + "]";
+                                gs.put(g, blah);
+                            } else if (site == WEBSITE) {
+                                String blah = "[" + RedirectUtil.getURL(request, "/app/websiteDocs/" + link) + " " + substring + "]";
+                                gs.put(g, blah);
+                            }
                         }
                     }
 
