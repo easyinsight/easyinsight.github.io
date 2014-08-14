@@ -442,6 +442,16 @@
     </rule>
 
     <rule>
+        <from>^/groups.json$</from>
+        <to>/json/groups</to>
+    </rule>
+    <rule>
+        <from>^/groups/([A-Za-z0-9]+).json</from>
+        <to>/json/groupInfo?group_id=$1</to>
+    </rule>
+
+
+    <rule>
         <from>^/docs/(.*?)</from>
         <to>/docs/index.jsp?doc=$1</to>
     </rule>

@@ -337,7 +337,7 @@ public class UserService {
             }).start();
             if (account.getAccountType() != Account.PERSONAL) {
                 if (account.getGroupID() != null) {
-                    new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
+                    new GroupStorage().addOrUpdateUser(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER, conn);
                 }
             }
         }

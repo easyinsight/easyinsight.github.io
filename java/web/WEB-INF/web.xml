@@ -451,6 +451,18 @@
     </servlet>
 
     <servlet>
+        <servlet-name>GroupAdmin</servlet-name>
+        <display-name>GroupAdmin</display-name>
+        <servlet-class>com.easyinsight.api.v3.GetGroupsServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>GroupInfo</servlet-name>
+        <display-name>GroupInfo</display-name>
+        <servlet-class>com.easyinsight.api.v3.GetGroupServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>Me</servlet-name>
         <display-name>Me</display-name>
         <servlet-class>com.easyinsight.api.v3.MeServlet</servlet-class>
@@ -1277,6 +1289,14 @@
     <servlet-mapping>
         <servlet-name>GetUsers</servlet-name>
         <url-pattern>/json/getUsers</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GroupAdmin</servlet-name>
+        <url-pattern>/json/groups</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GroupInfo</servlet-name>
+        <url-pattern>/json/groupInfo</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

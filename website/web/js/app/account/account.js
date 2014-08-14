@@ -1,9 +1,11 @@
-var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
+(function() {
+    var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
 
-eiAccounts.controller('AccountController', ["$scope", function ($scope) {
+
+    eiAccounts.controller('AccountController', ["$scope", function ($scope) {
 
 
-}]);
+    }]);
 
 eiAccounts.controller("AccountInfoController", ["$scope", "$http", "PageInfo", "$location",
     "$rootScope",
@@ -256,13 +258,71 @@ eiAccounts.controller("UserProfileController", ["$scope", "$rootScope", "$http",
     }
 }]);
 
-eiAccounts.controller("GroupBaseController", ["$scope", function($scope) {
-
+eiAccounts.controller("GroupBaseController", ["$scope", "$http", function($scope, $http) {
+    $scope.loading = $http.get("/app/json/groups");
+    $scope.loading.then(function(c) {
+        $scope.groups = c.data.groups;
+    })
 }]);
 
 eiAccounts.controller("GroupIndexController", ["$scope", function($scope) {
 
 }]);
+
+    eiAccounts.filter("not_in_group", function() {
+        return function(input, group) {
+            if(!input) return input;
+            return input.filter(function(e, i, l) {
+                if(group == null)
+                    return true;
+                else {
+                    return !group.some(function(ee, ii, ll) {
+                        return e.id == ee.id;
+                    });
+
+                }
+            })
+        }
+    })
+
+eiAccounts.controller("GroupInfoController", ["$scope", "$http", "$routeParams", "$filter", function($scope, $http, $routeParams, $filter) {
+    $scope.group_loading = $http.get("/app/groups/" + $routeParams.id + ".json");
+    $scope.group_loading.then(function(c) {
+        $scope.group = c.data.group;
+        console.log($scope.group.users)
+    })
+    $scope.user_load = $http.get("/app/json/getUsers").success(function (d, r) {
+        $scope.users = d.users;
+    })
+
+    $scope.removeSelectedUsers = function() {
+        $scope.group.users = $scope.group.users.filter(function(e, i, l) {
+            return !e.selected;
+        })
+    }
+
+    $scope.submit = function() {
+        $scope.submit_promise = $http.post("/app/groups/" + $routeParams.id + ".json", JSON.stringify($scope.group));
+        $scope.submit_promise.success(function(d) {console.log(d)})
+
+    }
+
+    $scope.addSelectedUsers = function() {
+
+        var v = $filter("not_in_group")($scope.users, $scope.group.users).filter(function(e, i, l) {
+            return e.selected;
+        }).map(function(e, i, l) {
+                e.selected = false;
+                return {id: e.id,
+                    name: e.name,
+                    role: "Viewer",
+                    user_name: e.username
+                }
+            });
+        $scope.group.users = $scope.group.users.concat(v);
+    }
+
+}])
 
 eiAccounts.directive("eimulticolorform", function() {
     return {
@@ -272,7 +332,9 @@ eiAccounts.directive("eimulticolorform", function() {
             field: "=field"
         }
     };
-})
+});
+
+
 
 eiAccounts.directive('eicolorform', function() {
     return {
@@ -298,6 +360,7 @@ eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($loca
         when("/account/skin", "account.index.skin").
         when("/account/report_header", "account.index.report_header").
         when("/account/groups", "account.group.index").
+        when("/account/groups/:id", "account.group.group_info").
         segment("account", {
             templateUrl: '/angular_templates/account/base.template.html',
             controller: 'AccountController'
@@ -331,28 +394,35 @@ eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($loca
             templateUrl: '/angular_templates/account/user_base.template.html',
             controller: 'UserBaseController'
         }).within().
-        segment("user", {
-            templateUrl: '/angular_templates/account/user.template.html',
-            controller: 'UserController',
-            dependencies: ["id"]
-        }).
-        segment("index", {
-            templateUrl: '/angular_templates/account/users.template.html',
-            controller: "UsersController"
-        }).segment("new_designer", {
-            templateUrl: '/angular_templates/account/user.template.html',
-            controller: 'NewDesignerController'
-        }).segment("new_viewer", {
-            templateUrl: '/angular_templates/account/user.template.html',
-            controller: 'NewViewerController'
-        }).up().
+            segment("user", {
+                templateUrl: '/angular_templates/account/user.template.html',
+                controller: 'UserController',
+                dependencies: ["id"]
+            }).
+            segment("index", {
+                templateUrl: '/angular_templates/account/users.template.html',
+                controller: "UsersController"
+            }).segment("new_designer", {
+                templateUrl: '/angular_templates/account/user.template.html',
+                controller: 'NewDesignerController'
+            }).segment("new_viewer", {
+                templateUrl: '/angular_templates/account/user.template.html',
+                controller: 'NewViewerController'
+            }).up().
         segment("group", {
             templateUrl: '/angular_templates/account/group_base.template.html',
             controller: 'GroupBaseController'
         }).within().
         segment("index", {
-            template_url: '/angular_templates/account/groups.template.html',
+            templateUrl: '/angular_templates/account/groups.template.html',
             controller: 'GroupIndexController'
+        }).
+        segment("group_info", {
+            templateUrl: '/angular_templates/account/group.template.html',
+            controller: 'GroupInfoController',
+            dependencies: ["id"]
         });
     ;
 }])
+
+})();
