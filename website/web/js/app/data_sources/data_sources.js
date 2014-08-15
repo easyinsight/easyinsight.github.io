@@ -57,13 +57,14 @@ eiDataSources.controller("deleteSelectedController", ["$scope", "$http", functio
 
 eiDataSources.controller("reportsListController", ["$scope", "$http", "$routeParams", "$interval", "PageInfo",
     function($scope, $http, $routeParams, $interval, PageInfo) {
-    $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json")
+    $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json");
+
     $scope.load.then(function(d) {
         $scope.data_source = d.data.data_source;
         PageInfo.setTitle($scope.data_source.name)
         $scope.reports = d.data.reports;
         $scope.folders = d.data.folders;
-        $scope.current_folder = 1;
+        $scope.current_folder = $scope.folders[1];
     });
 
     $scope.refresh_data_source = function() {
@@ -93,7 +94,9 @@ eiDataSources.controller("reportsListController", ["$scope", "$http", "$routePar
 
     $scope.switch_folder = function(folder) {
         $scope.current_folder = folder;
+        $scope.folder_dropdown.status = false;
     }
+    $scope.folder_dropdown = {status: false};
 
     $http.get("/app/html/reportTags.json").then(function(d) {
         $scope.tags = d.data.tags;
