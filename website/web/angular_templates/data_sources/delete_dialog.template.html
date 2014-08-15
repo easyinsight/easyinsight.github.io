@@ -1,0 +1,10 @@
+<div cg-busy="deleting" />
+<div style="padding:10px;">
+    <div class="alert-danger">You are about to delete the following data sources:</div>
+    <ul>
+        <li ng-repeat="data_source in to_delete"> {{ data_source.name }}</li>
+    </ul>
+
+    <button ng-click="confirmDelete()" class="btn btn-default">Ok</button> <button ng-click="$dismiss()" class="btn btn-default">Cancel</button>
+
+</div>

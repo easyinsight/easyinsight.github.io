@@ -1,4 +1,4 @@
-var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy']);
+var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy', 'ui.bootstrap']);
 
 eiDataSources.controller("homeBaseController", ["$scope", "$http", function($scope, $http) {
     $http.get("/app/recentActions.json").then(function(d) {
@@ -6,7 +6,7 @@ eiDataSources.controller("homeBaseController", ["$scope", "$http", function($sco
     })
 }])
 
-eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", function($scope, $http, PageInfo) {
+eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", function($scope, $http, PageInfo, $filter, $modal) {
     PageInfo.setTitle("Data Sources");
     $scope.load = $http.get("/app/dataSources.json");
     $scope.load.then(function(d) {
@@ -17,6 +17,44 @@ eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageIn
     });
     $scope.toggleTag = function(tag) {
         tag.enabled = !tag.enabled;
+    }
+
+    $scope.delete_selected = function() {
+        var to_delete = $filter("tagged")($scope.data_sources, $scope.tags).filter(function(e, i, l) {
+            return e.selected;
+        })
+        if(to_delete.length > 0) {
+
+            $scope.to_delete = to_delete;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/data_sources/delete_dialog.template.html",
+                scope: $scope,
+                controller: "deleteSelectedController"
+            });
+            m.result.then(function(r) {
+                $scope.data_sources = $scope.data_sources.filter(function(e, i, l) {
+                    return !e.selected;
+                });
+
+            }).finally(function() {
+                delete $scope.to_delete;
+            })
+        }
+    }
+}]);
+
+eiDataSources.controller("deleteSelectedController", ["$scope", "$http", function($scope, $http) {
+    $scope.confirmDelete = function() {
+        var v = { "data_sources": $scope.to_delete.map(function(e, i, l) {
+            return e.url_key
+        }) };
+        $scope.deleting = $http.post("/app/dataSources.json", JSON.stringify(v));
+        $scope.deleting.then(function(c) {
+            console.log(c);
+            $scope.$close();
+        }, function(c) {
+            $scope.error = c.data.error;
+        })
     }
 }])
 
