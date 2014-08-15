@@ -50,10 +50,7 @@ eiDataSources.controller("deleteSelectedController", ["$scope", "$http", functio
         }) };
         $scope.deleting = $http.post("/app/dataSources.json", JSON.stringify(v));
         $scope.deleting.then(function(c) {
-            console.log(c);
             $scope.$close();
-        }, function(c) {
-            $scope.error = c.data.error;
         })
     }
 }])
