@@ -30,6 +30,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
 
     public static final String ID = "Activity ID";
     private static final String TYPE = "Activity Type";
+    private static final String ASSIGNED_TO = "Assigned To";
     private static final String COMMENTS = "Comments";
     private static final String DURATION = "Duration";
     private static final String LOCATION = "Location";
@@ -80,11 +81,16 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(REPEAT_INTERVAL)));
         analysisItems.add(new AnalysisDimension(keys.get(PARENT_COMPANY)));
         analysisItems.add(new AnalysisDimension(keys.get(PARENT_CONTACT)));
-        analysisItems.add(new AnalysisDimension(keys.get(DETAILS)));
+        analysisItems.add(new AnalysisText(keys.get(DETAILS)));
         Key countKey = keys.get(COUNT);
         if (countKey == null) {
             countKey = new NamedKey(COUNT);
         }
+        Key assignedToKey = keys.get(ASSIGNED_TO);
+        if (assignedToKey == null) {
+            assignedToKey = new NamedKey(ASSIGNED_TO);
+        }
+        analysisItems.add(new AnalysisDimension(assignedToKey));
         analysisItems.add(new AnalysisMeasure(countKey, AggregationTypes.SUM));
         return analysisItems;
     }
@@ -98,6 +104,8 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
     protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
+
+    // completed, responsible party
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage dataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
@@ -141,6 +149,7 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
                     type = "Scheduled Email";
                 }
                 row.addValue(keys.get(TYPE), type);
+                row.addValue(keys.get(ASSIGNED_TO), queryField(activityNode, "fields/assignedto/@cn"));
                 row.addValue(keys.get(COMMENTS), queryField(activityNode, "comments/text()"));
                 String durationStr = queryField(activityNode, "fields/duration/text()");
                 if(durationStr != null && !"?".equals(durationStr))
@@ -171,7 +180,13 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
                 row.addValue(keys.get(REMIND_STATUS), queryField(activityNode, "fields/remindstatus/text()"));
                 row.addValue(keys.get(PRIORITY), queryField(activityNode, "fields/priority/text()"));
                 row.addValue(keys.get(TITLE), queryField(activityNode, "fields/title/text()"));
-                row.addValue(keys.get(COMPLETED), queryField(activityNode, "fields/completed/text()"));
+                String completed = queryField(activityNode, "fields/completed/text()");
+                if (completed == null || "".equals(completed) || "0".equals(completed)) {
+                    completed = "Not Completed";
+                } else {
+                    completed = "Completed";
+                }
+                row.addValue(keys.get(COMPLETED), completed);
                 row.addValue(keys.get(REPEAT_INTERVAL), queryField(activityNode, "fields/repeatinterval/text()"));
                 row.addValue(keys.get(COUNT), 1);
                 if(lastRefreshDate != null) {
