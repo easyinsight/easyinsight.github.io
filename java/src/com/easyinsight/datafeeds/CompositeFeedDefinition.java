@@ -7,6 +7,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
@@ -15,6 +16,7 @@ import java.sql.*;
 import java.util.*;
 
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -253,6 +255,45 @@ public class CompositeFeedDefinition extends FeedDefinition {
             session.close();
         }
     }*/
+
+    @Nullable
+    public Long reportIDForField(AnalysisItem analysisItem) {
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            if (analysisItem.getKey() instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+                if (derivedKey.getParentKey() instanceof NamedKey) {
+                    long feedID = derivedKey.getFeedID();
+                    for (CompositeFeedNode node : getCompositeFeedNodes()) {
+                        if (node.getDataFeedID() == feedID) {
+                            if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                                PreparedStatement pStmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
+                                pStmt.setLong(1, feedID);
+                                ResultSet rs = pStmt.executeQuery();
+                                if (rs.next()) {
+                                    long reportID = rs.getLong(1);
+                                    pStmt.close();
+                                    return reportID;
+                                } else {
+                                    pStmt.close();
+                                    return null;
+                                }
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
+
+                }
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public void decorateFields(List<AnalysisItem> fields, EIConnection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT REPORT_ID FROM distinct_cached_addon_report_source WHERE DATA_SOURCE_ID = ?");
