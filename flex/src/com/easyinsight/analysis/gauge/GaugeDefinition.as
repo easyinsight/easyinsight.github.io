@@ -23,6 +23,7 @@ public class GaugeDefinition extends AnalysisDefinition {
     public var color1:uint = 0xFF0000;
     public var color2:uint = 0xFFFF00;
     public var color3:uint = 0x00BB11;
+    public var benchmarkLabel:String = "Benchmark";
 
     public function GaugeDefinition() {
         super();
@@ -31,6 +32,10 @@ public class GaugeDefinition extends AnalysisDefinition {
     override public function fromSave(savedDef:AnalysisDefinition):void {
         super.fromSave(savedDef);
         this.gaugeDefinitionID = GaugeDefinition(savedDef).gaugeDefinitionID;
+    }
+
+    override public function useHTMLInFlash():Boolean {
+        return super.useHTMLInFlash() || gaugeModel == "Bullet";
     }
 
     override public function get type():int {
