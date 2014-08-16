@@ -1627,28 +1627,34 @@ public class AnalysisService {
                 }
                 if (drillThrough.isFilterRowGroupings()) {
 
-                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
-                    if (dataSource instanceof CompositeFeedDefinition) {
-                        CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
-                        Long reportID = compositeFeedDefinition.reportIDForField(analysisItem);
-                        if (reportID != null) {
-                            WSAnalysisDefinition fromReport = new AnalysisService().openAnalysisDefinition(reportID);
-                            if (fromReport instanceof WSListDefinition) {
-                                WSListDefinition cols = (WSListDefinition) fromReport;
-                                for (AnalysisItem item : cols.getColumns()) {
-                                    for (FilterDefinition filterDefinition : item.getFilters()) {
-                                        FilterDefinition clone;
-                                        try {
-                                            clone = filterDefinition.clone();
-                                        } catch (CloneNotSupportedException e) {
-                                            throw new RuntimeException(e);
+                    try {
+                        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+                        if (dataSource instanceof CompositeFeedDefinition) {
+                            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                            Long reportID = compositeFeedDefinition.reportIDForField(analysisItem);
+                            if (reportID != null) {
+                                WSAnalysisDefinition fromReport = new AnalysisService().openAnalysisDefinition(reportID);
+                                if (fromReport instanceof WSListDefinition) {
+                                    WSListDefinition cols = (WSListDefinition) fromReport;
+                                    for (AnalysisItem item : cols.getColumns()) {
+                                        if (item.toDisplay().equals(analysisItem.toOriginalDisplayName())) {
+                                            for (FilterDefinition filterDefinition : item.getFilters()) {
+                                                FilterDefinition clone;
+                                                try {
+                                                    clone = filterDefinition.clone();
+                                                } catch (CloneNotSupportedException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                                clone.setToggleEnabled(true);
+                                                filters.add(clone);
+                                            }
                                         }
-                                        clone.setToggleEnabled(true);
-                                        filters.add(clone);
                                     }
                                 }
                             }
                         }
+                    } catch (Exception e) {
+                        LogClass.error(e);
                     }
 
                     List<FilterDefinition> fieldFilters = analysisItem.getFilters();
