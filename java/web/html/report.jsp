@@ -183,6 +183,9 @@
                                 <a class="export_pdf">Export to PDF</a>
                             </li>
                             <li>
+                                <a class="export_png">Export to PNG</a>
+                            </li>
+                            <li>
                                 <a class="report-emailReportButton">Email the Report</a>
                             </li>
                             <li>
@@ -254,6 +257,7 @@
     </jsp:include>
     <jsp:include page="emailReportWindow.jsp"/>
     <jsp:include page="refreshingDataSource.jsp"/>
+    <jsp:include page="modalIndicator.jsp"/>
     <div id="base"/>
 </div>
 </body>
