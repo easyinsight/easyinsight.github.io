@@ -544,6 +544,16 @@ public class ExportService {
         return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata), conn, request);
     }
 
+    public String toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                      Element element) throws SQLException, DocumentException {
+        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element), conn);
+    }
+
+    public String toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
+                                      HttpServletRequest request, Element element) throws SQLException, DocumentException {
+        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element), conn, request);
+    }
+
     public ReportFault emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
                                    byte[] pdfBytes, int width, int height) {
         boolean includeTitle = true;
@@ -821,6 +831,10 @@ public class ExportService {
     }
 
     public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
+        return toPDFBytes(analysisDefinition, conn, insightRequestMetadata, null);
+    }
+
+    public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Element childElement) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
@@ -865,7 +879,9 @@ public class ExportService {
         }
 
         Element element;
-        if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
+        if (childElement != null) {
+            element = childElement;
+        } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             element = crosstabToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.TREND_GRID) {
             element = kpiReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
@@ -4560,7 +4576,7 @@ public class ExportService {
                                     String encodedValue;
 
                                     try {
-                                        encodedValue = toDrillthroughValue(listRow.getValues()[k]);
+                                        encodedValue = toDrillthroughValue(listRow.getValues()[k], dataItem, exportMetadata);
                                         sb.append(" data-drillthrough");
                                         sb.append(dataItem.getAnalysisItemID());
                                         sb.append("=\"");
@@ -4578,7 +4594,7 @@ public class ExportService {
                             sb.append("=\"");
 
                             try {
-                                sb.append(toDrillthroughValue(value));
+                                sb.append(toDrillthroughValue(value, analysisItem, exportMetadata));
                             } catch (UnsupportedEncodingException e) {
                                 throw new RuntimeException(e);
                             }
@@ -4676,14 +4692,14 @@ public class ExportService {
         return sb.toString();
     }
 
-    private static String toDrillthroughValue(Value value) throws UnsupportedEncodingException {
+    private static String toDrillthroughValue(Value value, AnalysisItem item, ExportMetadata md) throws UnsupportedEncodingException {
         String encodedValue;
         Value drillthroughValue = value;
         String drillthroughValueString;
         if (drillthroughValue.type() == Value.NUMBER) {
             drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
         } else {
-            drillthroughValueString = drillthroughValue.toString();
+            drillthroughValueString= ExportService.createValue(md, item, value, true);
         }
         encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
         return encodedValue;
