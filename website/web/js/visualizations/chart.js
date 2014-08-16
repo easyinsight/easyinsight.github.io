@@ -29,7 +29,7 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 130 : (needStagger ? 60 : 30), left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 130 : (needStagger ? 60 : 50), left: 80});
 
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {
@@ -338,7 +338,7 @@ Chart = {
                                 })
                                 .showYAxis(true)        //Show the y-axis
                                 .showXAxis(true)        //Show the x-axis
-                                .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 30), left: 85});
+                                .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 60), left: 85});
                             var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                             if (customWidth > -1) {
                                 chart.width(customWidth);
@@ -370,7 +370,7 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 30), left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 60), left: 80});
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
                                 if (dtOptions["id"]) {
