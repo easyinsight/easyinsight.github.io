@@ -57,6 +57,7 @@ public class UserServiceResponse
     public var accountReports:Boolean;
     public var decimalSeperator:String;
     public var thousandsSeperator:String;
+    public var defaultFontFamily:String;
 
     public function UserServiceResponse()
         {
