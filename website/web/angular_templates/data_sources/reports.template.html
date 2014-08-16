@@ -81,6 +81,8 @@
             <a ng-repeat="tag in tags" class="btn btn-default tag-select" ng-class="{selected: tag.enabled, active: tag.enabled}" data-toggle="button" ng-click="toggleTag(tag)">{{ tag.name }}</a>
         </div>
     </div>
+    <div class="col-md-8" ng-if="(!tags || tags.length == 0)">
+    </div>
     <div class="col-md-4">
         <div class="dropdown pull-right" is-open="folder_dropdown.status" ng-if="numKeys(folders) > 0 && !tagsEnabled()">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
