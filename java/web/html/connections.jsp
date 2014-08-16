@@ -35,6 +35,13 @@
 </jsp:include>
 <div class="container corePageWell" style="margin-top: 20px;">
     <div class="row">
+        <div class="col-md-8 col-md-offset-2" style="text-align:center">
+            <h2>
+                Click on a connection below to pull data into Easy Insight and get started!
+            </h2>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-12">
     <%--<div class="row">--%>
         <% for (Solution solution : validSolutions) { %>
