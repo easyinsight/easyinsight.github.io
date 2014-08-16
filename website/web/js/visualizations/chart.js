@@ -312,6 +312,7 @@ Chart = {
                         });
                         var factorForRotate = nv.utils.windowSize().width / 30;
                         var useRotate = maxLabelSize > factorForRotate;
+                        var needStagger = maxLabelSize > (nv.utils.windowSize().width / 50);
                         var charLimit = useRotate ? 15 : 0;
 
                         if (data["oneMeasure"]) {
@@ -327,7 +328,7 @@ Chart = {
                                 //.width(width)
                                 .height(height)
                                 .color(colors)
-                                .staggerLabels(!useRotate)
+                                .staggerLabels(!useRotate && needStagger)
                                 .transitionDuration(350)  //how fast do you want the lines to transition?
                                 .tooltipContent(function(key, x, y, e, graph) {
                                     return '<b>' + x + '</b>' +
@@ -335,7 +336,7 @@ Chart = {
                                 })
                                 .showYAxis(true)        //Show the y-axis
                                 .showXAxis(true)        //Show the x-axis
-                                .margin({top: 20, right: 40, bottom: useRotate ? 110 : 80, left: 80});
+                                .margin({top: 20, right: 40, bottom: useRotate ? 110 : (needStagger ? 60 : 30), left: 85});
                             var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                             if (customWidth > -1) {
                                 chart.width(customWidth);
@@ -363,11 +364,11 @@ Chart = {
                             .height(height)
                             .reduceXTicks(false)
                             .showControls(false)
-                            .staggerLabels(!useRotate)
+                            .staggerLabels(!useRotate && needStagger)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 110 : 80, left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 110 : (needStagger ? 60 : 30), left: 80});
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
                                 if (dtOptions["id"]) {
@@ -518,6 +519,23 @@ Chart = {
         }
         $("#d3Canvas"+target).attr('height', h);
         $("#d3Canvas"+target).attr('width', w);
+
+        if (styleProps != null && styleProps["png"]) {
+            var targ = d3.select('#d3Div' + target + " .nv-wrap");
+            targ.insert("rect", ":first-child")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("fill", "#FFFFFF");
+            d3.selectAll("svg text").style("font", "normal 12px Arial");
+            d3.selectAll(".title").style("font", "bold 14px Arial");
+            d3.selectAll(".nv-axislabel").style("font", "bold 14px Arial");
+            d3.selectAll(".nvd3 .nv-axis .nv-axisMaxMin text").style("font-weight", "bold");
+            d3.selectAll(".nvd3 .nv-discretebar .nv-groups text").style("font-weight", "bold");
+            d3.selectAll(".nvd3 .nv-multibarHorizontal .nv-groups text").style("font-weight", "bold");
+            d3.selectAll(".nvd3 .nv-multibar .nv-groups rect").style("fill-opacity", 1);
+            d3.selectAll(".nvd3 .nv-multibarHorizontal .nv-groups rect").style("fill-opacity", 1);
+            d3.selectAll(".nvd3 .nv-discretebar .nv-groups rect").style("fill-opacity", 1);
+        }
     },
 
     chartHeightWithIFrame:function (target, styleProps, iframedInUI) {
