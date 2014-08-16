@@ -1870,7 +1870,6 @@ public class AnalysisService {
             asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", targetDisplay, format));
             //asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
-            filterValueDefinition.setFieldIsDrillthroughAddition(true);
             filterValueDefinition.setField(asTextDimension);
             filterValueDefinition.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
 
