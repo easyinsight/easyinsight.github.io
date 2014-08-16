@@ -30,6 +30,15 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
     private String stackSort;
     private int stackLimit = 15;
+    private boolean dateAxis;
+
+    public boolean isDateAxis() {
+        return dateAxis;
+    }
+
+    public void setDateAxis(boolean dateAxis) {
+        this.dateAxis = dateAxis;
+    }
 
     protected AnalysisItem itemForNoDataTest() {
         return getYaxis();
@@ -298,6 +307,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         labelPosition = findStringProperty(properties, "labelPosition", "none");
         labelInsideFontColor = (int) findNumberProperty(properties, "labelInsideFontColor", 0);
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
+        dateAxis = findBooleanProperty(properties, "dateAxis", false);
         stackLimit = (int) findNumberProperty(properties, "stackLimit", 15);
         multiColors = multiColorProperty(properties, "multiColors");
     }
@@ -313,6 +323,7 @@ public class WSStackedBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportStringProperty("labelFontWeight", labelFontWeight));
         properties.add(new ReportStringProperty("labelPosition", labelPosition));
         properties.add(new ReportBooleanProperty("useInsideLabelFontColor", useInsideLabelFontColor));
+        properties.add(new ReportBooleanProperty("dateAxis", dateAxis));
         properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
         properties.add(new ReportNumericProperty("stackLimit", stackLimit));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));

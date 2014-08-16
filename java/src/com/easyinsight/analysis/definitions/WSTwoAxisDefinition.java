@@ -18,6 +18,8 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
     private AnalysisItem yaxis;
     private List<AnalysisItem> measures;
     private boolean multiMeasure;
+    private AnalysisItem eventPoint;
+    private AnalysisItem eventPointLabel;
 
     public List<ReportAuditEvent> validate() {
         List<ReportAuditEvent> events = super.validate();
@@ -115,6 +117,22 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         }
     }
 
+    public AnalysisItem getEventPoint() {
+        return eventPoint;
+    }
+
+    public void setEventPoint(AnalysisItem eventPoint) {
+        this.eventPoint = eventPoint;
+    }
+
+    public AnalysisItem getEventPointLabel() {
+        return eventPointLabel;
+    }
+
+    public void setEventPointLabel(AnalysisItem eventPointLabel) {
+        this.eventPointLabel = eventPointLabel;
+    }
+
     public List<AnalysisItem> getMeasures() {
         return measures;
     }
@@ -160,6 +178,12 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         addItems("yAxis", Arrays.asList(yaxis), structure);
         addItems("measure", Arrays.asList(measure), structure);
         addItems("measures", measures, structure);
+        if (eventPoint != null) {
+            addItems("eventPoint", Arrays.asList(eventPoint), structure);
+        }
+        if (eventPointLabel != null) {
+            addItems("eventPointLabel", Arrays.asList(eventPointLabel), structure);
+        }
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
@@ -167,6 +191,8 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         yaxis = firstItem("yAxis", structure);
         measure = firstItem("measure", structure);
         measures = items("measures", structure);
+        eventPoint = firstItem("eventPoint", structure);
+        eventPointLabel = firstItem("eventPointLabel", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
