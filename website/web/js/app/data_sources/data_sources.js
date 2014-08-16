@@ -35,10 +35,10 @@ eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageIn
                 $scope.data_sources = $scope.data_sources.filter(function(e, i, l) {
                     return !e.selected;
                 });
-
-            }).finally(function() {
                 delete $scope.to_delete;
-            })
+            }, function(r) {
+                delete $scope.to_delete;
+            });
         }
     }
 }]);
