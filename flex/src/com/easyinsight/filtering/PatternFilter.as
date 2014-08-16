@@ -2,6 +2,7 @@ package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
+import com.easyinsight.framework.User;
 import com.easyinsight.skin.ImageConstants;
 
 import com.easyinsight.util.PopUpUtil;
@@ -119,6 +120,9 @@ import mx.managers.PopUpManager;
             addChild(labelText);
 
             valueLabel = new TextInput();
+            if (User.getInstance() != null && User.getInstance().defaultFontFamily != null && User.getInstance().defaultFontFamily != "") {
+                valueLabel.setStyle("fontFamily", User.getInstance().defaultFontFamily);
+            }
             valueLabel.addEventListener(FocusEvent.FOCUS_OUT, onFocusOut);
             valueLabel.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
             BindingUtils.bindProperty(valueLabel, "text", filterDefinition, "pattern");

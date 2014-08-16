@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"  implements="com.easyinsight.filtering.IFilterDetailEditor">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"  implements="com.easyinsight.filtering.IFilterDetailEditor"
+        creationComplete="onCreation()">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.User;
+
         import mx.collections.ArrayCollection;
 
         private var _filterValueDefinition:FilterDefinition;
@@ -23,6 +26,12 @@
         private var patternText:String;
 
         private var _fields:ArrayCollection;
+
+        private function onCreation():void {
+            if (User.getInstance() != null && User.getInstance().defaultFontFamily != null && User.getInstance().defaultFontFamily != "") {
+                patternInput.setStyle("fontFamily", User.getInstance().defaultFontFamily);
+            }
+        }
 
     public function set fields(value:ArrayCollection):void {
         _fields = value;

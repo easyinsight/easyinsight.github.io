@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.filtering {
+import com.easyinsight.framework.User;
 import com.easyinsight.util.GridCheckbox;
 
 import flash.events.Event;
@@ -48,6 +49,9 @@ public class FilterStringCheckbox extends GridCheckbox {
     override protected function createChildren():void {
         super.createChildren();
         addChild(checkbox);
+        if (User.getInstance() != null && User.getInstance().defaultFontFamily != null && User.getInstance().defaultFontFamily != "") {
+            checkbox.setStyle("fontFamily", User.getInstance().defaultFontFamily);
+        }
     }
 
     [Bindable("dataChange")]

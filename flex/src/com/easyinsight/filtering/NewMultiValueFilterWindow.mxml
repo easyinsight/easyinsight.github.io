@@ -10,6 +10,7 @@
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.dashboard.Dashboard;
+        import com.easyinsight.framework.User;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -357,6 +358,9 @@
         }
 
         private function creationCompleteHandler(event:FlexEvent):void {
+            if (User.getInstance() != null && User.getInstance().defaultFontFamily != null && User.getInstance().defaultFontFamily != "") {
+                setStyle("fontFamily", User.getInstance().defaultFontFamily);
+            }
             filterTileList = new List();
             filterTileList.id = "solutionGrid";
             filterTileList.itemRenderer = new ClassFactory(FilterStringCheckbox);
