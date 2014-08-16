@@ -28,9 +28,12 @@ public class ColumnChartServlet extends HtmlServlet {
         JSONObject object = new JSONObject();
         // need series, need ticks
         AnalysisItem xAxisItem;
+        AnalysisItem xMinItem = null;
 
         List<AnalysisItem> measures;
         JSONArray blahArray = new JSONArray();
+
+        boolean dateAxis = false;
 
         Comparator c = null;
 
@@ -62,6 +65,7 @@ public class ColumnChartServlet extends HtmlServlet {
             baseColor = columnChartDefinition.getChartColor();
             xAxisItem = columnChartDefinition.getYaxis();
             measures = columnChartDefinition.getMeasures();
+            xMinItem = columnChartDefinition.getMinimumXAxis();
             String sortType = columnChartDefinition.getColumnSort();
             if ("X-Axis Ascending".equals(sortType)) {
                 c = new RowComparator(measures.get(0), true);
@@ -75,6 +79,7 @@ public class ColumnChartServlet extends HtmlServlet {
             if ("Logarithmic".equals(columnChartDefinition.getAxisType())) {
                 logarithmic = true;
             }
+            dateAxis = columnChartDefinition.isDateAxis();
         } else {
             throw new RuntimeException();
         }
@@ -112,7 +117,17 @@ public class ColumnChartServlet extends HtmlServlet {
                 JSONObject point = new JSONObject();
                 point.put("x", x);
                 Value measureValue = row.getValue(measureItem);
+                // if it's a date axis bar chart, we're going to need the start milliseconds and end milliseconds
                 point.put("y", measureValue.toDouble());
+                if (xMinItem != null) {
+                    Value minValue = row.getValue(xMinItem);
+                    System.out.println(minValue.toDouble().longValue() + " gave min = " + new Date(minValue.toDouble().longValue()));
+                    point.put("minY", minValue.toDouble());
+                    point.put("y", measureValue.toDouble() - minValue.toDouble());
+                } else {
+                    point.put("minY", 0);
+                }
+                System.out.println(measureValue.toDouble().longValue() + " gave max = " + new Date(measureValue.toDouble().longValue()));
                 if (colors.size() == 1) {
                     String color = null;
                     if (measureValue.getValueExtension() != null && measureValue.getValueExtension() instanceof TextValueExtension) {
@@ -153,6 +168,12 @@ public class ColumnChartServlet extends HtmlServlet {
         }
         if (logarithmic) {
             object.put("yLog", true);
+        }
+
+        object.put("floatingY", xMinItem != null);
+
+        if (dateAxis) {
+            object.put("dateAxis", dateAxis);
         }
 
         object.put("values", blahArray);
