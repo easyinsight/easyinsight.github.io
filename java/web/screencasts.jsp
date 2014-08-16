@@ -99,6 +99,7 @@
                     <li><a href="#creatingConnection">Creating a Connection in Easy Insight</a></li>
                     <li><a href="#navigating">Navigating the Easy Insight user interface</a></li>
                     <li><a href="#basicReportEditing">Basic Report Editing</a></li>
+                    <li><a href="#creatingFilters">Creating Filters</a></li>
                 </ul>
             </div>
             <div class="row">
@@ -131,6 +132,18 @@
             <div class="row">
                 <div class="col-md-12">
                     <iframe width="600" height="359" src="//www.youtube.com/embed/sIN5tGyWI1Y?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <!-- <iframe width="854" height="510" src="//www.youtube.com/embed/So2IW_3CmdI" frameborder="0" allowfullscreen></iframe> -->
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="productHeader" id="creatingFilters">Creating Filters</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <iframe width="600" height="359" src="//www.youtube.com/embed/So2IW_3CmdI?modestbranding=1&rel=0&theme=light" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>

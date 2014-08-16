@@ -40,6 +40,7 @@
             insightResponse = new AnalysisService().openAnalysisIfPossibleByID(reportID);
         } else {
             String reportIDString = request.getParameter("reportID");
+            System.out.println(reportIDString);
             insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
         }
 
@@ -156,13 +157,13 @@
 <body>
 <jsp:include page="../header.jsp">
     <jsp:param name="userName" value="<%= userName %>"/>
-    <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
+    <jsp:param name="headerActive" value="<%= HtmlConstants.NONE %>"/>
 </jsp:include>
 <div class="nav navbar-pills reportNav" style="margin-bottom: 0">
-    <div class="container">
-        <div class="row">
+    <div class="container-fluid">
+        <div class="row controlsRow">
             <div class="col-md-4 reportBlah">
-                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
             <div class="col-md-8 reportControlToolbar">
                 <div class="btn-toolbar pull-right">
@@ -176,24 +177,16 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse export_excel" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Export to Excel
-                                </button>
+                                <a class="export_excel">Export to Excel</a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse export_pdf" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Export to PDF
-                                </button>
+                                <a class="export_pdf">Export to PDF</a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse report-emailReportButton" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Email the Report
-                                </button>
+                                <a class="report-emailReportButton">Email the Report</a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse" type="button" onclick="window.location.href = '/app/html/embeddedReport/<%= report.getUrlKey() %>'"
-                                        style="padding:5px;margin:5px;width:150px">Printable View
-                                </button>
+                                <a href="#" onclick="window.location.href = '/app/html/embeddedReport/<%= report.getUrlKey() %>'">Printable View</a>
                             </li>
                         </ul>
                     </div>
@@ -204,9 +197,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse full_refresh" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Refresh the Report
-                                </button>
+                                <a class="full_refresh">Refresh the Report</a>
                             </li>
                             <%
                                 if(userName != null) {
@@ -214,11 +205,7 @@
                                 if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
                             %>
                             <li>
-                                <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
-                                        onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')" style="padding:5px;margin:5px;width:150px">Refresh
-                                    Data
-                                    Source
-                                </button>
+                                <a href="#" onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')">Refresh the Data Source</a>
                             </li>
                             <%
                                 }
@@ -244,7 +231,7 @@
                         }
                     %>
                     <% if (designer && !iPad && !phone) { %>
-                    <div class="btn-group">
+                    <div class="btn-group reportControlBtnGroup" style="margin-right:5px">
                         <a href="<%= RedirectUtil.getURL(request, "/app/embeddedReportEditor.jsp?reportID=" + report.getUrlKey())%>"
                            class="reportControl">Edit Report</a>
                     </div>
@@ -254,7 +241,7 @@
         </div>
     </div>
 </div>
-<div class="container" style="margin-top:0;padding:0;margin-bottom:10px">
+<div class="container" style="margin-top:10px;padding:0;margin-bottom:10px">
     <div class="row" style="margin:0;padding:0">
         <div class="col-md-12" style="text-align:center;margin: 0;padding:0">
             <h2 style="color: #333333;margin:0;padding:0"><%= report.getName() %></h2>

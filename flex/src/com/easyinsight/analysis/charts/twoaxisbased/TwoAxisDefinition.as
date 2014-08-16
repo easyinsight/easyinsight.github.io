@@ -12,6 +12,8 @@ public class TwoAxisDefinition extends ChartDefinition{
     public var xaxis:AnalysisItem;
     public var yaxis:AnalysisItem;
     public var measures:ArrayCollection;
+    public var eventPoint:AnalysisItem;
+    public var eventPointLabel:AnalysisItem;
 
     public var multiMeasure:Boolean = false;
 

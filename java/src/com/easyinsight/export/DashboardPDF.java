@@ -44,7 +44,7 @@ public class DashboardPDF {
     public static final int SUCCESS = 1;
     public static final int FAILURE = 2;
 
-    public Element blah(WSAnalysisDefinition report, int width, int height, EIConnection conn) throws SQLException, BadElementException, IOException, CloneNotSupportedException {
+    public static Element blah(WSAnalysisDefinition report, int width, int height, EIConnection conn) throws SQLException, BadElementException, IOException, CloneNotSupportedException {
 
 
 
@@ -91,6 +91,7 @@ public class DashboardPDF {
         Image image = Image.getInstance(imageData.getBytes());
         //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
         float percent = 770f / imageData.getWidth() * 100;
+        //float percent = 50f;
         image.setBorder(Image.NO_BORDER);
         image.scalePercent(percent);
         image.setAlignment(Element.ALIGN_CENTER);
@@ -99,10 +100,9 @@ public class DashboardPDF {
 
     public static final String OUTBOUND_QUEUE = "EISelenium";
 
-    private PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
+    private static PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
         // send an SQS request
         try {
-            //Thread.sleep(500000);
             MessageQueue msgQueue = SQSUtils.connectToQueue(OUTBOUND_QUEUE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             msgQueue.sendMessage(url);
 

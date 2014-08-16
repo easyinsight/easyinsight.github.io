@@ -1,0 +1,74 @@
+<div cg-busy="save" />
+<form role="form" method="POST" name="groupForm" ng-submit="submit()" novalidate>
+    <div class="form-group">
+        <label for="group_name">Group Name</label>
+        <input type="text" class="form-control" id="group_name" name="group_name" placeholder="Group Name"
+               ng-model="group.name" required />
+        <p ng-show="groupForm.group_name.$invalid && !groupForm.group_name.$pristine">Group Name is required.</p>
+    </div>
+    <div class="form-group">
+            <label for="group_name">Group Description</label>
+        <input type="text" class="form-control" id="group_description" name="group_description" placeholder="Group Description"
+               ng-model="group.description" required />
+        <p ng-show="groupForm.group_description.$invalid && !groupForm.group_description.$pristine">Group Description is required.</p>
+    </div>
+    <div class="form-group">
+
+        <input type="checkbox" id="auto_include" name="auto_include"
+               ng-model="group.auto_include" /> <label for="auto_include">Should reports included in data sources automatically be included with Viewer access?</label>
+    </div>
+    <div class="row">
+        <div class="col-md-12"><h4>Users</h4></div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>User Name</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="user in group.users track by user.id">
+                    <td><input type="checkbox" ng-model="user.selected" /></td>
+                    <td>{{ user.user_name }}</td>
+                    <td><select ng-model="user.role">
+                        <option>Viewer</option>
+                        <option>Editor</option>
+                        <option>Owner</option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <input type="button" value="Remove from Group" ng-click="removeSelectedUsers()"/>
+        </div>
+        <div class="col-md-6">
+            <table class="table table-striped table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>User Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="user in users | not_in_group:group.users">
+                        <td><input type="checkbox" ng-model="user.selected" /></td><td>{{user.first_name}} {{user.last_name}}</td><td>{{user.email}}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <input type="button" value="Add to Group" ng-click="addSelectedUsers()"/>
+        </div>
+    </div>
+    <div class="form-group" ng-if="error">
+        <label>Error: {{error}}</label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Create Group" ng-if="new" ng-disabled="userForm.$invalid" />
+        <input type="submit" value="Update Group" ng-if="!new" ng-disabled="userForm.$invalid" />
+    </div>
+</form>

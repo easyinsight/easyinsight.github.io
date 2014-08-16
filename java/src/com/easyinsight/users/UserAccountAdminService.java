@@ -19,6 +19,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
+import sun.util.calendar.ZoneInfo;
 
 import java.sql.*;
 import java.util.*;
@@ -31,6 +32,11 @@ import java.util.Date;
  */
 public class UserAccountAdminService {
 
+    public List<String> getTimezones() {
+        String[] availableIDs = ZoneInfo.getAvailableIDs();
+        return Arrays.asList(availableIDs);
+    }
+
     public void resendInvite(long userID) {
         SecurityUtil.authorizeAccountAdmin();
         Session session = Database.instance().createSession();
@@ -38,7 +44,7 @@ public class UserAccountAdminService {
             session.beginTransaction();
             User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-            if (user.getAccount().getAccountID() != user.getAccount().getAccountID()) {
+            if (user.getAccount().getAccountID() != SecurityUtil.getAccountID()) {
                 throw new SecurityException();
             }
             final String adminFirstName = admin.getFirstName();
@@ -1308,6 +1314,7 @@ public class UserAccountAdminService {
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
             account.setApiEnabled(accountSettings.isApiEnabled());
+            account.setDefaultFontFamily(accountSettings.getDefaultFontFamily());
             account.setDateFormat(accountSettings.getDateFormat());
             account.setGroupID(accountSettings.getGroupID() > 0 ? accountSettings.getGroupID() : null);
             account.setFirstDayOfWeek(accountSettings.getFirstDayOfWeek());
@@ -1351,6 +1358,7 @@ public class UserAccountAdminService {
             accountSettings.setMaxResults(account.getMaxRecords());
             accountSettings.setSendEmail(account.isSendEmailsToNewUsers());
             accountSettings.setHtmlView(account.isUseHTMLVersion());
+            accountSettings.setDefaultFontFamily(account.getDefaultFontFamily());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

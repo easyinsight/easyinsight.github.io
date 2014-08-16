@@ -1,4 +1,4 @@
-var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy']);
+var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy', 'ui.bootstrap']);
 
 eiDataSources.controller("homeBaseController", ["$scope", "$http", function($scope, $http) {
     $http.get("/app/recentActions.json").then(function(d) {
@@ -6,7 +6,7 @@ eiDataSources.controller("homeBaseController", ["$scope", "$http", function($sco
     })
 }])
 
-eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", function($scope, $http, PageInfo) {
+eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", function($scope, $http, PageInfo, $filter, $modal) {
     PageInfo.setTitle("Data Sources");
     $scope.load = $http.get("/app/dataSources.json");
     $scope.load.then(function(d) {
@@ -18,17 +18,53 @@ eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageIn
     $scope.toggleTag = function(tag) {
         tag.enabled = !tag.enabled;
     }
+
+    $scope.delete_selected = function() {
+        var to_delete = $filter("tagged")($scope.data_sources, $scope.tags).filter(function(e, i, l) {
+            return e.selected;
+        })
+        if(to_delete.length > 0) {
+
+            $scope.to_delete = to_delete;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/data_sources/delete_dialog.template.html",
+                scope: $scope,
+                controller: "deleteSelectedController"
+            });
+            m.result.then(function(r) {
+                $scope.data_sources = $scope.data_sources.filter(function(e, i, l) {
+                    return !e.selected;
+                });
+                delete $scope.to_delete;
+            }, function(r) {
+                delete $scope.to_delete;
+            });
+        }
+    }
+}]);
+
+eiDataSources.controller("deleteSelectedController", ["$scope", "$http", function($scope, $http) {
+    $scope.confirmDelete = function() {
+        var v = { "data_sources": $scope.to_delete.map(function(e, i, l) {
+            return e.url_key
+        }) };
+        $scope.deleting = $http.post("/app/dataSources.json", JSON.stringify(v));
+        $scope.deleting.then(function(c) {
+            $scope.$close();
+        })
+    }
 }])
 
 eiDataSources.controller("reportsListController", ["$scope", "$http", "$routeParams", "$interval", "PageInfo",
     function($scope, $http, $routeParams, $interval, PageInfo) {
-    $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json")
+    $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json");
+
     $scope.load.then(function(d) {
         $scope.data_source = d.data.data_source;
         PageInfo.setTitle($scope.data_source.name)
         $scope.reports = d.data.reports;
         $scope.folders = d.data.folders;
-        $scope.current_folder = 1;
+        $scope.current_folder = $scope.folders[1];
     });
 
     $scope.refresh_data_source = function() {
@@ -58,7 +94,9 @@ eiDataSources.controller("reportsListController", ["$scope", "$http", "$routePar
 
     $scope.switch_folder = function(folder) {
         $scope.current_folder = folder;
+        $scope.folder_dropdown.status = false;
     }
+    $scope.folder_dropdown = {status: false};
 
     $http.get("/app/html/reportTags.json").then(function(d) {
         $scope.tags = d.data.tags;

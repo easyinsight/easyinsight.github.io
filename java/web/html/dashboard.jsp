@@ -81,12 +81,15 @@
         jo.put("configuration_name", (Object) selectedConfiguration);
         jo.put("configuration_key", (Object) configurationKey);
         EIConnection c = Database.instance().getConnection();
+
         JSONObject userObject = new JSONObject();
         try {
             userObject = SecurityUtil.getUserJSON(c, request);
         } finally {
             Database.closeConnection(c);
         }
+
+
 
 %>
 <head>
@@ -111,9 +114,10 @@
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
 <div class="nav nav-pills reportNav">
-        <div class="container">
+    <div class="container-fluid">
+        <div class="row controlsRow">
             <div class="col-md-4 reportBlah">
-                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
             <div class="col-md-8 reportControlToolbar">
                 <div class="btn-toolbar pull-right">
@@ -128,14 +132,10 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse export_dashboard_pdf" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Export to PDF
-                                </button>
+                                <a class="export_dashboard_pdf">Export to PDF</a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse embed_dashboard" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Embed the Dashboard
-                                </button>
+                                <a class="embed_dashboard">Embed the Dashboard</a>
                             </li>
                         </ul>
                     </div>
@@ -146,15 +146,10 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button class="btn btn-inverse full_refresh" type="button"
-                                        style="padding:5px;margin:5px;width:150px">Refresh the Dashboard
-                                </button>
+                                <a class="full_refresh">Refresh the Dashboard</a>
                             </li>
                             <li>
-                                <button class="btn btn-inverse" type="button" id="refreshDataSourceButton"
-                                        onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')" style="padding:5px;margin:5px;width:150px">Refresh
-                                    Data Source
-                                </button>
+                                <a onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')" id="refreshDataSourceButton">Refresh the Data Source</a>
                             </li>
                         </ul>
                     </div>
@@ -162,7 +157,7 @@
                         <a class="reportControl toggle-filters">Toggle Filters</a>
                     </div>
                     <% if (designer && !iPad && !phone) { %>
-                    <div class="btn-group">
+                    <div class="btn-group reportControlBtnGroup" style="margin-right: 5px">
                         <a href="<%= RedirectUtil.getURL(request, "/app/embeddedDashboardEditor.jsp?dashboardID=" + dashboard.getUrlKey())%>"
                            class="reportControl">Edit Dashboard</a>
                     </div>
@@ -170,7 +165,21 @@
                 </div>
             </div>
         </div>
+    </div>
 </div>
+
+<%--<% if (!tipsEnabled) { %>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="alert alert-tutorial alert-dismissible" style="font-size:16px" role="alert">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <p>Congratulations, you've installed your connection to <%=StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%>! What you see below is the default dashboard. You can click on the different tabs to navigate through the prebuilt reports. You can also click on values in the reports to drill into details. When you're done checking out the reports, click on the <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%> link in the upper left.</p><p>Need more help? Check out <a href="https://www.easy-insight.com/app/docScreencasts.jsp" class="alert-link">screencasts</a>, <a href="#" class="alert-link">help</a>, or contact us at <strong>support@easy-insight.com</strong> or <strong>1-720-316-8174</strong>.
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>--%>
 
 <div class="container">
 <%--    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>--%>

@@ -5,6 +5,8 @@
                 <h3>Embedding Dashboard</h3>
             </div>
             <div class="modal-body">
+                <div class="alert alert-info" id="embedDashboardVisibility"></div>
+                <hr/>
                 <form class="form-horizontal">
                     <div class="control-group">
 
@@ -18,6 +20,7 @@
 
                     </div>
                 </form>
+                <hr/>
                 <div><p>You can paste this HTML into any web page to embed the dashboard into the page.</p></div>
                 <div><p id="embedDashboardURL"></p></div>
             </div>

@@ -81,6 +81,7 @@ import com.easyinsight.datasources.DistinctCachedSource;
 import com.easyinsight.datasources.FreshbooksDataSource;
 import com.easyinsight.datasources.FreshdeskDataSource;
 import com.easyinsight.datasources.GithubCompositeSource;
+import com.easyinsight.datasources.HappyFoxDataSource;
 import com.easyinsight.datasources.HarvestDataSource;
 import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
@@ -320,6 +321,7 @@ public class TORegistry {
         var piv:PivotalTrackerV5CompositeSource;
         var lcomp:LinkedinCompositeDataSource;
         var oracleSales:OracleSalesCloudCompositeSource;
+        var happyFox:HappyFoxDataSource;
     }
 }
 }

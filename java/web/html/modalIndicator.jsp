@@ -1,7 +1,7 @@
 <div class="modal fade" id="pleaseWaitDialog">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" style="text-align: center">
                 <h2 id="pleaseWaitProcessingMessage">Processing...</h2>
             </div>
             <div class="modal-body">

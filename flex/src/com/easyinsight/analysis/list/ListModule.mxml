@@ -49,6 +49,7 @@
         import com.easyinsight.analysis.Value;
         import com.easyinsight.etl.LookupPair;
         import com.easyinsight.etl.LookupTable;
+        import com.easyinsight.framework.User;
         import com.easyinsight.util.SaveButton;
 
         import mx.collections.ArrayCollection;
@@ -203,6 +204,8 @@
             //dataGrid.setStyle("fontFamily", def.getFont());
             if (def.useCustomFontFamily) {
                 dataGrid.setStyle("fontFamily", def.getFont());
+            } else if (User.getInstance() != null && User.getInstance().defaultFontFamily != null && User.getInstance().defaultFontFamily != "") {
+                dataGrid.setStyle("fontFamily", User.getInstance().defaultFontFamily);
             }
             var uid:String = additionalProperties["cappedResults"];
             if (uid) {

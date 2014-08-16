@@ -15,6 +15,11 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.text.translate.AggregateTranslator;
+import org.apache.commons.lang3.text.translate.EntityArrays;
+import org.apache.commons.lang3.text.translate.LookupTranslator;
+import org.apache.commons.lang3.text.translate.UnicodeEscaper;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -52,40 +57,34 @@ public class AltPostgresStorageDialect implements IStorageDialect {
 
     private String fileName;
 
-    private CsvWriter csvWriter;
+    //private CsvWriter csvWriter;
     private List<File> files = new ArrayList<File>();
     private File file;
     private FileOutputStream fos;
     private int rows = 0;
+
+
 
     public void updateData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
     }
 
     private String escape(String string) {
-        String ret = string;
-        if (string.contains("\\")) {
-            ret = ret.replace("\\", "\\\\");
+        //String ret = string;
+        String ret = new AggregateTranslator(new LookupTranslator(new String[][] {
+                {"\"", "\\\""},
+                {"\\", "\\\\"},
+        }),new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE())).translate(string);
+        if (ret.contains("|")) {
+            ret = ret.replace("|", "\\|");
         }
-        if (string.contains("'")) {
-            ret = ret.replace("'", "\\'");
-        }
-        if (string.contains("\"")) {
-            ret = ret.replace("\"", "\\\"");
-        }
-        if (string.contains("\n")) {
-            ret = ret.replace("\n", "\\\n");
-        }
-        if (string.contains("\r")) {
-            ret = ret.replace("\r", "\\\r");
-        }
-        //System.out.println("converted " + string + " to " + ret);
         return ret;
     }
 
     public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         int i = 0;
+        StringBuilder sb = new StringBuilder();
         for (IRow row : dataSet.getRows()) {
             rows++;
             i++;
@@ -95,9 +94,6 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                 Key key = entry.getKey();
                 KeyMetadata keyMetadata = entry.getValue();
                 Value value = row.getValue(key);
-                if (i == 1) {
-                    System.out.println("\tkey " + key.toKeyString() + " has value " + value);
-                }
                 if (value.type() == Value.DATE) {
                     DateValue dateValue = (DateValue) value;
                     if (dateValue.getDate() == null) {
@@ -127,7 +123,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     if (value.toString() == null) {
                         string = "";
                     } else {
-                        string = String.valueOf(value.toString());
+                        string = value.toString();
                     }
                     if (string.length() > 253) {
                         string = string.substring(0, 253);
@@ -138,27 +134,37 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     rowValues[j++] = escape(string);
                 }
             }
-            csvWriter.writeRecord(rowValues);
+            for (String string : rowValues) {
+                sb.append(string).append("|");
+            }
+            sb.append("\n");
+            //csvWriter.writeRecord(rowValues);
         }
-        csvWriter.flush();
+        if (sb.toString().contains("Acme")) {
+            System.out.println(sb.toString());
+        }
+        bos.write(sb.toString().getBytes(Charset.forName("UTF-8")));
+        bos.flush();
+        //csvWriter.flush();
         if (rows > 10000000) {
             rows = 0;
-            csvWriter.flush();
-            csvWriter.close();
+            bos.flush();
+            bos.close();
+            //csvWriter.close();
             fos.close();
             files.add(file);
             System.out.println("starting new file of " + tableName + files.size() + ".csv" );
             file = new File(tableName + files.size() + ".csv");
             fos = new FileOutputStream(file);
-            BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
+            bos = new BufferedOutputStream(fos, 512);
+            //csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
         }
     }
 
     public void commit() {
         try {
-            csvWriter.flush();
-            csvWriter.close();
+            bos.flush();
+            bos.close();
             fos.close();
 
             files.add(this.file);
@@ -196,10 +202,11 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                 ObjectMetadata objectMetadata = new ObjectMetadata();
                 objectMetadata.setContentLength(bytes.length);
                 s3.putObject(new PutObjectRequest(bucketName, fileName, stream, objectMetadata));
-                boolean success = file.delete();
+                System.out.println("saved off " + fileName + " for debug");
+                /*boolean success = file.delete();
                 if (!success) {
                     LogClass.error("Could not delete " + fileName);
-                }
+                }*/
             }
 
         } catch (Exception e) {
@@ -218,7 +225,6 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         sqlBuilder.append("( ");
         for (KeyMetadata keyMetadata : keys.values()) {
             String columnSQL = getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable);
-            System.out.println("\t" + keyMetadata.getKey().toKeyString() + " had column " + columnSQL);
             sqlBuilder.append(columnSQL);
             sqlBuilder.append(",");
         }
@@ -273,12 +279,14 @@ public class AltPostgresStorageDialect implements IStorageDialect {
 
             file = new File(fileName);
             fos = new FileOutputStream(file);
-            BufferedOutputStream bos = new BufferedOutputStream(fos, 512);
-            csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
+            bos = new BufferedOutputStream(fos, 512);
+            //csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private BufferedOutputStream bos;
 
 
 

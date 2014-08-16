@@ -3,10 +3,13 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.WSChartDefinition;
+import com.easyinsight.analysis.WSGaugeDefinition;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.DashboardPDF;
 import com.easyinsight.export.ExportMetadata;
-import com.easyinsight.export.ExportResponse;
 import com.easyinsight.export.ExportService;
+import com.itextpdf.text.Element;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +23,17 @@ import javax.servlet.http.HttpServletResponse;
 public class HTMLPDFServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
-        String urlKey = new ExportService().toListPDFInDatabase(report, conn, insightRequestMetadata, request);
+        // if it's a standard type of report, otherwise
+        Element element = null;
+        if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition) {
+            int pdfWidth = (int) Double.parseDouble(request.getParameter("pdfWidth"));
+            int pdfHeight = (int) Double.parseDouble(request.getParameter("pdfHeight"));
+            /*double r = 1540.0 / pdfWidth;
+            int height = (int) (r * pdfHeight);*/
+            //System.out.println(height);
+            element = DashboardPDF.blah(report, pdfWidth, pdfHeight, conn);
+        }
+        String urlKey = new ExportService().toListPDFInDatabase(report, conn, insightRequestMetadata, request, element);
         JSONObject object = new JSONObject();
         object.put("urlKey", urlKey);
         response.setContentType("application/json");

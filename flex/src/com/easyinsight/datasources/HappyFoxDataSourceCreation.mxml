@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var url:String;
+        [Bindable]
+        private var apiKeyText:String;
+        [Bindable]
+        private var authKeyText:String;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new HappyFoxDataSource();
+        }
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:HappyFoxDataSource = feedDefinition as HappyFoxDataSource;
+            apiKeyText = ds.hfApiKey;
+            authKeyText = ds.authKey;
+            url = ds.url;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:HappyFoxDataSource = feedDefinition as HappyFoxDataSource;
+            ds.hfApiKey = happyFoxAPIKeyInput.text;
+            ds.authKey = happyFoxAUthKeyInput.text;
+            ds.url = urlInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:Label text="Happy Fox URL:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
+    </mx:HBox>
+    <mx:TextArea width="700" text="Your Happy Fox URL is the browser URL you normally use to connect to Happy Fox. For example, if you access Happy Fox as yourcompanyname.happyfox.com, put yourcompanyname in as the Happy Fox URL."
+            editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+    <mx:HBox>
+        <mx:Label text="Happy Fox API Key:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="happyFoxAPIKeyInput" width="350"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Label text="Happy Fox Auth Token:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="happyFoxAUthKeyInput" width="350"/>
+    </mx:HBox>
+</mx:VBox>

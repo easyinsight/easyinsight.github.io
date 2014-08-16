@@ -11,6 +11,7 @@ public class YAxisDefinition extends ChartDefinition{
 
     public var measures:ArrayCollection;
     public var yaxis:AnalysisItem;
+    public var minimumXAxis:AnalysisItem;
 
     public function YAxisDefinition() {
         super();

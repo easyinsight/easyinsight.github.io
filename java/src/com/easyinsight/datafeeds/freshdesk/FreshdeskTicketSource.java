@@ -2,7 +2,9 @@ package com.easyinsight.datafeeds.freshdesk;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -29,6 +31,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
     public static final String STATUS = "Status";
     public static final String PRIORITY = "Priority";
     public static final String CREATED_AT = "Created At";
+    public static final String RESOLVED_AT = "Resolved At";
     public static final String SOURCE_NAME = "Source Name";
     public static final String TRAINED = "Trained";
     public static final String TICKET_TYPE = "Ticket Type";
@@ -43,6 +46,9 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
     public static final String SPAM = "Spam";
     public static final String COUNT = "Ticket Count";
     public static final String TICKET_URL = "Ticket URL";
+    public static final String REOPEN_COUNT = "Times Reopened";
+
+
 
     public FreshdeskTicketSource() {
         setFeedName("Tickets");
@@ -71,7 +77,9 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         fieldBuilder.addField(DUE_BY, new AnalysisDateDimension());
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(RESOLVED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(REOPEN_COUNT, new AnalysisMeasure());
 
         customFields = new ArrayList<>();
 
@@ -106,6 +114,9 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         int ctr;
         int page = 1;
         List<String> ticketIDs = new ArrayList<>();
+        Map<String, List<Map>> statusUpdates = new HashMap<>();
+        Map<String, List<Map>> assignmentUpdates = new HashMap<>();
+        Map<String, List<Map>> addedNotes = new HashMap<>();
         do {
             ctr = 0;
             List responseList;
@@ -119,14 +130,83 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                 Map map = (Map) obj;
                 String id = map.get("id").toString();
                 String displayID = getJSONValue(map, "display_id");
+                List<Map> activities = runRestRequestForList("tickets/activities/" + displayID + ".json", client, freshdeskCompositeSource);
+
+
                 IRow row = dataSet.createRow();
                 Date updatedAt = createTicket(keys, map, id, row, freshdeskCompositeSource);
                 //if (lastRefreshDate == null || lastRefreshDate.before(updatedAt)) {
                     ticketIDs.add(displayID);
+                    List<Map> statusUpdateList = new LinkedList<>();
+                    List<Map> assignmentUpdateList = new LinkedList<>();
+                    List<Map> noteList = new LinkedList<>();
+                    for (Map activity : activities) {
+                        Map ticketActivity = (Map) activity.get("ticket_activity");
+                        //IRow row = dataSet.createRow();
+                        Object activityObj = ticketActivity.get("activity");
+                        String activityBody;
+                        if (activityObj instanceof String) {
+                            activityBody = activityObj.toString();
+                        } else if (activityObj instanceof List) {
+                            List list = (List) activityObj;
+                            activityBody = list.get(list.size() - 1).toString();
+                        } else {
+                            throw new RuntimeException();
+                        }
+                        if (activityBody.startsWith("updated status to ")) {
+                            statusUpdateList.add(activity);
+                        } else if (activityBody.startsWith("assigned to ")) {
+                            assignmentUpdateList.add(activity);
+                        } else if (activityBody.startsWith("Added a note")) {
+                            noteList.add(activity);
+                        }
+
+                    }
+                    statusUpdates.put(displayID, statusUpdateList);
+                    assignmentUpdates.put(displayID, assignmentUpdateList);
+                    addedNotes.put(displayID, noteList);
+
+                boolean closed = false;
+                int reopenCount = 0;
+                System.out.println("new ticket");
+                Value resolvedAt = null;
+                for (Object activityObject : statusUpdateList) {
+                    // calculate # of times issues was reopened
+                    Map m = (Map) activityObject;
+                    Map ticketActivityMap = (Map) m.get("ticket_activity");
+                    System.out.println(m);
+                    List<String> list = (List<String>) ticketActivityMap.get("activity");
+                    for (String activityBody : list) {
+                        System.out.println("\tbody = " + activityBody);
+                        int index = activityBody.lastIndexOf(" ");
+                        String status = activityBody.substring(index).trim();
+                        System.out.println("\tstatus = " + status);
+                        if ("Resolved".equals(status) || "Closed".equals(status)) {
+                            System.out.println("Setting closed ");
+                            if (!closed) {
+                                resolvedAt = getDate(ticketActivityMap, "performed_time");
+                            }
+                            closed = true;
+                        } else {
+                            resolvedAt = new EmptyValue();
+                            if (closed) {
+                                System.out.println("Incrementing reopen count");
+                                reopenCount++;
+                            }
+                            System.out.println("Marking unclosed");
+                            closed = false;
+                        }
+                    }
+                }
+                row.addValue(keys.get(REOPEN_COUNT), reopenCount);
+                row.addValue(keys.get(RESOLVED_AT), resolvedAt);
                 //}
             }
             page++;
         } while (ctr == 30);
+        freshdeskCompositeSource.setAssignmentUpdates(assignmentUpdates);
+        freshdeskCompositeSource.setStatusUpdates(statusUpdates);
+        freshdeskCompositeSource.setNotes(addedNotes);
         freshdeskCompositeSource.setTicketIDs(ticketIDs);
         return dataSet;
     }

@@ -27,8 +27,9 @@ import java.util.stream.Collectors;
  */
 public class DataSourceTagServlet extends JSONServlet {
 
+
     @Override
-    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject responseObject = new JSONObject();
         List<Tag> tags = new UserUploadService().getDataSourceTags();
         ExportMetadata md = ExportService.createExportMetadata(conn);
@@ -44,6 +45,11 @@ public class DataSourceTagServlet extends JSONServlet {
 
         responseObject.put("tags", array);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
+    }
+
+    @Override
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -91,6 +91,7 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         try {
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
+                System.out.println("Was invoking " + url + path);
                 throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));

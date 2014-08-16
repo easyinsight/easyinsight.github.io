@@ -116,6 +116,7 @@
         JSONObject style = new JSONObject();
         style.put("preferredWidth", width);
         style.put("preferredHeight", height);
+        style.put("png", true);
         reportJO.put("styles", style);
         intermediate.put("report", jj);
 
@@ -143,8 +144,7 @@
     <meta name="description" content="">
     <meta charset="utf-8">
     <meta name="author" content="">
-    <title>Easy Insight &mdash; <%= StringEscapeUtils.escapeHtml(report.getName()) %>
-    </title>
+    <title>Easy Insight</title>
     <jsp:include page="../html/bootstrapHeader.jsp"/>
     <jsp:include page="../html/reportDashboardHeader.jsp"/>
     <%

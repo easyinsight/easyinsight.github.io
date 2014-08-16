@@ -27,6 +27,15 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
     private int color1 = 16711680;
     private int color2 = 16776960;
     private int color3 = 47889;
+    private String benchmarkLabel = "Benchmark";
+
+    public String getBenchmarkLabel() {
+        return benchmarkLabel;
+    }
+
+    public void setBenchmarkLabel(String benchmarkLabel) {
+        this.benchmarkLabel = benchmarkLabel;
+    }
 
     public String getGaugeModel() {
         return gaugeModel;
@@ -186,6 +195,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         color2 = (int) findNumberProperty(properties, "color2", 16776960);
         color3 = (int) findNumberProperty(properties, "color3", 47889);
         gaugeModel = findStringProperty(properties, "gaugeModel", "Gauge");
+        benchmarkLabel = findStringProperty(properties, "benchmarkLabel", "Benchmark");
     }
 
     public List<ReportProperty> createProperties() {
@@ -196,6 +206,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("color2", color2));
         properties.add(new ReportNumericProperty("color3", color3));
         properties.add(new ReportStringProperty("gaugeModel", gaugeModel));
+        properties.add(new ReportStringProperty("benchmarkLabel", benchmarkLabel));
         return properties;
     }
 

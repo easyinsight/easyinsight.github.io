@@ -30,7 +30,7 @@ busyIndicator = busyIndicator || (function () {
 
     return {
         showPleaseWait: function() {
-            $("#pleaseWaitProcessingMessage").html("Generating PDF...");
+            $("#pleaseWaitProcessingMessage").html("Processing...");
             $("#pleaseWaitDialog").modal(true, true, true);
         },
         hidePleaseWait: function () {
@@ -57,16 +57,6 @@ function captureAndReturn(o) {
         return imageData;
     }
 
-}
-
-function capture(id) {
-    var svg = $("#d3Div" + id);
-    var h = svg.height();
-    var w = svg.width();
-    var imageData = {};
-    imageData.height = h;
-    imageData.width = w;
-    return imageData;
 }
 
 function drillThrough(params) {
@@ -275,39 +265,95 @@ var confirmRender = function (o, f) {
 
 }
 
-var toPDF = function (o, dashboardID, drillthroughID) {
+var toPNG = function (o, dashboardID, drillthroughID) {
+
+
     var obj = o.report.report;
     var id = o.report.id;
+
+    var i;
+    if ($("#" + id + " :visible").size() == 0) {
+        o.rendered = false;
+        return;
+    }
+
+    var curFilters = $.map(o.filters, function (e, i) {
+        return toFilterString(e, false);
+    });
+    var fullFilters = {};
+    for (i = 0; i < curFilters.length; i++) {
+        fullFilters[curFilters[i].id] = curFilters[i];
+    }
+
+    var url =  "/app/htmlPNG" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset();
+
+    var svg = $("#d3Div" + id);
+    var h = svg.height();
+    var w = svg.width();
+    url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
+
+    busyIndicator.showPleaseWait();
+    $.ajax({
+        url: url,
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify(fullFilters),
+        error: function() {
+            busyIndicator.hidePleaseWait();
+            alert("Something went wrong in trying to export to PNG.");
+        },
+        success: function(data) {
+            busyIndicator.hidePleaseWait();
+            window.location.href = "/app/png?urlKey="+data["urlKey"];
+        },
+        type: "POST"
+    });
+}
+
+var toPDF = function (o, dashboardID, drillthroughID) {
+
+
+    var obj = o.report.report;
+    var id = o.report.id;
+
+    var i;
+    if ($("#" + id + " :visible").size() == 0) {
+        o.rendered = false;
+        return;
+    }
+
+    var curFilters = $.map(o.filters, function (e, i) {
+        return toFilterString(e, false);
+    });
+    var fullFilters = {};
+    for (i = 0; i < curFilters.length; i++) {
+        fullFilters[curFilters[i].id] = curFilters[i];
+    }
+
+    var url =  "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset();
+
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
         obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition") {
-        var i;
-        if ($("#" + id + " :visible").size() == 0) {
-            o.rendered = false;
-            return;
-        }
-        var curFilters = $.map(o.filters, function (e, i) {
-            return toFilterString(e, false);
-        });
-        var fullFilters = {};
-        for (i = 0; i < curFilters.length; i++) {
-            fullFilters[curFilters[i].id] = curFilters[i];
-        }
-        //beforeRefresh($("#" + id + " .loading"))();
-        $.ajax({
-            url: "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(),
-            contentType: "application/json; charset=UTF-8",
-            data: JSON.stringify(fullFilters),
-            error: function() {
-                alert("Something went wrong in trying to export to PDF.");
-            },
-            success: function(data) {
-                window.location.href = "/app/pdf?urlKey="+data["urlKey"];
-            },
-            type: "POST"
-        });
     } else {
-        capture(id);
+        var svg = $("#d3Div" + id);
+        var h = svg.height();
+        var w = svg.width();
+        url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
     }
+    busyIndicator.showPleaseWait();
+    $.ajax({
+        url: url,
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify(fullFilters),
+        error: function() {
+            busyIndicator.hidePleaseWait();
+            alert("Something went wrong in trying to export to PDF.");
+        },
+        success: function(data) {
+            busyIndicator.hidePleaseWait();
+            window.location.href = "/app/pdf?urlKey="+data["urlKey"];
+        },
+        type: "POST"
+    });
 }
 
 
@@ -582,6 +628,12 @@ var renderExcel = function (obj, dashboardID, drillthroughID, force) {
 var renderPDF = function (obj, dashboardID, drillthroughID, force) {
     if (obj.type == "report") {
         toPDF(obj, dashboardID, drillthroughID);
+    }
+}
+
+var renderPNG = function (obj, dashboardID, drillthroughID, force) {
+    if (obj.type == "report") {
+        toPNG(obj, dashboardID, drillthroughID);
     }
 }
 
@@ -1247,6 +1299,15 @@ $(function () {
         })
 
         $(".embed_dashboard").click(function(e) {
+
+            if (dashboardJSON["publiclyVisible"]) {
+                $("#embedDashboardVisibility").html("Anyone viewing the page containing this dashboard will be able to see it without needing to log in via Easy Insight credentials.");
+            } else if (dashboardJSON["publiclyVisibleWithKey"]) {
+                $("#embedDashboardVisibility").html("Anyone viewing the page containing this dashboard will be able to see it without needing to log in via Easy Insight credentials if the appropriate embed key property is passed in as part of the URL.");
+            } else {
+                $("#embedDashboardVisibility").html("Accessing this dashboard will require users to log in via Easy Insight credentials. You can change this permission setting under the Additional Configuration setting of the report editor.");
+            }
+
             $("#embedDashboardURL").text("<iframe width=\"500\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
             $("#embedDashboardWindow").modal(true, true, true);
         })
@@ -1365,6 +1426,10 @@ $(function () {
 
         $(".export_pdf").click(function(e) {
             renderPDF(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+        })
+
+        $(".export_png").click(function(e) {
+            renderPNG(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
         })
 
         saveConfiguration = function (name, key) {

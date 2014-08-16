@@ -1,17 +1,22 @@
 package com.easyinsight.api.v3;
 
+import com.easyinsight.analysis.AnalysisService;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.userupload.UserUploadService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Comparator;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,6 +29,25 @@ public class DataSourceListServlet extends JSONServlet {
 
     @Override
     protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        net.minidev.json.JSONArray urls = (net.minidev.json.JSONArray) jsonObject.get("data_sources");
+        final FeedStorage fs = new FeedStorage();
+        new UserUploadService().deleteUserUploads(urls.stream().map((a) -> {
+            try {
+                return fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(a)));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList()));
+        return new ResponseInfo(200, "");
+    }
+
+    @Override
+    protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject responseObject = new JSONObject();
         JSONArray array = new JSONArray();
         responseObject.put("data_sources", array);
