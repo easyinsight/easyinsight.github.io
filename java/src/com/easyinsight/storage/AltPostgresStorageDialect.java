@@ -78,6 +78,9 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         if (ret.contains("|")) {
             ret = ret.replace("|", "\\|");
         }
+        if (ret.contains("'")) {
+            ret = ret.replace("'", "\\'");
+        }
         return ret;
     }
 
@@ -140,9 +143,6 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             sb.append("\n");
             //csvWriter.writeRecord(rowValues);
         }
-        if (sb.toString().contains("Acme")) {
-            System.out.println(sb.toString());
-        }
         bos.write(sb.toString().getBytes(Charset.forName("UTF-8")));
         bos.flush();
         //csvWriter.flush();
@@ -203,10 +203,10 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                 objectMetadata.setContentLength(bytes.length);
                 s3.putObject(new PutObjectRequest(bucketName, fileName, stream, objectMetadata));
                 System.out.println("saved off " + fileName + " for debug");
-                /*boolean success = file.delete();
+                boolean success = file.delete();
                 if (!success) {
                     LogClass.error("Could not delete " + fileName);
-                }*/
+                }
             }
 
         } catch (Exception e) {
