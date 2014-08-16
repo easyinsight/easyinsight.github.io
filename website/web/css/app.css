@@ -91,10 +91,23 @@ a.dp-choose-date {
     max-width: none;
 }
 
+svg {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+}
+
 .reportArea {
     overflow:auto;
     padding:10px;
+    /*margin:0;*/
 }
+
+/*.dashboardReportDiv {
+    padding:0;
+    margin:0;
+}*/
 
 a.trendDrillthrough {
     color:inherit;
@@ -158,7 +171,7 @@ label {
 .navbar {
     min-height:36px;
     margin-bottom:20px;
-    border: 1px solid transparent;
+    border: 0;
     border-bottom: 4px solid #0084b4;
 }
 
@@ -270,12 +283,12 @@ a {
 }
 
 .tag-select {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .browse-by-tag {
     float:left;
-    font-size: 12px;
+    font-size: 14px;
     font-weight:500;
     line-height: 32px;
     vertical-align: middle;
@@ -316,12 +329,12 @@ a {
 }
 
 .noReports {
-    font-size: 18px;
+    font-size: 16px;
     padding-bottom: 20px;
 }
 
 .reportListControl {
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .reportListHR {
@@ -379,4 +392,24 @@ a {
 
 .active_link {
     text-decoration: underline;
+}
+
+.alert-tutorial {
+    color: #000000;
+    background-color: #e4ef59;
+    border-color: #e4ef59;
+}
+.alert-tutorial hr {
+    border-top-color: #f7e1b5;
+}
+.alert-tutorial .alert-link {
+    color: #000000;
+}
+
+h2 {
+    color: #1C5C76;
+}
+
+.deleteSelected {
+    padding-bottom: 5px;
 }

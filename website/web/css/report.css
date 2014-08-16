@@ -223,10 +223,36 @@ nav.navbar_first {
 
 .reportControlBtnGroup > a,
 .reportControlBtnGroup > a:hover {
+    color: #FFFFFF;
+}
+
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+    background-color: #0084b4;
+    border-color: #0084b4;
+}
+
+.reportControlBtnGroup > a:focus {
+    color: #FFF;
+    background-color: #0084b4;
 }
 
 .reportControlToolbar > a,
-.reportControlToolbar > a:hover {
+.reportControlToolbar > a:hover,
+.reportControlToolbar > a:focus {
+    color: #FFFFFF;
+}
+
+
+.reportBlah > a,
+.reportBlah > a:hover,
+.reportBlah > a:focus{
+    color: #FFFFFF;
+}
+
+.reportControlToolbar > .active > a {
+    background-color: #0084b4;
 }
 
 .reportControlToolbar {
@@ -334,4 +360,13 @@ table.dataTable tfoot td {
 #embedDashboardURL {
     font-size:12px;
     font-family: 'Courier',serif;
+}
+
+.report_annotation {
+    border-style: solid;
+    border-width: 1px;
+}
+
+.controlsRow {
+    background-color:#0084b4;
 }
