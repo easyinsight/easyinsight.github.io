@@ -9,14 +9,14 @@ Chart = {
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
 
-                        console.log("height = " + height + " with preferredHeight = " + styleProps["preferredHeight"]);
+                        var rWidth = $("#d3Div" + target).width();
 
                         var s1 = data["values"];
                         var maxLabelSize = d3.max(s1, function(d) {
                             return d3.max(d.values, function(e) { return e.x.length } );
                         });
-                        var factorForRotate = nv.utils.windowSize().width / 30;
-                        var needStagger = maxLabelSize > (nv.utils.windowSize().width / 50);
+                        var factorForRotate = rWidth / 30;
+                        var needStagger = maxLabelSize > (rWidth / 50);
                         var useRotate = maxLabelSize > factorForRotate;
                         var charLimit = useRotate ? 15 : 0;
 
@@ -29,7 +29,7 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 110 : (needStagger ? 60 : 30), left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 130 : (needStagger ? 60 : 30), left: 80});
 
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {
@@ -48,7 +48,7 @@ Chart = {
                             });
                         }
 
-                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 80, -70, charLimit);
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, -70, charLimit);
                         Chart.assignAxisMinMaxValues(chart, data, true);
 
 
@@ -310,9 +310,11 @@ Chart = {
                         var maxLabelSize = d3.max(s1, function(d) {
                             return d3.max(d.values, function(e) { return e.x.length } );
                         });
-                        var factorForRotate = nv.utils.windowSize().width / 30;
+                        var rWidth = $("#d3Div" + target).width();
+
+                        var factorForRotate = rWidth / 30;
                         var useRotate = maxLabelSize > factorForRotate;
-                        var needStagger = maxLabelSize > (nv.utils.windowSize().width / 50);
+                        var needStagger = maxLabelSize > (rWidth / 50);
                         var charLimit = useRotate ? 15 : 0;
 
                         if (data["oneMeasure"]) {
@@ -336,7 +338,7 @@ Chart = {
                                 })
                                 .showYAxis(true)        //Show the y-axis
                                 .showXAxis(true)        //Show the x-axis
-                                .margin({top: 20, right: 40, bottom: useRotate ? 110 : (needStagger ? 60 : 30), left: 85});
+                                .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 30), left: 85});
                             var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                             if (customWidth > -1) {
                                 chart.width(customWidth);
@@ -368,7 +370,7 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 110 : (needStagger ? 60 : 30), left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 30), left: 80});
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
                                 if (dtOptions["id"]) {
@@ -392,7 +394,7 @@ Chart = {
 
 
 
-                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, -70, charLimit);
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 30, -70, charLimit);
 
                         if (useRotate) {
                             chart.xAxis.rotateLabels(-45);
