@@ -49,12 +49,25 @@ List = {
                 var lockHeaders = properties["lockHeaders"];
 
                 List.createClasses(properties, targetDiv);
+                var rowNumEnabled = properties["showLineNumbers"];
+                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array,
+                fnRowCallback: function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                    if (rowNumEnabled) {
+                        var index = iDisplayIndex +1;
+                        $('td:eq(0)',nRow).html(index);
+                        return nRow;
+                    } else {
+                        return nRow;
+                    }
+                }
 
-                List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array });
+                });
+
                 //new $.fn.dataTable.FixedHeader(List.availableDataTables[targetDiv]);
                 if (lockHeaders) {
                     $('#' + targetDiv + ' .reportArea table').floatThead();
                 }
+
                 //new $.fn.dataTable.FixedHeader(List.availableDataTables[targetDiv]);
                 $(".list_drillthrough").click(function (e) {
                     e.preventDefault();

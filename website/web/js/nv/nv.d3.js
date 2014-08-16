@@ -1238,10 +1238,21 @@ nv.utils.optionsFunc = function(args) {
               } else {
                   debugX = rotateYLabel ? (-scale.range()[0] / 2) : -axis.tickPadding();
               }
+              var yLabelPosition;
+              if (rotateYLabel) {
+                  if (axisLabelDistance != 0) {
+                      yLabelPosition = axisLabelDistance;
+                  } else {
+                      yLabelPosition = -Math.max(margin.left,width);
+                  }
+                  //rotateYLabel ? ((axisLabelDistance > 0) ? axisLabelDistance : (-Math.max(margin.left,width))) : -10;
+              } else {
+                  yLabelPosition = -10;
+              }
           axisLabel
               .style('text-anchor', rotateYLabel ? 'middle' : 'end')
               .attr('transform', rotateYLabel ? 'rotate(-90)' : '')
-              .attr('y', rotateYLabel ? (-Math.max(margin.left,width) + axisLabelDistance) : -10) //TODO: consider calculating this based on largest tick width... OR at least expose this on chart
+              .attr('y', yLabelPosition) //TODO: consider calculating this based on largest tick width... OR at least expose this on chart
               .attr('x', rotateYLabel ? (debugX) : -axis.tickPadding());
           if (showMaxMin) {
             var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
@@ -8544,12 +8555,14 @@ nv.models.multiBarHorizontal = function() {
     , y = d3.scale.linear()
     , getX = function(d) { return d.x }
     , getY = function(d) { return d.y }
+    , getMinX = function(d) { return 0 }
     , forceY = [0] // 0 is forced by default.. this makes sense for the majority of bar graphs... user can always do chart.forceY([]) to remove
     , color = nv.utils.defaultColor()
     , barColor = null // adding the ability to set the color for each rather than the whole group
     , disabled // used in conjunction with barColor to communicate from multiBarHorizontalChart what series are disabled
     , stacked = false
     , showValues = false
+    , cumulativeDateAxis = false
     , showBarLabels = false
     , valuePadding = 60
     , valueFormat = d3.format(',.2f')
@@ -8580,12 +8593,13 @@ nv.models.multiBarHorizontal = function() {
           availableHeight = height - margin.top - margin.bottom,
           container = d3.select(this);
 
-
-      if (stacked)
+        if (stacked)
         data = d3.layout.stack()
                  .offset('zero')
-                 .values(function(d){ return d.values })
+                 .values(function(d){
+                    return d.values })
                  .y(getY)
+
                  (data);
 
 
@@ -8604,15 +8618,18 @@ nv.models.multiBarHorizontal = function() {
         data[0].values.map(function(d,i) {
           var posBase = 0, negBase = 0;
           data.map(function(d) {
-            var f = d.values[i]
+            var f = d.values[i];
             f.size = Math.abs(f.y);
             if (f.y<0)  {
               f.y1 = negBase - f.size;
               negBase = negBase - f.size;
-            } else
-            {
-              f.y1 = posBase;
-              posBase = posBase + f.size;
+            } else {
+                if (cumulativeDateAxis) {
+                    f.y1 = f.xMin;
+                } else {
+                    f.y1 = posBase;
+                    posBase = posBase + f.size;
+                }
             }
           });
         });
@@ -8626,7 +8643,7 @@ nv.models.multiBarHorizontal = function() {
       var seriesData = (xDomain && yDomain) ? [] : // if we know xDomain and yDomain, no need to calculate
             data.map(function(d) {
               return d.values.map(function(d,i) {
-                return { x: getX(d,i), y: getY(d,i), y0: d.y0, y1: d.y1 }
+                return { x: getX(d,i), y: getY(d,i) + getMinX(d, i), y0: d.y0, y1: d.y1 }
               })
             });
 
@@ -8634,7 +8651,8 @@ nv.models.multiBarHorizontal = function() {
           .rangeBands(xRange || [0, availableHeight], .1);
 
       //y   .domain(yDomain || d3.extent(d3.merge(seriesData).map(function(d) { return d.y + (stacked ? d.y0 : 0) }).concat(forceY)))
-      y   .domain(yDomain || d3.extent(d3.merge(seriesData).map(function(d) { return stacked ? (d.y > 0 ? d.y1 + d.y : d.y1 ) : d.y }).concat(forceY)))
+        if (cumulativeDateAxis) y.domain(forceY);
+        else y.domain(yDomain || d3.extent(d3.merge(seriesData).map(function(d) { return d.y + (stacked ? d.y0 : 0) }).concat(forceY)));
 
       if (showValues && !stacked)
         y.range(yRange || [(y.domain()[0] < 0 ? valuePadding : 0), availableWidth - (y.domain()[1] > 0 ? valuePadding : 0) ]);
@@ -8691,7 +8709,8 @@ nv.models.multiBarHorizontal = function() {
 
       var barsEnter = bars.enter().append('g')
           .attr('transform', function(d,i,j) {
-              return 'translate(' + y0(stacked ? d.y0 : 0) + ',' + (stacked ? 0 : (j * x.rangeBand() / data.length ) + x(getX(d,i))) + ')'
+              var yTranslate = (stacked ? y0(d.y0) : y(getMinX(d, i)));
+              return 'translate(' + yTranslate + ',' + (stacked ? 0 : (j * x.rangeBand() / data.length ) + x(getX(d,i))) + ')'
           });
 
       barsEnter.append('rect')
@@ -8801,9 +8820,10 @@ nv.models.multiBarHorizontal = function() {
       else
         bars.transition()
             .attr('transform', function(d,i) {
+                var minY = y(getMinX(d, i));
               //TODO: stacked must be all positive or all negative, not both?
               return 'translate(' +
-              (getY(d,i) < 0 ? y(getY(d,i)) : y(0))
+              (minY)
               + ',' +
               (d.series * x.rangeBand() / data.length
               +
@@ -8846,6 +8866,12 @@ nv.models.multiBarHorizontal = function() {
     getY = _;
     return chart;
   };
+
+    chart.minX = function(_) {
+        if (!arguments.length) return getMinX;
+        getMinX = _;
+        return chart;
+    };
 
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -8915,6 +8941,12 @@ nv.models.multiBarHorizontal = function() {
     stacked = _;
     return chart;
   };
+
+    chart.cumulativeDateAxis = function(_) {
+        if (!arguments.length) { return cumulativeDateAxis };
+        cumulativeDateAxis = _;
+        return chart;
+    };
 
   chart.color = function(_) {
     if (!arguments.length) return color;
@@ -8996,6 +9028,7 @@ nv.models.multiBarHorizontalChart = function() {
     , color = nv.utils.defaultColor()
     , showControls = true
     , showLegend = true
+    , cumulativeDateAxis = false
     , showXAxis = true
     , showYAxis = true
     , stacked = false
@@ -9006,6 +9039,7 @@ nv.models.multiBarHorizontalChart = function() {
       }
     , x //can be accessed via chart.xScale()
     , y //can be accessed via chart.yScale()
+    , minX
     , state = { stacked: stacked }
     , defaultState = null
     , noData = 'No Data Available.'
@@ -9186,6 +9220,7 @@ nv.models.multiBarHorizontalChart = function() {
         .disabled(data.map(function(series) { return series.disabled }))
         .width(availableWidth)
         .height(availableHeight)
+          .cumulativeDateAxis(cumulativeDateAxis)
         .color(data.map(function(d,i) {
           return d.color || color(d, i);
         }).filter(function(d,i) { return !data[i].disabled }))
@@ -9336,7 +9371,7 @@ nv.models.multiBarHorizontalChart = function() {
   chart.yAxis = yAxis;
 
   d3.rebind(chart, multibar, 'x', 'y', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY',
-    'clipEdge', 'id', 'delay', 'showValues','showBarLabels', 'valueFormat', 'stacked', 'barColor');
+    'clipEdge', 'id', 'delay', 'showValues','showBarLabels', 'valueFormat', 'stacked', 'barColor', 'minX', 'cumulativeDateAxis');
 
   chart.options = nv.utils.optionsFunc.bind(chart);
 
@@ -9377,6 +9412,12 @@ nv.models.multiBarHorizontalChart = function() {
   chart.showLegend = function(_) {
     if (!arguments.length) return showLegend;
     showLegend = _;
+    return chart;
+  };
+
+    chart.cumulativeDateAxis = function(_) {
+    if (!arguments.length) { return cumulativeDateAxis };
+        cumulativeDateAxis = _;
     return chart;
   };
 
