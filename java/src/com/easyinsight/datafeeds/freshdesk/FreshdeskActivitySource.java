@@ -60,7 +60,7 @@ public class FreshdeskActivitySource extends FreshdeskBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        try {
+        /*try {
             FreshdeskCompositeSource freshdeskCompositeSource = (FreshdeskCompositeSource) parentDefinition;
             List<String> ticketIDs = freshdeskCompositeSource.getTicketIDs();
             HttpClient client = getHttpClient(freshdeskCompositeSource.getFreshdeskApiKey());
@@ -119,6 +119,7 @@ public class FreshdeskActivitySource extends FreshdeskBaseSource {
             return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
+        }*/
+        return new DataSet();
     }
 }
