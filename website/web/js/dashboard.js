@@ -59,16 +59,6 @@ function captureAndReturn(o) {
 
 }
 
-function capture(id) {
-    var svg = $("#d3Div" + id);
-    var h = svg.height();
-    var w = svg.width();
-    var imageData = {};
-    imageData.height = h;
-    imageData.width = w;
-    return imageData;
-}
-
 function drillThrough(params) {
     if(typeof(userJSON.embedKey) != "undefined")
         params["embedKey"] = userJSON.embedKey;
@@ -276,38 +266,50 @@ var confirmRender = function (o, f) {
 }
 
 var toPDF = function (o, dashboardID, drillthroughID) {
+
+
     var obj = o.report.report;
     var id = o.report.id;
+
+    var i;
+    if ($("#" + id + " :visible").size() == 0) {
+        o.rendered = false;
+        return;
+    }
+
+    var curFilters = $.map(o.filters, function (e, i) {
+        return toFilterString(e, false);
+    });
+    var fullFilters = {};
+    for (i = 0; i < curFilters.length; i++) {
+        fullFilters[curFilters[i].id] = curFilters[i];
+    }
+
+    var url =  "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset();
+
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
         obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition") {
-        var i;
-        if ($("#" + id + " :visible").size() == 0) {
-            o.rendered = false;
-            return;
-        }
-        var curFilters = $.map(o.filters, function (e, i) {
-            return toFilterString(e, false);
-        });
-        var fullFilters = {};
-        for (i = 0; i < curFilters.length; i++) {
-            fullFilters[curFilters[i].id] = curFilters[i];
-        }
-        //beforeRefresh($("#" + id + " .loading"))();
-        $.ajax({
-            url: "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset(),
-            contentType: "application/json; charset=UTF-8",
-            data: JSON.stringify(fullFilters),
-            error: function() {
-                alert("Something went wrong in trying to export to PDF.");
-            },
-            success: function(data) {
-                window.location.href = "/app/pdf?urlKey="+data["urlKey"];
-            },
-            type: "POST"
-        });
     } else {
-        capture(id);
+        var svg = $("#d3Div" + id);
+        var h = svg.height();
+        var w = svg.width();
+        url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
     }
+    busyIndicator.showPleaseWait();
+    $.ajax({
+        url: url,
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify(fullFilters),
+        error: function() {
+            busyIndicator.hidePleaseWait();
+            alert("Something went wrong in trying to export to PDF.");
+        },
+        success: function(data) {
+            busyIndicator.hidePleaseWait();
+            window.location.href = "/app/pdf?urlKey="+data["urlKey"];
+        },
+        type: "POST"
+    });
 }
 
 
