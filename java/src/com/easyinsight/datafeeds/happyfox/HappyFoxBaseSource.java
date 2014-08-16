@@ -1,4 +1,4 @@
-package com.easyinsight.datafeeds.freshdesk;
+package com.easyinsight.datafeeds.happyfox;
 
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
@@ -23,14 +23,14 @@ import java.util.Map;
 
 /**
  * User: jamesboe
- * Date: 1/10/14
- * Time: 11:45 AM
+ * Date: 8/15/14
+ * Time: 11:27 AM
  */
-public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
-    protected static HttpClient getHttpClient(String username) {
+public class HappyFoxBaseSource extends ServerDataSourceDefinition {
+    protected static HttpClient getHttpClient(String apiKey, String authToken) {
         HttpClient client = new HttpClient();
         client.getParams().setAuthenticationPreemptive(true);
-        Credentials defaultcreds = new UsernamePasswordCredentials(username, "X");
+        Credentials defaultcreds = new UsernamePasswordCredentials(apiKey, authToken);
         client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
         return client;
     }
@@ -47,7 +47,7 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
 
     protected Value getDate(Map n, String key) {
         if (df == null) {
-            df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+            df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
         }
         String value = getValue(n, key);
         if (value != null) {
@@ -61,8 +61,9 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         return new EmptyValue();
     }
 
-    protected static Map runRestRequestForMap(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
-        String url = parentDefinition.getUrl() + "/helpdesk/";
+    protected static Map runRestRequestForMap(String path, HttpClient client, HappyFoxCompositeSource parentDefinition) throws ReportException {
+        String url = parentDefinition.getUrl() + "/api/1.1/json/";
+        System.out.println(url + path);
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
@@ -70,7 +71,7 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         try {
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Happy Fox instance at " + url, parentDefinition));
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
@@ -82,8 +83,8 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    protected static List runRestRequestForList(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
-        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "freshdesk.com") + "/helpdesk/";
+    protected static List runRestRequestForList(String path, HttpClient client, HappyFoxCompositeSource parentDefinition) throws ReportException {
+        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "happyfox.com") + "/api/1.1/json/";
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
@@ -92,7 +93,7 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
                 System.out.println("Was invoking " + url + path);
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Happy Fox instance at " + url, parentDefinition));
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
@@ -108,8 +109,8 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         }
     }
 
-    protected static List runRestRequestForListNoHelp(String path, HttpClient client, FreshdeskCompositeSource parentDefinition) throws ReportException {
-        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "freshdesk.com") + "/";
+    protected static List runRestRequestForListNoHelp(String path, HttpClient client, HappyFoxCompositeSource parentDefinition) throws ReportException {
+        String url = parentDefinition.generateURL(parentDefinition.getUrl(), "happyfox.com") + "/api/1.1/json/";
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
@@ -117,7 +118,7 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
         try {
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Freshdesk instance at " + url, parentDefinition));
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Happy Fox instance at " + url, parentDefinition));
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }

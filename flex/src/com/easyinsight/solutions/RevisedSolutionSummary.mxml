@@ -117,6 +117,7 @@
                     event.solution.dataSourceType == DataSourceType.DISTINCT_CACHED ||
                     event.solution.dataSourceType == DataSourceType.LINKEDIN ||
                     event.solution.dataSourceType == DataSourceType.FRESHDESK ||
+                    event.solution.dataSourceType == DataSourceType.HAPPY_FOX ||
                     event.solution.dataSourceType == DataSourceType.BLANK ||
                     event.solution.dataSourceType == DataSourceType.SENDGRID ||
                     event.solution.dataSourceType == DataSourceType.TRELLO ||

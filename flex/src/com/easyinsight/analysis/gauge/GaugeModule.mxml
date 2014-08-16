@@ -73,7 +73,7 @@
                 gauge.alertColors = [ gaugeDefinition.color1, gaugeDefinition.color2, gaugeDefinition.color3 ];
                 numFormatter = gaugeDefinition.measure.getFormatter();
                 if (gaugeDefinition.benchmarkMeasure != null) {
-                    benchmarkValue = "Benchmark: " + gaugeDefinition.benchmarkMeasure.getFormatter().format(row[gaugeDefinition.benchmarkMeasure.qualifiedName()]);
+                    benchmarkValue = gaugeDefinition.benchmarkLabel + ": " + gaugeDefinition.benchmarkMeasure.getFormatter().format(row[gaugeDefinition.benchmarkMeasure.qualifiedName()]);
                 } else {
                     benchmarkValue = null;
                 }

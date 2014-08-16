@@ -14,6 +14,7 @@ public class AccountSettings {
     public var maxResults:int;
     public var sendEmail:Boolean;
     public var htmlView:Boolean;
+    public var defaultFontFamily:String;
     public var locale:String;
     
     public function AccountSettings() {

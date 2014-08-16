@@ -8,6 +8,7 @@ import com.easyinsight.analysis.ReportFault;
 
 import com.easyinsight.analysis.Value;
 import com.easyinsight.dashboard.Dashboard;
+import com.easyinsight.framework.User;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
@@ -92,6 +93,9 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
         this.reportID = reportID;
         this.dashboardID = dashboardID;
         this.height = 23;
+        if (User.getInstance() != null && User.getInstance().defaultFontFamily != null && User.getInstance().defaultFontFamily != "") {
+            setStyle("fontFamily", User.getInstance().defaultFontFamily);
+        }
     }
 
     private var _filterEditable:Boolean = true;

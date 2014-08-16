@@ -87,6 +87,9 @@ public class Account {
     @Column(name="core_storage")
     private long coreStorage;
 
+    @Column(name="default_font_family")
+    private String defaultFontFamily;
+
     @Column(name="addon_storage_units")
     private int addonStorageUnits;
 
@@ -96,6 +99,9 @@ public class Account {
     private int addonQuickbaseConnections;
     @Column(name="field_model")
     private boolean fieldModel;
+
+    @Column(name="timezone")
+    private String timezone;
 
     @Column(name="exchange_author")
     private boolean exchangeAuthor;
@@ -371,6 +377,14 @@ public class Account {
         this.hourlyRefreshEnabled = hourlyRefreshEnabled;
     }
 
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+
     public String getSpecialStorage() {
         return specialStorage;
     }
@@ -385,6 +399,14 @@ public class Account {
 
     public void setNewPricingModelInvoice(boolean newPricingModelInvoice) {
         this.newPricingModelInvoice = newPricingModelInvoice;
+    }
+
+    public String getDefaultFontFamily() {
+        return defaultFontFamily;
+    }
+
+    public void setDefaultFontFamily(String defaultFontFamily) {
+        this.defaultFontFamily = defaultFontFamily;
     }
 
     public int getMaxRecords() {
@@ -1196,7 +1218,7 @@ public class Account {
                 throw new RuntimeException();
             }
         } else {
-            cost = 50 + (designers * 50) + (smallBizConnections * 25) + (storageAddons * 150);
+            cost = 50 + (designers * 15) + (smallBizConnections * 15) + (storageAddons * 150);
         }
         return cost;
     }

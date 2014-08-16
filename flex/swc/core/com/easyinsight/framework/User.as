@@ -30,6 +30,7 @@ public class User extends EventDispatcher
     private var _userName:String;
     public var accountAdmin:Boolean;
     public var userID:int;
+    public var defaultFontFamily:String;
     public var billingInformationGiven:Boolean;
     public var accountState:int;
     public var uiConfiguration:UIConfiguration;
@@ -67,6 +68,7 @@ public class User extends EventDispatcher
         var formatString:String;
         switch (dateFormat) {
             case 0:
+            case 8:
                 formatString = "MM/DD/YYYY HH:NN";
                 break;
             case 1:
@@ -141,8 +143,11 @@ public class User extends EventDispatcher
         _user.personaID = response.personaID;
         _user.dateFormat = response.dateFormat;
         _user.scenario = response.scenario;
+        _user.defaultFontFamily = response.defaultFontFamily;
         if (response.currencySymbol == "EUR") {
             _user.currencySymbol = "\u20AC";
+        } else if (response.currencySymbol == "GBP") {
+            _user.currencySymbol = "\u00A3";
         } else {
             _user.currencySymbol = response.currencySymbol;
         }

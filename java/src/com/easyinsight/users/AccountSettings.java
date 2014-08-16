@@ -18,12 +18,21 @@ public class AccountSettings {
     private long groupID;
     private int dateFormat;
     private String currencySymbol;
+    private String defaultFontFamily;
     private int firstDayOfWeek;
     private int maxResults;
     private boolean sendEmail;
     private boolean htmlView;
 
     public AccountSettings() {
+    }
+
+    public String getDefaultFontFamily() {
+        return defaultFontFamily;
+    }
+
+    public void setDefaultFontFamily(String defaultFontFamily) {
+        this.defaultFontFamily = defaultFontFamily;
     }
 
     public String getLocale() {

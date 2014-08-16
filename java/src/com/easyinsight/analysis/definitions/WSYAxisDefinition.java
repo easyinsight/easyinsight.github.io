@@ -17,6 +17,7 @@ import java.util.*;
 public abstract class WSYAxisDefinition extends WSChartDefinition {
     private List<AnalysisItem> measures;
     private AnalysisItem yaxis;
+    private AnalysisItem minimumXAxis;
 
     public LimitsResults applyLimits(DataSet dataSet) {
         LimitsResults limitsResults;
@@ -64,6 +65,14 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
         return limitsResults;
     }
 
+    public AnalysisItem getMinimumXAxis() {
+        return minimumXAxis;
+    }
+
+    public void setMinimumXAxis(AnalysisItem minimumXAxis) {
+        this.minimumXAxis = minimumXAxis;
+    }
+
     public AnalysisItem getYaxis() {
         return yaxis;
     }
@@ -83,11 +92,15 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
     public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("yAxis", Arrays.asList(yaxis), structure);
         addItems("measure", measures, structure);
+        if (minimumXAxis != null) {
+            addItems("minimumXAxis", Arrays.asList(minimumXAxis), structure);
+        }
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         yaxis = firstItem("yAxis", structure);
         measures = items("measure", structure);
+        minimumXAxis = firstItem("minimumXAxis", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
@@ -96,6 +109,9 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
             for (AnalysisItem measure : measures) {
                 columnList.add(measure);
             }
+        }
+        if (minimumXAxis != null) {
+            columnList.add(minimumXAxis);
         }
         columnList.add(yaxis);
         return columnList;

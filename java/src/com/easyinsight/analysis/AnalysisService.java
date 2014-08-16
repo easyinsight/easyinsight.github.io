@@ -1491,8 +1491,6 @@ public class AnalysisService {
                 throw new RuntimeException();
             }
 
-
-
             List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
             Set<AnalysisItem> used = new HashSet<AnalysisItem>();
             if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
@@ -1629,11 +1627,30 @@ public class AnalysisService {
                 }
                 if (drillThrough.isFilterRowGroupings()) {
 
-                    /*for (FilterDefinition filter : filters) {
-                        if (filter.getField() != null) {
-                            used.add(filter.getField());
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+                    if (dataSource instanceof CompositeFeedDefinition) {
+                        CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+                        Long reportID = compositeFeedDefinition.reportIDForField(analysisItem);
+                        if (reportID != null) {
+                            WSAnalysisDefinition fromReport = new AnalysisService().openAnalysisDefinition(reportID);
+                            if (fromReport instanceof WSListDefinition) {
+                                WSListDefinition cols = (WSListDefinition) fromReport;
+                                for (AnalysisItem item : cols.getColumns()) {
+                                    for (FilterDefinition filterDefinition : item.getFilters()) {
+                                        FilterDefinition clone;
+                                        try {
+                                            clone = filterDefinition.clone();
+                                        } catch (CloneNotSupportedException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                        clone.setToggleEnabled(true);
+                                        filters.add(clone);
+                                    }
+                                }
+                            }
                         }
-                    }*/
+                    }
+
                     List<FilterDefinition> fieldFilters = analysisItem.getFilters();
                     for (FilterDefinition filter : fieldFilters) {
                         FilterDefinition clone;
@@ -1670,7 +1687,11 @@ public class AnalysisService {
                                 if (target instanceof Value) {
                                     val = (Value) target;
                                 } else {
-                                    val = new StringValue(target.toString());
+                                    if ("(Empty)".equals(target.toString())) {
+                                        val = new StringValue("[ No Value ]");
+                                    } else {
+                                        val = new StringValue(target.toString());
+                                    }
                                 }
                                 FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, grouping, data, val, multiValue, additionalAnalysisItems);
                                 if (filter != null) {
@@ -1681,12 +1702,28 @@ public class AnalysisService {
                     }
                 }
             }
-            /*AnalysisDefinition targetReport = analysisStorage.getPersistableReport(drillThrough.getReportID());
+            /*WSAnalysisDefinition targetReport = new AnalysisService().openAnalysisDefinition(drillThrough.getReportID());
 
-            for (FilterDefinition filter : filters) {
+            Iterator<FilterDefinition> filterIter = filters.iterator();
+            while (filterIter.hasNext()) {
+                FilterDefinition filter = filterIter.next();
                 if (filter.getField() != null) {
                     AnalysisItem field = filter.getField();
-
+                    for (FilterDefinition reportFilter : targetReport.getFilterDefinitions()) {
+                        if (reportFilter.isShowOnReportView() && reportFilter.getField() != null && reportFilter.getField().toOriginalDisplayName().equals(field.toOriginalDisplayName())) {
+                            if (filter instanceof FilterValueDefinition && reportFilter instanceof FilterValueDefinition) {
+                                FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                                FilterValueDefinition reportFilterValueDefinition = (FilterValueDefinition) reportFilter;
+                                if (reportFilterValueDefinition.isAllOption() && reportFilterValueDefinition.getFilteredValues() != null &&
+                                        reportFilterValueDefinition.getFilteredValues().size() == 1 &&
+                                        reportFilterValueDefinition.getFilteredValues().get(0) != null &&
+                                        "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
+                                    reportFilterValueDefinition.setFilteredValues(filterValueDefinition.getFilteredValues());
+                                    filterIter.remove();
+                                }
+                            }
+                        }
+                    }
                 }
             }*/
 
@@ -1784,7 +1821,7 @@ public class AnalysisService {
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
             DerivedAnalysisDimension asTextDimension = new DerivedAnalysisDimension();
-            String targetDisplay = dateDimension.toDisplay();
+            String targetDisplay = dateDimension.toOriginalDisplayName();
             if (report.getFilterDefinitions() != null) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
                     if (filter instanceof AnalysisItemFilterDefinition && ((AnalysisItemFilterDefinition) filter).getExpandDates() > 0) {
@@ -1861,6 +1898,7 @@ public class AnalysisService {
                 if ("(Empty)".equals(value.toString())) {
                     filterValueDefinition.setFilteredValues(Arrays.asList((Object) new EmptyValue()));
                 } else {
+
                     try {
                         SimpleDateFormat sdf;
 

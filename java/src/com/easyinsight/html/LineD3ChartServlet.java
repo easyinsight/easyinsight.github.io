@@ -27,14 +27,39 @@ import java.util.*;
 public class LineD3ChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
+        WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
+        AnalysisItem eventPoint = twoAxisDefinition.getEventPoint();
+        AnalysisItem eventPointLabel = twoAxisDefinition.getEventPointLabel();
+        twoAxisDefinition.setEventPoint(null);
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
-
-        JSONObject object = new JSONObject();
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         DateFormat dFormat = new SimpleDateFormat("MM/dd/yyyy");
+
+        JSONArray events = new JSONArray();
+        if (eventPoint != null) {
+            WSListDefinition temp = new WSListDefinition();
+            temp.setDataFeedID(twoAxisDefinition.getDataFeedID());
+            temp.setColumns(Arrays.asList(eventPoint, eventPointLabel));
+            temp.setFilterDefinitions(new ArrayList<>());
+            temp.setAddedItems(twoAxisDefinition.getAddedItems());
+            temp.setAddonReports(twoAxisDefinition.getAddonReports());
+            DataSet tempSet = DataService.listDataSet(temp, insightRequestMetadata, conn);
+            for (IRow row : tempSet.getRows()) {
+                DateValue eventPointValue = (DateValue) row.getValue(eventPoint);
+                Value eventPointLabelValue = row.getValue(eventPointLabel);
+                JSONObject eventObject = new JSONObject();
+                eventObject.put("date", dFormat.format(eventPointValue.getDate()));
+                eventObject.put("label", eventPointLabelValue);
+                events.put(eventObject);
+            }
+        }
+
+        JSONObject object = new JSONObject();
+
+
         // need series, need ticks
-        WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
+
         JSONArray blahArray = new JSONArray();
         JSONArray labelArray = new JSONArray();
         List<String> colors = twoAxisDefinition.createMultiColors();
@@ -143,6 +168,7 @@ public class LineD3ChartServlet extends HtmlServlet {
                     String formattedDate = dateFormat.format(x);
                     point.put("label", formattedDate);
                     //point.put("x", x.getTime());
+                    // if there's a start date
                     point.put("x", dFormat.format(x));
                     point.put("y", entry.getValue().get(x));
                     points.put(point);
@@ -163,6 +189,10 @@ public class LineD3ChartServlet extends HtmlServlet {
             configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasure(), md);
         } else {
             configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasures(), md);
+        }
+
+        if (events.length() > 0) {
+            object.put("events", events);
         }
 
         response.setContentType("application/json");

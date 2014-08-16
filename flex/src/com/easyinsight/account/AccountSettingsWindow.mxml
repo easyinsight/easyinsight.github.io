@@ -38,6 +38,7 @@
             sendEmail = accountSettings.sendEmail;
             htmlView = accountSettings.htmlView;
             selectedLocale = accountSettings.locale;
+            defaultFontFamily = accountSettings.defaultFontFamily;
         }
 
         private function save():void {
@@ -49,6 +50,7 @@
             accountSettings.sendEmail = emailSetupCheckbox.selected;
             accountSettings.htmlView = htmlViewCheckbox.selected;
             accountSettings.locale = localeBox.selectedItem.data;
+            accountSettings.defaultFontFamily = defaultFontFamilyInput.text;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -80,6 +82,12 @@
 
         [Bindable]
         private var selectedLocale:String;
+
+        [Bindable]
+        private var defaultFontFamily:String;
+
+        [Bindable]
+        private var defaultTimezone:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
@@ -139,6 +147,12 @@
             </mx:FormItem>
             <mx:FormItem label="Default to HTML View:">
                 <mx:CheckBox id="htmlViewCheckbox" selected="{htmlView}"/>
+            </mx:FormItem>
+            <!--<mx:FormItem label="Default Account Timezone:">
+                <mx:ComboBox id="timezoneBox" selectedItem="{defaultTimezone}"/>
+            </mx:FormItem>-->
+            <mx:FormItem label="Default Font Family:">
+                <mx:TextInput id="defaultFontFamilyInput" text="{defaultFontFamily}"/>
             </mx:FormItem>
         </mx:Form>
         <mx:HBox width="100%" horizontalAlign="center">

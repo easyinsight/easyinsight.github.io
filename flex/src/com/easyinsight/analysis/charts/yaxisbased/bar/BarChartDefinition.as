@@ -22,6 +22,7 @@ public class BarChartDefinition extends YAxisDefinition{
     public var labelInsideFontColor:int = 0x222222;
     public var labelOutsideFontColor:int = 0;
     public var useInsideLabelFontColor:Boolean = true;
+    public var dateAxis:Boolean = false;
     public var useOutsideLabelFontColor:Boolean = true;
     public var multiColors:ArrayCollection;
 
