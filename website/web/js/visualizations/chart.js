@@ -95,6 +95,8 @@ Chart = {
                         var leftNeeded = maxLen * 16;
                         if (leftNeeded > 150) {
                             leftNeeded = 150;
+                        } else if (leftNeeded < 50) {
+                            leftNeeded = 50;
                         }
 
                         var chart = nv.models.multiBarHorizontalChart()
@@ -438,6 +440,8 @@ Chart = {
                         var leftNeeded = maxLen * 16;
                         if (leftNeeded > 150) {
                             leftNeeded = 150;
+                        } else if (leftNeeded < 50) {
+                            leftNeeded = 50;
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
