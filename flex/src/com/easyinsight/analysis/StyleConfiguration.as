@@ -162,6 +162,17 @@ public class StyleConfiguration {
             items.addItem(new FieldFormItem("Alert Measure 2", "alert2Measure", GaugeDefinition(report).alert2Measure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new FieldFormItem("Benchmark Measure", "benchmarkMeasure", GaugeDefinition(report).benchmarkMeasure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new ComboBoxReportFormItem("Gauge Model", "gaugeModel", GaugeDefinition(report).gaugeModel, report, ["Gauge", "Bullet"]));
+            items.addItem(new TextReportFormItem("Benchmark Label", "benchmarkLabel", GaugeDefinition(report).benchmarkLabel, report));
+        }
+        if (report is TwoAxisDefinition) {
+            items.addItem(new FieldFormItem("Event Date", "eventPoint", TwoAxisDefinition(report).eventPoint, report, allFields, AnalysisItemTypes.DATE));
+            items.addItem(new FieldFormItem("Event Point Label", "eventPointLabel", TwoAxisDefinition(report).eventPointLabel, report, allFields, AnalysisItemTypes.DIMENSION));
+        }
+        if (report is BarChartDefinition) {
+            items.addItem(new FieldFormItem("X Axis Minimum", "minimumXAxis", BarChartDefinition(report).minimumXAxis, report, allFields));
+        }
+        if (report is StackedBarChartDefinition) {
+            items.addItem(new FieldFormItem("X Axis Minimum", "minimumXAxis", StackedBarChartDefinition(report).minimumXAxis, report, allFields));
         }
         if (report is TopoMapDefinition) {
             items.addItem(new FieldFormItem("Longitude", "longitude", TopoMapDefinition(report).longitude, report, allFields, AnalysisItemTypes.DIMENSION));
@@ -407,7 +418,7 @@ public class StyleConfiguration {
                     ["Linear", "Logarithmic"]));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
-
+            items.addItem(new CheckBoxReportFormItem("Date Axis", "dateAxis", BarChartDefinition(report).dateAxis, report));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", BarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", BarChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));
@@ -440,6 +451,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Chart Sort", "columnSort", StackedBarChartDefinition(report).columnSort, report,
                     [ChartDefinition.SORT_UNSORTED, ChartDefinition.SORT_X_ASCENDING, ChartDefinition.SORT_X_DESCENDING,
                         ChartDefinition.SORT_Y_ASCENDING, ChartDefinition.SORT_Y_DESCENDING]));
+            items.addItem(new CheckBoxReportFormItem("Date Axis", "dateAxis", StackedBarChartDefinition(report).dateAxis, report));
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", StackedBarChartDefinition(report).labelPosition,
                     report, ["none", "inside"]));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", StackedBarChartDefinition(report).labelFontSize, report, 8, 48));
