@@ -95,7 +95,7 @@ public class DashboardPDF {
 
         String url = "/app/embed/seleniumReport.jsp?seleniumUserName={0}&seleniumPassword={1}&seleniumID={2}";
         String formatted = MessageFormat.format(url, u, p, String.valueOf(id));
-        System.out.println("https://localhost:4443" + formatted);
+        System.out.println("https://www.easy-insight.com" + formatted);
 
         PDFImageData imageData = launchAndWaitForRequest(formatted, conn, id);
 
