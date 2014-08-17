@@ -6,7 +6,10 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.csvreader.CsvWriter;
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
@@ -27,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -97,7 +101,46 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                 Key key = entry.getKey();
                 KeyMetadata keyMetadata = entry.getValue();
                 Value value = row.getValue(key);
-                if (value.type() == Value.DATE) {
+                if (keyMetadata.getType() == Value.DATE) {
+                    if (value.type() != Value.DATE) {
+                        AnalysisItem analysisItem = keyMetadata.getAnalysisItem();
+                        AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
+                        int prevLevel = analysisDateDimension.getDateLevel();
+                        analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+                        Calendar calendar = Calendar.getInstance();
+                        Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata(), false, calendar);
+                        analysisDateDimension.setDateLevel(prevLevel);
+                        if (transformedValue.type() == Value.EMPTY) {
+                            rowValues[j++] = "";
+                        } else {
+                            DateValue dateValue = (DateValue) transformedValue;
+                            String string = sdf.format(dateValue.getDate());
+                            rowValues[j++] = escape(string);
+                        }
+                    } else {
+                        DateValue dateValue = (DateValue) value;
+                        if (dateValue.getDate() == null) {
+                            rowValues[j++] = "";
+                        } else {
+                            String string = sdf.format(dateValue.getDate());
+                            rowValues[j++] = escape(string);
+                        }
+                    }
+                } else if (keyMetadata.getType() == Value.NUMBER) {
+                    Double num = null;
+                    if (value.type() == Value.STRING || value.type() == Value.TEXT) {
+                        num = NumericValue.produceDoubleValue(value.toString());
+                    } else if (value.type() == Value.NUMBER) {
+                        NumericValue numericValue = (NumericValue) value;
+                        num = numericValue.toDouble();
+                    }
+                    if (num == null) {
+                        rowValues[j++] = "";
+                    } else {
+                        String string = String.valueOf(num);
+                        rowValues[j++] = escape(string);
+                    }
+                } else if (value.type() == Value.DATE) {
                     DateValue dateValue = (DateValue) value;
                     if (dateValue.getDate() == null) {
                         rowValues[j++] = "";
