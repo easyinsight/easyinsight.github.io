@@ -157,7 +157,7 @@ public class DocReader {
                         if (substring.contains("|")) {
                             substring = substring.split("\\|")[0];
                         }
-                        System.out.println(substring);
+
                         if (substring.contains("screencasts.jsp")) {
                             String link = "[" + RedirectUtil.getURL(request, "/app/screencasts.jsp") + " Screencasts ]";
                             gs.put(g, link);
