@@ -26,9 +26,7 @@ public class PNGCreator {
     private var upload:RemoteObject;
 
     private function exported(event:ResultEvent):void {
-//        var url:URLRequest = new URLRequest("/app/image");
-//        navigateToURL(url, "_blank");
-        ExternalInterface.call("loadPage", "/app/image");
+        ExternalInterface.call("loadPage", "/app/png");
     }
 
     public function exportPNG(renderable:DisplayObject, parent:UIComponent, reportName:String):void {
