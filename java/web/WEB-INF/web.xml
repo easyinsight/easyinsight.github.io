@@ -397,6 +397,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>HTMLPNG</servlet-name>
+        <display-name>HTMLPNG</display-name>
+        <servlet-class>com.easyinsight.html.HTMLPNGServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ThreadDump</servlet-name>
         <display-name>ThreadDump</display-name>
         <servlet-class>com.easyinsight.datafeeds.custom.ThreadDumpServlet</servlet-class>
@@ -1182,6 +1188,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>HTMLPNG</servlet-name>
+        <url-pattern>/htmlPNG</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>PieChart</servlet-name>
         <url-pattern>/pieChart</url-pattern>
     </servlet-mapping>
@@ -1278,7 +1289,7 @@
 
     <servlet-mapping>
         <servlet-name>Image</servlet-name>
-        <url-pattern>/image</url-pattern>
+        <url-pattern>/png</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

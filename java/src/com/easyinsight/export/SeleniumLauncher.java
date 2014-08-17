@@ -22,7 +22,7 @@ public class SeleniumLauncher {
 
     public static final String OUTBOUND_QUEUE = "EISelenium";
 
-    private static final String URL = "/app/selenium/selenium.jsp?userName={0}&password={1}&seleniumID={2}&dataSourceID={3}&reportID={4}&reportType={5}&width={6}&height={7}";
+    private static final String URL = "/app/selenium/selenium.jsp?userName={0}&password={1}&dataSourceID={3}&reportID={4}&reportType={5}&width={6}&height={7}&seleniumID={2}";
     private static final String DASHBOARD_URL = "/app/selenium/seleniumDashboard.jsp?userName={0}&password={1}&seleniumID={2}&dashboardID={3}&width={4}&height={5}";
 
     public long requestSeleniumDrawForReport(long reportID, long accountActivityID, long userID, long accountID, EIConnection conn,
@@ -89,18 +89,6 @@ public class SeleniumLauncher {
         queryStmt.close();
         launchRequest(url);
         return id;
-    }
-
-    public static void main(String[] args) {
-        // https://www.easy-insight.com/app/selenium/selenium.jsp%3FuserName=vFbuzHjPcjMhCcAIvpVcbMjxRYBvjOKzKPSSNfkhnCRLlyfqOz&password=LckCIdVbEMHuMRCPmvhfMzNzbpSXVFvgwwtKtMDeLxxiQgnCKX&seleniumID=11396&dataSourceID=722&reportID=udwpHWsoQYZWGDOhxNXg&reportType=8&width=1000&height=800
-        String userName = "vFbuzHjPcjMhCcAIvpVcbMjxRYBvjOKzKPSSNfkhnCRLlyfqOz";
-        String password = "LckCIdVbEMHuMRCPmvhfMzNzbpSXVFvgwwtKtMDeLxxiQgnCKX";
-        String seleniumID = "11396";
-        String dataSourceID = "";
-        String urlKey = "";
-        String reportType = "";
-        String url = MessageFormat.format(URL, userName, password, seleniumID, dataSourceID, urlKey, reportType, "1000", "800");
-        System.out.println(url);
     }
 
     public long requestSeleniumDrawForMobile(long reportID, long userID, long accountID, EIConnection conn, int width, int height) throws SQLException {

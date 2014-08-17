@@ -72,8 +72,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
             limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
         }*/
-        /*System.out.println("Materialized using start date " + new Date(limitDate));
-        System.out.println("Materialized using end date " + new Date(endDate));*/
         if (rollingFilterDefinition.getInterval() > ALL) {
             if (rollingFilterDefinition.getStartDate() != null && rollingFilterDefinition.getEndDate() == null) {
                 mode = RollingFilterDefinition.AFTER;
@@ -165,7 +163,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 case WEEK_TO_NOW:
                     zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
                     zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    System.out.println(zdt);
                     break;
                 case MONTH_TO_NOW:
                     zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -200,7 +197,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 case LAST_FULL_WEEK:
                     zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
                     zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    System.out.println(zdt);
                     break;
                 case LAST_FULL_MONTH:
                     zdt = zdt.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -341,14 +337,6 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             return cal.getTimeInMillis();
         }
 
-    }
-
-    public static void main(String[] args) {
-        for (int i = 1; i <= 12; i++){
-            int month = i - 1;
-            int quarterMonth = month - (month % 3) + 1;
-            System.out.println("month " + i + " has quarter start month of " + quarterMonth);
-        }
     }
 
     public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {

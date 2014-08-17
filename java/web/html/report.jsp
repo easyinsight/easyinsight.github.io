@@ -182,11 +182,27 @@
                             <li>
                                 <a class="export_pdf">Export to PDF</a>
                             </li>
+                            <% if (report.getReportType() == WSAnalysisDefinition.AREA ||
+                                    report.getReportType() == WSAnalysisDefinition.LINE ||
+                                    report.getReportType() == WSAnalysisDefinition.PIE ||
+                                    report.getReportType() == WSAnalysisDefinition.COLUMN ||
+                                    report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN ||
+                                    report.getReportType() == WSAnalysisDefinition.BAR ||
+                                    report.getReportType() == WSAnalysisDefinition.STACKED_BAR ||
+                                    report.getReportType() == WSAnalysisDefinition.GAUGE ||
+                                    report.getReportType() == WSAnalysisDefinition.DIAGRAM) { %>
                             <li>
                                 <a class="export_png">Export to PNG</a>
                             </li>
+                            <% } %>
                             <li>
                                 <a class="report-emailReportButton">Email the Report</a>
+                            </li>
+                            <li>
+                                <a class="embed_report">Embed the Report</a>
+                            </li>
+                            <li>
+                                <a class="report_as_json_api">JSON API to Report</a>
                             </li>
                             <li>
                                 <a href="#" onclick="window.location.href = '/app/html/embeddedReport/<%= report.getUrlKey() %>'">Printable View</a>
@@ -256,6 +272,8 @@
         <jsp:param name="reportID" value="<%= report.getUrlKey()%>"/>
     </jsp:include>
     <jsp:include page="emailReportWindow.jsp"/>
+    <jsp:include page="embedReportWindow.jsp"/>
+    <jsp:include page="reportJSONWindow.jsp"/>
     <jsp:include page="refreshingDataSource.jsp"/>
     <jsp:include page="modalIndicator.jsp"/>
     <div id="base"/>

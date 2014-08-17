@@ -20,20 +20,14 @@ import javax.servlet.http.HttpServletResponse;
  * Date: 5/3/14
  * Time: 2:03 PM
  */
-public class HTMLPDFServlet extends HtmlServlet {
+public class HTMLPNGServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         // if it's a standard type of report, otherwise
-        Element element = null;
-        if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition) {
-            int pdfWidth = (int) Double.parseDouble(request.getParameter("pdfWidth"));
-            int pdfHeight = (int) Double.parseDouble(request.getParameter("pdfHeight"));
-            /*double r = 1540.0 / pdfWidth;
-            int height = (int) (r * pdfHeight);*/
-            //System.out.println(height);
-            element = DashboardPDF.generatePDF(report, pdfWidth, pdfHeight, conn);
-        }
-        String urlKey = new ExportService().toListPDFInDatabase(report, conn, insightRequestMetadata, request, element);
+        int pdfWidth = (int) Double.parseDouble(request.getParameter("pdfWidth"));
+        int pdfHeight = (int) Double.parseDouble(request.getParameter("pdfHeight"));
+        byte[] bytes = DashboardPDF.generatePNG(report, pdfWidth, pdfHeight, conn);
+        String urlKey = new ExportService().exportToPNG(report.getName(), bytes, conn, request);
         JSONObject object = new JSONObject();
         object.put("urlKey", urlKey);
         response.setContentType("application/json");

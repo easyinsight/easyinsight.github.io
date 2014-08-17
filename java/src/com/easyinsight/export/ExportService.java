@@ -1697,16 +1697,20 @@ public class ExportService {
         }
     }
 
-    public void exportToPNG(String reportName, byte[] bytes) {
+    public String exportToPNG(String reportName, byte[] bytes) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            toDatabase(reportName, bytes, conn);
+            return toDatabase(reportName, bytes, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public String exportToPNG(String reportName, byte[] bytes, EIConnection conn, HttpServletRequest request) throws SQLException {
+        return toDatabase(reportName, bytes, conn, request);
     }
 
     private String toDatabase(String reportName, byte[] bytes, EIConnection conn) throws SQLException {
