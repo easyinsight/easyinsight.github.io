@@ -44,7 +44,18 @@ public class DashboardPDF {
     public static final int SUCCESS = 1;
     public static final int FAILURE = 2;
 
-    public static Element blah(WSAnalysisDefinition report, int width, int height, EIConnection conn) throws SQLException, BadElementException, IOException, CloneNotSupportedException {
+    public static final int PDF = 0;
+    public static final int PNG = 1;
+
+    public static Element generatePDF(WSAnalysisDefinition report, int width, int height, EIConnection conn) throws SQLException, BadElementException, IOException, CloneNotSupportedException {
+        return (Element) blah(report, width, height, conn, PDF);
+    }
+
+    public static byte[] generatePNG(WSAnalysisDefinition report, int width, int height, EIConnection conn) throws SQLException, BadElementException, IOException, CloneNotSupportedException {
+        return (byte[]) blah(report, width, height, conn, PNG);
+    }
+
+    public static Object blah(WSAnalysisDefinition report, int width, int height, EIConnection conn, int outputFormat) throws SQLException, BadElementException, IOException, CloneNotSupportedException {
 
 
 
@@ -88,14 +99,21 @@ public class DashboardPDF {
 
         PDFImageData imageData = launchAndWaitForRequest(formatted, conn, id);
 
-        Image image = Image.getInstance(imageData.getBytes());
-        //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
-        float percent = 770f / imageData.getWidth() * 100;
-        //float percent = 50f;
-        image.setBorder(Image.NO_BORDER);
-        image.scalePercent(percent);
-        image.setAlignment(Element.ALIGN_CENTER);
-        return image;
+        if (outputFormat == PDF) {
+
+            Image image = Image.getInstance(imageData.getBytes());
+            //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
+            float percent = 770f / imageData.getWidth() * 100;
+            //float percent = 50f;
+            image.setBorder(Image.NO_BORDER);
+            image.scalePercent(percent);
+            image.setAlignment(Element.ALIGN_CENTER);
+            return image;
+        } else if (outputFormat == PNG) {
+            return imageData.getBytes();
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     public static final String OUTBOUND_QUEUE = "EISelenium";
@@ -334,7 +352,7 @@ public class DashboardPDF {
                 PDFImageData imageData = images.get(dashboardReport.getUrlKey());
 
                 if (imageData.getBytes() == null) {
-                    result = blah(report, imageData.getWidth(), imageData.getHeight(), conn);
+                    result = generatePDF(report, imageData.getWidth(), imageData.getHeight(), conn);
                 } else {
                     Image image = Image.getInstance(imageData.getBytes());
                     //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
