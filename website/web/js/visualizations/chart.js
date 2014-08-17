@@ -95,6 +95,8 @@ Chart = {
                         var leftNeeded = maxLen * 16;
                         if (leftNeeded > 150) {
                             leftNeeded = 150;
+                        } else if (leftNeeded < 50) {
+                            leftNeeded = 50;
                         }
 
                         var chart = nv.models.multiBarHorizontalChart()
@@ -374,7 +376,6 @@ Chart = {
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
                                 if (dtOptions["id"]) {
-
                                 }
                                 chart.multibar.dispatch.on("elementClick", function(e) {
                                     var drillthrough = data["drillthrough"];
@@ -439,6 +440,8 @@ Chart = {
                         var leftNeeded = maxLen * 16;
                         if (leftNeeded > 150) {
                             leftNeeded = 150;
+                        } else if (leftNeeded < 50) {
+                            leftNeeded = 50;
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
@@ -454,7 +457,7 @@ Chart = {
                             .height(height)
                             .showControls(false)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
-                            .margin({top: 10, right: 30, bottom: 40, left: leftNeeded});
+                            .margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
                         var floatingY = data["floatingY"];
                         if (floatingY) {
                             var vals = s1[0].values;
