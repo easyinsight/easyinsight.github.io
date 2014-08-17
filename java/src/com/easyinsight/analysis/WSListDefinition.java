@@ -473,6 +473,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
                     p.put(property.getPropertyName(), ((ReportNumericProperty) property).getValue());
             }
             p.put("lockHeaders", lockHeaders);
+            p.put("showLineNumbers", showLineNumbers);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
