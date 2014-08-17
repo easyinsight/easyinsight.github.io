@@ -362,6 +362,11 @@ table.dataTable tfoot td {
     font-family: 'Courier',serif;
 }
 
+#embedReportURL {
+    font-size:12px;
+    font-family: 'Courier',serif;
+}
+
 .report_annotation {
     border-style: solid;
     border-width: 1px;
@@ -369,4 +374,8 @@ table.dataTable tfoot td {
 
 .controlsRow {
     background-color:#0084b4;
+}
+
+.dropdown-menu > li > a:hover {
+    color: #fff;
 }
