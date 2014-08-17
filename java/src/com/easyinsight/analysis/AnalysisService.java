@@ -1637,7 +1637,7 @@ public class AnalysisService {
                                 if (fromReport instanceof WSListDefinition) {
                                     WSListDefinition cols = (WSListDefinition) fromReport;
                                     for (AnalysisItem item : cols.getColumns()) {
-                                        if (item.toDisplay().equals(analysisItem.toOriginalDisplayName())) {
+                                        if (item.toDisplay().equals(analysisItem.toDisplay())) {
                                             for (FilterDefinition filterDefinition : item.getFilters()) {
                                                 FilterDefinition clone;
                                                 try {
