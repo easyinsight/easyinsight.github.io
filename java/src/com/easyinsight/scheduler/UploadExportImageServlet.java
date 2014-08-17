@@ -1,27 +1,12 @@
 package com.easyinsight.scheduler;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.easyinsight.analysis.AnalysisService;
-import com.easyinsight.analysis.InsightResponse;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.DashboardPDF;
-import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.util.RandomTextGenerator;
-import flex.messaging.FlexContext;
+import com.xerox.amazonws.sqs2.MessageQueue;
+import com.xerox.amazonws.sqs2.SQSUtils;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.poi.util.IOUtils;
-import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,12 +15,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * User: jamesboe
@@ -67,6 +46,9 @@ public class UploadExportImageServlet extends HttpServlet {
             updateStmt.setLong(5, id);
             updateStmt.executeUpdate();
             updateStmt.close();
+            MessageQueue messageQueue = SQSUtils.connectToQueue("EISeleniumProgress", "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            System.out.println("Sending response of " + id);
+            messageQueue.sendMessage(String.valueOf(id));
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
