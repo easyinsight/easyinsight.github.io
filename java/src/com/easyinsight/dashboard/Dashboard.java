@@ -786,6 +786,7 @@ public class Dashboard implements Cloneable, Serializable {
         dashboard.put("key", getUrlKey());
         dashboard.put("local_storage", enableLocalStorage);
         dashboard.put("publiclyVisible", isPublicVisible());
+        dashboard.put("publiclyVisibleWithKey", isPublicWithKey());
 
         JSONArray configurations = new JSONArray();
         if (getConfigurations() != null) {

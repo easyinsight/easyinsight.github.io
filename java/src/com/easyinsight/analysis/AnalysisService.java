@@ -1637,7 +1637,7 @@ public class AnalysisService {
                                 if (fromReport instanceof WSListDefinition) {
                                     WSListDefinition cols = (WSListDefinition) fromReport;
                                     for (AnalysisItem item : cols.getColumns()) {
-                                        if (item.toDisplay().equals(analysisItem.toOriginalDisplayName())) {
+                                        if (item.toDisplay().equals(analysisItem.toDisplay())) {
                                             for (FilterDefinition filterDefinition : item.getFilters()) {
                                                 FilterDefinition clone;
                                                 try {
@@ -1778,6 +1778,25 @@ public class AnalysisService {
                 }
             }
 
+            Map<FilterKey, FilterDefinition> dupeMap = new HashMap<>();
+            List<FilterDefinition> others = new ArrayList<>();
+            for (FilterDefinition filter : filters) {
+                FilterKey filterKey = null;
+                if (filter instanceof FilterValueDefinition && filter.getField() != null) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    filterKey = new FilterKey(filterValueDefinition.getField(), filterValueDefinition.getFilteredValues());
+                }
+                if (filterKey == null) {
+                    others.add(filter);
+                } else {
+                    dupeMap.put(filterKey, filter);
+                }
+            }
+            List<FilterDefinition> endFilters = new ArrayList<>(others);
+            for (FilterDefinition filter : dupeMap.values()) {
+                endFilters.add(filter);
+            }
+
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
             EIDescriptor descriptor;
             if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
@@ -1791,12 +1810,50 @@ public class AnalysisService {
                 descriptor = dashboardDescriptor;
             }
             drillThroughResponse.setDescriptor(descriptor);
-            drillThroughResponse.setFilters(filters);
+            drillThroughResponse.setFilters(endFilters);
             drillThroughResponse.setAdditionalFields(report.getAddedItems());
             return drillThroughResponse;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private static class FilterKey {
+        private AnalysisItem field;
+        private List<Object> values;
+        private int rollingValue;
+
+        private FilterKey(AnalysisItem field, List<Object> values) {
+            this.field = field;
+            this.values = values;
+        }
+
+        private FilterKey(AnalysisItem field, int rollingValue) {
+            this.field = field;
+            this.rollingValue = rollingValue;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FilterKey filterKey = (FilterKey) o;
+
+            if (rollingValue != filterKey.rollingValue) return false;
+            if (field != null ? !field.equals(filterKey.field) : filterKey.field != null) return false;
+            if (values != null ? !values.equals(filterKey.values) : filterKey.values != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = field != null ? field.hashCode() : 0;
+            result = 31 * result + (values != null ? values.hashCode() : 0);
+            result = 31 * result + rollingValue;
+            return result;
         }
     }
 

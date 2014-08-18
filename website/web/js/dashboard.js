@@ -287,10 +287,17 @@ var toPNG = function (o, dashboardID, drillthroughID) {
 
     var url =  "/app/htmlPNG" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset();
 
-    var svg = $("#d3Div" + id);
-    var h = svg.height();
-    var w = svg.width();
-    url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
+    if (obj.metadata.type == "gauge") {
+        var canvas = $("#gauge" + id);
+        url = url + "&pdfWidth=" + canvas.width() + "&pdfHeight=" + canvas.height();
+    } else {
+        var svg = $("#d3Div" + id);
+        var h = svg.height();
+        var w = svg.width();
+        url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
+    }
+
+
 
     busyIndicator.showPleaseWait();
     $.ajax({
@@ -334,10 +341,18 @@ var toPDF = function (o, dashboardID, drillthroughID) {
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
         obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition") {
     } else {
-        var svg = $("#d3Div" + id);
-        var h = svg.height();
-        var w = svg.width();
-        url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
+        if (obj.metadata.type == "gauge") {
+            var gCanvas = $("#gauge" + id);
+            url = url + "&pdfWidth=" + gCanvas.width() + "&pdfHeight=" + gCanvas.height();
+        } else if (obj.metadata.type == "gauge") {
+            var dCanvas = $("#diagram" + id);
+            url = url + "&pdfWidth=" + dCanvas.width() + "&pdfHeight=" + dCanvas.height();
+        } else {
+            var svg = $("#d3Div" + id);
+            var h = svg.height();
+            var w = svg.width();
+            url = url + "&pdfWidth=" + w + "&pdfHeight=" + h;
+        }
     }
     busyIndicator.showPleaseWait();
     $.ajax({
@@ -1194,13 +1209,26 @@ $(function () {
                 var width = $("#embedDashboardWidth").val();
                 var height = $("#embedDashboardHeight").val();
 
-                $("#embedDashboardURL").text("<iframe width=\""+width+"\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
+                $("#embedDashboardURL").text("<iframe width=\""+width+"\" height=\""+height+"\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
             });
 
             $("#embedDashboardHeight").change(function(e) {
                 var width = $("#embedDashboardWidth").val();
                 var height = $("#embedDashboardHeight").val();
-                $("#embedDashboardURL").text("<iframe width=\""+width+"\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
+                $("#embedDashboardURL").text("<iframe width=\""+width+"\" height=\""+height+"\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
+            });
+
+            $("#embedReportWidth").change(function(e) {
+                var width = $("#embedReportWidth").val();
+                var height = $("#embedReportHeight").val();
+
+                $("#embedReportURL").text("<iframe width=\""+width+"\" height=\""+height+"\" src=\"https://www.easy-insight.com/app/html/report/" + dashboardJSON["key"] + "/embed\"></iframe>");
+            });
+
+            $("#embedReportHeight").change(function(e) {
+                var width = $("#embedReportWidth").val();
+                var height = $("#embedReportHeight").val();
+                $("#embedReportURL").text("<iframe width=\""+width+"\" height=\""+height+"\" src=\"https://www.easy-insight.com/app/html/report/" + dashboardJSON["key"] + "/embed\"></iframe>");
             });
 
             $(".report-emailReportButton", target).click(function (e) {
@@ -1305,12 +1333,31 @@ $(function () {
             } else if (dashboardJSON["publiclyVisibleWithKey"]) {
                 $("#embedDashboardVisibility").html("Anyone viewing the page containing this dashboard will be able to see it without needing to log in via Easy Insight credentials if the appropriate embed key property is passed in as part of the URL.");
             } else {
-                $("#embedDashboardVisibility").html("Accessing this dashboard will require users to log in via Easy Insight credentials. You can change this permission setting under the Additional Configuration setting of the report editor.");
+                $("#embedDashboardVisibility").html("Accessing this dashboard will require users to log in via Easy Insight credentials. You can change this permission setting under the Additional Configuration setting of the dashboard editor.");
             }
 
             $("#embedDashboardURL").text("<iframe width=\"500\" height=\"500\" src=\"https://www.easy-insight.com/app/html/dashboard/" + dashboardJSON["key"] + "/embed\"></iframe>");
             $("#embedDashboardWindow").modal(true, true, true);
         })
+
+        $(".embed_report").click(function(e) {
+
+            if (dashboardJSON["publiclyVisible"]) {
+                $("#embedReportVisibility").html("Anyone viewing the page containing this report will be able to see it without needing to log in via Easy Insight credentials.");
+            } else if (dashboardJSON["publiclyVisibleWithKey"]) {
+                $("#embedReportVisibility").html("Anyone viewing the page containing this report will be able to see it without needing to log in via Easy Insight credentials if the appropriate embed key property is passed in as part of the URL.");
+            } else {
+                $("#embedReportVisibility").html("Accessing this report will require users to log in via Easy Insight credentials. You can change this permission setting under the Additional Configuration setting of the report editor.");
+            }
+
+            $("#embedReportURL").text("<iframe width=\"500\" height=\"500\" src=\"https://www.easy-insight.com/app/html/report/" + dashboardJSON["key"] + "/embed\"></iframe>");
+            $("#embedReportWindow").modal(true, true, true);
+        })
+
+        $(".report_as_json_api").click(function(e) {
+            $("#reportJSONURL").html("https://www.easy-insight.com/app/html/report/" + dashboardJSON["key"] + ".json");
+            $("#reportJSONWindow").modal(true, true, true);
+        });
 
         $(".embedReportButton").click(function (e) {
             $("#embedReportWindow").modal(true, true, true);

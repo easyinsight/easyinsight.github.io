@@ -13,6 +13,7 @@
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="org.hibernate.Session" %>
+<%@ page import="com.easyinsight.analysis.definitions.WSDiagramDefinition" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -122,7 +123,13 @@
 
         JSONObject seleniumObject = new JSONObject();
         seleniumObject.put("seleniumID", triggerID);
-
+        if (report instanceof WSGaugeDefinition) {
+            seleniumObject.put("reportType", "gauge");
+        } else if (report instanceof WSDiagramDefinition) {
+            seleniumObject.put("reportType", "diagram");
+        } else {
+            seleniumObject.put("reportType", "svg");
+        }
 
         EIConnection c = Database.instance().getConnection();
         JSONObject userObject = new JSONObject();
