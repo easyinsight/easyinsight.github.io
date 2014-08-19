@@ -62,6 +62,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         fieldBuilder.addField(TICKET_URL, new AnalysisDimension());
         fieldBuilder.addField(DESCRIPTION, new AnalysisText());
         fieldBuilder.addField(STATUS, new AnalysisDimension());
+        fieldBuilder.addField(SOURCE_NAME, new AnalysisDimension());
         fieldBuilder.addField(PRIORITY, new AnalysisDimension());
         fieldBuilder.addField(TRAINED, new AnalysisDimension());
         fieldBuilder.addField(TICKET_TYPE, new AnalysisDimension());
@@ -230,6 +231,22 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         row.addValue(keys.get(GROUP_ID), getJSONValue(map, "group_id"));
         row.addValue(keys.get(REQUESTER_STATUS), getJSONValue(map, "requester_status_name"));
         row.addValue(keys.get(DELETED), getJSONValue(map, "deleted"));
+
+        // creating reports in Easy Insight
+
+        // new data source created
+
+        // combining data sources
+        // styling reports
+        // connecting your data
+        // scheduling reports and dashboards
+        // pro services
+        // creating dashboards
+        // configuring the data source
+        // using the api
+        // data level security
+        //
+
         row.addValue(keys.get(OWNER_ID), getJSONValue(map, "owner_id"));
         row.addValue(keys.get(RESPONDER_NAME), getJSONValue(map, "responder_name"));
         row.addValue(keys.get(SPAM), getValue(map, "spam"));
