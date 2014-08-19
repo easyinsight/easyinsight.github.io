@@ -119,13 +119,15 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 List<Stuff> companyStuff = new ArrayList<Stuff>();
                 List companies = (List) person.get("company_affiliations");
 
-                for (Object companyObject : companies) {
-                    Map company = (Map) companyObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1(company.get("company_id").toString());
-                    stuff.setPart2((String) company.get("primary").toString());
-                    stuff.setPart3((String) company.get("job_title"));
-                    companyStuff.add(stuff);
+                if (companies != null) {
+                    for (Object companyObject : companies) {
+                        Map company = (Map) companyObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1(company.get("company_id").toString());
+                        stuff.setPart2((String) company.get("primary").toString());
+                        stuff.setPart3((String) company.get("job_title"));
+                        companyStuff.add(stuff);
+                    }
                 }
                 peopleList.add(new Person(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, firstName, lastName, companyStuff, customFieldValues));
             }
