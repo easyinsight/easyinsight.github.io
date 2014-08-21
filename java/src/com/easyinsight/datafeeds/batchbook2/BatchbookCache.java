@@ -43,54 +43,64 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 count++;
                 Map person = (Map) personObject;
                 String id = (person.get("id")).toString();
-                String about = (String) person.get("about");
-                String firstName = (String) person.get("first_name");
-                String lastName = (String) person.get("last_name");
+                String about = getValue(person, "about");
+                String firstName = getValue(person, "first_name");
+                String lastName = getValue(person, "last_name");
 
                 List emails = (List) person.get("emails");
                 List<Stuff> emailStuff = new ArrayList<Stuff>();
-                for (Object emailObject : emails) {
-                    Map email = (Map) emailObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1((String) email.get("address"));
-                    stuff.setPart2((String) email.get("label"));
-                    emailStuff.add(stuff);
+                if (emails != null) {
+                    for (Object emailObject : emails) {
+                        Map email = (Map) emailObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1(getValue(email, "address"));
+                        stuff.setPart2(getValue(email, "label"));
+                        emailStuff.add(stuff);
+                    }
                 }
 
                 List phones = (List) person.get("phones");
                 List<Stuff> phoneStuff = new ArrayList<Stuff>();
-                for (Object phoneObject : phones) {
-                    Map phone = (Map) phoneObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1((String) phone.get("number"));
-                    stuff.setPart2((String) phone.get("label"));
-                    phoneStuff.add(stuff);
+                if (phones != null) {
+                    for (Object phoneObject : phones) {
+                        Map phone = (Map) phoneObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1(getValue(phone, "number"));
+                        stuff.setPart2(getValue(phone, "label"));
+                        phoneStuff.add(stuff);
+                    }
                 }
 
                 List websites = (List) person.get("websites");
                 List<Stuff> websiteStuff = new ArrayList<Stuff>();
-                for (Object websiteObject : websites) {
-                    Map website = (Map) websiteObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1((String) website.get("address"));
-                    stuff.setPart2((String) website.get("label"));
-                    websiteStuff.add(stuff);
+                if (websites != null) {
+                    for (Object websiteObject : websites) {
+                        Map website = (Map) websiteObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1(getValue(website, "address"));
+                        stuff.setPart2(getValue(website, "label"));
+                        websiteStuff.add(stuff);
+                    }
                 }
 
                 List addresses = (List) person.get("addresses");
                 List<Address> addressList = new ArrayList<Address>();
-                for (Object addressObject : addresses) {
-                    Map address = (Map) addressObject;
-                    addressList.add(new Address((String) address.get("address_1"), (String) address.get("address_2"),
-                            (String) address.get("city"), (String) address.get("state"), (String) address.get("postal_code"),
-                            (String) address.get("country"), (String) address.get("label")));
+                if (addresses != null) {
+                    for (Object addressObject : addresses) {
+                        Map address = (Map) addressObject;
+                        addressList.add(new Address(getValue(address, "address_1"), getValue(address, "address_2"),
+                                getValue(address, "city"), getValue(address, "state"), getValue(address, "postal_code"),
+                                getValue(address, "country"), getValue(address, "label")));
+                    }
                 }
 
                 List tags = (List) person.get("tags");
                 List<String> tagList = new ArrayList<String>();
-                for (Object tagObject : tags) {
-                    Map tag = (Map) tagObject;
-                    tagList.add((String) tag.get("name"));
+                if (tags != null) {
+                    for (Object tagObject : tags) {
+                        Map tag = (Map) tagObject;
+                        tagList.add(getValue(tag, "name"));
+                    }
                 }
 
                 List<CustomFieldValue> customFieldValues = new ArrayList<CustomFieldValue>();
@@ -119,13 +129,16 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 List<Stuff> companyStuff = new ArrayList<Stuff>();
                 List companies = (List) person.get("company_affiliations");
 
-                for (Object companyObject : companies) {
-                    Map company = (Map) companyObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1(company.get("company_id").toString());
-                    stuff.setPart2((String) company.get("primary").toString());
-                    stuff.setPart3((String) company.get("job_title"));
-                    companyStuff.add(stuff);
+                if (companies != null) {
+                    for (Object companyObject : companies) {
+                        Map company = (Map) companyObject;
+                        Stuff stuff = new Stuff();
+
+                        stuff.setPart1(getValue(company, "company_id"));
+                        stuff.setPart2(getValue(company, "primary"));
+                        stuff.setPart3(getValue(company, "job_title"));
+                        companyStuff.add(stuff);
+                    }
                 }
                 peopleList.add(new Person(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, firstName, lastName, companyStuff, customFieldValues));
             }
@@ -150,47 +163,52 @@ public class BatchbookCache extends Batchbook2BaseSource {
                 String id = (person.get("id")).toString();
                 String about = (String) person.get("about");
                 String name = (String) person.get("name");
-                if ("Delta Metrics".equals(name)){
-                    System.out.println(".");
-                }
 
                 List emails = (List) person.get("emails");
                 List<Stuff> emailStuff = new ArrayList<Stuff>();
-                for (Object emailObject : emails) {
-                    Map email = (Map) emailObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1((String) email.get("address"));
-                    stuff.setPart2((String) email.get("label"));
-                    emailStuff.add(stuff);
+                if (emails != null) {
+                    for (Object emailObject : emails) {
+                        Map email = (Map) emailObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1(getValue(email, "address"));
+                        stuff.setPart2(getValue(email, "label"));
+                        emailStuff.add(stuff);
+                    }
                 }
 
                 List phones = (List) person.get("phones");
                 List<Stuff> phoneStuff = new ArrayList<Stuff>();
-                for (Object phoneObject : phones) {
-                    Map phone = (Map) phoneObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1((String) phone.get("number"));
-                    stuff.setPart2((String) phone.get("label"));
-                    phoneStuff.add(stuff);
+                if (phones != null) {
+                    for (Object phoneObject : phones) {
+                        Map phone = (Map) phoneObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1((String) phone.get("number"));
+                        stuff.setPart2((String) phone.get("label"));
+                        phoneStuff.add(stuff);
+                    }
                 }
 
                 List websites = (List) person.get("websites");
                 List<Stuff> websiteStuff = new ArrayList<Stuff>();
-                for (Object websiteObject : websites) {
-                    Map website = (Map) websiteObject;
-                    Stuff stuff = new Stuff();
-                    stuff.setPart1((String) website.get("address"));
-                    stuff.setPart2((String) website.get("label"));
-                    websiteStuff.add(stuff);
+                if (websites != null) {
+                    for (Object websiteObject : websites) {
+                        Map website = (Map) websiteObject;
+                        Stuff stuff = new Stuff();
+                        stuff.setPart1((String) website.get("address"));
+                        stuff.setPart2((String) website.get("label"));
+                        websiteStuff.add(stuff);
+                    }
                 }
 
                 List addresses = (List) person.get("addresses");
                 List<Address> addressList = new ArrayList<Address>();
-                for (Object addressObject : addresses) {
-                    Map address = (Map) addressObject;
-                    addressList.add(new Address((String) address.get("address_1"), (String) address.get("address_2"),
-                            (String) address.get("city"), (String) address.get("state"), (String) address.get("postal_code"),
-                            (String) address.get("country"), (String) address.get("label")));
+                if (addresses != null) {
+                    for (Object addressObject : addresses) {
+                        Map address = (Map) addressObject;
+                        addressList.add(new Address((String) address.get("address_1"), (String) address.get("address_2"),
+                                (String) address.get("city"), (String) address.get("state"), (String) address.get("postal_code"),
+                                (String) address.get("country"), (String) address.get("label")));
+                    }
                 }
 
                 List tags = (List) person.get("tags");

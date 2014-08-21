@@ -22,6 +22,7 @@ import com.easyinsight.datafeeds.github.GithubCompositeSource;
 import com.easyinsight.datafeeds.github.GithubRepositorySource;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.happyfox.HappyFoxCompositeSource;
+import com.easyinsight.datafeeds.happyfox.HappyFoxContactSource;
 import com.easyinsight.datafeeds.happyfox.HappyFoxTicketSource;
 import com.easyinsight.datafeeds.harvest.*;
 import com.easyinsight.datafeeds.highrise.*;
@@ -443,6 +444,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHDESK_STATUS, FreshdeskStatusSource.class);
         registerType(FeedType.HAPPYFOX_COMPOSITE, HappyFoxCompositeSource.class);
         registerType(FeedType.HAPPYFOX_TICKET, HappyFoxTicketSource.class);
+        registerType(FeedType.HAPPYFOX_CONTACTS, HappyFoxContactSource.class);
+        registerType(FeedType.FRESHDESK_SURVEY, FreshdeskSurveySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
