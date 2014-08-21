@@ -33,6 +33,14 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
+    protected static String getValue(Map n, String key) {
+        Object obj = n.get(key);
+        if(obj != null)
+            return obj.toString();
+        else
+            return null;
+    }
+
     protected static Map runRestRequest(String path, HttpClient client, Batchbook2CompositeSource parentDefinition) throws ReportException {
         String url = parentDefinition.getUrl() + "/api/v1";
         String getURL = url + path + (path.contains("?") ? "&" : "?") + "auth_token=" + parentDefinition.getToken();
