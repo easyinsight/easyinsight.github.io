@@ -143,6 +143,7 @@
                     <exclude name="**/**/route-segment.js" />
                     <exclude name="**/**/intro.js" />
                     <exclude name="**/**/outro.js" />
+                    <exclude name="**/**/data_sources.js" />
                 </fileset>
                 <mapper>
                       <globmapper from="*.css" to="*.min.css"/>
