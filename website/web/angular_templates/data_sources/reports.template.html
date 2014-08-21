@@ -112,14 +112,23 @@
     <table ng-if="filtered && filtered.length > 0" class="table table-striped table-bordered table-condensed reportDashboardTable">
         <thead>
         <tr>
+            <th style="width:41px;" ng-if="user.designer">
+
+            </th>
             <th>Name</th>
             <th style="width:120px">Type</th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="report in filtered">
+        <tr ng-repeat="report in filtered" ng-init="show_tags = false">
+            <td ng-show="user.designer">
+                <i class="glyphicon" ng-class="{'glyphicon-tag': report.tags.length == 0, 'glyphicon-tags': report.tags.length > 0 }" ng-click="show_tags = !show_tags" />
+            </td>
             <td class="header-tr">
                 <a href="/app/html/{{report.type}}/{{report.url_key}}" ng-click="$event.stopPropagation()">{{report.name}}</a>
+                <div ng-show="show_tags">Tags: <span ng-repeat="tag in report.tags">{{tag.name}} <i class="glyphicon glyphicon-remove" ng-click="remove_report_tag(report, tag)" /> </span>
+                <input ui-keyup="{'enter': 'add_report_tag(report, null, new_tag)'}" type="text" ng-init="new_tag={}" ng-model="new_tag.text" typeahead="tag.name for tag in tags | filter: {name: $viewValue} | not_tagged:report.tags | limitTo: 8" typeahead-on-select="add_report_tag(report, $item, new_tag)" />
+                <i class="glyphicon glyphicon-plus" ng-click="add_report_tag(report, null, new_tag)" /></div>
             </td>
             <td>
                 <a href="/app/html/{{report.type}}/{{report.url_key}}" ng-click="$event.stopPropagation()">{{ report.type.capitalize() }}</a>

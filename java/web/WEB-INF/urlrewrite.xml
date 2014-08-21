@@ -327,6 +327,26 @@
     </rule>
 
     <rule>
+        <from>/dataSources/([A-Za-z0-9]+)/tags/([A-Za-z0-9]+)</from>
+        <to>/html/dataSourceTags.json?dataSourceID=$1&amp;tagID=$2</to>
+    </rule>
+
+    <rule>
+        <from>/dataSources/([A-Za-z0-9]+)/tags/?$</from>
+        <to>/html/dataSourceTags.json?dataSourceID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/reports/([A-Za-z0-9]+)/tags/?$</from>
+        <to>/html/reportTags.json?reportID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/reports/([A-Za-z0-9]+)/tags/([A-Za-z0-9]+)$</from>
+        <to>/html/reportTags.json?reportID=$1&amp;tagID=$2</to>
+    </rule>
+
+    <rule>
         <from>/html/connections/([A-Za-z0-9]+)</from>
         <to>/html/connectionCreation.jsp?connectionID=$1</to>
     </rule>

@@ -116,42 +116,42 @@ public abstract class JSONServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-        authProcessor(req, resp, () ->
-            Database.useConnection((conn) -> {
-            try {
-                ResponseInfo responseInfo;
-                try {
-                    conn.setAutoCommit(false);
-                    responseInfo = processGet(null, conn, req);
-                    conn.commit();
-                } catch (ServiceRuntimeException sre) {
-                    conn.rollback();
-                    LogClass.error(sre);
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
-                } catch (ParsingException spe) {
-                    conn.rollback();
-                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
-                } catch (Exception e) {
-                    conn.rollback();
-                    LogClass.error(e);
-                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
-                } finally {
-                    conn.setAutoCommit(true);
-                    Database.closeConnection(conn);
-                }
-                resp.setContentType("application/json");
-                resp.setStatus(responseInfo.getCode());
-                resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
-                resp.getOutputStream().flush();
-            } catch (Exception e) {
-                sendError(400, "Your request was malformed.", resp);
-            }
-        }));
+            authProcessor(req, resp, () ->
+                    Database.useConnection((conn) -> {
+                        try {
+                            ResponseInfo responseInfo;
+                            try {
+                                conn.setAutoCommit(false);
+                                responseInfo = processGet(null, conn, req);
+                                conn.commit();
+                            } catch (ServiceRuntimeException sre) {
+                                conn.rollback();
+                                LogClass.error(sre);
+                                responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
+                            } catch (ParsingException spe) {
+                                conn.rollback();
+                                responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
+                            } catch (Exception e) {
+                                conn.rollback();
+                                LogClass.error(e);
+                                responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                            } finally {
+                                conn.setAutoCommit(true);
+                                Database.closeConnection(conn);
+                            }
+                            resp.setContentType("application/json");
+                            resp.setStatus(responseInfo.getCode());
+                            resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
+                            resp.getOutputStream().flush();
+                        } catch (Exception e) {
+                            sendError(400, "Your request was malformed.", resp);
+                        }
+                    }));
 
-        } catch(RuntimeException e) {
-            if(e.getCause() instanceof IOException)
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException)
                 throw (IOException) e.getCause();
-            if(e.getCause() instanceof ServletException)
+            if (e.getCause() instanceof ServletException)
                 throw (ServletException) e.getCause();
         }
 
@@ -261,11 +261,52 @@ public abstract class JSONServlet extends HttpServlet {
 
     }
 
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        authProcessor(req, resp, () -> {
+            try {
+
+                EIConnection conn = Database.instance().getConnection();
+                ResponseInfo responseInfo;
+                try {
+                    conn.setAutoCommit(false);
+                    responseInfo = processDelete(null, conn, req);
+                    conn.commit();
+                } catch (ServiceRuntimeException sre) {
+                    conn.rollback();
+                    LogClass.error(sre);
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
+                } catch (ParsingException spe) {
+                    conn.rollback();
+                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
+                } catch (Exception e) {
+                    conn.rollback();
+                    LogClass.error(e);
+                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                    SecurityUtil.clearThreadLocal();
+                }
+                resp.setContentType("application/json");
+                resp.setStatus(responseInfo.getCode());
+                resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
+                resp.getOutputStream().flush();
+            } catch (Exception e) {
+                sendError(400, "Your request was malformed.", resp);
+            }
+        });
+    }
+
     protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         return processJSON(jsonObject, conn, request);
     }
 
     protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        return processJSON(jsonObject, conn, request);
+    }
+
+    protected ResponseInfo processDelete(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         return processJSON(jsonObject, conn, request);
     }
 
