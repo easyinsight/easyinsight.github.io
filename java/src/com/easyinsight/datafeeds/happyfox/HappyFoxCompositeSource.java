@@ -92,6 +92,7 @@ public class HappyFoxCompositeSource extends CompositeServerDataSource {
     protected Set<FeedType> getFeedTypes() {
         Set<FeedType> types = new HashSet<>();
         types.add(FeedType.HAPPYFOX_TICKET);
+        types.add(FeedType.HAPPYFOX_CONTACTS);
         return types;
     }
 

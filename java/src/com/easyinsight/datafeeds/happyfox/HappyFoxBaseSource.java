@@ -43,7 +43,7 @@ public class HappyFoxBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    private transient DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private transient DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     protected Value getDate(Map n, String key) {
         if (df == null) {

@@ -27,6 +27,7 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
     private transient Map<String, List<Map>> notes;
     private transient Map<String, List<Map>> statusUpdates;
     private transient Map<String, List<Map>> assignmentUpdates;
+    private transient Map<String, List<Map>> surveys;
 
     public FreshdeskCompositeSource() {
         setFeedName("Freshdesk");
@@ -36,6 +37,14 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
         factory.addField("Freshdesk URL", "url", "Your Freshdesk URL is the browser URL you normally use to connect to Freshdesk. For example, if you access Freshdesk as yourcompanyname.freshdesk.com, put yourcompanyname in as the Freshdesk URL.");
         factory.addField("Freshdesk API Authentication Token:", "token", "You can find the token on your Freshdesk page under My Info - API Token.");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
+    public Map<String, List<Map>> getSurveys() {
+        return surveys;
+    }
+
+    public void setSurveys(Map<String, List<Map>> surveys) {
+        this.surveys = surveys;
     }
 
     public Map<String, List<Map>> getNotes() {
@@ -116,11 +125,12 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
     protected Set<FeedType> getFeedTypes() {
         Set<FeedType> types = new HashSet<FeedType>();
         types.add(FeedType.FRESHDESK_TICKET);
-        //types.add(FeedType.FRESHDESK_TIME);
+        types.add(FeedType.FRESHDESK_TIME);
         types.add(FeedType.FRESHDESK_ACTIVITY);
         types.add(FeedType.FRESHDESK_NOTE);
         types.add(FeedType.FRESHDESK_ASSIGNMENT);
         types.add(FeedType.FRESHDESK_STATUS);
+        types.add(FeedType.FRESHDESK_SURVEY);
         return types;
     }
 
@@ -158,7 +168,9 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_ACTIVITY, FreshdeskTicketSource.DISPLAY_ID, FreshdeskActivitySource.ACTIVITY_TICKET_ID),
                 new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_ASSIGNMENT, FreshdeskTicketSource.DISPLAY_ID, FreshdeskAssignmentSource.ASSIGNMENT_TICKET_ID),
                 new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_STATUS, FreshdeskTicketSource.DISPLAY_ID, FreshdeskStatusSource.STATUS_TICKET_ID),
-                new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_NOTE, FreshdeskTicketSource.DISPLAY_ID, FreshdeskNoteSource.NOTE_TICKET_ID)
+                new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_NOTE, FreshdeskTicketSource.DISPLAY_ID, FreshdeskNoteSource.NOTE_TICKET_ID),
+                new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_SURVEY, FreshdeskTicketSource.DISPLAY_ID, FreshdeskSurveySource.SURVEY_TICKET_ID),
+                new ChildConnection(FeedType.FRESHDESK_TICKET, FeedType.FRESHDESK_TIME, FreshdeskTicketSource.DISPLAY_ID, FreshdeskTimeEntrySource.TICKET_ID)
         );
     }
 
