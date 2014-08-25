@@ -24,7 +24,7 @@
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="deleteUserUploads" result="deleted()"/>
     </mx:RemoteObject>
-    <mx:Text text="Are you want to delete the following data sources? This action will delete the data sources and all reports and dashboards built on these data sources."
+    <mx:Text text="Are you sure you want to delete the following data sources? This action will delete the data sources and all reports and dashboards built on these data sources."
             width="400" styleName="fallThroughFonts" fontSize="16"/>
     <mx:List dataProvider="{dataSources}" labelField="name" width="300"/>
     <mx:HBox width="100%" horizontalAlign="center">
