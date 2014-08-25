@@ -60,11 +60,4 @@ public class WSDiagramDefinition extends WSKPIDefinition {
         diagram.put("url", "/app/diagramChart");
         return diagram;
     }
-
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-        String format = "$.getJSON(''/app/diagramChart?reportID={0}&{1}&''+ strParams, function(data) '{' window.drawDiagram(data, $(\"#{2}\"), ''{3}'', afterRefresh) '}');";
-        return MessageFormat.format(format, getUrlKey(), timezoneOffset, targetDiv, getUrlKey());
-    }
 }
