@@ -6,6 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -55,39 +56,45 @@ public class FreshdeskTimeEntrySource extends FreshdeskBaseSource {
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
-        FreshdeskCompositeSource freshdeskCompositeSource = (FreshdeskCompositeSource) parentDefinition;
-        DataSet dataSet = new DataSet();
-        HttpClient client = getHttpClient(freshdeskCompositeSource.getFreshdeskApiKey());
-        int ctr;
-        int page = 1;
-        do {
-            ctr = 0;
-            List<Map> blah;
-            if (page == 1) {
-                blah = runRestRequestForList("time_sheets.json", client, freshdeskCompositeSource);
-            } else {
-                blah = runRestRequestForList("time_sheets.json?page=" + page, client, freshdeskCompositeSource);
-            }
-            for (Map map : blah) {
-                ctr++;
-                Map timeEntry = (Map) map.get("time_entry");
-                IRow row = dataSet.createRow();
-                row.addValue(keys.get(ID), getValue(timeEntry, "id"));
-                row.addValue(keys.get(TIME_SPENT), getValue(timeEntry, "timespent"));
-                row.addValue(keys.get(WORKABLE_TYPE), getValue(timeEntry, "workable_type"));
-                row.addValue(keys.get(AGENT_NAME), getValue(timeEntry, "agent_name"));
-                row.addValue(keys.get(EXECUTED_AT), getDate(timeEntry, "executed_at"));
-                row.addValue(keys.get(CREATED_AT), getDate(timeEntry, "created_at"));
-                row.addValue(keys.get(UPDATED_AT), getDate(timeEntry, "updated_at"));
-                row.addValue(keys.get(START_TIME), getDate(timeEntry, "start_time"));
-                row.addValue(keys.get(CUSTOMER_NAME), getDate(timeEntry, "customer_name"));
-                row.addValue(keys.get(TICKET_ID), getValue(timeEntry, "ticket_id"));
-                row.addValue(keys.get(BILLABLE), getValue(timeEntry, "billable"));
-                row.addValue(keys.get(TIME_ENTRY_NOTE), getValue(timeEntry, "note"));
-            }
-            page++;
-        } while (ctr == 30);
-        return dataSet;
+        try {
+            FreshdeskCompositeSource freshdeskCompositeSource = (FreshdeskCompositeSource) parentDefinition;
+            DataSet dataSet = new DataSet();
+            HttpClient client = getHttpClient(freshdeskCompositeSource.getFreshdeskApiKey());
+            int ctr;
+            int page = 1;
+            do {
+                ctr = 0;
+                List<Map> blah;
+                if (page == 1) {
+                    blah = runRestRequestForList("time_sheets.json", client, freshdeskCompositeSource);
+                } else {
+                    blah = runRestRequestForList("time_sheets.json?page=" + page, client, freshdeskCompositeSource);
+                }
+                for (Map map : blah) {
+                    ctr++;
+                    Map timeEntry = (Map) map.get("time_entry");
+                    IRow row = dataSet.createRow();
+                    row.addValue(keys.get(ID), getValue(timeEntry, "id"));
+                    row.addValue(keys.get(TIME_SPENT), getValue(timeEntry, "timespent"));
+                    row.addValue(keys.get(WORKABLE_TYPE), getValue(timeEntry, "workable_type"));
+                    row.addValue(keys.get(AGENT_NAME), getValue(timeEntry, "agent_name"));
+                    row.addValue(keys.get(EXECUTED_AT), getDate(timeEntry, "executed_at"));
+                    row.addValue(keys.get(CREATED_AT), getDate(timeEntry, "created_at"));
+                    row.addValue(keys.get(UPDATED_AT), getDate(timeEntry, "updated_at"));
+                    row.addValue(keys.get(START_TIME), getDate(timeEntry, "start_time"));
+                    row.addValue(keys.get(CUSTOMER_NAME), getDate(timeEntry, "customer_name"));
+                    row.addValue(keys.get(TICKET_ID), getValue(timeEntry, "ticket_id"));
+                    row.addValue(keys.get(BILLABLE), getValue(timeEntry, "billable"));
+                    row.addValue(keys.get(TIME_ENTRY_NOTE), getValue(timeEntry, "note"));
+                }
+                page++;
+            } while (ctr == 30);
+            return dataSet;
+        } catch (Exception e) {
+            // we can ignore for now because it may not be supported for their freshdesk account
+            LogClass.error(e);
+            return new DataSet();
+        }
     }
 
     @Override
