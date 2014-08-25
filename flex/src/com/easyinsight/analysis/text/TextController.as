@@ -8,7 +8,7 @@
 package com.easyinsight.analysis.text {
 import com.easyinsight.analysis.DataViewFactory;
 import com.easyinsight.analysis.IReportController;
-import com.easyinsight.analysis.service.ListDataService;
+import com.easyinsight.analysis.service.TextDataService;
 
 public class TextController implements IReportController {
     public function TextController() {
@@ -17,7 +17,7 @@ public class TextController implements IReportController {
 
     public function createDataView():DataViewFactory {
         var factory:DataViewFactory = new DataViewFactory();
-        factory.reportDataService = ListDataService;
+        factory.reportDataService = TextDataService;
         factory.reportControlBar = TextControlBar;
         factory.reportRenderer = "TextModule.swf";
         factory.newDefinition = TextReport;

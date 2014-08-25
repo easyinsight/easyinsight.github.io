@@ -8,6 +8,7 @@
 package com.easyinsight.analysis.text {
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
+import com.easyinsight.analysis.verticallist.EmbeddedTextService;
 
 public class TextEmbeddedController implements IEmbeddedReportController {
     public function TextEmbeddedController() {
@@ -15,7 +16,8 @@ public class TextEmbeddedController implements IEmbeddedReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "TextModule.swf";
+        factory.reportDataService = EmbeddedTextService;
+        factory.reportRenderer = "TextEndUserView.swf";
         return factory;
     }
 }

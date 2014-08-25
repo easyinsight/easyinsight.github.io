@@ -58,7 +58,8 @@ public class TextControlBar extends ReportControlBar implements IReportControlBa
     }
 
     public function isDataValid():Boolean {
-        return (listViewGrouping.getListColumns().length > 0);
+        //return (listDefinition.text != null && listDefinition.text != "") || listViewGrouping.getListColumns().length > 0;
+        return true;
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {
@@ -73,6 +74,10 @@ public class TextControlBar extends ReportControlBar implements IReportControlBa
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        if (event is TextChangeEvent) {
+            listDefinition.text = TextChangeEvent(event).text;
+            dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+        }
     }
 }
 }
