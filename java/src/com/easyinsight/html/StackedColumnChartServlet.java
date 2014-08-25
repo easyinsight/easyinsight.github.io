@@ -94,6 +94,11 @@ public class StackedColumnChartServlet extends HtmlServlet {
             populator = new ColumnPopulator();
             sortStackAscending = "Stack Ascending".equals(columnChartDefinition.getStackSort());
             sortStackDescending = "Stack Descending".equals(columnChartDefinition.getStackSort());
+            if ("inside".equals(columnChartDefinition.getLabelPosition())) {
+                seriesDefaults.put("pointLabels", pointLabels);
+                pointLabels.put("labels", new JSONArray());
+                object.put("valueLabel", true);
+            }
         } else if (report instanceof WSStackedBarChartDefinition) {
             WSStackedBarChartDefinition columnChartDefinition = (WSStackedBarChartDefinition) report;
             xAxisItem = columnChartDefinition.getYaxis();
@@ -105,6 +110,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
             if ("inside".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());
+                object.put("valueLabel", true);
             }
             sortStackAscending = "Stack Ascending".equals(columnChartDefinition.getStackSort());
             sortStackDescending = "Stack Descending".equals(columnChartDefinition.getStackSort());
@@ -298,7 +304,6 @@ public class StackedColumnChartServlet extends HtmlServlet {
                             min = indexToMin.get(key);
                             stackMap.put(key, min);
                         }
-                        System.out.println("min = " + new Date(min.longValue()));
                         Double y = (Double) jo.get("y");
                         Double delta = y - min;
                         maxY = Math.max(maxY, y);
@@ -310,31 +315,12 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
                 axisObject.put("values", list);
                 blahs.put(axisObject);
-
-
-
-
-                /*if (minItem != null && seriesKey.equals(firstLabel)) {
-                    for (JSONObject arr : entry.getValue()) {
-                        String key = arr.get("x").toString();
-                        Double min = indexToMin.get(key);
-                        if (min != null) {
-                            System.out.println("updating to " + min + " for " + seriesKey + " and " + key);
-                            arr.put("xMin", min);
-                            //arr.put("y0", min);
-
-                        }
-                    }
-                }*/
             } else {
                 zeroIndicies.add(k);
             }
             k++;
         }
 
-        /*for (int j = zeroIndicies.size() - 1; j >= 0; j--) {
-            series.remove(zeroIndicies.get(j));
-        }*/
         object.put("maxY", maxY);
         object.put("values", blahs);
         object.put("floatingY", minItem != null);

@@ -2132,24 +2132,16 @@ public class ExportService {
     }
 
     public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
-        DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
+
         WSTextDefinition wsTextDefinition = (WSTextDefinition) listDefinition;
+        String text = wsTextDefinition.toExportHTML(conn, insightRequestMetadata, email);
         StringBuilder sb = new StringBuilder();
         if (!email) {
             String style = MessageFormat.format("<div style=\"text-align:left; color:{1}; font-size:{0}px\">", wsTextDefinition.getFontSize(),
                     createHexString(wsTextDefinition.getFontColor()));
             sb.append(style);
         }
-        for (IRow row : dataSet.getRows()) {
-            for (int i = 0; i < wsTextDefinition.getColumns().size(); i++) {
-                AnalysisItem item = wsTextDefinition.getColumns().get(i);
-                Value value = row.getValue(item);
-                sb.append(value.toString());
-                if (i < wsTextDefinition.getColumns().size() - 1) {
-                    sb.append(" ");
-                }
-            }
-        }
+        sb.append(text);
         if (!email) {
             sb.append("</div>");
         }
@@ -4648,11 +4640,11 @@ public class ExportService {
                                     if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
                                         TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
                                         if (textReportFieldExtension.getAlign() != null) {
-                                            if ("Left".equals(textReportFieldExtension.getAlign())) {
+                                            if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
                                                 align = "left";
-                                            } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                                            } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
                                                 align = "center";
-                                            } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                                            } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
                                                 align = "right";
                                             }
                                         }
