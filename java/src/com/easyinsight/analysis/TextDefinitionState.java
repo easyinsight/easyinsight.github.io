@@ -18,10 +18,22 @@ public class TextDefinitionState extends AnalysisDefinitionState {
     @Column(name="text_report_id")
     private long textReportID;
 
+    @Column(name="report_text")
+    private String reportText;
+
+    public String getReportText() {
+        return reportText;
+    }
+
+    public void setReportText(String reportText) {
+        this.reportText = reportText;
+    }
+
     @Override
     public WSAnalysisDefinition createWSDefinition() {
         WSTextDefinition gantt = new WSTextDefinition();
         gantt.setTextReportID(textReportID);
+        gantt.setText(reportText);
         return gantt;
     }
 

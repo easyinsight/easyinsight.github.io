@@ -2153,6 +2153,91 @@ public class DataService {
         }
     }
 
+
+
+    public EmbeddedTextDataResults getEmbeddedTextResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
+                                                  List<FilterDefinition> drillthroughFilters) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long start = System.currentTimeMillis();
+            SecurityUtil.authorizeInsight(reportID);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+
+            WSTextDefinition analysisDefinition = (WSTextDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun();
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillthroughFilters);
+            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            String text = analysisDefinition.createText(map, dataSet);
+            EmbeddedTextDataResults results = new EmbeddedTextDataResults();
+            results.setText(text);
+            results.setDefinition(analysisDefinition);
+            results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            reportViewBenchmark(analysisDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+            return results;
+        } catch (ReportException dae) {
+            EmbeddedTextDataResults embeddedDataResults = new EmbeddedTextDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + reportID, e);
+            EmbeddedTextDataResults embeddedDataResults = new EmbeddedTextDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static String getText(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
+        Map<String, DerivedAnalysisDimension> map = textReport.beforeRun();
+        ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+        DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        return textReport.createText(map, dataSet);
+
+    }
+
+    public TextDataResults getTextDataResults(WSTextDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long start = System.currentTimeMillis();
+            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+            Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun();
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            String text = analysisDefinition.createText(map, dataSet);
+            TextDataResults results = new TextDataResults();
+            results.setText(text);
+            decorateResults(analysisDefinition, insightRequestMetadata, conn, reportRetrieval, reportRetrieval.getDataSet().getAudits(), results);
+            results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            if (!insightRequestMetadata.isNoLogging()) {
+                reportEditorBenchmark(analysisDefinition, System.currentTimeMillis() - insightRequestMetadata.getDatabaseTime() - start, insightRequestMetadata.getDatabaseTime(), conn);
+            }
+            return results;
+        } catch (ReportException dae) {
+            TextDataResults embeddedDataResults = new TextDataResults();
+            embeddedDataResults.setReportFault(dae.getReportFault());
+            return embeddedDataResults;
+        } catch (Throwable e) {
+            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+            TextDataResults embeddedDataResults = new TextDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
+            Database.closeConnection(conn);
+        }
+    }
+
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
@@ -2266,8 +2351,17 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
+
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+
+            Map<String, DerivedAnalysisDimension> map = null;
+            if (analysisDefinition instanceof WSTextDefinition) {
+                WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
+
+                map = textReport.beforeRun();
+
+            }
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             /*List<ReportAuditEvent> events = new ArrayList<ReportAuditEvent>();
             events.addAll(reportRetrieval.getDataSet().getAudits());*/
