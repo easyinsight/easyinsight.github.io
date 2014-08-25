@@ -379,3 +379,10 @@ table.dataTable tfoot td {
 .dropdown-menu > li > a:hover {
     color: #fff;
 }
+
+.stackLabel {
+    fill: #000;
+    stroke: #000;
+    stroke-width: 0;
+    font: normal 12px Arial;
+}
