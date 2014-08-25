@@ -75,7 +75,7 @@ public class ReportTagServlet extends JSONServlet {
         EIDescriptor descriptor = response.getInsightDescriptor();
         if (response.getInsightDescriptor() != null) {
             if (chosenTag != null) {
-                uus.tagReportsAndDashboards(Arrays.asList(descriptor), chosenTag);
+                uus.tagReportsAndDashboards(Arrays.asList(descriptor), chosenTag, conn);
             }
             return new ResponseInfo(ResponseInfo.ALL_GOOD, chosenTag.toJSON(md).toString());
 
@@ -91,8 +91,8 @@ public class ReportTagServlet extends JSONServlet {
         InsightResponse response = new AnalysisService().openAnalysisIfPossible(String.valueOf(request.getParameter("reportID")));
         EIDescriptor descriptor = response.getInsightDescriptor();
         if (response.getInsightDescriptor() != null) {
-            uus.untagReportsAndDashboards(Arrays.asList(descriptor), t);
-            uus.checkReportsTag(t);
+            uus.untagReportsAndDashboards(Arrays.asList(descriptor), t, conn);
+            uus.checkReportsTag(t, conn);
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
         } else
             return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");

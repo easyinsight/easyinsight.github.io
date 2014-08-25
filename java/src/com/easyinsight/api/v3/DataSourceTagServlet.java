@@ -75,7 +75,7 @@ public class DataSourceTagServlet extends JSONServlet {
 
 
         if(chosenTag != null) {
-            uus.tagDataSources(Arrays.asList(fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(request.getParameter("dataSourceID"))))), chosenTag);
+            uus.tagDataSources(Arrays.asList(fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(request.getParameter("dataSourceID"))))), chosenTag, conn);
         }
         return new ResponseInfo(ResponseInfo.ALL_GOOD, chosenTag.toJSON(md).toString());
     }
@@ -85,8 +85,8 @@ public class DataSourceTagServlet extends JSONServlet {
         final FeedStorage fs = new FeedStorage();
         Tag t = new Tag(Long.parseLong(String.valueOf(request.getParameter("tagID"))), null, false, false, false);
         UserUploadService uus = new UserUploadService();
-        uus.untagDataSource(Arrays.asList(fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(request.getParameter("dataSourceID"))))), t);
-        uus.checkTag(t);
+        uus.untagDataSource(Arrays.asList(fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(request.getParameter("dataSourceID"))))), t, conn);
+        uus.checkTag(t, conn);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
     }
 
