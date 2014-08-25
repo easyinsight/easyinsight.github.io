@@ -125,25 +125,32 @@ public class UserUploadService {
     }
 
     public List<Tag> getDataSourceTags() {
-        List<Tag> tags = new ArrayList<Tag>();
+
         EIConnection conn = Database.instance().getConnection();
+
         try {
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND DATA_SOURCE_TAG = ? ORDER BY TAG_INDEX");
-            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
-            getTagsStmt.setBoolean(2, true);
-            ResultSet rs = getTagsStmt.executeQuery();
-            while (rs.next()) {
-                String tagName = rs.getString(1);
-                long tagID = rs.getLong(2);
-                boolean dataSourceTag = rs.getBoolean(3);
-                boolean reportTag = rs.getBoolean(4);
-                boolean fieldTag = rs.getBoolean(5);
-                tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
-            }
+            return getDataSourceTags(conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public List<Tag> getDataSourceTags(EIConnection conn) throws SQLException {
+        List<Tag> tags = new ArrayList<Tag>();
+        PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND DATA_SOURCE_TAG = ? ORDER BY TAG_INDEX");
+        getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+        getTagsStmt.setBoolean(2, true);
+        ResultSet rs = getTagsStmt.executeQuery();
+
+        while (rs.next()) {
+            String tagName = rs.getString(1);
+            long tagID = rs.getLong(2);
+            boolean dataSourceTag = rs.getBoolean(3);
+            boolean reportTag = rs.getBoolean(4);
+            boolean fieldTag = rs.getBoolean(5);
+            tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
         }
         return tags;
     }
