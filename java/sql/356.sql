@@ -1,0 +1,1 @@
+alter table text_report add report_text text default null;
