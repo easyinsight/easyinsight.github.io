@@ -21,7 +21,7 @@ public class ListSummaryComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
 
         Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(pipelineData.getReportItems());
-        AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
+        /*AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
         structure.setReport(pipelineData.getReport());
         structure.setConn(pipelineData.getConn());
         List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure,
@@ -38,9 +38,167 @@ public class ListSummaryComponent implements IComponent {
             if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
                 iter.remove();
             }
+        }*/
+
+        List<AnalysisItem> recalcsOnSummary = new ArrayList<>();
+        for (AnalysisItem reportItem : reportItems) {
+            if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                AnalysisCalculation analysisCalculation = (AnalysisCalculation) reportItem;
+                if (analysisCalculation.isRecalculateSummary()) {
+                    recalcsOnSummary.add(analysisCalculation);
+                }
+            }
+        }
+        if (recalcsOnSummary.size() > 0) {
+            for (AnalysisItem reportItem : reportItems) {
+                if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    if (reportItem.getReportFieldExtension() != null && reportItem.getReportFieldExtension() instanceof TextReportFieldExtension &&
+                            ((TextReportFieldExtension) reportItem.getReportFieldExtension()).isIgnoreOnSummary()) {
+                        continue;
+                    }
+                    if (!recalcsOnSummary.contains(reportItem)) {
+                        recalcsOnSummary.add(reportItem);
+                    }
+                }
+            }
+            WSListDefinition recalc = new WSListDefinition();
+            recalc.setColumns(recalcsOnSummary);
+            recalc.setDataFeedID(pipelineData.getReport().getDataFeedID());
+            recalc.setFilterDefinitions(pipelineData.getReport().getFilterDefinitions());
+            recalc.setAddedItems(pipelineData.getReport().getAddedItems());
+            recalc.setAddonReports(pipelineData.getReport().getAddonReports());
+            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setUtcOffset(pipelineData.getInsightRequestMetadata().getUtcOffset());
+            DataSet recalcSet = DataService.listDataSet(recalc, insightRequestMetadata, pipelineData.getConn());
+
+            if (pipelineData.getReport().getReportRunMarmotScript() != null && !"".equals(pipelineData.getReport().getReportRunMarmotScript())) {
+                Map<String, UniqueKey> namespaceMap = null;
+
+                List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(pipelineData.getAllItems());
+                if (pipelineData.getReport() != null && pipelineData.getReport().getAddedItems() != null) {
+                    if (pipelineData.getConn() != null) {
+                        namespaceMap = new NamespaceGenerator().generate(pipelineData.getReport().getDataFeedID(), pipelineData.getReport().getAddonReports(), pipelineData.getConn());
+                    }
+                    allItems.addAll(pipelineData.getReport().getAddedItems());
+                }
+                if (namespaceMap == null) {
+                    namespaceMap = new HashMap<String, UniqueKey>();
+                }
+                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+                Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+                Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+                Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
+                StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
+                CalculationMetadata calculationMetadata = new CalculationMetadata();
+                calculationMetadata.setReport(pipelineData.getReport());
+                calculationMetadata.setDataSourceFields(allItems);
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+
+                    try {
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, unqualifiedDisplayMap, recalcSet.getRow(0), namespaceMap,
+                                calculationMetadata);
+                    } catch (ReportException re) {
+                        throw re;
+                    } catch (Exception e) {
+                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
+                    }
+
+                }
+            }
+            for (IRow row : recalcSet.getRows()) {
+                for (AnalysisItem item : recalcsOnSummary) {
+                    Value summaryValue = row.getValue(item);
+                    aggregationMap.put((AnalysisMeasure) item, summaryValue);
+                }
+            }
+        } else {
+            AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
+            structure.setReport(pipelineData.getReport());
+            structure.setConn(pipelineData.getConn());
+            List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure,
+                    pipelineData.getInsightRequestMetadata());
+
+            Iterator<IComponent> iter = components.iterator();
+            while (iter.hasNext()) {
+                IComponent component = iter.next();
+                if (!(component instanceof CalculationComponent)) {
+                    iter.remove();
+                    continue;
+                }
+                CalculationComponent calculationComponent = (CalculationComponent) component;
+                if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
+                    iter.remove();
+                }
+            }
+            DataSet tempSet = new DataSet();
+            IRow tempRow = tempSet.createRow();
+            for (AnalysisItem reportItem : pipelineData.getReportItems()) {
+                if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                        AnalysisCalculation analysisCalculation = (AnalysisCalculation) reportItem;
+                        if (analysisCalculation.isRecalculateSummary()) {
+                            continue;
+                        }
+                    }
+                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) reportItem;
+                    AggregationFactory aggregationFactory = new AggregationFactory(analysisMeasure, false);
+                    Aggregation aggregation = aggregationFactory.getAggregation();
+                    for (IRow row : dataSet.getRows()) {
+                        Value value = row.getValue(analysisMeasure.createAggregateKey());
+                        aggregation.addValue(value);
+                    }
+                    Value aggregateValue = aggregation.getValue();
+                    aggregationMap.put(analysisMeasure, aggregateValue);
+                    tempRow.addValue(analysisMeasure.createAggregateKey(), aggregateValue);
+                }
+            }
+            for (IComponent component : components) {
+                component.apply(tempSet, pipelineData);
+            }
+            if (pipelineData.getReport().getReportRunMarmotScript() != null && !"".equals(pipelineData.getReport().getReportRunMarmotScript())) {
+                Map<String, UniqueKey> namespaceMap = null;
+
+                List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(pipelineData.getAllItems());
+                if (pipelineData.getReport() != null && pipelineData.getReport().getAddedItems() != null) {
+                    if (pipelineData.getConn() != null) {
+                        namespaceMap = new NamespaceGenerator().generate(pipelineData.getReport().getDataFeedID(), pipelineData.getReport().getAddonReports(), pipelineData.getConn());
+                    }
+                    allItems.addAll(pipelineData.getReport().getAddedItems());
+                }
+                if (namespaceMap == null) {
+                    namespaceMap = new HashMap<String, UniqueKey>();
+                }
+                KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
+                Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
+                Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
+                Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
+                StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
+                CalculationMetadata calculationMetadata = new CalculationMetadata();
+                calculationMetadata.setReport(pipelineData.getReport());
+                calculationMetadata.setDataSourceFields(allItems);
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+
+                    try {
+                        new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, unqualifiedDisplayMap, tempSet.getRow(0), namespaceMap,
+                                calculationMetadata);
+                    } catch (ReportException re) {
+                        throw re;
+                    } catch (Exception e) {
+                        throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
+                    }
+
+                }
+            }
+            for (AnalysisItem reportItem : pipelineData.getReportItems()) {
+                if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                    aggregationMap.put((AnalysisMeasure) reportItem, tempSet.getRow(0).getValue(reportItem));
+                }
+            }
         }
 
-        DataSet tempSet = new DataSet();
+        /*DataSet tempSet = new DataSet();
         IRow tempRow = tempSet.createRow();
         for (AnalysisItem reportItem : pipelineData.getReportItems()) {
             if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -64,47 +222,13 @@ public class ListSummaryComponent implements IComponent {
         }
         for (IComponent component : components) {
             component.apply(tempSet, pipelineData);
-        }
-        if (pipelineData.getReport().getReportRunMarmotScript() != null && !"".equals(pipelineData.getReport().getReportRunMarmotScript())) {
-            Map<String, UniqueKey> namespaceMap = null;
+        }*/
 
-            List<AnalysisItem> allItems = new ArrayList<AnalysisItem>(pipelineData.getAllItems());
-            if (pipelineData.getReport() != null && pipelineData.getReport().getAddedItems() != null) {
-                if (pipelineData.getConn() != null) {
-                    namespaceMap = new NamespaceGenerator().generate(pipelineData.getReport().getDataFeedID(), pipelineData.getReport().getAddonReports(), pipelineData.getConn());
-                }
-                allItems.addAll(pipelineData.getReport().getAddedItems());
-            }
-            if (namespaceMap == null) {
-                namespaceMap = new HashMap<String, UniqueKey>();
-            }
-            KeyDisplayMapper mapper = KeyDisplayMapper.create(allItems);
-            Map<String, List<AnalysisItem>> keyMap = mapper.getKeyMap();
-            Map<String, List<AnalysisItem>> displayMap = mapper.getDisplayMap();
-            Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
-            StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
-            CalculationMetadata calculationMetadata = new CalculationMetadata();
-            calculationMetadata.setReport(pipelineData.getReport());
-            calculationMetadata.setDataSourceFields(allItems);
-            while (toker.hasMoreTokens()) {
-                String line = toker.nextToken();
-
-                try {
-                    new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, unqualifiedDisplayMap, tempSet.getRow(0), namespaceMap,
-                            calculationMetadata);
-                } catch (ReportException re) {
-                    throw re;
-                } catch (Exception e) {
-                    throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
-                }
-
-            }
-        }
-        for (AnalysisItem reportItem : pipelineData.getReportItems()) {
+        /*for (AnalysisItem reportItem : pipelineData.getReportItems()) {
             if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
                 aggregationMap.put((AnalysisMeasure) reportItem, tempSet.getRow(0).getValue(reportItem));
             }
-        }
+        }*/
         return dataSet;
     }
 
