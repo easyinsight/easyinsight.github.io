@@ -5,6 +5,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
 import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.summary.MultiSummaryDefinition;
+import com.easyinsight.analysis.text.TextReport;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -444,7 +445,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function refresh():void {
-        if (_adHocMode) {
+        if (_adHocMode || (analysisDefinition != null && analysisDefinition is TextReport)) {
             if (_reportRenderer == null) {
                 pendingRequest = true;
             } else {
