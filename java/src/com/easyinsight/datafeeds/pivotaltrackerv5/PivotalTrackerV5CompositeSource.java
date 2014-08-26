@@ -71,7 +71,7 @@ public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
             }
         }
         for (IServerDataSourceDefinition s : children) {
-            if (s.getFeedType().getType() == FeedType.PIVOTAL_V5_STORY.getType() &&
+            if (s.getFeedType().getType() == FeedType.PIVOTAL_V5_STORY.getType() ||
                     s.getFeedType().getType() == FeedType.PIVOTAL_V5_EPIC.getType()) {
                 set.add(s.getFeedType().getType());
                 end.add(s);

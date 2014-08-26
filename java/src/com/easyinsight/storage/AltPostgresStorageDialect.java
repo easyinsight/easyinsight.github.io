@@ -1,341 +1,200 @@
-package com.easyinsight.storage;
+package com.easyinsight.datafeeds.pivotaltrackerv5;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.csvreader.CsvWriter;
-import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.Value;
-import com.easyinsight.database.Database;
-import com.easyinsight.database.EIConnection;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.logging.LogClass;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.text.translate.AggregateTranslator;
-import org.apache.commons.lang3.text.translate.EntityArrays;
-import org.apache.commons.lang3.text.translate.LookupTranslator;
-import org.apache.commons.lang3.text.translate.UnicodeEscaper;
+import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
+import com.easyinsight.datafeeds.composite.ChildConnection;
+import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.GZIPOutputStream;
+import java.util.*;
 
 /**
  * User: jamesboe
- * Date: 4/10/14
- * Time: 1:56 PM
+ * Date: 2/6/14
+ * Time: 4:47 PM
  */
-public class AltPostgresStorageDialect implements IStorageDialect {
+public class PivotalTrackerV5CompositeSource extends CompositeServerDataSource {
 
-    private String tableName;
-    private Map<Key, KeyMetadata> keys;
-    private Key distKey;
+    private String token;
 
-    public AltPostgresStorageDialect(String tableName, Map<Key, KeyMetadata> keys) {
-        this.tableName = tableName;
-        this.keys = keys;
+    public PivotalTrackerV5CompositeSource() {
+        setFeedName("Pivotal Tracker");
+        setDefaultToFullJoins(true);
     }
 
-    public AltPostgresStorageDialect(String tableName, Map<Key, KeyMetadata> keys, Key distKey) {
-        this.tableName = tableName;
-        this.keys = keys;
-        this.distKey = distKey;
+    public String getToken() {
+        return token;
     }
 
-
-
-    private String fileName;
-
-    //private CsvWriter csvWriter;
-    private List<File> files = new ArrayList<File>();
-    private File file;
-    private FileOutputStream fos;
-    private int rows = 0;
-
-
-
-    public void updateData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
-        insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    private String escape(String string) {
-        //String ret = string;
-        String ret = new AggregateTranslator(new LookupTranslator(new String[][] {
-                {"\"", "\\\""},
-                {"\\", "\\\\"},
-        }),new LookupTranslator(EntityArrays.JAVA_CTRL_CHARS_ESCAPE())).translate(string);
-        if (ret.contains("|")) {
-            ret = ret.replace("|", "\\|");
+    @Override
+    public void customStorage(Connection conn) throws SQLException {
+        super.customStorage(conn);
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM pivotalv5 WHERE DATA_SOURCE_ID = ?");
+        clearStmt.setLong(1, getDataFeedID());
+        clearStmt.executeUpdate();
+        clearStmt.close();
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO pivotalv5 (DATA_SOURCE_ID, TOKEN) VALUES (?, ?)");
+        saveStmt.setLong(1, getDataFeedID());
+        saveStmt.setString(2, token);
+        saveStmt.execute();
+        saveStmt.close();
+    }
+
+    @Override
+    public void customLoad(Connection conn) throws SQLException {
+        super.customLoad(conn);
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN FROM pivotalv5 WHERE data_source_id = ?");
+        queryStmt.setLong(1, getDataFeedID());
+        ResultSet rs = queryStmt.executeQuery();
+        if (rs.next()) {
+            token = rs.getString(1);
         }
-        if (ret.contains("'")) {
-            ret = ret.replace("'", "\\'");
-        }
-        return ret;
+        queryStmt.close();
     }
 
-    public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        int i = 0;
-        StringBuilder sb = new StringBuilder();
-        for (IRow row : dataSet.getRows()) {
-            rows++;
-            i++;
-            String[] rowValues = new String[keys.size()];
-            int j = 0;
-            for (Map.Entry<Key, KeyMetadata> entry : keys.entrySet()) {
-                Key key = entry.getKey();
-                KeyMetadata keyMetadata = entry.getValue();
-                Value value = row.getValue(key);
-                if (keyMetadata.getType() == Value.DATE) {
-                    if (value.type() != Value.DATE) {
-                        AnalysisItem analysisItem = keyMetadata.getAnalysisItem();
-                        AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
-                        int prevLevel = analysisDateDimension.getDateLevel();
-                        analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-                        Calendar calendar = Calendar.getInstance();
-                        Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata(), false, calendar);
-                        analysisDateDimension.setDateLevel(prevLevel);
-                        if (transformedValue.type() == Value.EMPTY) {
-                            rowValues[j++] = "";
-                        } else {
-                            DateValue dateValue = (DateValue) transformedValue;
-                            String string = sdf.format(dateValue.getDate());
-                            rowValues[j++] = escape(string);
-                        }
-                    } else {
-                        DateValue dateValue = (DateValue) value;
-                        if (dateValue.getDate() == null) {
-                            rowValues[j++] = "";
-                        } else {
-                            String string = sdf.format(dateValue.getDate());
-                            rowValues[j++] = escape(string);
-                        }
-                    }
-                } else if (keyMetadata.getType() == Value.NUMBER) {
-                    Double num = null;
-                    if (value.type() == Value.STRING || value.type() == Value.TEXT) {
-                        num = NumericValue.produceDoubleValue(value.toString());
-                    } else if (value.type() == Value.NUMBER) {
-                        NumericValue numericValue = (NumericValue) value;
-                        num = numericValue.toDouble();
-                    }
-                    if (num == null) {
-                        rowValues[j++] = "";
-                    } else {
-                        String string = String.valueOf(num);
-                        rowValues[j++] = escape(string);
-                    }
-                } else if (value.type() == Value.DATE) {
-                    DateValue dateValue = (DateValue) value;
-                    if (dateValue.getDate() == null) {
-                        rowValues[j++] = "";
-                    } else {
-                        String string = sdf.format(dateValue.getDate());
-                        rowValues[j++] = escape(string);
-                    }
-                } else if (value.type() == Value.EMPTY) {
-                    rowValues[j++] = "";
-                } else if (value.type() == Value.NUMBER) {
-                    Double num = null;
-                    if (value.type() == Value.STRING || value.type() == Value.TEXT) {
-                        num = NumericValue.produceDoubleValue(value.toString());
-                    } else if (value.type() == Value.NUMBER) {
-                        NumericValue numericValue = (NumericValue) value;
-                        num = numericValue.toDouble();
-                    }
-                    if (num == null) {
-                        rowValues[j++] = "";
-                    } else {
-                        String string = String.valueOf(num);
-                        rowValues[j++] = escape(string);
-                    }
-                } else if (value.type() == Value.STRING) {
-                    String string;
-                    if (value.toString() == null) {
-                        string = "";
-                    } else {
-                        string = value.toString();
-                    }
-                    if (string.length() > 253) {
-                        string = string.substring(0, 253);
-                    }
-                    rowValues[j++] = escape(string);
-                } else {
-                    String string = value.toString();
-                    rowValues[j++] = escape(string);
-                }
-            }
-            for (String string : rowValues) {
-                sb.append(string).append("|");
-            }
-            sb.append("\n");
-            //csvWriter.writeRecord(rowValues);
-        }
-        bos.write(sb.toString().getBytes(Charset.forName("UTF-8")));
-        bos.flush();
-        //csvWriter.flush();
-        if (rows > 10000000) {
-            rows = 0;
-            bos.flush();
-            bos.close();
-            //csvWriter.close();
-            fos.close();
-            files.add(file);
-            System.out.println("starting new file of " + tableName + files.size() + ".csv" );
-            file = new File(tableName + files.size() + ".csv");
-            fos = new FileOutputStream(file);
-            bos = new BufferedOutputStream(fos, 512);
-            //csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
-        }
-    }
-
-    public void commit() {
-        try {
-            bos.flush();
-            bos.close();
-            fos.close();
-
-            files.add(this.file);
-
-            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-            String bucketName = "refresh" + tableName;
-            s3.createBucket(bucketName);
-
-            for (File file : files) {
-
-                ByteArrayOutputStream archiveStream = new ByteArrayOutputStream();
-
-                GZIPOutputStream zos = new GZIPOutputStream(archiveStream);
-                BufferedOutputStream bufOS = new BufferedOutputStream(zos, 1024);
-                byte[] buffer = new byte[1024];
-                InputStream bfis = new FileInputStream(file);
-                int nBytes;
-                while ((nBytes = bfis.read(buffer)) != -1) {
-                    bufOS.write(buffer, 0, nBytes);
-                }
-                bufOS.flush();
-                zos.flush();
-
-                bfis.close();
-
-                archiveStream.flush();
-
-                zos.close();
-
-                archiveStream.close();
-
-                byte[] bytes = archiveStream.toByteArray();
-                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-
-                ObjectMetadata objectMetadata = new ObjectMetadata();
-                objectMetadata.setContentLength(bytes.length);
-                s3.putObject(new PutObjectRequest(bucketName, fileName, stream, objectMetadata));
-                System.out.println("saved off " + fileName + " for debug");
-                boolean success = file.delete();
-                if (!success) {
-                    LogClass.error("Could not delete " + fileName);
-                }
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String defineTableSQL(boolean hugeTable) {
-        return defineTableSQL(tableName, false);
-    }
-
-    private String defineTableSQL(String tableName, boolean hugeTable) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ");
-        sqlBuilder.append(tableName);
-        sqlBuilder.append("( ");
-        for (KeyMetadata keyMetadata : keys.values()) {
-            String columnSQL = getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType(), hugeTable);
-            sqlBuilder.append(columnSQL);
-            sqlBuilder.append(",");
-        }
-        String primaryKey = tableName + "_ID";
-        sqlBuilder.append(primaryKey);
-        sqlBuilder.append(" int identity,");
-        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        if (distKey == null) {
-            sqlBuilder.append(" )");
-        } else {
-            sqlBuilder.append(" ) DISTSTYLE KEY DISTKEY(");
-            sqlBuilder.append("k").append(distKey.getKeyID() + ")");
-        }
-        //sqlBuilder.append(" ) CHARSET=utf8");
-        return sqlBuilder.toString();
-    }
-
-    public String getColumnDefinitionSQL(Key key, int type, boolean hugeTable) {
-        String column;
-        if (type == Value.DATE) {
-            column = "k" + key.getKeyID() + " TIMESTAMP, datedim_" + key.getKeyID() + "_id integer";
-        } else if (type == Value.NUMBER) {
-            column = "k" + key.getKeyID() + " DECIMAL(18, 4)";
-        } else if (type == Value.TEXT) {
-            column = "k" + key.getKeyID() + " TEXT";
-        } else {
-            if (hugeTable) {
-                column = "k" + key.getKeyID() + " TEXT";
-            } else {
-                column = "k" + key.getKeyID() + " VARCHAR(255)";
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.PIVOTAL_V5_ITERATION.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
             }
         }
-        return column;
-    }
-
-    public void createTempTable(String sql, Database database, boolean insert) throws SQLException {
-        try {
-            if (!insert) {
-                // create a load table
-                EIConnection storageConn = database.getConnection();
-                try {
-                    String tableSQL = defineTableSQL("load" + tableName, true);
-                    PreparedStatement createSQL = storageConn.prepareStatement(tableSQL);
-                    createSQL.execute();
-                    createSQL.close();
-                } finally {
-                    Database.closeConnection(storageConn);
-                }
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.PIVOTAL_V5_STORY.getType() ||
+                    s.getFeedType().getType() == FeedType.PIVOTAL_V5_EPIC.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
             }
-
-            fileName = tableName + ".csv";
-
-            file = new File(fileName);
-            fos = new FileOutputStream(file);
-            bos = new BufferedOutputStream(fos, 512);
-            //csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
     }
 
-    private BufferedOutputStream bos;
+    @Override
+    protected void refreshDone() {
+        super.refreshDone();
+        storyIDToLabelMap = null;
+        storyIDToUserMap = null;
+        epicIDToLabelMap = null;
+        iterationToStoryMap = null;
+        iterationToStateMap = null;
+        userMap = null;
+    }
+
+    public String getUser(String userID) {
+        if (userID == null) {
+            return null;
+        }
+        return userMap.get(userID);
+    }
+
+    public Map<String, String> getUserMap() {
+        return userMap;
+    }
+
+    public void setUserMap(Map<String, String> userMap) {
+        this.userMap = userMap;
+    }
+
+    public Map<String, List<String>> getStoryIDToLabelMap() {
+        return storyIDToLabelMap;
+    }
+
+    public void setStoryIDToLabelMap(Map<String, List<String>> storyIDToLabelMap) {
+        this.storyIDToLabelMap = storyIDToLabelMap;
+    }
 
 
 
-    public String defineTempInsertTable() { return ""; }
+    public Map<String, List<String>> getEpicIDToLabelMap() {
+        return epicIDToLabelMap;
+    }
 
-    public String defineTempUpdateTable() {
-        return "";
+    public void setEpicIDToLabelMap(Map<String, List<String>> epicIDToLabelMap) {
+        this.epicIDToLabelMap = epicIDToLabelMap;
+    }
+
+    public Map<String, String> getIterationToStoryMap() {
+        return iterationToStoryMap;
+    }
+
+    public void setIterationToStoryMap(Map<String, String> iterationToStoryMap) {
+        this.iterationToStoryMap = iterationToStoryMap;
+    }
+
+    public Map<String, String> getIterationToStateMap() {
+        return iterationToStateMap;
+    }
+
+    public void setIterationToStateMap(Map<String, String> iterationToStateMap) {
+        this.iterationToStateMap = iterationToStateMap;
+    }
+
+    public Map<String, List<String>> getStoryIDToUserMap() {
+        return storyIDToUserMap;
+    }
+
+    public void setStoryIDToUserMap(Map<String, List<String>> storyIDToUserMap) {
+        this.storyIDToUserMap = storyIDToUserMap;
+    }
+
+    private Map<String, String> userMap = new HashMap<String, String>();
+    private Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
+    private Map<String, List<String>> storyIDToUserMap = new HashMap<String, List<String>>();
+    private Map<String, List<String>> epicIDToLabelMap = new HashMap<String, List<String>>();
+    private Map<String, String> iterationToStoryMap = new HashMap<String, String>();
+    private Map<String, String> iterationToStateMap = new HashMap<String, String>();
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.PIVOTAL_V5_COMPOSITE;
+    }
+
+    @Override
+    public int getDataSourceType() {
+        return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    @Override
+    protected Set<FeedType> getFeedTypes() {
+        Set<FeedType> types = new HashSet<FeedType>();
+        types.add(FeedType.PIVOTAL_V5_PROJECT);
+        types.add(FeedType.PIVOTAL_V5_EPIC);
+        types.add(FeedType.PIVOTAL_V5_STORY);
+        types.add(FeedType.PIVOTAL_V5_STORY_TO_LABEL);
+        types.add(FeedType.PIVOTAL_V5_LABEL);
+        types.add(FeedType.PIVOTAL_V5_ITERATION);
+        /*types.add(FeedType.PIVOTAL_V5_STORY_TO_OWNER);*/
+        return types;
+    }
+
+    @Override
+    protected Collection<ChildConnection> getChildConnections() {
+        return Arrays.asList(new ChildConnection(FeedType.PIVOTAL_V5_PROJECT, FeedType.PIVOTAL_V5_STORY, PivotalTrackerV5ProjectSource.ID, PivotalTrackerV5StorySource.PROJECT_ID),
+                new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_ITERATION, PivotalTrackerV5StorySource.ITERATION_ID, PivotalTrackerV5IterationSource.ID, true),
+                new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_STORY_TO_LABEL, PivotalTrackerV5StorySource.ID, PivotalTrackerV5StoryToLabelSource.STORY_ID, true),
+                /*new ChildConnection(FeedType.PIVOTAL_V5_STORY, FeedType.PIVOTAL_V5_STORY_TO_OWNER, PivotalTrackerV5StorySource.ID, PivotalTrackerV5StoryOwnerService.ID, true),*/
+                new ChildConnection(FeedType.PIVOTAL_V5_STORY_TO_LABEL, FeedType.PIVOTAL_V5_LABEL, PivotalTrackerV5StoryToLabelSource.LABEL_ID, PivotalTrackerV5LabelSource.ID, true),
+                new ChildConnection(FeedType.PIVOTAL_V5_LABEL, FeedType.PIVOTAL_V5_EPIC, PivotalTrackerV5LabelSource.ID, PivotalTrackerV5EpicSource.LABEL_ID, true));
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Pivotal Tracker API Authentication Token:", "token", "You can find the token on your Pivotal Tracker page under My Info - API Token.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }
