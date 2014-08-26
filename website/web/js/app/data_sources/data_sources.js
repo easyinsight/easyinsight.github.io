@@ -49,10 +49,6 @@
             remove_tag(data_source, tag, "/app/dataSources/" + data_source.url_key + "/tags/" + tag.id, $http);
         }
 
-
-
-
-
         $scope.add_ds_tag = function (data_source, tag, model) {
             add_tag(data_source, tag, model, "/app/dataSources/" + data_source.url_key + "/tags", $http);
         }
@@ -69,6 +65,19 @@
             })
         }
     }])
+
+    eiDataSources.controller("deleteSelectedReportsController", ["$scope", "$http", function ($scope, $http) {
+            $scope.confirmDelete = function () {
+                var v = { "reports": $scope.to_delete.map(function (e, i, l) {
+                    return {"url_key": e.url_key, "type": e.type }
+                }) };
+
+                $scope.deleting = $http.post("/app/dataSources/" + $scope.data_source.url_key + "/reports.json", JSON.stringify(v));
+                $scope.deleting.then(function (c) {
+                    $scope.$close();
+                })
+            }
+        }])
 
     var remove_tag = function (data_source, tag, url, $http) {
         var d = $http.delete(url);
@@ -91,8 +100,9 @@
 
     };
 
-    eiDataSources.controller("reportsListController", ["$scope", "$http", "$routeParams", "$interval", "PageInfo",
-        function ($scope, $http, $routeParams, $interval, PageInfo) {
+    eiDataSources.controller("reportsListController", ["$scope", "$http", "$routeParams", "$interval", "PageInfo", "$modal",
+        "$filter",
+        function ($scope, $http, $routeParams, $interval, PageInfo, $modal, $filter) {
             $scope.load = $http.get("/app/dataSources/" + $routeParams.id + "/reports.json");
 
             $scope.load.then(function (d) {
@@ -154,6 +164,29 @@
 
             $scope.remove_report_tag = function (data_source, tag) {
                 remove_tag(data_source, tag, "/app/reports/" + data_source.url_key + "/tags/" + tag.id, $http);
+            }
+
+            $scope.delete_selected = function() {
+                var to_delete = $filter("tagged")($scope.reports, $scope.tags, $scope.current_folder.id).filter(function (e, i, l) {
+                    return e.selected;
+                })
+                if (to_delete.length > 0) {
+
+                    $scope.to_delete = to_delete;
+                    var m = $modal.open({
+                        templateUrl: "/angular_templates/data_sources/delete_reports_dialog.template.html",
+                        scope: $scope,
+                        controller: "deleteSelectedReportsController"
+                    });
+                    m.result.then(function (r) {
+                        $scope.reports = $scope.reports.filter(function (e, i, l) {
+                            return !e.selected;
+                        });
+                        delete $scope.to_delete;
+                    }, function (r) {
+                        delete $scope.to_delete;
+                    });
+                }
             }
 
         }]);

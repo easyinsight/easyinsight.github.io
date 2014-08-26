@@ -47,7 +47,7 @@ public class FeedStorage {
     public List<LookupTableDescriptor> getLookupTableDescriptors(EIConnection conn) throws SQLException {
 
         PreparedStatement queryStmt = conn.prepareStatement("SELECT LOOKUP_TABLE_ID, LOOKUP_TABLE_NAME, DATA_SOURCE_ID FROM LOOKUP_TABLE, UPLOAD_POLICY_USERS, USER " +
-                "WHERE LOOKUP_TABLE.data_source_id = UPLOAD_POLICY_USERS.feed_id  AND UPLOAD_POLICY_USERS.user_id = user.user_id and user.account_id = ?");
+                "WHERE LOOKUP_TABLE.data_source_id = UPLOAD_POLICY_USERS.feed_id  AND UPLOAD_POLICY_USERS.user_id = user.user_id AND user.account_id = ?");
         queryStmt.setLong(1, SecurityUtil.getAccountID());
         ResultSet rs = queryStmt.executeQuery();
         Map<Long, LookupTableDescriptor> map = new HashMap<Long, LookupTableDescriptor>();
@@ -251,7 +251,7 @@ public class FeedStorage {
         clearFoldersStmt.close();
         for (FeedFolder childFolder : folder.getChildFolders()) {
             saveFolder(childFolder, feedID, conn, ids);
-            PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) values (?, ?)");
+            PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) VALUES (?, ?)");
             insertChildFolderStmt.setLong(1, folder.getFolderID());
             insertChildFolderStmt.setLong(2, childFolder.getFolderID());
             insertChildFolderStmt.execute();
@@ -274,7 +274,7 @@ public class FeedStorage {
         clearJoinsStmt.setLong(1, folder.getFolderID());
         clearJoinsStmt.executeUpdate();
         clearJoinsStmt.close();*/
-        PreparedStatement insertFieldStmt = conn.prepareStatement("INSERT INTO folder_to_analysis_item (folder_id, analysis_item_id) values (?, ?)");
+        PreparedStatement insertFieldStmt = conn.prepareStatement("INSERT INTO folder_to_analysis_item (folder_id, analysis_item_id) VALUES (?, ?)");
         for (AnalysisItem analysisItem : folder.getChildItems()) {
             boolean okay = fields.contains(analysisItem.getAnalysisItemID());
             if (okay) {
@@ -1024,7 +1024,7 @@ public class FeedStorage {
             dataSources.add(feedDescriptor);
         }
         queryStmt.close();
-        PreparedStatement myRoleStmt = conn.prepareStatement("SELECT ROLE FROM upload_policy_users where user_id = ? and feed_id = ?");
+        PreparedStatement myRoleStmt = conn.prepareStatement("SELECT ROLE FROM upload_policy_users WHERE user_id = ? AND feed_id = ?");
         for (DataSourceDescriptor dataSource : dataSources) {
             myRoleStmt.setLong(1, userID);
             myRoleStmt.setLong(2, dataSource.getId());
@@ -1224,18 +1224,22 @@ public class FeedStorage {
     public DataSourceDescriptor dataSourceURLKeyForDataSource(long dataSourceID) throws SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT API_KEY, FEED_NAME, refresh_behavior FROM DATA_FEED WHERE DATA_FEED_ID = ?");
-            stmt.setLong(1, dataSourceID);
-            ResultSet rs = stmt.executeQuery();
-            rs.next();
-            String urlKey = rs.getString(1);
-            String name = rs.getString(2);
-            DataSourceDescriptor dsd = new DataSourceDescriptor(name, dataSourceID, 0, true, rs.getInt(3));
-            dsd.setUrlKey(urlKey);
-            return dsd;
+            return dataSourceURLKeyForDataSource(dataSourceID, conn);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public DataSourceDescriptor dataSourceURLKeyForDataSource(long dataSourceID, EIConnection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT API_KEY, FEED_NAME, refresh_behavior FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+        stmt.setLong(1, dataSourceID);
+        ResultSet rs = stmt.executeQuery();
+        rs.next();
+        String urlKey = rs.getString(1);
+        String name = rs.getString(2);
+        DataSourceDescriptor dsd = new DataSourceDescriptor(name, dataSourceID, 0, true, rs.getInt(3));
+        dsd.setUrlKey(urlKey);
+        return dsd;
     }
 
 

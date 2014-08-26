@@ -38,7 +38,7 @@ public class DataSourceListServlet extends JSONServlet {
         final FeedStorage fs = new FeedStorage();
         new UserUploadService().deleteUserUploads(urls.stream().map((a) -> {
             try {
-                return fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(a)));
+                return fs.dataSourceURLKeyForDataSource(fs.dataSourceIDForDataSource(String.valueOf(a)), conn);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
