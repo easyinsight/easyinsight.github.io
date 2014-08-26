@@ -3,6 +3,7 @@ package com.easyinsight.storage;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.csvreader.CsvWriter;
@@ -481,7 +482,7 @@ public class DataStorage implements IDataStorage {
                     sb.append(key.toSQL()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape truncatecolumns removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
@@ -2278,5 +2279,30 @@ stmt.setFetchSize(Integer.MIN_VALUE);
         csvWriter.close();
         fos.close();
         return file;
+    }
+
+    public static void main(String[] args) {
+        AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("AKIAI5YYYFRMWFLLEC2A", "NmonY27/vE03AeGNWhLBmkR41kJrvbWSYhLzh5pE"));
+        List<Bucket> buckets = s3.listBuckets();
+        for (Bucket bucket : buckets) {
+            if (bucket.getName().startsWith("refreshdt")) {
+                System.out.println(bucket.getName());
+                String bucketName = bucket.getName();
+                ObjectListing objectListing = s3.listObjects(bucketName);
+                List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+                for (S3ObjectSummary summary : summaries) {
+                    System.out.println("\t" + summary.getKey());
+                    s3.deleteObject(bucketName, summary.getKey());
+                }
+                s3.deleteBucket(bucketName);
+            }
+            /*ObjectListing objectListing = s3.listObjects();
+            List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+            for (S3ObjectSummary summary : summaries) {
+                System.out.println("\t" + summary.getKey());
+                s3.deleteObject(bucketName, summary.getKey());
+            }
+            s3.deleteBucket(bucketName);*/
+        }
     }
 }
