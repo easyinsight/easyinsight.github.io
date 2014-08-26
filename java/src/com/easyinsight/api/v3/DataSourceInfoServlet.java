@@ -1,8 +1,11 @@
 package com.easyinsight.api.v3;
 
+import com.easyinsight.analysis.AnalysisService;
 import com.easyinsight.analysis.InsightRequestMetadata;
+import com.easyinsight.analysis.InsightResponse;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
@@ -31,12 +34,12 @@ import java.util.stream.Collectors;
 public class DataSourceInfoServlet extends JSONServlet {
 
     @Override
-    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+    protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject responseObject = new JSONObject();
 
         String dataSourceKey = request.getParameter("dataSourceID");
         long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
-        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dataSourceID);
+        DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dataSourceID, conn);
         ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
         JSONArray array;
         List<EIDescriptor> descriptors = new UserUploadService().getFeedAnalysisTreeForDataSource(new DataSourceDescriptor(null, dataSourceID, 0, false, 0));
@@ -79,6 +82,32 @@ public class DataSourceInfoServlet extends JSONServlet {
         responseObject.put("data_source", dataSourceDescriptor.toJSON(md));
         responseObject.put("reports", array);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
+    }
+
+    @Override
+    protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        JSONObject responseObject = new JSONObject();
+        new UserUploadService().deleteReports(((net.minidev.json.JSONArray) jsonObject.get("reports")).stream().map((a) -> {
+            switch(String.valueOf(((net.minidev.json.JSONObject) a).get("type"))) {
+                case "report":
+                    InsightResponse ir = new AnalysisService().openAnalysisIfPossible(String.valueOf(((net.minidev.json.JSONObject) a).get("url_key")));
+                    if(ir.getInsightDescriptor() != null) {
+                        return ir.getInsightDescriptor();
+                    }
+                    throw new SecurityException();
+                case "dashboard":
+                    return new DashboardService().getDashboardDescriptor(String.valueOf(((net.minidev.json.JSONObject) a).get("url_key")), conn);
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+        ).collect(Collectors.toList()));
+        return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
+    }
+
+    @Override
+    protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        throw new UnsupportedOperationException();
     }
 
 }
