@@ -169,6 +169,9 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     } else {
                         string = value.toString();
                     }
+                    if (string.length() > 100) {
+                        string = string.substring(0, 100);
+                    }
                     String escaped = escape(string);
 
                     rowValues[j++] = escaped;
