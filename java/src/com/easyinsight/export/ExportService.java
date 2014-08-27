@@ -606,7 +606,7 @@ public class ExportService {
         }
     }
 
-    private boolean toDirectPDF(int reportType) {
+    public static boolean toDirectPDF(int reportType) {
         return (reportType == WSAnalysisDefinition.LIST || reportType == WSAnalysisDefinition.TREE ||
                 reportType == WSAnalysisDefinition.CROSSTAB || reportType == WSAnalysisDefinition.SUMMARY ||
                 reportType == WSAnalysisDefinition.FORM || reportType == WSAnalysisDefinition.YTD ||
@@ -1280,7 +1280,7 @@ public class ExportService {
     }
 
     public Element crosstabToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
-                                    ExportMetadata exportMetadata) throws DocumentException {
+                                      ExportMetadata exportMetadata) throws DocumentException {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
@@ -4319,33 +4319,34 @@ public class ExportService {
 
                         if (headerItem == analysisItem) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
-                                double summary = listDataResults.getSummaries()[j];
-                                if (Double.isNaN(summary) || Double.isInfinite(summary)) {
-                                    summary = 0;
-                                }
-                                StringBuilder styleString = new StringBuilder(tdStyle);
-                                String align = "left";
-                                if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
-                                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
-                                    if (textReportFieldExtension.getAlign() != null) {
-                                        if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
-                                            align = "left";
-                                        } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
-                                            align = "center";
-                                        } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
-                                            align = "right";
-                                        }
-                                    }
-                                    styleString.append(align);
-                                    if (textReportFieldExtension.getFixedWidth() > 0) {
-                                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
-                                    }
+                                Value summary = (Value) listDataResults.getAdditionalProperties().get("summary" + headerItem.qualifiedName());
+                                if (summary == null) {
+                                    sb.append("<td></td>");
                                 } else {
-                                    styleString.append(align);
+                                    StringBuilder styleString = new StringBuilder(tdStyle);
+                                    String align = "left";
+                                    if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                                        TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) headerItem.getReportFieldExtension();
+                                        if (textReportFieldExtension.getAlign() != null) {
+                                            if ("Left".equals(textReportFieldExtension.getAlign()) || "left".equals(textReportFieldExtension.getAlign())) {
+                                                align = "left";
+                                            } else if ("Center".equals(textReportFieldExtension.getAlign()) || "center".equals(textReportFieldExtension.getAlign())) {
+                                                align = "center";
+                                            } else if ("Right".equals(textReportFieldExtension.getAlign()) || "right".equals(textReportFieldExtension.getAlign())) {
+                                                align = "right";
+                                            }
+                                        }
+                                        styleString.append(align);
+                                        if (textReportFieldExtension.getFixedWidth() > 0) {
+                                            styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                                        }
+                                    } else {
+                                        styleString.append(align);
+                                    }
+                                    sb.append("<td style=\"").append(styleString.toString()).append("\">");
+                                    sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, summary, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+                                    sb.append("</td>");
                                 }
-                                sb.append("<td style=\"").append(styleString.toString()).append("\">");
-                                sb.append(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, headerItem, new NumericValue(summary), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
-                                sb.append("</td>");
                             } else {
                                 sb.append("<td></td>");
                             }
@@ -4555,14 +4556,14 @@ public class ExportService {
                     } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                         DrillThrough drillThrough = (DrillThrough) defaultLink;
                         sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
-                                                        sb.append(report.getUrlKey());
-                                                        sb.append("\" data-drillthroughid=\"");
-                                                        sb.append(drillThrough.createID());
-                                                        sb.append("\" data-embedded=\"");
-                                                        sb.append(exportProperties.isEmbedded());
-                                                        sb.append("\" data-source=\"");
-                                                        sb.append(analysisItem.getAnalysisItemID());
-                                                        sb.append("\"");
+                        sb.append(report.getUrlKey());
+                        sb.append("\" data-drillthroughid=\"");
+                        sb.append(drillThrough.createID());
+                        sb.append("\" data-embedded=\"");
+                        sb.append(exportProperties.isEmbedded());
+                        sb.append("\" data-source=\"");
+                        sb.append(analysisItem.getAnalysisItemID());
+                        sb.append("\"");
                         if (drillThrough.isFilterRowGroupings()) {
 
 
