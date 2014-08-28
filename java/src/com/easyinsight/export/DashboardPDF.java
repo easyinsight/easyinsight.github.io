@@ -163,7 +163,8 @@ public class DashboardPDF {
         throw new RuntimeException("Timeout");
     }
 
-    public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images, int timezoneOffset, boolean includeHeader) {
+    public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images, int timezoneOffset, boolean includeHeader,
+                            boolean landscapeOrientation) {
         // have to find the underlying grid of reports
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -184,7 +185,11 @@ public class DashboardPDF {
             DashboardElement element = findElementToRender(root, selected, replaceFilters);
             populateReportData(element, conn, selected, reportMap, replaceFilters);
             Document document;
-            document = new Document(PageSize.A4.rotate(), 0, 0, 5, 5);
+            if (landscapeOrientation) {
+                document = new Document(PageSize.A4.rotate(), 0, 0, 5, 5);
+            } else {
+                document = new Document(PageSize.A4, 0, 0, 5, 5);
+            }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             PdfWriter.getInstance(document, baos);

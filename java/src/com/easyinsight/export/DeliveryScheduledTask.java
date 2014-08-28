@@ -526,7 +526,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         positions = new DashboardStackPositions();
                     }
                     byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, new HashMap<>(),
-                            insightRequestMetadata.getUtcOffset(), deliveryExtension.isShowHeader());
+                            insightRequestMetadata.getUtcOffset(), deliveryExtension.isShowHeader(), !"Portrait".equals(deliveryExtension.getOrientation()));
                     return new DeliveryResult(new AttachmentInfo(bytes, dashboard.getName() + ".pdf", "application/pdf"));
                 } else {
                     return dashboardToPDFViaFlash(deliveryInfo, conn);

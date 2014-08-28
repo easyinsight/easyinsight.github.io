@@ -474,7 +474,7 @@ public class ExportService {
         SecurityUtil.authorizeDashboard(dashboard.getId());
         try {
             // todo: fix
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true);
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true, true);
             EIConnection conn = Database.instance().getConnection();
             try {
                 toDatabase(dashboard.getName(), bytes, conn);
