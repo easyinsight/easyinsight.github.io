@@ -1,8 +1,10 @@
 package com.easyinsight.analysis {
 
+import com.easyinsight.analysis.heatmap.HTMLIFrameModule;
 import com.easyinsight.analysis.heatmap.TopoMapDefinition;
 import com.easyinsight.analysis.list.SizeOverrideEvent;
 import com.easyinsight.analysis.service.EmbeddedDataService;
+import com.easyinsight.analysis.service.EmbeddedHTMLDataService;
 import com.easyinsight.analysis.service.ReportRetrievalFault;
 import com.easyinsight.analysis.summary.MultiSummaryDefinition;
 import com.easyinsight.customupload.ProblemDataEvent;
@@ -329,6 +331,50 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         retrieveData(true);
     }
 
+    private var _previousDataService:IEmbeddedDataService;
+    private var _previousReportRenderer:IReportRenderer;
+
+    private var htmlModule:HTMLIFrameModule;
+    private var htmlDataService:EmbeddedHTMLDataService;
+
+    private function htmlHandling():void {
+        if (_report.useHTMLInFlash()) {
+            if (_reportRenderer is HTMLIFrameModule) {
+                // we're okay
+            } else {
+                _previousDataService = _dataService;
+                _previousReportRenderer = _reportRenderer;
+                if (htmlModule == null) {
+                    htmlModule = new HTMLIFrameModule();
+                    htmlModule.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
+                    htmlModule.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
+                    htmlModule.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
+                    htmlModule.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, onItemChange, false, 0, true);
+                    UIComponent(htmlModule).percentWidth = 100;
+                    UIComponent(htmlModule).percentHeight = 100;
+                }
+                if (htmlDataService == null) {
+                    htmlDataService = new EmbeddedHTMLDataService();
+                    htmlDataService.preserveValues = _reportRenderer.preserveValues();
+                    htmlDataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+                    htmlDataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+                    htmlDataService.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
+                    htmlDataService.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, retrievalFault);
+                    htmlDataService.addEventListener(EIErrorEvent.ERROR, onError);
+                    _dataService = htmlDataService;
+                    _reportRenderer = htmlModule;
+                }
+            }
+        } else {
+            if (_reportRenderer is HTMLIFrameModule) {
+                _dataService = _previousDataService;
+                _reportRenderer = _previousReportRenderer;
+            } else {
+
+            }
+        }
+    }
+
     public function retrieveData(forceRetrieve:Boolean = false):void {
         if (_adHocMode || forceRetrieve) {
             if (_reportRenderer == null) {
@@ -349,6 +395,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
                         filters.addItem(filter);
                     }
                 }
+                htmlHandling();
                 _dataService.retrieveData(reportID, dataSourceID, filters, false, drillthroughFilters, _noCache, overrides, createRequestParams(), _additionalItems);
             }
         }
