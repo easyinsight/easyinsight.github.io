@@ -167,7 +167,7 @@ public abstract class JSONServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        authProcessor(req, resp, () -> {
+        authProcessor(req, resp, authorizeFilter(req, resp, () -> {
             try {
                 InputStream is = req.getInputStream();
                 JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -217,7 +217,7 @@ public abstract class JSONServlet extends HttpServlet {
             } catch (Exception e) {
                 sendError(400, "Your request was malformed.", resp);
             }
-        });
+        }));
     }
 
     @Override
