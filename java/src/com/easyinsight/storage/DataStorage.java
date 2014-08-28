@@ -954,7 +954,7 @@ public class DataStorage implements IDataStorage {
                     AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
                     KeyMetadata baseMetadata = this.keys.get(testKey);
                     if ((!insightRequestMetadata.isAggregateQuery() || analysisMeasure.getAggregation() != AggregationTypes.COUNT_DISTINCT) && baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                        System.out.println("forcing to alt value");
+                        System.out.println("forcing " + analysisMeasure.toDisplay() + " to alt value");
                         keys.put(key, baseMetadata);
                     } else {
                         keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
@@ -1159,6 +1159,7 @@ public class DataStorage implements IDataStorage {
                             if (analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
                                 cDistinct = true;
                                 row.addValue(aggregateKey, new NumericValue(1));
+                                i++;
                             }
                         }
                         if (!cDistinct) {
