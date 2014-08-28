@@ -910,7 +910,7 @@ public class DataStorage implements IDataStorage {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
         }
-        reportItems = new ArrayList<AnalysisItem>(reportItems);
+        reportItems = new ArrayList<>(reportItems);
         boolean countDistinct = false;
         Set<String> keyStrings = new HashSet<String>();
 
@@ -947,19 +947,19 @@ public class DataStorage implements IDataStorage {
                     keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                    if (analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                    /*if (!insightRequestMetadata.isOptimizeDays() && analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
                         countDistinct = true;
                         keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+                    } else {*/
+                    AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
+                    KeyMetadata baseMetadata = this.keys.get(testKey);
+                    if ((!insightRequestMetadata.isAggregateQuery() || analysisMeasure.getAggregation() != AggregationTypes.COUNT_DISTINCT) && baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
+                        System.out.println("forcing to alt value");
+                        keys.put(key, baseMetadata);
                     } else {
-                        AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
-                        KeyMetadata baseMetadata = this.keys.get(testKey);
-                        if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                            System.out.println("forcing to alt value");
-                            keys.put(key, baseMetadata);
-                        } else {
-                            keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
-                        }
+                        keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
                     }
+                    //}
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     keys.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
                 } else {
@@ -1004,6 +1004,8 @@ public class DataStorage implements IDataStorage {
         } else {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
+
+        System.out.println(queryBuilder.toString());
 
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
@@ -1151,15 +1153,25 @@ public class DataStorage implements IDataStorage {
                             row.addValue(aggregateKey, new EmptyValue());
                         }
                     } else {
-                        try {
-                            String value = dataRS.getString(i++);
-                            if (dataRS.wasNull()) {
-                                row.addValue(aggregateKey, new EmptyValue());
-                            } else {
-                                row.addValue(aggregateKey, new StringValue(value));
+                        boolean cDistinct = false;
+                        if (!aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                            AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                            if (analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                                cDistinct = true;
+                                row.addValue(aggregateKey, new NumericValue(1));
                             }
-                        } catch (SQLException e) {
-                            row.addValue(aggregateKey, new EmptyValue());
+                        }
+                        if (!cDistinct) {
+                            try {
+                                String value = dataRS.getString(i++);
+                                if (dataRS.wasNull()) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    row.addValue(aggregateKey, new StringValue(value));
+                                }
+                            } catch (SQLException e) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            }
                         }
                     }
                 }
@@ -1275,8 +1287,14 @@ public class DataStorage implements IDataStorage {
                 AggregateKey testKey = new AggregateKey(analysisMeasure.createAggregateKey().toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
                 KeyMetadata baseMetadata = this.keys.get(testKey);
                 if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                    groupByBuilder.append(columnName);
-                    groupByBuilder.append(",");
+                    int aggregation = analysisMeasure.getQueryAggregation();
+                    if (aggregation == AggregationTypes.COUNT_DISTINCT) {
+                        columnName = "COUNT(DISTINCT " + columnName + ")";
+                        //groupByBuilder.append(columnName);
+                    } else {
+                        groupByBuilder.append(columnName);
+                        groupByBuilder.append(",");
+                    }
                 } else {
                     int aggregation = analysisMeasure.getQueryAggregation();
                     if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {
