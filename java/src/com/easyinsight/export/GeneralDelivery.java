@@ -6,7 +6,6 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
-import com.easyinsight.security.SecurityUtil;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
@@ -39,7 +38,7 @@ public class GeneralDelivery extends ScheduledDelivery {
         deliveryLabel = xmlImportMetadata.getValue(root, "deliveryLabel/text()");
         body = xmlImportMetadata.getValue(root, "body/text()");
         Nodes deliveryInfoNodes = root.query("deliveryInfos/deliveryInfo");
-        deliveryInfos = new ArrayList<DeliveryInfo>();
+        deliveryInfos = new ArrayList<>();
         for (int i = 0; i < deliveryInfoNodes.size(); i++) {
             Element deliveryInfoNode = (Element) deliveryInfoNodes.get(i);
             DeliveryInfo deliveryInfo = new DeliveryInfo();
@@ -186,7 +185,7 @@ public class GeneralDelivery extends ScheduledDelivery {
         long id = Database.instance().getAutoGenKey(insertStmt);
         PreparedStatement insertReportStmt = conn.prepareStatement("INSERT INTO delivery_to_report (general_delivery_id, report_id, delivery_index, delivery_format, delivery_label, send_if_no_data, configuration_id) values (?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
-        PreparedStatement insertDashboardStmt = conn.prepareStatement("INSERT INTO delivery_to_dashboard (general_delivery_id, dashboard_id, delivery_index, delivery_format, delivery_label, send_if_no_data) values (?, ?, ?, ?, ?, ?)",
+        PreparedStatement insertDashboardStmt = conn.prepareStatement("INSERT INTO delivery_to_dashboard (general_delivery_id, dashboard_id, delivery_index, delivery_format, delivery_label, send_if_no_data, saved_configuration_id) values (?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         PreparedStatement insertScorecardStmt = conn.prepareStatement("INSERT INTO delivery_to_scorecard (general_delivery_id, scorecard_id, delivery_index, delivery_format) values (?, ?, ?, ?)");
         PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO delivery_to_report_to_filter (delivery_to_report_id, filter_id) values (?, ?)");
@@ -232,8 +231,14 @@ public class GeneralDelivery extends ScheduledDelivery {
                 insertDashboardStmt.setInt(4, deliveryInfo.getFormat());
                 insertDashboardStmt.setString(5, deliveryInfo.getLabel());
                 insertDashboardStmt.setBoolean(6, deliveryInfo.isSendIfNoData());
+                if (deliveryInfo.getConfigurationID() == 0) {
+                    insertDashboardStmt.setNull(7, Types.BIGINT);
+                } else {
+                    insertDashboardStmt.setLong(7, deliveryInfo.getConfigurationID());
+                }
                 insertDashboardStmt.execute();
                 long insertDashboardID = Database.instance().getAutoGenKey(insertDashboardStmt);
+                insertDashboardStmt.close();
                 if (deliveryInfo.getDeliveryExtension() != null) {
                     deliveryInfo.getDeliveryExtension().save(conn, 0, 0, insertDashboardID);
                 }
@@ -319,7 +324,7 @@ public class GeneralDelivery extends ScheduledDelivery {
                 infos.add(deliveryInfo);
             }
             getScorecardStmt.close();
-            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_DASHBOARD_ID, DATA_SOURCE_ID, DELIVERY_LABEL, SEND_IF_NO_DATA FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_DASHBOARD_ID, DATA_SOURCE_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, SAVED_CONFIGURATION_ID FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_dashboard.dashboard_id = dashboard.dashboard_id");
 
             getDashboardStmt.setLong(1, id);
@@ -334,16 +339,12 @@ public class GeneralDelivery extends ScheduledDelivery {
                 deliveryInfo.setDataSourceID(dashboardRS.getLong(6));
                 deliveryInfo.setLabel(dashboardRS.getString(7));
                 deliveryInfo.setSendIfNoData(dashboardRS.getBoolean(8));
+                deliveryInfo.setConfigurationID(dashboardRS.getLong(9));
                 deliveryInfo.setType(DeliveryInfo.DASHBOARD);
                 infos.add(deliveryInfo);
                 deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, 0, deliveryInfo.getFormat(), deliveryInfoID));
             }
-            Collections.sort(infos, new Comparator<DeliveryInfo>() {
-
-                public int compare(DeliveryInfo deliveryInfo, DeliveryInfo deliveryInfo1) {
-                    return ((Integer) deliveryInfo.getIndex()).compareTo(deliveryInfo1.getIndex());
-                }
-            });
+            Collections.sort(infos, (deliveryInfo, deliveryInfo1) -> ((Integer) deliveryInfo.getIndex()).compareTo(deliveryInfo1.getIndex()));
             setDeliveryInfos(infos);
         }
         queryStmt.close();
