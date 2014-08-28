@@ -115,7 +115,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
         typeStmt.close();
         info.setEnd(new Date());
-        BenchmarkManager.measureTask(info);
     }
 
     private static class DeliveryResult {
@@ -516,10 +515,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
                                 "saved_configuration.saved_configuration_id = ?");
                         urlKeyStmt.setLong(1, deliveryInfo.getConfigurationID());
                         ResultSet urlRS = urlKeyStmt.executeQuery();
-                        urlRS.next();
-                        String key = urlRS.getString(1);
+                        if (urlRS.next()) {
+                            String key = urlRS.getString(1);
 
-                        positions = new DashboardService().getConfigurationForDashboard(key).getSavedConfiguration().getDashboardStackPositions();
+                            positions = new DashboardService().getConfigurationForDashboard(key).getSavedConfiguration().getDashboardStackPositions();
+                        } else {
+                            positions = new DashboardStackPositions();
+                        }
                     } else {
                         positions = new DashboardStackPositions();
                     }
