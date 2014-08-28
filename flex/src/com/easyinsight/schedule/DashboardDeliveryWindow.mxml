@@ -52,7 +52,6 @@
                 dashboardID = _deliveryInfo.id;
                 deliveryExtension = _deliveryInfo.deliveryExtension;
                 configurationID = _deliveryInfo.configurationID;
-                Alert.show("hrm");
                 if (deliveryExtension != null) {
                     showHeader = PDFDeliveryExtension(deliveryExtension).showHeader;
                     pdfWidth = PDFDeliveryExtension(deliveryExtension).width;
@@ -114,7 +113,7 @@
         private var stackIndex:int = 0;
 
         [Bindable]
-        private var generateByHTML:int;
+        private var generateByHTML:int = 1;
         ]]></mx:Script>
     <mx:RemoteObject id="dashboardService" destination="dashboardService">
         <mx:method name="getConfigurationsForDashboard" result="gotConfigurations()"/>
