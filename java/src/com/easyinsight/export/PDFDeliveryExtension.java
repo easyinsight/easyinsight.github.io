@@ -11,11 +11,22 @@ import java.sql.SQLException;
  * Time: 8:48 PM
  */
 public class PDFDeliveryExtension extends DeliveryExtension {
+
+    private int generateByHTML;
+
     private boolean showHeader;
     private boolean displayType;
     private int width;
     private int height;
     private String orientation = "Landscape";
+
+    public int getGenerateByHTML() {
+        return generateByHTML;
+    }
+
+    public void setGenerateByHTML(int generateByHTML) {
+        this.generateByHTML = generateByHTML;
+    }
 
     public boolean isDisplayType() {
         return displayType;
@@ -68,35 +79,41 @@ public class PDFDeliveryExtension extends DeliveryExtension {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM pdf_delivery_extension WHERE report_delivery_id = ?");
             deleteStmt.setLong(1, deliveryID);
             deleteStmt.executeUpdate();
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (report_delivery_id, show_header, export_mode, width, height) values (?, ?, ?, ?, ?)");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (report_delivery_id, show_header, export_mode, width, height, render_mode) values (?, ?, ?, ?, ?, ?)");
             insertStmt.setLong(1, deliveryID);
             insertStmt.setBoolean(2, showHeader);
             insertStmt.setBoolean(3, displayType);
             insertStmt.setInt(4, width);
             insertStmt.setInt(5, height);
+            insertStmt.setInt(6, generateByHTML);
             insertStmt.execute();
+            insertStmt.close();
         } else if (deliveryToReportID > 0) {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM pdf_delivery_extension WHERE delivery_to_report_id = ?");
             deleteStmt.setLong(1, deliveryToReportID);
             deleteStmt.executeUpdate();
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (delivery_to_report_id, show_header, export_mode, width, height) values (?, ?, ?, ?, ?)");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (delivery_to_report_id, show_header, export_mode, width, height, render_mode) values (?, ?, ?, ?, ?, ?)");
             insertStmt.setLong(1, deliveryToReportID);
             insertStmt.setBoolean(2, showHeader);
             insertStmt.setBoolean(3, displayType);
             insertStmt.setInt(4, width);
             insertStmt.setInt(5, height);
+            insertStmt.setInt(6, generateByHTML);
             insertStmt.execute();
+            insertStmt.close();
         } else {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM pdf_delivery_extension WHERE delivery_to_dashboard_id = ?");
             deleteStmt.setLong(1, dashboardID);
             deleteStmt.executeUpdate();
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (delivery_to_dashboard_id, show_header, export_mode, width, height) values (?, ?, ?, ?, ?)");
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO pdf_delivery_extension (delivery_to_dashboard_id, show_header, export_mode, width, height, render_mode) values (?, ?, ?, ?, ?, ?)");
             insertStmt.setLong(1, dashboardID);
             insertStmt.setBoolean(2, showHeader);
             insertStmt.setBoolean(3, displayType);
             insertStmt.setInt(4, width);
             insertStmt.setInt(5, height);
+            insertStmt.setInt(6, generateByHTML);
             insertStmt.execute();
+            insertStmt.close();
         }
     }
 }

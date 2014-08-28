@@ -50,6 +50,25 @@ public class ConfigLoader {
 
     private String memcachedUrl;
 
+    private String baseSeleniumQueue = "EISelenium";
+    private String baseSeleniumResponseQueue = "EISeleniumResponse";
+
+    public String getBaseSeleniumQueue() {
+        return baseSeleniumQueue;
+    }
+
+    public void setBaseSeleniumQueue(String baseSeleniumQueue) {
+        this.baseSeleniumQueue = baseSeleniumQueue;
+    }
+
+    public String getBaseSeleniumResponseQueue() {
+        return baseSeleniumResponseQueue;
+    }
+
+    public void setBaseSeleniumResponseQueue(String baseSeleniumResponseQueue) {
+        this.baseSeleniumResponseQueue = baseSeleniumResponseQueue;
+    }
+
     public boolean isEmailRunner() {
         return emailRunner;
     }
@@ -279,6 +298,14 @@ public class ConfigLoader {
             reportDeliveryQueue = (String) properties.get("report.delivery.queue");
             memcachedUrl = (String) properties.get("memcached.url");
 
+            baseSeleniumQueue = (String) properties.get("base.selenium.queue");
+            if (baseSeleniumQueue == null || "".equals(baseSeleniumQueue)) {
+                baseSeleniumQueue = "EISelenium";
+            }
+            baseSeleniumResponseQueue = (String) properties.get("base.selenium.response.queue");
+            if (baseSeleniumQueue == null || "".equals(baseSeleniumQueue)) {
+                baseSeleniumQueue = "EISeleniumResponse";
+            }
         } catch (IOException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

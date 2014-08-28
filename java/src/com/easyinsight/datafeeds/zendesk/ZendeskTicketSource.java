@@ -129,6 +129,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                         } else if ("NumericField".equals(type) || "FieldDecimal".equals(type) || "FieldInteger".equals(type) || "FieldNumeric".equals(type) ||
                                 "integer".equals(type) || "decimal".equals(type) || "numeric".equals(type)) {
                             item = new AnalysisMeasure(customKey, title, AggregationTypes.SUM);
+                        } else if ("date".equals(type)) {
+                            item = new AnalysisDateDimension(customKey, title, AnalysisDateDimension.DAY_LEVEL);
                         } else {
                             item = null;
                         }
@@ -264,6 +266,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     for (Map.Entry<String, Key> entry : keys.entrySet()) {
                         if (entry.getKey().startsWith("zd")) {
                             int customFieldID = Integer.parseInt(entry.getKey().substring(2));
+
+
                             Object customFieldObject = map.get("field_" + customFieldID);
                             if (customFieldObject != null) {
                                 row.addValue(entry.getKey(), customFieldObject.toString());

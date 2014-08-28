@@ -3,6 +3,7 @@ package com.easyinsight.storage;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.csvreader.CsvWriter;
@@ -481,7 +482,7 @@ public class DataStorage implements IDataStorage {
                     sb.append(key.toSQL()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape truncatecolumns removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
@@ -550,7 +551,9 @@ public class DataStorage implements IDataStorage {
                     sb.append("k").append(key.getKeyID()).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
-                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                // TODO: argh
+                // String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
+                String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
@@ -907,7 +910,7 @@ public class DataStorage implements IDataStorage {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
         }
-        reportItems = new ArrayList<AnalysisItem>(reportItems);
+        reportItems = new ArrayList<>(reportItems);
         boolean countDistinct = false;
         Set<String> keyStrings = new HashSet<String>();
 
@@ -944,19 +947,19 @@ public class DataStorage implements IDataStorage {
                     keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                 } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                    if (analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                    /*if (!insightRequestMetadata.isOptimizeDays() && analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
                         countDistinct = true;
                         keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+                    } else {*/
+                    AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
+                    KeyMetadata baseMetadata = this.keys.get(testKey);
+                    if ((!insightRequestMetadata.isAggregateQuery() || analysisMeasure.getAggregation() != AggregationTypes.COUNT_DISTINCT) && baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
+                        System.out.println("forcing " + analysisMeasure.toDisplay() + " to alt value");
+                        keys.put(key, baseMetadata);
                     } else {
-                        AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
-                        KeyMetadata baseMetadata = this.keys.get(testKey);
-                        if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                            System.out.println("forcing to alt value");
-                            keys.put(key, baseMetadata);
-                        } else {
-                            keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
-                        }
+                        keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
                     }
+                    //}
                 } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                     keys.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
                 } else {
@@ -1001,6 +1004,8 @@ public class DataStorage implements IDataStorage {
         } else {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
+
+        System.out.println(queryBuilder.toString());
 
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
@@ -1148,15 +1153,26 @@ public class DataStorage implements IDataStorage {
                             row.addValue(aggregateKey, new EmptyValue());
                         }
                     } else {
-                        try {
-                            String value = dataRS.getString(i++);
-                            if (dataRS.wasNull()) {
-                                row.addValue(aggregateKey, new EmptyValue());
-                            } else {
-                                row.addValue(aggregateKey, new StringValue(value));
+                        boolean cDistinct = false;
+                        if (!aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                            AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                            if (analysisMeasure.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                                cDistinct = true;
+                                row.addValue(aggregateKey, new NumericValue(1));
+                                i++;
                             }
-                        } catch (SQLException e) {
-                            row.addValue(aggregateKey, new EmptyValue());
+                        }
+                        if (!cDistinct) {
+                            try {
+                                String value = dataRS.getString(i++);
+                                if (dataRS.wasNull()) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    row.addValue(aggregateKey, new StringValue(value));
+                                }
+                            } catch (SQLException e) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            }
                         }
                     }
                 }
@@ -1272,8 +1288,14 @@ public class DataStorage implements IDataStorage {
                 AggregateKey testKey = new AggregateKey(analysisMeasure.createAggregateKey().toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
                 KeyMetadata baseMetadata = this.keys.get(testKey);
                 if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                    groupByBuilder.append(columnName);
-                    groupByBuilder.append(",");
+                    int aggregation = analysisMeasure.getQueryAggregation();
+                    if (aggregation == AggregationTypes.COUNT_DISTINCT) {
+                        columnName = "COUNT(DISTINCT " + columnName + ")";
+                        //groupByBuilder.append(columnName);
+                    } else {
+                        groupByBuilder.append(columnName);
+                        groupByBuilder.append(",");
+                    }
                 } else {
                     int aggregation = analysisMeasure.getQueryAggregation();
                     if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {
@@ -2278,5 +2300,30 @@ stmt.setFetchSize(Integer.MIN_VALUE);
         csvWriter.close();
         fos.close();
         return file;
+    }
+
+    public static void main(String[] args) {
+        AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("AKIAI5YYYFRMWFLLEC2A", "NmonY27/vE03AeGNWhLBmkR41kJrvbWSYhLzh5pE"));
+        List<Bucket> buckets = s3.listBuckets();
+        for (Bucket bucket : buckets) {
+            if (bucket.getName().startsWith("refreshdt")) {
+                System.out.println(bucket.getName());
+                String bucketName = bucket.getName();
+                ObjectListing objectListing = s3.listObjects(bucketName);
+                List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+                for (S3ObjectSummary summary : summaries) {
+                    System.out.println("\t" + summary.getKey());
+                    s3.deleteObject(bucketName, summary.getKey());
+                }
+                s3.deleteBucket(bucketName);
+            }
+            /*ObjectListing objectListing = s3.listObjects();
+            List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
+            for (S3ObjectSummary summary : summaries) {
+                System.out.println("\t" + summary.getKey());
+                s3.deleteObject(bucketName, summary.getKey());
+            }
+            s3.deleteBucket(bucketName);*/
+        }
     }
 }

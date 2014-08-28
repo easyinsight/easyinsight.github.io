@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.csvreader.CsvWriter;
+
 import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
@@ -18,11 +18,9 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.apache.commons.lang3.text.translate.EntityArrays;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
-import org.apache.commons.lang3.text.translate.UnicodeEscaper;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -171,12 +169,17 @@ public class AltPostgresStorageDialect implements IStorageDialect {
                     } else {
                         string = value.toString();
                     }
-                    if (string.length() > 253) {
-                        string = string.substring(0, 253);
+                    if (string.length() > 100) {
+                        string = string.substring(0, 100);
                     }
-                    rowValues[j++] = escape(string);
+                    String escaped = escape(string);
+
+                    rowValues[j++] = escaped;
                 } else {
                     String string = value.toString();
+                    if (string.length() > 253) {
+                        System.out.println("*** " + string);
+                    }
                     rowValues[j++] = escape(string);
                 }
             }

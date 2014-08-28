@@ -62,10 +62,10 @@
 
                 var formattingBox:VBox = new VBox();
                 /*var formatText:Text = new Text();
-                formatText.maxWidth = 500;
-                formatText.text = "Depending on your report type, you can set a wide variety of formatting options to ensure that your data";
-                formattingBox.addChild(formatText);*/
-                formattingBox.verticalScrollPolicy = "on";
+                 formatText.maxWidth = 500;
+                 formatText.text = "Depending on your report type, you can set a wide variety of formatting options to ensure that your data";
+                 formattingBox.addChild(formatText);*/
+                formattingBox.verticalScrollPolicy = "auto";
                 formattingBox.percentWidth = 100;
                 formattingBox.percentHeight = 100;
                 formattingBox.setStyle("borderThickness", 1);
@@ -93,7 +93,7 @@
                 colorExplText.maxWidth = 500;
                 colorExplText.text = "For your report, you can either use the default color scheme specified on your account skin (found under the Account -> Account Skin section of the user interface) by setting the color set below to Primary or Secondary, or you can customize this report alone by setting the color set to None.";
                 colorBox.addChild(colorExplText);
-                colorBox.verticalScrollPolicy = "on";
+                colorBox.verticalScrollPolicy = "auto";
                 colorBox.percentWidth = 100;
                 colorBox.percentHeight = 100;
                 colorBox.setStyle("borderThickness", 1);
@@ -121,7 +121,7 @@
             limitItems = StyleConfiguration.getLimitItems(_definition, _allFields);
             if (limitItems.length > 0) {
                 var formBox:Box = new Box();
-                formBox.verticalScrollPolicy = "on";
+                formBox.verticalScrollPolicy = "auto";
                 formBox.percentWidth = 100;
                 formBox.percentHeight = 100;
                 formBox.setStyle("borderThickness", 1);
@@ -143,7 +143,7 @@
             reportSpecificItems = StyleConfiguration.createReportPage(_definition, _allFields);
             if (reportSpecificItems.length > 0) {
                 var repBox:Box = new Box();
-                repBox.verticalScrollPolicy = "on";
+                repBox.verticalScrollPolicy = "auto";
                 repBox.percentWidth = 100;
                 repBox.percentHeight = 100;
                 repBox.setStyle("borderThickness", 1);
@@ -169,7 +169,7 @@
                 experimentText.maxWidth = 500;
                 experimentText.text = "These are configuration settings which are still in a beta state of readiness. We don't recommend using these settings unless directed to by support.";
                 experimentBox.addChild(experimentText);
-                experimentBox.verticalScrollPolicy = "on";
+                experimentBox.verticalScrollPolicy = "auto";
                 experimentBox.percentWidth = 100;
                 experimentBox.percentHeight = 100;
                 experimentBox.setStyle("borderThickness", 1);
@@ -280,13 +280,21 @@
         private function onItemClick(event:ItemClickEvent):void {
             tabNavigator.selectedIndex = event.index;
         }
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+        }
         ]]>
     </mx:Script>
     <mx:HBox horizontalGap="0">
-    <mx:TabBar direction="vertical" dataProvider="{sections}" itemClick="onItemClick(event)" tabStyleName="propTabBarStyle" width="160"/>
+        <mx:Canvas>
+            <mx:TabBar direction="vertical" dataProvider="{sections}" itemClick="onItemClick(event)" tabStyleName="propTabBarStyle" width="160" id="tabBar"/>
+            <mx:HRule y="168" width="160" strokeWidth="1" strokeColor="#000000" id="tabRule"/>
+        </mx:Canvas>
+
     <mx:ViewStack id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="730" height="425">
         <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
-                horizontalAlign="center" label="Report Properties" verticalScrollPolicy="on">
+                horizontalAlign="center" label="Report Properties" verticalScrollPolicy="auto">
             <mx:Form label="General Properties">
                 <mx:FormItem label="Report Name:">
                     <mx:TextInput id="reportNameInput" width="380" text="{reportName}"/>
@@ -313,13 +321,13 @@
             </mx:Form>
         </mx:Box>
         <mx:Box width="100%" height="425" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
-                horizontalAlign="center" label="Report Processing" verticalScrollPolicy="on" id="configBox">
+                horizontalAlign="center" label="Report Processing" verticalScrollPolicy="auto" id="configBox">
             <mx:Form id="form">
 
             </mx:Form>
         </mx:Box>
         <mx:Box width="100%" height="425" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
-                horizontalAlign="center" label="Caching Properties" verticalScrollPolicy="on">
+                horizontalAlign="center" label="Caching Properties" verticalScrollPolicy="auto">
             <mx:Form id="cachingForm">
 
             </mx:Form>

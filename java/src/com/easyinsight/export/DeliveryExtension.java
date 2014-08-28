@@ -20,13 +20,13 @@ public class DeliveryExtension {
         if (format == ReportDelivery.PDF) {
             PreparedStatement stmt;
             if (reportDeliveryID > 0) {
-                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height FROM pdf_delivery_extension WHERE report_delivery_id = ?");
+                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height, render_mode FROM pdf_delivery_extension WHERE report_delivery_id = ?");
                 stmt.setLong(1, reportDeliveryID);
             } else if (dashboardDeliveryID > 0) {
-                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height FROM pdf_delivery_extension WHERE delivery_to_dashboard_id = ?");
+                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height, render_mode FROM pdf_delivery_extension WHERE delivery_to_dashboard_id = ?");
                 stmt.setLong(1, dashboardDeliveryID);
             } else {
-                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height FROM pdf_delivery_extension WHERE delivery_to_report_id = ?");
+                stmt = conn.prepareStatement("SELECT show_header, export_mode, width, height, render_mode FROM pdf_delivery_extension WHERE delivery_to_report_id = ?");
                 stmt.setLong(1, deliveryToReportID);
             }
             ResultSet rs = stmt.executeQuery();
@@ -36,6 +36,7 @@ public class DeliveryExtension {
                 pdfDeliveryExtension.setDisplayType(rs.getBoolean(2));
                 pdfDeliveryExtension.setWidth(rs.getInt(3));
                 pdfDeliveryExtension.setHeight(rs.getInt(4));
+                pdfDeliveryExtension.setGenerateByHTML(rs.getInt(5));
                 return pdfDeliveryExtension;
             }
         }

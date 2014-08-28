@@ -58,7 +58,7 @@ public class AggregationFactory {
                 aggregation = new CountAggregation();
                 break;
             case AggregationTypes.COUNT_DISTINCT:
-                aggregation = new CountAggregation();
+                aggregation = new CountDistinctAggregation();
                 break;
             case AggregationTypes.LAST_VALUE:
                 aggregation = new SumAggregation();
