@@ -206,6 +206,9 @@
                 window.deliveryInfo = event.deliveryInfo;
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
+            } else if (event.deliveryInfo.type == DeliveryInfo.DASHBOARD) {
+                var ext:PDFDeliveryExtension = new PDFDeliveryExtension();
+                event.deliveryInfo.deliveryExtension = ext;
             }
         }
 

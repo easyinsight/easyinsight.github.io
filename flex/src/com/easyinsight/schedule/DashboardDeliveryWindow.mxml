@@ -58,7 +58,6 @@
                     pdfHeight = PDFDeliveryExtension(deliveryExtension).height;
                     orientation = PDFDeliveryExtension(deliveryExtension).orientation;
                     generateByHTML = PDFDeliveryExtension(deliveryExtension).generateByHTML;
-                    Alert.show("generate by HTML = " + generateByHTML);
 
                     if (generateByHTML == 1) {
                         stackIndex = 0;
