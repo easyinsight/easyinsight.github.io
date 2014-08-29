@@ -272,6 +272,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>AsyncMultiSummary</servlet-name>
+        <display-name>AsyncMultiSummary</display-name>
+        <servlet-class>com.easyinsight.html.AsyncMultiSummaryServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>UnsubscribeServlet</servlet-name>
         <display-name>UnsubscribeServlet</display-name>
         <servlet-class>com.easyinsight.users.UnsubscribeServlet</servlet-class>
@@ -1150,6 +1156,11 @@
     <servlet-mapping>
         <servlet-name>AsyncList</servlet-name>
         <url-pattern>/asyncList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AsyncMultiSummary</servlet-name>
+        <url-pattern>/asyncMultiSummary</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

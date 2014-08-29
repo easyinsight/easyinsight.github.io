@@ -1,12 +1,34 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="getConfigurations()" horizontalAlign="left">
     <mx:Script><![CDATA[
+        import com.easyinsight.report.SavedConfiguration;
+
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private var _deliveryInfo:DeliveryInfo;
 
         public function set deliveryInfo(value:DeliveryInfo):void {
             _deliveryInfo = value;
+        }
+
+        private function getConfigurations():void {
+            dashboardService.getConfigurationsForDashboard.send(dashboardID);
+        }
+
+        private function gotConfigurations():void {
+            configurations = dashboardService.getConfigurationsForDashboard.lastResult as ArrayCollection;
+            if (configurationComboBox != null) {
+                configurationComboBox.selectedValue = configurationID;
+            }
+
+            if (configurations.length == 0) {
+                configEnabled = false;
+            } else {
+                configurations.addItemAt({ name: "[ Select a Configuration ]"}, 0);
+                configEnabled = true;
+            }
         }
 
         private var dashboardID:int;
@@ -29,38 +51,103 @@
             if (dashboardID != _deliveryInfo.id) {
                 dashboardID = _deliveryInfo.id;
                 deliveryExtension = _deliveryInfo.deliveryExtension;
+                configurationID = _deliveryInfo.configurationID;
                 if (deliveryExtension != null) {
                     showHeader = PDFDeliveryExtension(deliveryExtension).showHeader;
                     pdfWidth = PDFDeliveryExtension(deliveryExtension).width;
                     pdfHeight = PDFDeliveryExtension(deliveryExtension).height;
                     orientation = PDFDeliveryExtension(deliveryExtension).orientation;
+                    generateByHTML = PDFDeliveryExtension(deliveryExtension).generateByHTML;
+
+                    if (generateByHTML == 1) {
+                        stackIndex = 0;
+                    } else {
+                        stackIndex = 1;
+                    }
                 }
+
+            }
+        }
+
+        private function onRenderChange():void {
+            if (renderGroup.selectedValue == "renderViaHTML") {
+                stackIndex = 0;
+            } else {
+                stackIndex = 1;
             }
         }
 
         public function save():void {
             _deliveryInfo.id = dashboardID;
+            _deliveryInfo.format = 3;
+            if (configurationComboBox.selectedItem is SavedConfiguration) {
+                var sc:SavedConfiguration = configurationComboBox.selectedItem as SavedConfiguration;
+                _deliveryInfo.configurationID = sc.id;
+            } else {
+                _deliveryInfo.configurationID = 0;
+            }
             var ext:PDFDeliveryExtension = new PDFDeliveryExtension();
+            ext.generateByHTML = renderGroup.selectedValue == "renderViaHTML" ? 1 : 0;
             ext.showHeader = showHeaderCheckBox.selected;
-            ext.width = widthStepper.value;
-            ext.height = heightStepper.value;
+            /*ext.width = widthStepper.value;
+            ext.height = heightStepper.value;*/
             ext.orientation = orientationBox.selectedItem as String;
             _deliveryInfo.deliveryExtension = ext;
             PopUpManager.removePopUp(this);
         }
+
+        [Bindable]
+        private var configurations:ArrayCollection;
+
+        [Bindable]
+        private var selectedMode:String;
+
+        [Bindable]
+        private var configEnabled:Boolean;
+
+        [Bindable]
+        private var configurationID:int;
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        [Bindable]
+        private var generateByHTML:int = 1;
         ]]></mx:Script>
+    <mx:RemoteObject id="dashboardService" destination="dashboardService">
+        <mx:method name="getConfigurationsForDashboard" result="gotConfigurations()"/>
+    </mx:RemoteObject>
     <mx:Form>
-        <mx:FormItem label="Show Header:">
+        <mx:FormItem label="Show Header:" labelWidth="200">
             <mx:CheckBox id="showHeaderCheckBox" selected="{showHeader}"/>
         </mx:FormItem>
-        <mx:FormItem label="Width:">
-            <mx:NumericStepper id="widthStepper" value="{pdfWidth}" maximum="3000" minimum="100"/>
+        <mx:FormItem label="Rendering Mode:" labelWidth="200">
+            <mx:RadioButtonGroup id="renderGroup" change="onRenderChange()"/>
+            <mx:RadioButton name="renderViaHTML" value="renderViaHTML" id="renderViaHTML" groupName="renderGroup" selected="{generateByHTML == 1}" label="HTML5 - Render PDF from the new HTML5 interface (recommended)"/>
+            <mx:RadioButton name="renderViaFlash" value="renderViaFlash" id="renderViaFlash" groupName="renderGroup" selected="{generateByHTML == 0}" label="Flash - Render PDF from the legacy Flash interface"/>
         </mx:FormItem>
-        <mx:FormItem label="Height:">
-            <mx:NumericStepper id="heightStepper" value="{pdfHeight}" maximum="3000" minimum="100"/>
+    </mx:Form>
+    <mx:Text maxWidth="500" text="To send out a specific page on a dashboard stack or customize the filters used in the PDF, you can save Configurations on the end user view, and then reference back to those customers with the dropdown below."/>
+    <mx:Form>
+        <mx:FormItem label="Configuration:" id="configurationComboBoxItem" labelWidth="200">
+            <util:SmartComboBox dataProvider="{configurations}" selectedValue="{configurationID}" selectedProperty="id"
+                                id="configurationComboBox" labelField="name" enabled="{configEnabled}"/>
         </mx:FormItem>
-        <mx:FormItem label="Orientation:">
-            <mx:ComboBox id="orientationBox">
+    </mx:Form>
+        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+            <mx:Form/>
+            <mx:Form>
+                <mx:FormItem label="Width:" labelWidth="200">
+                    <mx:NumericStepper id="widthStepper" value="{pdfWidth}" maximum="3000" minimum="100"/>
+                </mx:FormItem>
+                <mx:FormItem label="Height:" labelWidth="200">
+                    <mx:NumericStepper id="heightStepper" value="{pdfHeight}" maximum="3000" minimum="100"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:ViewStack>
+    <mx:Form>
+        <mx:FormItem label="Orientation:" labelWidth="200">
+            <mx:ComboBox id="orientationBox" selectedItem="{orientation}">
                 <mx:dataProvider>
                     <mx:ArrayCollection>
                         <mx:Array>

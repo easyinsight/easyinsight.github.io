@@ -36,10 +36,10 @@
                     $scope.data_sources = $scope.data_sources.filter(function (e, i, l) {
                         return !e.selected;
                     });
-                    delete $scope.to_delete;
-                }, function (r) {
-                    delete $scope.to_delete;
                 });
+                m.result.finally(function(r) {
+                    delete $scope.to_delete;
+                })
             }
         }
 
@@ -182,10 +182,11 @@
                         $scope.reports = $scope.reports.filter(function (e, i, l) {
                             return !e.selected;
                         });
-                        delete $scope.to_delete;
-                    }, function (r) {
-                        delete $scope.to_delete;
+
                     });
+                    m.result.finally(function(r) {
+                        delete $scope.to_delete;
+                    })
                 }
             }
 

@@ -113,10 +113,16 @@ public abstract class JSONServlet extends HttpServlet {
         }
     }
 
+    protected VoidIOFunction authorizeFilter(HttpServletRequest req, HttpServletResponse resp, VoidIOFunction f) {
+        return () -> {
+            f.apply();
+        };
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            authProcessor(req, resp, () ->
+            authProcessor(req, resp, authorizeFilter(req, resp, () ->
                     Database.useConnection((conn) -> {
                         try {
                             ResponseInfo responseInfo;
@@ -146,7 +152,7 @@ public abstract class JSONServlet extends HttpServlet {
                         } catch (Exception e) {
                             sendError(400, "Your request was malformed.", resp);
                         }
-                    }));
+                    })));
 
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException)
@@ -161,7 +167,7 @@ public abstract class JSONServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        authProcessor(req, resp, () -> {
+        authProcessor(req, resp, authorizeFilter(req, resp, () -> {
             try {
                 InputStream is = req.getInputStream();
                 JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -211,12 +217,12 @@ public abstract class JSONServlet extends HttpServlet {
             } catch (Exception e) {
                 sendError(400, "Your request was malformed.", resp);
             }
-        });
+        }));
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        authProcessor(req, resp, () -> {
+        authProcessor(req, resp, authorizeFilter(req, resp, () -> {
             try {
                 InputStream is = req.getInputStream();
                 JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -257,20 +263,31 @@ public abstract class JSONServlet extends HttpServlet {
             } catch (Exception e) {
                 sendError(400, "Your request was malformed.", resp);
             }
-        });
+        }));
 
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        authProcessor(req, resp, () -> {
+        authProcessor(req, resp, authorizeFilter(req, resp, () -> {
             try {
-
+                InputStream is = req.getInputStream();
+                JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+                Object o = parser.parse(is);
+                net.minidev.json.JSONObject postObject;
+                if (o instanceof JSONArray) {
+                    postObject = new net.minidev.json.JSONObject();
+                    postObject.put("rows", o);
+                } else if(o instanceof String) {
+                    postObject = null;
+                } else {
+                    postObject = (net.minidev.json.JSONObject) o;
+                }
                 EIConnection conn = Database.instance().getConnection();
                 ResponseInfo responseInfo;
                 try {
                     conn.setAutoCommit(false);
-                    responseInfo = processDelete(null, conn, req);
+                    responseInfo = processDelete(postObject, conn, req);
                     conn.commit();
                 } catch (ServiceRuntimeException sre) {
                     conn.rollback();
@@ -295,7 +312,7 @@ public abstract class JSONServlet extends HttpServlet {
             } catch (Exception e) {
                 sendError(400, "Your request was malformed.", resp);
             }
-        });
+        }));
     }
 
     protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {

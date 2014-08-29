@@ -1381,6 +1381,53 @@ public class UserUploadService {
         }
     }
 
+    public void addAccountReport(EIDescriptor descriptor, EIConnection conn) throws SQLException {
+        SecurityUtil.authorizeAccountAdmin();
+        PreparedStatement ps = null;
+        try {
+            if (descriptor.getType() == EIDescriptor.REPORT) {
+                ps = conn.prepareStatement("INSERT INTO ACCOUNT_TO_REPORT (ACCOUNT_ID, REPORT_ID) VALUES (?, ?)");
+
+            } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                ps = conn.prepareStatement("INSERT INTO ACCOUNT_TO_DASHBOARD (ACCOUNT_ID, DASHBOARD_ID) VALUES (?, ?)");
+            }
+            if (ps == null) return;
+
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ps.setLong(2, descriptor.getId());
+            ps.execute();
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+        }
+    }
+
+    public void deleteAccountReports(List<EIDescriptor> descriptors, EIConnection conn) throws SQLException {
+        PreparedStatement deleteDashboard = conn.prepareStatement("DELETE FROM ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_ID = ? AND DASHBOARD_ID = ?");
+        PreparedStatement deleteReport = conn.prepareStatement("DELETE FROM ACCOUNT_TO_REPORT WHERE ACCOUNT_ID = ? AND REPORT_ID = ?");
+        try {
+            for(EIDescriptor descriptor: descriptors) {
+                PreparedStatement deleteStmt = null;
+                if(descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    deleteStmt = deleteDashboard;
+                } else if(descriptor.getType() == EIDescriptor.REPORT) {
+                    deleteStmt = deleteReport;
+                }
+                if(deleteStmt == null) return;
+                deleteStmt.setLong(1, SecurityUtil.getAccountID());
+                deleteStmt.setLong(2, descriptor.getId());
+                deleteStmt.execute();
+            }
+        } finally {
+            if(deleteDashboard != null)
+                deleteDashboard.close();
+            if(deleteReport != null)
+                deleteReport.close();
+        }
+    }
+
+
     public List<EIDescriptor> getAccountReports() {
         EIConnection conn = Database.instance().getConnection();
         try {

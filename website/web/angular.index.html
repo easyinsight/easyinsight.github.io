@@ -52,8 +52,11 @@
                 </a>
                 <ul class="dropdown-menu">
                     <li ng-repeat="bookmark in bookmarks"><a href="/app/html/{{bookmark.type}}/{{bookmark.url_key}}" ng-click="$event.stopPropagation()">{{bookmark.name}}</a></li>
+                    <li class="divider" />
+                    <li><a href="/a/account/quick_links">Configure...</a></li>
                 </ul>
             </li>
+            <li ng-if="!bookmarks || bookmarks.length == 0"><a href="/a/account/quick_links">Reports</a></li>
             <li><a href="/app/whatsnew.jsp" ng-click="$event.stopPropagation()">What's New <span style="margin-left:5px;margin-top: -3px;vertical-align:middle" class="badge" ng-if="news_alert > 0">{{ news_alert }}</span></a></li>
             <li><a href="/app/docs" ng-click="$event.stopPropagation()">Help</a></li>
             <li class="dropdown">

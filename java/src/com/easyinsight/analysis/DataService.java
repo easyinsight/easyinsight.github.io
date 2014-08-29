@@ -12,6 +12,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.CacheableDataSet;
+import com.easyinsight.dataset.CacheableMultiSummaryData;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTable;
 import com.easyinsight.export.ExportService;
@@ -1361,20 +1362,37 @@ public class DataService {
         return copyResults;
     }
 
-    public static DataSet listDataSetViaCache(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn, String uid) {
+    public static MultiSummaryData multiSummaryDataViaCache(WSMultiSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn, String uid) throws SQLException, CloneNotSupportedException {
         MemcachedClient client = MemCachedManager.instance();
-        CacheableDataSet cacheableDataSet = (CacheableDataSet) client.get(uid);
-        DataSet dataSet = null;
-        if (cacheableDataSet == null) {
-            System.out.println("nothing in cache for UID " + uid);
-        }
+        CacheableMultiSummaryData cacheableDataSet = (CacheableMultiSummaryData) client.get(uid);
+
         List<String> filters = new ArrayList<>();
         XMLMetadata xmlMetadata = new XMLMetadata();
         xmlMetadata.setConn(conn);
         filters.addAll(analysisDefinition.getFilterDefinitions().stream().map(filter -> filter.toXML(xmlMetadata).toXML()).collect(Collectors.toList()));
-        if (cacheableDataSet != null && !cacheableDataSet.getFilters().equals(filters)) {
-            System.out.println("filters did not match for " + uid);
+        MultiSummaryData multiSummaryData;
+        if (cacheableDataSet == null || !cacheableDataSet.getFilters().equals(filters)) {
+
+            multiSummaryData = getMultiSummaryDataResults(analysisDefinition, insightRequestMetadata, conn);
+            cacheableDataSet = new CacheableMultiSummaryData();
+            cacheableDataSet.setFilters(filters);
+            cacheableDataSet.setMultiSummaryData(multiSummaryData);
+            client.delete(uid);
+            client.add(uid, 2500, cacheableDataSet);
+        } else {
+            multiSummaryData = cacheableDataSet.getMultiSummaryData();
         }
+        return multiSummaryData;
+    }
+
+    public static DataSet listDataSetViaCache(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn, String uid) {
+        MemcachedClient client = MemCachedManager.instance();
+        CacheableDataSet cacheableDataSet = (CacheableDataSet) client.get(uid);
+        DataSet dataSet = null;
+        List<String> filters = new ArrayList<>();
+        XMLMetadata xmlMetadata = new XMLMetadata();
+        xmlMetadata.setConn(conn);
+        filters.addAll(analysisDefinition.getFilterDefinitions().stream().map(filter -> filter.toXML(xmlMetadata).toXML()).collect(Collectors.toList()));
         if (cacheableDataSet == null || !cacheableDataSet.getFilters().equals(filters)) {
 
             ReportRetrieval reportRetrieval;
@@ -1394,7 +1412,6 @@ public class DataService {
             client.delete(uid);
             client.add(uid, 2500, cacheableDataSet);
         } else {
-            System.out.println("using cache for " + uid);
             dataSet = cacheableDataSet.getDataSet();
         }
         return dataSet;
@@ -1577,7 +1594,6 @@ public class DataService {
 
     public static MultiSummaryData getMultiSummaryDataResults(WSMultiSummaryDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn)
             throws SQLException, CloneNotSupportedException {
-        System.out.println("irm utc offset = " + insightRequestMetadata.getUtcOffset());
         ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
 
         Map<InsightDescriptor, DataSet> childSets = new HashMap<>();

@@ -409,9 +409,10 @@ public class ExportService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
-                    "scheduled_account_activity_id = ?");
+                    "scheduled_account_activity_id = ? AND scheduled_account_activity.account_id = ?");
             for (Integer scheduledActivityID : activities) {
                 deleteStmt.setLong(1, scheduledActivityID);
+                deleteStmt.setLong(2, SecurityUtil.getAccountID());
                 deleteStmt.executeUpdate();
             }
             deleteStmt.close();
@@ -474,7 +475,7 @@ public class ExportService {
         SecurityUtil.authorizeDashboard(dashboard.getId());
         try {
             // todo: fix
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0);
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true, true);
             EIConnection conn = Database.instance().getConnection();
             try {
                 toDatabase(dashboard.getName(), bytes, conn);
