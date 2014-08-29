@@ -87,7 +87,7 @@
     }
 
     var add_tag = function (data_source, tag, model, url, $http) {
-        if (model.text == "")
+        if (!model || !model.text || model.text.length == 0)
             return;
         var d = $http.post(url, JSON.stringify({name: tag ? tag.name : model.text}));
         if (tag)
