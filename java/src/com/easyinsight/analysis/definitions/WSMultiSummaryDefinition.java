@@ -4,6 +4,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportService;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.ListSummaryComponent;
 import com.easyinsight.preferences.ApplicationSkin;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONArray;
@@ -38,6 +40,24 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
     private boolean nestedReportHeaders;
     private int nestedFontSize;
     private boolean defaultToExpanded;
+    private boolean summaryRow;
+    private boolean lockHeaders;
+
+    public boolean isSummaryRow() {
+        return summaryRow;
+    }
+
+    public void setSummaryRow(boolean summaryRow) {
+        this.summaryRow = summaryRow;
+    }
+
+    public boolean isLockHeaders() {
+        return lockHeaders;
+    }
+
+    public void setLockHeaders(boolean lockHeaders) {
+        this.lockHeaders = lockHeaders;
+    }
 
     public boolean isNestedReportHeaders() {
         return nestedReportHeaders;
@@ -227,6 +247,17 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         /*for (HigherLevel higherLevel : higherLevels) {
             sb.append(higherLevel.toHTML(insightRequestMetadata, conn));
         }*/
+        if (isSummaryRow()) {
+            sb.append("<tfoot>");
+            sb.append("<tr>");
+            sb.append("<td></td>");
+            for (AnalysisItem headerItem : coreItems) {
+                sb.append("<td>");
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+            sb.append("</tfoot>");
+        }
         sb.append("</table>");
         return sb.toString();
     }
@@ -241,12 +272,20 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
                 if (property instanceof ReportNumericProperty)
                     p.put(property.getPropertyName(), ((ReportNumericProperty) property).getValue());
             }
-            /*p.put("lockHeaders", lockHeaders);
-            p.put("showLineNumbers", showLineNumbers);*/
+            p.put("lockHeaders", lockHeaders);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return p;
+    }
+
+    @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        if (summaryRow) {
+            components.add(new ListSummaryComponent());
+        }
+        return components;
     }
 
 
@@ -336,6 +375,8 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         nestedReportTitles = findBooleanProperty(properties, "nestedReportTitles", false);
         nestedReportHeaders = findBooleanProperty(properties, "nestedReportHeaders", true);
         defaultToExpanded = findBooleanProperty(properties, "defaultToExpanded", false);
+        summaryRow = findBooleanProperty(properties, "summaryRow", false);
+        lockHeaders = findBooleanProperty(properties, "lockHeaders", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -351,6 +392,8 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("nestedReportTitles", nestedReportTitles));
         properties.add(new ReportBooleanProperty("nestedReportHeaders", nestedReportHeaders));
         properties.add(new ReportBooleanProperty("defaultToExpanded", defaultToExpanded));
+        properties.add(new ReportBooleanProperty("summaryRow", summaryRow));
+        properties.add(new ReportBooleanProperty("lockHeaders", lockHeaders));
         return properties;
     }
 
@@ -364,6 +407,12 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
             }
             if (applicationSkin.isReportHeaderTextColorEnabled()) {
                 setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
+            }
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryTextColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
             }
         }
     }

@@ -1619,6 +1619,7 @@ public class DataService {
             childSets.put(childReport, childSet);
             reportMap.put(childReport, child);
         }
+
         return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn, insightRequestMetadata), dataSet, childSets, reportMap, addedJoinColumn);
     }
 
