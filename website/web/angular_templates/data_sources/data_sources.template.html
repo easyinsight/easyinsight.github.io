@@ -29,7 +29,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="data_source in data_sources | tagged:tags" ng-init="show_tags = false">
+        <tr ng-repeat="data_source in (filtered = (data_sources | tagged:tags))" ng-init="show_tags = false">
             <td ng-show="user.designer">
                 <input type="checkbox" ng-model="data_source.selected" />
                 <i class="glyphicon tag-value" ng-class="{'glyphicon-tag': data_source.tags.length == 0, 'glyphicon-tags': data_source.tags.length > 0 }" ng-click="show_tags = !show_tags" />
@@ -43,6 +43,9 @@
             <td>
                 {{data_source.last_refresh_time}}
             </td>
+        </tr>
+        <tr ng-if="filtered.length <= 0">
+            <td colspan="3">There are no reports for this combination of tags.</td>
         </tr>
         </tbody>
     </table>
