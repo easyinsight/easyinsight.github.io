@@ -316,17 +316,13 @@ public class StackedColumnChartServlet extends HtmlServlet {
                 Collections.reverse(axisNames);
             }
                 for (List<JSONObject> list : seriesMap.values()) {
-                    Collections.sort(list, new Comparator<JSONObject>() {
-
-                        @Override
-                        public int compare(JSONObject o1, JSONObject o2) {
-                            try {
-                                String val1 = o1.get("x").toString();
-                                String val2 = o2.get("x").toString();
-                                return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
-                            }
+                    Collections.sort(list, (o1, o2) -> {
+                        try {
+                            String val1 = o1.get("x").toString();
+                            String val2 = o2.get("x").toString();
+                            return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
                         }
                     });
             }
@@ -346,13 +342,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
                 }
             }
-            Collections.sort(axisNames, new Comparator<String>() {
-
-                @Override
-                public int compare(String o1, String o2) {
-                    return map.get(o1).compareTo(map.get(o2));
-                }
-            });
+            Collections.sort(axisNames, (o1, o2) -> map.get(o1).compareTo(map.get(o2)));
             if (!ascending) {
                 Collections.reverse(axisNames);
             }
