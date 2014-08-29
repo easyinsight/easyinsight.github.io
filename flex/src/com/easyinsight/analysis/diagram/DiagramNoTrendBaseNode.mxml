@@ -76,9 +76,11 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            var ext:DiagramReportFieldExtension = DiagramReportFieldExtension(_outcome.measure.reportFieldExtension);
-            if (ext.iconImage != null) {
-                iconImage.load(Constants.instance().prefix + "/app/assets/icons/32x32/" + ext.iconImage);
+            if (_outcome.measure.reportFieldExtension is DiagramReportFieldExtension) {
+                var ext:DiagramReportFieldExtension = DiagramReportFieldExtension(_outcome.measure.reportFieldExtension);
+                if (ext.iconImage != null) {
+                    iconImage.load(Constants.instance().prefix + "/app/assets/icons/32x32/" + ext.iconImage);
+                }
             }
         }
 
@@ -95,6 +97,9 @@
 
         override protected function handleMove(event:MoveEvent):void {
             super.handleMove(event);
+            if (!(_outcome.measure.reportFieldExtension is DiagramReportFieldExtension)) {
+                _outcome.measure.reportFieldExtension = new DiagramReportFieldExtension();
+            }
             DiagramReportFieldExtension(_outcome.measure.reportFieldExtension).x = this.x;
             DiagramReportFieldExtension(_outcome.measure.reportFieldExtension).y = this.y;
         }
