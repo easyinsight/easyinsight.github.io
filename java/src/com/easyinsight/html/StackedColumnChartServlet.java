@@ -342,7 +342,17 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
                 }
             }
-            Collections.sort(axisNames, (o1, o2) -> map.get(o1).compareTo(map.get(o2)));
+            Collections.sort(axisNames, (o1, o2) -> {
+                Double d1 = map.get(o1);
+                Double d2 = map.get(o2);
+                if (d1 == null) {
+                    d1 = 0.;
+                }
+                if (d2 == null) {
+                    d2 = 0.;
+                }
+                return d1.compareTo(d2);
+            });
             if (!ascending) {
                 Collections.reverse(axisNames);
             }
