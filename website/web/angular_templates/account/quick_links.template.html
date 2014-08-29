@@ -4,25 +4,29 @@
         <h4>Add a Report/Dashboard</h4>
         </div>
     </div>
-    <div class="row form-group">
-        <div class="col-md-2">
-        Data Source:
+    <div ng-show="data_sources.length > 1" class="row form-group">
+        <div class="col-md-3">
+        Choose a Data Source:
         </div>
         <div class="col-md-3">
-            <input class="form-control" type="text" ng-model="ds_name" typeahead="data_source as data_source.name for data_source in data_sources | filter: {name: $viewValue}" typeahead-editable="false" typeahead-on-select="select_data_source($item, $model, $label)" />
+            <input class="form-control" type="text" ng-model="ds_name" placeholder="Search for a data source..."
+                   typeahead="data_source as data_source.name for data_source in data_sources | filter: {name: $viewValue}" typeahead-min-length="0"
+                   typeahead-editable="false" typeahead-on-select="select_data_source($item, $model, $label)" />
         </div>
     </div>
     <div class="row form-group">
-        <div class="col-md-2">
-            Report:
+        <div class="col-md-3">
+            Choose a Report:
         </div>
         <div class="col-md-3">
-            <input class="form-control" type="text" ng-model="selected_report" ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue}" typeahead-editable="false" />
+            <input class="form-control" type="text" ng-model="selected_report" placeholder="Search for a report..."
+                   ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue}"
+                   typeahead-min-length="0" typeahead-editable="false" />
         </div>
     </div>
     <div class="row form-group">
-        <div class="col-md-12">
-            <button class="btn btn-default" ng-click="addReport()">Add Report/Dashboard</button>
+        <div class="col-md-9 col-md-offset-3">
+            <button class="btn btn-default" ng-disabled="!isSelected(selected_report)" ng-click="addReport()">Add Report/Dashboard</button>
         </div>
     </div>
 <div class="row">
