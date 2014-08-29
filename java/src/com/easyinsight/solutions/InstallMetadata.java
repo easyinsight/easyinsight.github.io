@@ -109,7 +109,7 @@ public class InstallMetadata {
             exists = true;
             AnalysisDefinition report = analysisStorage.getPersistableReport(resultID, session);
             existingVersion = 1;
-            Set<EIDescriptor> ids = report.containedReportIDs();
+            Set<EIDescriptor> ids = report.containedReportIDs(session);
             for (EIDescriptor descriptor : ids) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     validations.addAll(validateReport(descriptor.getId()));
@@ -319,7 +319,7 @@ public class InstallMetadata {
             AnalysisDefinition fromReport = analysisStorage.getPersistableReport(insightDescriptor.getId(), session);
             metadata = copyReportToDataSource(originalSource, fromReport, factory);
             saveMetadataMap.put(insightDescriptor.getId(), metadata);
-            Set<EIDescriptor> ids = fromReport.containedReportIDs();
+            Set<EIDescriptor> ids = fromReport.containedReportIDs(session);
             for (EIDescriptor descriptor : ids) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     determineReport((InsightDescriptor) descriptor, saveMetadataMap);
@@ -377,7 +377,7 @@ public class InstallMetadata {
             newOrUpdatedReports.add(report);
             newOrUpdatedMetadatas.add(metadata);
             originReportList.add(fromReport);
-            Set<EIDescriptor> ids = fromReport.containedReportIDs();
+            Set<EIDescriptor> ids = fromReport.containedReportIDs(session);
             for (EIDescriptor descriptor : ids) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     installReport((InsightDescriptor) descriptor, factory);
