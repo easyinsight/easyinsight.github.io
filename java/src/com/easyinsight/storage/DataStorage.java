@@ -358,7 +358,7 @@ public class DataStorage implements IDataStorage {
                         throw se;
                     }
                 } finally {
-                    storageConn.close();
+                    Database.closeConnection(storageConn);
                 }
             }
         }
