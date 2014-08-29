@@ -96,6 +96,7 @@
         import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.report.ReportNavigationEvent;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.suggestion.AddonReportSourceReport;
         import com.easyinsight.suggestion.DataSourceLevelFieldReport;
         import com.easyinsight.suggestion.IntentionListWindow;
         import com.easyinsight.suggestion.IntentionSuggestion;
@@ -677,6 +678,11 @@
                     if (analysisDefinition.dataSourceFieldReport) {
                         var df:DataSourceLevelFieldReport = new DataSourceLevelFieldReport();
                         rightBox.addChildAt(df, 0);
+                    }
+                    if (analysisDefinition.reportSourceName) {
+                        var af:AddonReportSourceReport = new AddonReportSourceReport();
+                        af.reportSourceName = analysisDefinition.reportSourceName;
+                        rightBox.addChildAt(af, 0);
                     }
                     //this.title = analysisDefinition.name;
                     if (!User.getInstance().accountReports && !analysisDefinition.canSave) {

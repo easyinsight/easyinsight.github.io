@@ -3062,6 +3062,19 @@ public class AnalysisService {
             } catch (Exception e) {
                 LogClass.error(e);
             }
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement stmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED, distinct_cached_addon_report_source WHERE " +
+                        "DATA_FEED.data_feed_id = distinct_cached_addon_report_source.data_source_id AND distinct_cached_addon_report_source.report_id = ?");
+                stmt.setLong(1, analysisID);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    report.setReportSourceName(rs.getString(1));
+                }
+                stmt.close();
+            } finally {
+                Database.closeConnection(conn);
+            }
             return report;
         } catch (Exception e) {
             LogClass.error(e);

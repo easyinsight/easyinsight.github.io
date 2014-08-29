@@ -8,6 +8,8 @@
         frameRate="60">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.WindowManagement;
+        import com.easyinsight.WindowManagementInstance;
         import com.easyinsight.account.Account;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.PopupMenuFactory;
@@ -106,6 +108,7 @@
             Font.registerFont(myNormalLucida);
             Font.registerFont(openSans);
             Font.registerFont(openSansBold);
+            WindowManagementInstance.assign(WindowManagement.getManager());
             Font.registerFont(helveticaNeue);
             /*Font.registerFont(openSansBold);*/
             Security.allowInsecureDomain("maps.googleapis.com");

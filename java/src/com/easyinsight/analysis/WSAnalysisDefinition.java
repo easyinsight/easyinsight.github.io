@@ -140,6 +140,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean dataSourceFieldReport;
     private List<FilterSetDescriptor> filterSets;
     private boolean dataDiscoveryEnabled;
+    private String reportSourceName;
 
     private String defaultDate;
 
@@ -446,6 +447,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setRecommendedExchange(boolean recommendedExchange) {
         this.recommendedExchange = recommendedExchange;
+    }
+
+    public String getReportSourceName() {
+        return reportSourceName;
+    }
+
+    public void setReportSourceName(String reportSourceName) {
+        this.reportSourceName = reportSourceName;
     }
 
     public boolean isAutoSetupDelivery() {

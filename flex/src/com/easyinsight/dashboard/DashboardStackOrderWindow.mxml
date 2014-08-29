@@ -6,13 +6,19 @@
         import mx.managers.PopUpManager;
 
         private var _dashboardStack:DashboardStack;
+        private var _editor:DashboardStackEditorComponent;
+
+
+        public function set editor(value:DashboardStackEditorComponent):void {
+            _editor = value;
+        }
 
         [Bindable]
         private var stackChildren:ArrayCollection;
 
         public function set dashboardStack(value:DashboardStack):void {
             _dashboardStack = value;
-            stackChildren = _dashboardStack.gridItems;
+            stackChildren = _editor.getItems();
             var index:int = 1;
             for each (var item:DashboardStackItem in stackChildren) {
                 var label:String;
@@ -33,6 +39,7 @@
         }
 
         public function save():Boolean {
+
             _dashboardStack.gridItems = ArrayCollection(stackGrid.dataProvider);
             return changed;
         }

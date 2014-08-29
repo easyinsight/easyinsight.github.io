@@ -33,6 +33,11 @@ public class MultiSummaryDefinition extends AnalysisDefinition {
         super();
     }
 
+
+    override public function useHTMLInFlash():Boolean {
+        return true;
+    }
+
     override public function getFont():String {
         if (customFontFamily != null && customFontFamily != "" && useCustomFontFamily) {
             return customFontFamily;

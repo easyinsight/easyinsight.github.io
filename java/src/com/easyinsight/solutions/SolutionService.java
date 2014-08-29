@@ -810,7 +810,7 @@ public class SolutionService {
     public static void recurseReport(Map<Long, AnalysisDefinition> reports, Map<Long, Dashboard> dashboards, AnalysisDefinition report, Session session, EIConnection conn) throws Exception {
         if (!reports.containsKey(report.getAnalysisID())) {
             reports.put(report.getAnalysisID(), report);
-            Set<EIDescriptor> containedReportIDs = report.containedReportIDs();
+            Set<EIDescriptor> containedReportIDs = report.containedReportIDs(session);
             for (EIDescriptor descriptor : containedReportIDs) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     AnalysisDefinition child = new AnalysisStorage().getPersistableReport(descriptor.getId(), session);

@@ -13,7 +13,7 @@ import mx.controls.Alert;
 
 import mx.core.UIComponent;
 
-public class WindowManagement {
+public class WindowManagement implements IWindowManagement {
 
     public var factory:DataViewFactory;
     public var endUserFactories:ArrayCollection = new ArrayCollection();
@@ -27,6 +27,10 @@ public class WindowManagement {
     public function clearFactory():void {
         this.factory = null;
         endUserFactories = new ArrayCollection();
+    }
+
+    public static function getManager():WindowManagement {
+        return manager;
     }
 
     public function registerFactory(factory:DataViewFactory):void {
