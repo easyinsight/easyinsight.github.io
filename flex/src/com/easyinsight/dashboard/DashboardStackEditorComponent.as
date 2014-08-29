@@ -65,6 +65,22 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         return box;
     }
 
+    public function getItems():ArrayCollection {
+        var comps:ArrayCollection = stackComponents();
+        var items:ArrayCollection = new ArrayCollection();
+        for (var i:int = 0; i < dashboardStack.count; i++) {
+            if (i < comps.length) {
+                var box:DashboardBox = comps.getItemAt(i) as DashboardBox;
+                box.save();
+                var dashboardGridItem:DashboardStackItem = new DashboardStackItem();
+                dashboardGridItem.position = i;
+                dashboardGridItem.dashboardElement = box.element;
+                items.addItem(dashboardGridItem);
+            }
+        }
+        return items;
+    }
+
     public function save():void {
         var comps:ArrayCollection = stackComponents();
         var items:ArrayCollection = new ArrayCollection();
@@ -173,6 +189,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
 
     public function edit():void {
         var window:StackDimensionsWindow = new StackDimensionsWindow();
+        window.editorComponent = this;
         window.dashboardStack = dashboardStack;
         window.availableDimensions = dashboardEditorMetadata.availableFields;
         window.dataSourceID = dashboardEditorMetadata.dataSourceID;
