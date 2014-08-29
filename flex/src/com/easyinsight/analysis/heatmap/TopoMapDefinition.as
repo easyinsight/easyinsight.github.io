@@ -28,6 +28,10 @@ public class TopoMapDefinition extends AnalysisDefinition {
         super();
     }
 
+    override public function useHTMLInFlash():Boolean {
+        return true;
+    }
+
     override public function fromSave(savedDef:AnalysisDefinition):void {
         super.fromSave(savedDef);
         this.mapID = TopoMapDefinition(savedDef).mapID;
