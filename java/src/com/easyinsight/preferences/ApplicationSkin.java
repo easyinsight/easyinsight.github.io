@@ -1083,7 +1083,20 @@ public class ApplicationSkin implements Serializable {
                         throw new RuntimeException(e);
                     }
                 };
+        if(multiColors.size() == 0) {
+            multiColors = new ArrayList<>();
+            for(int i = 0;i < 15;i++) {
+                multiColors.add(new MultiColor());
+            }
+        }
         jo.put("multi_colors", new JSONArray(multiColors.stream().map(toJSON).collect(Collectors.toList())));
+
+        if(secondaryMultiColors.size() == 0) {
+            secondaryMultiColors = new ArrayList<>();
+            for(int i = 0;i < 15;i++) {
+                secondaryMultiColors.add(new MultiColor());
+            }
+        }
         jo.put("secondary_multi_colors", new JSONArray(secondaryMultiColors.stream().map(toJSON).collect(Collectors.toList())));
 
 
