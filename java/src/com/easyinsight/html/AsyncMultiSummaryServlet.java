@@ -210,6 +210,20 @@ public class AsyncMultiSummaryServlet extends HtmlServlet {
                 }
                 jsonRows.put(jsonRow);
             }
+            if (listDefinition.isSummaryRow()) {
+                JSONArray summaryData = new JSONArray();
+                for (AnalysisItem analysisItem : items) {
+                    Value summary = (Value) multiSummaryData.getAdditionalProperties().get("summary" + analysisItem.qualifiedName());
+                    if (summary == null) {
+                        summaryData.put("");
+                    } else {
+                        double doubleValue = summary.toDouble();
+                        String string = ExportService.createValue(md, analysisItem, new NumericValue(doubleValue), false);
+                        summaryData.put(string);
+                    }
+                }
+                results.put("summaries", summaryData);
+            }
             results.put("columnLength", listDefinition.getCoreItems().size());
             returnObject.put("iTotalRecords", totalRecords);
             returnObject.put("iTotalDisplayRecords", totalRecords);
