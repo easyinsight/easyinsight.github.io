@@ -52,6 +52,9 @@ public class DataSourceTagServlet extends JSONServlet {
     @Override
     protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         String tagName = String.valueOf(jsonObject.get("name"));
+        if(tagName.isEmpty()) {
+            return new ResponseInfo(ResponseInfo.BAD_REQUEST, new JSONObject().toString());
+        }
         Tag chosenTag = null;
         UserUploadService uus = new UserUploadService();
         FeedStorage fs = new FeedStorage();

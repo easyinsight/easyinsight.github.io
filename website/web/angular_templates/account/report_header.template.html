@@ -2,7 +2,7 @@
 <div cg-busy="upload" />
 <div ng-if="saved" class="alert alert-success">Saved!</div>
 <form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate ng-file-drop-available="dropSupported=true">
-    <input type="checkbox" id="report_header_checkbox" ng-model="skin.report_header" /><label for="report_header_checkbox">Do you want to define a custom header for reports and dashboards?</label>
+    <input type="checkbox" id="report_header_checkbox" ng-model="skin.report_header" /> <label for="report_header_checkbox">Do you want to define a custom header for reports and dashboards?</label>
     <p>Images:</p>
     <div class="row">
         <div class="col-md-3">
@@ -20,6 +20,6 @@
     <div eicolorform text="'Background Color'" enabledfielddisabled="true" field="skin.header_background_color" disabledfield="!skin.report_header"></div>
     <div eicolorform text="'Text Color'" enabledfielddisabled="true" field="skin.header_text_color" disabledfield="!skin.report_header"></div>
     <div class="form-group">
-        <input type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
+        <input class="btn btn-default" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
     </div>
 </form>

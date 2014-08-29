@@ -413,3 +413,7 @@ h2 {
 .deleteSelected {
     padding-bottom: 5px;
 }
+
+.tag-value {
+    cursor:  pointer;
+}
