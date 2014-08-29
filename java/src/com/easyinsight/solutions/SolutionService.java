@@ -1,6 +1,5 @@
 package com.easyinsight.solutions;
 
-import com.easyinsight.api.v3.Tips;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
