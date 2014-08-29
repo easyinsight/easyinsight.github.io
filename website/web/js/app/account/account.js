@@ -1,5 +1,5 @@
 (function() {
-    var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
+    var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ui.keypress', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
 
 
     eiAccounts.controller('AccountController', ["$scope", function ($scope) {
@@ -349,6 +349,80 @@ eiAccounts.directive('eicolorform', function() {
     }
 });
 
+eiAccounts.controller("quickLinksController", ["$scope", "PageInfo", "$rootScope", "$http", "$modal", function($scope, PageInfo, $rootScope, $http, $modal) {
+    PageInfo.setTitle("Top Reports and Dashboards");
+    $http.get("/app/html/dataSourceTags.json").then(function (d) {
+        $scope.ds_tags = d.data.tags;
+    });
+
+    $http.get("/app/html/reportTags.json").then(function (d) {
+        $scope.report_tags = d.data.tags;
+    });
+
+    $scope.ds_load = $http.get("/app/dataSources.json");
+    $scope.ds_load.then(function (d) {
+        $scope.data_sources = d.data.data_sources;
+    });
+
+    $scope.select_data_source = function(item) {
+        $http.get("/app/dataSources/" + item.url_key + "/reports.json").then(function(d) {
+            $scope.reports = d.data.reports;
+        });
+    }
+
+    $scope.isSelected = function(val) {
+        return val && typeof(val) === "object"
+    }
+
+    $scope.addReport = function() {
+        var out = {"bookmarks": [{"url_key": $scope.selected_report.url_key, "type": $scope.selected_report.type }]}
+        $scope.saving = $http.post("/app/userInfo.json", JSON.stringify(out))
+        $scope.saving.then(function(d) {
+            $rootScope.bookmarks.push(d.data);
+        })
+    }
+
+    $scope.deleteSelected = function() {
+
+        var toDelete = $rootScope.bookmarks.filter(function(e, i, l) {
+            return e.selected;
+        })
+
+          /*.map(function(e, i, l) {
+                      return {"url_key": e.url_key, "type": e.type };
+                  });*/
+        if (toDelete.length > 0) {
+            $scope.to_delete = toDelete;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/account/delete_quick_links_dialog.template.html",
+                scope: $scope,
+                controller: "deleteSelectedBookmarksController"
+            });
+            m.result.then(function (r) {
+                $rootScope.bookmarks = $rootScope.bookmarks.filter(function (e, i, l) {
+                    return !e.selected;
+                });
+            });
+            m.result.finally(function(r) {
+                delete $scope.to_delete;
+            })
+        }
+
+    }
+}]);
+
+    eiAccounts.controller("deleteSelectedBookmarksController", ["$http", "$scope", function($http, $scope) {
+        $scope.confirmDelete = function() {
+            var output = {"bookmarks": $scope.to_delete.map(function(e, i, l) {
+                return {"url_key": e.url_key, "type": e.type };
+            }) };
+            $scope.saving = $http.delete("/app/userInfo.json", {data: JSON.stringify(output)});
+            $scope.saving.then(function (c) {
+                $scope.$close();
+            })
+        }
+    }])
+
 eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($locationProvider, $routeSegmentProvider) {
     $routeSegmentProvider.when("/account", "account.index.overview").
         when("/account/settings", "account.index.settings").
@@ -361,6 +435,7 @@ eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($loca
         when("/account/report_header", "account.index.report_header").
         when("/account/groups", "account.group.index").
         when("/account/groups/:id", "account.group.group_info").
+        when("/account/quick_links", "account.index.quick_links").
         segment("account", {
             templateUrl: '/angular_templates/account/base.template.html',
             controller: 'AccountController'
@@ -384,6 +459,10 @@ eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($loca
         segment("report_header", {
             templateUrl: "/angular_templates/account/report_header.template.html",
             controller: "AccountSkinController"
+        }).
+        segment("quick_links", {
+            templateUrl: "/angular_templates/account/quick_links.template.html",
+            controller: "quickLinksController"
         }).
         up().
         segment("profile", {

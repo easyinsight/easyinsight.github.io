@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.security.Roles;
 import org.json.JSONException;
