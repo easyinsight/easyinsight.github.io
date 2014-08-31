@@ -255,6 +255,8 @@ public class StyleConfiguration {
 
             items.addItem(new ColorReportFormItem("Header Top Color", "headerColor1", MultiSummaryDefinition(report).headerColor1, report, null, colorSetFormItem, "Look and Feel"));
             items.addItem(new ColorReportFormItem("Header Bottom Color", "headerColor2", MultiSummaryDefinition(report).headerColor2, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Summary Background Color", "summaryBackgroundColor", MultiSummaryDefinition(report).summaryBackgroundColor, report, null, colorSetFormItem, "Look and Feel"));
+            items.addItem(new ColorReportFormItem("Summary Text Color", "summaryTextColor", MultiSummaryDefinition(report).summaryTextColor, report, null, colorSetFormItem, "Look and Feel"));
         }
         if (report is CrosstabDefinition) {
             items.addItem(new ColorReportFormItem("Header Background Color", "headerBackgroundColor", CrosstabDefinition(report).headerBackgroundColor, report, null, colorSetFormItem));
@@ -320,6 +322,8 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Default to Expanded", "defaultToExpanded", MultiSummaryDefinition(report).defaultToExpanded, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Nested Report Headers", "nestedReportHeaders", MultiSummaryDefinition(report).nestedReportHeaders, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Nested Report Titles", "nestedReportTitles", MultiSummaryDefinition(report).nestedReportTitles, report, null, true));
+            items.addItem(new CheckBoxReportFormItem("Lock Headers", "lockHeaders", MultiSummaryDefinition(report).lockHeaders, report, null, true));
+            items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryRow", MultiSummaryDefinition(report).summaryRow, report, null, true));
             items.addItem(new NumericReportFormItem("Nested Font Size", "nestedFontSize", MultiSummaryDefinition(report).nestedFontSize, report, 8, 48));
         }
         if (report is CrosstabDefinition) {
@@ -595,6 +599,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("No Data on No Join", "noDataOnNoJoin", report.noDataOnNoJoin, report));
         items.addItem(new CheckBoxReportFormItem("Full Joins", "fullJoins", report.fullJoins, report));
         items.addItem(new CheckBoxReportFormItem("Log Report", "logReport", report.logReport, report));
+        items.addItem(new CheckBoxReportFormItem("Use HTML in Flash", "htmlInFlash", report.htmlInFlash, report));
 
         items.addItem(new CheckBoxReportFormItem("Report Runs Manually", "adHocExecution", report.adHocExecution, report));
         items.addItem(new CheckBoxReportFormItem("Run Before Manual", "manualButRunFirst", report.manualButRunFirst, report));

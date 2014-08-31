@@ -64,6 +64,11 @@ public class StackedBarChartDefinition extends YAxisDefinition{
         }
     }
 
+
+    override public function useHTMLInFlash():Boolean {
+        return dateAxis;
+    }
+
     public function populateGroupings(dataSet:ArrayCollection, uniques:ArrayCollection):ArrayCollection {
         var map:Object = new Object();
         var results:ArrayCollection = new ArrayCollection();

@@ -29,20 +29,23 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="data_source in data_sources | tagged:tags" ng-init="show_tags = false">
+        <tr ng-repeat="data_source in (filtered = (data_sources | tagged:tags))" ng-init="show_tags = false">
             <td ng-show="user.designer">
                 <input type="checkbox" ng-model="data_source.selected" />
-                <i class="glyphicon" ng-class="{'glyphicon-tag': data_source.tags.length == 0, 'glyphicon-tags': data_source.tags.length > 0 }" ng-click="show_tags = !show_tags" />
+                <i class="glyphicon tag-value" ng-class="{'glyphicon-tag': data_source.tags.length == 0, 'glyphicon-tags': data_source.tags.length > 0 }" ng-click="show_tags = !show_tags" />
             </td>
             <td class="header-tr">
                 <a href="/a/data_sources/{{data_source.url_key}}">{{data_source.name}}</a>
-                <div ng-show="show_tags">Tags: <span ng-repeat="tag in data_source.tags">{{tag.name}} <i class="glyphicon glyphicon-remove" ng-click="remove_ds_tag(data_source, tag)" /> </span>
+                <div ng-show="show_tags">Tags: <span ng-repeat="tag in data_source.tags">{{tag.name}} <i class="glyphicon glyphicon-remove tag-value" ng-click="remove_ds_tag(data_source, tag)" /> </span>
                     <input ui-keyup="{'enter': 'add_ds_tag(data_source, null, new_tag)'}" type="text" ng-init="new_tag={}" ng-model="new_tag.text" typeahead="tag.name for tag in tags | filter: {name: $viewValue} | not_tagged:data_source.tags | limitTo: 8" typeahead-on-select="add_ds_tag(data_source, $item, new_tag)" />
-                    <i class="glyphicon glyphicon-plus" ng-click="add_ds_tag(data_source, null, new_tag)" /></div>
+                    <i class="glyphicon glyphicon-plus tag-value" ng-click="add_ds_tag(data_source, null, new_tag)" /></div>
             </td>
             <td>
                 {{data_source.last_refresh_time}}
             </td>
+        </tr>
+        <tr ng-if="filtered.length <= 0">
+            <td colspan="3">There are no reports for this combination of tags.</td>
         </tr>
         </tbody>
     </table>

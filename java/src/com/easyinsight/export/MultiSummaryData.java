@@ -38,6 +38,7 @@ public class MultiSummaryData implements Serializable {
     public static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
     public static final String tdStyle1 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
     public static final String tdStyle2 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
+    private final Map<String, Object> additionalProperties;
 
     private WSMultiSummaryDefinition report;
     private ExportMetadata exportMetadata;
@@ -55,6 +56,7 @@ public class MultiSummaryData implements Serializable {
         this.addedJoinColumn = addedJoinColumn;
         this.exportMetadata = exportMetadata;
         this.reportMap = reportMap;
+        this.additionalProperties = dataSet.getAdditionalProperties();
 
         List<MultiSummaryRow> rows = new ArrayList<>();
 
@@ -85,6 +87,10 @@ public class MultiSummaryData implements Serializable {
         }
         this.higherLevels = higherLevels;
         this.rows = rows;
+    }
+
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
     }
 
     public Workbook toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, boolean format2007) throws SQLException {

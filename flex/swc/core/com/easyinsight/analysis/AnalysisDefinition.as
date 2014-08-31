@@ -50,6 +50,7 @@ import mx.collections.ArrayCollection;
 		public var name:String;
         public var addonReports:ArrayCollection = new ArrayCollection();
     public var dataSourceFieldReport:Boolean;
+    public var reportSourceName:String;
 		public var analysisID:int;
 		public var filterDefinitions:ArrayCollection = new ArrayCollection();
         public var filtersForDrillthrough:ArrayCollection;

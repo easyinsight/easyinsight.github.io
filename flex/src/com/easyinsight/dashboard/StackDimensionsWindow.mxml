@@ -22,6 +22,9 @@
 
         private var commandProcessor:CommandProcessor;
 
+        [Bindable]
+        public var editorComponent:DashboardStackEditorComponent;
+
         private function onCommand(event:CommandEvent):void {
             commandProcessor.addCommand(event.command);
         }
@@ -129,7 +132,7 @@
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
         <mx:TabNavigator resizeToContent="true" id="tabNavigator" creationPolicy="all">
-            <dashboard:DashboardStackOrderWindow id="orderWindow" dashboardStack="{_dashboardStack}" label="Contents"/>
+            <dashboard:DashboardStackOrderWindow id="orderWindow" dashboardStack="{_dashboardStack}" label="Contents" editor="{editorComponent}"/>
             <mx:Box label="Stack Properties" paddingLeft="5" paddingTop="5" paddingBottom="5"
                 horizontalAlign="center" height="300" updateComplete="onEvent(event)" width="800" verticalScrollPolicy="on">
                 <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">

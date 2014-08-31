@@ -57,6 +57,7 @@ AsyncMultiSummary = {
 
         //var paging = properties["generalSizeLimit"] > 0;
         var paging = true;
+        var lockHeaders = properties["lockHeaders"];
         AsyncMultiSummary.createClasses(properties, targetDiv, columnData.classes);
         $("#" + targetDiv + " .reportArea").show();
         $("#" + targetDiv + " .noData").hide();
@@ -96,6 +97,20 @@ AsyncMultiSummary = {
                     drillThrough(f);
                 })
             },
+            fnFooterCallback: function(nFoot, aData, iStart, iEnd, aiDisplay) {
+                if (typeof(nFoot) != "undefined") {
+                    //var json = this.ajax.json();
+                    var api = this.api();
+                    var json = api.ajax.json();
+                    var rowData = json["rowData"];
+                    var summaries = rowData["summaries"];
+                    var nCells = nFoot.getElementsByTagName('td');
+                    var colLength = rowData["columnLength"];
+                    for (var i = 0; i < colLength; i++) {
+                        nCells[i + 1].innerHTML = summaries[i];
+                    }
+                }
+            },
             sAjaxDataProp: "rowData.rows",
             oLanguage: {
                 sLoadingRecords: "Loading the report...",
@@ -104,7 +119,9 @@ AsyncMultiSummary = {
             bProcessing: true,
             fnRowCallback: AsyncMultiSummary.createStyleCallback(l)
         });
-
+        if (lockHeaders) {
+            $('#' + targetDiv + ' .reportArea table').floatThead();
+        }
     },
     createStyleCallback:function (colCount) {
         return function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
@@ -196,6 +213,7 @@ AsyncMultiSummary = {
          curStyleSheet.insertRule("#" + target + " table.dataTable tr.even {background-color:#FFFFFF;}", 0);
 
          curStyleSheet.insertRule("#" + target + " table.dataTable tfoot td {background-color:" + Color.numToStr(properties["summaryRowBackgroundColor"]) + "; color: " + Color.numToStr(properties["summaryRowTextColor"]) + ";}", 0);*/
+        curStyleSheet.insertRule("#" + target + " table.dataTable tfoot td {background-color:" + Color.numToStr(properties["summaryBackgroundColor"]) + "; color: " + Color.numToStr(properties["summaryTextColor"]) + ";}", 0);
         var gradientString = "background-color: " + Color.numToStr(properties["headerColor1"]);
         curStyleSheet.insertRule("#" + target + " table.dataTable thead tr {" + gradientString + "color:" + Color.numToStr(properties["headerTextColor"]) + ";}", 0);
     },

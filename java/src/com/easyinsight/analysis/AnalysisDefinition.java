@@ -1090,7 +1090,7 @@ public class AnalysisDefinition implements Cloneable {
         return validationIDs;
     }
 
-    public Set<EIDescriptor> containedReportIDs() {
+    public Set<EIDescriptor> containedReportIDs(Session session) {
         Set<EIDescriptor> drillIDs = new HashSet<EIDescriptor>();
         for (AnalysisItem analysisItem : reportStructure.values()) {
             List<Link> links = analysisItem.getLinks();
@@ -1110,6 +1110,12 @@ public class AnalysisDefinition implements Cloneable {
         if (reportStubs != null) {
             for (ReportStub reportStub : reportStubs) {
                 drillIDs.add(new InsightDescriptor(reportStub.getReportID(), null, 0, 0, null, 0, false));
+            }
+        }
+        Collection<? extends AnalysisDefinition> containedReports = analysisDefinitionState.containedReports(session);
+        if (containedReports != null) {
+            for (AnalysisDefinition contained : containedReports) {
+                drillIDs.add(new InsightDescriptor(contained.getAnalysisID(), null, 0, 0, null, 0, false));
             }
         }
         return drillIDs;

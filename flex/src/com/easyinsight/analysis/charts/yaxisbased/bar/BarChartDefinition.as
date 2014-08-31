@@ -34,6 +34,10 @@ public class BarChartDefinition extends YAxisDefinition{
         return true;
     }
 
+    override public function useHTMLInFlash():Boolean {
+        return super.useHTMLInFlash() || dateAxis;
+    }
+
     override public function get type():int {
         return AnalysisDefinition.BAR;
     }
