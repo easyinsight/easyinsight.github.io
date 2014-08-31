@@ -2,6 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -116,12 +117,12 @@ public class DashboardPDF {
         }
     }
 
-    public static final String OUTBOUND_QUEUE = "EISelenium";
+    //public static final String OUTBOUND_QUEUE = "EISelenium";
 
     private static PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
         // send an SQS request
         try {
-            MessageQueue msgQueue = SQSUtils.connectToQueue(OUTBOUND_QUEUE, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getBaseSeleniumQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             msgQueue.sendMessage(url);
 
             PreparedStatement stmt = conn.prepareStatement("SELECT image_state FROM image_selenium_trigger WHERE image_selenium_trigger_id = ?");
@@ -162,7 +163,8 @@ public class DashboardPDF {
         throw new RuntimeException("Timeout");
     }
 
-    public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images, int timezoneOffset) {
+    public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images, int timezoneOffset, boolean includeHeader,
+                            boolean landscapeOrientation) {
         // have to find the underlying grid of reports
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -183,33 +185,39 @@ public class DashboardPDF {
             DashboardElement element = findElementToRender(root, selected, replaceFilters);
             populateReportData(element, conn, selected, reportMap, replaceFilters);
             Document document;
-            document = new Document(PageSize.A4.rotate(), 0, 0, 5, 5);
+            if (landscapeOrientation) {
+                document = new Document(PageSize.A4.rotate(), 0, 0, 5, 5);
+            } else {
+                document = new Document(PageSize.A4, 0, 0, 5, 5);
+            }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             PdfWriter.getInstance(document, baos);
             document.open();
 
             try {
-                UIData uiData = Utils.createUIData(conn);
-                DashboardUIProperties dashboardProps = dashboard.findHeaderImage();
-                if (dashboardProps.isImageFullHeader() && dashboardProps.getHeader() != null) {
-                    ImageDescriptor imageDescriptor = dashboardProps.getHeader();
-                    byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
-                    Image image = Image.getInstance(bytes);
-                    float width = image.getPlainWidth();
-                    if (width > 800) {
-                        float ratio = 800 / width;
-                        float adjustedHeight = ratio * image.getPlainHeight();
-                        image.scaleAbsolute(800, adjustedHeight);
+                if (includeHeader) {
+                    UIData uiData = Utils.createUIData(conn);
+                    DashboardUIProperties dashboardProps = dashboard.findHeaderImage();
+                    if (dashboardProps.isImageFullHeader() && dashboardProps.getHeader() != null) {
+                        ImageDescriptor imageDescriptor = dashboardProps.getHeader();
+                        byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
+                        Image image = Image.getInstance(bytes);
+                        float width = image.getPlainWidth();
+                        if (width > 800) {
+                            float ratio = 800 / width;
+                            float adjustedHeight = ratio * image.getPlainHeight();
+                            image.scaleAbsolute(800, adjustedHeight);
+                        }
+                        image.setAlignment(Element.ALIGN_CENTER);
+                        document.add(image);
+                    } else if (uiData.getApplicationSkin() != null && uiData.getApplicationSkin().isReportHeader() && uiData.getHeaderImageDescriptor() != null) {
+                        ImageDescriptor imageDescriptor = uiData.getHeaderImageDescriptor();
+                        byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
+                        Image image = Image.getInstance(bytes);
+                        image.setAlignment(Element.ALIGN_CENTER);
+                        document.add(image);
                     }
-                    image.setAlignment(Element.ALIGN_CENTER);
-                    document.add(image);
-                } else if (uiData.getApplicationSkin() != null && uiData.getApplicationSkin().isReportHeader() && uiData.getHeaderImageDescriptor() != null) {
-                    ImageDescriptor imageDescriptor = uiData.getHeaderImageDescriptor();
-                    byte[] bytes = new PreferencesService().getImage(imageDescriptor.getId());
-                    Image image = Image.getInstance(bytes);
-                    image.setAlignment(Element.ALIGN_CENTER);
-                    document.add(image);
                 }
             } catch (Exception e) {
                 LogClass.error(e);
@@ -312,16 +320,6 @@ public class DashboardPDF {
             } else if (report.getReportType() == WSAnalysisDefinition.TREND_GRID) {
                 result = new ExportService().kpiReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             } else if (report.getReportType() == WSAnalysisDefinition.YTD) {
-                for (FilterDefinition filter : report.getFilterDefinitions()) {
-                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.getFilterID() + " - " + filter.isEnabled());
-                    if (filter instanceof FlatDateFilter) {
-                        FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
-                        System.out.println("\t" + flatDateFilter.getValue());
-                    } else if (filter instanceof MultiFlatDateFilter) {
-                        MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
-                        System.out.println(multiFlatDateFilter.getLevels());
-                    }
-                }
                 result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSTreeDefinition) {
                 result = new ExportService().treeToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
@@ -330,16 +328,6 @@ public class DashboardPDF {
             } else if (report instanceof WSYTDDefinition) {
                 result = ExportService.ytdToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSCompareYearsDefinition) {
-                for (FilterDefinition filter : report.getFilterDefinitions()) {
-                    System.out.println("filter " + filter.getClass().getName() + " - " + filter.getFilterID() + " - " + filter.isEnabled());
-                    if (filter instanceof FlatDateFilter) {
-                        FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
-                        System.out.println("\t" + flatDateFilter.getValue());
-                    } else if (filter instanceof MultiFlatDateFilter) {
-                        MultiFlatDateFilter multiFlatDateFilter = (MultiFlatDateFilter) filter;
-                        System.out.println(multiFlatDateFilter.getLevels());
-                    }
-                }
                 result = ExportService.compareYearsToPDF(report, conn, insightRequestMetadata);
             } else if (report instanceof WSTrendDefinition) {
                 WSTrendDefinition trend = (WSTrendDefinition) report;

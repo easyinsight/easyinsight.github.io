@@ -279,7 +279,7 @@ a {
 }
 
 .tag-list {
-    padding-bottom: 10px;
+    /*padding-bottom: 10px;*/
 }
 
 .tag-select {
@@ -412,4 +412,8 @@ h2 {
 
 .deleteSelected {
     padding-bottom: 5px;
+}
+
+.tag-value {
+    cursor:  pointer;
 }

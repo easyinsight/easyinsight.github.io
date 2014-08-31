@@ -130,6 +130,7 @@ public class AnalysisDefinitionFactory {
             WSTextDefinition wsTextDefinition = (WSTextDefinition) wsAnalysisDefinition;
             TextDefinitionState textDefinitionState = new TextDefinitionState();
             textDefinitionState.setTextReportID(wsTextDefinition.getTextReportID());
+            textDefinitionState.setReportText(wsTextDefinition.getText());
             analysisDefinitionState = textDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.MULTI_SUMMARY)) {
             WSMultiSummaryDefinition wsMultiSummaryDefinition = (WSMultiSummaryDefinition) wsAnalysisDefinition;

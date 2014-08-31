@@ -421,9 +421,9 @@
                     dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(event.descriptor), event.filters, _breadCrumbs,
                             event.additionalItems)));
                 } else if (event.descriptor is DashboardDescriptor) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:DashboardDescriptor(event.descriptor).id,
-                        initialFilters:event.filters,
-                        breadCrumbs:_breadCrumbs})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: DashboardDescriptor(event.descriptor).id,
+                        initialFilters: event.filters,
+                        breadCrumbs: _breadCrumbs})));
                 }
             } else {
                 _reportNavHandler.call(null, event);
@@ -527,68 +527,68 @@
         override protected function createChildren():void {
             super.createChildren();
             //try {
-                viewFactory.reportID = _reportID;
-                viewFactory.dataSourceID = _dataSourceID;
-                //BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
-                WindowManagement.manager.registerEndUserFactory(viewFactory);
-                //viewFactory.drillthroughFilters = _parameterFilters;
-                screenTarget.addChild(viewFactory);
-                viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
-                viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
-                viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
-                viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
-                viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-                viewFactory.addEventListener("export", onExport);
-                viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
-                viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
-                this.reportHeaderImage = User.getInstance().reportLogo;
-                this.headerBackgroundColor = ApplicationSkin.instance().headerBackgroundColor;
-                this.headerTextColor = ApplicationSkin.instance().headerTextColor;
-                this.headerVisible = ApplicationSkin.instance().reportHeader;
-                logoVisible = User.getInstance().reportLogo != null;
+            viewFactory.reportID = _reportID;
+            viewFactory.dataSourceID = _dataSourceID;
+            //BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
+            WindowManagement.manager.registerEndUserFactory(viewFactory);
+            //viewFactory.drillthroughFilters = _parameterFilters;
+            screenTarget.addChild(viewFactory);
+            viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
+            viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+            viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+            viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
+            viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
+            viewFactory.addEventListener("export", onExport);
+            viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
+            viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
+            this.reportHeaderImage = User.getInstance().reportLogo;
+            this.headerBackgroundColor = ApplicationSkin.instance().headerBackgroundColor;
+            this.headerTextColor = ApplicationSkin.instance().headerTextColor;
+            this.headerVisible = ApplicationSkin.instance().reportHeader;
+            logoVisible = User.getInstance().reportLogo != null;
 
-                loading = true;
+            loading = true;
 
-                var desc:InsightDescriptor = new InsightDescriptor();
-                desc.id = _reportID;
+            var desc:InsightDescriptor = new InsightDescriptor();
+            desc.id = _reportID;
 
-                // if filters were passed in
-                overlayIndex = 0;
-                if (_reportID != 0) {
-                    UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
-                }
-                if (_breadCrumbs != null && _breadCrumbs.length > 0) {
-                    var backButton:Button = new Button();
-                    var crumb:BreadCrumb = _breadCrumbs[_breadCrumbs.length - 1] as BreadCrumb;
-                    backButton.styleName = "grayButton";
-                    backButton.label = "Back to " + crumb.eiDescriptor.name;
-                    backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
-                        _breadCrumbs.pop();
-                        if (crumb.eiDescriptor is InsightDescriptor) {
-                            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, _breadCrumbs, null, crumb.stackPositions,
+            // if filters were passed in
+            overlayIndex = 0;
+            if (_reportID != 0) {
+                UserAudit.instance().log(new ActionReportLog(ActionReportLog.VIEW, _reportID));
+            }
+            if (_breadCrumbs != null && _breadCrumbs.length > 0) {
+                var backButton:Button = new Button();
+                var crumb:BreadCrumb = _breadCrumbs[_breadCrumbs.length - 1] as BreadCrumb;
+                backButton.styleName = "grayButton";
+                backButton.label = "Back to " + crumb.eiDescriptor.name;
+                backButton.addEventListener(MouseEvent.CLICK, function (event:MouseEvent):void {
+                    _breadCrumbs.pop();
+                    if (crumb.eiDescriptor is InsightDescriptor) {
+                        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(crumb.eiDescriptor), null, _breadCrumbs, null, crumb.stackPositions,
                                 crumb.savedConfiguration)));
-                        } else {
-                            dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:crumb.eiDescriptor.id,
-                                initialFilters:crumb.filters,
+                    } else {
+                        dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: crumb.eiDescriptor.id,
+                            initialFilters: crumb.filters,
 
-                                breadCrumbs:_breadCrumbs, dashboardStackPositions:crumb.stackPositions})));
-                        }
-                    });
-                    breadCrumbBox.addChild(backButton);
-                }
-                if (stackPositions != null) {
-                    if (stackPositions.filterMap != null) {
-                        var f:ArrayCollection = new ArrayCollection();
-                        for each (var filter:FilterDefinition in stackPositions.filterMap) {
-                            f.addItem(filter);
-                        }
-                        parameterFilters = f;
+                            breadCrumbs: _breadCrumbs, dashboardStackPositions: crumb.stackPositions})));
                     }
+                });
+                breadCrumbBox.addChild(backButton);
+            }
+            if (stackPositions != null) {
+                if (stackPositions.filterMap != null) {
+                    var f:ArrayCollection = new ArrayCollection();
+                    for each (var filter:FilterDefinition in stackPositions.filterMap) {
+                        f.addItem(filter);
+                    }
+                    parameterFilters = f;
                 }
-                viewFactory.setup();
+            }
+            viewFactory.setup();
             /*} catch (e:Error) {
-                Alert.show(e.message);
-            }*/
+             Alert.show(e.message);
+             }*/
         }
 
         private var _stackPositions:DashboardStackPositions;
@@ -863,7 +863,9 @@
         }
 
         private function viewInHTML():void {
-            navigateToURL(new URLRequest("/app/html/report/" + report.urlKey), "_blank");
+            if (report.urlKey != null) {
+                navigateToURL(new URLRequest("/app/html/report/" + report.urlKey), "_blank");
+            }
         }
 
         [Bindable]
@@ -916,7 +918,7 @@
             } else if (data == 3) {
                 var thisObj:UIComponent = this;
                 Alert.show("Are you sure you want to delete the selected configuration?", "Alert", Alert.OK | Alert.CANCEL, this,
-                        function(closeEvent:CloseEvent):void {
+                        function (closeEvent:CloseEvent):void {
                             if (closeEvent.detail == Alert.OK) {
                                 ProgressAlert.alert(thisObj, "Deleting configuration...", null, dashboardService.deleteConfiguration);
                                 dashboardService.deleteConfiguration.send(selectedConfiguration);

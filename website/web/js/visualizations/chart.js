@@ -29,7 +29,14 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 130 : (needStagger ? 60 : 50), left: 80});
+                            .margin({top: 20, right: 40, bottom: useRotate ? 130 : (needStagger ? 60 : 55), left: 80});
+
+                        if (data["valueLabel"]) {
+                            chart.showValues(true);
+                            if (data["yFormat"]) {
+                                chart.valueFormat(Chart.createFormat(data["yFormat"]));
+                            }
+                        }
 
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {
@@ -60,6 +67,8 @@ Chart = {
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+                        d3.select('#d3Div' + target + " .stackLabel").style('fill', '#000000');
 
                         Chart.canvasHeights(target, styleProps);
 
@@ -112,6 +121,13 @@ Chart = {
                             .stacked(true)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .margin({top: 20, right: 40, bottom: 60, left: leftNeeded});
+
+                        if (data["valueLabel"]) {
+                            chart.showValues(true);
+                            if (data["yFormat"]) {
+                                chart.valueFormat(Chart.createFormat(data["yFormat"]));
+                            }
+                        }
 
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {

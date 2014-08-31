@@ -453,6 +453,9 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "serverList") {
         var p = postData.url.substr(obj.metadata.url.length);
         AsyncList.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID);
+    } else if (obj.metadata.type == "multi_summary") {
+        var p = postData.url.substr(obj.metadata.url.length);
+        AsyncMultiSummary.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID);
     } else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID));

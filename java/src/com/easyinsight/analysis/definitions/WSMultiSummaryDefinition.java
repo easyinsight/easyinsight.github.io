@@ -3,8 +3,12 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.ListSummaryComponent;
 import com.easyinsight.preferences.ApplicationSkin;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +40,24 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
     private boolean nestedReportHeaders;
     private int nestedFontSize;
     private boolean defaultToExpanded;
+    private boolean summaryRow;
+    private boolean lockHeaders;
+
+    public boolean isSummaryRow() {
+        return summaryRow;
+    }
+
+    public void setSummaryRow(boolean summaryRow) {
+        this.summaryRow = summaryRow;
+    }
+
+    public boolean isLockHeaders() {
+        return lockHeaders;
+    }
+
+    public void setLockHeaders(boolean lockHeaders) {
+        this.lockHeaders = lockHeaders;
+    }
 
     public boolean isNestedReportHeaders() {
         return nestedReportHeaders;
@@ -209,12 +231,131 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         }
     }
 
+    private String toHTMLTableSkeletonForAsync() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table class=\"table table-condensed table-bordered\">");
+        sb.append("<thead>");
+        sb.append("<tr style=\"background-color:").append(ExportService.createHexString(getHeaderColor1())).append("\">");
+        sb.append("<th style=\"text-align:left\"></th>");
+        for (AnalysisItem item : getCoreItems()) {
+            sb.append("<th style=\"text-align:center;color:").append(ExportService.createHexString(getHeaderTextColor())).append("\">").append(item.toUnqualifiedDisplay()).append("</th>");
+        }
+        sb.append("</tr>");
+        sb.append("</thead>");
+        sb.append("<tbody>");
+        sb.append("</tbody>");
+        /*for (HigherLevel higherLevel : higherLevels) {
+            sb.append(higherLevel.toHTML(insightRequestMetadata, conn));
+        }*/
+        if (isSummaryRow()) {
+            sb.append("<tfoot>");
+            sb.append("<tr>");
+            sb.append("<td></td>");
+            for (AnalysisItem headerItem : coreItems) {
+                sb.append("<td>");
+                sb.append("</td>");
+            }
+            sb.append("</tr>");
+            sb.append("</tfoot>");
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
+
+    public JSONObject jsonProperties() {
+
+        JSONObject p = new JSONObject();
+        try {
+            List<ReportProperty> properties = createProperties();
+            populateProperties(properties);
+            for (ReportProperty property : properties) {
+                if (property instanceof ReportNumericProperty)
+                    p.put(property.getPropertyName(), ((ReportNumericProperty) property).getValue());
+            }
+            p.put("lockHeaders", lockHeaders);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return p;
+    }
+
+    @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        if (summaryRow) {
+            components.add(new ListSummaryComponent());
+        }
+        return components;
+    }
+
+
+    private JSONObject getAnalysisItemMap() throws JSONException {
+        JSONObject analysisItemMap = new JSONObject();
+        JSONArray columnJSON = new JSONArray();
+        JSONObject columnClassJSON = new JSONObject();
+
+        JSONObject sorting = new JSONObject();
+
+        JSONObject controlColumnObject = new JSONObject();
+        String controlClassName = String.valueOf(0);
+        controlColumnObject.put("sClass", controlClassName);
+        columnJSON.put(controlColumnObject);
+        JSONObject controlStyleData = new JSONObject();
+        columnClassJSON.put(controlClassName, controlStyleData);
+        controlStyleData.put("align", "left");
+
+        for (int i = 0; i < coreItems.size(); i++) {
+            AnalysisItem analysisItem = coreItems.get(i);
+            JSONObject columnObject = new JSONObject();
+            String className = String.valueOf(i + 1);
+            columnObject.put("sClass", className);
+            columnJSON.put(columnObject);
+
+            JSONObject styleData = new JSONObject();
+            columnClassJSON.put(className, styleData);
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                TextReportFieldExtension tfe = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                if ("Center".equals(tfe.getAlign()) || "center".equals(tfe.getAlign())) {
+                    styleData.put("align", "center");
+                } else if ("Right".equals(tfe.getAlign()) || "right".equals(tfe.getAlign())) {
+                    styleData.put("align", "right");
+                } else {
+                    styleData.put("align", "left");
+                }
+                if (tfe.getFixedWidth() > 0) {
+                    // TODO: impl
+                }
+            } else {
+                styleData.put("align", "left");
+            }
+
+
+            if (analysisItem.getSortSequence() > 0) {
+                JSONArray array = new JSONArray();
+                array.put(String.valueOf(analysisItem.getItemPosition()));
+                array.put(analysisItem.getSort() == 2 ? "desc" : "asc");
+                sorting.put(String.valueOf(analysisItem.getSortSequence()), array);
+            }
+        }
+        analysisItemMap.put("columns", columnJSON);
+        analysisItemMap.put("classes", columnClassJSON);
+        analysisItemMap.put("sorting", sorting);
+        return analysisItemMap;
+    }
+
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
         list.put("type", "multi_summary");
+        list.put("tableHTML", toHTMLTableSkeletonForAsync());
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");
+
+        list.put("properties", jsonProperties());
+        list.put("columnData", getAnalysisItemMap());
+        list.put("columns", coreItems.size());
+        list.put("uid", getUrlKey() + System.currentTimeMillis());
+
         return list;
     }
 
@@ -234,6 +375,8 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         nestedReportTitles = findBooleanProperty(properties, "nestedReportTitles", false);
         nestedReportHeaders = findBooleanProperty(properties, "nestedReportHeaders", true);
         defaultToExpanded = findBooleanProperty(properties, "defaultToExpanded", false);
+        summaryRow = findBooleanProperty(properties, "summaryRow", false);
+        lockHeaders = findBooleanProperty(properties, "lockHeaders", false);
     }
 
     public List<ReportProperty> createProperties() {
@@ -249,6 +392,8 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
         properties.add(new ReportBooleanProperty("nestedReportTitles", nestedReportTitles));
         properties.add(new ReportBooleanProperty("nestedReportHeaders", nestedReportHeaders));
         properties.add(new ReportBooleanProperty("defaultToExpanded", defaultToExpanded));
+        properties.add(new ReportBooleanProperty("summaryRow", summaryRow));
+        properties.add(new ReportBooleanProperty("lockHeaders", lockHeaders));
         return properties;
     }
 
@@ -262,6 +407,12 @@ public class WSMultiSummaryDefinition extends WSAnalysisDefinition {
             }
             if (applicationSkin.isReportHeaderTextColorEnabled()) {
                 setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
+            }
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryTextColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
             }
         }
     }

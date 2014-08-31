@@ -30,7 +30,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         factory.addField("Port", "port", HTMLConnectionProperty.INTEGER);
         factory.addField("Database Name", "databaseName");
         factory.addField("Database User Name", "dbUserName");
-        factory.addField("Database Password", "dbPassword");
+        factory.addPassword("Database Password", "dbPassword", true);
         factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
         factory.addField("Connection Timeout", "timeout", HTMLConnectionProperty.INTEGER);
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);

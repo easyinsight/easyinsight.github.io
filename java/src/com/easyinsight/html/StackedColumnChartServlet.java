@@ -77,6 +77,9 @@ public class StackedColumnChartServlet extends HtmlServlet {
         boolean dateAxis = false;
         boolean sortStackAscending = false;
         boolean sortStackDescending = false;
+        boolean sortX = false;
+        boolean sortY = false;
+        boolean ascending = false;
 
         JSONObject seriesDefaults = new JSONObject();
         JSONObject object = new JSONObject();
@@ -94,6 +97,24 @@ public class StackedColumnChartServlet extends HtmlServlet {
             populator = new ColumnPopulator();
             sortStackAscending = "Stack Ascending".equals(columnChartDefinition.getStackSort());
             sortStackDescending = "Stack Descending".equals(columnChartDefinition.getStackSort());
+            if ("X-Axis Descending".equals(columnChartDefinition.getColumnSort())) {
+                sortX = true;
+                ascending = false;
+            } else if ("X-Axis Ascending".equals(columnChartDefinition.getColumnSort())) {
+                sortX = true;
+                ascending = true;
+            } else if ("Y-Axis Descending".equals(columnChartDefinition.getColumnSort())) {
+                sortY = true;
+                ascending = false;
+            } else if ("Y-Axis Ascending".equals(columnChartDefinition.getColumnSort())) {
+                sortY = true;
+                ascending = true;
+            }
+            if ("inside".equals(columnChartDefinition.getLabelPosition())) {
+                seriesDefaults.put("pointLabels", pointLabels);
+                pointLabels.put("labels", new JSONArray());
+                object.put("valueLabel", true);
+            }
         } else if (report instanceof WSStackedBarChartDefinition) {
             WSStackedBarChartDefinition columnChartDefinition = (WSStackedBarChartDefinition) report;
             xAxisItem = columnChartDefinition.getYaxis();
@@ -105,6 +126,20 @@ public class StackedColumnChartServlet extends HtmlServlet {
             if ("inside".equals(columnChartDefinition.getLabelPosition())) {
                 seriesDefaults.put("pointLabels", pointLabels);
                 pointLabels.put("labels", new JSONArray());
+                object.put("valueLabel", true);
+            }
+            if ("Y-Axis Descending".equals(columnChartDefinition.getColumnSort())) {
+                sortX = true;
+                ascending = false;
+            } else if ("Y-Axis Ascending".equals(columnChartDefinition.getColumnSort())) {
+                sortX = true;
+                ascending = true;
+            } else if ("X-Axis Descending".equals(columnChartDefinition.getColumnSort())) {
+                sortY = true;
+                ascending = false;
+            } else if ("X-Axis Ascending".equals(columnChartDefinition.getColumnSort())) {
+                sortY = true;
+                ascending = true;
             }
             sortStackAscending = "Stack Ascending".equals(columnChartDefinition.getStackSort());
             sortStackDescending = "Stack Descending".equals(columnChartDefinition.getStackSort());
@@ -117,7 +152,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
         Map<String, Integer> indexMap = new HashMap<String, Integer>();
         Map<Integer, String> reverseIndexMap = new HashMap<Integer, String>();
 
-        JSONArray axisNames = new JSONArray();
+        List<String> axisNames = new ArrayList<>();
 
 
         JSONObject rendererOptions = new JSONObject();
@@ -154,7 +189,7 @@ public class StackedColumnChartServlet extends HtmlServlet {
             String stackValue = sValue.toString();
             Integer index = indexMap.get(xAxisValue);
             if (index == null) {
-                axisNames.put(xAxisValue);
+                axisNames.add(xAxisValue);
                 index = i++;
                 indexMap.put(xAxisValue, index);
                 reverseIndexMap.put(index, xAxisValue);
@@ -274,6 +309,69 @@ public class StackedColumnChartServlet extends HtmlServlet {
         JSONArray blahs = new JSONArray();
         int k = 0;
         double maxY = Double.MIN_VALUE;
+
+        if (sortX) {
+            Collections.sort(axisNames);
+            if (!ascending) {
+                Collections.reverse(axisNames);
+            }
+                for (List<JSONObject> list : seriesMap.values()) {
+                    Collections.sort(list, (o1, o2) -> {
+                        try {
+                            String val1 = o1.get("x").toString();
+                            String val2 = o2.get("x").toString();
+                            return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+            }
+        } else if (sortY) {
+
+            Map<String, Double> map = new HashMap<>();
+            for (List<JSONObject> list : seriesMap.values()) {
+
+                for (JSONObject jo : list) {
+                    String x = jo.get("x").toString();
+                    Double d = map.get(x);
+                    if (d == null) {
+                        map.put(x, (Double) jo.get("y"));
+                    } else {
+                        map.put(x, (Double) jo.get("y") + d);
+                    }
+
+                }
+            }
+            Collections.sort(axisNames, (o1, o2) -> {
+                Double d1 = map.get(o1);
+                Double d2 = map.get(o2);
+                if (d1 == null) {
+                    d1 = 0.;
+                }
+                if (d2 == null) {
+                    d2 = 0.;
+                }
+                return d1.compareTo(d2);
+            });
+            if (!ascending) {
+                Collections.reverse(axisNames);
+            }
+            for (List<JSONObject> list : seriesMap.values()) {
+                Collections.sort(list, new Comparator<JSONObject>() {
+
+                    @Override
+                    public int compare(JSONObject o1, JSONObject o2) {
+                        try {
+                            String val1 = o1.get("x").toString();
+                            String val2 = o2.get("x").toString();
+                            return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+            }
+        }
         Map<String, Double> stackMap = new HashMap<>();
 
         for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
@@ -298,7 +396,6 @@ public class StackedColumnChartServlet extends HtmlServlet {
                             min = indexToMin.get(key);
                             stackMap.put(key, min);
                         }
-                        System.out.println("min = " + new Date(min.longValue()));
                         Double y = (Double) jo.get("y");
                         Double delta = y - min;
                         maxY = Math.max(maxY, y);
@@ -310,31 +407,12 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
                 axisObject.put("values", list);
                 blahs.put(axisObject);
-
-
-
-
-                /*if (minItem != null && seriesKey.equals(firstLabel)) {
-                    for (JSONObject arr : entry.getValue()) {
-                        String key = arr.get("x").toString();
-                        Double min = indexToMin.get(key);
-                        if (min != null) {
-                            System.out.println("updating to " + min + " for " + seriesKey + " and " + key);
-                            arr.put("xMin", min);
-                            //arr.put("y0", min);
-
-                        }
-                    }
-                }*/
             } else {
                 zeroIndicies.add(k);
             }
             k++;
         }
 
-        /*for (int j = zeroIndicies.size() - 1; j >= 0; j--) {
-            series.remove(zeroIndicies.get(j));
-        }*/
         object.put("maxY", maxY);
         object.put("values", blahs);
         object.put("floatingY", minItem != null);

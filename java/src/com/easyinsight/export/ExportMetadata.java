@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -8,7 +9,7 @@ import java.util.Locale;
 * Date: 7/6/12
 * Time: 11:30 AM
 */
-public class ExportMetadata {
+public class ExportMetadata implements Serializable {
     public int dateFormat;
     public String currencySymbol;
     public Locale locale;

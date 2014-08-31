@@ -3,8 +3,11 @@ import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
 import com.easyinsight.analysis.charts.xaxisbased.column.StackedColumnChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartDefinition;
 import com.easyinsight.analysis.charts.yaxisbased.bar.StackedBarChartDefinition;
+import com.easyinsight.analysis.heatmap.HTMLIFrameModule;
 import com.easyinsight.analysis.heatmap.TopoMapDefinition;
+import com.easyinsight.analysis.service.HTMLDataService;
 import com.easyinsight.analysis.summary.MultiSummaryDefinition;
+import com.easyinsight.analysis.text.TextReport;
 import com.easyinsight.customupload.ProblemDataEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
@@ -68,13 +71,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function hideReport():void {
-        if (htmlView) {
+        if (_reportRenderer is HTMLIFrameModule) {
             currentComponent.visible = false;
         }
     }
 
     public function restoreReport():void {
-        if (htmlView) {
+        if (_reportRenderer is HTMLIFrameModule) {
             currentComponent.visible = true;
         }
     }
@@ -398,13 +401,25 @@ public class DataViewFactory extends VBox implements IRetrievable {
         _dataService.removeEventListener(DataServiceEvent.DATA_RETURNED, gotData);
         _controlBar.removeEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest);
         _controlBar.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar);
+        cleanupReportRenderer();
+    }
+
+    private function cleanupReportRenderer():void {
         if (_reportRenderer != null) {
             _reportRenderer.removeEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
             _reportRenderer.removeEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
             _reportRenderer.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
+            _reportRenderer.removeEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow);
+            _reportRenderer.removeEventListener(ReportNavigationEvent.TO_REPORT, toReport);
+            _reportRenderer.removeEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, itemChange);
+            if (reportWatcher != null) {
+                reportWatcher.unwatch();
+                reportWatcher = null;
+            }
             if (UIComponent(_reportRenderer).parent) {
                 reportCanvas.removeChild(_reportRenderer as DisplayObject);
             }
+            currentComponent = null;
         }
     }
 
@@ -429,6 +444,39 @@ public class DataViewFactory extends VBox implements IRetrievable {
         }
     }
 
+    private var _previousDataService:IReportDataService;
+    private var _previousReportRenderer:IReportRenderer;
+
+    private var htmlModule:HTMLIFrameModule;
+
+    private function htmlHandling():void {
+        if (analysisDefinition.useHTMLInFlash()) {
+            if (_reportRenderer is HTMLIFrameModule) {
+                // we're okay
+            } else {
+                cleanupReportRenderer();
+                _previousDataService = _dataService;
+                _previousReportRenderer = _reportRenderer;
+                htmlModule = new HTMLIFrameModule();
+                _dataService = new HTMLDataService();
+                _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent, false, 0, true);
+                _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent, false, 0, true);
+                _dataService.addEventListener(DataServiceEvent.DATA_RETURNED, gotData);
+                _reportRenderer = htmlModule;
+                newReportRenderer();
+            }
+        } else {
+            if (_reportRenderer is HTMLIFrameModule) {
+                cleanupReportRenderer();
+                _dataService = _previousDataService;
+                _reportRenderer = _previousReportRenderer;
+                newReportRenderer();
+            } else {
+
+            }
+        }
+    }
+
     public function rerender():void {
         if (_lastData == null) {
             refresh();
@@ -444,13 +492,14 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function refresh():void {
-        if (_adHocMode) {
+        if (_adHocMode || (analysisDefinition != null && analysisDefinition is TextReport)) {
             if (_reportRenderer == null) {
                 pendingRequest = true;
             } else {
                 _analysisDefinition = _controlBar.createAnalysisDefinition();
                 if (_controlBar.isDataValid()) {
                     _analysisDefinition.createDefaultLimits();
+                    htmlHandling();
                     _dataService.retrieveData(_analysisDefinition, false, createRequestParams());
                 } else {
                     showNotConfigured();
@@ -472,6 +521,7 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
             if (_controlBar.isDataValid()) {
                 _analysisDefinition.createDefaultLimits();
+                htmlHandling();
                 _dataService.retrieveData(_analysisDefinition, false, createRequestParams());
             } else {
                 showNotConfigured();
@@ -504,6 +554,25 @@ public class DataViewFactory extends VBox implements IRetrievable {
             currentComponent.width = reportCanvas.width;
             reportCanvas.addChildAt(currentComponent, 0);
             invalidateDisplayList();
+        }
+    }
+
+    private function newReportRenderer():void {
+        _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded, false, 0, true);
+        _reportRenderer.addEventListener(ReportRendererEvent.REMOVE_ITEM, onItemRemoved, false, 0, true);
+        _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender, false, 0, true);
+        _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer, false, 0, true);
+        _reportRenderer.addEventListener(ReportWindowEvent.REPORT_WINDOW, onReportWindow, false, 0, true);
+        _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport, false, 0, true);
+        _reportRenderer.addEventListener(AnalysisItemChangeEvent.ANALYSIS_ITEM_CHANGE, itemChange, false, 0, true);
+        if (Object(_reportRenderer).hasOwnProperty("feedMetadata")) {
+            _reportRenderer["feedMetadata"] = _feedMetadata;
+        }
+        if (_reportRenderer is ISelectableReportRenderer) {
+            reportSelectable = true;
+            reportWatcher = BindingUtils.bindProperty(_reportRenderer, "selectionEnabled", this, "reportSelectionEnabled");
+        } else {
+            reportSelectable = false;
         }
     }
 

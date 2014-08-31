@@ -409,9 +409,10 @@ public class ExportService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
-                    "scheduled_account_activity_id = ?");
+                    "scheduled_account_activity_id = ? AND scheduled_account_activity.account_id = ?");
             for (Integer scheduledActivityID : activities) {
                 deleteStmt.setLong(1, scheduledActivityID);
+                deleteStmt.setLong(2, SecurityUtil.getAccountID());
                 deleteStmt.executeUpdate();
             }
             deleteStmt.close();
@@ -474,7 +475,7 @@ public class ExportService {
         SecurityUtil.authorizeDashboard(dashboard.getId());
         try {
             // todo: fix
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0);
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true, true);
             EIConnection conn = Database.instance().getConnection();
             try {
                 toDatabase(dashboard.getName(), bytes, conn);
@@ -2132,24 +2133,16 @@ public class ExportService {
     }
 
     public static String textReportToHtml(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
-        DataSet dataSet = DataService.listDataSet(listDefinition, insightRequestMetadata, conn);
+
         WSTextDefinition wsTextDefinition = (WSTextDefinition) listDefinition;
+        String text = wsTextDefinition.toExportHTML(conn, insightRequestMetadata, email);
         StringBuilder sb = new StringBuilder();
         if (!email) {
             String style = MessageFormat.format("<div style=\"text-align:left; color:{1}; font-size:{0}px\">", wsTextDefinition.getFontSize(),
                     createHexString(wsTextDefinition.getFontColor()));
             sb.append(style);
         }
-        for (IRow row : dataSet.getRows()) {
-            for (int i = 0; i < wsTextDefinition.getColumns().size(); i++) {
-                AnalysisItem item = wsTextDefinition.getColumns().get(i);
-                Value value = row.getValue(item);
-                sb.append(value.toString());
-                if (i < wsTextDefinition.getColumns().size() - 1) {
-                    sb.append(" ");
-                }
-            }
-        }
+        sb.append(text);
         if (!email) {
             sb.append("</div>");
         }

@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
  * Date: 7/6/12
  * Time: 9:50 AM
  */
-public class MultiSummaryData {
+public class MultiSummaryData implements Serializable {
 
     public static final String headerLabelStyle = "text-align:center;padding-top:15px;padding-bottom:15px;font-size:14px";
     public static final String tableStyle = "font-size:12px;border-collapse:collapse;border-style:solid;border-width:1px;border-spacing:0;border-color:#000000;width:100%";
@@ -37,13 +38,11 @@ public class MultiSummaryData {
     public static final String tdStyle = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
     public static final String tdStyle1 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
     public static final String tdStyle2 = "border-color:#000000;padding:6px;border-style:solid;border-width:1px;text-align:";
+    private final Map<String, Object> additionalProperties;
 
     private WSMultiSummaryDefinition report;
     private ExportMetadata exportMetadata;
-    private DataSet dataSet;
     private Map<InsightDescriptor, WSListDefinition> reportMap = new HashMap<>();
-
-    private Map<InsightDescriptor, DataSet> childSets = new HashMap<>();
 
     private List<MultiSummaryRow> rows;
 
@@ -56,9 +55,8 @@ public class MultiSummaryData {
         this.report = report;
         this.addedJoinColumn = addedJoinColumn;
         this.exportMetadata = exportMetadata;
-        this.dataSet = dataSet;
-        this.childSets = childSets;
         this.reportMap = reportMap;
+        this.additionalProperties = dataSet.getAdditionalProperties();
 
         List<MultiSummaryRow> rows = new ArrayList<>();
 
@@ -89,6 +87,10 @@ public class MultiSummaryData {
         }
         this.higherLevels = higherLevels;
         this.rows = rows;
+    }
+
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
     }
 
     public Workbook toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, boolean format2007) throws SQLException {
@@ -243,6 +245,9 @@ public class MultiSummaryData {
         return rows;
     }
 
+    public List<HigherLevel> getHigherLevels() {
+        return higherLevels;
+    }
 
     public static String rgbToString(float r, float g, float b) {
         String rs = Integer.toHexString((int) (r));
@@ -251,20 +256,34 @@ public class MultiSummaryData {
         return rs + gs + bs;
     }
 
-    private class HigherLevel extends AbstractTreeRow {
-        private Map<InsightDescriptor, List<IRow>> reportToChildRows = new LinkedHashMap<>();
+    public void sort(HigherLevelComparator rowComparator) {
+        Collections.sort(higherLevels, rowComparator);
+    }
+
+    public class HigherLevel extends AbstractTreeRow {
         private int backgroundColor;
         private int textColor;
 
         private IRow row;
         private int rowID;
 
+        public int getRowID() {
+            return rowID;
+        }
 
         private HigherLevel(IRow row, int rowID) {
             this.row = row;
             this.rowID = rowID;
             backgroundColor = report.getSummaryBackgroundColor();
             textColor = report.getSummaryTextColor();
+        }
+
+        public IRow getRow() {
+            return row;
+        }
+
+        public Map<InsightDescriptor, List<IRow>> getMap() {
+            return map;
         }
 
         public MultiSummaryRow toTreeRow(PipelineData pipelineData) {
@@ -440,7 +459,7 @@ public class MultiSummaryData {
             StringBuilder sb = new StringBuilder();
             sb.append("<tr>");
             if (atLeastOneRow) {
-                sb.append("<td><button type=\"button\" style=\"padding: 2px 4px;font-size:10px\" class=\"btn btn-info\" data-toggle=\"collapse\" data-target=\"#collapse" + rowID + "\">Details</button>");
+                sb.append("<td><button type=\"button\" style=\"padding: 2px 4px;font-size:10px\" class=\"btn btn-info\" data-toggle=\"collapse\" data-target=\"#collapse").append(rowID).append("\">Details</button>");
             } else {
                 sb.append("<td></td>");
             }
@@ -509,6 +528,32 @@ public class MultiSummaryData {
             return sb.toString();
         }
 
+        public String createChildDiv(InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<InsightDescriptor, List<IRow>> entry : map.entrySet()) {
+                if (entry.getValue().size() > 0) {
+                    WSListDefinition childReport = reportMap.get(entry.getKey());
+                    if (report.isNestedReportTitles()) {
+                        sb.append("<tr><td style=\"text-align:center;font-size:10px;background-color:#555555;color:#FFFFFF\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">").append(childReport.getName()).append("</td></tr>");
+                    }
+                    sb.append("<tr style=\"min-height:0\"><td style=\"min-height:0; background-color:#DDDDDD\" colspan=\"").append(report.getCoreItems().size() + 1).append("\">");
+
+                    if (report.isDefaultToExpanded()) {
+                        sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse\">");
+                    } else {
+                        sb.append("<div id=\"collapse" + rowID + "\" class=\"panel-collapse collapse\">");
+                    }
+
+
+                    LowerLevel lowerLevel = new LowerLevel(entry.getValue(), childReport);
+                    sb.append(lowerLevel.toHTML(insightRequestMetadata, conn));
+                    sb.append("</div>");
+                    sb.append("</td></tr>");
+                }
+            }
+            return sb.toString();
+        }
+
         private Map<InsightDescriptor, List<IRow>> map = new LinkedHashMap<>();
 
         public void addChildRow(InsightDescriptor key, IRow childRow) {
@@ -521,7 +566,7 @@ public class MultiSummaryData {
         }
     }
 
-    private class LowerLevel extends AbstractTreeRow {
+    public class LowerLevel extends AbstractTreeRow {
         private List<IRow> rows;
         private WSListDefinition childDefinition;
 
@@ -624,7 +669,7 @@ public class MultiSummaryData {
         }
     }
 
-    private abstract class AbstractTreeRow {
+    public abstract class AbstractTreeRow implements Serializable {
 
         public abstract void toElement(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Element parent) throws SQLException, DocumentException;
 

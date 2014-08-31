@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.NamedKey;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.intention.Intention;
@@ -8,12 +10,18 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
+import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
+import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
+import org.eclipse.mylyn.wikitext.core.util.ServiceLocator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: James Boe
@@ -24,6 +32,16 @@ public class WSTextDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> columns;
     private long textReportID;
     private int fontColor;
+    private String text;
+    private transient String originalText;
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 
     public int getFontColor() {
         return fontColor;
@@ -76,38 +94,6 @@ public class WSTextDefinition extends WSAnalysisDefinition {
         setColumns(items("", structure));
     }
 
-    /*@Override
-    public List<String> javaScriptIncludes() {
-        List<String> list = new ArrayList<String>();
-        return list;
-    }*/
-
-    /*@Override
-    public List<String> cssIncludes() {
-        return Arrays.asList("/css/jquery.dataTables.css");
-    }*/
-
-    /*@Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        try {
-            JSONObject analysisItemMap = new JSONObject();
-            for (AnalysisItem i : columns) {
-                if (i.getSortSequence() > 0) {
-                    JSONArray array = new JSONArray();
-                    array.put(String.valueOf(i.getItemPosition()));
-                    array.put(i.getSort() == 2 ? "desc" : "asc");
-                    analysisItemMap.put(String.valueOf(i.getSortSequence()), array);
-                }
-            }
-
-            String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-
-            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-*/
     @Override
     public void populateProperties(List<ReportProperty> properties) {
         super.populateProperties(properties);
@@ -143,5 +129,73 @@ public class WSTextDefinition extends WSAnalysisDefinition {
         List<ReportProperty> properties = super.createProperties();
         properties.add(new ReportNumericProperty("fontColor", fontColor));
         return properties;
+    }
+
+    public Map<String, DerivedAnalysisDimension> beforeRun() {
+        Map<String, DerivedAnalysisDimension> map = new HashMap<>();
+
+        if (getText() != null && !"".equals(getText())) {
+
+            originalText = getText();
+
+            List<AnalysisItem> tmpColumns = new ArrayList<>();
+            if (getAddedItems() == null) {
+                setAddedItems(new ArrayList<>());
+            }
+
+            Pattern pattern = Pattern.compile("\\{(.*?)\\}");
+            Matcher matcher = pattern.matcher(getText());
+            Map<String, String> aliasMap = new HashMap<>();
+            int i = 0;
+            while (matcher.find()) {
+                String g = matcher.group();
+                String substring = g.substring(1, g.length() - 1).trim();
+                DerivedAnalysisDimension dim = new DerivedAnalysisDimension();
+                dim.setDerivationCode(substring);
+                System.out.println(substring);
+                String alias = "tmp" + (i++);
+                dim.setKey(new NamedKey(alias));
+                map.put(alias, dim);
+                aliasMap.put(g, alias);
+                getAddedItems().add(dim);
+                tmpColumns.add(dim);
+            }
+            for (Map.Entry<String, String> entry : aliasMap.entrySet()) {
+                setText(getText().replace(entry.getKey(), entry.getValue()));
+            }
+            setColumns(tmpColumns);
+        }
+        return map;
+    }
+
+    public String createText(Map<String, DerivedAnalysisDimension> map, DataSet dataSet) {
+        if (dataSet.getRows().size() == 0) {
+            return "";
+        }
+        System.out.println(getText());
+        StringWriter writer = new StringWriter();
+        HtmlDocumentBuilder builder = new HtmlDocumentBuilder(writer);
+        MarkupParser parser = new MarkupParser(ServiceLocator.getInstance().getMarkupLanguage("MediaWiki"), builder);
+        parser.parse(getText());
+        //String html = parser.parseToHtml(wikiText);
+        String html = writer.toString();
+        IRow row = dataSet.getRow(0);
+        for (Map.Entry<String, DerivedAnalysisDimension> entry : map.entrySet()) {
+            String string = row.getValue(entry.getValue().createAggregateKey()).toString();
+            html = html.replace(entry.getKey(), string);
+        }
+        html = html.substring(169);
+        html = html.substring(0, html.length() - 14);
+        setText(originalText);
+        return html;
+    }
+
+    @Override
+    public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
+        try {
+            return DataService.getText(this, insightRequestMetadata, conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

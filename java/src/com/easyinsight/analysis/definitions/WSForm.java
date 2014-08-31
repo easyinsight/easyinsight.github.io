@@ -130,21 +130,15 @@ public class WSForm extends WSAnalysisDefinition {
         DataSet dataSet = DataService.listDataSet(this, insightRequestMetadata, conn);
         if (email) {
             if (dataSet.getRows().size() > 0) {
-                IRow row = dataSet.getRow(0);
                 StringBuilder sb = new StringBuilder();
-                sb.append("<form class=\"form-horizontal\">\n");
-                for (AnalysisItem analysisItem : columns) {
-                    sb.append("<fieldset>\n");
-                    sb.append("<div class=\"form-group\">\n");
-                    String inputName = String.valueOf(analysisItem.getAnalysisItemID());
-                    sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toUnqualifiedDisplay()).append("</label>");
-                    sb.append("<div class=\"col-md-6\">");
-                    sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
-                    sb.append("</div>");
-                    sb.append("</div>\n");
-                    sb.append("</fieldset>\n");
+                for (IRow row : dataSet.getRows()) {
+
+                    sb.append("<table>\n");
+                    for (AnalysisItem analysisItem : columns) {
+                        sb.append("<tr><td style=\"text-align:right;font-weight:bold;padding:5px\">").append(analysisItem.toUnqualifiedDisplay()).append(":</td>").append("<td style=\"text-align:left;padding:5px\">").append(row.getValue(analysisItem).toHTMLString()).append("</td>").append("</tr>");
+                    }
+                    sb.append("</table>");
                 }
-                sb.append("</form>");
                 return sb.toString();
             } else {
                 return "";
@@ -153,19 +147,11 @@ public class WSForm extends WSAnalysisDefinition {
             if (dataSet.getRows().size() > 0) {
                 IRow row = dataSet.getRow(0);
                 StringBuilder sb = new StringBuilder();
-                sb.append("<form class=\"form-horizontal\">\n");
+                sb.append("<table>\n");
                 for (AnalysisItem analysisItem : columns) {
-                    sb.append("<fieldset>\n");
-                    sb.append("<div class=\"form-group\">\n");
-                    String inputName = String.valueOf(analysisItem.getAnalysisItemID());
-                    sb.append("<label class=\"col-md-4 control-label\" for=\"").append(inputName).append("\">").append(analysisItem.toUnqualifiedDisplay()).append("</label>");
-                    sb.append("<div class=\"col-md-6\">");
-                    sb.append("<input type=\"text\" class=\"form-control\" readonly=\"readonly\" id=\"").append(inputName).append("\" value=\"").append(row.getValue(analysisItem).toHTMLString()).append("\">");
-                    sb.append("</div>");
-                    sb.append("</div>\n");
-                    sb.append("</fieldset>\n");
+                    sb.append("<tr><td style=\"text-align:right;font-weight:bold;padding:5px\">").append(analysisItem.toUnqualifiedDisplay()).append(":</td>").append("<td style=\"text-align:left;padding:5px\">").append(row.getValue(analysisItem).toHTMLString()).append("</td>").append("</tr>");
                 }
-                sb.append("</form>");
+                sb.append("</table>");
                 return sb.toString();
             } else {
                 return "";

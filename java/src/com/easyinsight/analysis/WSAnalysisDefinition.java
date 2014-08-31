@@ -140,6 +140,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean dataSourceFieldReport;
     private List<FilterSetDescriptor> filterSets;
     private boolean dataDiscoveryEnabled;
+    private String reportSourceName;
 
     private String defaultDate;
 
@@ -446,6 +447,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setRecommendedExchange(boolean recommendedExchange) {
         this.recommendedExchange = recommendedExchange;
+    }
+
+    public String getReportSourceName() {
+        return reportSourceName;
+    }
+
+    public void setReportSourceName(String reportSourceName) {
+        this.reportSourceName = reportSourceName;
     }
 
     public boolean isAutoSetupDelivery() {
@@ -1265,11 +1274,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return new ArrayList<String>();
     }
 
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-        return "$.get('/app/htmlExport?reportID=" + getUrlKey() + "&embedded=" + htmlReportMetadata.isEmbedded() + "&" + timezoneOffset + "&'+ strParams, function(data) { Utils.noData(data, function() { $('#" + targetDiv + " .reportArea').html(data); }, null, '" + targetDiv + "');});";
-    }
-
     public String rootHTML() {
         return "";
     }
@@ -1439,7 +1443,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
             int i = 0;
             if (!multiFieldFilterDefinition.excludeReportFields()) {
                 for (AnalysisItem column : columns) {
-                    System.out.println("\tadded report field " + column.toDisplay());
                     set.add(column);
                     positions.put(column, i++);
                 }
@@ -1451,7 +1454,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     positions.put(item, i++);
                 } else {
                     item = mapByName.get(field.getName());
-                    System.out.println("\tadded by name " + item.toDisplay());
                     if (item != null) {
                         set.add(item);
                         positions.put(item, i++);
@@ -1548,14 +1550,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
 
         final boolean alphaSort = multiFieldFilterDefinition.isAlphaSort();
-
-        if (alphaSort) {
-            System.out.println("Using alpha sort");
-        } else if (fieldOrderingMap.isEmpty()) {
-            System.out.println("Using position sort");
-        } else {
-            System.out.println("Using field ordering sort");
-        }
 
         Collections.sort(clones, new Comparator<AnalysisItem>() {
 

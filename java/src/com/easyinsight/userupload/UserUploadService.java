@@ -125,25 +125,32 @@ public class UserUploadService {
     }
 
     public List<Tag> getDataSourceTags() {
-        List<Tag> tags = new ArrayList<Tag>();
+
         EIConnection conn = Database.instance().getConnection();
+
         try {
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND DATA_SOURCE_TAG = ? ORDER BY TAG_INDEX");
-            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
-            getTagsStmt.setBoolean(2, true);
-            ResultSet rs = getTagsStmt.executeQuery();
-            while (rs.next()) {
-                String tagName = rs.getString(1);
-                long tagID = rs.getLong(2);
-                boolean dataSourceTag = rs.getBoolean(3);
-                boolean reportTag = rs.getBoolean(4);
-                boolean fieldTag = rs.getBoolean(5);
-                tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
-            }
+            return getDataSourceTags(conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public List<Tag> getDataSourceTags(EIConnection conn) throws SQLException {
+        List<Tag> tags = new ArrayList<Tag>();
+        PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND DATA_SOURCE_TAG = ? ORDER BY TAG_INDEX");
+        getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+        getTagsStmt.setBoolean(2, true);
+        ResultSet rs = getTagsStmt.executeQuery();
+
+        while (rs.next()) {
+            String tagName = rs.getString(1);
+            long tagID = rs.getLong(2);
+            boolean dataSourceTag = rs.getBoolean(3);
+            boolean reportTag = rs.getBoolean(4);
+            boolean fieldTag = rs.getBoolean(5);
+            tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
         }
         return tags;
     }
@@ -189,9 +196,7 @@ public class UserUploadService {
                 existingTags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
             }
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, tag_index, data_source_tag, report_tag, field_tag) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, tag_index = ?, data_source_tag = ?, report_tag = ?, field_tag = ? WHERE ACCOUNT_TAG_ID = ?");
+
 
             for (Tag existingTag : existingTags) {
                 if (!tags.contains(existingTag)) {
@@ -203,29 +208,14 @@ public class UserUploadService {
             int i = 0;
             for (Tag tag : tags) {
                 if (tag.getId() == 0) {
-                    insertStmt.setString(1, tag.getName());
-                    insertStmt.setLong(2, SecurityUtil.getAccountID());
-                    insertStmt.setInt(3, i);
-                    insertStmt.setBoolean(4, tag.isDataSource());
-                    insertStmt.setBoolean(5, tag.isReport());
-                    insertStmt.setBoolean(6, tag.isField());
-                    insertStmt.execute();
-                    long id = Database.instance().getAutoGenKey(insertStmt);
-                    tag.setId(id);
+                    createTag(conn, i, tag);
                 } else {
-                    updateStmt.setString(1, tag.getName());
-                    updateStmt.setInt(2, i);
-                    updateStmt.setBoolean(3, tag.isDataSource());
-                    updateStmt.setBoolean(4, tag.isReport());
-                    updateStmt.setBoolean(5, tag.isField());
-                    updateStmt.setLong(6, tag.getId());
-                    updateStmt.executeUpdate();
+                    saveTag(conn, i, tag);
                 }
                 i++;
             }
             deleteStmt.close();
-            insertStmt.close();
-            updateStmt.close();
+
             return tags;
         } catch (Exception e) {
             LogClass.error(e);
@@ -235,98 +225,122 @@ public class UserUploadService {
         }
     }
 
+    public void saveTag(EIConnection conn, int i, Tag tag) throws SQLException {
+        PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, data_source_tag = ?, report_tag = ?, field_tag = ?" + (i == -1 ? "" : ", tag_index = ?") + " WHERE ACCOUNT_TAG_ID = ?");
+        updateStmt.setString(1, tag.getName());
+        updateStmt.setBoolean(2, tag.isDataSource());
+        updateStmt.setBoolean(3, tag.isReport());
+        updateStmt.setBoolean(4, tag.isField());
+
+        if (i != -1) {
+            updateStmt.setInt(5, i);
+            updateStmt.setLong(6, tag.getId());
+        } else
+            updateStmt.setLong(5, tag.getId());
+        updateStmt.executeUpdate();
+        updateStmt.close();
+    }
+
+    public Tag createTag(EIConnection conn, int i, Tag tag) throws SQLException {
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TAG (TAG_NAME, ACCOUNT_ID, tag_index, data_source_tag, report_tag, field_tag) " +
+                "VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        insertStmt.setString(1, tag.getName());
+        insertStmt.setLong(2, SecurityUtil.getAccountID());
+        insertStmt.setInt(3, i);
+        insertStmt.setBoolean(4, tag.isDataSource());
+        insertStmt.setBoolean(5, tag.isReport());
+        insertStmt.setBoolean(6, tag.isField());
+        insertStmt.execute();
+        long id = Database.instance().getAutoGenKey(insertStmt);
+        tag.setId(id);
+        insertStmt.close();
+        return tag;
+    }
+
     public void tagReportsAndDashboards(List<EIDescriptor> descriptors, Tag tag) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement existingReportStmt = conn.prepareStatement("SELECT tag_id FROM report_to_tag WHERE report_id = ?");
-            PreparedStatement existingDashboardStmt = conn.prepareStatement("SELECT tag_id FROM dashboard_to_tag WHERE dashboard_id = ?");
-            PreparedStatement saveReportStmt = conn.prepareStatement("INSERT INTO report_to_tag (tag_id, report_id) VALUES (?, ?)");
-            PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_to_tag (tag_id, dashboard_id) VALUES (?, ?)");
-            for (EIDescriptor dsd : descriptors) {
-                if (dsd.getType() == EIDescriptor.REPORT) {
-                    Set<Long> existingIDs = new HashSet<Long>();
-                    existingReportStmt.setLong(1, dsd.getId());
-                    ResultSet rs = existingReportStmt.executeQuery();
-                    while (rs.next()) {
-                        existingIDs.add(rs.getLong(1));
-                    }
-                    if (!existingIDs.contains(tag.getId())) {
-                        saveReportStmt.setLong(1, tag.getId());
-                        saveReportStmt.setLong(2, dsd.getId());
-                        saveReportStmt.execute();
-                    }
-                } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
-                    Set<Long> existingIDs = new HashSet<Long>();
-                    existingDashboardStmt.setLong(1, dsd.getId());
-                    ResultSet rs = existingDashboardStmt.executeQuery();
-                    while (rs.next()) {
-                        existingIDs.add(rs.getLong(1));
-                    }
-                    if (!existingIDs.contains(tag.getId())) {
-                        saveDashboardStmt.setLong(1, tag.getId());
-                        saveDashboardStmt.setLong(2, dsd.getId());
-                        saveDashboardStmt.execute();
-                    }
-                }
-            }
-            existingReportStmt.close();
-            existingDashboardStmt.close();
-            saveReportStmt.close();
-            saveDashboardStmt.close();
+            tagReportsAndDashboards(descriptors, tag, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public void tagReportsAndDashboards(List<EIDescriptor> descriptors, Tag tag, EIConnection conn) throws SQLException {
+        PreparedStatement existingReportStmt = conn.prepareStatement("SELECT tag_id FROM report_to_tag WHERE report_id = ?");
+        PreparedStatement existingDashboardStmt = conn.prepareStatement("SELECT tag_id FROM dashboard_to_tag WHERE dashboard_id = ?");
+        PreparedStatement saveReportStmt = conn.prepareStatement("INSERT INTO report_to_tag (tag_id, report_id) VALUES (?, ?)");
+        PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_to_tag (tag_id, dashboard_id) VALUES (?, ?)");
+        for (EIDescriptor dsd : descriptors) {
+            if (dsd.getType() == EIDescriptor.REPORT) {
+                Set<Long> existingIDs = new HashSet<Long>();
+                existingReportStmt.setLong(1, dsd.getId());
+                ResultSet rs = existingReportStmt.executeQuery();
+                while (rs.next()) {
+                    existingIDs.add(rs.getLong(1));
+                }
+                if (!existingIDs.contains(tag.getId())) {
+                    saveReportStmt.setLong(1, tag.getId());
+                    saveReportStmt.setLong(2, dsd.getId());
+                    saveReportStmt.execute();
+                }
+            } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
+                Set<Long> existingIDs = new HashSet<Long>();
+                existingDashboardStmt.setLong(1, dsd.getId());
+                ResultSet rs = existingDashboardStmt.executeQuery();
+                while (rs.next()) {
+                    existingIDs.add(rs.getLong(1));
+                }
+                if (!existingIDs.contains(tag.getId())) {
+                    saveDashboardStmt.setLong(1, tag.getId());
+                    saveDashboardStmt.setLong(2, dsd.getId());
+                    saveDashboardStmt.execute();
+                }
+            }
+        }
+        existingReportStmt.close();
+        existingDashboardStmt.close();
+        saveReportStmt.close();
+        saveDashboardStmt.close();
     }
 
     public void untagReportsAndDashboards(List<EIDescriptor> descriptors, Tag tag) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement deleteReportStmt = conn.prepareStatement("DELETE FROM report_to_tag WHERE tag_id = ? AND report_id = ?");
-            PreparedStatement deleteDashboardStmt = conn.prepareStatement("DELETE FROM dashboard_to_tag WHERE tag_id = ? AND dashboard_id = ?");
-            for (EIDescriptor dsd : descriptors) {
-                if (dsd.getType() == EIDescriptor.REPORT) {
-                    deleteReportStmt.setLong(1, tag.getId());
-                    deleteReportStmt.setLong(2, dsd.getId());
-                    deleteReportStmt.executeUpdate();
-                } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
-                    deleteDashboardStmt.setLong(1, tag.getId());
-                    deleteDashboardStmt.setLong(2, dsd.getId());
-                    deleteDashboardStmt.executeUpdate();
-                }
-            }
-            deleteReportStmt.close();
-            deleteDashboardStmt.close();
+            untagReportsAndDashboards(descriptors, tag, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public void untagReportsAndDashboards(List<EIDescriptor> descriptors, Tag tag, EIConnection conn) throws SQLException {
+        PreparedStatement deleteReportStmt = conn.prepareStatement("DELETE FROM report_to_tag WHERE tag_id = ? AND report_id = ?");
+        PreparedStatement deleteDashboardStmt = conn.prepareStatement("DELETE FROM dashboard_to_tag WHERE tag_id = ? AND dashboard_id = ?");
+        for (EIDescriptor dsd : descriptors) {
+            if (dsd.getType() == EIDescriptor.REPORT) {
+                deleteReportStmt.setLong(1, tag.getId());
+                deleteReportStmt.setLong(2, dsd.getId());
+                deleteReportStmt.executeUpdate();
+            } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
+                deleteDashboardStmt.setLong(1, tag.getId());
+                deleteDashboardStmt.setLong(2, dsd.getId());
+                deleteDashboardStmt.executeUpdate();
+            }
+        }
+        deleteReportStmt.close();
+        deleteDashboardStmt.close();
     }
 
     public void tagDataSources(List<DataSourceDescriptor> dataSources, Tag tag) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement existingStmt = conn.prepareStatement("SELECT account_tag_id FROM data_source_to_tag WHERE data_source_id = ?");
-            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO data_source_to_tag (account_tag_id, data_source_id) VALUES (?, ?)");
-            for (DataSourceDescriptor dsd : dataSources) {
-                Set<Long> existingIDs = new HashSet<Long>();
-                existingStmt.setLong(1, dsd.getId());
-                ResultSet rs = existingStmt.executeQuery();
-                while (rs.next()) {
-                    existingIDs.add(rs.getLong(1));
-                }
-                if (!existingIDs.contains(tag.getId())) {
-                    saveStmt.setLong(1, tag.getId());
-                    saveStmt.setLong(2, dsd.getId());
-                    saveStmt.execute();
-                }
-            }
-            existingStmt.close();
-            saveStmt.close();
+            tagDataSources(dataSources, tag, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -335,22 +349,46 @@ public class UserUploadService {
         }
     }
 
+    public void tagDataSources(List<DataSourceDescriptor> dataSources, Tag tag, EIConnection conn) throws SQLException {
+        PreparedStatement existingStmt = conn.prepareStatement("SELECT account_tag_id FROM data_source_to_tag WHERE data_source_id = ?");
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO data_source_to_tag (account_tag_id, data_source_id) VALUES (?, ?)");
+        for (DataSourceDescriptor dsd : dataSources) {
+            Set<Long> existingIDs = new HashSet<Long>();
+            existingStmt.setLong(1, dsd.getId());
+            ResultSet rs = existingStmt.executeQuery();
+            while (rs.next()) {
+                existingIDs.add(rs.getLong(1));
+            }
+            if (!existingIDs.contains(tag.getId())) {
+                saveStmt.setLong(1, tag.getId());
+                saveStmt.setLong(2, dsd.getId());
+                saveStmt.execute();
+            }
+        }
+        existingStmt.close();
+        saveStmt.close();
+    }
+
     public void untagDataSource(List<DataSourceDescriptor> dataSources, Tag tag) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM data_source_to_tag WHERE account_tag_id = ? AND data_source_id = ?");
-            for (DataSourceDescriptor dsd : dataSources) {
-                deleteStmt.setLong(1, tag.getId());
-                deleteStmt.setLong(2, dsd.getId());
-                deleteStmt.executeUpdate();
-            }
-            deleteStmt.close();
+            untagDataSource(dataSources, tag, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public void untagDataSource(List<DataSourceDescriptor> dataSources, Tag tag, EIConnection conn) throws SQLException {
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM data_source_to_tag WHERE account_tag_id = ? AND data_source_id = ?");
+        for (DataSourceDescriptor dsd : dataSources) {
+            deleteStmt.setLong(1, tag.getId());
+            deleteStmt.setLong(2, dsd.getId());
+            deleteStmt.executeUpdate();
+        }
+        deleteStmt.close();
     }
 
     public void deleteReports(List<EIDescriptor> descriptors) {
@@ -542,14 +580,8 @@ public class UserUploadService {
             objects.addAll(reports);
             objects.addAll(new ScorecardInternalService().getScorecards(userID, accountID, conn, testAccountVisible).values());
 
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
+            Map<Long, Tag> tags = getAllTags(conn);
 
-            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet tagRS = getTagsStmt.executeQuery();
-            Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
-            while (tagRS.next()) {
-                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
-            }
             addTagsToDashboards(dashboards, conn, tags);
             addTagsToReports(reports, conn, tags);
 
@@ -611,6 +643,20 @@ public class UserUploadService {
         }
     }
 
+    public Map<Long, Tag> getAllTags(EIConnection conn) throws SQLException {
+        Map<Long, Tag> tags = new LinkedHashMap<Long, Tag>();
+
+        PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? ORDER BY TAG_INDEX");
+
+        getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet tagRS = getTagsStmt.executeQuery();
+
+        while (tagRS.next()) {
+            tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
+        }
+        return tags;
+    }
+
     private void addTagsToDashboards(List<DashboardDescriptor> dashboards, EIConnection conn, Map<Long, Tag> tags) throws SQLException {
         PreparedStatement getTagsToDashboardStmt = conn.prepareStatement("SELECT DASHBOARD_TO_TAG.TAG_ID, DASHBOARD_ID FROM dashboard_to_tag, account_tag WHERE " +
                 "account_tag.account_tag_id = dashboard_to_tag.tag_id AND account_tag.account_id = ?");
@@ -655,7 +701,7 @@ public class UserUploadService {
         }
         getTagsToReportsStmt.close();
 
-        for(InsightDescriptor d : reports) {
+        for (InsightDescriptor d : reports) {
             d.setTags(reportToTagMap.get(d.getId()));
         }
 
@@ -1335,6 +1381,53 @@ public class UserUploadService {
         }
     }
 
+    public void addAccountReport(EIDescriptor descriptor, EIConnection conn) throws SQLException {
+        SecurityUtil.authorizeAccountAdmin();
+        PreparedStatement ps = null;
+        try {
+            if (descriptor.getType() == EIDescriptor.REPORT) {
+                ps = conn.prepareStatement("INSERT INTO ACCOUNT_TO_REPORT (ACCOUNT_ID, REPORT_ID) VALUES (?, ?)");
+
+            } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                ps = conn.prepareStatement("INSERT INTO ACCOUNT_TO_DASHBOARD (ACCOUNT_ID, DASHBOARD_ID) VALUES (?, ?)");
+            }
+            if (ps == null) return;
+
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ps.setLong(2, descriptor.getId());
+            ps.execute();
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+        }
+    }
+
+    public void deleteAccountReports(List<EIDescriptor> descriptors, EIConnection conn) throws SQLException {
+        PreparedStatement deleteDashboard = conn.prepareStatement("DELETE FROM ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_ID = ? AND DASHBOARD_ID = ?");
+        PreparedStatement deleteReport = conn.prepareStatement("DELETE FROM ACCOUNT_TO_REPORT WHERE ACCOUNT_ID = ? AND REPORT_ID = ?");
+        try {
+            for(EIDescriptor descriptor: descriptors) {
+                PreparedStatement deleteStmt = null;
+                if(descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    deleteStmt = deleteDashboard;
+                } else if(descriptor.getType() == EIDescriptor.REPORT) {
+                    deleteStmt = deleteReport;
+                }
+                if(deleteStmt == null) return;
+                deleteStmt.setLong(1, SecurityUtil.getAccountID());
+                deleteStmt.setLong(2, descriptor.getId());
+                deleteStmt.execute();
+            }
+        } finally {
+            if(deleteDashboard != null)
+                deleteDashboard.close();
+            if(deleteReport != null)
+                deleteReport.close();
+        }
+    }
+
+
     public List<EIDescriptor> getAccountReports() {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1412,6 +1505,58 @@ public class UserUploadService {
 
         }
         return rawUploadData;
+    }
+
+    public void checkTag(Tag t) {
+        Database.useConnection(false, (conn) -> {
+            checkTag(t, conn);
+        });
+    }
+
+    public void checkTag(Tag t, EIConnection conn) throws SQLException {
+        PreparedStatement checkStatement = conn.prepareStatement("SELECT COUNT(*) FROM data_source_to_tag WHERE account_tag_id = ?");
+        checkStatement.setLong(1, t.getId());
+        ResultSet rs = checkStatement.executeQuery();
+        if (rs.next()) {
+            long count = rs.getLong(1);
+            if (count == 0) {
+                PreparedStatement typeStatement = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE account_tag_id = ? AND REPORT_TAG = ? AND FIELD_TAG = ?");
+                typeStatement.setLong(1, t.getId());
+                typeStatement.setBoolean(2, false);
+                typeStatement.setBoolean(3, false);
+                typeStatement.execute();
+                PreparedStatement removeStatement = conn.prepareStatement("UPDATE ACCOUNT_TAG SET DATA_SOURCE_TAG = ? WHERE ACCOUNT_TAG_ID = ?");
+                removeStatement.setBoolean(1, false);
+                removeStatement.setLong(2, t.getId());
+                removeStatement.execute();
+            }
+        }
+    }
+
+    public void checkReportsTag(Tag t) {
+        Database.useConnection(false, (conn) -> {
+            checkReportsTag(t, conn);
+        });
+    }
+
+    public void checkReportsTag(Tag t, EIConnection conn) throws SQLException {
+        PreparedStatement checkStatement = conn.prepareStatement("SELECT COUNT(*) FROM report_to_tag WHERE tag_id = ?");
+        checkStatement.setLong(1, t.getId());
+        ResultSet rs = checkStatement.executeQuery();
+        if (rs.next()) {
+            long count = rs.getLong(1);
+            if (count == 0) {
+                PreparedStatement typeStatement = conn.prepareStatement("DELETE FROM ACCOUNT_TAG WHERE account_tag_id = ? AND DATA_SOURCE_TAG = ? AND FIELD_TAG = ?");
+                typeStatement.setLong(1, t.getId());
+                typeStatement.setBoolean(2, false);
+                typeStatement.setBoolean(3, false);
+                typeStatement.execute();
+                PreparedStatement removeStatement = conn.prepareStatement("UPDATE ACCOUNT_TAG SET report_tag = ? WHERE ACCOUNT_TAG_ID = ?");
+                removeStatement.setBoolean(1, false);
+                removeStatement.setLong(2, t.getId());
+                removeStatement.execute();
+            }
+        }
     }
 
     public static class RawUploadData {

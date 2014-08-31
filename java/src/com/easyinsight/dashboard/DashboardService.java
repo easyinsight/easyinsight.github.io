@@ -433,6 +433,16 @@ public class DashboardService {
         }
     }
 
+    //TODO: ADD TAGS
+    public DashboardDescriptor getDashboardDescriptor(String urlKey, EIConnection conn) {
+        long dashboardID = canAccessDashboard(urlKey);
+        if(dashboardID == 0)
+            return null;
+        DashboardDescriptor dd = new DashboardDescriptor();
+        dd.setId(dashboardID);
+        return dd;
+    }
+
     public ReportResults getDashboardWithTags() {
         return getDashboardWithTags(new ArrayList<String>());
     }

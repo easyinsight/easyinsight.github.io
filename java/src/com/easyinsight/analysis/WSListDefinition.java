@@ -287,19 +287,6 @@ public class WSListDefinition extends WSAnalysisDefinition {
         return new ArrayList<String>();
     }
 
-    @Override
-    public String toHTML(String targetDiv, HTMLReportMetadata htmlReportMetadata) {
-        try {
-            JSONObject analysisItemMap = getAnalysisItemMap();
-
-            String timezoneOffset = "timezoneOffset='+new Date().getTimezoneOffset()+'";
-
-            return "$.get('/app/htmlExport?reportID=" + getUrlKey() +"&embedded="+htmlReportMetadata.isEmbedded()+ "&" + timezoneOffset + "&'+ strParams, List.getCallback('" + targetDiv + "', " + jsonProperties().toString() + ", " + analysisItemMap.toString() +", " + columns.size() + "));";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private JSONObject getAnalysisItemMap() throws JSONException {
         JSONObject analysisItemMap = new JSONObject();
         JSONArray columnJSON = new JSONArray();

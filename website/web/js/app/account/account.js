@@ -1,5 +1,5 @@
 (function() {
-    var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
+    var eiAccounts = angular.module('eiAccounts', ['ui.bootstrap', 'ui.keypress', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'colorpicker.module', 'angularFileUpload']);
 
 
     eiAccounts.controller('AccountController', ["$scope", function ($scope) {
@@ -10,8 +10,10 @@
 eiAccounts.controller("AccountInfoController", ["$scope", "$http", "PageInfo", "$location",
     "$rootScope",
     function($scope, $http, PageInfo, $location, $rootScope) {
-    if(!$rootScope.user.admin)
-        $location.path("/account/profile");
+    $rootScope.user_promise.then(function() {
+        if(!$rootScope.user.admin)
+            $location.path("/account/profile");
+    });
     PageInfo.setTitle("Account Info");
     $http.get("/app/account.json").success(function (d, r) {
         $scope.account = d.account;
@@ -49,10 +51,12 @@ eiAccounts.controller('UserBaseController', ["$scope", "$http", function ($scope
 
 eiAccounts.controller('UsersController', ["$scope", "$filter", "$http", "PageInfo", "$location", "$rootScope",
     function ($scope, $filter, $http, PageInfo, $location, $rootScope) {
-    if(!$rootScope.user.admin)
-        $location.path("/account/profile");
-    PageInfo.setTitle("Users")
-    $scope.deleteSelected = function () {
+        $rootScope.user_promise.then(function() {
+            if(!$rootScope.user.admin)
+                $location.path("/account/profile");
+        });
+        PageInfo.setTitle("Users")
+        $scope.deleteSelected = function () {
         var usersToDelete = $filter('filter')($scope.users, {"delete": true}, true);
         var usersToDeleteIDs = usersToDelete.map(function (e, i, l) {
             return e.id;
@@ -74,8 +78,10 @@ eiAccounts.controller('UsersController', ["$scope", "$filter", "$http", "PageInf
 
 eiAccounts.controller('UserController', ["$scope", "$routeParams", "$http", "$location", "PageInfo", "$rootScope",
     function ($scope, $routeParams, $http, $location, PageInfo, $rootScope) {
-    if(!$rootScope.user.admin)
-        $location.path("/account/profile");
+    $rootScope.user_promise.then(function() {
+        if(!$rootScope.user.admin)
+            $location.path("/account/profile");
+    });
     $scope.load.then(function () {
         var i;
         for (i in $scope.users) {
@@ -111,8 +117,10 @@ eiAccounts.controller('UserController', ["$scope", "$routeParams", "$http", "$lo
 
 eiAccounts.controller('NewDesignerController', ["$scope", "$http", "$location", "PageInfo", "$rootScope",
     function ($scope, $http, $location, PageInfo, $rootScope) {
-    if(!$rootScope.user.admin)
-        $location.path("/account/profile");
+        $rootScope.user_promise.then(function() {
+            if(!$rootScope.user.admin)
+                $location.path("/account/profile");
+        });
     PageInfo.setTitle("New Designer");
     $scope.user = {
         "email": null,
@@ -146,8 +154,10 @@ eiAccounts.controller('NewDesignerController', ["$scope", "$http", "$location", 
 
 eiAccounts.controller('NewViewerController', ["$scope", "$http", "$location", "PageInfo", "$rootScope",
     function ($scope, $http, $location, PageInfo, $rootScope) {
-    if(!$rootScope.user.admin)
-        $location.path("/account/profile");
+    $rootScope.user_promise.then(function() {
+        if(!$rootScope.user.admin)
+            $location.path("/account/profile");
+    });
     PageInfo.setTitle("New Viewer");
     $scope.user = {
         "email": null,
@@ -285,11 +295,10 @@ eiAccounts.controller("GroupIndexController", ["$scope", function($scope) {
         }
     })
 
-eiAccounts.controller("GroupInfoController", ["$scope", "$http", "$routeParams", "$filter", function($scope, $http, $routeParams, $filter) {
+eiAccounts.controller("GroupInfoController", ["$scope", "$http", "$routeParams", "$filter", "$rootScope", function($scope, $http, $routeParams, $filter) {
     $scope.group_loading = $http.get("/app/groups/" + $routeParams.id + ".json");
     $scope.group_loading.then(function(c) {
         $scope.group = c.data.group;
-        console.log($scope.group.users)
     })
     $scope.user_load = $http.get("/app/json/getUsers").success(function (d, r) {
         $scope.users = d.users;
@@ -303,7 +312,7 @@ eiAccounts.controller("GroupInfoController", ["$scope", "$http", "$routeParams",
 
     $scope.submit = function() {
         $scope.submit_promise = $http.post("/app/groups/" + $routeParams.id + ".json", JSON.stringify($scope.group));
-        $scope.submit_promise.success(function(d) {console.log(d)})
+        $scope.submit_promise.success(function(d) {})
 
     }
 
@@ -349,6 +358,85 @@ eiAccounts.directive('eicolorform', function() {
     }
 });
 
+eiAccounts.controller("quickLinksController", ["$scope", "PageInfo", "$rootScope", "$http", "$modal", function($scope, PageInfo, $rootScope, $http, $modal) {
+    $rootScope.user_promise.then(function() {
+        if(!$rootScope.user.admin)
+            $location.path("/account/profile");
+    });
+    PageInfo.setTitle("Top Reports and Dashboards");
+    $http.get("/app/html/dataSourceTags.json").then(function (d) {
+        $scope.ds_tags = d.data.tags;
+    });
+
+    $http.get("/app/html/reportTags.json").then(function (d) {
+        $scope.report_tags = d.data.tags;
+    });
+
+    $scope.ds_load = $http.get("/app/dataSources.json");
+    $scope.ds_load.then(function (d) {
+        $scope.data_sources = d.data.data_sources;
+        if($scope.data_sources.length == 1) {
+            $scope.ds_name = $scope.data_sources[0];
+            $scope.select_data_source($scope.ds_name);
+        }
+    });
+
+    $scope.select_data_source = function(item) {
+        $http.get("/app/dataSources/" + item.url_key + "/reports.json").then(function(d) {
+            $scope.reports = d.data.reports;
+        });
+    }
+
+    $scope.isSelected = function(val) {
+        return val && typeof(val) === "object"
+    }
+
+    $scope.addReport = function() {
+        var out = {"bookmarks": [{"url_key": $scope.selected_report.url_key, "type": $scope.selected_report.type }]}
+        $scope.saving = $http.post("/app/userInfo.json", JSON.stringify(out))
+        $scope.saving.then(function(d) {
+            $rootScope.bookmarks.push(d.data);
+        })
+    }
+
+    $scope.deleteSelected = function() {
+
+        var toDelete = $rootScope.bookmarks.filter(function(e, i, l) {
+            return e.selected;
+        })
+        if (toDelete.length > 0) {
+            $scope.to_delete = toDelete;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/account/delete_quick_links_dialog.template.html",
+                scope: $scope,
+                controller: "deleteSelectedBookmarksController"
+            });
+            m.result.then(function (r) {
+                $rootScope.bookmarks = $rootScope.bookmarks.filter(function (e, i, l) {
+                    return !e.selected;
+                });
+            });
+            m.result.finally(function(r) {
+                delete $scope.to_delete;
+            })
+        }
+
+    }
+
+}]);
+
+    eiAccounts.controller("deleteSelectedBookmarksController", ["$http", "$scope", function($http, $scope) {
+        $scope.confirmDelete = function() {
+            var output = {"bookmarks": $scope.to_delete.map(function(e, i, l) {
+                return {"url_key": e.url_key, "type": e.type };
+            }) };
+            $scope.saving = $http.delete("/app/userInfo.json", {data: JSON.stringify(output)});
+            $scope.saving.then(function (c) {
+                $scope.$close();
+            })
+        }
+    }])
+
 eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($locationProvider, $routeSegmentProvider) {
     $routeSegmentProvider.when("/account", "account.index.overview").
         when("/account/settings", "account.index.settings").
@@ -361,6 +449,7 @@ eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($loca
         when("/account/report_header", "account.index.report_header").
         when("/account/groups", "account.group.index").
         when("/account/groups/:id", "account.group.group_info").
+        when("/account/quick_links", "account.index.quick_links").
         segment("account", {
             templateUrl: '/angular_templates/account/base.template.html',
             controller: 'AccountController'
@@ -384,6 +473,10 @@ eiAccounts.config(["$locationProvider", "$routeSegmentProvider", function ($loca
         segment("report_header", {
             templateUrl: "/angular_templates/account/report_header.template.html",
             controller: "AccountSkinController"
+        }).
+        segment("quick_links", {
+            templateUrl: "/angular_templates/account/quick_links.template.html",
+            controller: "quickLinksController"
         }).
         up().
         segment("profile", {

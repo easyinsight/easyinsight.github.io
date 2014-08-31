@@ -37,7 +37,7 @@
         private function onCreation():void {
 
             controlsFactory = new ClassFactory(ConnectionControls);
-            ClassFactory(controlsFactory).properties = { fields:fields };
+            ClassFactory(controlsFactory).properties = { fields: fields };
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_TOP, onMoveToTop);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, onMoveToBottom);
@@ -126,12 +126,13 @@
 
         private function revert():void {
             //startJoins = null;
-            var startSize:int = startJoins.length;
             connections = null;
-            for (var i:int = 0; i < startJoins.length; i++) {
-                var join:JoinOverride = startJoins.getItemAt(i) as JoinOverride;
-                if (join.dataSourceID == selectedDataSource.id) {
-                    startJoins.removeItemAt(i--);
+            if (startJoins != null) {
+                for (var i:int = 0; i < startJoins.length; i++) {
+                    var join:JoinOverride = startJoins.getItemAt(i) as JoinOverride;
+                    if (join.dataSourceID == selectedDataSource.id) {
+                        startJoins.removeItemAt(i--);
+                    }
                 }
             }
 

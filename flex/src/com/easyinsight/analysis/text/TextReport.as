@@ -18,6 +18,7 @@ public class TextReport extends AnalysisDefinition {
     public var textReportID:int;
     public var columns:ArrayCollection;
     public var fontColor:uint = 0x333333;
+    public var text:String;
 
     public function TextReport() {
     }

@@ -40,17 +40,21 @@ easyInsight.config(["$httpProvider", function($httpProvider) {
     }])
 }])
 
-easyInsight.run(["$rootScope", "$http", "$location", "PageInfo",
-    function ($rootScope, $http, $location, PageInfo) {
+easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q",
+    function ($rootScope, $http, $location, PageInfo, $q) {
     $rootScope.user = {
         "username": "..."
     };
+        var user_defer = $q.defer();
+    $rootScope.user_promise = user_defer.promise;
+
     $http.get("/app/userInfo.json").success(function (d, r) {
         if (r == 401)
             window.location = "/app/login.jsp";
         else {
             $rootScope.bookmarks = d.bookmarks;
             $rootScope.user = d.user;
+            user_defer.resolve($rootScope.user);
             $rootScope.news_alert = d.news_alert;
         }
     }).error(function () {

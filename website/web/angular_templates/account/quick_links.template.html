@@ -1,0 +1,61 @@
+<div cg-busy="saving" />
+<div class="row">
+        <div class="col-md-12">
+        <h4>Add a Report/Dashboard</h4>
+        </div>
+    </div>
+    <div ng-show="data_sources.length > 1" class="row form-group">
+        <div class="col-md-3">
+            <label for="report_select">
+        Choose a Data Source:
+                </label>
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" type="text" ng-model="ds_name" placeholder="Search for a data source..."
+                   typeahead="data_source as data_source.name for data_source in data_sources | filter: {name: $viewValue}" typeahead-min-length="0"
+                   typeahead-editable="false" typeahead-on-select="select_data_source($item, $model, $label)" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label for="report_select">Choose a Report:</label>
+        </div>
+        <div class="col-md-3">
+            <input id="report_select" class="form-control" type="text" ng-model="selected_report" placeholder="Search for a report..."
+                   ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue}"
+                   typeahead-min-length="0" typeahead-editable="false" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-9 col-md-offset-3">
+            <button class="btn btn-default" ng-disabled="!isSelected(selected_report)" ng-click="addReport()">Add Report/Dashboard</button>
+        </div>
+    </div>
+<div class="row">
+    <div class="col-md-9">
+        <h4>Top Reports and Dashboards</h4>
+    </div>
+        <div class="col-md-3">
+            <button class="btn btn-danger pull-right" ng-click="deleteSelected()">Delete Selected</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+        <table class="table table-striped table-bordered table-condensed reportDashboardTable">
+            <thead>
+            <th style="width:22px"></th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            </thead>
+            <tbody>
+                <tr ng-repeat="bookmark in bookmarks">
+                    <td><input type="checkbox" ng-model="bookmark.selected"/></td>
+                    <td>{{bookmark.name}}</td>
+                    <td>{{bookmark.description}}</td>
+                    <td>{{bookmark.type.capitalize()}}</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>

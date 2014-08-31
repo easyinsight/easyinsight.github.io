@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+           implements="com.easyinsight.analysis.IReportRenderer">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
@@ -19,18 +20,25 @@
             if (this.width == 0) {
                 addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdate);
             } else {
+                markdownTextArea.maxWidth = this.width;
+                markdownTextArea.width = this.width;
                 reportText.maxWidth = this.width;
+                reportText.width = this.width;
             }
         }
 
         private function onUpdate(event:FlexEvent):void {
             removeEventListener(FlexEvent.UPDATE_COMPLETE, onUpdate);
             reportText.maxWidth = this.width;
+            reportText.width = this.width;
+            markdownTextArea.width = this.width;
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
+
             blah();
             textReport = analysisDefinition as TextReport;
+            this.markdownText = textReport.text;
             if (textReport.useCustomFontFamily) {
                 setStyle("fontFamily", textReport.getFont());
                 fontFamily = textReport.getFont();
@@ -39,24 +47,13 @@
             fontSize = textReport.fontSize;
             fontColor = textReport.fontColor;
 
-            var str:String = "";
-            for each (var obj:Object in dataSet) {
-                for (var i:int = 0; i < textReport.columns.length; i++) {
-                    var item:AnalysisItem = textReport.columns.getItemAt(i) as AnalysisItem;
-                    var val:Value = obj[item.qualifiedName()];
-                    if (val.type() == Value.EMPTY) {
-                        continue;
-                    }
-                    str += val.toString();
-                    /*if (i < (textReport.columns.length - 1)) {
-                     str += " ";
-                     }*/
-                }
-            }
             if (additionalProperties["preferredSize"]) {
                 reportText.addEventListener(FlexEvent.UPDATE_COMPLETE, onUpdateComplete);
             }
-            this.text = str;
+            var text:String = additionalProperties["text"];
+            if (text != null) {
+                this.text = text;
+            }
         }
 
         private function onUpdateComplete(event:Event):void {
@@ -77,15 +74,35 @@
         [Bindable]
         private var fontFamily:String;
 
+        [Bindable]
+        private var markdownText:String;
+
         public function updateExportMetadata(report:AnalysisDefinition = null):void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
 
+        private function apply():void {
+            dispatchEvent(new TextChangeEvent(markdownTextArea.text));
+        }
+
         public function preserveValues():Boolean {
             return true;
         }
+
+        [Bindable]
+        private var explain:String = "Define the text of the report below using Mediawiki formatting. Wrap up any Easy Insight fields or scripting with { }, such as {[Deal Size]}."
         ]]></mx:Script>
-    <mx:Text htmlText="{text}" id="reportText" fontSize="{fontSize}" color="{fontColor}" fontFamily="{fontFamily}"/>
+    <mx:VBox>
+        <mx:Text text="{explain}"/>
+        <mx:TextArea editable="true" htmlText="{markdownText}" id="markdownTextArea" fontSize="{fontSize}" color="{fontColor}" fontFamily="{fontFamily}" height="200"
+                borderStyle="solid" borderThickness="1" borderColor="#CCCCCC"/>
+        <mx:HBox verticalAlign="middle">
+            <mx:Text text="When ready, click Apply to actually run the report."/>
+            <mx:Button id="applyButton" label="Apply" click="apply()" styleName="flatSaveButton"/>
+        </mx:HBox>
+        <mx:Text htmlText="{text}" id="reportText" fontSize="{fontSize}" color="{fontColor}" fontFamily="{fontFamily}"/>
+    </mx:VBox>
+
 </mx:Canvas>

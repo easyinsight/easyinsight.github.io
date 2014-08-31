@@ -9,6 +9,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
@@ -118,6 +119,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         Map<String, List<Map>> statusUpdates = new HashMap<>();
         Map<String, List<Map>> assignmentUpdates = new HashMap<>();
         Map<String, List<Map>> addedNotes = new HashMap<>();
+        Map<String, List<Map>> surveyMap = new HashMap<>();
         do {
             ctr = 0;
             List responseList;
@@ -131,12 +133,13 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                 Map map = (Map) obj;
                 String id = map.get("id").toString();
                 String displayID = getJSONValue(map, "display_id");
-                List<Map> activities = runRestRequestForList("tickets/activities/" + displayID + ".json", client, freshdeskCompositeSource);
+
 
 
                 IRow row = dataSet.createRow();
                 Date updatedAt = createTicket(keys, map, id, row, freshdeskCompositeSource);
                 //if (lastRefreshDate == null || lastRefreshDate.before(updatedAt)) {
+                    List<Map> activities = runRestRequestForList("tickets/activities/" + displayID + ".json", client, freshdeskCompositeSource);
                     ticketIDs.add(displayID);
                     List<Map> statusUpdateList = new LinkedList<>();
                     List<Map> assignmentUpdateList = new LinkedList<>();
@@ -167,23 +170,29 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                     assignmentUpdates.put(displayID, assignmentUpdateList);
                     addedNotes.put(displayID, noteList);
 
+                try {
+                    List<Map> surveys = runRestRequestForList("tickets/" + displayID + "/surveys.json", client, freshdeskCompositeSource);
+                    surveyMap.put(displayID, surveys);
+                } catch (ClassCastException e) {
+                    LogClass.error(e);
+                    // ignore, feature is locked
+                }
+
                 boolean closed = false;
                 int reopenCount = 0;
-                System.out.println("new ticket");
                 Value resolvedAt = null;
                 for (Object activityObject : statusUpdateList) {
                     // calculate # of times issues was reopened
                     Map m = (Map) activityObject;
                     Map ticketActivityMap = (Map) m.get("ticket_activity");
-                    System.out.println(m);
                     List<String> list = (List<String>) ticketActivityMap.get("activity");
                     for (String activityBody : list) {
-                        System.out.println("\tbody = " + activityBody);
+
                         int index = activityBody.lastIndexOf(" ");
                         String status = activityBody.substring(index).trim();
-                        System.out.println("\tstatus = " + status);
+
                         if ("Resolved".equals(status) || "Closed".equals(status)) {
-                            System.out.println("Setting closed ");
+
                             if (!closed) {
                                 resolvedAt = getDate(ticketActivityMap, "performed_time");
                             }
@@ -191,10 +200,10 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                         } else {
                             resolvedAt = new EmptyValue();
                             if (closed) {
-                                System.out.println("Incrementing reopen count");
+
                                 reopenCount++;
                             }
-                            System.out.println("Marking unclosed");
+
                             closed = false;
                         }
                     }
@@ -209,6 +218,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         freshdeskCompositeSource.setStatusUpdates(statusUpdates);
         freshdeskCompositeSource.setNotes(addedNotes);
         freshdeskCompositeSource.setTicketIDs(ticketIDs);
+        freshdeskCompositeSource.setSurveys(surveyMap);
         return dataSet;
     }
 

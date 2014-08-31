@@ -24,6 +24,8 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.WindowManagementInstance;
+
         import mx.collections.ArrayCollection;
         import mx.events.CloseEvent;
         import mx.events.FlexEvent;
@@ -98,6 +100,7 @@
             alert.progressText = progressText;
             alert.completeText = completeText;
             alert.operations = new ArrayCollection(operations);
+            WindowManagementInstance.getManager().addWindow(alert);
             PopUpManager.addPopUp(alert, parent, true);
             PopUpUtil.centerPopUp(alert);
             return alert;

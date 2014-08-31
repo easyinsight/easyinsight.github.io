@@ -28,9 +28,18 @@ public class MultiSummaryDefinition extends AnalysisDefinition {
     public var defaultMeasureAlignment:String;
     public var defaultGroupingAlignnment:String;
     public var defaultDateAlignment:String;
+    public var summaryRow:Boolean;
+    public var lockHeaders:Boolean;
+    public var summaryTextColor:uint;
+    public var summaryBackgroundColor:uint;
 
     public function MultiSummaryDefinition() {
         super();
+    }
+
+
+    override public function useHTMLInFlash():Boolean {
+        return true;
     }
 
     override public function getFont():String {

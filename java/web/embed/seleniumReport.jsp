@@ -136,7 +136,7 @@
         try {
             userObject = SecurityUtil.getUserJSON(c, request);
         } finally {
-            c.close();
+            Database.closeConnection(c);
         }
 
         userObject.put("embedded", true);

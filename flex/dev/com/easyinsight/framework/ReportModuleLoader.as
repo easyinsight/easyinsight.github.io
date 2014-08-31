@@ -27,6 +27,7 @@ import com.easyinsight.analysis.heatmap.HTMLIFrameModule;
 import com.easyinsight.analysis.list.ListModule;
 import com.easyinsight.analysis.summary.MultiSummaryModule;
 import com.easyinsight.analysis.summary.NewSummaryModule;
+import com.easyinsight.analysis.text.TextEndUserView;
 import com.easyinsight.analysis.text.TextModule;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.trend.TrendGridModule;
@@ -154,6 +155,9 @@ public class ReportModuleLoader extends EventDispatcher {
                 break;
             case "MultiSummaryModule.swf":
                 module = new MultiSummaryModule();
+                break;
+            case "TextEndUserView.swf":
+                module = new TextEndUserView();
                 break;
         }
         return module;
