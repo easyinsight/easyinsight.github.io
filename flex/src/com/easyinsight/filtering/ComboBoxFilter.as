@@ -1,5 +1,5 @@
 package com.easyinsight.filtering {
-import com.easyinsight.WindowManagement;
+import com.easyinsight.WindowManagementInstance;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import com.easyinsight.analysis.AnalysisItem;
@@ -345,11 +345,11 @@ public class ComboBoxFilter extends UIComponent implements IFilter {
     }
 
     private function onOpen(event:DropdownEvent):void {
-        WindowManagement.manager.hideReport();
+        WindowManagementInstance.getManager().hideReport();
     }
 
     private function filterValueChanged(event:DropdownEvent):void {
-        WindowManagement.manager.restoreReport();
+        WindowManagementInstance.getManager().restoreReport();
         var newValue:String = event.currentTarget.selectedLabel;
 
         var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
