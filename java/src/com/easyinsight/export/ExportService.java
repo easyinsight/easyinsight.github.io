@@ -1281,7 +1281,7 @@ public class ExportService {
     }
 
     public Element crosstabToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
-                                    ExportMetadata exportMetadata) throws DocumentException {
+                                      ExportMetadata exportMetadata) throws DocumentException {
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
         DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
@@ -4557,14 +4557,14 @@ public class ExportService {
                     } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
                         DrillThrough drillThrough = (DrillThrough) defaultLink;
                         sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
-                                                        sb.append(report.getUrlKey());
-                                                        sb.append("\" data-drillthroughid=\"");
-                                                        sb.append(drillThrough.createID());
-                                                        sb.append("\" data-embedded=\"");
-                                                        sb.append(exportProperties.isEmbedded());
-                                                        sb.append("\" data-source=\"");
-                                                        sb.append(analysisItem.getAnalysisItemID());
-                                                        sb.append("\"");
+                        sb.append(report.getUrlKey());
+                        sb.append("\" data-drillthroughid=\"");
+                        sb.append(drillThrough.createID());
+                        sb.append("\" data-embedded=\"");
+                        sb.append(exportProperties.isEmbedded());
+                        sb.append("\" data-source=\"");
+                        sb.append(analysisItem.getAnalysisItemID());
+                        sb.append("\"");
                         if (drillThrough.isFilterRowGroupings()) {
 
 
