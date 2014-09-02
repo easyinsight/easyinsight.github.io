@@ -226,7 +226,7 @@ public class UserUploadService {
     }
 
     public void saveTag(EIConnection conn, int i, Tag tag) throws SQLException {
-        PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, data_source_tag = ?, report_tag = ?, field_tag = ?" + (i == -1 ? "" : ", tag_index = ?") + " WHERE ACCOUNT_TAG_ID = ?");
+        PreparedStatement updateStmt = conn.prepareStatement("UPDATE ACCOUNT_TAG SET TAG_NAME = ?, data_source_tag = ?, report_tag = ?, field_tag = ?" + (i == -1 ? "" : ", tag_index = ?") + " WHERE ACCOUNT_TAG_ID = ? AND ACCOUNT_TAG.ACCOUNT_ID = ?");
         updateStmt.setString(1, tag.getName());
         updateStmt.setBoolean(2, tag.isDataSource());
         updateStmt.setBoolean(3, tag.isReport());
@@ -237,6 +237,7 @@ public class UserUploadService {
             updateStmt.setLong(6, tag.getId());
         } else
             updateStmt.setLong(5, tag.getId());
+        updateStmt.setLong(6, SecurityUtil.getAccountID());
         updateStmt.executeUpdate();
         updateStmt.close();
     }
@@ -276,6 +277,7 @@ public class UserUploadService {
         PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO dashboard_to_tag (tag_id, dashboard_id) VALUES (?, ?)");
         for (EIDescriptor dsd : descriptors) {
             if (dsd.getType() == EIDescriptor.REPORT) {
+                SecurityUtil.authorizeReport(dsd.getId(), Roles.EDITOR);
                 Set<Long> existingIDs = new HashSet<Long>();
                 existingReportStmt.setLong(1, dsd.getId());
                 ResultSet rs = existingReportStmt.executeQuery();
@@ -288,6 +290,7 @@ public class UserUploadService {
                     saveReportStmt.execute();
                 }
             } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
+                SecurityUtil.authorizeDashboard(dsd.getId(), Roles.EDITOR);
                 Set<Long> existingIDs = new HashSet<Long>();
                 existingDashboardStmt.setLong(1, dsd.getId());
                 ResultSet rs = existingDashboardStmt.executeQuery();
@@ -324,10 +327,12 @@ public class UserUploadService {
         PreparedStatement deleteDashboardStmt = conn.prepareStatement("DELETE FROM dashboard_to_tag WHERE tag_id = ? AND dashboard_id = ?");
         for (EIDescriptor dsd : descriptors) {
             if (dsd.getType() == EIDescriptor.REPORT) {
+                SecurityUtil.authorizeReport(dsd.getId(), Roles.EDITOR);
                 deleteReportStmt.setLong(1, tag.getId());
                 deleteReportStmt.setLong(2, dsd.getId());
                 deleteReportStmt.executeUpdate();
             } else if (dsd.getType() == EIDescriptor.DASHBOARD) {
+                SecurityUtil.authorizeDashboard(dsd.getId(), Roles.EDITOR);
                 deleteDashboardStmt.setLong(1, tag.getId());
                 deleteDashboardStmt.setLong(2, dsd.getId());
                 deleteDashboardStmt.executeUpdate();
@@ -411,6 +416,26 @@ public class UserUploadService {
         }
     }
 
+    public List<String> validationReportDeletion(List<EIDescriptor> descriptors) {
+        try {
+            for (EIDescriptor descriptor : descriptors) {
+                if (descriptor.getType() == EIDescriptor.REPORT) {
+                    new AnalysisService().deleteAnalysisDefinition(descriptor.getId());
+                } else if (descriptor.getType() == EIDescriptor.SCORECARD) {
+                    new ScorecardService().deleteScorecard(descriptor.getId());
+                } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
+                    new DashboardService().deleteDashboard(descriptor.getId());
+                } else if (descriptor.getType() == EIDescriptor.LOOKUP_TABLE) {
+                    new FeedService().deleteLookupTable(descriptor.getId());
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public long newFolder(String name, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -436,7 +461,7 @@ public class UserUploadService {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (descriptor.getType() == EIDescriptor.REPORT) {
-                SecurityUtil.authorizeInsight(descriptor.getId());
+                SecurityUtil.authorizeReport(descriptor.getId(), Roles.EDITOR);
                 InsightDescriptor insightDescriptor = (InsightDescriptor) descriptor;
                 new AnalysisStorage().clearCache(descriptor.getId(), insightDescriptor.getDataFeedID());
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET FOLDER = ? WHERE ANALYSIS_ID = ?");
@@ -445,7 +470,7 @@ public class UserUploadService {
                 updateStmt.executeUpdate();
                 updateStmt.close();
             } else if (descriptor.getType() == EIDescriptor.DASHBOARD) {
-                SecurityUtil.authorizeDashboard(descriptor.getId());
+                SecurityUtil.authorizeDashboard(descriptor.getId(), Roles.EDITOR);
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET FOLDER = ? WHERE DASHBOARD_ID = ?");
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
@@ -1632,11 +1657,10 @@ public class UserUploadService {
 
     private void deleteUserUpload(long dataFeedID, EIConnection conn) throws SQLException {
         int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
-        if (role <= Roles.SHARER) {
+        if (role == Roles.OWNER) {
             LogClass.info("USER " + SecurityUtil.getUserID() + " DELETING DATA SOURCE " + dataFeedID);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
             feedDefinition.setVisible(false);
-            PreparedStatement updateReportStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE DATA_FEED_ID = ?");
             try {
                 feedDefinition.delete(conn);
             } catch (HibernateException e) {
@@ -1653,7 +1677,7 @@ public class UserUploadService {
 
     public long createAnalysisBasedFeed(AnalysisBasedFeedDefinition definition) {
         long userID = SecurityUtil.getUserID();
-        SecurityUtil.authorizeInsight(definition.getReportID());
+        SecurityUtil.authorizeReport(definition.getReportID(), Roles.OWNER);
         try {
             long feedID = feedStorage.addFeedDefinitionData(definition);
             new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
