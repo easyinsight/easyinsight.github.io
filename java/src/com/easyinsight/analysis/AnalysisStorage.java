@@ -463,7 +463,7 @@ public class AnalysisStorage {
                 ownerName = "";
             }
             descriptors.add(new InsightDescriptor(lastChanceGroupRS.getLong(1), lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt(4), lastChanceGroupRS.getString(5),
-                    new Date(lastChanceGroupRS.getTimestamp(7).getTime()), ownerName, lastChanceGroupRS.getInt(6), lastChanceGroupRS.getBoolean(8), lastChanceGroupRS.getInt(9), lastChanceGroupRS.getString(10),
+                    new Date(lastChanceGroupRS.getTimestamp(7).getTime()), ownerName, Roles.VIEWER, lastChanceGroupRS.getBoolean(8), lastChanceGroupRS.getInt(9), lastChanceGroupRS.getString(10),
                     new Date(lastChanceGroupRS.getTimestamp(11).getTime())));
         }
         lastChanceGroupStmt.close();
