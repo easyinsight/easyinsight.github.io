@@ -12,6 +12,7 @@ import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.analysis.list.ColumnReorderEvent;
 import com.easyinsight.analysis.list.EnableLookupEditingEvent;
 
 import flash.events.MouseEvent;
@@ -106,6 +107,10 @@ public class SummaryControlBar extends ReportControlBar implements IReportContro
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        if (event is ColumnReorderEvent) {
+            var columnReorderEvent:ColumnReorderEvent = event as ColumnReorderEvent;
+            itemGrouping.reorder(columnReorderEvent.columns);
+        }
     }
 
     public function onDataReceipt(event:DataServiceEvent):void {

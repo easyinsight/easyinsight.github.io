@@ -2239,6 +2239,7 @@ public class DataService {
             }
             return results;
         } catch (ReportException dae) {
+            LogClass.error(dae);
             TextDataResults embeddedDataResults = new TextDataResults();
             embeddedDataResults.setReportFault(dae.getReportFault());
             return embeddedDataResults;

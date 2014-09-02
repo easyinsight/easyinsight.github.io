@@ -27,6 +27,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.concurrent.Semaphore;
 
 /**
  * User: James Boe
@@ -48,6 +49,7 @@ public class GoogleAnalyticsFeed extends Feed {
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
+            semaphore.acquire();
             AnalysisItem queryItem;
             if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
@@ -142,6 +144,8 @@ public class GoogleAnalyticsFeed extends Feed {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            semaphore.release();
         }
         metadata.calculateCaches();
         return metadata;
@@ -199,8 +203,11 @@ public class GoogleAnalyticsFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
+    private static Semaphore semaphore = new Semaphore(1);
+
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
+            semaphore.acquire();
             Collection<AnalysisDimension> dimensions = new HashSet<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new HashSet<AnalysisMeasure>();
             List<AnalysisItem> convertedItems = new ArrayList<AnalysisItem>();
@@ -430,6 +437,8 @@ public class GoogleAnalyticsFeed extends Feed {
         } catch (Exception e) {
             as = null;
             throw new RuntimeException(e);
+        } finally {
+            semaphore.release();
         }
     }
 

@@ -6,5 +6,7 @@ import mx.core.UIComponent;
 
 public interface IWindowManagement {
     function addWindow(window:UIComponent):void;
+    function restoreReport():void;
+    function hideReport():void;
 }
 }

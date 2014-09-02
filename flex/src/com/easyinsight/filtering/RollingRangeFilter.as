@@ -1,5 +1,6 @@
 package com.easyinsight.filtering
 {
+import com.easyinsight.WindowManagementInstance;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.skin.ImageConstants;
@@ -215,6 +216,7 @@ public class RollingRangeFilter extends HBox implements IFilter
             comboBox.rowCount = 16 + ((rollingFilter.intrinsic || rollingFilter.trendFilter) ? 0 : 1);
             comboBox.dataProvider = rangeOptions;
             comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
+            comboBox.addEventListener(DropdownEvent.OPEN, onFilterOpen);
 
             if (newFilter) {
                 comboBox.selectedIndex = 0;
@@ -266,7 +268,12 @@ public class RollingRangeFilter extends HBox implements IFilter
         dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, rollingFilter, null, this));
     }
 
+    private function onFilterOpen(event:DropdownEvent):void {
+        WindowManagementInstance.getManager().hideReport();
+    }
+
     private function filterValueChanged(event:DropdownEvent):void {
+        WindowManagementInstance.getManager().restoreReport();
         var newValue:int = event.currentTarget.selectedItem.data;
         if (newValue == RollingDateRangeFilterDefinition.CUSTOM) {
             currentState = "Custom";
