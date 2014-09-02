@@ -1342,7 +1342,7 @@ public class FeedService {
     }
 
     public String updateFeedDefinition(FeedDefinition feedDefinition) {
-        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.SHARER);
+        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.EDITOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -1365,7 +1365,7 @@ public class FeedService {
 
     public List<FeedDefinition> getDataSourcesForFederated(long federatedDataSourceID) {
         List<FeedDefinition> dataSources = new ArrayList<FeedDefinition>();
-        SecurityUtil.authorizeFeed(federatedDataSourceID, Roles.SHARER);
+        SecurityUtil.authorizeFeed(federatedDataSourceID, Roles.EDITOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             FederatedDataSource federatedDataSource = (FederatedDataSource) feedStorage.getFeedDefinitionData(federatedDataSourceID, conn);
@@ -1395,7 +1395,7 @@ public class FeedService {
     }
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {
-        SecurityUtil.authorizeFeed(dataFeedID, Roles.SHARER);
+        SecurityUtil.authorizeFeed(dataFeedID, Roles.EDITOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             FeedDefinition dataSource = feedStorage.getFeedDefinitionData(dataFeedID, conn);
