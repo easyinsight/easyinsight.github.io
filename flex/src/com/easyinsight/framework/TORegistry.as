@@ -103,6 +103,7 @@ import com.easyinsight.datasources.SmartsheetTableSource;
 import com.easyinsight.datasources.Solve360CompositeDataSource;
 import com.easyinsight.datasources.TrelloCompositeSource;
 import com.easyinsight.filtering.MultiFieldFilterDefinition;
+import com.easyinsight.solutions.DataSourceGroupDescriptor;
 
 //import com.easyinsight.datasources.ReportDataSourceDefinition;
 import com.easyinsight.datasources.SQLServerDatabaseConnection;
@@ -260,6 +261,7 @@ public class TORegistry {
         var scorecardList:ScorecardList;
         var scorecardWrapper:ScorecardResults;
         var dsd:DataSourceDescriptor;
+        var dsdg:DataSourceGroupDescriptor;
         var sKPIData:SolutionKPIData;
         var qb:QuickbaseResponse;
         var harvestDS:HarvestDataSource;
