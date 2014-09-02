@@ -9,6 +9,7 @@ import com.easyinsight.framework.DataFolder;
 import com.easyinsight.framework.PerspectiveInfo;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.quicksearch.EIDescriptor;
+import com.easyinsight.quicksearch.Roles;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -99,7 +100,7 @@ public class MyDataIconControls extends UIComponent implements IListItemRenderer
         this.obj = value;
         if (value is EIDescriptor) {
             var desc:EIDescriptor = value as EIDescriptor;
-            deleteVisible = desc.role <= DataSourceType.EDITOR;
+            deleteVisible = desc.role == Roles.OWNER;
             if (value is InsightDescriptor) {
                 adminVisible = true;
             } else if (value is LookupTableDescriptor) {
