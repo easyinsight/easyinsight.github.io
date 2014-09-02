@@ -235,9 +235,12 @@ public class UserUploadService {
         if (i != -1) {
             updateStmt.setInt(5, i);
             updateStmt.setLong(6, tag.getId());
-        } else
+            updateStmt.setLong(7, SecurityUtil.getAccountID());
+        } else {
             updateStmt.setLong(5, tag.getId());
-        updateStmt.setLong(6, SecurityUtil.getAccountID());
+            updateStmt.setLong(6, SecurityUtil.getAccountID());
+        }
+
         updateStmt.executeUpdate();
         updateStmt.close();
     }

@@ -519,7 +519,37 @@ public class AnalysisStorage {
             }
             queryAccountStmt.close();
         }
-        return new ArrayList<InsightDescriptor>(descriptors);
+        PreparedStatement userGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, " +
+                "group_to_user_join.binding_type, create_date, account_visible, folder, analysis.description, analysis.update_date FROM ANALYSIS, group_to_user_join," +
+                "group_to_insight WHERE " +
+                "analysis.analysis_id = group_to_insight.insight_id and group_to_insight.group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? and analysis.temporary_report = ? AND " +
+                "analysis.data_feed_id = ?");
+        userGroupStmt.setLong(1, userID);
+        userGroupStmt.setBoolean(2, false);
+        userGroupStmt.setLong(3, dataSourceID);
+        ResultSet groupRS = userGroupStmt.executeQuery();
+        while (groupRS.next()) {
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5),
+                    groupRS.getInt(6), groupRS.getBoolean("account_visible")));
+        }
+        userGroupStmt.close();
+        PreparedStatement lastChanceGroupStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, ANALYSIS.URL_KEY, " +
+                "group_to_user_join.binding_type, create_date, account_visible, folder, analysis.description, analysis.update_date FROM ANALYSIS, group_to_user_join," +
+                "community_group, upload_policy_groups WHERE " +
+                "analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? " +
+                "and analysis.temporary_report = ? AND analysis.data_feed_id = ?");
+        lastChanceGroupStmt.setBoolean(1, true);
+        lastChanceGroupStmt.setLong(2, userID);
+        lastChanceGroupStmt.setBoolean(3, false);
+        lastChanceGroupStmt.setLong(4, dataSourceID);
+        ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
+        while (lastChanceGroupRS.next()) {
+            descriptors.add(new InsightDescriptor(lastChanceGroupRS.getLong(1), lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt(4), lastChanceGroupRS.getString(5),
+                    Roles.VIEWER, lastChanceGroupRS.getBoolean("account_visible")));
+        }
+        lastChanceGroupStmt.close();
+        return new ArrayList<>(descriptors);
     }
 
     public Collection<WSAnalysisDefinition> getAllDefinitions(long userID) {
