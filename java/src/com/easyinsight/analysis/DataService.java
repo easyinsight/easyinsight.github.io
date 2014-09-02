@@ -94,9 +94,9 @@ public class DataService {
 
 
                 if (report != null) {
-                    SecurityUtil.authorizeInsight(report.getAnalysisID());
+                    SecurityUtil.authorizeReport(report.getAnalysisID(), Roles.PUBLIC);
                 } else if (dashboardID > 0) {
-                    SecurityUtil.authorizeDashboard(dashboardID);
+                    SecurityUtil.authorizeDashboard(dashboardID, Roles.PUBLIC);
                 }
             }
 
@@ -772,11 +772,11 @@ public class DataService {
             WSAnalysisDefinition report = null;
             long dataSourceID;
             if (reportID != null) {
-                SecurityUtil.authorizeInsight(reportID);
+                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
                 report = new AnalysisStorage().getAnalysisDefinition(reportID);
                 dataSourceID = report.getDataFeedID();
             } else if (dashboardID != null) {
-                SecurityUtil.authorizeDashboard(dashboardID);
+                SecurityUtil.authorizeDashboard(dashboardID, Roles.PUBLIC);
                 PreparedStatement stmt = conn.prepareStatement("SELECT data_source_id FROM dashboard WHERE dashboard_id = ?");
                 stmt.setLong(1, dashboardID);
                 ResultSet dashboardRS = stmt.executeQuery();
@@ -795,7 +795,7 @@ public class DataService {
                     throw new RuntimeException();
                 }
                 dataSourceID = dashboardStructureStub.dataSourceID;
-                SecurityUtil.authorizeDashboard(dashboardStructureStub.dashboardID);
+                SecurityUtil.authorizeDashboard(dashboardStructureStub.dashboardID, Roles.PUBLIC);
                 rootStmt.close();
                 findParentInGridStmt.close();
                 findParentInStackStmt.close();
@@ -853,9 +853,9 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
-                SecurityUtil.authorizeInsight(reportID);
+                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             } else if (dashboardID > 0) {
-                SecurityUtil.authorizeDashboard(dashboardID);
+                SecurityUtil.authorizeDashboard(dashboardID, Roles.PUBLIC);
             } else {
                 try {
                     SecurityUtil.authorizeFeedAccess(feedID);
@@ -1084,7 +1084,7 @@ public class DataService {
             //feedMetadata.setDataSourceFields(feed.getDataSource().getFields());
             WSListDefinition tempList = new WSListDefinition();
             tempList.setDataFeedID(feedID);
-            tempList.setColumns(new ArrayList<AnalysisItem>());
+            tempList.setColumns(new ArrayList<>());
             feedMetadata.setSuggestions(new AnalysisService().generatePossibleIntentions(tempList, conn, new InsightRequestMetadata()));
             feedMetadata.setLookupTables(lookupTables);
             return feedMetadata;
@@ -1132,7 +1132,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSKPIDefinition analysisDefinition = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             CacheKey cacheKey = null;
@@ -1192,7 +1192,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, drillthroughFilters);
@@ -1439,7 +1439,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
 
             conn.setAutoCommit(false);
@@ -1630,7 +1630,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSTreeDefinition report = (WSTreeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, report, conn, customFilters, drillthroughFilters);
@@ -1673,7 +1673,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             WSCompareYearsDefinition wsytdDefinition = (WSCompareYearsDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
@@ -1749,7 +1749,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
@@ -2178,7 +2178,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
 
             WSTextDefinition analysisDefinition = (WSTextDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);

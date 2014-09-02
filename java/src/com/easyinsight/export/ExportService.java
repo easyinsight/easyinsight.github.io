@@ -28,6 +28,7 @@ import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.ListDataResults;
@@ -457,7 +458,7 @@ public class ExportService {
     }*/
 
     public String htmlDashboardToPDFAlt(byte[] bytes, Dashboard dashboard, HttpServletRequest request) {
-        SecurityUtil.authorizeDashboard(dashboard.getId());
+        SecurityUtil.authorizeDashboard(dashboard.getId(), Roles.PUBLIC);
         try {
             EIConnection conn = Database.instance().getConnection();
             try {
@@ -472,7 +473,7 @@ public class ExportService {
     }
 
     public void exportDashboardToPDFAlt(Dashboard dashboard, DashboardStackPositions positions, Map<String, PDFImageData> images) {
-        SecurityUtil.authorizeDashboard(dashboard.getId());
+        SecurityUtil.authorizeDashboard(dashboard.getId(), Roles.PUBLIC);
         try {
             // todo: fix
             byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true, true);
@@ -489,7 +490,7 @@ public class ExportService {
     }
 
     public void exportDashboardToPDF(Dashboard dashboard, List<Page> pages, boolean landscapeOrientation) {
-        SecurityUtil.authorizeDashboard(dashboard.getId());
+        SecurityUtil.authorizeDashboard(dashboard.getId(), Roles.PUBLIC);
         EIConnection conn = Database.instance().getConnection();
         try {
             byte[] pdfBytes = toImagePDF(pages, landscapeOrientation);

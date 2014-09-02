@@ -121,6 +121,18 @@ public class SecurityUtil {
         }
     }
 
+    public static boolean isAccountReports(EIConnection conn) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
+        ps.setLong(1, getUserID());
+        ResultSet rs = ps.executeQuery();
+        boolean ret = false;
+        if (rs.next()) {
+            ret = rs.getBoolean(1);
+        }
+        ps.close();
+        return ret;
+    }
+
     public static boolean isAccountAdmin() {
         UserPrincipal userPrincipal = getSecurityProvider().getUserPrincipal();
         if (userPrincipal == null)
@@ -394,10 +406,10 @@ public class SecurityUtil {
         return getRole(userID, feedID);
     }
 
-    public static int getInsightRole(long userID, long insightID) {
+    private static int getInsightRole(long userID, long insightID) {
         Connection conn = Database.instance().getConnection();
         try {
-            int role;
+            int role = Roles.NONE;
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE " +
                     "USER_ID = ? AND ANALYSIS_ID = ?");
             existingLinkQuery.setLong(1, userID);
@@ -412,8 +424,11 @@ public class SecurityUtil {
                 groupQueryStmt.setLong(2, insightID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    role = Roles.SUBSCRIBER;
+                    role = groupRS.getInt(1);
                 } else {
+
+                    // this block of code is for reports which are included as part of "include reports" on groups per data source
+
                     PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID FROM ANALYSIS, group_to_user_join," +
                             "community_group, upload_policy_groups WHERE " +
                             "analysis.analysis_id = ? AND analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
@@ -535,19 +550,25 @@ public class SecurityUtil {
         }
     }
 
+    public static int authorizeReport(long reportID, int neededRole) {
+        int role = authorizeInsight(reportID);
+        if (role > neededRole) {
+            throw new SecurityException();
+        }
+        return role;
+    }
+
     public static int authorizeInsight(long insightID) {
         boolean accountVisibility = false;
-        long dataFeedID = 0;
         boolean publicVisibility = false;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT ACCOUNT_VISIBLE, DATA_FEED_ID, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT ACCOUNT_VISIBLE, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             authorizeStmt.setLong(1, insightID);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
                 accountVisibility = rs.getBoolean(1);
-                dataFeedID = rs.getLong(2);
-                publicVisibility = rs.getBoolean(3);
+                publicVisibility = rs.getBoolean(2);
             } else {
                 throw new SecurityException();
             }
@@ -565,7 +586,7 @@ public class SecurityUtil {
                 if (!publicVisibility) {
                     throw new SecurityException();
                 } else {
-                    return Roles.SUBSCRIBER;
+                    return Roles.PUBLIC;
                 }
             }
         }
@@ -604,14 +625,21 @@ public class SecurityUtil {
             }
         } else {
             int role = getInsightRole(userPrincipal.getUserID(), insightID);
-            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
+            if (role != Roles.OWNER && role != Roles.SUBSCRIBER && role != Roles.EDITOR) {
                 if (!publicVisibility) {
                     throw new SecurityException();
                 } else {
-                    return Roles.SUBSCRIBER;
+                    return Roles.PUBLIC;
                 }
             }
             return role;
+        }
+    }
+
+    public static void authorizeDashboard(long dashboardID, int neededRole) {
+        int role = authorizeDashboard(dashboardID);
+        if (role > neededRole) {
+            throw new SecurityException();
         }
     }
 
@@ -640,7 +668,7 @@ public class SecurityUtil {
                     if (!publicVisible) {
                         throw new SecurityException();
                     } else {
-                        return Roles.SUBSCRIBER;
+                        return Roles.PUBLIC;
                     }
                 }
             }
@@ -655,8 +683,8 @@ public class SecurityUtil {
                 long accountID = userRS.getLong(2);
                 if (userID == SecurityUtil.getUserID()) {
                     role = Math.min(Roles.OWNER, role);
-                } else if ((accountVisible || isAccountReports()) && accountID == SecurityUtil.getAccountID()) {
-                    role = Math.min(Roles.SUBSCRIBER, role);
+                } else if ((accountVisible && isAccountReports(conn)) && accountID == SecurityUtil.getAccountID()) {
+                    role = Math.min(Roles.OWNER, role);
                 }
             }
             if (role != Roles.NONE) {
@@ -669,7 +697,23 @@ public class SecurityUtil {
             ResultSet groupRS = groupQueryStmt.executeQuery();
             if (groupRS.next()) {
                 return groupRS.getInt(1);
+            } else {
+                PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT dashboard.DASHBOARD_ID FROM dashboard, group_to_user_join," +
+                        "community_group, upload_policy_groups WHERE " +
+                        "dashboard.dashboard_id = ? AND dashboard.data_source_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                        "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
+                lastChanceStmt.setLong(1, dashboardID);
+                lastChanceStmt.setBoolean(2, true);
+                lastChanceStmt.setLong(3, SecurityUtil.getUserID());
+                ResultSet lastChanceRS = lastChanceStmt.executeQuery();
+                if (lastChanceRS.next()) {
+                    role = Roles.SUBSCRIBER;
+                } else {
+                    role = Roles.NONE;
+                }
+                lastChanceStmt.close();
             }
+
             if (role == Roles.NONE) {
                 throw new SecurityException();
             }
@@ -735,15 +779,73 @@ public class SecurityUtil {
             return;
         }
         // retrieve feed policy
-        boolean publiclyVisible = false;
         boolean accountVisible = false;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, ACCOUNT_VISIBLE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT ACCOUNT_VISIBLE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             authorizeStmt.setLong(1, dataFeed);
             ResultSet rs = authorizeStmt.executeQuery();
             if (rs.next()) {
-                publiclyVisible = rs.getBoolean(1);
+                accountVisible = rs.getBoolean(1);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        if (accountVisible || isAccountReports()) {
+            conn = Database.instance().getConnection();
+            try {
+                PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +
+                        "UPLOAD_POLICY_USERS.user_id AND UPLOAD_POLICY_USERS.feed_id = ?");
+                query.setLong(1, dataFeed);
+                ResultSet rs = query.executeQuery();
+                if (rs.next()) {
+                    long accountID = rs.getLong(1);
+                    if (accountID == getAccountID()) {
+                        // all good
+                    } else {
+                        throw new SecurityException();
+                    }
+                } else {
+                    throw new SecurityException();
+                }
+            } catch (SQLException e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+        } else {
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                userPrincipal = threadLocal.get();
+                if (userPrincipal == null) {
+                    throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                }
+            }
+            int role = getRole(userPrincipal.getUserID(), dataFeed);
+            if (role > Roles.SUBSCRIBER) {
+                throw new SecurityException();
+            }
+        }
+    }
+
+    public static long authorizeFeedAccess(String urlKey) {
+        // retrieve feed policy
+        boolean accountVisible = false;
+        long dataFeed;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT DATA_FEED_ID, ACCOUNT_VISIBLE FROM DATA_FEED WHERE DATA_FEED.API_KEY = ?");
+            authorizeStmt.setString(1, urlKey);
+            ResultSet rs = authorizeStmt.executeQuery();
+            if (rs.next()) {
+                dataFeed = rs.getLong(1);
                 accountVisible = rs.getBoolean(2);
             } else {
                 throw new SecurityException();
@@ -754,105 +856,40 @@ public class SecurityUtil {
         } finally {
             Database.closeConnection(conn);
         }
-        if (!publiclyVisible) {
-            if (accountVisible || isAccountReports()) {
-                conn = Database.instance().getConnection();
-                try {
-                    PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +
-                            "UPLOAD_POLICY_USERS.user_id AND UPLOAD_POLICY_USERS.feed_id = ?");
-                    query.setLong(1, dataFeed);
-                    ResultSet rs = query.executeQuery();
-                    if (rs.next()) {
-                        long accountID = rs.getLong(1);
-                        if (accountID == getAccountID()) {
-                            // all good
-                        } else {
-                            throw new SecurityException();
-                        }
+        if (accountVisible && isAccountReports()) {
+            conn = Database.instance().getConnection();
+            try {
+                PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +
+                        "UPLOAD_POLICY_USERS.user_id AND UPLOAD_POLICY_USERS.feed_id = ?");
+                query.setLong(1, dataFeed);
+                ResultSet rs = query.executeQuery();
+                if (rs.next()) {
+                    long accountID = rs.getLong(1);
+                    if (accountID == getAccountID()) {
+                        // all good
                     } else {
                         throw new SecurityException();
                     }
-                } catch (SQLException e) {
-                    LogClass.error(e);
-                    throw new RuntimeException(e);
-                } finally {
-                    Database.closeConnection(conn);
-                }
-            } else {
-                UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
-                if (userPrincipal == null) {
-                    userPrincipal = threadLocal.get();
-                    if (userPrincipal == null) {
-                        throw new SecurityException(SecurityException.LOGIN_REQUIRED);
-                    }
-                }
-                int role = getRole(userPrincipal.getUserID(), dataFeed);
-                if (role > Roles.SUBSCRIBER) {
+                } else {
                     throw new SecurityException();
                 }
+            } catch (SQLException e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                Database.closeConnection(conn);
             }
-        }
-    }
-
-    public static long authorizeFeedAccess(String urlKey) {
-        // retrieve feed policy
-        boolean publiclyVisible = false;
-        boolean accountVisible = false;
-        long dataFeed;
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT DATA_FEED_ID, PUBLICLY_VISIBLE, ACCOUNT_VISIBLE FROM DATA_FEED WHERE DATA_FEED.API_KEY = ?");
-            authorizeStmt.setString(1, urlKey);
-            ResultSet rs = authorizeStmt.executeQuery();
-            if (rs.next()) {
-                dataFeed = rs.getLong(1);
-                publiclyVisible = rs.getBoolean(2);
-                accountVisible = rs.getBoolean(3);
-            } else {
+        } else {
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                userPrincipal = threadLocal.get();
+                if (userPrincipal == null) {
+                    throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                }
+            }
+            int role = getRole(userPrincipal.getUserID(), dataFeed);
+            if (role > Roles.SUBSCRIBER) {
                 throw new SecurityException();
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-        if (!publiclyVisible) {
-            if (accountVisible && isAccountReports()) {
-                conn = Database.instance().getConnection();
-                try {
-                    PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, UPLOAD_POLICY_USERS WHERE USER.USER_ID = " +
-                            "UPLOAD_POLICY_USERS.user_id AND UPLOAD_POLICY_USERS.feed_id = ?");
-                    query.setLong(1, dataFeed);
-                    ResultSet rs = query.executeQuery();
-                    if (rs.next()) {
-                        long accountID = rs.getLong(1);
-                        if (accountID == getAccountID()) {
-                            // all good
-                        } else {
-                            throw new SecurityException();
-                        }
-                    } else {
-                        throw new SecurityException();
-                    }
-                } catch (SQLException e) {
-                    LogClass.error(e);
-                    throw new RuntimeException(e);
-                } finally {
-                    Database.closeConnection(conn);
-                }
-            } else {
-                UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
-                if (userPrincipal == null) {
-                    userPrincipal = threadLocal.get();
-                    if (userPrincipal == null) {
-                        throw new SecurityException(SecurityException.LOGIN_REQUIRED);
-                    }
-                }
-                int role = getRole(userPrincipal.getUserID(), dataFeed);
-                if (role > Roles.SUBSCRIBER) {
-                    throw new SecurityException();
-                }
             }
         }
         return dataFeed;

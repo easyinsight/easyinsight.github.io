@@ -411,7 +411,7 @@ public class AnalysisStorage {
                     ownerName = "";
                 }
                 descriptors.add(new InsightDescriptor(reportID, accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5),
-                        new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.SHARER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9),
+                        new Date(accountRS.getTimestamp(6).getTime()), ownerName, Roles.OWNER, accountRS.getBoolean(7), accountRS.getInt(8), accountRS.getString(9),
                         new Date(accountRS.getTimestamp(10).getTime())));
             }
             queryAccountStmt.close();
@@ -479,7 +479,7 @@ public class AnalysisStorage {
         userGroupStmt.setLong(1, groupID);
         ResultSet groupRS = userGroupStmt.executeQuery();
         while (groupRS.next()) {
-            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), new Date(groupRS.getTimestamp(6).getTime()), "", Roles.SUBSCRIBER, groupRS.getBoolean(7)));
+            descriptors.add(new InsightDescriptor(groupRS.getLong(1), groupRS.getString(2), groupRS.getLong(3), groupRS.getInt(4), groupRS.getString(5), new Date(groupRS.getTimestamp(6).getTime()), "", Roles.VIEWER, groupRS.getBoolean(7)));
         }
         userGroupStmt.close();
         return descriptors;
@@ -515,7 +515,7 @@ public class AnalysisStorage {
             queryAccountStmt.setLong(4, dataSourceID);
             ResultSet accountRS = queryAccountStmt.executeQuery();
             while (accountRS.next()) {
-                descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.SHARER, accountRS.getBoolean(6)));
+                descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.OWNER, accountRS.getBoolean(6)));
             }
             queryAccountStmt.close();
         }

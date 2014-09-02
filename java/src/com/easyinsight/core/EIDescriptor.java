@@ -42,7 +42,7 @@ public abstract class EIDescriptor implements Serializable {
     private Date modifiedDate;
     private boolean accountVisible;
     private long id;
-    private int role = Roles.SUBSCRIBER;
+    private int role = Roles.VIEWER;
     private int folder = MAIN_VIEW;
     private String description;
 
@@ -170,6 +170,7 @@ public abstract class EIDescriptor implements Serializable {
         jo.put("url_key", getUrlKey());
         jo.put("description", getDescription());
         jo.put("folder", getFolder());
+        jo.put("delete_enabled", role == Roles.OWNER);
         return jo;
     }
 }

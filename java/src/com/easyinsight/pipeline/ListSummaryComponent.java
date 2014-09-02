@@ -21,24 +21,6 @@ public class ListSummaryComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
 
         Set<AnalysisItem> reportItems = new HashSet<AnalysisItem>(pipelineData.getReportItems());
-        /*AnalysisItemRetrievalStructure structure = new AnalysisItemRetrievalStructure(null);
-        structure.setReport(pipelineData.getReport());
-        structure.setConn(pipelineData.getConn());
-        List<IComponent> components = new CalcGraph().doFunGraphStuff(reportItems, pipelineData.getAllItems(), reportItems, null, structure,
-                pipelineData.getInsightRequestMetadata());
-
-        Iterator<IComponent> iter = components.iterator();
-        while (iter.hasNext()) {
-            IComponent component = iter.next();
-            if (!(component instanceof CalculationComponent)) {
-                iter.remove();
-                continue;
-            }
-            CalculationComponent calculationComponent = (CalculationComponent) component;
-            if (!calculationComponent.getAnalysisCalculation().isRecalculateSummary()) {
-                iter.remove();
-            }
-        }*/
 
         List<AnalysisItem> recalcsOnSummary = new ArrayList<>();
         for (AnalysisItem reportItem : reportItems) {
@@ -197,38 +179,6 @@ public class ListSummaryComponent implements IComponent {
                 }
             }
         }
-
-        /*DataSet tempSet = new DataSet();
-        IRow tempRow = tempSet.createRow();
-        for (AnalysisItem reportItem : pipelineData.getReportItems()) {
-            if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
-                if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) reportItem;
-                    if (analysisCalculation.isRecalculateSummary()) {
-                        continue;
-                    }
-                }
-                AnalysisMeasure analysisMeasure = (AnalysisMeasure) reportItem;
-                AggregationFactory aggregationFactory = new AggregationFactory(analysisMeasure, false);
-                Aggregation aggregation = aggregationFactory.getAggregation();
-                for (IRow row : dataSet.getRows()) {
-                    Value value = row.getValue(analysisMeasure.createAggregateKey());
-                    aggregation.addValue(value);
-                }
-                Value aggregateValue = aggregation.getValue();
-                aggregationMap.put(analysisMeasure, aggregateValue);
-                tempRow.addValue(analysisMeasure.createAggregateKey(), aggregateValue);
-            }
-        }
-        for (IComponent component : components) {
-            component.apply(tempSet, pipelineData);
-        }*/
-
-        /*for (AnalysisItem reportItem : pipelineData.getReportItems()) {
-            if (reportItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                aggregationMap.put((AnalysisMeasure) reportItem, tempSet.getRow(0).getValue(reportItem));
-            }
-        }*/
         return dataSet;
     }
 

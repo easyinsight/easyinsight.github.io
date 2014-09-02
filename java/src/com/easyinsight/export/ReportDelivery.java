@@ -8,6 +8,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.scheduler.ScheduledTask;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import nu.xom.Attribute;
 import nu.xom.Element;
@@ -345,7 +346,7 @@ public class ReportDelivery extends ScheduledDelivery {
     @Override
     public boolean authorize() {
         try {
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.EDITOR);
             return true;
         } catch (Exception e) {
             return false;

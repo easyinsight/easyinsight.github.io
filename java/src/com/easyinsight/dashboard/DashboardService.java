@@ -15,6 +15,7 @@ import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.util.RandomTextGenerator;
@@ -227,6 +228,7 @@ public class DashboardService {
     }
 
     public SavedConfiguration saveConfigurationForReport(SavedConfiguration savedConfiguration, long reportID) {
+        SecurityUtil.authorizeReport(reportID, Roles.SHARER);
         EIConnection conn = Database.instance().getConnection();
         try {
             long id = savedConfiguration.getDashboardStackPositions().save(conn, 0, reportID);
@@ -264,6 +266,7 @@ public class DashboardService {
         try {
             PreparedStatement stmt = conn.prepareStatement("DELETE FROM saved_configuration WHERE saved_configuration_id = ?");
             for (SavedConfiguration configuration : configurations) {
+                authorizeConfig(configuration.getUrlKey(), conn);
                 stmt.setLong(1, configuration.getId());
                 stmt.executeUpdate();
             }
@@ -277,6 +280,7 @@ public class DashboardService {
     }
 
     public List<SavedConfiguration> getConfigurationsForReport(long reportID) {
+        SecurityUtil.authorizeInsight(reportID);
         EIConnection conn = Database.instance().getConnection();
         try {
             List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
@@ -303,6 +307,7 @@ public class DashboardService {
     }
 
     public List<SavedConfiguration> getConfigurationsForDashboard(long dashboardID) {
+        SecurityUtil.authorizeDashboard(dashboardID);
         EIConnection conn = Database.instance().getConnection();
         try {
             List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
@@ -329,6 +334,7 @@ public class DashboardService {
     }
 
     public String saveDashboardLink(long dashboardID, DashboardStackPositions dashboardStackPositions) {
+        SecurityUtil.authorizeDashboard(dashboardID);
         EIConnection conn = Database.instance().getConnection();
         try {
             long id = dashboardStackPositions.save(conn, dashboardID, 0);
@@ -349,6 +355,7 @@ public class DashboardService {
     public DashboardInfo retrieveFromDashboardLink(String urlKey) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            authorizeConfig(urlKey, conn);
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_STATE.dashboard_state_id, dashboard_id FROM DASHBOARD_LINK, DASHBOARD_STATE WHERE URL_KEY = ? AND " +
                     "DASHBOARD_LINK.dashboard_state_id = dashboard_state.dashboard_state_id");
             queryStmt.setString(1, urlKey);
@@ -372,6 +379,7 @@ public class DashboardService {
     }
 
     public NewDashboardMetadata getDashboardEditorMetadata(long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             List<InsightDescriptor> reports = new AnalysisStorage().getInsightDescriptorsForDataSource(SecurityUtil.getUserID(), SecurityUtil.getAccountID(), dataSourceID, conn, true);
@@ -543,6 +551,7 @@ public class DashboardService {
 
     public Dashboard saveAs(Dashboard dashboard, String name) {
         SecurityUtil.authorizeDashboard(dashboard.getId());
+        SecurityUtil.authorizeFeedAccess(dashboard.getDataSourceID());
         try {
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dashboard.getDataSourceID());
             UserStub userStub = new UserStub();
@@ -566,7 +575,9 @@ public class DashboardService {
 
     public Dashboard saveDashboard(Dashboard dashboard) {
         if (dashboard.getId() > 0) {
-            SecurityUtil.authorizeDashboard(dashboard.getId());
+            SecurityUtil.authorizeDashboard(dashboard.getId(), Roles.EDITOR);
+        } else {
+            SecurityUtil.authorizeFeedAccess(dashboard.getDataSourceID());
         }
         try {
             if (dashboard.getUrlKey() == null) {
@@ -623,7 +634,7 @@ public class DashboardService {
     }
 
     public void updateReportVisibility(long dashboardID) {
-        SecurityUtil.authorizeDashboard(dashboardID);
+        SecurityUtil.authorizeDashboard(dashboardID, Roles.EDITOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             Dashboard dashboard = dashboardStorage.getDashboard(dashboardID, conn);
@@ -655,58 +666,6 @@ public class DashboardService {
                 }
                 updateStmt.close();
             }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void shareDashboard(long dashboardID) {
-        SecurityUtil.authorizeDashboard(dashboardID);
-        Connection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET ACCOUNT_VISIBLE = ? WHERE DASHBOARD_ID = ?");
-            updateStmt.setBoolean(1, true);
-            updateStmt.setLong(2, dashboardID);
-            updateStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
-    public ReportMetrics rateDashboard(long dashboardID, int rating) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT dashboard_user_rating_id FROM dashboard_user_rating WHERE " +
-                    "user_id = ? AND dashboard_id = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
-            queryStmt.setLong(2, dashboardID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE dashboard_user_rating SET rating = ? WHERE dashboard_user_rating_id = ?");
-                updateStmt.setInt(1, rating);
-                updateStmt.setLong(2, id);
-                updateStmt.executeUpdate();
-            } else {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO dashboard_user_rating (rating, user_id, dashboard_id) VALUES (?, ?, ?)");
-                insertStmt.setInt(1, rating);
-                insertStmt.setLong(2, SecurityUtil.getUserID());
-                insertStmt.setLong(3, dashboardID);
-                insertStmt.execute();
-            }
-            PreparedStatement ratingStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM DASHBOARD_USER_RATING WHERE DASHBOARD_ID = ?");
-            ratingStmt.setLong(1, dashboardID);
-            ResultSet dashboardRS = ratingStmt.executeQuery();
-            dashboardRS.next();
-            double ratingAverage = dashboardRS.getDouble(1);
-            int ratingCount = dashboardRS.getInt(2);
-            return new ReportMetrics(ratingCount, ratingAverage, rating);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -1187,7 +1146,7 @@ public class DashboardService {
     }
 
     public void deleteDashboard(long dashboardID) {
-        SecurityUtil.authorizeDashboard(dashboardID);
+        SecurityUtil.authorizeDashboard(dashboardID, Roles.OWNER);
         try {
             MemCachedManager.delete("dashboard" + dashboardID);
             dashboardStorage.deleteDashboard(dashboardID);
