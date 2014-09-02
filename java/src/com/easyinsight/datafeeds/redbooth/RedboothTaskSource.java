@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.redbooth;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -75,11 +76,11 @@ public class RedboothTaskSource extends RedboothBaseSource {
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
 
         List<Map>  people = (List<Map>) queryList("/api/2/people?count=0", redboothCompositeSource, httpClient);
-        List<Map>  userList = (List<Map>) queryList("/api/2/users?count=0", redboothCompositeSource, httpClient);
+        Map map = (Map) queryList("/api/1/users", redboothCompositeSource, httpClient);
 
-        Map<String, String> users = new HashMap<String, String>();
-        Map<String, String> persons = new HashMap<String, String>();
-        for (Map ref : userList) {
+        Map<String, String> users = new HashMap<>();
+        Map<String, String> persons = new HashMap<>();
+        for (Map ref : (List<Map>) map.get("objects")) {
             users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
         }
         // average # of days by project type - first due date and project creation date
@@ -90,7 +91,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
 
         long endID = 0;
         int count;
-        Map<String, Value> idToCompletionDate = new HashMap<String, Value>();
+        Map<String, Value> idToCompletionDate = new HashMap<>();
+        Map<String, Value> idToName = new HashMap<>();
 
         do {
             count = 0;
@@ -115,6 +117,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
                 }
                 Value completedAt = getYetAnotherDate(org, "completed_at");
                 idToCompletionDate.put(id, completedAt);
+                idToName.put(id, new StringValue(getJSONValue(org, "name")));
 
             }
         }  while (count == 20);
@@ -148,7 +151,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
                     endID = Math.min(numID, endID);
                 }
                 row.addValue(keys.get(ID), id);
-                row.addValue(keys.get(NAME), getJSONValue(org, "name"));
+                row.addValue(keys.get(NAME), idToName.get(id));
+                //row.addValue(keys.get(NAME), getJSONValue(org, "name"));
                 row.addValue(keys.get(PROJECT_ID), projectID);
                 row.addValue(keys.get(TASK_LIST_ID), getJSONValue(org, "task_list_id"));
                 row.addValue(keys.get(POSITION), getJSONValue(org, "position"));
