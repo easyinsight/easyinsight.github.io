@@ -22,7 +22,7 @@
         </div>
         <div class="col-md-3">
             <input id="report_select" class="form-control" type="text" ng-model="selected_report" placeholder="Search for a report..."
-                   ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue}"
+                   ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue} | not_bookmarked:bookmarks"
                    typeahead-min-length="0" typeahead-editable="false" />
         </div>
     </div>
