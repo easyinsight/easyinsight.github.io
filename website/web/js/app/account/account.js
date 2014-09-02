@@ -425,6 +425,16 @@ eiAccounts.controller("quickLinksController", ["$scope", "PageInfo", "$rootScope
 
 }]);
 
+    eiAccounts.filter("not_bookmarked", function() {
+        return function (input, bookmarks) {
+            return input.filter(function(e, i, l) {
+                return !bookmarks.some(function(ee, ii, ll) {
+                    return ee.url_key == e.url_key && ee.type == e.type;
+                })
+            })
+        }
+    })
+
     eiAccounts.controller("deleteSelectedBookmarksController", ["$http", "$scope", function($http, $scope) {
         $scope.confirmDelete = function() {
             var output = {"bookmarks": $scope.to_delete.map(function(e, i, l) {
