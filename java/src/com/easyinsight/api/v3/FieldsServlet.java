@@ -28,7 +28,7 @@ public class FieldsServlet extends JSONServlet {
         String dataSourceID = request.getParameter("dataSourceID");
         JSONObject responseObject = new JSONObject();
         FeedResponse feedResponse = new FeedService().openFeedIfPossible(dataSourceID);
-        SecurityUtil.authorizeFeed(feedResponse.getFeedDescriptor().getId(), Roles.SUBSCRIBER);
+        SecurityUtil.authorizeFeed(feedResponse.getFeedDescriptor().getId(), Roles.VIEWER);
         FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
         JSONArray fieldList = new JSONArray();
         for(AnalysisItem field : dataSource.getFields()) {
