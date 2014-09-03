@@ -6,6 +6,11 @@ import com.easyinsight.calculations.IFunction;
 import com.easyinsight.core.*;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -30,33 +35,25 @@ public class EIDateFormatFunction extends Function implements IFunction {
         } else {
             throw new FunctionException("We couldn't parse the value of " + value.toString() + " as a date.");
         }
-        Calendar cal = null;
+
+        String formatString = minusQuotes(getParameter(1)).toString();
+        if (formatString.startsWith("QQ")) {
+            formatString = "QQ-yyyy";
+        } else if ("qq".equals(formatString)) {
+            formatString = "QQ";
+        }
 
         if (calculationMetadata.getInsightRequestMetadata() != null) {
-            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-            String string;
-            if (time > 0) {
-                string = "GMT-"+Math.abs(time);
-            } else if (time < 0) {
-                string = "GMT+"+Math.abs(time);
-            } else {
-                string = "GMT";
-            }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-
-            cal = calculationMetadata.getCalendar();
-            cal.setTimeZone(timeZone);
+            Instant instant = date.toInstant();
+            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+            ZonedDateTime zdt = instant.atZone(zoneId);
+            return new StringValue(DateTimeFormatter.ofPattern(formatString).format(zdt));
+        } else {
+            Instant instant = date.toInstant();
+            ZoneId zoneId = ZoneId.of("UTC");
+            ZonedDateTime zdt = instant.atZone(zoneId);
+            return new StringValue(DateTimeFormatter.ofPattern(formatString).format(zdt));
         }
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(minusQuotes(getParameter(1)).toString());
-        if (cal != null) {
-            simpleDateFormat.setCalendar(cal);
-        }
-        String string = simpleDateFormat.format(date);
-        if (calculationMetadata.getInsightRequestMetadata() != null && calculationMetadata.getInsightRequestMetadata().isLogReport()) {
-            System.out.println("Translated " + date + " to " + string);
-        }
-        return new StringValue(string);
     }
 
     @Override
