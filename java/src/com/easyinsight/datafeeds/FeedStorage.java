@@ -1296,7 +1296,7 @@ public class FeedStorage {
         uploadPolicy.setMarketplaceVisible(marketplaceVisible);
         List<FeedConsumer> owners = new ArrayList<FeedConsumer>();
         List<FeedConsumer> viewers = new ArrayList<FeedConsumer>();
-        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL, USER.ACCOUNT_ID, USER.FIRST_NAME FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
+        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL, USER.ACCOUNT_ID, USER.FIRST_NAME, USER.ANALYST FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
                 "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID");
         policyUserStmt.setLong(1, feedID);
         ResultSet usersRS = policyUserStmt.executeQuery();
@@ -1308,7 +1308,7 @@ public class FeedStorage {
             String email = usersRS.getString(5);
             long accountID = usersRS.getLong(6);
             String firstName = usersRS.getString(7);
-            UserStub userStub = new UserStub(userID, userName, email, name, accountID, firstName);
+            UserStub userStub = new UserStub(userID, userName, email, name, accountID, firstName, usersRS.getBoolean("user.analyst"));
             if (role == Roles.OWNER) {
                 owners.add(userStub);
             } else {
