@@ -12,6 +12,7 @@ package com.easyinsight.administration.sharing
         public var accountID:int;
         public var firstName:String;
         public var userKey:String;
+        public var designer:Boolean;
 		
 		public function UserStub()
 		{
