@@ -31,7 +31,7 @@ public class GroupTest extends TestCase {
         group.setName("Test Group");
         group.setDescription("Test Description");
 
-        GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER, null);
+        GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER, null, false);
         group.setGroupUsers(Arrays.asList(groupUser));
         Group retrieved = groupService.addGroup(group);
         long groupID = retrieved.getGroupID();
