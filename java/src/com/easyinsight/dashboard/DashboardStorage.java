@@ -561,7 +561,7 @@ public class DashboardStorage {
         while (userRS.next()) {
             long userID = userRS.getLong(1);
             // TODO: cleanup
-            admins.add(new UserStub(userID, null, null, null, 0, null));
+            admins.add(new UserStub(userID, null, null, null, 0, null, false));
         }
         getUserStmt.close();
         dashboard.setAdministrators(admins);
