@@ -463,7 +463,7 @@ public class AnalysisStorage {
                 ownerName = "";
             }
             descriptors.add(new InsightDescriptor(lastChanceGroupRS.getLong(1), lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt(4), lastChanceGroupRS.getString(5),
-                    new Date(lastChanceGroupRS.getTimestamp(7).getTime()), ownerName, Roles.VIEWER, lastChanceGroupRS.getBoolean(8), lastChanceGroupRS.getInt(9), lastChanceGroupRS.getString(10),
+                    new Date(lastChanceGroupRS.getTimestamp(7).getTime()), ownerName, lastChanceGroupRS.getInt("group_to_user_join.binding_type"), lastChanceGroupRS.getBoolean(8), lastChanceGroupRS.getInt(9), lastChanceGroupRS.getString(10),
                     new Date(lastChanceGroupRS.getTimestamp(11).getTime())));
         }
         lastChanceGroupStmt.close();
@@ -546,7 +546,7 @@ public class AnalysisStorage {
         ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
         while (lastChanceGroupRS.next()) {
             descriptors.add(new InsightDescriptor(lastChanceGroupRS.getLong(1), lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt(4), lastChanceGroupRS.getString(5),
-                    Roles.VIEWER, lastChanceGroupRS.getBoolean("account_visible")));
+                    lastChanceGroupRS.getInt("group_to_user_join.binding_type"), lastChanceGroupRS.getBoolean("account_visible")));
         }
         lastChanceGroupStmt.close();
         return new ArrayList<>(descriptors);

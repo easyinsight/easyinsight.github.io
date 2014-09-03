@@ -429,7 +429,7 @@ public class SecurityUtil {
 
                     // this block of code is for reports which are included as part of "include reports" on groups per data source
 
-                    PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID FROM ANALYSIS, group_to_user_join," +
+                    PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM ANALYSIS, group_to_user_join," +
                             "community_group, upload_policy_groups WHERE " +
                             "analysis.analysis_id = ? AND analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
                             "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
@@ -438,7 +438,7 @@ public class SecurityUtil {
                     lastChanceStmt.setLong(3, userID);
                     ResultSet lastChanceRS = lastChanceStmt.executeQuery();
                     if (lastChanceRS.next()) {
-                        role = Roles.SUBSCRIBER;
+                        role = lastChanceRS.getInt(1);
                     } else {
                         role = Integer.MAX_VALUE;
                     }
@@ -698,7 +698,7 @@ public class SecurityUtil {
             if (groupRS.next()) {
                 return groupRS.getInt(1);
             } else {
-                PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT dashboard.DASHBOARD_ID FROM dashboard, group_to_user_join," +
+                PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM dashboard, group_to_user_join," +
                         "community_group, upload_policy_groups WHERE " +
                         "dashboard.dashboard_id = ? AND dashboard.data_source_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
                         "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
@@ -707,7 +707,7 @@ public class SecurityUtil {
                 lastChanceStmt.setLong(3, SecurityUtil.getUserID());
                 ResultSet lastChanceRS = lastChanceStmt.executeQuery();
                 if (lastChanceRS.next()) {
-                    role = Roles.SUBSCRIBER;
+                    role = lastChanceRS.getInt(1);
                 } else {
                     role = Roles.NONE;
                 }

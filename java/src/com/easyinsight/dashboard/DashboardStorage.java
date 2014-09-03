@@ -144,7 +144,7 @@ public class DashboardStorage {
         lastChanceGroupStmt.setBoolean(3, false);
         ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
         while (lastChanceGroupRS.next()) {
-            dashboards.add(new DashboardDescriptor(lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(1),  lastChanceGroupRS.getString(4), lastChanceGroupRS.getLong(3), Roles.VIEWER, name,
+            dashboards.add(new DashboardDescriptor(lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(1),  lastChanceGroupRS.getString(4), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt("group_to_user_join.binding_type"), name,
                     lastChanceGroupRS.getBoolean("dashboard.account_visible"), lastChanceGroupRS.getInt("dashboard.folder"),
                     new Date(lastChanceGroupRS.getTimestamp("dashboard.creation_date").getTime()), new Date(lastChanceGroupRS.getTimestamp("dashboard.update_date").getTime())));
         }
@@ -240,7 +240,7 @@ public class DashboardStorage {
         lastChanceGroupStmt.setBoolean(3, false);
         ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
         while (lastChanceGroupRS.next()) {
-            dashboards.add(new DashboardDescriptor(lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(1),  lastChanceGroupRS.getString(4), lastChanceGroupRS.getLong(3), Roles.VIEWER, "",
+            dashboards.add(new DashboardDescriptor(lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(1),  lastChanceGroupRS.getString(4), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt("group_to_user_join.binding_type"), "",
                     lastChanceGroupRS.getBoolean("dashboard.account_visible"), lastChanceGroupRS.getInt("dashboard.folder"),
                     new Date(lastChanceGroupRS.getTimestamp("dashboard.creation_date").getTime()), new Date(lastChanceGroupRS.getTimestamp("dashboard.update_date").getTime())));
         }
