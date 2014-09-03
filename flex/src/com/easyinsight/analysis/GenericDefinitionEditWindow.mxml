@@ -280,18 +280,10 @@
         private function onItemClick(event:ItemClickEvent):void {
             tabNavigator.selectedIndex = event.index;
         }
-
-        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
-            super.updateDisplayList(unscaledWidth, unscaledHeight);
-        }
         ]]>
     </mx:Script>
     <mx:HBox horizontalGap="0">
-        <mx:Canvas>
-            <mx:TabBar direction="vertical" dataProvider="{sections}" itemClick="onItemClick(event)" tabStyleName="propTabBarStyle" width="160" id="tabBar"/>
-            <mx:HRule y="168" width="160" strokeWidth="1" strokeColor="#000000" id="tabRule"/>
-        </mx:Canvas>
-
+        <mx:TabBar direction="vertical" dataProvider="{sections}" itemClick="onItemClick(event)" tabStyleName="propTabBarStyle" width="160" id="tabBar"/>
     <mx:ViewStack id="tabNavigator" creationPolicy="all" selectedIndex="{startIndex}" width="730" height="425">
         <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
                 horizontalAlign="center" label="Report Properties" verticalScrollPolicy="auto">

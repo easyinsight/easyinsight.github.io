@@ -75,16 +75,17 @@ public class WindowManagement implements IWindowManagement {
             openWindow = null;
         }
 
-        openWindow = window;
-        if (factory != null) {
-            factory.hideReport();
-        } else if (endUserFactories.length > 0) {
-            for each (var f:EmbeddedViewFactory in endUserFactories) {
-                f.hideReport();
+        if (window != null) {
+            openWindow = window;
+            if (factory != null) {
+                factory.hideReport();
+            } else if (endUserFactories.length > 0) {
+                for each (var f:EmbeddedViewFactory in endUserFactories) {
+                    f.hideReport();
+                }
             }
+            window.addEventListener(Event.REMOVED_FROM_STAGE, onEvent);
         }
-        window.addEventListener(Event.REMOVED_FROM_STAGE, onEvent);
-
     }
 
     private function onEvent(event:Event):void {

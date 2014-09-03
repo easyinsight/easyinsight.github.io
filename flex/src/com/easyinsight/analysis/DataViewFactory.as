@@ -71,13 +71,13 @@ public class DataViewFactory extends VBox implements IRetrievable {
     }
 
     public function hideReport():void {
-        if (_reportRenderer is HTMLIFrameModule) {
+        if (_reportRenderer is HTMLIFrameModule && currentComponent != null) {
             currentComponent.visible = false;
         }
     }
 
     public function restoreReport():void {
-        if (_reportRenderer is HTMLIFrameModule) {
+        if (_reportRenderer is HTMLIFrameModule && currentComponent != null) {
             currentComponent.visible = true;
         }
     }
