@@ -43,6 +43,8 @@ import mx.utils.ObjectUtil;
     public static const THIS_MONTH:int = -16;
     public static const THIS_QUARTER:int = -17;
     public static const THIS_YEAR:int = -18;
+    public static const THIS_FISCAL_YEAR:int = -19;
+    public static const PREVIOUS_FISCAL_YEAR:int = -20;
 
     /*
      intervals.addItem(createInterval("Last Full Quarter", "dayofmonth(nowdate() - quarters(1), 1)", "dayofmonth(nowdate() - quarters(1), daysinquarter(nowdate() - quarters(1))))"));

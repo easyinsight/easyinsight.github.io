@@ -80,6 +80,8 @@ public class RollingRangeFilter extends HBox implements IFilter
         rangeOptions.addItem(new RangeOption("This Month", RollingDateRangeFilterDefinition.THIS_MONTH));
         rangeOptions.addItem(new RangeOption("This Quarter", RollingDateRangeFilterDefinition.THIS_QUARTER));
         rangeOptions.addItem(new RangeOption("This Year", RollingDateRangeFilterDefinition.THIS_YEAR));
+        rangeOptions.addItem(new RangeOption("This Fiscal Year", RollingDateRangeFilterDefinition.THIS_FISCAL_YEAR));
+        rangeOptions.addItem(new RangeOption("Prior Fiscal Year", RollingDateRangeFilterDefinition.PREVIOUS_FISCAL_YEAR));
 
         rangeOptions.addItem(new RangeOption("Custom", RollingDateRangeFilterDefinition.CUSTOM));
 
