@@ -1471,9 +1471,13 @@ public class UserUploadService {
                 long dataSourceID = reportRS.getLong(3);
                 int reportType = reportRS.getInt(4);
                 String urlKey = reportRS.getString(5);
-                InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
-                id.setDescription(reportRS.getString(6));
-                reports.add(id);
+                try {
+                    InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
+                    id.setDescription(reportRS.getString(6));
+                    reports.add(id);
+                } catch (SecurityException e) {
+                    // ignore
+                }
             }
             getReportStmt.close();
             PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
@@ -1486,9 +1490,14 @@ public class UserUploadService {
                 long reportID = dashboardRS.getLong(2);
                 long dataSourceID = dashboardRS.getLong(3);
                 String urlKey = dashboardRS.getString(4);
-                DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
-                dd.setDescription(dashboardRS.getString(5));
-                reports.add(dd);
+                try {
+                    SecurityUtil.authorizeDashboard(reportID);
+                    DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
+                    dd.setDescription(dashboardRS.getString(5));
+                    reports.add(dd);
+                } catch (SecurityException e) {
+                    // ignore
+                }
             }
             getDashboardStmt.close();
             return reports;
