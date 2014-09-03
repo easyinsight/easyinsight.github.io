@@ -39,6 +39,7 @@
             htmlView = accountSettings.htmlView;
             selectedLocale = accountSettings.locale;
             defaultFontFamily = accountSettings.defaultFontFamily;
+            fiscalYearStartMonth = accountSettings.fiscalYearStartMonth;
         }
 
         private function save():void {
@@ -51,6 +52,7 @@
             accountSettings.htmlView = htmlViewCheckbox.selected;
             accountSettings.locale = localeBox.selectedItem.data;
             accountSettings.defaultFontFamily = defaultFontFamilyInput.text;
+            accountSettings.fiscalYearStartMonth = fiscalYearBox.selectedItem.data;
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -88,6 +90,9 @@
 
         [Bindable]
         private var defaultTimezone:String;
+
+        [Bindable]
+        private var fiscalYearStartMonth:int;
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
@@ -135,6 +140,18 @@
                             <mx:Object label="Thursday" data="5"/>
                             <mx:Object label="Friday" data="6"/>
                             <mx:Object label="Saturday" data="7"/>
+                        </mx:Array>
+                    </util:dataProvider>
+                </util:SmartComboBox>
+            </mx:FormItem>
+            <mx:FormItem label="Fiscal Year Start Month:">
+                <util:SmartComboBox id="fiscalYearBox" rowCount="6" selectedValue="{fiscalYearStartMonth}" selectedProperty="data">
+                    <util:dataProvider>
+                        <mx:Array>
+                            <mx:Object label="January" data="1"/>
+                            <mx:Object label="April" data="4"/>
+                            <mx:Object label="July" data="7"/>
+                            <mx:Object label="October" data="10"/>
                         </mx:Array>
                     </util:dataProvider>
                 </util:SmartComboBox>
