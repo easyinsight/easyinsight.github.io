@@ -434,7 +434,7 @@ public class KPIStorage {
             long userID = rs.getLong(1);
             FeedConsumer feedConsumer;
             if (!rs.wasNull()) {
-                feedConsumer = new UserStub(userID, rs.getString(3), rs.getString(4), rs.getString(5), rs.getLong(9), rs.getString(10));
+                feedConsumer = new UserStub(userID, rs.getString(3), rs.getString(4), rs.getString(5), rs.getLong(9), rs.getString(10), true);
             } else {
                 feedConsumer = new GroupDescriptor(rs.getString(6), rs.getLong(3), 0, "");
             }

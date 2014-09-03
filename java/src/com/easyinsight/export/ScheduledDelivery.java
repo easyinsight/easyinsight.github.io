@@ -84,7 +84,7 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
     }
 
     protected void customLoad(EIConnection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.user_id, USER.username, USER.email, USER.name, USER.account_id, USER.first_name FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT USER.user_id, USER.username, USER.email, USER.name, USER.account_id, USER.first_name, USER.analyst FROM " +
                 "delivery_to_user, user WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND delivery_to_user.user_id = USER.user_id");
         queryStmt.setLong(1, getScheduledActivityID());
@@ -92,7 +92,7 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
 
         List<UserStub> users = new ArrayList<UserStub>();
         while (rs.next()) {
-            UserStub userStub = new UserStub(rs.getLong(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getLong(5), rs.getString(6));
+            UserStub userStub = new UserStub(rs.getLong(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getLong(5), rs.getString(6), rs.getBoolean("user.analyst"));
             users.add(userStub);
         }
         queryStmt.close();
