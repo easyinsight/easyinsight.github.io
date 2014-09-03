@@ -1475,7 +1475,7 @@ public class UserUploadService {
                     InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
                     id.setDescription(reportRS.getString(6));
                     reports.add(id);
-                } catch (SecurityException e) {
+                } catch (com.easyinsight.security.SecurityException e) {
                     // ignore
                 }
             }
@@ -1495,7 +1495,7 @@ public class UserUploadService {
                     DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
                     dd.setDescription(dashboardRS.getString(5));
                     reports.add(dd);
-                } catch (SecurityException e) {
+                } catch (com.easyinsight.security.SecurityException e) {
                     // ignore
                 }
             }
