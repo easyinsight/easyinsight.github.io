@@ -23,8 +23,17 @@ public class AccountSettings {
     private int maxResults;
     private boolean sendEmail;
     private boolean htmlView;
+    private int fiscalYearStartMonth;
 
     public AccountSettings() {
+    }
+
+    public int getFiscalYearStartMonth() {
+        return fiscalYearStartMonth;
+    }
+
+    public void setFiscalYearStartMonth(int fiscalYearStartMonth) {
+        this.fiscalYearStartMonth = fiscalYearStartMonth;
     }
 
     public String getDefaultFontFamily() {
