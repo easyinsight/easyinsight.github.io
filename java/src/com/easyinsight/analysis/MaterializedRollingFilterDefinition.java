@@ -53,6 +53,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int THIS_MONTH = -16;
     public static final int THIS_QUARTER = -17;
     public static final int THIS_YEAR = -18;
+    public static final int THIS_FISCAL_YEAR = -19;
+    public static final int PRIOR_FISCAL_YEAR = -20;
 
     private long limitDate;
     private long endDate;

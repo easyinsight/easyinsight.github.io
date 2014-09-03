@@ -13,6 +13,8 @@ import com.easyinsight.datafeeds.composite.FallthroughConnection;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.documentation.DocReader;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.preferences.ApplicationSkin;
@@ -1857,7 +1859,7 @@ public class AnalysisService {
         }
     }
 
-    private FilterDefinition constructDrillthroughFilter(WSAnalysisDefinition report, DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
+    private FilterDefinition constructDrillthroughFilter(WSAnalysisDefinition report, DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) throws SQLException {
         FilterDefinition filterDefinition;
         AnalysisItem targetItem;
         boolean hasExpandDates = false;
@@ -1905,16 +1907,61 @@ public class AnalysisService {
             asTextDimension.setKey(new NamedKey(targetDisplay + "." + dateDimension.getDateLevel() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
             String format = "yyyy-MM-dd";
+            ExportMetadata md;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                md = ExportService.createExportMetadata(conn);
+            } finally {
+                Database.closeConnection(conn);
+            }
             if (dateDimension.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
                 format = "yyyy";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                format = "yyyy-MM";
+                if (md.dateFormat == 0 || md.dateFormat == 3) {
+                    format = "MM/yyyy";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM";
+                } else if (md.dateFormat == 2) {
+                    format = "MM-yyyy";
+                } else if (md.dateFormat == 4) {
+                    format = "MM.yyyy";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                format = "yyyy-MM-dd";
+                if (md.dateFormat == 0) {
+                    format = "MM/dd/yyyy";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM-dd";
+                } else if (md.dateFormat == 2) {
+                    format = "dd-MM-yyyy";
+                } else if (md.dateFormat == 3) {
+                    format = "dd/MM/yyyy";
+                } else if (md.dateFormat == 4) {
+                    format = "dd.MM.yyyy";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL) {
-                format = "yyyy-MM-dd HH";
+                if (md.dateFormat == 0) {
+                    format = "MM/dd/yyyy HH:mm";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM-dd HH:mm";
+                } else if (md.dateFormat == 2) {
+                    format = "dd-MM-yyyy HH:mm";
+                } else if (md.dateFormat == 3) {
+                    format = "dd/MM/yyyy HH:mm";
+                } else if (md.dateFormat == 4) {
+                    format = "dd.MM.yyyy HH:mm";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
-                format = "yyyy-MM-dd HH:mm";
+                if (md.dateFormat == 0) {
+                    format = "MM/dd/yyyy HH:mm";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM-dd HH:mm";
+                } else if (md.dateFormat == 2) {
+                    format = "dd-MM-yyyy HH:mm";
+                } else if (md.dateFormat == 3) {
+                    format = "dd/MM/yyyy HH:mm";
+                } else if (md.dateFormat == 4) {
+                    format = "dd.MM.yyyy HH:mm";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
                 format = "yyyy-ww";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_OF_YEAR_FLAT) {
@@ -1930,7 +1977,12 @@ public class AnalysisService {
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
                 format = "qq";
             }
-            asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", targetDisplay, format));
+            if (dateDimension.isTimeshift()) {
+                asTextDimension.setDerivationCode(MessageFormat.format("dateformat([{0}], \"{1}\")", targetDisplay, format));
+            } else {
+                asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", targetDisplay, format));
+            }
+
             //asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
