@@ -136,7 +136,7 @@
         </mx:HBox>
     </mx:ViewStack>
     <mx:Form>
-        <mx:FormItem label="Should reports included in data sources automatically be included with Viewer access?">
+        <mx:FormItem label="Should all reports and dashboards included in data sources in the group automatically be included?">
             <mx:CheckBox id="reportIncludeCheckBox" selected="{reportInclude}" change="onChange(event)"/>
         </mx:FormItem>
     </mx:Form>
