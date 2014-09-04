@@ -446,9 +446,19 @@ public class DashboardService {
         long dashboardID = canAccessDashboard(urlKey);
         if(dashboardID == 0)
             return null;
-        DashboardDescriptor dd = new DashboardDescriptor();
-        dd.setId(dashboardID);
-        return dd;
+        try {
+            DashboardDescriptor dd = new DashboardDescriptor();
+            PreparedStatement ps = conn.prepareStatement("SELECT DASHBOARD_NAME FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+            ps.setLong(1, dashboardID);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            dd.setName(rs.getString(1));
+            ps.close();
+            dd.setId(dashboardID);
+            return dd;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ReportResults getDashboardWithTags() {
