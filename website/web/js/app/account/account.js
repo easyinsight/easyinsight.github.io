@@ -224,7 +224,7 @@ eiAccounts.controller("AccountSkinController", ["$scope", "$http", "$upload", fu
 
         $scope.saving = $http.post("/app/account_skin.json", JSON.stringify($scope.skin));
         $scope.saving.then(function(c) {
-            console.log($scope.skinForm)
+
             $scope.skinForm.$setPristine();
         })
     }
