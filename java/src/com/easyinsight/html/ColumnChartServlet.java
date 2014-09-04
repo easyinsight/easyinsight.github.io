@@ -34,6 +34,7 @@ public class ColumnChartServlet extends HtmlServlet {
         JSONArray blahArray = new JSONArray();
 
         boolean dateAxis = false;
+        boolean variableHeight = false;
 
         Comparator c = null;
 
@@ -66,6 +67,7 @@ public class ColumnChartServlet extends HtmlServlet {
             xAxisItem = columnChartDefinition.getYaxis();
             measures = columnChartDefinition.getMeasures();
             xMinItem = columnChartDefinition.getMinimumXAxis();
+            variableHeight = columnChartDefinition.isVariableHeight();
             String sortType = columnChartDefinition.getColumnSort();
             if ("X-Axis Ascending".equals(sortType)) {
                 c = new RowComparator(measures.get(0), true);
@@ -113,7 +115,7 @@ public class ColumnChartServlet extends HtmlServlet {
             AnalysisItem measureItem = measures.get(i);
             for (IRow row : dataSet.getRows()) {
                 Value value = row.getValue(xAxisItem);
-                String x = ExportService.createValue(md, xAxisItem, value, false);
+                String x = ExportService.createValue(md, xAxisItem, value, true);
                 JSONObject point = new JSONObject();
                 point.put("x", x);
                 Value measureValue = row.getValue(measureItem);
@@ -121,13 +123,12 @@ public class ColumnChartServlet extends HtmlServlet {
                 point.put("y", measureValue.toDouble());
                 if (xMinItem != null) {
                     Value minValue = row.getValue(xMinItem);
-                    System.out.println(minValue.toDouble().longValue() + " gave min = " + new Date(minValue.toDouble().longValue()));
                     point.put("minY", minValue.toDouble());
                     point.put("y", measureValue.toDouble() - minValue.toDouble());
                 } else {
                     point.put("minY", 0);
                 }
-                System.out.println(measureValue.toDouble().longValue() + " gave max = " + new Date(measureValue.toDouble().longValue()));
+
                 if (colors.size() == 1) {
                     String color = null;
                     if (measureValue.getValueExtension() != null && measureValue.getValueExtension() instanceof TextValueExtension) {
@@ -171,6 +172,7 @@ public class ColumnChartServlet extends HtmlServlet {
         }
 
         object.put("floatingY", xMinItem != null);
+        object.put("variableHeight", variableHeight);
 
         if (dateAxis) {
             object.put("dateAxis", dateAxis);
