@@ -6,6 +6,9 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -124,5 +127,15 @@ public class CompositeFeedNode implements Serializable {
         } else {
             return new DataSourceQueryNodeKey(dataFeedID);
         }
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("data_feed_id", dataFeedID);
+        jo.put("data_source_name", dataSourceName);
+        jo.put("data_source_type", dataSourceType);
+        jo.put("refresh_behavior", refreshBehavior);
+
+        return jo;
     }
 }

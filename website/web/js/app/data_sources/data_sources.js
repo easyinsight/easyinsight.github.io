@@ -235,10 +235,40 @@
         }
     })
 
+    eiDataSources.controller("combineDataSourcesSplashController", function() {
+
+    })
+
+    eiDataSources.controller("combineDifferentSourcesController", ["$scope", "$http", "$rootScope", "$location", function($scope, $http, $rootScope, $location) {
+        $rootScope.user_promise.then(function(u) {
+            if(!u.designer) {
+                $location.path("/missing");
+            }
+        });
+
+        $scope.composite = {"data_sources": []}
+
+        $scope.loadingSources = $http.get("/app/dataSources.json");
+        $scope.loadingSources.then(function(c) {
+            $scope.data_sources = c.data.data_sources;
+        });
+
+        $scope.addDataSource = function() {
+            if(typeof($scope.selected_data_source) != "object")
+                return;
+
+            $scope.composite.data_sources.push($scope.selected_data_source);
+            console.log($scope.composite);
+        }
+
+    }])
+
     eiDataSources.config(["$routeSegmentProvider", function ($routeSegmentProvider) {
         $routeSegmentProvider.when("/home", "two_column.data_sources").
             when("/", "two_column.data_sources").
             when("/data_sources/:id", "two_column.reports").
+            when("/combine_sources", "combine_sources").
+            when("/combine_sources/different", "combine_different_sources").
             segment("two_column", {
                 templateUrl: "/angular_templates/data_sources/home_base.template.html",
                 controller: "homeBaseController"
@@ -252,6 +282,14 @@
                 templateUrl: "/angular_templates/data_sources/reports.template.html",
                 controller: "reportsListController",
                 depends: ["id"]
+            }).up().
+            segment("combine_sources", {
+                templateUrl: "/angular_templates/data_sources/combine_data_sources_splash.template.html",
+                controller: "combineDataSourcesSplashController"
+            }).
+            segment("combine_different_sources", {
+                templateUrl: "/angular_templates/data_sources/combine_different_sources.template.html",
+                controller: "combineDifferentSourcesController"
             })
     }])
 

@@ -448,11 +448,12 @@ public class DashboardService {
             return null;
         try {
             DashboardDescriptor dd = new DashboardDescriptor();
-            PreparedStatement ps = conn.prepareStatement("SELECT DASHBOARD_NAME FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+            PreparedStatement ps = conn.prepareStatement("SELECT DASHBOARD_NAME, DESCRIPTION FROM DASHBOARD WHERE DASHBOARD_ID = ?");
             ps.setLong(1, dashboardID);
             ResultSet rs = ps.executeQuery();
             rs.next();
             dd.setName(rs.getString(1));
+            dd.setDescription(rs.getString(2));
             ps.close();
             dd.setId(dashboardID);
             return dd;

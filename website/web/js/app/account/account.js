@@ -396,6 +396,8 @@ eiAccounts.controller("quickLinksController", ["$scope", "PageInfo", "$rootScope
         $scope.saving = $http.post("/app/userInfo.json", JSON.stringify(out))
         $scope.saving.then(function(d) {
             $rootScope.bookmarks.push(d.data);
+            $scope.selected_report = null;
+            $scope.ds_name = null;
         })
     }
 
