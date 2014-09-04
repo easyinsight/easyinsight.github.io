@@ -22,6 +22,7 @@ public class ApplicationSkin implements Serializable {
 
     public static final int APPLICATION = 1;
     public static final int ACCOUNT = 2;
+    public static final int USER = 3;
 
     private ImageDescriptor coreAppBackgroundImage;
     private boolean coreAppBackgroundImageEnabled;
@@ -364,7 +365,7 @@ public class ApplicationSkin implements Serializable {
             properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
             properties.add(ReportMultiColorProperty.fromColors(secondaryMultiColors, "secondaryMultiColors"));
         }
-        if (mode == APPLICATION) {
+        if (mode == APPLICATION || mode == USER) {
             properties.add(new ReportBooleanProperty("myDataName", myDataName));
             properties.add(new ReportBooleanProperty("myDataSize", myDataSize));
             properties.add(new ReportBooleanProperty("myDataOwner", myDataOwner));
