@@ -221,8 +221,11 @@ eiAccounts.controller("AccountSkinController", ["$scope", "$http", "$upload", fu
         $scope.images = c.data.images
     })
     $scope.submit= function() {
+
         $scope.saving = $http.post("/app/account_skin.json", JSON.stringify($scope.skin));
         $scope.saving.then(function(c) {
+            console.log($scope.skinForm)
+            $scope.skinForm.$setPristine();
         })
     }
     $scope.onFileSelect = function(files) {
@@ -353,7 +356,8 @@ eiAccounts.directive('eicolorform', function() {
             text: "=text",
             enabled_field_disabled: "=enabledfielddisabled",
             disabled_field: "=disabledfield",
-            enabled_field: "=enabledfield"
+            enabled_field: "=enabledfield",
+            skin: "=skin"
         }
     }
 });
