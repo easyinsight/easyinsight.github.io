@@ -6,6 +6,7 @@ Modernizr.load({ complete: function () {
 var stack;
 var grid;
 var textTemplate;
+var imageTemplate;
 var reportTemplate;
 var fullReportTemplate;
 
@@ -145,6 +146,8 @@ var dashboardComponent = function (obj) {
         return textTemplate(obj);
     } else if (obj.type == "report") {
         return reportTemplate({data: obj });
+    } else if (obj.type == "image") {
+        return imageTemplate(obj);
     }
 }
 
@@ -607,7 +610,7 @@ var hideFilters = function (obj, filterMap) {
             ss = selectedIndex(obj.id);
         }
         hideFilters(obj.children[ss], filterMap);
-    } else if (obj.type != "report" && obj.type != "text") {
+    } else if (obj.type != "report" && obj.type != "text" && obj.type != "image") {
         for (var i = 0; i < obj.children.length; i++) {
             hideFilters(obj.children[i], filterMap);
         }
@@ -618,7 +621,7 @@ var renderReports = function (obj, dashboardID, drillthroughID, force) {
     if (obj.type == "report") {
         if (!obj.report.report.metadata.adhoc_execution)
             renderReport(obj, dashboardID, drillthroughID, force);
-    } else if (obj.type != "text") {
+    } else if (obj.type != "text" && obj.type != "image")  {
         for (var i = 0; i < obj.children.length; i++) {
             renderReports(obj.children[i], dashboardID, drillthroughID, force);
         }
@@ -629,7 +632,7 @@ var fullRenderPDF = function (obj, dashboardID, drillthroughID, pdfData) {
 
     if (obj.type == "report") {
         pdfData[obj.id] = captureAndReturn(obj);
-    } else if (obj.type != "text") {
+    } else if (obj.type != "text" && obj.type != "image") {
         for (var i = 0; i < obj.children.length; i++) {
             fullRenderPDF(obj.children[i], dashboardID, drillthroughID, pdfData);
         }
@@ -714,6 +717,7 @@ $(function () {
         reportTemplate = _.template($("#report_template", s).html());
         fullReportTemplate = _.template($("#report_full_template", s).html());
         textTemplate = _.template($("#text_template", s).html());
+        imageTemplate = _.template($("#image_template", s).html());
         gaugeTemplate = _.template($("#gauge_template", s).html());
         d3Template = _.template($("#d3_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
@@ -966,6 +970,7 @@ $(function () {
                             d.error = "Too many values, please refine your search."
                         } else {
                             $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selMap }, results: d }));
+
                             $(".cb_all_choice", $(e.target)).click(allCheck);
                             $(".cb_filter_choice", $(e.target)).click(choiceAllCheck);
                         }

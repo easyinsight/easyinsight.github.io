@@ -1075,8 +1075,9 @@ nv.utils.optionsFunc = function(args) {
       //------------------------------------------------------------
 
 
-      if (ticks !== null)
-        axis.ticks(ticks);
+      if (ticks !== null) {
+          axis.ticks(ticks);
+      }
       else if (axis.orient() == 'top' || axis.orient() == 'bottom')
         axis.ticks(Math.abs(scale.range()[1] - scale.range()[0]) / 100);
 
@@ -1228,6 +1229,7 @@ nv.utils.optionsFunc = function(args) {
             if(labelPadding > width) width = labelPadding;
           });
           */
+
           axisLabel.enter().append('text').attr('class', 'nv-axislabel');
               var debugX;
               if (rotateYLabel && horizontalBar) {
@@ -9155,7 +9157,14 @@ nv.models.multiBarHorizontalChart = function() {
     .highlightZero(false)
     .showMaxMin(false)
     .horizontalBar(true)
-    .tickFormat(function(d) { return d })
+    .tickFormat(function(d) {
+          if (d.length > 15) {
+              return d.substring(0, 15) + "...";
+          } else {
+              return d;
+          }
+          //return d;
+      })
     ;
   yAxis
     .orient('bottom')
@@ -9339,7 +9348,12 @@ nv.models.multiBarHorizontalChart = function() {
           xAxis
             .scale(x)
             .ticks( availableHeight / 24 )
-            .tickSize(-availableWidth, 0);
+            .tickSize(-availableWidth, 0).
+          tickFormat(function(d) { if (d.length > 15) {
+                  return d.substring(0, 15) + "...";
+              } else {
+                  return d;
+              }});
 
           g.select('.nv-x.nv-axis').transition()
               .call(xAxis);
@@ -11241,6 +11255,7 @@ nv.models.scatter = function() {
 
       var wrap = container.selectAll('g.nv-wrap.nv-scatter').data([data]);
       var wrapEnter = wrap.enter().append('g').attr('class', 'nvd3 nv-wrap nv-scatter nv-chart-' + id + (singlePoint ? ' nv-single-point' : ''));
+
       var defsEnter = wrapEnter.append('defs');
       var gEnter = wrapEnter.append('g');
       var g = wrap.select('g');
