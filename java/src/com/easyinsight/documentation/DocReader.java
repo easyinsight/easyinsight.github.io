@@ -157,8 +157,13 @@ public class DocReader {
                         if (substring.contains("|")) {
                             substring = substring.split("\\|")[0];
                         }
-
-                        if (substring.contains("screencasts.jsp")) {
+                        if (substring.contains("screencast:")) {
+                            String screencastURL = substring.substring("screencast:".length());
+                            //String iframe = "<iframe width=\"600\" height=\"359\" src=\"//www.youtube.com/embed/"+screencastURL+"?modestbranding=1&rel=0&theme=light\" frameborder=\"0\" allowfullscreen></iframe>";
+                            String iframe = "<iframe width=\"600\" height=\"359\" src=\"//www.youtube.com/embed/"+screencastURL+"?modestbranding=1&rel=0&theme=light\" frameborder=\"0\" allowfullscreen></iframe>";
+                            fileMap.put("AAA" + substring + "AAA", iframe);
+                            gs.put(g, "AAA" + substring + "AAA");
+                        } else if (substring.contains("screencasts.jsp")) {
                             String link = "[" + RedirectUtil.getURL(request, "/app/screencasts.jsp") + " Screencasts ]";
                             gs.put(g, link);
                         } else if (substring.contains("docScreencasts.jsp")) {
