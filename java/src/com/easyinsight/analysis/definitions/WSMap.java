@@ -194,8 +194,7 @@ public class WSMap extends WSAnalysisDefinition {
                 return resultColors;
             }
         }
-        return Arrays.asList("#a6bc59", "#597197", "#d6ab2a", "#d86068", "#5d9942",
-                "#7a4c6c", "#F0B400", "#1E6C0B", "#00488C", "#332600", "#D84000");
+        return Arrays.asList("#F8F877");
     }
 
     @Override
