@@ -27,7 +27,16 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
     private boolean useOutsideLabelFontColor;
     private String labelFontWeight;
     private boolean dateAxis;
+    private boolean variableHeight;
     private List<MultiColor> multiColors = new ArrayList<MultiColor>();
+
+    public boolean isVariableHeight() {
+        return variableHeight;
+    }
+
+    public void setVariableHeight(boolean variableHeight) {
+        this.variableHeight = variableHeight;
+    }
 
     public boolean isDateAxis() {
         return dateAxis;
@@ -169,6 +178,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         useInsideLabelFontColor = findBooleanProperty(properties, "useInsideLabelFontColor", false);
         useOutsideLabelFontColor = findBooleanProperty(properties, "useOutsideLabelFontColor", false);
         dateAxis = findBooleanProperty(properties, "dateAxis", false);
+        variableHeight = findBooleanProperty(properties, "variableHeight", false);
         multiColors = multiColorProperty(properties, "multiColors");
     }
 
@@ -186,6 +196,7 @@ public class WSBarChartDefinition extends WSYAxisDefinition {
         properties.add(new ReportBooleanProperty("useInsideLabelFontColor", useInsideLabelFontColor));
         properties.add(new ReportBooleanProperty("useOutsideLabelFontColor", useOutsideLabelFontColor));
         properties.add(new ReportBooleanProperty("dateAxis", dateAxis));
+        properties.add(new ReportBooleanProperty("variableHeight", variableHeight));
         properties.add(new ReportNumericProperty("labelInsideFontColor", labelInsideFontColor));
         properties.add(new ReportNumericProperty("labelOutsideFontColor", labelOutsideFontColor));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
