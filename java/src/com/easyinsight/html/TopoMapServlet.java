@@ -35,7 +35,8 @@ public class TopoMapServlet extends HtmlServlet {
         WSMap wsMap = (WSMap) report;
 
         JSONObject object = new JSONObject();
-
+        object.put("map", wsMap.getMap());
+        object.put("noDataFill", ExportService.createHexString(wsMap.getNoDataFill()));
         AnalysisItem region = wsMap.getRegion();
         AnalysisItem measure = wsMap.getMeasure();
         AnalysisItem latitude = wsMap.getLatitude();
@@ -43,7 +44,9 @@ public class TopoMapServlet extends HtmlServlet {
         AnalysisItem pointMeasure = wsMap.getPointMeasure();
         AnalysisItem pointGrouping = wsMap.getPointGrouping();
 
-        populateRegionData(insightRequestMetadata, conn, wsMap, object, region, measure);
+        if (region != null && measure != null) {
+            populateRegionData(insightRequestMetadata, conn, wsMap, object, region, measure);
+        }
 
         if (longitude != null && latitude != null && pointMeasure != null) {
             populatePointData(insightRequestMetadata, conn, wsMap, object, longitude, latitude, pointMeasure, pointGrouping);
@@ -194,7 +197,7 @@ public class TopoMapServlet extends HtmlServlet {
         }
 
         object.put("regions", geoData);
-        object.put("map", wsMap.getMap());
+
         int startIntColor = wsMap.getRegionFillStart();
         int endInitColor = wsMap.getRegionFillEnd();
         Color startColor = new Color(startIntColor);
@@ -238,7 +241,7 @@ public class TopoMapServlet extends HtmlServlet {
         }
 
         object.put("colors", colorArray);
-        object.put("noDataFill", ExportService.createHexString(wsMap.getNoDataFill()));
+
     }
 
     private static class Region {
