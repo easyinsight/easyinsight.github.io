@@ -113,6 +113,23 @@ public class DocReader {
 
             Map<String, String> fileMap = new HashMap<String, String>();
             Map<String, String> escapeMap = new HashMap<String, String>();
+            int i = 0;
+            {
+                Map<String, String> gs = new HashMap<String, String>();
+                Pattern pattern = Pattern.compile("\\[https(.*?)\\]");
+                Matcher matcher = pattern.matcher(value);
+                while (matcher.find()) {
+                    String g = matcher.group();
+                    System.out.println(g);
+                    String template = "BBB" + g.substring(1, g.length() - 1) + "BBB";
+                    System.out.println("\t" + template);
+                    gs.put(g, "BBB" + String.valueOf(i) + "BBB");
+                    fileMap.put("BBB" + String.valueOf(i++) + "BBB", "<a href=\"" + g.substring(1, g.indexOf(" ")) + "\">" + g.substring(g.indexOf(" "), g.length() - 1) + "</a>");
+                }
+                for (Map.Entry<String, String> entry : gs.entrySet()) {
+                    value = value.replace(entry.getKey(), entry.getValue());
+                }
+            }
             // find links
             {
                 Map<String, String> gs = new HashMap<String, String>();
@@ -150,7 +167,7 @@ public class DocReader {
                             }
                         }
                         gs.put(g, "AAA" + substring + "AAA");
-                        fileMap.put("AAA" + substring + "AAA", "<img src=\"https://wiki.easy-insight.com/" + target + "\" alt=\"" + substring + "\"/>");
+                        fileMap.put("AAA" + substring + "AAA", "<div><img style=\"border-style:solid;border-width:1px;border-color:#CCCCCC\" class=\"img-fit-responsive\" src=\"https://wiki.easy-insight.com" + target + "\" alt=\"" + substring + "\"/></div>");
                         //fileMap.put("AAA" + substring + "AAA", "");
                     } else {
                         String substring = g.substring(2, g.length() - 2);
@@ -184,6 +201,7 @@ public class DocReader {
                     //System.out.println();
                 }
 
+
                 for (Map.Entry<String, String> entry : gs.entrySet()) {
                     value = value.replace(entry.getKey(), entry.getValue());
                 }
@@ -193,12 +211,17 @@ public class DocReader {
                 value = value.replace("<br />", "\n");
             }
             //System.out.println(value);
-            String html = parseMediaWiki(value);
+            String html = parseMediaWiki(value).replace("<pre>", "<p>").replace("</pre>", "</p>");
             for (Map.Entry<String, String> entry : escapeMap.entrySet()) {
                 html = html.replace(entry.getKey(), entry.getValue());
             }
             for (Map.Entry<String, String> entry : fileMap.entrySet()) {
-                html = html.replace(entry.getKey(), entry.getValue());
+                System.out.println("replacing " + entry.getKey() + " with " + entry.getValue());
+                if (!html.contains(entry.getKey())) {
+                    System.out.println("hrm");
+                } else {
+                    html = html.replace(entry.getKey(), entry.getValue());
+                }
             }
             pageResults = html;
 
@@ -216,7 +239,7 @@ public class DocReader {
                 pageResults = pageResults.substring(0, insertPoint) + insertContent + pageResults.substring(insertPoint);
             }
 
-            MemCachedManager.instance().add(cacheKey, 500000, pageResults);
+           // MemCachedManager.instance().add(cacheKey, 500000, pageResults);
         }
         return pageResults;
     }
