@@ -75,7 +75,11 @@ public class HappyFoxBaseSource extends ServerDataSourceDefinition {
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
-            return (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            if (o instanceof String) {
+                System.out.println(o);
+            }
+            return (Map) o;
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
@@ -90,6 +94,7 @@ public class HappyFoxBaseSource extends ServerDataSourceDefinition {
         restMethod.setRequestHeader("Content-Type", "application/json");
 
         try {
+            System.out.println(url + path);
             client.executeMethod(restMethod);
             if (restMethod.getStatusCode() == 404) {
                 System.out.println("Was invoking " + url + path);

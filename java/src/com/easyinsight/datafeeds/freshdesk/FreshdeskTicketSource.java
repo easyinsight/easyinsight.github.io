@@ -15,6 +15,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -47,7 +49,10 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
     public static final String SPAM = "Spam";
     public static final String COUNT = "Ticket Count";
     public static final String TICKET_URL = "Ticket URL";
-    public static final String REOPEN_COUNT = "Times Reopened";
+    public static final String AGENT_TOUCHES = "Agent Touches";
+    public static final String CUSTOMER_TOUCHES = "Customer Touches";
+    public static final String AGENT_TIME = "Agent Time";
+    public static final String CUSTOMER_TIME = "Customer Time";
 
 
 
@@ -81,7 +86,10 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(RESOLVED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
-        fieldBuilder.addField(REOPEN_COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(AGENT_TOUCHES, new AnalysisMeasure());
+        fieldBuilder.addField(CUSTOMER_TOUCHES, new AnalysisMeasure());
+        fieldBuilder.addField(AGENT_TIME, new AnalysisMeasure(FormattingConfiguration.MILLISECONDS));
+        fieldBuilder.addField(CUSTOMER_TIME, new AnalysisMeasure(FormattingConfiguration.MILLISECONDS));
 
         customFields = new ArrayList<>();
 
@@ -181,34 +189,41 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                 boolean closed = false;
                 int reopenCount = 0;
                 Value resolvedAt = null;
+                DateValue createdAt = (DateValue) getDate(map, "created_at");
+                ZonedDateTime zdt = createdAt.getDate().toInstant().atZone(ZoneId.systemDefault());
+                TicketAnalysis ticketAnalysis = new TicketAnalysis(zdt);
                 for (Object activityObject : statusUpdateList) {
                     // calculate # of times issues was reopened
                     Map m = (Map) activityObject;
                     Map ticketActivityMap = (Map) m.get("ticket_activity");
                     List<String> list = (List<String>) ticketActivityMap.get("activity");
+                    DateValue performedTime = (DateValue) getDate(ticketActivityMap, "performed_time");
                     for (String activityBody : list) {
 
                         int index = activityBody.lastIndexOf(" ");
                         String status = activityBody.substring(index).trim();
 
                         if ("Resolved".equals(status) || "Closed".equals(status)) {
-
+                            ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, performedTime.getDate());
                             if (!closed) {
                                 resolvedAt = getDate(ticketActivityMap, "performed_time");
                             }
                             closed = true;
+                        } else if ("Waiting on Customer".equals(status) || "Waiting on Third Party".equals(status)) {
+                            ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, performedTime.getDate());
                         } else {
+                            ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, performedTime.getDate());
                             resolvedAt = new EmptyValue();
-                            if (closed) {
-
-                                reopenCount++;
-                            }
-
                             closed = false;
                         }
                     }
                 }
-                row.addValue(keys.get(REOPEN_COUNT), reopenCount);
+                ticketAnalysis.calculate();
+                row.addValue(keys.get(AGENT_TIME), ticketAnalysis.getElapsedAgentTime());
+                row.addValue(keys.get(CUSTOMER_TIME), ticketAnalysis.getElapsedCustomerTime());
+                row.addValue(keys.get(AGENT_TOUCHES), ticketAnalysis.getAgentHandles());
+                row.addValue(keys.get(CUSTOMER_TOUCHES), ticketAnalysis.getCustomerHandles());
+                //row.addValue(keys.get(REOPEN_COUNT), reopenCount);
                 row.addValue(keys.get(RESOLVED_AT), resolvedAt);
                 //}
             }

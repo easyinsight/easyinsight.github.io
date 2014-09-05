@@ -9,10 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -98,7 +95,14 @@ public class HappyFoxCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return new ArrayList<>();
+        return getLiveChildConnections();
+    }
+
+    @Override
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return Arrays.asList(
+                new ChildConnection(FeedType.HAPPYFOX_TICKET, FeedType.HAPPYFOX_CONTACTS, HappyFoxTicketSource.TICKET_CREATED_BY_ID, HappyFoxContactSource.CONTACT_ID)
+        );
     }
 
     public String getUrl() {
