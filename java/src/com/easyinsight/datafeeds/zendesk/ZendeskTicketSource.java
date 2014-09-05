@@ -59,8 +59,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     public static final String COUNT = "Ticket Count";
 
     public static final String CURRENT = "Ticket With";
-    public static final String AGENT_HANDLES = "Agent Handles";
-    public static final String CUSTOMER_HANDLES = "Customer Handles";
+    public static final String AGENT_HANDLES = "Agent Touches";
+    public static final String CUSTOMER_HANDLES = "Customer Touches";
     public static final String TIME_UNASSIGNED = "Time Unassigned";
     public static final String TIME_WITH_AGENT = "Time With Agent";
     public static final String TIME_WITH_CUSTOMER = "Time With Customer";
