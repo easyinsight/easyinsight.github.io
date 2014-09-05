@@ -392,14 +392,12 @@ public class DataStorage implements IDataStorage {
         }
         try {
             String sql = defineTableSQL(false, updateKey);
-            System.out.println(sql);
             PreparedStatement createSQL = storageConn.prepareStatement(sql);
             createSQL.execute();
         } catch (SQLException e) {
             LogClass.error(e);
             if (e.getMessage().contains("Row size too large")) {
                 String sql = defineTableSQL(true, updateKey);
-                System.out.println(sql);
                 PreparedStatement createSQL = storageConn.prepareStatement(sql);
                 createSQL.execute();
             } else {
@@ -483,7 +481,6 @@ public class DataStorage implements IDataStorage {
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
-                System.out.println(string);
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
                 stmt.close();
@@ -492,7 +489,6 @@ public class DataStorage implements IDataStorage {
                 ObjectListing objectListing = s3.listObjects(bucketName);
                 List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
                 for (S3ObjectSummary summary : summaries) {
-                    System.out.println("\tdeleting bucket " + summary.getKey());
                     s3.deleteObject(bucketName, summary.getKey());
                 }
                 s3.deleteBucket(bucketName);
@@ -554,7 +550,7 @@ public class DataStorage implements IDataStorage {
                 // TODO: argh
                 // String string = "copy " + getTableName() + " (" + sb.toString() + ") from 's3://" + bucketName + "/" + tempTable + "' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
                 String string = "copy " + loadTable + " ("+sb.toString()+") from 's3://"+bucketName+"/"+tempTable+"' credentials 'aws_access_key_id=0AWCBQ78TJR8QCY8ABG2;aws_secret_access_key=bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI' escape removequotes truncatecolumns emptyasnull blanksasnull delimiter '|' GZIP timeformat 'YYYY-MM-DD HH:MI:SS'";
-                System.out.println(string);
+
                 PreparedStatement stmt = storageConn.prepareStatement(string);
                 stmt.execute();
             } finally {
@@ -562,7 +558,6 @@ public class DataStorage implements IDataStorage {
                 ObjectListing objectListing = s3.listObjects(bucketName);
                 List<S3ObjectSummary> summaries = objectListing.getObjectSummaries();
                 for (S3ObjectSummary summary : summaries) {
-                    System.out.println("\t" + summary.getKey());
                     s3.deleteObject(bucketName, summary.getKey());
                 }
                 s3.deleteBucket(bucketName);
@@ -570,16 +565,12 @@ public class DataStorage implements IDataStorage {
 
             String tempTableSQL = "CREATE TEMP TABLE " + tempTable + " AS SELECT * FROM " + loadTable;
 
-            System.out.println("temp table = " + tempTableSQL);
-
             PreparedStatement createTempTableStmt = storageConn.prepareStatement(tempTableSQL);
             createTempTableStmt.execute();
             createTempTableStmt.close();
 
             String deleteSQL = "DELETE FROM " + getTableName() + " USING " + tempTable + " WHERE " + getTableName() + "." + updateKey.toSQL() + " = " +
                     tempTable + "." + updateKey.toSQL();
-
-            System.out.println("delete sql = " + deleteSQL);
 
 
             StringBuilder columnBuilder = new StringBuilder();
@@ -595,12 +586,12 @@ public class DataStorage implements IDataStorage {
 
             PreparedStatement deleteStmt = storageConn.prepareStatement(deleteSQL);
             int rows = deleteStmt.executeUpdate();
-            System.out.println("rows deleted = " + rows);
+
             deleteStmt.close();
 
             String insertSQL = "INSERT INTO " + getTableName() + " SELECT " + columnBuilder.toString() + " FROM " + tempTable;
 
-            System.out.println("insert sql = " + insertSQL);
+
 
             PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
             insertStmt.execute();
@@ -954,7 +945,6 @@ public class DataStorage implements IDataStorage {
                     AggregateKey testKey = new AggregateKey(key.toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
                     KeyMetadata baseMetadata = this.keys.get(testKey);
                     if ((!insightRequestMetadata.isAggregateQuery() || analysisMeasure.getAggregation() != AggregationTypes.COUNT_DISTINCT) && baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                        System.out.println("forcing " + analysisMeasure.toDisplay() + " to alt value");
                         keys.put(key, baseMetadata);
                     } else {
                         keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
@@ -1005,8 +995,6 @@ public class DataStorage implements IDataStorage {
             queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         }
 
-        System.out.println(queryBuilder.toString());
-
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
 
@@ -1051,7 +1039,6 @@ public class DataStorage implements IDataStorage {
                     if (filterDefinition instanceof FilterValueDefinition && database.getDialect() == Database.POSTGRES) {
                         FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
                         if (filterValueDefinition.getFilteredValues().size() > 970) {
-                            System.out.println("Redshift ignoring filter with " + filterValueDefinition.getFilteredValues().size() + " values");
                             continue;
                         }
                     }
@@ -1062,7 +1049,6 @@ public class DataStorage implements IDataStorage {
                         if (filterDefinition instanceof FilterValueDefinition) {
                             FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
                             if (filterValueDefinition.getFilteredValues() != null && filterValueDefinition.getFilteredValues().size() > SystemSettings.instance().getMaxFilterValues()) {
-                                System.out.println("Ignoring filter with " + filterValueDefinition.getFilteredValues().size() + " values");
                                 continue;
                             }
                         }
