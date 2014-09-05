@@ -49,32 +49,50 @@ eiAccounts.controller('UserBaseController', ["$scope", "$http", function ($scope
     })
 }])
 
-eiAccounts.controller('UsersController', ["$scope", "$filter", "$http", "PageInfo", "$location", "$rootScope",
-    function ($scope, $filter, $http, PageInfo, $location, $rootScope) {
+eiAccounts.controller('UsersController', ["$scope", "$filter", "$http", "PageInfo", "$location", "$rootScope", "$modal",
+    function ($scope, $filter, $http, PageInfo, $location, $rootScope, $modal) {
         $rootScope.user_promise.then(function() {
             if(!$rootScope.user.admin)
                 $location.path("/account/profile");
         });
         PageInfo.setTitle("Users")
         $scope.deleteSelected = function () {
-        var usersToDelete = $filter('filter')($scope.users, {"delete": true}, true);
-        var usersToDeleteIDs = usersToDelete.map(function (e, i, l) {
-            return e.id;
-        });
-        if (confirm("Are you sure you want to delete the selected set of users?")) {
-            $scope.delete_promise = $http.post("/app/html/account/deleteUsers", JSON.stringify({user_ids: usersToDeleteIDs}));
-            $scope.delete_promise.then(function (c) {
-                if (c.data.success) {
-                    for (var ctr = 0; ctr < usersToDelete.length; ctr++) {
-                        var user = usersToDelete[ctr];
-                        var index = $scope.users.indexOf(user);
-                        $scope.users.splice(index, 1);
-                    }
+            var usersToDelete = $filter('filter')($scope.users, {"delete": true}, true);
+
+            $scope.to_delete = usersToDelete;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/account/delete_users_dialog.template.html",
+                scope: $scope,
+                controller: "deleteUsersController"
+            });
+            m.result.then(function (r) {
+                for (var ctr = 0; ctr < usersToDelete.length; ctr++) {
+                    var user = usersToDelete[ctr];
+                    var index = $scope.users.indexOf(user);
+                    $scope.users.splice(index, 1);
                 }
             });
+            m.result.finally(function(r) {
+                delete $scope.to_delete;
+            })
+
+
         }
-    }
 }])
+
+    eiAccounts.controller("deleteUsersController", ["$scope", "$http", function($scope, $http) {
+        $scope.confirmDelete = function() {
+            var usersToDeleteIDs = $scope.to_delete.map(function (e, i, l) {
+                return e.id;
+            });
+
+            $scope.delete_promise = $http.post("/app/html/account/deleteUsers", JSON.stringify({user_ids: usersToDeleteIDs}));
+            $scope.delete_promise.then(function (c) {
+
+                $scope.$close();
+            });
+        }
+    }])
 
 eiAccounts.controller('UserController', ["$scope", "$routeParams", "$http", "$location", "PageInfo", "$rootScope",
     function ($scope, $routeParams, $http, $location, PageInfo, $rootScope) {
