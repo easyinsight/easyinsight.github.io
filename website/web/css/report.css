@@ -386,3 +386,9 @@ table.dataTable tfoot td {
     stroke-width: 0;
     font: normal 12px Arial;
 }
+
+.filterBoxLabel {
+    height:40px;
+    float:left;
+    font-weight: bold;
+}

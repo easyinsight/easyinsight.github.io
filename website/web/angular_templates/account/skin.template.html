@@ -1,10 +1,21 @@
 <div cg-busy="loading" />
 <div cg-busy="upload" />
+<div class="row">
+    <div class="col-md-12">
+        <h2>Account Skin</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>These settings will be used in the styling of any reports and dashboards set to the Primary look and feel setting.</p>
+    </div>
+</div>
 <div ng-if="saved" class="alert alert-success">Saved!</div>
 <form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate ng-file-drop-available="dropSupported=true">
     <div class="row" ng-if="skinForm.$dirty">
-        <div class="col-md-6 alert alert-warning">
+        <div class="col-md-4 alert alert-warning">
             You have unsaved changes.
+            <input class="btn btn-primary" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
         </div>
     </div>
     <div eicolorform text="'Primary Chart Color'" skin="skin" enabledfield="'primary_chart_color_enabled'" field="skin.primary_chart_color"></div>
@@ -31,6 +42,6 @@
     <div eimulticolorform text="'Secondary Report Multi Color'" field="skin.secondary_multi_colors"></div>
 
     <div class="form-group">
-        <input class="btn btn-default" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
+        <input class="btn btn-primary" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
     </div>
 </form>

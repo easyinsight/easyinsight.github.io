@@ -1,9 +1,19 @@
 <div cg-busy="saving" />
 <div class="row">
         <div class="col-md-12">
-        <h4>Add a Report/Dashboard</h4>
+            <h2>Top Reports and Dashboards</h2>
         </div>
     </div>
+<div class="row">
+    <div class="col-md-12">
+        <p>The top reports and dashboards selected below are quickly available through the Reports dropdown at the top of the application.</p>
+    </div>
+</div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Add a Report or Dashboard</h4>
+            </div>
+        </div>
     <div ng-show="data_sources.length > 1" class="row form-group">
         <div class="col-md-3">
             <label for="report_select">
@@ -36,7 +46,7 @@
         <h4>Top Reports and Dashboards</h4>
     </div>
         <div class="col-md-3">
-            <button class="btn btn-danger pull-right" ng-click="deleteSelected()">Delete Selected</button>
+            <button class="btn btn-danger pull-right" ng-click="deleteSelected()">Remove Selected</button>
         </div>
     </div>
     <div class="row">

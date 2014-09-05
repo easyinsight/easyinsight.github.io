@@ -469,6 +469,11 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
             dataType: "text",
             success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID))
         }));
+    } else if (obj.metadata.type == "crosstab") {
+        $.ajax($.extend(postData, {
+            dataType: "text",
+            success: confirmRender(o, List.crosstabCallback(id, obj.metadata.properties, fullFilters, drillthroughID))
+        }));
     } else if (obj.metadata.type == "bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3BarChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));

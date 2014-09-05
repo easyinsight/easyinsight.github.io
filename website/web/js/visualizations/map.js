@@ -19,10 +19,11 @@ Map = {
             svg.attr("height", height);
             var width = $("#" + target).width() - 50;
             svg.attr("width", width);
-            var color = d3.scale.quantize()
-                .range(data.colors);
+            var color;
+
 
             var mapType = data.map;
+
             var projection;
             var targetJSON;
             var featureProp;
@@ -67,92 +68,108 @@ Map = {
                 projection = d3.geo.albers().scale(1)
                     .translate([0, 0]).rotate([86.7489, 0])
                     .center([0, 35.7449]);
-                /*projection = d3.geo.albers()
-                    .translate([width / 2, height / 2])
-                    .scale(scale)
-                    .rotate([86.7489, 0])
-                    .center([0, 35.7449]);*/
                 targetJSON = "/js/maps/tn.json";
                 featureProp = "tnzip";
             }
 
 
-
-
             var path = d3.geo.path().projection(projection);
 
-            var  active = d3.select(null);
-
-            var jData = data.regions;
+            var regionFill = false;
             var lookup = {};
             var valueLookup = {};
             var reverseLookup = {};
-
-            color.domain([
-                d3.min(jData, function(d) { return d.scaledValue; }),
-                d3.max(jData, function(d) { return d.scaledValue; })
-            ]);
-
-            var formatPercent = d3.format(".0%"),
-                formatNumber = d3.format(".0f");
+            if (typeof(data.regions) != "undefined") {
+                color = d3.scale.quantize()
+                    .range(data.colors);
+                regionFill = true;
+                var jData = data.regions;
 
 
 
-            for (var i = 0; i < jData.length; i++) {
-                var jD = jData[i];
-                lookup[jD.region] = jD.scaledValue;
-                valueLookup[jD.region] = jD.value;
-                reverseLookup[jD.region] = jD.originalRegion;
+
+                color.domain([
+                    d3.min(jData, function(d) { return d.scaledValue; }),
+                    d3.max(jData, function(d) { return d.scaledValue; })
+                ]);
+                for (var i = 0; i < jData.length; i++) {
+                    var jD = jData[i];
+                    lookup[jD.region] = jD.scaledValue;
+                    valueLookup[jD.region] = jD.value;
+                    reverseLookup[jD.region] = jD.originalRegion;
+                }
             }
+
+
+
+
+
+
 
             var g = svg.append("g");
 
             var tooltip = $("#" + target + " .mapTooltip");
 
+            console.log("loading " + targetJSON);
             d3.json(targetJSON, function(error, topology) {
                 if (error) return console.error(error);
 
                 var feature = topojson.feature(topology, topology.objects[featureProp]);
                 var country = g.selectAll(".counties").data(feature.features);
 
-                if (mapType == "TN") {
-                    var boundsSet = data["bounds_set"];
-                    var targetData;
-                    if (typeof(boundsSet) != "undefined") {
-                        /*var selected = d3.set([ "Bedford", "Bledsoe", "Bradley", "Coffee", "Franklin", "Grundy", "Hamilton", "Lincoln", "Marion",
-                            "McMinn", "Meigs", "Moore", "Polk", "Rhea", "Sequatchie"]);*/
-                        var selected = d3.set(boundsSet);
+                if (regionFill) {
 
-                        targetData = topojson.merge(topology, topology.objects.tncounties.geometries.filter(function(d) { return selected.has(d.properties.name) }));
-                        var h = height - 20;
-                        var b = path.bounds(targetData),
-                            s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / h),
-                            t = [(width - s * (b[1][0] + b[0][0])) / 2, ((h - s * (b[1][1] + b[0][1])) / 2) + 30];
 
-                        projection
-                            .scale(s)
-                            .translate(t);
-                    } else {
-                        targetData = topology.objects.tncounties;
-                    }
+                    if (mapType == "TN") {
+                        var boundsSet = data["bounds_set"];
+                        var targetData;
+                        if (typeof(boundsSet) != "undefined") {
+                            var selected = d3.set(boundsSet);
 
-                    svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.tncounties, function (a, b) {
-                        return a !== b;
-                    })).style("fill", "none").style("stroke", "#AAAAAA").attr("d", path);
+                            targetData = topojson.merge(topology, topology.objects.tncounties.geometries.filter(function (d) {
+                                return selected.has(d.properties.name)
+                            }));
+                            var h = height - 20;
+                            var b = path.bounds(targetData),
+                                s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / h),
+                                t = [(width - s * (b[1][0] + b[0][0])) / 2, ((h - s * (b[1][1] + b[0][1])) / 2) + 30];
 
-                    svg.append("path").datum(targetData).style("fill", "none").style("stroke-width", "3px").style("stroke", "#000000").attr("d", path);
-                }
-
-                country.enter().append("path").attr("class", "counties").attr("d", path).style("fill",
-                    function(d) {
-                        var value = lookup[d.properties.name];
-                        if (value) {
-                            return color(value);
+                            projection
+                                .scale(s)
+                                .translate(t);
                         } else {
-                            return data.noDataFill;
+                            targetData = topology.objects.tncounties;
                         }
+
+                        svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.tncounties, function (a, b) {
+                            return a !== b;
+                        })).style("fill", "none").style("stroke", "#AAAAAA").attr("d", path);
+
+                        svg.append("path").datum(targetData).style("fill", "none").style("stroke-width", "3px").style("stroke", "#000000").attr("d", path);
                     }
-                );
+
+                    country.enter().append("path").attr("class", "counties").attr("d", path).style("fill",
+                        function (d) {
+                            var value = lookup[d.properties.name];
+                            if (value) {
+                                return color(value);
+                            } else {
+                                return data.noDataFill;
+                            }
+                        }
+                    );
+                } else {
+                    country.enter().append("path").attr("class", "counties").attr("d", path).style("fill",
+                        function (d) {
+                            var value = lookup[d.properties.name];
+                            if (value) {
+                                return color(value);
+                            } else {
+                                return data.noDataFill;
+                            }
+                        }
+                    );
+                }
 
                 country
                     .on("mouseover", function(d, i) {
@@ -279,30 +296,46 @@ Map = {
                     }
                 }
 
-                var xMin = d3.min(jData, function(d) { return d.scaledValue; });
-                var xMax = d3.max(jData, function(d) { return d.scaledValue; });
-                var xActualMin = d3.min(jData, function(d) { return d.value; });
-                var xActualMax = d3.max(jData, function(d) { return d.value; });
-                var x = d3.scale.linear()
-                    .domain([xMin,
-                        xMax])
-                    .range([0, 240]);
+                if (regionFill) {
+                    var xMin = d3.min(jData, function (d) {
+                        return d.scaledValue;
+                    });
+                    var xMax = d3.max(jData, function (d) {
+                        return d.scaledValue;
+                    });
+                    var xActualMin = d3.min(jData, function (d) {
+                        return d.value;
+                    });
+                    var xActualMax = d3.max(jData, function (d) {
+                        return d.value;
+                    });
+                    var x = d3.scale.linear()
+                        .domain([xMin,
+                            xMax])
+                        .range([0, 240]);
 
-                svg.append("rect").attr("height", 25).attr("width", width + 30).style("fill", "#FFFFFF");
-                svg.selectAll("rect")
-                    .data(color.range().map(function(c) {
-                        var d = color.invertExtent(c);
-                        if (d[0] == null) d[0] = x.domain()[0];
-                        if (d[1] == null) d[1] = x.domain()[1];
-                        return d;
-                    }))
-                    .enter().append("rect")
-                    .attr("height", 8)
-                    .attr("x", function(d) { return x(d[0]); })
-                    .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-                    .style("fill", function(d) { return color(d[0]); });
-                svg.append("text").attr("y", 20).attr("x", 10).text(xActualMin);
-                svg.append("text").attr("y", 20).attr("x", 230).text(xActualMax);
+                    svg.append("rect").attr("height", 25).attr("width", width + 30).style("fill", "#FFFFFF");
+                    svg.selectAll("rect")
+                        .data(color.range().map(function (c) {
+                            var d = color.invertExtent(c);
+                            if (d[0] == null) d[0] = x.domain()[0];
+                            if (d[1] == null) d[1] = x.domain()[1];
+                            return d;
+                        }))
+                        .enter().append("rect")
+                        .attr("height", 8)
+                        .attr("x", function (d) {
+                            return x(d[0]);
+                        })
+                        .attr("width", function (d) {
+                            return x(d[1]) - x(d[0]);
+                        })
+                        .style("fill", function (d) {
+                            return color(d[0]);
+                        });
+                    svg.append("text").attr("y", 20).attr("x", 10).text(xActualMin);
+                    svg.append("text").attr("y", 20).attr("x", 230).text(xActualMax);
+                }
 
                 if(typeof(afterRefresh) != "undefined") {
                     if (afterRefresh.length > 1) {
