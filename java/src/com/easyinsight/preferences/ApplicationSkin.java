@@ -1117,7 +1117,7 @@ public class ApplicationSkin implements Serializable {
         as.setSummaryBackgroundColor(fromHex(jo.get("summary_background_color")));
         as.setSummaryTextColorEnabled(booleanValue(jo.get("summary_text_color_enabled")));
         as.setSummaryTextColor(fromHex(jo.get("summary_text_color")));
-        as.setCrosstabHeaderBackgroundColorEnabled(booleanValue("crosstab_header_background_color_enabled"));
+        as.setCrosstabHeaderBackgroundColorEnabled(booleanValue(jo.get("crosstab_header_background_color_enabled")));
         as.setCrosstabHeaderBackgroundColor(fromHex(jo.get("crosstab_header_background_color")));
         as.setCrosstabHeaderTextColorEnabled(booleanValue(jo.get("crosstab_header_text_color_enabled")));
         as.setCrosstabHeaderTextColor(fromHex(jo.get("crosstab_header_text_color")));
