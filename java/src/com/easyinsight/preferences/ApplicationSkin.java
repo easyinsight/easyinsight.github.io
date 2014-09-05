@@ -1155,6 +1155,10 @@ public class ApplicationSkin implements Serializable {
     }
 
     private static int fromHex(Object color) {
-        return Color.decode(String.valueOf(color)).getRGB();
+        String colorString = color.toString();
+        if (colorString.length() == 7) {
+            colorString = colorString.substring(1, 7);
+        }
+        return Integer.parseInt(colorString, 16);
     }
 }
