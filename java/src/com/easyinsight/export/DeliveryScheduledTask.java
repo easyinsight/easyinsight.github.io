@@ -774,7 +774,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 return null;
             }
             if (!exportProperties.isEmailed()) {
-                table = ExportService.crosstabReportToHTMLTableWithActualCSS(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
+                table = ExportService.crosstabReportToHTMLTableWithActualCSS(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle, exportProperties);
             } else {
                 table = ExportService.crosstabReportToHTMLTable(analysisDefinition, dataSet, conn, insightRequestMetadata, includeTitle);
             }

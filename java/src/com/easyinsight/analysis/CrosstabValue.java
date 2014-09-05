@@ -2,6 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * User: jamesboe
  * Date: 9/10/11
@@ -13,6 +16,7 @@ public class CrosstabValue {
     private AnalysisItem measure;
     private boolean headerLabel;
     private boolean summaryValue;
+    private Map<String, Value> dtMap;
 
     public CrosstabValue() {
     }
@@ -42,6 +46,18 @@ public class CrosstabValue {
         this.headerLabel = headerLabel;
         this.summaryValue = summaryValue;
         this.measure = measure;
+    }
+
+
+    public Map<String, Value> getDtMap() {
+        return dtMap;
+    }
+
+    public void addDTValue(String string, Value value) {
+        if (dtMap == null) {
+            dtMap = new HashMap<>();
+        }
+        dtMap.put(string, value);
     }
 
     public AnalysisItem getMeasure() {
