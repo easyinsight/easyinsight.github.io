@@ -149,6 +149,7 @@ public class AccountSettings {
         jo.put("max_rows", maxResults);
         jo.put("send_email", sendEmail);
         jo.put("html_view", htmlView);
+        jo.put("fiscal_quarter_start", fiscalYearStartMonth);
         return jo;
     }
 
@@ -158,6 +159,7 @@ public class AccountSettings {
         as.setLocale(String.valueOf(jo.get("locale")));
         as.setCurrencySymbol(String.valueOf(jo.get("currency_symbol")));
         as.setFirstDayOfWeek((Integer.valueOf(String.valueOf(jo.get("first_day_of_week")))));
+        as.setFiscalYearStartMonth((Integer.valueOf(String.valueOf(jo.get("fiscal_quarter_start")))));
         as.setMaxResults(Integer.valueOf(String.valueOf(jo.get("max_rows"))));
         as.setSendEmail(Boolean.valueOf(String.valueOf(jo.get("send_email"))));
         as.setHtmlView(Boolean.valueOf(String.valueOf(jo.get("html_view"))));
