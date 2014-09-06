@@ -53,7 +53,7 @@ public class AsyncMultiSummaryServlet extends HtmlServlet {
             WSMultiSummaryDefinition listDefinition = (WSMultiSummaryDefinition) report;
 
 
-            System.out.println(request.getParameter("iSortCol_1"));
+
 
             String uid = request.getParameter("uid");
 
@@ -228,7 +228,7 @@ public class AsyncMultiSummaryServlet extends HtmlServlet {
             returnObject.put("iTotalRecords", totalRecords);
             returnObject.put("iTotalDisplayRecords", totalRecords);
             returnObject.put("rowData", results);
-            System.out.println(returnObject);
+
             response.setContentType("application/json");
             response.getOutputStream().write(returnObject.toString().getBytes());
             response.getOutputStream().flush();
