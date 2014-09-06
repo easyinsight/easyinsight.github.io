@@ -1264,14 +1264,8 @@ public class DataStorage implements IDataStorage {
                 AggregateKey testKey = new AggregateKey(analysisMeasure.createAggregateKey().toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
                 KeyMetadata baseMetadata = this.keys.get(testKey);
                 if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                    int aggregation = analysisMeasure.getQueryAggregation();
-                    if (aggregation == AggregationTypes.COUNT_DISTINCT) {
-                        columnName = "COUNT(DISTINCT " + columnName + ")";
-                        //groupByBuilder.append(columnName);
-                    } else {
-                        groupByBuilder.append(columnName);
-                        groupByBuilder.append(",");
-                    }
+                    groupByBuilder.append(columnName);
+                    groupByBuilder.append(",");
                 } else {
                     int aggregation = analysisMeasure.getQueryAggregation();
                     if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {
