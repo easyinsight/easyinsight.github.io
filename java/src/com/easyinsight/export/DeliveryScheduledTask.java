@@ -614,7 +614,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
     private void reportDelivery(EIConnection conn) throws SQLException, IOException, MessagingException, DocumentException, CloneNotSupportedException, InterruptedException {
 
-        ReportDelivery reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn);
+        ReportDelivery reportDelivery = null;
+        try {
+            reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn);
+        } catch (Exception e) {
+            LogClass.userError("On loading activity " + activityID, e);
+        }
         if (reportDelivery != null) {
             final int deliveryFormat = reportDelivery.getReportFormat();
             long reportID = reportDelivery.getReportID();
