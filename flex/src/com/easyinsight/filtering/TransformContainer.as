@@ -624,7 +624,8 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
-        var roleVisible:Boolean = User.getInstance() != null && User.getInstance().accountAdmin;
+        var roleVisible:Boolean = _role == 0 || (User.getInstance() != null && User.getInstance().accountAdmin);
+        //var roleVisible:Boolean = User.getInstance() != null && User.getInstance().accountAdmin;
 
         if (!_reportView || (filter.filterDefinition.showOnReportView && roleVisible)) {
             if (_reportView && filter.filterDefinition != null && filter.filterDefinition.section != 0) {
