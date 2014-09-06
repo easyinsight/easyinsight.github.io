@@ -48,7 +48,6 @@ public class EIDateFormatNoShiftFunction extends Function implements IFunction {
         Instant instant = date.toInstant();
         ZonedDateTime zdt = instant.atZone(ZoneId.of("UTC"));
         string = dateTimeFormatter.format(zdt);
-        System.out.println(string);
 
 
         if (calculationMetadata.getInsightRequestMetadata() != null && calculationMetadata.getInsightRequestMetadata().isLogReport()) {

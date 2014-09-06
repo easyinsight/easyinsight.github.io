@@ -47,6 +47,12 @@ function captureAndReturn(o) {
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
         obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend") {
         return null;
+    } else if (obj.metadata.type == "gauge") {
+        var canvas = $("#gauge" + id);
+        var canvasImageData = {};
+        canvasImageData.height = canvas.height();
+        canvasImageData.width = canvas.width();
+        return canvasImageData;
     } else {
         var id = o.report.id;
         var svg = $("#d3Div" + id);

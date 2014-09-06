@@ -244,7 +244,6 @@ public class Crosstab {
                     }
                     CrosstabValue cv = new CrosstabValue(value, null, analysisItem);
                     array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = cv;
-                    System.out.println(value + " col = " + columnSection.values.get(0) + " - row = " + rowSection.values.get(0));
                     if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1) {
                         cv.addDTValue(crosstabDefinition.getColumns().get(0).qualifiedName(), columnSection.values.get(0));
                         cv.addDTValue(crosstabDefinition.getRows().get(0).qualifiedName(), rowSection.values.get(0));
