@@ -41,8 +41,13 @@ public class RefreshStatusServlet extends HttpServlet {
                 }
                 jsonObject.put("statusMessage", message);
                 if (callData.getStatus() == ServiceUtil.FAILED) {
-                    DataSourceConnectivityReportFault fault = (DataSourceConnectivityReportFault) callData.getResult();
-                    jsonObject.put("problemHTML", fault.toHTML());
+                    if (callData.getResult() instanceof DataSourceConnectivityReportFault) {
+                        DataSourceConnectivityReportFault fault = (DataSourceConnectivityReportFault) callData.getResult();
+                        jsonObject.put("problemHTML", fault.toHTML());
+                    } else {
+                        DataSourceRefreshEvent event = (DataSourceRefreshEvent) callData.getResult();
+                        jsonObject.put("problemHTML", "Something went wrong in pulling data for this data source.");
+                    }
                 }
             }
             response.setContentType("application/json");

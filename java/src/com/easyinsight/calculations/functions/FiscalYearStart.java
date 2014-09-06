@@ -54,6 +54,7 @@ public class FiscalYearStart extends Function {
             }
             instant = zdt.toInstant();
             Date endDate = Date.from(instant);
+            ps.close();
             return new DateValue(endDate);
         } catch (SQLException e) {
             throw new RuntimeException(e);

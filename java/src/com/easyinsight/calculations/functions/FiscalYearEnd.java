@@ -45,6 +45,7 @@ public class FiscalYearEnd extends Function {
             ps.setLong(1, SecurityUtil.getAccountID());
             ResultSet rs = ps.executeQuery();
             rs.next();
+
             int fiscalYearStartMonth = rs.getInt(1);
             int month = zdt.getMonthValue();
             if (fiscalYearStartMonth <= month) {
@@ -54,6 +55,7 @@ public class FiscalYearEnd extends Function {
             }
             instant = zdt.toInstant();
             Date endDate = Date.from(instant);
+            ps.close();
             return new DateValue(endDate);
         } catch (SQLException e) {
             throw new RuntimeException(e);
