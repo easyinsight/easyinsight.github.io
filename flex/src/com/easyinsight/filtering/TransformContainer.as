@@ -11,6 +11,7 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardFilterOverride;
+import com.easyinsight.framework.User;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
@@ -623,9 +624,8 @@ public class TransformContainer extends HBox
         filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
         filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
         filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);
-        var roleVisible:Boolean = _role == 0 || _role <= filter.filterDefinition.minimumRole;
+        var roleVisible:Boolean = User.getInstance() != null && User.getInstance().accountAdmin;
 
-        // http://www.carrier-data.net/GPSWeb/Modules/Account/SmartelLogin.aspx
         if (!_reportView || (filter.filterDefinition.showOnReportView && roleVisible)) {
             if (_reportView && filter.filterDefinition != null && filter.filterDefinition.section != 0) {
                 var section:VBox = sectionMap[String(filter.filterDefinition.section)];
