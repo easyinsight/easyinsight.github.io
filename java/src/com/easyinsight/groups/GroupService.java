@@ -272,8 +272,8 @@ public class GroupService {
     }
 
     public void addInsightToGroup(long insightID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
-        SecurityUtil.authorizeInsight(insightID);
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        SecurityUtil.authorizeReport(insightID, Roles.OWNER);
         try {
             groupStorage.addReportToGroup(insightID, groupID);
         } catch (Exception e) {
@@ -282,19 +282,9 @@ public class GroupService {
         }
     }
 
-    public void addTagToGroup(long tagID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
-        try {
-            groupStorage.addReportToGroup(tagID, groupID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public void addDashboardToGroup(long dashboardID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
-        SecurityUtil.authorizeDashboard(dashboardID);
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        SecurityUtil.authorizeDashboard(dashboardID, Roles.OWNER);
         try {
             groupStorage.addDashboardToGroup(dashboardID, groupID);
         } catch (Exception e) {
@@ -304,7 +294,7 @@ public class GroupService {
     }
 
     public void addScorecardToGroup(long scorecardID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
             groupStorage.addScorecardToGroup(scorecardID, groupID);
@@ -315,8 +305,8 @@ public class GroupService {
     }
 
     public void addFeedToGroup(long feedID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             groupStorage.addFeedToGroup(feedID, groupID, Roles.OWNER);
             FeedRegistry.instance().flushCache(feedID);

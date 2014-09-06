@@ -136,7 +136,7 @@
         </mx:HBox>
     </mx:ViewStack>
     <mx:Form>
-        <mx:FormItem label="Should reports included in data sources automatically be included with Viewer access?">
+        <mx:FormItem label="Should all reports and dashboards included in data sources in the group automatically be included?">
             <mx:CheckBox id="reportIncludeCheckBox" selected="{reportInclude}" change="onChange(event)"/>
         </mx:FormItem>
     </mx:Form>
@@ -150,19 +150,10 @@
                 <mx:columns>
                     <mx:DataGridColumn headerText="" dataField="name" width="30" itemRenderer="com.easyinsight.util.GenericGridCheckbox" sortable="false"/>
                     <mx:DataGridColumn headerText="User Name" dataField="name" width="200"/>
-                    <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
-                        rendererIsEditor="true" editorDataField="data"/>
+                    <mx:DataGridColumn headerText="Privileges" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
+                        rendererIsEditor="true" editorDataField="data" width="250"/>
                 </mx:columns>
             </mx:DataGrid>
-        </mx:VBox>
-        <mx:VBox>
-            <mx:Text text="You can configure the following levels for your users:"/>
-            <mx:Text text="Owner" styleName="boldStyle" fontWeight="bold"/>
-            <mx:Text htmlText="{ownerExplanation}" maxWidth="450"/>
-            <mx:Text text="Editor" styleName="boldStyle" fontWeight="bold"/>
-            <mx:Text htmlText="{sharerExplanation}" maxWidth="450"/>
-            <mx:Text text="Viewer" styleName="boldStyle" fontWeight="bold"/>
-            <mx:Text htmlText="{viewerExplanation}" maxWidth="450"/>
         </mx:VBox>
     </mx:HBox>
 

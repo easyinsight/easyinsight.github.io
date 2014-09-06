@@ -5,6 +5,7 @@ import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.freshdesk.TicketAnalysis;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -19,6 +20,8 @@ import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -54,6 +57,13 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     public static final String VIA = "Ticket Submitted Via";
     public static final String SCORE = "Score";
     public static final String COUNT = "Ticket Count";
+
+    public static final String CURRENT = "Ticket With";
+    public static final String AGENT_HANDLES = "Agent Touches";
+    public static final String CUSTOMER_HANDLES = "Customer Touches";
+    public static final String TIME_UNASSIGNED = "Time Unassigned";
+    public static final String TIME_WITH_AGENT = "Time With Agent";
+    public static final String TIME_WITH_CUSTOMER = "Time With Customer";
 
     public ZendeskTicketSource() {
         setFeedName("Tickets");
@@ -103,6 +113,35 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         items.add(new AnalysisMeasure(keys.get(BASE_SCORE), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(SCORE), AggregationTypes.SUM));
         items.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        Key currentKey = keys.get(CURRENT);
+        if (currentKey == null) {
+            currentKey = new NamedKey(CURRENT);
+        }
+        items.add(new AnalysisDimension(currentKey));
+
+        Key agentHandlesKey = keys.get(AGENT_HANDLES);
+        if (agentHandlesKey == null) {
+            agentHandlesKey = new NamedKey(AGENT_HANDLES);
+        }
+        items.add(new AnalysisMeasure(agentHandlesKey, AggregationTypes.SUM));
+
+        Key customerHandlesKey = keys.get(CUSTOMER_HANDLES);
+        if (customerHandlesKey == null) {
+            customerHandlesKey = new NamedKey(CUSTOMER_HANDLES);
+        }
+        items.add(new AnalysisMeasure(customerHandlesKey, AggregationTypes.SUM));
+
+        Key timeWithAgent = keys.get(TIME_WITH_AGENT);
+        if (timeWithAgent == null) {
+            timeWithAgent = new NamedKey(TIME_WITH_AGENT);
+        }
+        items.add(new AnalysisMeasure(timeWithAgent, TIME_WITH_AGENT, AggregationTypes.SUM, false, FormattingConfiguration.MILLISECONDS));
+
+        Key timeWithCustomer = keys.get(TIME_WITH_CUSTOMER);
+        if (timeWithCustomer == null) {
+            timeWithCustomer = new NamedKey(TIME_WITH_CUSTOMER);
+        }
+        items.add(new AnalysisMeasure(timeWithCustomer, TIME_WITH_CUSTOMER, AggregationTypes.SUM, false, FormattingConfiguration.MILLISECONDS));
 
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
@@ -188,53 +227,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return false;
     }
 
-    /*private void getUpdatedTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, Date lastUpdateDate, IDataStorage IDataStorage,
-                                   ZendeskUserCache zendeskUserCache) throws Exception {
-
-        HttpClient httpClient = new HttpClient();
-        Builder builder = new Builder();
-
-        DateFormat updateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(lastUpdateDate);
-        cal.add(Calendar.DAY_OF_YEAR, -7);
-        lastUpdateDate = cal.getTime();
-
-        String updateDate = updateFormat.format(lastUpdateDate);
-        Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
-        int page = 1;
-        int count = 0;
-        int recordCount = 0;
-        do {
-            String path = "/search.xml?query=" + URLEncoder.encode("\"type:ticket updated>"+updateDate+"\"", "UTF-8");
-            path += "&page=" + page;
-            System.out.println(path);
-            Document doc = runRestRequest(zendeskCompositeSource, httpClient, path, builder);
-            Nodes ticketNodes = doc.query("/records/record");
-            if (page == 1) {
-                Nodes countNodes = doc.query("/records/@count");
-                if (countNodes.size() == 1) {
-                    count = Integer.parseInt(countNodes.get(0).getValue());
-                } else {
-                    count = 0;
-                }
-            }
-            for (int i = 0; i < ticketNodes.size(); i++) {
-                DataSet dataSet = new DataSet();
-                IRow row = dataSet.createRow();
-                Node ticketNode = ticketNodes.get(i);
-                String id = parseTicket(keys, zendeskUserCache, row, ticketNode);
-                if (id != null) {
-                    StringWhere userWhere = new StringWhere(noteKey, id);
-                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));
-                }
-            }
-            page++;
-            recordCount += 15;
-        } while (recordCount < count);
-    }*/
-
     private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage, Date lastStart) throws Exception {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(zendeskCompositeSource);
@@ -254,6 +246,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
 
         Set<String> ticketIDs = new HashSet<>();
         Set<String> commentIDs = new HashSet<>();
+        Set<String> auditIDs = new HashSet<>();
         int safeguard = 0;
         while (nextPage != null) {
             Map ticketObjects = queryList(nextPage, zendeskCompositeSource, httpClient);
@@ -274,8 +267,64 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                             }
                         }
                     }
+
+                    String status = queryField(map, "status");
+                    if (!"Deleted".equals(status)) {
+                        if (auditIDs.contains(id)) {
+
+                        } else {
+                            try {
+                                Date createDate = ((DateValue) queryDate(map, "created_at")).getDate();
+                                ZonedDateTime createDateTime = createDate.toInstant().atZone(ZoneId.systemDefault());
+                                TicketAnalysis ticketAnalysis = new TicketAnalysis(createDateTime);
+                                Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/audits.json", zendeskCompositeSource, httpClient);
+
+                                List<Map> audits = (List<Map>) ticketDetail.get("audits");
+                                if (audits != null) {
+                                    for (Map audit : audits) {
+                                        Date date = df2.parse(audit.get("created_at").toString());
+                                        List<Map> events = (List<Map>) audit.get("events");
+                                        for (Map event : events) {
+                                            if (event.get("field_name") != null) {
+
+                                                String fieldName = event.get("field_name").toString();
+                                                if ("status".equals(fieldName)) {
+                                                    String type = event.get("value").toString();
+                                                    if ("new".equals(type) || "open".equals(type)) {
+                                                        ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, date);
+                                                    } else if ("solved".equals(type)) {
+                                                        ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, date);
+                                                    } else {
+                                                        ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, date);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                ticketAnalysis.calculate();
+                                row.addValue(keys.get(CUSTOMER_HANDLES), ticketAnalysis.getCustomerHandles());
+                                row.addValue(keys.get(AGENT_HANDLES), ticketAnalysis.getAgentHandles());
+                                if (ticketAnalysis.getWaitState() == TicketAnalysis.AGENT) {
+                                    row.addValue(keys.get(CURRENT), "On Agent");
+                                } else if (ticketAnalysis.getWaitState() == TicketAnalysis.CUSTOMER) {
+                                    row.addValue(keys.get(CURRENT), "On Customer");
+                                } else if (ticketAnalysis.getWaitState() == TicketAnalysis.UNASSIGNED) {
+                                    row.addValue(keys.get(CURRENT), "Unassigned");
+                                } else if (ticketAnalysis.getWaitState() == TicketAnalysis.SOLVED) {
+                                    row.addValue(keys.get(CURRENT), "Solved");
+                                }
+                                row.addValue(keys.get(TIME_WITH_CUSTOMER), ticketAnalysis.getElapsedCustomerTime());
+                                row.addValue(keys.get(TIME_WITH_AGENT), ticketAnalysis.getElapsedAgentTime());
+                            } catch (Exception e) {
+                                LogClass.error(e);
+                            }
+                            auditIDs.add(id);
+                        }
+                    }
+                    //}
+
                     if (zendeskCompositeSource.isHackMethod()) {
-                        //System.out.println(id);
                         if (ticketIDs.contains(id)) {
 
                         } else {
@@ -310,7 +359,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                     }
 
                     if (zendeskCompositeSource.isLoadComments()) {
-                        //System.out.println(id);
                         if (commentIDs.contains(id)) {
 
                         } else {
@@ -354,7 +402,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 long ms = Long.parseLong(nextPage.split("\\=")[1]) * 1000;
                 Calendar c2 = Calendar.getInstance();
                 c2.setTimeInMillis(ms);
-                System.out.println("time = " + c2.getTime() + " when start time = " + start);
                 if (c2.getTime().after(start)) {
                     nextPage = null;
                 } else {

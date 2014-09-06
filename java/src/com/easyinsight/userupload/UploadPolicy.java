@@ -28,7 +28,7 @@ public class UploadPolicy implements Serializable {
     }
 
     public UploadPolicy(long userID, long accountID) {
-        owners.add(new UserStub(userID, null, null, null, accountID, null));
+        owners.add(new UserStub(userID, null, null, null, accountID, null, false));
     }
 
     public boolean isPubliclyVisible() {

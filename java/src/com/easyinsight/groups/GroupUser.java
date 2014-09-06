@@ -21,8 +21,8 @@ public class GroupUser extends UserStub {
         return FeedConsumer.GROUP;
     }
 
-    public GroupUser(long userID, String userName, String email, String fullName, int role, String firstName) {
-        super(userID, userName, email, fullName, 0, firstName);
+    public GroupUser(long userID, String userName, String email, String fullName, int role, String firstName, boolean designer) {
+        super(userID, userName, email, fullName, 0, firstName, designer);
         this.role = role;
     }
 

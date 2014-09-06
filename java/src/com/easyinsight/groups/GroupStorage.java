@@ -117,7 +117,7 @@ public class GroupStorage {
         List<GroupUser> users = new ArrayList<GroupUser>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryUsersStmt = conn.prepareStatement("SELECT USERNAME, NAME, EMAIL, USER.USER_ID, BINDING_TYPE, FIRST_NAME FROM USER, GROUP_TO_USER_JOIN WHERE " +
+            PreparedStatement queryUsersStmt = conn.prepareStatement("SELECT USERNAME, NAME, EMAIL, USER.USER_ID, BINDING_TYPE, FIRST_NAME, ANALYST FROM USER, GROUP_TO_USER_JOIN WHERE " +
                     "GROUP_TO_USER_JOIN.USER_ID = USER.USER_ID AND GROUP_TO_USER_JOIN.GROUP_ID = ?");
             queryUsersStmt.setLong(1, groupID);
             ResultSet rs = queryUsersStmt.executeQuery();
@@ -128,7 +128,7 @@ public class GroupStorage {
                 long userID = rs.getLong(4);
                 int role = rs.getInt(5);
                 String firstName = rs.getString(6);
-                users.add(new GroupUser(userID, userName, email, name, role, firstName));
+                users.add(new GroupUser(userID, userName, email, name, role, firstName, rs.getBoolean("analyst")));
             }
         } finally {
             Database.closeConnection(conn);

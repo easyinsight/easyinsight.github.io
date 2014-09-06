@@ -237,8 +237,17 @@
     </div>
 </script>
 
+    <script type="text/template" id="image_template">
+        <div class="dashboard_image"<%
+        if(typeof(preferredHeight) != "undefined" || typeof(preferredWidth) != "undefined") { %> style="<% if(typeof(preferredHeight) != "undefined") { %>height:<%- preferredHeight %>px;<% } %><%
+        if(typeof(preferredWidth) != "undefined") { %>width:<%- preferredWidth %>px;<% } %>"<% } %>>
+        <img src="/app/reportHeader/<%= item %>"/>
+        </div>
+    </script>
 
-<script type="text/template" id="single_value_filter_template">
+
+
+    <script type="text/template" id="single_value_filter_template">
     <div class="filter _<%= type %>_filter_<%= data.id %>">
         <%= Filter.base_filter({data: data, parent_id: parent_id, type: type, type: type}) %>
         <select id="<%= Filter.label(data, parent_id, type) %>" class="single_filter">

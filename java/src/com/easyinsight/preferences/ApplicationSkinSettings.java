@@ -110,18 +110,29 @@ public class ApplicationSkinSettings {
         } else {
             accountSkin = new ApplicationSkinSettings();
         }
-        return globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).toSkin();
+        ApplicationSkinSettings userSkin;
+        results = session.createQuery("from ApplicationSkinSettings where userID = ?").setLong(0, userID).list();
+        if (results.size() > 0) {
+            userSkin = (ApplicationSkinSettings) results.get(0);
+        } else {
+            userSkin = new ApplicationSkinSettings();
+        }
+        return globalSkin.toSkin().toSettings(ApplicationSkin.APPLICATION).override(accountSkin.toSkin().toSettings(ApplicationSkin.ACCOUNT)).override(userSkin.toSkin().toSettings(ApplicationSkin.USER)).toSkin();
     }
 
     public ApplicationSkinSettings override(ApplicationSkinSettings settings) {
+        return override(settings, true);
+    }
+
+    public ApplicationSkinSettings override(ApplicationSkinSettings settings, boolean checkEnabled) {
         Map<String, ReportProperty> propertyMap = new HashMap<String, ReportProperty>();
         for (ReportProperty reportProperty : settings.getProperties()) {
             if (reportProperty instanceof ReportMultiColorProperty) {
                 ReportMultiColorProperty multiColorProperty = (ReportMultiColorProperty) reportProperty;
-                if (multiColorProperty.isColor1StartEnabled()) {
+                if (multiColorProperty.isColor1StartEnabled()  || !checkEnabled) {
                     propertyMap.put(reportProperty.getPropertyName(), reportProperty);
                 }
-            } else if (reportProperty.isEnabled()) {
+            } else if (reportProperty.isEnabled() || !checkEnabled) {
                 propertyMap.put(reportProperty.getPropertyName(), reportProperty);
             }
         }
@@ -130,10 +141,10 @@ public class ApplicationSkinSettings {
             if (!propertyMap.containsKey(reportProperty.getPropertyName())) {
                 if (reportProperty instanceof ReportMultiColorProperty) {
                     ReportMultiColorProperty multiColorProperty = (ReportMultiColorProperty) reportProperty;
-                    if (multiColorProperty.isColor1StartEnabled()) {
+                    if (multiColorProperty.isColor1StartEnabled()  || !checkEnabled) {
                         propertyMap.put(reportProperty.getPropertyName(), reportProperty);
                     }
-                } else if (reportProperty.isEnabled()) {
+                } else if (reportProperty.isEnabled()  || !checkEnabled) {
                     propertyMap.put(reportProperty.getPropertyName(), reportProperty);
                 }
 

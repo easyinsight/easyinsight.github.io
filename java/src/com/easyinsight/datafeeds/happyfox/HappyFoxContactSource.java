@@ -54,14 +54,6 @@ public class HappyFoxContactSource extends HappyFoxBaseSource {
                 customFields.put(customFieldID, customField);
             }
         }
-        /*List reports = runRestRequestForList("reports/", client, happyFoxCompositeSource);
-        System.out.println(reports);*/
-        /*
-        "last_index":3,"start_index":1,"end_index":3,"rows":[
-        {"name":"All Tickets","description":"Reports all the tickets in your help desk. ","id":1},
-        {"name":"Pending Unassigned Tickets","description":"Reports all the unassigned tickets in your help desk in Pending State","id":2},
-        {"name":"Tickets created in last one week","description":"All tickets that are created in the last week","id":3}],"page_count":1}
-         */
     }
 
 
@@ -92,14 +84,17 @@ public class HappyFoxContactSource extends HappyFoxBaseSource {
                     row.addValue(keys.get(CONTACT_NAME), getJSONValue(ticket, "name"));
                     row.addValue(keys.get(CONTACT_EMAIL), getJSONValue(ticket, "email"));
                     row.addValue(keys.get(CONTACT_COUNT), 1);
-                    /*List<Map> customFields = (List<Map>) ticket.get("custom_fields");
+                    List<Map> customFields = (List<Map>) ticket.get("custom_fields");
                     for (Map customField : customFields) {
                         String customFieldID = customField.get("id").toString();
-                        String customFieldValue = customField.get("value").toString();
-                        if (this.customFields.containsKey(customFieldID)) {
-                            row.addValue(keys.get(customFieldID), customFieldValue);
+                        Object val = customField.get("value");
+                        if (val != null) {
+                            String customFieldValue = val.toString();
+                            if (this.customFields.containsKey(customFieldID)) {
+                                row.addValue(keys.get(customFieldID), customFieldValue);
+                            }
                         }
-                    }*/
+                    }
                 }
             } while (page <= pageCount);
             return dataSet;

@@ -1,5 +1,6 @@
 package com.easyinsight.filtering {
 
+import com.easyinsight.WindowManagementInstance;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
@@ -84,6 +85,7 @@ public class NewMultiValueFilter extends UIComponent implements IFilter {
             window.detailClass = NewMultiValueFilterEditWindow;
             window.analysisItems = _analysisItems;
             window.filterDefinition = _filterDefinition;
+            WindowManagementInstance.getManager().addWindow(window2);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUpWithY(window, 40);
         } else {
@@ -96,6 +98,7 @@ public class NewMultiValueFilter extends UIComponent implements IFilter {
             window2.otherFilters = _otherFilters;
             window2.dashboard = _dashboard;
             window2.addEventListener("updated", onUpdated, false, 0, true);
+            WindowManagementInstance.getManager().addWindow(window2);
             PopUpManager.addPopUp(window2, this, true);
             PopUpUtil.centerPopUpWithY(window2, 40);
         }
@@ -229,6 +232,7 @@ public class NewMultiValueFilter extends UIComponent implements IFilter {
         window2.otherFilters = _otherFilters;
         window2.dashboard = _dashboard;
         window2.addEventListener("updated", onUpdated, false, 0, true);
+        WindowManagementInstance.getManager().addWindow(window2);
         PopUpManager.addPopUp(window2, this, true);
         PopUpUtil.centerPopUpWithY(window2, 40);
     }

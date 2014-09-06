@@ -118,6 +118,9 @@ public class Account {
     @Column(name="google_oauth_secret_token")
     private String googleSecretToken;
 
+    @Column(name="fiscal_year_start_month")
+    private int fiscalYearStartMonth;
+
     @Column(name="google_oauth_token")
     private String googleToken;
 
@@ -447,6 +450,14 @@ public class Account {
 
     public void setUnlimitedQuickbaseConnections(boolean unlimitedQuickbaseConnections) {
         this.unlimitedQuickbaseConnections = unlimitedQuickbaseConnections;
+    }
+
+    public int getFiscalYearStartMonth() {
+        return fiscalYearStartMonth;
+    }
+
+    public void setFiscalYearStartMonth(int fiscalYearStartMonth) {
+        this.fiscalYearStartMonth = fiscalYearStartMonth;
     }
 
     public int getAddonQuickbaseConnections() {

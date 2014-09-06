@@ -423,6 +423,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Label Position", "labelPosition", BarChartDefinition(report).labelPosition,
                     report, ["none", "auto"]));
             items.addItem(new CheckBoxReportFormItem("Date Axis", "dateAxis", BarChartDefinition(report).dateAxis, report));
+            items.addItem(new CheckBoxReportFormItem("Variable Height", "variableHeight", BarChartDefinition(report).variableHeight, report));
             items.addItem(new NumericReportFormItem("Label Font Size", "labelFontSize", BarChartDefinition(report).labelFontSize, report, 8, 48));
             items.addItem(new ColorReportFormItem("Label Inside Font Color", "labelInsideFontColor", BarChartDefinition(report).labelInsideFontColor, report, "useInsideLabelFontColor"));
             items.addItem(new ColorReportFormItem("Label Outside Font Color", "labelOutsideFontColor", BarChartDefinition(report).labelOutsideFontColor, report, "useOutsideLabelFontColor"));

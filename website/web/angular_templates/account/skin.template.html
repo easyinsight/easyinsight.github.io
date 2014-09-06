@@ -1,24 +1,40 @@
 <div cg-busy="loading" />
 <div cg-busy="upload" />
+<div class="row">
+    <div class="col-md-12">
+        <h2>Account Skin</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>These settings will be used in the styling of any reports and dashboards set to the Primary look and feel setting.</p>
+    </div>
+</div>
 <div ng-if="saved" class="alert alert-success">Saved!</div>
 <form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate ng-file-drop-available="dropSupported=true">
-    <div eicolorform text="'Primary Chart Color'" enabledfield="skin.primary_chart_color_enabled" field="skin.primary_chart_color"></div>
-    <div eicolorform text="'Primary Chart Color Gradient End'" enabledfield="skin.primary_chart_color_gradient_enabled" field="skin.primary_chart_color_gradient"></div>
-    <div eicolorform text="'Secondary Chart Color'" enabledfield="skin.secondary_chart_color_enabled" field="skin.secondary_chart_color"></div>
-    <div eicolorform text="'Summary Background Color'" enabledfield="skin.summary_background_color_enabled" field="skin.summary_background_color"></div>
-    <div eicolorform text="'Summary Text Color'" enabledfield="skin.summary_text_color_enabled" field="skin.summary_text_color"></div>
-    <div eicolorform text="'Crosstab Header Background Color'" enabledfield="skin.crosstab_header_background_color_enabled" field="skin.crosstab_header_background_color"></div>
-    <div eicolorform text="'Crosstab Header Text Color'" enabledfield="skin.crosstab_header_text_color_enabled" field="skin.crosstab_header_text_color"></div>
-    <div eicolorform text="'Grid Header Background Color'" enabledfield="skin.grid_header_background_enabled" field="skin.grid_header_background"></div>
-    <div eicolorform text="'Grid Header Background Color Gradient End'" enabledfield="skin.grid_header_background_gradient_enabled" field="skin.grid_header_background_gradient"></div>
-    <div eicolorform text="'Grid Header Text Background'" enabledfield="skin.grid_header_text_color_enabled" field="skin.grid_header_text_color"></div>
-    <div eicolorform text="'Grid Row Background Color 1'" enabledfield="skin.grid_row_background_color_1_enabled" field="skin.grid_row_background_color_1"></div>
-    <div eicolorform text="'Grid Row Background Color 2'" enabledfield="skin.grid_row_background_color_2_enabled" field="skin.grid_row_background_color_2"></div>
-    <div eicolorform text="'Grid Text Color'" enabledfield="skin.grid_text_color_enabled" field="skin.grid_text_color"></div>
-    <div eicolorform text="'Stack 1 Fill Color'" enabledfield="skin.stack_1_fill_color_enabled" field="skin.stack_1_fill_color"></div>
-    <div eicolorform text="'Stack 1 Fill Color Gradient End'" enabledfield="skin.stack_1_fill_color_gradient_end_enabled" field="skin.stack_1_fill_color_gradient_end"></div>
-    <div eicolorform text="'Stack 2 Fill Color'" enabledfield="skin.stack_2_fill_color_enabled" field="skin.stack_2_fill_color"></div>
-    <div eicolorform text="'Stack 2 Fill Color Gradient End'" enabledfield="skin.stack_2_fill_color_gradient_end_enabled" field="skin.stack_2_fill_color_gradient_end"></div>
+    <div class="row" ng-if="skinForm.$dirty">
+        <div class="col-md-4 alert alert-warning">
+            You have unsaved changes.
+            <input class="btn btn-primary" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
+        </div>
+    </div>
+    <div eicolorform text="'Primary Chart Color'" skin="skin" enabledfield="'primary_chart_color_enabled'" field="skin.primary_chart_color"></div>
+    <div eicolorform text="'Primary Chart Color Gradient End'" skin="skin" enabledfield="'primary_chart_color_gradient_enabled'" field="skin.primary_chart_color_gradient"></div>
+    <div eicolorform text="'Secondary Chart Color'"  skin="skin" enabledfield="'secondary_chart_color_enabled'" field="skin.secondary_chart_color"></div>
+    <div eicolorform text="'Summary Background Color'" skin="skin" enabledfield="'summary_background_color_enabled'" field="skin.summary_background_color"></div>
+    <div eicolorform text="'Summary Text Color'" skin="skin" enabledfield="'summary_text_color_enabled'" field="skin.summary_text_color"></div>
+    <div eicolorform text="'Crosstab Header Background Color'" skin="skin" enabledfield="'crosstab_header_background_color_enabled'" field="skin.crosstab_header_background_color"></div>
+    <div eicolorform text="'Crosstab Header Text Color'" skin="skin" enabledfield="'crosstab_header_text_color_enabled'" field="skin.crosstab_header_text_color"></div>
+    <div eicolorform text="'Grid Header Background Color'" skin="skin" enabledfield="'grid_header_background_enabled'" field="skin.grid_header_background"></div>
+    <div eicolorform text="'Grid Header Background Color Gradient End'" skin="skin" enabledfield="'grid_header_background_gradient_enabled'" field="skin.grid_header_background_gradient"></div>
+    <div eicolorform text="'Grid Header Text Background'" skin="skin" enabledfield="'grid_header_text_color_enabled'" field="skin.grid_header_text_color"></div>
+    <div eicolorform text="'Grid Row Background Color 1'" skin="skin" enabledfield="'grid_row_background_color_1_enabled'" field="skin.grid_row_background_color_1"></div>
+    <div eicolorform text="'Grid Row Background Color 2'" skin="skin" enabledfield="'grid_row_background_color_2_enabled'" field="skin.grid_row_background_color_2"></div>
+    <div eicolorform text="'Grid Text Color'" skin="skin" enabledfield="'grid_text_color_enabled'" field="skin.grid_text_color"></div>
+    <div eicolorform text="'Stack 1 Fill Color'" skin="skin" enabledfield="'stack_1_fill_color_enabled'" field="skin.stack_1_fill_color"></div>
+    <div eicolorform text="'Stack 1 Fill Color Gradient End'" skin="skin" enabledfield="'stack_1_fill_color_gradient_end_enabled'" field="skin.stack_1_fill_color_gradient_end"></div>
+    <div eicolorform text="'Stack 2 Fill Color'" skin="skin" enabledfield="'stack_2_fill_color_enabled'" field="skin.stack_2_fill_color"></div>
+    <div eicolorform text="'Stack 2 Fill Color Gradient End'" skin="skin" enabledfield="'stack_2_fill_color_gradient_end_enabled'" field="skin.stack_2_fill_color_gradient_end"></div>
     <div eicolorform text="'Report Title Background Color'" enabledfielddisabled="true" field="skin.report_title_background_color"></div>
     <div eicolorform text="'Report Title Text Color'" enabledfielddisabled="true" field="skin.report_title_text_color"></div>
 
@@ -26,6 +42,6 @@
     <div eimulticolorform text="'Secondary Report Multi Color'" field="skin.secondary_multi_colors"></div>
 
     <div class="form-group">
-        <input class="btn btn-default" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
+        <input class="btn btn-primary" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
     </div>
 </form>

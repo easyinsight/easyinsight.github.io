@@ -81,6 +81,7 @@
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
+
         }
 
         private function apply():void {
@@ -96,7 +97,7 @@
         ]]></mx:Script>
     <mx:VBox>
         <mx:Text text="{explain}"/>
-        <mx:TextArea editable="true" htmlText="{markdownText}" id="markdownTextArea" fontSize="{fontSize}" color="{fontColor}" fontFamily="{fontFamily}" height="200"
+        <mx:TextArea editable="true" text="{markdownText}" id="markdownTextArea" fontSize="{fontSize}" color="{fontColor}" fontFamily="{fontFamily}" height="200"
                 borderStyle="solid" borderThickness="1" borderColor="#CCCCCC"/>
         <mx:HBox verticalAlign="middle">
             <mx:Text text="When ready, click Apply to actually run the report."/>

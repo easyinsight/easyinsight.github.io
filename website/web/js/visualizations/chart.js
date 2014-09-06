@@ -72,7 +72,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -81,12 +81,12 @@ Chart = {
         };
     },
 
-    getD3StackedBarChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3StackedBarChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey, iframedInUI) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
                     generate: function() {
-                        var height = Chart.chartHeight(target, styleProps);
+                        var height = Chart.chartHeightWithIFrame(target, styleProps, iframedInUI);
 
                         var s1 = data["values"];
 
@@ -167,6 +167,8 @@ Chart = {
 
                         if (data["dateAxis"]) {
                             data["yFormat"].type = "msToDate";
+                            var msFormat = { type: "measure", precision: 0, numberFormat: 4};
+                            chart.valueFormat(Chart.createFormat(msFormat));
                         }
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, -leftNeeded + 10, 30);
@@ -180,7 +182,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -215,7 +217,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -306,7 +308,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -426,7 +428,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -461,14 +463,20 @@ Chart = {
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (data["variableHeight"]) {
+                            var dLen = s1[0].values.length;
+                            height = dLen * 25 + 60;
+                        }
+
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         var chart = nv.models.multiBarHorizontalChart()
                             .x(function(d) {
-                                if (d.x.length > 15) {
+                                /*if (d.x.length > 15) {
                                     return d.x.substring(0, 15) + "...";
                                 } else {
                                     return d.x;
-                                }
+                                }*/
+                                return d.x;
                             })
                             .height(height)
                             .showControls(false)
@@ -506,6 +514,11 @@ Chart = {
 
                         if (data["dateAxis"]) {
                             data["yFormat"].type = "msToDate";
+                            var msFormat = { type: "measure", precision: 0, numberFormat: 4};
+                            chart.valueFormat(Chart.createFormat(msFormat));
+                            chart.tooltipContent(function(key, x, e, graph) {
+                                return '<h3>' + key + '</h3>';
+                            });
                         }
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, -leftNeeded + 10, 40);
@@ -520,7 +533,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -670,7 +683,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -753,9 +766,12 @@ Chart = {
         }
     },
 
-    millisecond:function(format, val) {
+    millisecond:function(format, val, precision) {
         if(val ==  0)
             return String("");
+        if (typeof(precision) == "undefined") {
+            precision = 0;
+        }
         var result = "";
         if(format == "s")
             val = val * 1000;
@@ -770,15 +786,27 @@ Chart = {
         } else if (unsigned < (60000 * 60)) {
             minutes = Math.floor(unsigned / 60000);
             seconds = Math.floor(unsigned / 1000) % 60;
-            result = minutes + "m: " + seconds + "s";
+            if (precision == 0) {
+                result = minutes + "m";
+            } else {
+                result = minutes + "m: " + seconds + "s";
+            }
         } else if (unsigned < (60000 * 60 * 24)) {
             hours = Math.floor(unsigned / (60000 * 60));
             minutes = Math.floor(unsigned % 24);
-            result = hours + "h:" + minutes + "m";
+            if (precision == 0) {
+                result = hours + "h";
+            } else {
+                result = hours + "h:" + minutes + "m";
+            }
         } else {
             days = Math.floor(unsigned / (60000 * 60 * 24));
             hours = Math.floor(unsigned / (60000 * 60) % 24);
-            result = days + "d:" + hours + "h";
+            if (precision == 0) {
+                result = days + "d";
+            } else {
+                result = days + "d:" + hours + "h";
+            }
         }
         if (val < 0) {
             result = "(" + result + ")";
@@ -859,10 +887,14 @@ Chart = {
 
                         }
 
+                        /*var seriesIndex = 0;
+                        var selector = 'g.nv-series-'+seriesIndex+' circle';
+                        d3.selectAll(selector).classed("hover",true);*/
+                        //d3.select('#d3Div' + target + ' g.nv-scatterwrap g.nv-series-0 path.nv-point').style('fill-opacity', 1).style('stroke-opacity', 1);
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -925,7 +957,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -937,6 +969,7 @@ Chart = {
     cleanup:function (target) {
         if (Chart.charts[target]) {
             var tt = $("#" + target);
+            tt.unbind("jqplotDataClick");
             tt.unbind("jqplotDataClick");
             Chart.charts[target].destroy();
             delete Chart.charts[target];

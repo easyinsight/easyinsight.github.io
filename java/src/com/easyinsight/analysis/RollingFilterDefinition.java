@@ -194,6 +194,9 @@ public class RollingFilterDefinition extends FilterDefinition {
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_QUARTER, "This Quarter", "dayofquarter(nowdate(), 1)", "dayofquarter(nowdate(), daysinquarter(nowdate()))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_YEAR, "This Year", "dayofyear(nowdate(), 1)", "dayofyear(nowdate(), daysinyear(nowdate()))"));
 
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_FISCAL_YEAR, "This Fiscal Year", "fiscalyearstart(nowdate())", "fiscalyearend(nowdate())"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.PRIOR_FISCAL_YEAR, "Prior Fiscal Year", "fiscalyearstart(nowdate() - years(1))", "fiscalyearend(nowdate() - years(1))"));
+
         return additionalIntervals;
     }
 

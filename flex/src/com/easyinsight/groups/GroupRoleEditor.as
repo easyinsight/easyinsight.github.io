@@ -15,7 +15,8 @@ import mx.collections.ArrayCollection;
 		private var ownerRole:Object;
 		private var editorRole:Object;
 		private var viewerRole:Object;
-		
+		private var actualViewerRole:Object;
+
 		[Bindable]
 		private var roles:ArrayCollection = new ArrayCollection();
 		
@@ -26,18 +27,6 @@ import mx.collections.ArrayCollection;
 			super();
 			setStyle("horizontalAlign", "center");
 			this.percentWidth = 100;
-			ownerRole = new Object();
-			ownerRole["label"] = "Owner";
-			ownerRole["data"] = 1;
-			roles.addItem(ownerRole);
-			editorRole = new Object();
-			editorRole["label"] = "Editor";
-			editorRole["data"] = 2;
-			roles.addItem(editorRole);
-			viewerRole = new Object();
-			viewerRole["label"] = "Viewer";
-			viewerRole["data"] = 3;
-			roles.addItem(viewerRole);						
 		}
 		
 		override protected function createChildren():void {
@@ -57,17 +46,47 @@ import mx.collections.ArrayCollection;
 		[Bindable]
 		override public function set data(object:Object):void {
 			this.userStub = object as GroupUser;
-			switch (userStub.role) {
-				case 1:
-					comboBox.selectedItem = ownerRole;
-					break;
-				case 2:
-					comboBox.selectedItem = editorRole;
-					break;
-				case 3:
-					comboBox.selectedItem = viewerRole;
-					break;
-			}
+
+            roles = new ArrayCollection();
+            if (userStub.designer) {
+                if (comboBox != null) {
+                    comboBox.dataProvider = roles;
+                }
+                ownerRole = new Object();
+                ownerRole["label"] = "Create, Edit, Delete, View";
+                ownerRole["data"] = 1;
+                roles.addItem(ownerRole);
+                editorRole = new Object();
+                editorRole["label"] = "Create, Edit, View";
+                editorRole["data"] = 2;
+                roles.addItem(editorRole);
+                viewerRole = new Object();
+                viewerRole["label"] = "Create, View";
+                viewerRole["data"] = 3;
+                roles.addItem(viewerRole);
+                switch (userStub.role) {
+                    case 1:
+                        comboBox.selectedItem = ownerRole;
+                        break;
+                    case 2:
+                        comboBox.selectedItem = editorRole;
+                        break;
+                    case 3:
+                        comboBox.selectedItem = viewerRole;
+                        break;
+                }
+            } else {
+                if (comboBox != null) {
+                    comboBox.dataProvider = roles;
+                }
+                actualViewerRole = new Object();
+                actualViewerRole["label"] = "View";
+                actualViewerRole["data"] = 3;
+                roles.addItem(actualViewerRole);
+                comboBox.selectedItem = actualViewerRole;
+                userStub.role = 3;
+                comboBox.enabled = false;
+            }
 		}
 		
 		override public function get data():Object {

@@ -20,9 +20,6 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.util.RandomTextGenerator;
-import com.easyinsight.groups.Group;
-import com.easyinsight.groups.GroupStorage;
-import com.easyinsight.billing.BrainTreeBillingSystem;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -852,7 +849,7 @@ public class UserService {
             }
         }
         if (count < 2) {
-            errorString = "You must use at least two of the following types of characters: Uppercase, lowercase, digits, and special characters.";
+            errorString = "You must use at least two of the following types of characters in your password: Uppercase, lowercase, digits, and special characters.";
         } else if (password == null || "".equals(password.trim())) {
             errorString = "Please enter the new password.";
         } else if (password.length() < 8) {
@@ -1190,7 +1187,7 @@ public class UserService {
             List results = session.createQuery("from User where userName = ?").setString(0, userName).list();
             if (results.size() > 0) {
                 User user = (User) results.get(0);
-                userStub = new UserStub(user.getUserID(), user.getUserName(), user.getEmail(), user.getName(), user.getAccount().getAccountID(), user.getFirstName());
+                userStub = new UserStub(user.getUserID(), user.getUserName(), user.getEmail(), user.getName(), user.getAccount().getAccountID(), user.getFirstName(), user.isAnalyst());
             }
             session.getTransaction().commit();
         } catch (Exception e) {

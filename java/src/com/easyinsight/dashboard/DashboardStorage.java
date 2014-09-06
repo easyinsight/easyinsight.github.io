@@ -114,7 +114,7 @@ public class DashboardStorage {
             queryStmt.setBoolean(3, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6),
+                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.OWNER, name, rs.getBoolean(5), rs.getInt(6),
                         new Date(rs.getTimestamp(7).getTime()), new Date(rs.getTimestamp(8).getTime())));
             }
             queryStmt.close();
@@ -132,6 +132,24 @@ public class DashboardStorage {
                     dashboardRS.getBoolean(7), dashboardRS.getInt(8), new Date(dashboardRS.getTimestamp(9).getTime()), new Date(dashboardRS.getTimestamp(10).getTime())));
         }
         dashboardGroupStmt.close();
+
+        PreparedStatement lastChanceGroupStmt = conn.prepareStatement("SELECT dashboard.DASHBOARD_ID, dashboard.dashboard_name, dashboard.data_source_id, dashboard.url_key," +
+                "group_to_user_join.binding_type, dashboard.creation_date, dashboard.account_visible, dashboard.folder, dashboard.update_date FROM dashboard, group_to_user_join," +
+                "community_group, upload_policy_groups WHERE " +
+                "dashboard.data_source_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? " +
+                "and dashboard.temporary_dashboard = ?");
+        lastChanceGroupStmt.setBoolean(1, true);
+        lastChanceGroupStmt.setLong(2, userID);
+        lastChanceGroupStmt.setBoolean(3, false);
+        ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
+        while (lastChanceGroupRS.next()) {
+            dashboards.add(new DashboardDescriptor(lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(1),  lastChanceGroupRS.getString(4), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt("group_to_user_join.binding_type"), name,
+                    lastChanceGroupRS.getBoolean("dashboard.account_visible"), lastChanceGroupRS.getInt("dashboard.folder"),
+                    new Date(lastChanceGroupRS.getTimestamp("dashboard.creation_date").getTime()), new Date(lastChanceGroupRS.getTimestamp("dashboard.update_date").getTime())));
+        }
+        lastChanceGroupStmt.close();
+
         return dashboards;
     }
 
@@ -160,7 +178,7 @@ public class DashboardStorage {
                 } else {
                     name = "";
                 }
-                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.SHARER, name, rs.getBoolean(5), rs.getInt(6)));
+                dashboards.add(new DashboardDescriptor(rs.getString(2), rs.getLong(1), rs.getString(3), rs.getLong(4), Roles.OWNER, name, rs.getBoolean(5), rs.getInt(6)));
             }
             queryStmt.close();
         }
@@ -211,6 +229,22 @@ public class DashboardStorage {
             dashboards.add(new DashboardDescriptor(dashboardRS.getString(2), dashboardRS.getLong(1),  dashboardRS.getString(4), dashboardRS.getLong(3), Roles.SUBSCRIBER, name,
                     dashboardRS.getBoolean(7), dashboardRS.getInt(8)));
         }
+        PreparedStatement lastChanceGroupStmt = conn.prepareStatement("SELECT dashboard.DASHBOARD_ID, dashboard.dashboard_name, dashboard.data_source_id, dashboard.url_key," +
+                "group_to_user_join.binding_type, dashboard.creation_date, dashboard.account_visible, dashboard.folder, dashboard.update_date FROM dashboard, group_to_user_join," +
+                "community_group, upload_policy_groups WHERE " +
+                "dashboard.data_source_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id and group_to_user_join.user_id = ? " +
+                "and dashboard.temporary_dashboard = ?");
+        lastChanceGroupStmt.setBoolean(1, true);
+        lastChanceGroupStmt.setLong(2, userID);
+        lastChanceGroupStmt.setBoolean(3, false);
+        ResultSet lastChanceGroupRS = lastChanceGroupStmt.executeQuery();
+        while (lastChanceGroupRS.next()) {
+            dashboards.add(new DashboardDescriptor(lastChanceGroupRS.getString(2), lastChanceGroupRS.getLong(1),  lastChanceGroupRS.getString(4), lastChanceGroupRS.getLong(3), lastChanceGroupRS.getInt("group_to_user_join.binding_type"), "",
+                    lastChanceGroupRS.getBoolean("dashboard.account_visible"), lastChanceGroupRS.getInt("dashboard.folder"),
+                    new Date(lastChanceGroupRS.getTimestamp("dashboard.creation_date").getTime()), new Date(lastChanceGroupRS.getTimestamp("dashboard.update_date").getTime())));
+        }
+        lastChanceGroupStmt.close();
         ownerStmt.close();
         dashboardGroupStmt.close();
         return dashboards;
@@ -527,7 +561,7 @@ public class DashboardStorage {
         while (userRS.next()) {
             long userID = userRS.getLong(1);
             // TODO: cleanup
-            admins.add(new UserStub(userID, null, null, null, 0, null));
+            admins.add(new UserStub(userID, null, null, null, 0, null, false));
         }
         getUserStmt.close();
         dashboard.setAdministrators(admins);

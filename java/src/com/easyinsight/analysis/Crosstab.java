@@ -242,7 +242,13 @@ public class Crosstab {
                     if (value == null) {
                         value = new EmptyValue();
                     }
-                    array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = new CrosstabValue(value, null, analysisItem);
+                    CrosstabValue cv = new CrosstabValue(value, null, analysisItem);
+                    array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = cv;
+                    System.out.println(value + " col = " + columnSection.values.get(0) + " - row = " + rowSection.values.get(0));
+                    if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1) {
+                        cv.addDTValue(crosstabDefinition.getColumns().get(0).qualifiedName(), columnSection.values.get(0));
+                        cv.addDTValue(crosstabDefinition.getRows().get(0).qualifiedName(), rowSection.values.get(0));
+                    }
                 }
             }
         }
@@ -272,7 +278,11 @@ public class Crosstab {
                     if (sumValue != null) {
                         sum = sumValue;
                     }
-                    array[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset][(i * crosstabDefinition.getMeasures().size()) + j + crosstabDefinition.getRows().size()] = new CrosstabValue(new NumericValue(sum), null, false, true, analysisMeasure);
+                    CrosstabValue cv = new CrosstabValue(new NumericValue(sum), null, false, true, analysisMeasure);
+                    array[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset][(i * crosstabDefinition.getMeasures().size()) + j + crosstabDefinition.getRows().size()] = cv;
+                    Section rowSection = rowSections.get(j);
+                    Map<AnalysisItem, Value> map = intersectionMap.get(new Intersection(rowSection, columnSection));
+                    //cv.addDTValue();
                 }
             } else {
                 Value sectionValue = columnSection.values.get(0);

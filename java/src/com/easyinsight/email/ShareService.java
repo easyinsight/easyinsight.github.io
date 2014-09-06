@@ -14,7 +14,7 @@ import java.sql.*;
  */
 public class ShareService {
 
-    private static final String USERS_IN_ACCOUNT = "SELECT USER_ID, USERNAME, EMAIL, NAME, ACCOUNT_ID, FIRST_NAME, USER_KEY FROM USER WHERE ACCOUNT_ID = ?";
+    private static final String USERS_IN_ACCOUNT = "SELECT USER_ID, USERNAME, EMAIL, NAME, ACCOUNT_ID, FIRST_NAME, USER_KEY, ANALYST FROM USER WHERE ACCOUNT_ID = ?";
 
     public List<UserStub> getUserStubs(boolean includeUser) {
         Connection conn = Database.instance().getConnection();
@@ -26,7 +26,7 @@ public class ShareService {
             ResultSet userAccountRS = usersStmt.executeQuery();
             while (userAccountRS.next()) {
                 UserStub userStub = new UserStub(userAccountRS.getLong(1), userAccountRS.getString(2), userAccountRS.getString(3),
-                        userAccountRS.getString(4), userAccountRS.getLong(5), userAccountRS.getString(6));
+                        userAccountRS.getString(4), userAccountRS.getLong(5), userAccountRS.getString(6), userAccountRS.getBoolean("analyst"));
                 if (SecurityUtil.isAccountAdmin()) {
                     userStub.setUserKey(userAccountRS.getString(7));
                 }

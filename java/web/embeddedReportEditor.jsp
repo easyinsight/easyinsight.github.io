@@ -88,6 +88,11 @@
         // -----------------------------------------------------------------------------
         // -->
     </script>
+    <script type="text/javascript" language="JavaScript">
+        function loadPage(val) {
+            window.location.href = val;
+        }
+    </script>
 </head>
 
 

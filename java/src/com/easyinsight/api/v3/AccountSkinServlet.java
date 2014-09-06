@@ -52,7 +52,7 @@ public class AccountSkinServlet extends JSONServlet {
         if(l != null && l > 0) {
             skin.setReportHeaderImage(new PreferencesService().getImageDescriptor(l, conn));
         }
-        new PreferencesService().saveAccountSkin(skin);
+        new PreferencesService().saveAccountSkin(skin, conn);
         return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
 
     }

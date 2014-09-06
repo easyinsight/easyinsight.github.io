@@ -2,12 +2,14 @@ package com.easyinsight.datafeeds.happyfox;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import com.easyinsight.datafeeds.freshdesk.TicketAnalysis;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -15,6 +17,7 @@ import com.easyinsight.storage.StringWhere;
 import org.apache.commons.httpclient.HttpClient;
 
 import java.sql.Connection;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -38,10 +41,17 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
     public static final String SUBJECT = "Subject";
     public static final String TICKET_CREATED_BY = "Ticket Created By";
     public static final String TICKET_CREATED_BY_ID = "Ticket Created By ID";
+    public static final String RESOLVED_AT = "Ticket Resolved At";
+    public static final String AGENT_TOUCHES = "Agent Touches";
+    public static final String CUSTOMER_TOUCHES = "Customer Touches";
+    public static final String AGENT_TIME = "Agent Time";
+    public static final String CUSTOMER_TIME = "Customer Time";
 
     public HappyFoxTicketSource() {
         setFeedName("Tickets");
     }
+
+    private transient Map<String, AnalysisItem> customFields;
 
     @Override
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
@@ -55,10 +65,29 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
         fieldBuilder.addField(LAST_REPLY_AT, new AnalysisDateDimension());
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(RESOLVED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(TICKET_COUNT, new AnalysisMeasure());
         fieldBuilder.addField(TIME_SPENT, new AnalysisMeasure());
         fieldBuilder.addField(TICKET_CREATED_BY, new AnalysisDimension());
         fieldBuilder.addField(TICKET_CREATED_BY_ID, new AnalysisDimension());
+        fieldBuilder.addField(AGENT_TOUCHES, new AnalysisMeasure());
+        fieldBuilder.addField(CUSTOMER_TOUCHES, new AnalysisMeasure());
+        fieldBuilder.addField(AGENT_TIME, new AnalysisMeasure(FormattingConfiguration.MILLISECONDS));
+        fieldBuilder.addField(CUSTOMER_TIME, new AnalysisMeasure(FormattingConfiguration.MILLISECONDS));
+        HappyFoxCompositeSource happyFoxCompositeSource = (HappyFoxCompositeSource) parentDefinition;
+        HttpClient client = getHttpClient(happyFoxCompositeSource.getHfApiKey(), happyFoxCompositeSource.getAuthKey());
+        List<Map> userCustomFields = runRestRequestForList("ticket_custom_fields/", client, happyFoxCompositeSource);
+        customFields = new HashMap<>();
+        for (Map userCustomField : userCustomFields) {
+            String name = userCustomField.get("name").toString();
+            String customFieldID = userCustomField.get("id").toString();
+            String type = userCustomField.get("type").toString();
+            if ("text".equals(type) || "multiple_choice".equals(type)) {
+                AnalysisDimension customField = new AnalysisDimension(name);
+                fieldBuilder.addField(customFieldID, customField);
+                customFields.put(customFieldID, customField);
+            }
+        }
     }
 
     @Override
@@ -96,6 +125,7 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
                 Set<String> postUpdate = new HashSet<>();
                 DataSet fullSet = new DataSet();
                 Map<String, DataSet> map = new HashMap<>();
+                Map<String, IRow> rowMap = new HashMap<>();
                 for (Map ticket : data) {
                     String ticketID = getJSONValue(ticket, "id");
                     IRow row;
@@ -138,6 +168,19 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
 
                     row.addValue(keys.get(SUBJECT), getJSONValue(ticket, "subject"));
                     row.addValue(keys.get(TICKET_COUNT), 1);
+                    List<Map> customFields = (List<Map>) ticket.get("custom_fields");
+                    for (Map customField : customFields) {
+                        String customFieldID = customField.get("id").toString();
+                        Object val = customField.get("value");
+                        if (val != null) {
+                            String customFieldValue = val.toString();
+                            if (this.customFields.containsKey(customFieldID)) {
+                                row.addValue(keys.get(customFieldID), customFieldValue);
+                            }
+                        }
+                    }
+
+                    rowMap.put(ticketID, row);
                 }
 
                 if (postUpdate.size() > 0) {
@@ -147,26 +190,46 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
                     }
                     sb.deleteCharAt(sb.length() - 1);
                     Map details = runRestRequestForMap("tickets/?q=id:" + sb.toString(), client, happyFoxCompositeSource);
-                    System.out.println(details);
+                    //System.out.println(details);
                     List<Map> detailData = (List<Map>) response.get("data");
                     for (Map ticket : detailData) {
+                        String ticketID = ticket.get("id").toString();
+                        IRow row = rowMap.get(ticketID);
+                        DateValue createdAt = (DateValue) row.getValue(keys.get(CREATED_AT));
+                        TicketAnalysis ticketAnalysis = new TicketAnalysis(createdAt.getDate().toInstant().atZone(ZoneId.systemDefault()));
                         List<Map> updates = (List<Map>) ticket.get("updates");
+                        boolean closed = false;
+                        Value resolvedAt = null;
                         for (Map update : updates) {
-                            update.get("timestamp");
-                            Map message = (Map) update.get("message");
-                            update.get("status_change");
-                            update.get("assignee_change");
+                            DateValue dv = (DateValue) getDate(update, "timestamp");
+                            Date date = dv.getDate();
+                            if (update.get("status_change") != null) {
+                                Map sc = (Map) update.get("status_change");
+                                String status = sc.get("new_name").toString();
+                                System.out.println(status + " - " + update.get("timestamp"));
+                                if ("Solved".equals(status) || "Closed".equals(status)) {
+                                    ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, date);
+                                    if (!closed) {
+                                        resolvedAt = dv;
+                                    }
+                                    closed = true;
+                                } else if ("On Hold".equals(status)) {
+                                    ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, date);
+                                } else {
+                                    ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, date);
+                                    resolvedAt = new EmptyValue();
+                                    closed = false;
+                                }
+                            }
                         }
+                        ticketAnalysis.calculate();
+                        row.addValue(keys.get(AGENT_TIME), ticketAnalysis.getElapsedAgentTime());
+                        row.addValue(keys.get(CUSTOMER_TIME), ticketAnalysis.getElapsedCustomerTime());
+                        row.addValue(keys.get(AGENT_TOUCHES), ticketAnalysis.getAgentHandles());
+                        row.addValue(keys.get(CUSTOMER_TOUCHES), ticketAnalysis.getCustomerHandles());
+                        //row.addValue(keys.get(REOPEN_COUNT), reopenCount);
+                        row.addValue(keys.get(RESOLVED_AT), resolvedAt);
                     }
-                    /*
-                    List<Map> updates = (List<Map>) ticket.get("updates");
-                    for (Map update : updates) {
-                        update.get("timestamp");
-                        Map message = (Map) update.get("message");
-                        update.get("status_change");
-                        update.get("assignee_change");
-                    }
-                     */
                 }
 
                 if (lastRefreshDate == null) {

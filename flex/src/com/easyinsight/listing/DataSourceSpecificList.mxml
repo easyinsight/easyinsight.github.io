@@ -30,6 +30,7 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.quicksearch.Roles;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.skin.ApplicationSkin;
@@ -234,10 +235,10 @@
             super.commitProperties();
 
             if (dataSourceInvalidate) {
-                if (_dataSourceDescriptor.role <= 2) {
+                if (_dataSourceDescriptor.role <= Roles.EDITOR) {
                     admin = true;
                 }
-                if (_dataSourceDescriptor.role <= 3) {
+                if (_dataSourceDescriptor.role <= Roles.VIEWER) {
                     realDataSource = true;
                 }
                 var ops:Array = [];
@@ -933,7 +934,7 @@
                     var folder:DataFolder = activity as DataFolder;
                     for each (var desc:EIDescriptor in folder.children) {
                         if (desc.selected) {
-                            if (desc.role == 3) {
+                            if (desc.role != Roles.OWNER) {
                                 Alert.show("You don't have permission to delete " + desc.name + ".");
                                 return;
                             }

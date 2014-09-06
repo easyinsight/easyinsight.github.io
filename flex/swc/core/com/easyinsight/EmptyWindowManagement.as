@@ -10,5 +10,11 @@ public class EmptyWindowManagement implements IWindowManagement {
 
     public function addWindow(window:UIComponent):void {
     }
+
+    public function restoreReport():void {
+    }
+
+    public function hideReport():void {
+    }
 }
 }

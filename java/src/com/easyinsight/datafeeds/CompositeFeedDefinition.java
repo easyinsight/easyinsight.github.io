@@ -9,14 +9,19 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * User: James Boe
@@ -804,5 +809,19 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         }
         return sources;
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        JSONArray ja = new JSONArray(compositeFeedNodes.stream().map((a) -> {
+            try {
+                return a.toJSON(md);
+            } catch(JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList()));
+        jo.put("data_sources", ja);
+        return jo;
     }
 }

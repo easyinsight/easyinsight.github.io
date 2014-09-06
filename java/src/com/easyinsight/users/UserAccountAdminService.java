@@ -1326,6 +1326,7 @@ public class UserAccountAdminService {
             account.setSendEmailsToNewUsers(accountSettings.isSendEmail());
             account.setUseHTMLVersion(accountSettings.isHtmlView());
             account.setAccountLocale(accountSettings.getLocale());
+            account.setFiscalYearStartMonth(accountSettings.getFiscalYearStartMonth());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1356,6 +1357,7 @@ public class UserAccountAdminService {
             accountSettings.setCurrencySymbol(account.getCurrencySymbol());
             accountSettings.setLocale(account.getAccountLocale());
             accountSettings.setMaxResults(account.getMaxRecords());
+            accountSettings.setFiscalYearStartMonth(account.getFiscalYearStartMonth());
             accountSettings.setSendEmail(account.isSendEmailsToNewUsers());
             accountSettings.setHtmlView(account.isUseHTMLVersion());
             accountSettings.setDefaultFontFamily(account.getDefaultFontFamily());

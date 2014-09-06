@@ -10,6 +10,7 @@ import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.ReportPropertiesIntention;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ListSummaryComponent;
+import com.easyinsight.util.HTMLPolicy;
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
 import org.eclipse.mylyn.wikitext.core.parser.builder.HtmlDocumentBuilder;
 import org.eclipse.mylyn.wikitext.core.util.ServiceLocator;
@@ -151,10 +152,15 @@ public class WSTextDefinition extends WSAnalysisDefinition {
                 String g = matcher.group();
                 String substring = g.substring(1, g.length() - 1).trim();
                 DerivedAnalysisDimension dim = new DerivedAnalysisDimension();
-                dim.setDerivationCode(substring);
+                if (substring.startsWith("[") && substring.endsWith("]")) {
+                    dim.setDerivationCode("format(" + substring + ")");
+                } else {
+                    dim.setDerivationCode(substring);
+                }
                 System.out.println(substring);
                 String alias = "tmp" + (i++);
                 dim.setKey(new NamedKey(alias));
+                dim.setDisplayName(substring);
                 map.put(alias, dim);
                 aliasMap.put(g, alias);
                 getAddedItems().add(dim);
@@ -186,6 +192,7 @@ public class WSTextDefinition extends WSAnalysisDefinition {
         }
         html = html.substring(169);
         html = html.substring(0, html.length() - 14);
+        html = HTMLPolicy.getPolicyFactory().sanitize(html);
         setText(originalText);
         return html;
     }

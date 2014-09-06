@@ -13,6 +13,8 @@ import com.easyinsight.datafeeds.composite.FallthroughConnection;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.documentation.DocReader;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.preferences.ApplicationSkin;
@@ -361,7 +363,7 @@ public class AnalysisService {
 
     public ReportInfo getReportInfo(long reportID, boolean obtainHeader) {
         try {
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
         } catch (Exception e) {
             ReportInfo reportInfo = new ReportInfo();
             reportInfo.setAccessDenied(true);
@@ -1857,7 +1859,7 @@ public class AnalysisService {
         }
     }
 
-    private FilterDefinition constructDrillthroughFilter(WSAnalysisDefinition report, DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) {
+    private FilterDefinition constructDrillthroughFilter(WSAnalysisDefinition report, DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) throws SQLException {
         FilterDefinition filterDefinition;
         AnalysisItem targetItem;
         boolean hasExpandDates = false;
@@ -1905,16 +1907,61 @@ public class AnalysisService {
             asTextDimension.setKey(new NamedKey(targetDisplay + "." + dateDimension.getDateLevel() + " for Drillthrough"));
             asTextDimension.setApplyBeforeAggregation(true);
             String format = "yyyy-MM-dd";
+            ExportMetadata md;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                md = ExportService.createExportMetadata(conn);
+            } finally {
+                Database.closeConnection(conn);
+            }
             if (dateDimension.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL) {
                 format = "yyyy";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                format = "yyyy-MM";
+                if (md.dateFormat == 0 || md.dateFormat == 3) {
+                    format = "MM/yyyy";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM";
+                } else if (md.dateFormat == 2) {
+                    format = "MM-yyyy";
+                } else if (md.dateFormat == 4) {
+                    format = "MM.yyyy";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.DAY_LEVEL) {
-                format = "yyyy-MM-dd";
+                if (md.dateFormat == 0) {
+                    format = "MM/dd/yyyy";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM-dd";
+                } else if (md.dateFormat == 2) {
+                    format = "dd-MM-yyyy";
+                } else if (md.dateFormat == 3) {
+                    format = "dd/MM/yyyy";
+                } else if (md.dateFormat == 4) {
+                    format = "dd.MM.yyyy";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL) {
-                format = "yyyy-MM-dd HH";
+                if (md.dateFormat == 0) {
+                    format = "MM/dd/yyyy HH:mm";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM-dd HH:mm";
+                } else if (md.dateFormat == 2) {
+                    format = "dd-MM-yyyy HH:mm";
+                } else if (md.dateFormat == 3) {
+                    format = "dd/MM/yyyy HH:mm";
+                } else if (md.dateFormat == 4) {
+                    format = "dd.MM.yyyy HH:mm";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
-                format = "yyyy-MM-dd HH:mm";
+                if (md.dateFormat == 0) {
+                    format = "MM/dd/yyyy HH:mm";
+                } else if (md.dateFormat == 1) {
+                    format =  "yyyy-MM-dd HH:mm";
+                } else if (md.dateFormat == 2) {
+                    format = "dd-MM-yyyy HH:mm";
+                } else if (md.dateFormat == 3) {
+                    format = "dd/MM/yyyy HH:mm";
+                } else if (md.dateFormat == 4) {
+                    format = "dd.MM.yyyy HH:mm";
+                }
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_LEVEL) {
                 format = "yyyy-ww";
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.WEEK_OF_YEAR_FLAT) {
@@ -1930,7 +1977,12 @@ public class AnalysisService {
             } else if (dateDimension.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_FLAT) {
                 format = "qq";
             }
-            asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", targetDisplay, format));
+            if (dateDimension.isTimeshift()) {
+                asTextDimension.setDerivationCode(MessageFormat.format("dateformat([{0}], \"{1}\")", targetDisplay, format));
+            } else {
+                asTextDimension.setDerivationCode(MessageFormat.format("dateformatnoshift([{0}], \"{1}\")", targetDisplay, format));
+            }
+
             //asTextDimension.setDerivationCode("dateformatnoshift(datelevel([" + dateDimension.toDisplay() + "], \"" + dateDimension.getDateLevel()+"\"), \"yyyy-MM-dd\")");
             FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
             filterValueDefinition.setField(asTextDimension);
@@ -2469,7 +2521,8 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition saveAs(WSAnalysisDefinition saveDefinition, String newName) {
-        SecurityUtil.authorizeInsight(saveDefinition.getAnalysisID());
+        SecurityUtil.authorizeReport(saveDefinition.getAnalysisID(), Roles.VIEWER);
+        SecurityUtil.authorizeFeedAccess(saveDefinition.getDataFeedID());
         EIConnection conn = Database.instance().getConnection();
         long reportID;
         try {
@@ -2527,7 +2580,7 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition copyReport(WSAnalysisDefinition saveDefinition, long targetID) {
-        SecurityUtil.authorizeInsight(saveDefinition.getAnalysisID());
+        SecurityUtil.authorizeReport(saveDefinition.getAnalysisID(), Roles.EDITOR);
         EIConnection conn = Database.instance().getConnection();
         long reportID;
         try {
@@ -2575,74 +2628,8 @@ public class AnalysisService {
         }
     }
 
-    public void keepReport(long reportID, long sourceReportID) {
-        SecurityUtil.authorizeInsight(reportID);
-        EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        try {
-            AnalysisDefinition baseReport = analysisStorage.getPersistableReport(reportID, session);
-            Map<Long, AnalysisDefinition> reports = new HashMap<Long, AnalysisDefinition>();
-            Map<Long, Dashboard> dashboards = new HashMap<Long, Dashboard>();
-            SolutionService.recurseReport(reports, dashboards, baseReport, session, conn);
-
-            for (AnalysisDefinition report : reports.values()) {
-                report.setTemporaryReport(false);
-                new AnalysisStorage().clearCache(report.getAnalysisID(), report.getDataFeedID());
-                session.update(report);
-            }
-            session.flush();
-            for (Dashboard tDashboard : dashboards.values()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE DASHBOARD SET TEMPORARY_DASHBOARD = ? where dashboard_id = ?");
-                updateStmt.setBoolean(1, false);
-                updateStmt.setLong(2, tDashboard.getId());
-                updateStmt.executeUpdate();
-            }
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT EXCHANGE_REPORT_INSTALL_ID FROM EXCHANGE_REPORT_INSTALL WHERE USER_ID = ? AND " +
-                    "REPORT_ID = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
-            queryStmt.setLong(2, sourceReportID);
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                PreparedStatement updateTimeStmt = conn.prepareStatement("UPDATE EXCHANGE_REPORT_INSTALL SET install_date = ? WHERE EXCHANGE_REPORT_INSTALL_ID = ?");
-                updateTimeStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-                updateTimeStmt.setLong(2, id);
-                updateTimeStmt.executeUpdate();
-            } else {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCHANGE_REPORT_INSTALL (USER_ID, REPORT_ID, INSTALL_DATE) VALUES (?, ?, ?)");
-                insertStmt.setLong(1, SecurityUtil.getUserID());
-                insertStmt.setLong(2, sourceReportID);
-                insertStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                insertStmt.execute();
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            Database.closeConnection(conn);
-        }
-    }
-
-    public void shareReport(long reportID) {
-        SecurityUtil.authorizeInsight(reportID);
-        Connection conn = Database.instance().getConnection();
-        try {
-            new AnalysisStorage().clearCache(reportID, 0);
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET ACCOUNT_VISIBLE = ? WHERE ANALYSIS_ID = ?");
-            updateStmt.setBoolean(1, true);
-            updateStmt.setLong(2, reportID);
-            updateStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
     public String validateCalculation(String calculationString, long dataSourceID, List<AnalysisItem> reportItems, WSAnalysisDefinition report) {
-        SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeFeed(dataSourceID, Roles.VIEWER);
         EIConnection conn = Database.instance().getConnection();
         try {
             Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
@@ -2750,7 +2737,9 @@ public class AnalysisService {
 
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
-            SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
+            SecurityUtil.authorizeReport(wsAnalysisDefinition.getAnalysisID(), Roles.EDITOR);
+        } else {
+            SecurityUtil.authorizeFeedAccess(wsAnalysisDefinition.getDataFeedID());
         }
         try {
             if (wsAnalysisDefinition.getJoinOverrides() != null) {
@@ -2953,25 +2942,22 @@ public class AnalysisService {
     }
 
     public void deleteAnalysisDefinition(long reportID) {
-        int role = SecurityUtil.authorizeInsight(reportID);
+        SecurityUtil.authorizeReport(reportID, Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
             AnalysisDefinition dbAnalysisDef = analysisStorage.getPersistableReport(reportID, session);
-            boolean canDelete = role == Roles.OWNER;
-            if (canDelete) {
-                try {
-                    session.delete(dbAnalysisDef);
-                    session.flush();
-                } catch (Exception e) {
+            try {
+                session.delete(dbAnalysisDef);
+                session.flush();
+            } catch (Exception e) {
 
-                    // hibernate not cooperating, so delete it the hard way
+                // hibernate not cooperating, so delete it the hard way
 
-                    PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
-                    manualDeleteStmt.setLong(1, reportID);
-                    manualDeleteStmt.executeUpdate();
-                }
+                PreparedStatement manualDeleteStmt = conn.prepareStatement("DELETE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                manualDeleteStmt.setLong(1, reportID);
+                manualDeleteStmt.executeUpdate();
             }
             new AnalysisStorage().clearCache(reportID, dbAnalysisDef.getDataFeedID());
             conn.commit();
@@ -2988,7 +2974,7 @@ public class AnalysisService {
     public List<FilterDefinition> getFilters(long reportID) {
         try {
             List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-            SecurityUtil.authorizeInsight(reportID);
+            SecurityUtil.authorizeReport(reportID, Roles.VIEWER);
             WSAnalysisDefinition report = analysisStorage.getAnalysisDefinition(reportID);
             for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
                 FilterDefinition clone = filterDefinition.clone();
@@ -3011,9 +2997,9 @@ public class AnalysisService {
 
     public static WSAnalysisDefinition openAnalysisDefinitionWithConn(long analysisID, EIConnection conn) {
         try {
-            int role = SecurityUtil.authorizeInsight(analysisID);
+            int role = SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
             WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
-            if (role == Roles.SUBSCRIBER) {
+            if (role >= Roles.VIEWER) {
                 report.setCanSave(false);
             } else {
                 report.setCanSave(true);
@@ -3041,9 +3027,9 @@ public class AnalysisService {
 
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
         try {
-            int role = SecurityUtil.authorizeInsight(analysisID);
+            int role = SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
             WSAnalysisDefinition report = analysisStorage.getAnalysisDefinition(analysisID);
-            if (role == Roles.SUBSCRIBER) {
+            if (role >= Roles.VIEWER) {
                 report.setCanSave(false);
             } else {
                 report.setCanSave(true);
@@ -3093,7 +3079,7 @@ public class AnalysisService {
                     ResultSet rs = queryStmt.executeQuery();
                     if (rs.next()) {
                         long analysisID = rs.getLong(1);
-                        SecurityUtil.authorizeInsight(analysisID);
+                        SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
                         insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(2),
                                 rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE, false));
                     } else {
@@ -3142,7 +3128,7 @@ public class AnalysisService {
         InsightResponse insightResponse;
         try {
             try {
-                SecurityUtil.authorizeInsight(analysisID);
+                SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
                 Connection conn = Database.instance().getConnection();
                 try {
                     PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");

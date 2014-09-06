@@ -8,6 +8,10 @@ import com.easyinsight.core.StringValue;
 import com.easyinsight.core.Value;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -36,20 +40,15 @@ public class EIDateFormatNoShiftFunction extends Function implements IFunction {
         String string;
         String formatString = minusQuotes(getParameter(1)).toString();
         if (formatString.startsWith("QQ")) {
-
-            int quarter = DayOfQuarter.quarter(date) + 1;
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            int year = cal.get(Calendar.YEAR);
-            string = quarter + "-" + year;
-            System.out.println(date + " produced " + string);
+            formatString = "QQ-yyyy";
         } else if ("qq".equals(formatString)) {
-            int quarter = DayOfQuarter.quarter(date) + 1;
-            string = String.valueOf(quarter);
-        } else {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(formatString);
-            string = simpleDateFormat.format(date);
+            formatString = "QQ";
         }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatString);
+        Instant instant = date.toInstant();
+        ZonedDateTime zdt = instant.atZone(ZoneId.of("UTC"));
+        string = dateTimeFormatter.format(zdt);
+        System.out.println(string);
 
 
         if (calculationMetadata.getInsightRequestMetadata() != null && calculationMetadata.getInsightRequestMetadata().isLogReport()) {

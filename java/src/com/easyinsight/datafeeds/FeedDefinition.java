@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.*;
 import com.easyinsight.datafeeds.composite.CustomFieldTag;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.security.SecurityUtil;
@@ -33,6 +34,8 @@ import nu.xom.Node;
 import nu.xom.Nodes;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -1104,5 +1107,12 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public String postOAuthSetup(HttpServletRequest request) {
         return null;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", getFeedName());
+        jo.put("url_key", getApiKey());
+        return jo;
     }
 }

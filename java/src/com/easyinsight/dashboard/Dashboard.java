@@ -490,7 +490,7 @@ public class Dashboard implements Cloneable, Serializable {
         Dashboard dashboard = this.clone();
         dashboard.setTemporary(true);
         dashboard.setAuthorName(SecurityUtil.getUserName());
-        dashboard.setAdministrators(Arrays.asList((FeedConsumer) new UserStub(SecurityUtil.getUserID(), null, null, null, 0, null)));
+        dashboard.setAdministrators(Arrays.asList((FeedConsumer) new UserStub(SecurityUtil.getUserID(), null, null, null, 0, null, false)));
         dashboard.setCreationDate(new Date());
         dashboard.setExchangeVisible(false);
         dashboard.setRecommendedExchange(false);

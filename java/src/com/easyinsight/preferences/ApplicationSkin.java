@@ -22,6 +22,7 @@ public class ApplicationSkin implements Serializable {
 
     public static final int APPLICATION = 1;
     public static final int ACCOUNT = 2;
+    public static final int USER = 3;
 
     private ImageDescriptor coreAppBackgroundImage;
     private boolean coreAppBackgroundImageEnabled;
@@ -364,7 +365,7 @@ public class ApplicationSkin implements Serializable {
             properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
             properties.add(ReportMultiColorProperty.fromColors(secondaryMultiColors, "secondaryMultiColors"));
         }
-        if (mode == APPLICATION) {
+        if (mode == APPLICATION || mode == USER) {
             properties.add(new ReportBooleanProperty("myDataName", myDataName));
             properties.add(new ReportBooleanProperty("myDataSize", myDataSize));
             properties.add(new ReportBooleanProperty("myDataOwner", myDataOwner));
@@ -1116,7 +1117,7 @@ public class ApplicationSkin implements Serializable {
         as.setSummaryBackgroundColor(fromHex(jo.get("summary_background_color")));
         as.setSummaryTextColorEnabled(booleanValue(jo.get("summary_text_color_enabled")));
         as.setSummaryTextColor(fromHex(jo.get("summary_text_color")));
-        as.setCrosstabHeaderBackgroundColorEnabled(booleanValue("crosstab_header_background_color_enabled"));
+        as.setCrosstabHeaderBackgroundColorEnabled(booleanValue(jo.get("crosstab_header_background_color_enabled")));
         as.setCrosstabHeaderBackgroundColor(fromHex(jo.get("crosstab_header_background_color")));
         as.setCrosstabHeaderTextColorEnabled(booleanValue(jo.get("crosstab_header_text_color_enabled")));
         as.setCrosstabHeaderTextColor(fromHex(jo.get("crosstab_header_text_color")));
@@ -1154,6 +1155,10 @@ public class ApplicationSkin implements Serializable {
     }
 
     private static int fromHex(Object color) {
-        return Color.decode(String.valueOf(color)).getRGB();
+        String colorString = color.toString();
+        if (colorString.length() == 7) {
+            colorString = colorString.substring(1, 7);
+        }
+        return Integer.parseInt(colorString, 16);
     }
 }

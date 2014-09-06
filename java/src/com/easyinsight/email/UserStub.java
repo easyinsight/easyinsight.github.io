@@ -14,18 +14,20 @@ public class UserStub extends FeedConsumer {
     private long accountID;
     private String firstName;
     private String userKey;
+    private boolean designer;
 
     public UserStub() {
     }
 
     public UserStub(long userID, String userName, String email, String fullName, long accountID,
-                    String firstName) {
+                    String firstName, boolean designer) {
         super(userName);
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
         this.accountID = accountID;
         this.firstName = firstName;
+        this.designer = designer;
     }
 
     /*
@@ -41,6 +43,14 @@ public class UserStub extends FeedConsumer {
 
     public int type() {
         return FeedConsumer.USER;
+    }
+
+    public boolean isDesigner() {
+        return designer;
+    }
+
+    public void setDesigner(boolean designer) {
+        this.designer = designer;
     }
 
     public String getUserKey() {

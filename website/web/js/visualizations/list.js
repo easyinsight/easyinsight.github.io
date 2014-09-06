@@ -21,6 +21,30 @@ $(function () {
 })
 
 List = {
+
+    crosstabCallback: function (targetDiv, properties, fullFilters, drillthroughKey) {
+        return function(data) {
+            Utils.noData(data, function() {
+                var report = $('#' + targetDiv + ' .reportArea');
+                report.html(data);
+                $(".list_drillthrough").click(function (e) {
+                    e.preventDefault();
+                    var x = $(e.target);
+                    var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughKey, "filters": fullFilters,
+                        "drillthrough_values": {}};
+                    f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
+
+                            if(i.match(/^drillthrough/))
+                                m[i.replace(/^drillthrough/, "")] = decodeURI(e);
+                            return m; },
+                        {});
+
+                    drillThrough(f);
+                })
+            }, null, targetDiv);
+        }
+    },
+
     getCallback: function (targetDiv, properties, sorting, numColumns, fullFilters, drillthroughKey) {
         return function (data) {
             Utils.noData(data, function () {

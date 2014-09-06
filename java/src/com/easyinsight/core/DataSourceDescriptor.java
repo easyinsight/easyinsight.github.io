@@ -34,16 +34,7 @@ public class DataSourceDescriptor extends EIDescriptor {
     private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
     private List<Tag> tags;
     private int rowCount;
-    private boolean inRequestedGroup;
     private Collection<EIDescriptor> prebuilts;
-
-    public boolean isInRequestedGroup() {
-        return inRequestedGroup;
-    }
-
-    public void setInRequestedGroup(boolean inRequestedGroup) {
-        this.inRequestedGroup = inRequestedGroup;
-    }
 
     public Collection<EIDescriptor> getPrebuilts() {
         return prebuilts;

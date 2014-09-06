@@ -17,6 +17,7 @@
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.quicksearch.Roles;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.scorecard.ScorecardDescriptor;
         import com.easyinsight.skin.ApplicationSkin;
@@ -128,7 +129,7 @@
 
             if (dataSourceInvalidate) {
 
-                if (_dataSourceDescriptor.role <= 3) {
+                if (_dataSourceDescriptor.role <= Roles.VIEWER) {
                     realDataSource = true;
                 }
 

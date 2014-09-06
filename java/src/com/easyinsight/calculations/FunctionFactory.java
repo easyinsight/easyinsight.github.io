@@ -198,6 +198,7 @@ public class FunctionFactory {
         } else if (s.equals("drillthroughfieldfilter")) {
             return new DrillthroughFieldFilter();
         } else if (s.equals("parsedate")) {
+            // parsedate("2014/" + [Month Field] + "/" + [Day Field], "yyyy/MM/dd")
             return new ParseDate();
         } else if (s.equals("fixedjoin")) {
             return new FixedJoin();
@@ -325,6 +326,10 @@ public class FunctionFactory {
             return new AssignColors();
         } else if (s.equals("assignbackgroundcolors")) {
             return new AssignBackgroundColors();
+        } else if (s.equals("fiscalyearstart")) {
+            return new FiscalYearStart();
+        } else if (s.equals("fiscalyearend")) {
+            return new FiscalYearEnd();
         } else {
             return null;
         }

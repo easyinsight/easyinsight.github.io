@@ -1,9 +1,23 @@
 <div cg-busy="loading" />
 <div cg-busy="upload" />
+<div class="row">
+    <div class="col-md-12">
+        <h2>Report and Dashboard Header</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>These settings will be used to provide a header image for your reports and dashboards.</p>
+    </div>
+</div>
 <div ng-if="saved" class="alert alert-success">Saved!</div>
 <form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate ng-file-drop-available="dropSupported=true">
     <input type="checkbox" id="report_header_checkbox" ng-model="skin.report_header" /> <label for="report_header_checkbox">Do you want to define a custom header for reports and dashboards?</label>
-    <p>Images:</p>
+    <div class="row">
+        <div class="col-md-3">
+            Uploaded Images:
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-3">
             <p><input id="image_none" type="radio" ng-disabled="!skin.report_header"  name="header_image" ng-model="skin.background_image" value="0" /> <label for="image_none">None</label></p>
@@ -16,10 +30,10 @@
         </div>
     </div>
     <input type="file" accept="image/*" capture="camera" ng-disabled="!skin.report_header"  ng-file-select="onFileSelect($files)">
-    <div ng-file-drop="onFileSelect($files)" ng-class="{'disabled_drop': !skin.report_header}" ng-show="dropSupported" class="droppable_area" ng-file-drag-over-class="'droppable_files'">drop files here</div>
+    <div ng-file-drop="onFileSelect($files)" ng-class="{'disabled_drop': !skin.report_header}" ng-show="dropSupported" class="droppable_area" ng-file-drag-over-class="'droppable_files'">drop file here</div>
     <div eicolorform text="'Background Color'" enabledfielddisabled="true" field="skin.header_background_color" disabledfield="!skin.report_header"></div>
     <div eicolorform text="'Text Color'" enabledfielddisabled="true" field="skin.header_text_color" disabledfield="!skin.report_header"></div>
     <div class="form-group">
-        <input class="btn btn-default" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
+        <input class="btn btn-primary" type="submit" value="Save" ng-disabled="skinForm.$invalid"/>
     </div>
 </form>

@@ -416,13 +416,13 @@ public class FeedStorage {
                 UserStub userStub = (UserStub) feedConsumer;
                 addUserStmt.setLong(1, userStub.getUserID());
                 addUserStmt.setLong(2, feedID);
-                addUserStmt.setInt(3, Roles.SHARER);
+                addUserStmt.setInt(3, Roles.EDITOR);
                 addUserStmt.execute();
             } else if (feedConsumer instanceof GroupDescriptor) {
                 GroupDescriptor groupDescriptor = (GroupDescriptor) feedConsumer;
                 addGroupStmt.setLong(1, groupDescriptor.getGroupID());
                 addGroupStmt.setLong(2, feedID);
-                addGroupStmt.setInt(3, Roles.SHARER);
+                addGroupStmt.setInt(3, Roles.EDITOR);
                 addGroupStmt.execute();
             }
         }
@@ -915,6 +915,19 @@ public class FeedStorage {
 
     }
 
+    private DataSourceGroupDescriptor createGroupDescriptor(long dataFeedID, String feedName, Integer userRole,
+                                                  int feedType, Date lastDataTime, Date creationDate, String owner, boolean accountVisible, String urlKey,
+                                                  int dataSourceBehavior) throws SQLException {
+        DataSourceGroupDescriptor dataSourceDescriptor = new DataSourceGroupDescriptor(feedName, dataFeedID, feedType, accountVisible, dataSourceBehavior);
+        dataSourceDescriptor.setLastDataTime(lastDataTime);
+        dataSourceDescriptor.setRole(userRole);
+        dataSourceDescriptor.setCreationDate(creationDate);
+        dataSourceDescriptor.setAuthor(owner);
+        dataSourceDescriptor.setUrlKey(urlKey);
+        dataSourceDescriptor.setPartOfGroup(true);
+        return dataSourceDescriptor;
+    }
+
     private DataSourceDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
                                                   int feedType, Date lastDataTime, Date creationDate, String owner, boolean accountVisible, String urlKey,
                                                   int dataSourceBehavior) throws SQLException {
@@ -1000,7 +1013,7 @@ public class FeedStorage {
     }
 
     public List<DataSourceDescriptor> getDataSourcesForGroup(long userID, long groupID, EIConnection conn) throws SQLException {
-        List<DataSourceDescriptor> dataSources = new ArrayList<DataSourceDescriptor>();
+        List<DataSourceDescriptor> dataSources = new ArrayList<>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                 "DATA_FEED.FEED_TYPE, last_refresh_start, DATA_FEED.account_visible, DATA_FEED.api_key, refresh_behavior " +
                 " FROM (upload_policy_groups, DATA_FEED) WHERE " +
@@ -1018,9 +1031,8 @@ public class FeedStorage {
                 lastDataTime = new Date(lastTime.getTime());
             }
 
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SUBSCRIBER, feedType, lastDataTime, null, null, rs.getBoolean(5), rs.getString(6),
+            DataSourceGroupDescriptor feedDescriptor = createGroupDescriptor(dataFeedID, feedName, Roles.SUBSCRIBER, feedType, lastDataTime, null, null, rs.getBoolean(5), rs.getString(6),
                     rs.getInt(7));
-            feedDescriptor.setInRequestedGroup(true);
             dataSources.add(feedDescriptor);
         }
         queryStmt.close();
@@ -1155,7 +1167,7 @@ public class FeedStorage {
             } else {
                 lastDataTime = creationDate;
             }
-            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.SHARER, feedType, lastDataTime, creationDate, name, rs.getBoolean(6), rs.getString(7), rs.getInt(8));
+            DataSourceDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, Roles.EDITOR, feedType, lastDataTime, creationDate, name, rs.getBoolean(6), rs.getString(7), rs.getInt(8));
             descriptorList.add(feedDescriptor);
         }
         queryStmt.close();
@@ -1284,7 +1296,7 @@ public class FeedStorage {
         uploadPolicy.setMarketplaceVisible(marketplaceVisible);
         List<FeedConsumer> owners = new ArrayList<FeedConsumer>();
         List<FeedConsumer> viewers = new ArrayList<FeedConsumer>();
-        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL, USER.ACCOUNT_ID, USER.FIRST_NAME FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
+        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL, USER.ACCOUNT_ID, USER.FIRST_NAME, USER.ANALYST FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
                 "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID");
         policyUserStmt.setLong(1, feedID);
         ResultSet usersRS = policyUserStmt.executeQuery();
@@ -1296,7 +1308,7 @@ public class FeedStorage {
             String email = usersRS.getString(5);
             long accountID = usersRS.getLong(6);
             String firstName = usersRS.getString(7);
-            UserStub userStub = new UserStub(userID, userName, email, name, accountID, firstName);
+            UserStub userStub = new UserStub(userID, userName, email, name, accountID, firstName, usersRS.getBoolean("user.analyst"));
             if (role == Roles.OWNER) {
                 owners.add(userStub);
             } else {

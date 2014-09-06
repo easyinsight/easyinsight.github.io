@@ -417,3 +417,7 @@ h2 {
 .tag-value {
     cursor:  pointer;
 }
+
+.combineSourcesChoices {
+    padding: 10px;
+}

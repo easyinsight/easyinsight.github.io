@@ -1,8 +1,8 @@
 <div class="form-group">
     <label>{{ text }}</label>
     <div>
-        <input type="checkbox" ng-model="enabled_field" ng-if="!enabled_field_disabled" ng-disabled="disabled_field" />
-        <input id="summary_text_color" type="text" colorpicker="hex" ng-model="field" ng-disabled="disabled_field" />
+        <input type="checkbox" ng-model="skin[enabled_field]" ng-if="!enabled_field_disabled" ng-disabled="disabled_field" />
+        <input type="text" colorpicker="hex" ng-model="field" ng-disabled="disabled_field" />
         <span class="color_swatch" ng-style="{ 'background-color': field }" />
     </div>
 </div>

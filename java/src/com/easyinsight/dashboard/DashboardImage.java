@@ -2,10 +2,15 @@ package com.easyinsight.dashboard;
 
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FilterDefinition;
+import com.easyinsight.analysis.FilterHTMLMetadata;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.scorecard.Scorecard;
+import com.easyinsight.util.HTMLPolicy;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,6 +55,14 @@ public class DashboardImage extends DashboardElement {
         }
         insertStmt.execute();
         return id;
+    }
+
+    @Override
+    public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
+        JSONObject textObject = super.toJSON(metadata, parentFilters);
+        textObject.put("type", "image");
+        textObject.put("item", imageDescriptor.getId());
+        return textObject;
     }
 
     @Override
