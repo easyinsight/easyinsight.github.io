@@ -479,6 +479,9 @@
 
 <script type="text/template" id="filters_template">
     <div class="filters">
+        <% if (filter_values.length > 0) { %>
+        <div class="filterBoxLabel">Filters:</div>
+        <% } %>
             <% _.each(_.select(filter_values, function(e, i, l) { return e.visible }), function(e, i, l) { %>
             <%= Filter.create(e, typeof(parent_id) == "undefined" ? '' : parent_id, type) %>
             <% }) %>
