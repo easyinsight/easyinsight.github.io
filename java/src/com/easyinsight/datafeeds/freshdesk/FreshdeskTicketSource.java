@@ -181,8 +181,8 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                 try {
                     List<Map> surveys = runRestRequestForList("tickets/" + displayID + "/surveys.json", client, freshdeskCompositeSource);
                     surveyMap.put(displayID, surveys);
-                } catch (ClassCastException e) {
-                    LogClass.error(e);
+                } catch (Exception e) {
+                    //LogClass.error(e);
                     // ignore, feature is locked
                 }
 
