@@ -45,12 +45,6 @@ public class AsyncListServlet extends HtmlServlet {
 
         WSListDefinition listDefinition = (WSListDefinition) report;
 
-
-
-
-
-        System.out.println(request.getParameter("iSortCol_1"));
-
         String uid = request.getParameter("uid");
 
         DataSet dataSet = DataService.listDataSetViaCache(report, insightRequestMetadata, conn, uid);
@@ -217,7 +211,6 @@ public class AsyncListServlet extends HtmlServlet {
         returnObject.put("iTotalRecords", totalRecords);
         returnObject.put("iTotalDisplayRecords", totalRecords);
         returnObject.put("rowData", results);
-        System.out.println(returnObject);
         response.setContentType("application/json");
         response.getOutputStream().write(returnObject.toString().getBytes());
         response.getOutputStream().flush();
