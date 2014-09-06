@@ -9,6 +9,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.export.MultiSummaryData;
+import com.easyinsight.logging.LogClass;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,25 +62,32 @@ public class AsyncMultiSummaryServlet extends HtmlServlet {
 
             HigherLevelComparator rowComparator = new HigherLevelComparator();
             boolean sort = false;
-            for (int i = 0; i < listDefinition.getCoreItems().size(); i++) {
-                // what's the sort column
-                String sortColumn = request.getParameter("iSortCol_" + (i));
-                // which direction is it sorting
-                String sortDirection = request.getParameter("sSortDir_" + (i));
+            try {
+                for (int i = 0; i < listDefinition.getCoreItems().size(); i++) {
+                    // what's the sort column
+                    String sortColumn = request.getParameter("iSortCol_" + (i));
+                    // which direction is it sorting
+                    String sortDirection = request.getParameter("sSortDir_" + (i));
 
-                if (sortColumn != null) {
-                    sort = true;
-                    AnalysisItem item = listDefinition.getCoreItems().get(Integer.parseInt(sortColumn) - 1);
-                    boolean descending = sortDirection.equals("desc");
-                    rowComparator.addSortKey(item, !descending);
-                } /*else {
-                    break;
-                }*/
+                    if (sortColumn != null) {
+                        sort = true;
+                        int index = Integer.parseInt(sortColumn) - 1;
+                        if (index != -1) {
+                            AnalysisItem item = listDefinition.getCoreItems().get(index);
+                            boolean descending = sortDirection.equals("desc");
+                            rowComparator.addSortKey(item, !descending);
+                        }
+                    } /*else {
+                        break;
+                    }*/
 
-            }
+                }
 
-            if (sort) {
-                multiSummaryData.sort(rowComparator);
+                if (sort) {
+                    multiSummaryData.sort(rowComparator);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
             }
 
             java.util.List<AnalysisItem> items = new java.util.ArrayList<>(listDefinition.getCoreItems());
