@@ -175,7 +175,7 @@ public class WSTextDefinition extends WSAnalysisDefinition {
     }
 
     public String createText(Map<String, DerivedAnalysisDimension> map, DataSet dataSet) {
-        if (dataSet.getRows().size() == 0) {
+        if (dataSet.getRows().size() == 0 || getText() == null) {
             return "";
         }
         System.out.println(getText());
