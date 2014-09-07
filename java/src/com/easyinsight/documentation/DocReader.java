@@ -239,7 +239,7 @@ public class DocReader {
                 pageResults = pageResults.substring(0, insertPoint) + insertContent + pageResults.substring(insertPoint);
             }
 
-           // MemCachedManager.instance().add(cacheKey, 500000, pageResults);
+            MemCachedManager.instance().add(cacheKey, 500000, pageResults);
         }
         return pageResults;
     }
