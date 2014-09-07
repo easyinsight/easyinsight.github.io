@@ -46,7 +46,7 @@ public class DayOfWeek extends Function {
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
                 calendar.set(Calendar.DAY_OF_WEEK, dayToSet);
-                System.out.println("Setting to " + dayToSet + " with timezone = " + timeZone + " gave time = " + calendar.getTime());
+                System.out.println("Setting to " + dayToSet + " with timezone = " + string + " gave time = " + calendar.getTime() + " from start = " + startDate);
                 return new DateValue(calendar.getTime());
             } else {
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
