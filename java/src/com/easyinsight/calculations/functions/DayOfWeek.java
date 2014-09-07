@@ -50,7 +50,16 @@ public class DayOfWeek extends Function {
             }
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
-                Date result = Date.from(zdt.with(ChronoField.DAY_OF_WEEK, dayToSet).toInstant());
+                java.time.DayOfWeek dow = translateDayOfWeek(dayToSet);
+                java.time.DayOfWeek currentDay = zdt.getDayOfWeek();
+                java.time.DayOfWeek firstDayOfWeek = translateDayOfWeek(SecurityUtil.getFirstDayOfWeek());
+
+                if (firstDayOfWeek.getValue() == java.time.DayOfWeek.SUNDAY.getValue() && currentDay.getValue() == java.time.DayOfWeek.SUNDAY.getValue() &&
+                        dow.getValue() != java.time.DayOfWeek.SUNDAY.getValue()) {
+                    zdt = zdt.plusDays(1);
+                }
+
+                Date result = Date.from(zdt.with(ChronoField.DAY_OF_WEEK, dow.getValue()).toInstant());
 
 
                 System.out.println("Setting to " + dayToSet + " gave result = " + result);
@@ -62,6 +71,36 @@ public class DayOfWeek extends Function {
         } else {
             return new EmptyValue();
         }
+    }
+
+    protected java.time.DayOfWeek translateDayOfWeek(int dayToSet) {
+        java.time.DayOfWeek dow;
+        switch(dayToSet) {
+            case Calendar.SUNDAY:
+                dow = java.time.DayOfWeek.SUNDAY;
+                break;
+            case Calendar.MONDAY:
+                dow = java.time.DayOfWeek.MONDAY;
+                break;
+            case Calendar.TUESDAY:
+                dow = java.time.DayOfWeek.TUESDAY;
+                break;
+            case Calendar.WEDNESDAY:
+                dow = java.time.DayOfWeek.WEDNESDAY;
+                break;
+            case Calendar.THURSDAY:
+                dow = java.time.DayOfWeek.THURSDAY;
+                break;
+            case Calendar.FRIDAY:
+                dow = java.time.DayOfWeek.FRIDAY;
+                break;
+            case Calendar.SATURDAY:
+                dow = java.time.DayOfWeek.SATURDAY;
+                break;
+            default:
+                throw new RuntimeException();
+        }
+        return dow;
     }
 
     public int getParameterCount() {
