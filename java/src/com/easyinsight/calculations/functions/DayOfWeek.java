@@ -9,6 +9,7 @@ import com.easyinsight.security.SecurityUtil;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -45,6 +46,7 @@ public class DayOfWeek extends Function {
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
                 calendar.set(Calendar.DAY_OF_WEEK, dayToSet);
+                System.out.println("Setting to " + dayToSet + " with timezone = " + timeZone + " gave time = " + calendar.getTime());
                 return new DateValue(calendar.getTime());
             } else {
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
@@ -57,5 +59,9 @@ public class DayOfWeek extends Function {
 
     public int getParameterCount() {
         return -1;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) + " - " + Calendar.getInstance().getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()));
     }
 }
