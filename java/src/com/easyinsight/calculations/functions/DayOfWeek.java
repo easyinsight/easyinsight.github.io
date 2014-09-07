@@ -7,6 +7,10 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.security.SecurityUtil;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -32,6 +36,10 @@ public class DayOfWeek extends Function {
         if (startDate != null) {
             Calendar calendar = Calendar.getInstance();
             int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+            ZonedDateTime zdt = startDate.toInstant().atZone(ZoneId.ofOffset("", ZoneOffset.ofHours(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+
+            System.out.println(zdt + " - " + zdt.getDayOfWeek() + " - " + zdt.with(ChronoField.DAY_OF_WEEK, java.time.DayOfWeek.SUNDAY.getValue()));
+
             String string;
             if (time > 0) {
                 string = "GMT-"+Math.abs(time);
@@ -40,14 +48,13 @@ public class DayOfWeek extends Function {
             } else {
                 string = "GMT";
             }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-            calendar.setTimeZone(timeZone);
-            calendar.setTimeInMillis(startDate.getTime());
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
-                calendar.set(Calendar.DAY_OF_WEEK, dayToSet);
-                System.out.println("Setting to " + dayToSet + " with timezone = " + string + " gave time = " + calendar.getTime() + " from start = " + startDate);
-                return new DateValue(calendar.getTime());
+                Date result = Date.from(zdt.with(ChronoField.DAY_OF_WEEK, dayToSet).toInstant());
+
+
+                System.out.println("Setting to " + dayToSet + " gave result = " + result);
+                return new DateValue(result);
             } else {
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
             }
