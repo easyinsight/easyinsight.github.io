@@ -446,6 +446,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.HAPPYFOX_TICKET, HappyFoxTicketSource.class);
         registerType(FeedType.HAPPYFOX_CONTACTS, HappyFoxContactSource.class);
         registerType(FeedType.FRESHDESK_SURVEY, FreshdeskSurveySource.class);
+        registerType(FeedType.SAMPLE_TASKS, SampleTaskSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
