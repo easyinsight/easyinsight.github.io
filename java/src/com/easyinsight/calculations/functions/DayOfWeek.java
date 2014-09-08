@@ -12,6 +12,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -47,21 +50,19 @@ public class DayOfWeek extends Function {
 
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
+
                 java.time.DayOfWeek dow = translateDayOfWeek(dayToSet);
-                java.time.DayOfWeek currentDay = zdt.getDayOfWeek();
                 java.time.DayOfWeek firstDayOfWeek = translateDayOfWeek(SecurityUtil.getFirstDayOfWeek());
 
-                // if first day of week = sunday, it's currently sunday, and we're setting to a non-sunday...
+                System.out.println("First day of week = " + firstDayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()));
 
-                if (firstDayOfWeek.getValue() == java.time.DayOfWeek.SUNDAY.getValue() && currentDay.getValue() == java.time.DayOfWeek.SUNDAY.getValue() &&
-                        dow.getValue() != java.time.DayOfWeek.SUNDAY.getValue()) {
-                    zdt = zdt.plusDays(1);
-                } else if (firstDayOfWeek.getValue() == java.time.DayOfWeek.SUNDAY.getValue() && currentDay.getValue() != java.time.DayOfWeek.SUNDAY.getValue()
-                    && dow.getValue() == java.time.DayOfWeek.SUNDAY.getValue()) {
-                    zdt = zdt.minusWeeks(1);
-                }
+                WeekFields weekFields = WeekFields.of(firstDayOfWeek, 1);
+                TemporalField adjuster = weekFields.dayOfWeek();
+                long tFrom = adjuster.getFrom(dow);
+                zdt = zdt.with(adjuster, tFrom);
 
-                Date result = Date.from(zdt.with(ChronoField.DAY_OF_WEEK, dow.getValue()).toInstant());
+                System.out.println("adjusted to " + zdt);
+                Date result = Date.from(zdt.toInstant());
 
 
                 System.out.println("Setting to " + dayToSet + " - " + dow.getValue() + " - " + dow.getDisplayName(TextStyle.FULL, Locale.getDefault()) + " gave result = " + result);

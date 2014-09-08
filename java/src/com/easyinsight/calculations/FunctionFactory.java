@@ -193,6 +193,8 @@ public class FunctionFactory {
             return new DateFunction();
         } else if (s.equals("nowdate")) {
             return new NowDate();
+        } else if (s.equals("nowdateforfilter")) {
+            return new NowDateForFilter();
         } else if (s.equals("additionalgrouping")) {
             return new AdditionalGroupingField();
         } else if (s.equals("drillthroughfieldfilter")) {
