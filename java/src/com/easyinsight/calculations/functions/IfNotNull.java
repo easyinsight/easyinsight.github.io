@@ -22,7 +22,7 @@ public class IfNotNull extends Function {
         } catch (IndexOutOfBoundsException e) {
             throw new FunctionException("The notnull() function requires an even number of parameters.");
         }
-        return EmptyValue.EMPTY_VALUE;
+        return new EmptyValue();
     }
 
     public int getParameterCount() {

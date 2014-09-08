@@ -95,11 +95,11 @@ public class Row implements IRow, Serializable, Cloneable {
     public Value getValue(Key rowName) {
         Short key = dataSetKeys.getKey(rowName);
         if (key >= valueMap.length) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         Value value = valueMap[key];
         if (value == null) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         return value;
     }
@@ -107,14 +107,14 @@ public class Row implements IRow, Serializable, Cloneable {
     public Value getValueNoAdd(Key rowName) {
         Short key = dataSetKeys.getKeyNoAdd(rowName);
         if (key == null) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         if (key >= valueMap.length) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         Value value = valueMap[key];
         if (value == null) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         return value;
     }
@@ -122,11 +122,11 @@ public class Row implements IRow, Serializable, Cloneable {
     public Value getValue(AnalysisItem analysisItem) {
         Short key = dataSetKeys.getKey(analysisItem);
         if (key >= valueMap.length) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         Value value = valueMap[key];
         if (value == null) {
-            return EmptyValue.EMPTY_VALUE;
+            return new EmptyValue();
         }
         return value;
     }
