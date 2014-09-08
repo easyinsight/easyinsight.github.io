@@ -617,6 +617,8 @@ public class DeliveryScheduledTask extends ScheduledTask {
         ReportDelivery reportDelivery = null;
         try {
             reportDelivery = (ReportDelivery) ScheduledActivity.createActivity(ScheduledActivity.REPORT_DELIVERY, activityID, conn);
+        } catch (OrphanActivityException oae) {
+            // ignore
         } catch (Exception e) {
             LogClass.userError("On loading activity " + activityID, e);
         }

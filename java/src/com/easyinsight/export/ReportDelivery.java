@@ -339,7 +339,7 @@ public class ReportDelivery extends ScheduledDelivery {
             setDeliveryExtension(DeliveryExtension.load(conn, reportDeliveryID, 0, reportFormat, 0));
         } else {
             queryStmt.close();
-            throw new RuntimeException("Orphan activity " + getScheduledActivityID());
+            throw new OrphanActivityException("Orphan activity " + getScheduledActivityID());
         }
     }
 
