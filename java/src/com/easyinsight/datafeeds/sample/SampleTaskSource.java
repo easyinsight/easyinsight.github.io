@@ -52,7 +52,7 @@ public class SampleTaskSource extends ServerDataSourceDefinition {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         try {
-            for (int i = -50; i < 50; i++) {
+            for (int i = -500; i < 500; i++) {
                 ZonedDateTime zdt = ZonedDateTime.now();
                 zdt = zdt.plusDays(i);
                 IRow row = dataSet.createRow();
