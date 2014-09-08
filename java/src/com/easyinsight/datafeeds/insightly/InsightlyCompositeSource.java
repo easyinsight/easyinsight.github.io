@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.insightly;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
@@ -35,6 +36,11 @@ public class InsightlyCompositeSource extends CompositeServerDataSource {
     @Override
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Insightly API Key:", "insightlyApiKey", "You can find the token on your Insightly page under User Settings - API Key.");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
     private Map<String, List<InsightlyLink>> linkedOrgMap;
