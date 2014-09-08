@@ -63,7 +63,26 @@
 </jsp:include>
 <div class="container corePageWell" style="margin-top: 20px">
 
-    <% if (existingURLKey != null) { %>
+    <%
+        if (request.getParameter("error") != null) {
+            if (request.getSession().getAttribute("connectionError") == null) {
+    %>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="alert alert-danger">Something went wrong in trying to create the connection. Check the configuration information you used.</div>
+            </div>
+        </div><%
+} else {
+%>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="alert alert-danger"><%= request.getSession().getAttribute("connectionError")%></div>
+            </div>
+        </div>
+    <%
+            request.getSession().removeAttribute(factory.getActionSummary());
+            }
+        } else if (existingURLKey != null) { %>
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
         <div class="alert alert-warning">You already have a data source of this connection type at <a href="<%=existingURLKey%>"><%=existingURLKey%></a>. You should probably be using that data source instead of creating a new one.</div>
@@ -76,18 +95,17 @@
         <div class="col-md-6 col-md-offset-3">
             <form class="well" method="post" action="/app/html/connectionCreationAction.jsp">
                 <div style="margin-bottom: 10px"><strong><%= factory.getTitle() %></strong></div>
-                <%
-                    if (request.getParameter("error") != null) {
-                        %><div style="margin-bottom: 10px">Something went wrong in trying to create the connection. Check the configuration information you used.</div><%
-                }   %>
                 <input type="hidden" id="connectionType" name="connectionType" value="<%= connectionID%>"/>
+                <% if (factory.getActionSummary() != null) { %>
+                <p style="margin-top:15px;margin-bottom:15px"><%= factory.getActionSummary() %></p>
+                <% } %>
                 <%
                     for (HTMLConnectionProperty property : factory.getProperties()) {
 
                         %>
-                <label for="<%= property.getSafeProperty()%>" class="promptLabel"><%=property.getField()%></label>
-                <%
-                    if (property.isPassword()) {
+                <label for="<%= property.getSafeProperty()%>" class="promptLabel" style="font-weight:bold"><%=property.getField()%></label>
+                 <%
+                if (property.isPassword()) {
                 %>
                 <input type="password" class="form-control" name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>"/>
                 <%
@@ -97,6 +115,11 @@
                 <%
                     }
                 %>
+                <%
+                    if (property.getExplanation() != null) { %>
+                <p class="helpBlock" style="font-size:12px"><%= property.getExplanation()%></p>
+
+                <%    } %>
                 <%
                     }
                 %>
