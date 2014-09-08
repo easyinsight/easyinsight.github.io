@@ -189,7 +189,7 @@ public class RollingFilterDefinition extends FilterDefinition {
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_QUARTER, "Next Full Quarter", "dayofquarter(nowdate() + quarters(1), 1)", "dayofquarter(nowdate() + quarters(1), daysinquarter(nowdate()))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_YEAR, "Next Full Year", "dayofyear(nowdate() + years(1), 1)", "dayofyear(nowdate() + years(1), daysinyear(nowdate()))"));
 
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_WEEK, "This Week", "dayofweek(nowdate(), 1)", "dayofweek(nowdate(), 7)"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_WEEK, "This Week", "dayofweek(now(), firstdayofweek())", "dayofweek(now(), lastdayofweek())"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_MONTH, "This Month", "dayofmonth(nowdate(), 1)", "dayofmonth(nowdate(), daysinmonth(nowdate()))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_QUARTER, "This Quarter", "dayofquarter(nowdate(), 1)", "dayofquarter(nowdate(), daysinquarter(nowdate()))"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_YEAR, "This Year", "dayofyear(nowdate(), 1)", "dayofyear(nowdate(), daysinyear(nowdate()))"));

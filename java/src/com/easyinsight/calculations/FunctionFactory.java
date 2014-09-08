@@ -330,6 +330,10 @@ public class FunctionFactory {
             return new FiscalYearStart();
         } else if (s.equals("fiscalyearend")) {
             return new FiscalYearEnd();
+        } else if (s.equals("firstdayofweek")) {
+            return new FirstDayOfWeek();
+        } else if (s.equals("lastdayofweek")) {
+            return new LastDayOfWeek();
         } else {
             return null;
         }

@@ -10,6 +10,7 @@ import com.easyinsight.security.SecurityUtil;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,40 +32,53 @@ public class DayOfWeek extends Function {
             if (start.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) start;
                 startDate = dateValue.getDate();
+            } else if (start.type() == Value.NUMBER) {
+                startDate = new Date(start.toDouble().longValue());
             }
         }
         if (startDate != null) {
             Calendar calendar = Calendar.getInstance();
-            int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+
+
             ZonedDateTime zdt = startDate.toInstant().atZone(ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60))));
 
             System.out.println(zdt + " - " + zdt.getDayOfWeek() + " - " + zdt.with(ChronoField.DAY_OF_WEEK, java.time.DayOfWeek.SUNDAY.getValue()));
 
-            String string;
-            if (time > 0) {
-                string = "GMT-"+Math.abs(time);
-            } else if (time < 0) {
-                string = "GMT+"+Math.abs(time);
-            } else {
-                string = "GMT";
-            }
+
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
                 java.time.DayOfWeek dow = translateDayOfWeek(dayToSet);
                 java.time.DayOfWeek currentDay = zdt.getDayOfWeek();
                 java.time.DayOfWeek firstDayOfWeek = translateDayOfWeek(SecurityUtil.getFirstDayOfWeek());
 
+                // if first day of week = sunday, it's currently sunday, and we're setting to a non-sunday...
+
                 if (firstDayOfWeek.getValue() == java.time.DayOfWeek.SUNDAY.getValue() && currentDay.getValue() == java.time.DayOfWeek.SUNDAY.getValue() &&
                         dow.getValue() != java.time.DayOfWeek.SUNDAY.getValue()) {
                     zdt = zdt.plusDays(1);
+                } else if (firstDayOfWeek.getValue() == java.time.DayOfWeek.SUNDAY.getValue() && currentDay.getValue() != java.time.DayOfWeek.SUNDAY.getValue()
+                    && dow.getValue() == java.time.DayOfWeek.SUNDAY.getValue()) {
+                    zdt = zdt.minusWeeks(1);
                 }
 
                 Date result = Date.from(zdt.with(ChronoField.DAY_OF_WEEK, dow.getValue()).toInstant());
 
 
-                System.out.println("Setting to " + dayToSet + " gave result = " + result);
+                System.out.println("Setting to " + dayToSet + " - " + dow.getValue() + " - " + dow.getDisplayName(TextStyle.FULL, Locale.getDefault()) + " gave result = " + result);
                 return new DateValue(result);
             } else {
+                int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
+                String string;
+                if (time > 0) {
+                    string = "GMT-"+Math.abs(time);
+                } else if (time < 0) {
+                    string = "GMT+"+Math.abs(time);
+                } else {
+                    string = "GMT";
+                }
+                TimeZone timeZone = TimeZone.getTimeZone(string);
+                calendar.setTimeZone(timeZone);
+                calendar.setTimeInMillis(startDate.getTime());
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
             }
             return new NumericValue(calendar.get(Calendar.DAY_OF_WEEK));
@@ -108,6 +122,6 @@ public class DayOfWeek extends Function {
     }
 
     public static void main(String[] args) {
-        System.out.println(Calendar.getInstance().get(Calendar.DAY_OF_WEEK) + " - " + Calendar.getInstance().getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()));
+
     }
 }
