@@ -291,7 +291,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                 throw new HighRiseLoginException("Could not locate a Highrise instance at " + getUrl());
             } else {
-                throw new HighRiseLoginException("Invalid Highrise authentication token--you can find the token under your the My Info link in the upper right corner on your Highrise page.");
+                throw new HighRiseLoginException("Invalid Highrise authentication token--you can find the token under your My Info link in the upper right corner on your Highrise page.");
             }
 
         }
@@ -779,7 +779,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             placeHolder.setKey(new NamedKey("Case Note Join Placeholder"));
             placeHolder.setDerivationCode("firstvalue(\"Placeholder\", [Case Note Body], [Join Case ID])");
             intentions.add(new CustomFieldIntention(placeHolder));
-            FilterValueDefinition excludeFilter = new FilterValueDefinition(placeHolder, false, Arrays.asList((Object) EmptyValue.EMPTY_VALUE));
+            FilterValueDefinition excludeFilter = new FilterValueDefinition(placeHolder, false, Arrays.asList(new EmptyValue()));
             excludeFilter.setShowOnReportView(false);
             Set<AnalysisItem> items = report.getAllAnalysisItems();
             if (items.isEmpty()) {
