@@ -279,9 +279,6 @@ public class Crosstab {
                     }
                     CrosstabValue cv = new CrosstabValue(new NumericValue(sum), null, false, true, analysisMeasure);
                     array[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset][(i * crosstabDefinition.getMeasures().size()) + j + crosstabDefinition.getRows().size()] = cv;
-                    Section rowSection = rowSections.get(j);
-                    Map<AnalysisItem, Value> map = intersectionMap.get(new Intersection(rowSection, columnSection));
-                    //cv.addDTValue();
                 }
             } else {
                 Value sectionValue = columnSection.values.get(0);
