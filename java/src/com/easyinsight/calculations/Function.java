@@ -183,7 +183,7 @@ public abstract class Function implements IFunction {
                 char end = string.charAt(string.length() - 1);
                 if (first == '"' && end == '"') {
                     if (string.length() == 2) {
-                        return EmptyValue.EMPTY_VALUE;
+                        return new EmptyValue();
                     }
                     return new com.easyinsight.core.StringValue(string.substring(1, string.length() - 1));
                 }

@@ -6,6 +6,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -33,33 +34,27 @@ public class TrelloCardSource extends TrelloBaseSource {
     public static final String CARD_ID = "Card ID";
     public static final String CARD_BOARD_ID = "Card Board ID";
     public static final String CARD_LIST_ID = "Card List ID";
+    public static final String CARD_COUNT = "Card Count";
 
     public TrelloCardSource() {
         setFeedName("Cards");
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(CARD_NAME, CARD_ID, CARD_BOARD_ID, CARD_LIST_ID, CARD_DUE_AT, CARD_DESCRIPTION, CARD_CLOSED);
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(CARD_NAME, new AnalysisDimension());
+        fieldBuilder.addField(CARD_ID, new AnalysisDimension());
+        fieldBuilder.addField(CARD_BOARD_ID, new AnalysisDimension());
+        fieldBuilder.addField(CARD_LIST_ID, new AnalysisDimension());
+        fieldBuilder.addField(CARD_DUE_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(CARD_DESCRIPTION, new AnalysisDimension());
+        fieldBuilder.addField(CARD_CLOSED, new AnalysisDimension());
+        fieldBuilder.addField(CARD_COUNT, new AnalysisMeasure());
     }
 
     @Override
     public FeedType getFeedType() {
         return FeedType.TRELLO_CARD;
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(CARD_NAME)));
-        fields.add(new AnalysisDimension(keys.get(CARD_DESCRIPTION)));
-        fields.add(new AnalysisDimension(keys.get(CARD_CLOSED)));
-        fields.add(new AnalysisDimension(keys.get(CARD_ID)));
-        fields.add(new AnalysisDimension(keys.get(CARD_LIST_ID)));
-        fields.add(new AnalysisDimension(keys.get(CARD_BOARD_ID)));
-        fields.add(new AnalysisDateDimension(keys.get(CARD_DUE_AT), true, AnalysisDateDimension.DAY_LEVEL));
-        return fields;
     }
 
     @Override
@@ -113,12 +108,14 @@ public class TrelloCardSource extends TrelloBaseSource {
                     row.addValue(CARD_BOARD_ID, card.get("idBoard").toString());
                     row.addValue(CARD_LIST_ID, card.get("idList").toString());
                     row.addValue(CARD_CLOSED, card.get("closed").toString());
+                    row.addValue(CARD_DESCRIPTION, card.get("description").toString());
                     try {
                         Date dueDate = sdf.parse(card.get("due").toString());
                         row.addValue(CARD_DUE_AT, new DateValue(dueDate));
                     } catch (ParseException e) {
                         // ignore
                     }
+                    row.addValue(CARD_COUNT, 1);
                 }
             }
         } catch (Exception e) {

@@ -193,6 +193,8 @@ public class FunctionFactory {
             return new DateFunction();
         } else if (s.equals("nowdate")) {
             return new NowDate();
+        } else if (s.equals("nowdateforfilter")) {
+            return new NowDateForFilter();
         } else if (s.equals("additionalgrouping")) {
             return new AdditionalGroupingField();
         } else if (s.equals("drillthroughfieldfilter")) {
@@ -330,6 +332,10 @@ public class FunctionFactory {
             return new FiscalYearStart();
         } else if (s.equals("fiscalyearend")) {
             return new FiscalYearEnd();
+        } else if (s.equals("firstdayofweek")) {
+            return new FirstDayOfWeek();
+        } else if (s.equals("lastdayofweek")) {
+            return new LastDayOfWeek();
         } else {
             return null;
         }

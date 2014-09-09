@@ -17,7 +17,7 @@
         } finally {
             Database.closeConnection(conn);
         }
-
+        request.getSession().removeAttribute("connectionError");
         HTMLConnectionFactory factory = new HTMLConnectionFactory(connectionType);
         factory.actionProcess(request, response, dataSource);
     } finally {

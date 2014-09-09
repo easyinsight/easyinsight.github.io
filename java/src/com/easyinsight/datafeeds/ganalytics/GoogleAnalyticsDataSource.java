@@ -130,6 +130,10 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String UNIQUE_EVENTS = "ga:uniqueEvents";
     public static final String EVENT_VALUE = "ga:eventValue";
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
+    }
+
     public static String[] generalDimensions = { BROWSER, BROWSER_VERSION, CITY, CONNECTION_SPEED, CONTINENT, CONTINENT,
         COUNT_OF_VISITS, COUNTRY, DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LATITUDE,
         LONGITUDE, NETWORK_DOMAIN, LANGUAGE, NETWORK_DOMAIN, NETWORK_LOCATION, PAGE_DEPTH, OPERATING_SYSTEM,

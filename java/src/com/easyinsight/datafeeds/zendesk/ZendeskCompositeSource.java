@@ -276,9 +276,9 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     }
 
     public void configureFactory(HTMLConnectionFactory factory) {
-        factory.addField("Zendesk URL", "url", "Your Highrise URL is the browser URL you normally use to connect to Highrise. For example, if you access Highrise as yourcompanyname.highrisehq.com, put yourcompanyname in as the Highrise URL.");
-        factory.addField("Zendesk User Name", "zdUserName", "You can find the token on your Highrise page under My Info - API Token.");
-        factory.addField("Zendesk API Authentication Token:", "zdApiKey", "You can find the token on your Highrise page under My Info - API Token.");
+        factory.addField("Zendesk URL", "url", "Your Zendesk URL is the browser URL you normally use to connect to Zendesk. For example, if you access Zendesk as yourcompanyname.zendesk.com, put yourcompanyname in as the Zendesk URL.");
+        factory.addField("Zendesk User Name", "zdUserName");
+        factory.addField("Zendesk API Token:", "zdApiKey", "You can find the API token on your Zendesk page under Admin - Channels - API - Token Access.");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }

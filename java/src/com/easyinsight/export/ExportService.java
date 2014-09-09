@@ -1474,6 +1474,9 @@ public class ExportService {
 
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf, @Nullable String explicitDateFormat, boolean skipSanitize) {
         String valueString;
+        if (headerItem == null) {
+            return "";
+        }
         if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure analysisMeasure = (AnalysisMeasure) headerItem;
             double doubleValue = value.toDouble();

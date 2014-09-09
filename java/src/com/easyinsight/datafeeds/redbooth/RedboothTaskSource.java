@@ -185,7 +185,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
                 row.addValue(RESOLVED_SUBTASKS, getJSONValue(org, "resolved_subtasks_count"));
                 row.addValue(COMPLETED_AT, completionDate);
                 row.addValue(keys.get(STATUS), status);
-                String url = "https://redbooth.com/a/#!/projects/" + id + "/tasks/" + id;
+                String url = "https://redbooth.com/a/#!/projects/" + projectID + "/tasks/" + id;
                 row.addValue(TASK_URL, url);
                 row.addValue(CREATED_AT, getDate(org, "created_at"));
                 row.addValue(UPDATED_AT, getDate(org, "updated_at"));

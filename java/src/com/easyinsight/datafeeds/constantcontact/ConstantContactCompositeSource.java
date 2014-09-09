@@ -3,10 +3,7 @@ package com.easyinsight.datafeeds.constantcontact;
 import com.easyinsight.analysis.*;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.IServerDataSourceDefinition;
-import com.easyinsight.datafeeds.UserMessageException;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.kpi.KPI;
@@ -122,6 +119,11 @@ public class ConstantContactCompositeSource extends CompositeServerDataSource {
 
     private ContactListCache contactListCache;
     private CampaignCache campaignCache;
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Constant Contact User Name", "ccUserName");
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
+    }
 
     protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
         List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();

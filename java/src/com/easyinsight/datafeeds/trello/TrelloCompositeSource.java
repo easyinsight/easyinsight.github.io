@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.trello;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.UserMessageException;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -122,6 +123,10 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
 
     public void setMemberData(List<Member> memberData) {
         this.memberData = memberData;
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
     }
 
     @Override

@@ -16,7 +16,7 @@ public class FirstValueFunction extends Function {
                 return minusQuotes(v);
             }
         }
-        return EmptyValue.EMPTY_VALUE;
+        return new EmptyValue();
     }
 
     public int getParameterCount() {

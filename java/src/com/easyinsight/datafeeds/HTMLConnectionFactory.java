@@ -24,6 +24,7 @@ public class HTMLConnectionFactory {
     private int type;
     private String title;
     private int dataSourceType;
+    private String actionSummary;
     private List<HTMLConnectionProperty> properties = new ArrayList<HTMLConnectionProperty>();
 
     private String name;
@@ -36,6 +37,10 @@ public class HTMLConnectionFactory {
         dataSource.configureFactory(this);
     }
 
+    public String getActionSummary() {
+        return actionSummary;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -46,6 +51,10 @@ public class HTMLConnectionFactory {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<HTMLConnectionProperty> getProperties() {
@@ -74,14 +83,19 @@ public class HTMLConnectionFactory {
             if (request.getParameter("pdataSourceName") != null) {
                 dataSource.setFeedName(request.getParameter("pdataSourceName"));
             }
-            dataSource.validateCredentials();
-            // launch via ajax
-            if (type == TYPE_OAUTH) {
-                OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
-                servletResponse.sendRedirect(response.getRequestToken());
+            String validation = dataSource.validateCredentials();
+            if (validation != null) {
+                request.getSession().setAttribute("connectionError", validation);
+                servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/connections/"+ dataSource.getFeedType().getType() + "?error=true"));
             } else {
-                new FeedStorage().updateDataFeedConfiguration(dataSource);
-                servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/dataSources/"+ dataSource.getApiKey() + "/createConnection"));
+                // launch via ajax
+                if (type == TYPE_OAUTH) {
+                    OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
+                    servletResponse.sendRedirect(response.getRequestToken());
+                } else {
+                    new FeedStorage().updateDataFeedConfiguration(dataSource);
+                    servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/dataSources/" + dataSource.getApiKey() + "/createConnection"));
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -91,6 +105,9 @@ public class HTMLConnectionFactory {
 
     public HTMLConnectionFactory type(int type) {
         this.type = type;
+        if (type == TYPE_OAUTH) {
+            actionSummary = "You'll need to grant access to Easy Insight to read your data. Click on the Authorize Access button and you'll be redirected to a page for granting access.";
+        }
         return this;
     }
 

@@ -34,8 +34,8 @@ public class FreshdeskCompositeSource extends CompositeServerDataSource {
     }
 
     public void configureFactory(HTMLConnectionFactory factory) {
-        factory.addField("Freshdesk URL", "url", "Your Freshdesk URL is the browser URL you normally use to connect to Freshdesk. For example, if you access Freshdesk as yourcompanyname.freshdesk.com, put yourcompanyname in as the Freshdesk URL.");
-        factory.addField("Freshdesk API Authentication Token:", "token", "You can find the token on your Freshdesk page under My Info - API Token.");
+        factory.addField("Freshdesk URL:", "url", "Your Freshdesk URL is the browser URL you normally use to connect to Freshdesk. For example, if you access Freshdesk as yourcompanyname.freshdesk.com, put yourcompanyname in as the Freshdesk URL.");
+        factory.addField("Freshdesk API Key:", "token", "You can find the token on your Freshdesk page under Profile Settings - API Key.");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
