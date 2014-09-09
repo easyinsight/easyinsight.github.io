@@ -77,10 +77,12 @@ AsyncMultiSummary = {
                 for ( var i=0 ; i<nTrs.length ; i++ )
                 {
                     var data = oSettings.aoData[i];
-                    var nested = data._aData["nestedData"];
-                    var tr = nTrs[i];
-                    var x = $(tr);
-                    $(nested).insertAfter(x);
+                    if (typeof(data._aData) != "undefined") {
+                        var nested = data._aData["nestedData"];
+                        var tr = nTrs[i];
+                        var x = $(tr);
+                        $(nested).insertAfter(x);
+                    }
                 }
                 $(".list_drillthrough").click(function (e) {
 
