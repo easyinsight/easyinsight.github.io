@@ -151,7 +151,7 @@ public class ReportModuleLoader extends EventDispatcher {
                 return new TextModule();
             } else if (moduleName == "TopoModule.swf") {
                 return new HTMLIFrameModule();
-            } else if (moduleName = "MultiSummaryModule.swf") {
+            } else if (moduleName == "MultiSummaryModule.swf") {
                 return new MultiSummaryModule();
             } else if (moduleName == "TextEndUserView.swf") {
                 return new TextEndUserView();
