@@ -54,18 +54,13 @@ public class DayOfWeek extends Function {
                 java.time.DayOfWeek dow = translateDayOfWeek(dayToSet);
                 java.time.DayOfWeek firstDayOfWeek = translateDayOfWeek(SecurityUtil.getFirstDayOfWeek());
 
-                System.out.println("First day of week = " + firstDayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()));
-
                 WeekFields weekFields = WeekFields.of(firstDayOfWeek, 1);
                 TemporalField adjuster = weekFields.dayOfWeek();
                 long tFrom = adjuster.getFrom(dow);
                 zdt = zdt.with(adjuster, tFrom);
 
-                System.out.println("adjusted to " + zdt);
                 Date result = Date.from(zdt.toInstant());
 
-
-                System.out.println("Setting to " + dayToSet + " - " + dow.getValue() + " - " + dow.getDisplayName(TextStyle.FULL, Locale.getDefault()) + " gave result = " + result);
                 return new DateValue(result);
             } else {
                 int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
