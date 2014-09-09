@@ -847,7 +847,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                analysisItem.populateNamedFilters(getFilterDefinitions());
                 List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
@@ -913,11 +912,23 @@ public abstract class WSAnalysisDefinition implements Serializable {
             populate(map, additionalGroupingItems, insightRequestMetadata);
         }
 
+        Set<AnalysisItem> extras = new HashSet<>();
+        for (AnalysisItem item : map.values()) {
+            for (AnalysisItem fItem : item.populateNamedFilters(getFilterDefinitions())) {
+                extras.addAll(fItem.getAnalysisItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure));
+            }
+        }
+        for (AnalysisItem item : extras) {
+            populate(map, item, insightRequestMetadata);
+        }
+
         if (!joinPipeline) {
             for (AnalysisItem analysisItem : map.values()) {
                 insightRequestMetadata.pipelineAssign(analysisItem);
             }
         }
+
+
 
         for (AnalysisItem analysisItem : map.values()) {
             if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {

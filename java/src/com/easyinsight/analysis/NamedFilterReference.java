@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.IComponent;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
 import java.sql.PreparedStatement;
@@ -81,17 +82,19 @@ public class NamedFilterReference extends FilterDefinition {
         filter.timeshift(dataSource, filters);
     }
 
-    public void populateNamedFilters(Collection<FilterDefinition> filters) {
+    @Nullable
+    public FilterDefinition populateNamedFilters(Collection<FilterDefinition> filters) {
         if (this.filter == null) {
             for (FilterDefinition filter : filters) {
                 if (referenceName.equals(filter.getFilterName())) {
                     this.filter = filter;
-                    break;
+                    return this.filter;
                 }
             }
             if (this.filter == null) {
                 throw new ReportException(new GenericReportFault("Could not find a filter named " + referenceName + " as referenced in a named filter reference you defined."));
             }
         }
+        return null;
     }
 }

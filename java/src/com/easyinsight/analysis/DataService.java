@@ -2183,7 +2183,7 @@ public class DataService {
 
             WSTextDefinition analysisDefinition = (WSTextDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-            Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun();
+            Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun(insightRequestMetadata);
             ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillthroughFilters);
             DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
             String text = analysisDefinition.createText(map, dataSet);
@@ -2212,7 +2212,7 @@ public class DataService {
 
     public static String getText(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
-        Map<String, DerivedAnalysisDimension> map = textReport.beforeRun();
+        Map<String, DerivedAnalysisDimension> map = textReport.beforeRun(insightRequestMetadata);
         ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
         DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
         return textReport.createText(map, dataSet);
@@ -2226,7 +2226,7 @@ public class DataService {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-            Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun();
+            Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun(insightRequestMetadata);
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
             String text = analysisDefinition.createText(map, dataSet);
@@ -2377,7 +2377,7 @@ public class DataService {
             if (analysisDefinition instanceof WSTextDefinition) {
                 WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
 
-                map = textReport.beforeRun();
+                map = textReport.beforeRun(insightRequestMetadata);
 
             }
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -2990,6 +2990,7 @@ public class DataService {
             insightRequestMetadata.setStructure(structure);
 
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(allFields, structure, insightRequestMetadata);
+
             if (analysisDefinition.isDataSourceFields()) {
                 Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
                 for (AnalysisItem field : feed.getFields()) {
@@ -3084,12 +3085,6 @@ public class DataService {
 
             for (AnalysisItem analysisItem : analysisItems) {
                 validQueryItems.add(analysisItem);
-                if (analysisItem.getFilters() != null) {
-                    analysisItem.populateNamedFilters(analysisDefinition.getFilterDefinitions());
-                    for (FilterDefinition filterDefinition : analysisItem.getFilters()) {
-                        filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
-                    }
-                }
             }
 
 
