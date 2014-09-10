@@ -23,9 +23,13 @@ import java.text.ParseException;
 public abstract class YouTrackBaseSource extends ServerDataSourceDefinition {
     protected static Document runRestRequest(String path, HttpClient client, Builder builder, YouTrackCompositeSource parentSource) throws ReportException, IOException, ParsingException {
         try {
-            System.out.println(parentSource.getUrl() + path);
-            HttpMethod restMethod = new GetMethod(parentSource.getUrl() + path);
-
+            HttpMethod restMethod = new GetMethod(parentSource.createURL(path)) {
+                @Override
+                public boolean getFollowRedirects() {
+                    return true;
+                }
+            };
+            //restMethod.setFollowRedirects(true);
             //restMethod.setRequestHeader("Accept", "application/xml");
             //restMethod.setRequestHeader("Content-Type", "application/xml");
 

@@ -9,6 +9,9 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.apache.commons.httpclient.params.HttpClientParams;
+import org.apache.commons.httpclient.params.HttpParams;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -50,13 +53,15 @@ public class YouTrackIssueSource extends YouTrackBaseSource {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
         try {
-            Document doc = runRestRequest("/rest/admin/project", new HttpClient(), new Builder(), (YouTrackCompositeSource) parentDefinition);
+            HttpClient client = new HttpClient();
+
+            Document doc = runRestRequest("/rest/admin/project", client, new Builder(), (YouTrackCompositeSource) parentDefinition);
             Nodes projects = doc.query("/projectRefs/project");
             Set<String> fieldNameSet = new HashSet<String>();
             for (int i = 0; i < projects.size(); i++) {
                 Element project = (Element) projects.get(i);
                 String id = project.getAttribute("id").getValue();
-                Document customFieldsDoc = runRestRequest("/rest/admin/project/"+id+"/customfield", new HttpClient(), new Builder(), (YouTrackCompositeSource) parentDefinition);
+                Document customFieldsDoc = runRestRequest("/rest/admin/project/"+id+"/customfield", client, new Builder(), (YouTrackCompositeSource) parentDefinition);
                 Nodes customFieldNodes = customFieldsDoc.query("/projectCustomFieldRefs/projectCustomField");
                 for (int j = 0; j < customFieldNodes.size(); j++) {
                     Element customFieldElement = (Element) customFieldNodes.get(j);

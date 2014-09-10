@@ -87,14 +87,26 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         this.timeEntries = timeEntries;
     }
 
-    public String createURL() {
+    public String createURL(String path) {
         String target;
         if (!url.startsWith("http")) {
-            target = "http://" + url;
+            target = "https://" + url;
         } else {
             target = url;
         }
-        return target;
+        int youtrackIndex = target.indexOf("youtrack");
+        if (youtrackIndex == -1) {
+            if (!target.endsWith("/")) {
+                target += "/";
+            }
+            target += "youtrack/";
+        } else {
+            target = target.substring(0, youtrackIndex + "youtrack".length()) + "/";
+        }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return target + path;
     }
 
     @Override
@@ -103,11 +115,17 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         try {
             if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
                 HttpClient httpClient = new HttpClient();
-                PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
+                PostMethod postMethod = new PostMethod(createURL("/rest/user/login?login="+ytUserName+"&password="+ytPassword)) {
+                    @Override
+                    public boolean getFollowRedirects() {
+                        return true;
+                    }
+                };;
                 postMethod.setRequestHeader("Connection", "keep-alive");
                 postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 httpClient.executeMethod(postMethod);
                 cookie = postMethod.getResponseHeader("Set-Cookie").getValue();
+
             }
         } catch (IOException e) {
             throw new ReportException(new DataSourceConnectivityReportFault("Invalid credentials.", this));
@@ -120,7 +138,12 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         try {
             if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
                 HttpClient httpClient = new HttpClient();
-                PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
+                PostMethod postMethod = new PostMethod(createURL("/rest/user/login?login="+ytUserName+"&password="+ytPassword)) {
+                    @Override
+                    public boolean getFollowRedirects() {
+                        return true;
+                    }
+                };
                 postMethod.setRequestHeader("Connection", "keep-alive");
                 postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 httpClient.executeMethod(postMethod);
