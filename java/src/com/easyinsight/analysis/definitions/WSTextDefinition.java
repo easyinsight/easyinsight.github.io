@@ -2,6 +2,7 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
@@ -132,7 +133,7 @@ public class WSTextDefinition extends WSAnalysisDefinition {
         return properties;
     }
 
-    public Map<String, DerivedAnalysisDimension> beforeRun() {
+    public Map<String, DerivedAnalysisDimension> beforeRun(InsightRequestMetadata insightRequestMetadata) {
         Map<String, DerivedAnalysisDimension> map = new HashMap<>();
 
         if (getText() != null && !"".equals(getText())) {
@@ -151,20 +152,34 @@ public class WSTextDefinition extends WSAnalysisDefinition {
             while (matcher.find()) {
                 String g = matcher.group();
                 String substring = g.substring(1, g.length() - 1).trim();
+                boolean skip = false;
                 DerivedAnalysisDimension dim = new DerivedAnalysisDimension();
+                dim.setApplyBeforeAggregation(false);
                 if (substring.startsWith("[") && substring.endsWith("]")) {
-                    dim.setDerivationCode("format(" + substring + ")");
+                    String subset = substring.substring(1, substring.length() - 1);
+                    for (FilterDefinition filter : getFilterDefinitions()) {
+                        String label = filter.label(false);
+                        if (subset.equals(label)) {
+                            aliasMap.put(g, filter.asString(insightRequestMetadata));
+                            skip = true;
+                        }
+                    }
+                    if (!skip) {
+                        dim.setDerivationCode("format(" + substring + ")");
+                    }
                 } else {
                     dim.setDerivationCode(substring);
                 }
                 System.out.println(substring);
-                String alias = "tmp" + (i++);
-                dim.setKey(new NamedKey(alias));
-                dim.setDisplayName(substring);
-                map.put(alias, dim);
-                aliasMap.put(g, alias);
-                getAddedItems().add(dim);
-                tmpColumns.add(dim);
+                if (!skip) {
+                    String alias = "tmp" + (i++);
+                    dim.setKey(new NamedKey(alias));
+                    dim.setDisplayName(substring);
+                    map.put(alias, dim);
+                    aliasMap.put(g, alias);
+                    getAddedItems().add(dim);
+                    tmpColumns.add(dim);
+                }
             }
             for (Map.Entry<String, String> entry : aliasMap.entrySet()) {
                 setText(getText().replace(entry.getKey(), entry.getValue()));
@@ -175,7 +190,8 @@ public class WSTextDefinition extends WSAnalysisDefinition {
     }
 
     public String createText(Map<String, DerivedAnalysisDimension> map, DataSet dataSet) {
-        if (dataSet.getRows().size() == 0 || getText() == null) {
+        if (getText() == null) {
+            setText(originalText);
             return "";
         }
         System.out.println(getText());
@@ -185,10 +201,16 @@ public class WSTextDefinition extends WSAnalysisDefinition {
         parser.parse(getText());
         //String html = parser.parseToHtml(wikiText);
         String html = writer.toString();
-        IRow row = dataSet.getRow(0);
-        for (Map.Entry<String, DerivedAnalysisDimension> entry : map.entrySet()) {
-            String string = row.getValue(entry.getValue().createAggregateKey()).toString();
-            html = html.replace(entry.getKey(), string);
+        if (dataSet.getRows().size() == 0) {
+            for (Map.Entry<String, DerivedAnalysisDimension> entry : map.entrySet()) {
+                html = html.replace(entry.getKey(), "");
+            }
+        } else {
+            IRow row = dataSet.getRow(0);
+            for (Map.Entry<String, DerivedAnalysisDimension> entry : map.entrySet()) {
+                String string = row.getValue(entry.getValue().createAggregateKey()).toString();
+                html = html.replace(entry.getKey(), string);
+            }
         }
         html = html.substring(169);
         html = html.substring(0, html.length() - 14);

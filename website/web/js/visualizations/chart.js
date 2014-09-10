@@ -9,15 +9,18 @@ Chart = {
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
 
-                        var rWidth = $("#d3Div" + target).width();
+
 
                         var s1 = data["values"];
                         var maxLabelSize = d3.max(s1, function(d) {
                             return d3.max(d.values, function(e) { return e.x.length } );
                         });
-                        var factorForRotate = rWidth / 30;
-                        var needStagger = maxLabelSize > (rWidth / 50);
-                        var useRotate = maxLabelSize > factorForRotate;
+                        var rWidth = $("#d3Div" + target).width() - 80 - 40;
+                        var maxTextSize = maxLabelSize * 7 * s1[0].values.length;
+
+                        var factorWidth = maxLabelSize * 4 * s1[0].values.length;
+                        var useRotate = factorWidth > rWidth;
+                        var needStagger = maxTextSize > rWidth;
                         var charLimit = useRotate ? 15 : 0;
 
                         var chart = nv.models.multiBarChart()
@@ -330,11 +333,12 @@ Chart = {
                         var maxLabelSize = d3.max(s1, function(d) {
                             return d3.max(d.values, function(e) { return e.x.length } );
                         });
-                        var rWidth = $("#d3Div" + target).width();
+                        var rWidth = $("#d3Div" + target).width() - 85 - 40;
+                        var maxTextSize = maxLabelSize * 7 * s1[0].values.length;
 
-                        var factorForRotate = rWidth / 30;
-                        var useRotate = maxLabelSize > factorForRotate;
-                        var needStagger = maxLabelSize > (rWidth / 50);
+                        var factorWidth = maxLabelSize * 4 * s1[0].values.length;
+                        var useRotate = factorWidth > rWidth;
+                        var needStagger = maxTextSize > rWidth;
                         var charLimit = useRotate ? 15 : 0;
 
                         if (data["oneMeasure"]) {
