@@ -6,6 +6,7 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
@@ -38,6 +39,13 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
 
     public YouTrackCompositeSource() {
         setFeedName("YouTrack");
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Youtrack URL:", "url", "Your Youtrack URL is the browser URL you normally use to connect to Youtrack. For example, if you access Zendesk as easyinsight.myjetbrains.com/youtrack, put easyinsight.myjetbrains.com/youtrack in as the Zendesk URL.");
+        factory.addField("Youtrack User Name:", "ytUserName");
+        factory.addPassword("Youtrack Password:", "ytPassword", true);
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
     public String getUrl() {
