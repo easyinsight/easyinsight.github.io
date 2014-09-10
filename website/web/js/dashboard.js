@@ -48,6 +48,7 @@ function captureAndReturn(o) {
         obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend") {
         return null;
     } else if (obj.metadata.type == "gauge") {
+        var id = o.report.id;
         var canvas = $("#gauge" + id);
         var canvasImageData = {};
         canvasImageData.height = canvas.height();
