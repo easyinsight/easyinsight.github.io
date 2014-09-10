@@ -6,6 +6,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -33,16 +34,11 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
     public static final String TO_LIST = "To List";
     public static final String HISTORY_TIME = "History Date";
     public static final String HISTORY_COUNT = "History Count";
+    public static final String CARD_MOVED_BY = "Card Moved By";
 
 
     public TrelloCardHistorySource() {
         setFeedName("Card History");
-    }
-
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(HISTORY_CARD_ID, HISTORY_ID, FROM_LIST, TO_LIST, HISTORY_TIME, HISTORY_COUNT);
     }
 
     @Override
@@ -51,15 +47,14 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(HISTORY_CARD_ID)));
-        fields.add(new AnalysisDimension(keys.get(HISTORY_ID)));
-        fields.add(new AnalysisDimension(keys.get(FROM_LIST)));
-        fields.add(new AnalysisDimension(keys.get(TO_LIST)));
-        fields.add(new AnalysisDateDimension(keys.get(HISTORY_TIME), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisMeasure(keys.get(HISTORY_COUNT), AggregationTypes.SUM));
-        return fields;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(HISTORY_CARD_ID, new AnalysisDimension());
+        fieldBuilder.addField(HISTORY_ID, new AnalysisDimension());
+        fieldBuilder.addField(FROM_LIST, new AnalysisDimension());
+        fieldBuilder.addField(TO_LIST, new AnalysisDimension());
+        fieldBuilder.addField(CARD_MOVED_BY, new AnalysisDimension());
+        fieldBuilder.addField(HISTORY_TIME, new AnalysisDateDimension());
+        fieldBuilder.addField(HISTORY_COUNT, new AnalysisMeasure());
     }
 
     @Override
@@ -69,9 +64,10 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
             SimpleDateFormat sdf = new SimpleDateFormat(XMLDATETIMEFORMAT);
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
+            int ctr = 0;
             for (int i = 0 ; i < boards.length(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
-                System.out.println(board.get("id") + " - " + board.get("name") + " - " + board.get("description") + " - " + board.get("url"));
+
 
                 String id = (String) board.get("id");
                 JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/cards", httpClient, (TrelloCompositeSource) parentDefinition);
@@ -82,11 +78,14 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
                     for (int k = 0; k < history.length(); k++) {
                         IRow row = dataSet.createRow();
                         JSONObject historyObject = (JSONObject) history.get(k);
+
                         String dateString = historyObject.get("date").toString();
                         Date date = sdf.parse(dateString);
                         String oldList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listBefore")).get("name").toString();
                         String newList = ((JSONObject)((JSONObject) historyObject.get("data")).get("listAfter")).get("name").toString();
+                        row.addValue(CARD_MOVED_BY, ((JSONObject) historyObject.get("memberCreator")).get("fullName").toString());
                         row.addValue(HISTORY_CARD_ID, card.get("id").toString());
+                        row.addValue(HISTORY_ID, card.get("id").toString() + (ctr++));
                         row.addValue(HISTORY_TIME, new DateValue(date));
                         row.addValue(FROM_LIST, oldList);
                         row.addValue(TO_LIST, newList);
