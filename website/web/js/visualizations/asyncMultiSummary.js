@@ -73,7 +73,7 @@ AsyncMultiSummary = {
                 aoData.push({ "name": "filters", "value": postData }, {"name": "uid", "value": uid})
             }, sServerMethod: "POST", bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array,
             fnDrawCallback: function( oSettings ) {
-                var nTrs = $('tbody tr');
+                var nTrs = $('#' + targetDiv + ' tbody tr');
                 for ( var i=0 ; i<nTrs.length ; i++ )
                 {
                     if (oSettings != null) {
