@@ -52,9 +52,8 @@ public class RedboothProjectSource extends RedboothBaseSource {
         RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
-        Map base = (Map) queryList("/api/1/projects?count=0", redboothCompositeSource, httpClient);
+        List<Map> organizations = (List<Map>) queryList("/api/3/projects", redboothCompositeSource, httpClient);
         Set<String> projectIDs = new HashSet<String>();
-        List<Map> organizations = (List<Map>) base.get("objects");
         for (Map org : organizations) {
             IRow row = dataSet.createRow();
             String name = getJSONValue(org, "name");
@@ -62,8 +61,8 @@ public class RedboothProjectSource extends RedboothBaseSource {
                 continue;
             }
             String archived = getJSONValue(org, "archived");
-            Value createdAt = getDate(org, "created_at");
-            Value updatedAt = getDate(org, "created_at");
+            Value createdAt = getDateFromLong(org, "created_at");
+            Value updatedAt = getDateFromLong(org, "updated_at");
             String id = getJSONValue(org, "id");
             projectIDs.add(id);
             row.addValue(keys.get(ID), id);
