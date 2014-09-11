@@ -411,7 +411,7 @@ public class LeadNurtureShell {
             "                    <tbody><tr>\n" +
             "                        <td align=\"center\" bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2\">\n" +
             "                            <p style=\"margin-bottom:1em;font-family:Geneva,Verdana,Arial,Helvetica,sans-serif;text-align:center;font-size:9px;line-height:1.34em;color:#999999;display:block\">\n" +
-            "                                ©2014 Easy Insight LLC. All Rights Reserved.&nbsp;&nbsp;1401 Wewatta St Unit 606&nbsp;&nbsp;Denver&nbsp;CO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "                                Copyright 2014 Easy Insight LLC. All Rights Reserved.&nbsp;&nbsp;1401 Wewatta St Unit 606&nbsp;&nbsp;Denver&nbsp;CO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
             "                                <br><br>\n" +
             "                                You are receiving this email because your organization has a Easy Insight account to which you have access. If you prefer not to receive Easy Insight emails like this, <a href=\"{14}\" target=\"_blank\">click here</a>.\n" +
             "                                <br><br>\n" +
