@@ -58,9 +58,9 @@ public class LeadNurtureShell {
         email.image1 = "connect.png";
         email.image2 = "monitor.png";
         email.image3 = "hammer.png";
-        email.url1 = "https://www.easy-insight.com/app/websiteDocs/Connecting_to_your_Data";
-        email.url2 = "https://www.easy-insight.com/app/screencasts.jsp#navigating";
-        email.url3 = "https://www.easy-insight.com/app/websiteDocs/Getting_Started_with_Reports";
+        email.url1 = "https://j8staging.easy-insight.com/app/websiteDocs/Connecting_to_your_Data";
+        email.url2 = "https://j8staging.easy-insight.com/app/screencasts.jsp#navigating";
+        email.url3 = "https://j8staging.easy-insight.com/app/websiteDocs/Getting_Started_with_Reports";
         email.header1 = "Connecting Your Data";
         email.header2 = "Navigating the Easy Insight Interface";
         email.header3 = "Building Reports";
@@ -79,9 +79,9 @@ public class LeadNurtureShell {
         email.image1 = "image.png";
         email.image2 = "document.png";
         email.image3 = "pyramid.png";
-        email.url1 = "https://www.easy-insight.com/app/websiteDocs/Report_Types";
-        email.url2 = "https://www.easy-insight.com/app/websiteDocs/List";
-        email.url3 = "https://www.easy-insight.com/app/websiteDocs/Getting_Started_with_Filters";
+        email.url1 = "https://j8staging.easy-insight.com/app/websiteDocs/Report_Types";
+        email.url2 = "https://j8staging.easy-insight.com/app/websiteDocs/List";
+        email.url3 = "https://j8staging.easy-insight.com/app/websiteDocs/Getting_Started_with_Filters";
         email.header1 = "Gallery of report types";
         email.header2 = "Tips and tricks of manipulating list reports";
         email.header3 = "Filter Options";
@@ -99,9 +99,9 @@ public class LeadNurtureShell {
         email.image1 = "briefcase.png";
         email.image2 = "key.png";
         email.image3 = "monitor.png";
-        email.url1 = "https://www.easy-insight.com/app/websiteDocs/Email_Scheduling_and_Exporting";
-        email.url2 = "https://www.easy-insight.com/app/websiteDocs/Collaboration";
-        email.url3 = "https://www.easy-insight.com/app/websiteDocs/Embedding_Reports_in_External_Systems";
+        email.url1 = "https://j8staging.easy-insight.com/app/websiteDocs/Email_Scheduling_and_Exporting";
+        email.url2 = "https://j8staging.easy-insight.com/app/websiteDocs/Collaboration";
+        email.url3 = "https://j8staging.easy-insight.com/app/websiteDocs/Embedding_Reports_in_External_Systems";
         email.header1 = "Scheduling emails";
         email.header2 = "Managing permissions";
         email.header3 = "Embedding into external";
@@ -356,7 +356,7 @@ public class LeadNurtureShell {
             "                                                                                                <tr>\n" +
             "                                                                                                    <td><a href=\"{9}\" target=\"_blank\"><img src=\"/images/maicons/{6}\" alt=\"\"></a></td>\n" +
             "                                                                                                    <td style=\"font-family:Arial,Helvetica,sans-serif;font-size:12px\">\n" +
-            "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><strong>{7}</strong></span></p>\n" +
+            "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><a href=\"{9}\" target=\"_blank\"><strong>{7}</strong></a></span></p>\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\">{8}</p>\n" +
             "                                                                                                    </td>\n" +
             "                                                                                                </tr>\n" +
@@ -374,7 +374,7 @@ public class LeadNurtureShell {
             "                                                                                                <tr>\n" +
             "                                                                                                    <td><a href=\"{13}\" target=\"_blank\"><img src=\"/images/maicons/{10}\" alt=\"\" border=\"0\"></a></td>\n" +
             "                                                                                                    <td style=\"font-family:Arial,Helvetica,sans-serif;font-size:12px\">\n" +
-            "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><strong>{11}</strong></span></p>\n" +
+            "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><a href=\"{13}\" target=\"_blank\"><strong>{11}</strong></a></span></p>\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\">{12}</p>\n" +
             "                                                                                                    </td>\n" +
             "                                                                                                </tr>\n" +
@@ -411,7 +411,7 @@ public class LeadNurtureShell {
             "                    <tbody><tr>\n" +
             "                        <td align=\"center\" bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2\">\n" +
             "                            <p style=\"margin-bottom:1em;font-family:Geneva,Verdana,Arial,Helvetica,sans-serif;text-align:center;font-size:9px;line-height:1.34em;color:#999999;display:block\">\n" +
-            "                                Copyright 2014 Easy Insight LLC. All Rights Reserved.&nbsp;&nbsp;1401 Wewatta St Unit 606&nbsp;&nbsp;Denver&nbsp;CO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "                                ©2014 Easy Insight LLC. All Rights Reserved.&nbsp;&nbsp;1401 Wewatta St Unit 606&nbsp;&nbsp;Denver&nbsp;CO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
             "                                <br><br>\n" +
             "                                You are receiving this email because your organization has a Easy Insight account to which you have access. If you prefer not to receive Easy Insight emails like this, <a href=\"{14}\" target=\"_blank\">click here</a>.\n" +
             "                                <br><br>\n" +
