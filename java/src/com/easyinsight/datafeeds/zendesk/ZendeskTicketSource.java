@@ -57,6 +57,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     public static final String VIA = "Ticket Submitted Via";
     public static final String SCORE = "Score";
     public static final String COUNT = "Ticket Count";
+    public static final String TICKET_URL = "Ticket URL";
 
     public static final String CURRENT = "Ticket With";
     public static final String AGENT_HANDLES = "Agent Touches";
@@ -142,6 +143,12 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             timeWithCustomer = new NamedKey(TIME_WITH_CUSTOMER);
         }
         items.add(new AnalysisMeasure(timeWithCustomer, TIME_WITH_CUSTOMER, AggregationTypes.SUM, false, FormattingConfiguration.MILLISECONDS));
+
+        Key ticketURLKey = keys.get(TICKET_URL);
+        if (ticketURLKey == null) {
+            ticketURLKey = new NamedKey(TICKET_URL);
+        }
+        items.add(new AnalysisDimension(ticketURLKey));
 
         try {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
@@ -255,7 +262,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 for (Object obj : results) {
                     Map map = (Map) obj;
                     IRow row = dataSet.createRow();
-                    String id = parseTicket(keys, userCache, row, map);
+                    String id = parseTicket(keys, userCache, row, map, zendeskCompositeSource);
                     for (Map.Entry<String, Key> entry : keys.entrySet()) {
                         if (entry.getKey().startsWith("zd")) {
                             int customFieldID = Integer.parseInt(entry.getKey().substring(2));
@@ -432,7 +439,8 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         return new EmptyValue();
     }
 
-    private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Map ticketNode) throws ParseException, InterruptedException {
+    private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Map ticketNode,
+                               ZendeskCompositeSource zendeskCompositeSource) throws ParseException, InterruptedException {
         try {
             row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned_at"));
             row.addValue(keys.get(INITIALLY_ASSIGNED_AT), queryDate(ticketNode, "initially_assigned_at"));
@@ -457,6 +465,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             row.addValue(keys.get(REQUESTER), queryField(ticketNode, "req_name"));
             row.addValue(keys.get(SUBMITTER), queryField(ticketNode, "submitter_name"));
             row.addValue(keys.get(VIA), queryField(ticketNode, "via"));
+            row.addValue(keys.get(TICKET_URL), zendeskCompositeSource.getUrl() + "/agent/#/tickets/" + id);
             String tags = queryField(ticketNode, "current_tags");
             if (tags != null) {
                 String[] tagElements = tags.split(" ");
