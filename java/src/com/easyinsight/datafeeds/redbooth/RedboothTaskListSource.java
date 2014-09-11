@@ -47,7 +47,7 @@ public class RedboothTaskListSource extends RedboothBaseSource {
         RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
-        List<Map> organizations = (List<Map>) queryList("/api/3/task_lists", redboothCompositeSource, httpClient);
+        List<Map> organizations = (List<Map>) queryList("/api/3/task_lists?per_page=1000", redboothCompositeSource, httpClient);
         Set<String> validIDs = redboothCompositeSource.getValidProjects();
         for (Map org : organizations) {
             String projectID = getJSONValue(org, "project_id");

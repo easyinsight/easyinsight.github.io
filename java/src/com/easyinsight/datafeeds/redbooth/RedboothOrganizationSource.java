@@ -44,7 +44,7 @@ public class RedboothOrganizationSource extends RedboothBaseSource {
         RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
-        List<Map> organizations = (List<Map>) queryList("/api/3/organizations", redboothCompositeSource, httpClient);
+        List<Map> organizations = (List<Map>) queryList("/api/3/organizations?per_page=1000", redboothCompositeSource, httpClient);
         for (Map org : organizations) {
             IRow row = dataSet.createRow();
             row.addValue(keys.get(ID), getJSONValue(org, "id"));

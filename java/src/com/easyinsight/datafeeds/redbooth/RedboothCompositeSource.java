@@ -119,7 +119,9 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getLiveChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.REDBOOTH_PROJECT, FeedType.REDBOOTH_TASK_LIST, RedboothProjectSource.ID, RedboothTaskListSource.PROJECT_ID),
+        return Arrays.asList(
+                new ChildConnection(FeedType.REDBOOTH_ORGANIZATION, FeedType.REDBOOTH_PROJECT, RedboothOrganizationSource.ID, RedboothProjectSource.ORGANIZATION_ID),
+                new ChildConnection(FeedType.REDBOOTH_PROJECT, FeedType.REDBOOTH_TASK_LIST, RedboothProjectSource.ID, RedboothTaskListSource.PROJECT_ID),
                 new ChildConnection(FeedType.REDBOOTH_TASK_LIST, FeedType.REDBOOTH_TASK, RedboothTaskListSource.ID, RedboothTaskSource.TASK_LIST_ID),
                 new ChildConnection(FeedType.REDBOOTH_TASK, FeedType.REDBOOTH_COMMENT, RedboothTaskSource.ID, RedboothCommentSource.TASK_ID));
     }
@@ -127,7 +129,9 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.REDBOOTH_PROJECT, FeedType.REDBOOTH_TASK_LIST, RedboothProjectSource.ID, RedboothTaskListSource.PROJECT_ID),
+        return Arrays.asList(
+                new ChildConnection(FeedType.REDBOOTH_ORGANIZATION, FeedType.REDBOOTH_PROJECT, RedboothOrganizationSource.ID, RedboothProjectSource.ORGANIZATION_ID),
+                new ChildConnection(FeedType.REDBOOTH_PROJECT, FeedType.REDBOOTH_TASK_LIST, RedboothProjectSource.ID, RedboothTaskListSource.PROJECT_ID),
                 new ChildConnection(FeedType.REDBOOTH_TASK_LIST, FeedType.REDBOOTH_TASK, RedboothTaskListSource.ID, RedboothTaskSource.TASK_LIST_ID),
                 new ChildConnection(FeedType.REDBOOTH_TASK, FeedType.REDBOOTH_COMMENT, RedboothTaskSource.ID, RedboothCommentSource.TASK_ID));
     }
