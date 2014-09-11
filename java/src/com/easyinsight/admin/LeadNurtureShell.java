@@ -336,7 +336,7 @@ public class LeadNurtureShell {
             "                                                                                            <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><table style=\"width:600px\" border=\"0\" cellspacing=\"0\" cellpadding=\"10\">\n" +
             "                                                                                                <tbody>\n" +
             "                                                                                                <tr>\n" +
-            "                                                                                                    <td><a href=\"{5}\" target=\"_blank\"><img src=\"http://j8staging.easy-insight.com/images/maicons/{2}\" alt=\"\" order=\"0\"></a></td>\n" +
+            "                                                                                                    <td><a href=\"{5}\" target=\"_blank\"><img src=\"https://j8staging.easy-insight.com/images/maicons/{2}\" alt=\"\" order=\"0\"></a></td>\n" +
             "                                                                                                    <td style=\"font-family:Arial,Helvetica,sans-serif;font-size:12px\">\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><a href=\"{5}\" target=\"_blank\"><strong>{3}</strong></a></span></p>\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\">{4}</p>\n" +
@@ -354,7 +354,7 @@ public class LeadNurtureShell {
             "                                                                                            <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><table style=\"width:600px\" border=\"0\" cellspacing=\"0\" cellpadding=\"10\">\n" +
             "                                                                                                <tbody>\n" +
             "                                                                                                <tr>\n" +
-            "                                                                                                    <td><a href=\"{9}\" target=\"_blank\"><img src=\"http://j8staging.easy-insight.com/images/maicons/{6}\" alt=\"\"></a></td>\n" +
+            "                                                                                                    <td><a href=\"{9}\" target=\"_blank\"><img src=\"https://j8staging.easy-insight.com/images/maicons/{6}\" alt=\"\"></a></td>\n" +
             "                                                                                                    <td style=\"font-family:Arial,Helvetica,sans-serif;font-size:12px\">\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><a href=\"{9}\" target=\"_blank\"><strong>{7}</strong></a></span></p>\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\">{8}</p>\n" +
@@ -372,7 +372,7 @@ public class LeadNurtureShell {
             "                                                                                            <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><table style=\"width:600px\" border=\"0\" cellspacing=\"0\" cellpadding=\"10\">\n" +
             "                                                                                                <tbody>\n" +
             "                                                                                                <tr>\n" +
-            "                                                                                                    <td><a href=\"{13}\" target=\"_blank\"><img src=\"http://j8staging.easy-insight.com/images/maicons/{10}\" alt=\"\" border=\"0\"></a></td>\n" +
+            "                                                                                                    <td><a href=\"{13}\" target=\"_blank\"><img src=\"https://j8staging.easy-insight.com/images/maicons/{10}\" alt=\"\" border=\"0\"></a></td>\n" +
             "                                                                                                    <td style=\"font-family:Arial,Helvetica,sans-serif;font-size:12px\">\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\"><span style=\"font-size:14px\"><a href=\"{13}\" target=\"_blank\"><strong>{11}</strong></a></span></p>\n" +
             "                                                                                                        <p style=\"margin-bottom:1em\">{12}</p>\n" +
