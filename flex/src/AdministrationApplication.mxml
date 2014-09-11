@@ -22,6 +22,7 @@
                         <mx:HBox>
                             <mx:Button label="Global Skin" click="globalSkin()"/>
                             <mx:Button label="Header Logo" click="headerLogo()"/>
+                            <mx:Button label="Email Test" click="emailTest()"/>
                         </mx:HBox>
                         <mx:Button label="Archive" click="archive()"/>
                         <mx:HBox>
@@ -85,6 +86,11 @@
         private function forceTrialExpire():void {
             ProgressAlert.alert(this, "Forcing trials to expire...", null, adminService.forceTrialExpire);
             adminService.forceTrialExpire.send();
+        }
+
+        private function emailTest():void {
+            ProgressAlert.alert(this, "Forcing trials to expire...", null, adminService.emails);
+            adminService.emails.send(45);
         }
 
         private function argh():void {
