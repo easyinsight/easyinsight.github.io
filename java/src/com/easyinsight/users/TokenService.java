@@ -162,14 +162,14 @@ public class TokenService {
             } else if (type == FeedType.REDBOOTH_COMPOSITE.getType()) {
                 OAuthClientRequest request;
                 request = OAuthClientRequest
-                            .authorizationLocation("https://redbooth.com/oauth/authorize")
+                            .authorizationLocation("https://redbooth.com/oauth2/authorize")
                             .setClientId(RedboothCompositeSource.CLIENT_KEY)
                             .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
                             .buildQueryMessage();
                 session.setAttribute("redirectTarget", redirectType);
                 session.setAttribute("dataSourceID", dataSource.getApiKey());
                 String uri = request.getLocationUri();
-                uri = uri + "&scope=read_projects";
+                //uri = uri + "&scope=read_projects";
                 return new OAuthResponse(uri, true);
             } else if (type == FeedType.GITHUB_COMPOSITE.getType()) {
                 GithubCompositeSource githubSource = (GithubCompositeSource) dataSource;
