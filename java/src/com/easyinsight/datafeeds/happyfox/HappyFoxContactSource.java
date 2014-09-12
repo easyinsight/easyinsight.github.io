@@ -76,6 +76,7 @@ public class HappyFoxContactSource extends HappyFoxBaseSource {
                 }
                 Map pageInfo = (Map) response.get("page_info");
                 pageCount = (int) pageInfo.get("page_count");
+                loadingProgress(page, pageCount, "Retrieving page " + page + " of " + pageCount + " pages of contacts from HappyFox", callDataID);
                 page++;
                 List<Map> data = (List<Map>) response.get("data");
                 for (Map ticket : data) {

@@ -61,7 +61,7 @@ public class TrelloListSource extends TrelloBaseSource {
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
             for (int i = 0 ; i < boards.length(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
-                System.out.println(board.get("id") + " - " + board.get("name") + " - " + board.get("description") + " - " + board.get("url"));
+
                 String id = (String) board.get("id");
                 JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/lists", httpClient, (TrelloCompositeSource) parentDefinition);
                 for (int j = 0; j < cards.length(); j++) {

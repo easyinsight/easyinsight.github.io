@@ -128,7 +128,9 @@ public class CCEventRegistrantSource extends ConstantContactBaseSource {
             IDataStorage.insertData(dataSet);
             return null;
         }  catch (Exception e) {
-            LogClass.error(e);
+
+            // ignore, feature is locked
+            //LogClass.error(e);
             return new DataSet();
         }
     }

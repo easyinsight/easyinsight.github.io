@@ -64,6 +64,7 @@ public class MultiSummaryDefinitionState extends AnalysisDefinitionState {
     public AnalysisDefinitionState clone(List<AnalysisItem> allFields) throws CloneNotSupportedException {
         MultiSummaryDefinitionState formDefinitionState = (MultiSummaryDefinitionState) super.clone(allFields);
         formDefinitionState.setMultiSummaryID(0);
+        formDefinitionState.setSummaryReports(new ArrayList<>(summaryReports));
         return formDefinitionState;
     }
 

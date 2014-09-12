@@ -23,6 +23,7 @@ import java.util.*;
  */
 public class RedboothProjectSource extends RedboothBaseSource {
     public static final String ID = "ID";
+    public static final String ORGANIZATION_ID = "Project Organization ID";
     public static final String NAME = "Name";
     public static final String CREATED_AT = "Created At";
     public static final String UPDATED_AT = "Updated At";
@@ -35,6 +36,7 @@ public class RedboothProjectSource extends RedboothBaseSource {
 
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(ORGANIZATION_ID, new AnalysisDimension());
         fieldBuilder.addField(NAME, new AnalysisDimension());
         fieldBuilder.addField(ARCHIVED, new AnalysisDimension());
         fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
@@ -52,9 +54,8 @@ public class RedboothProjectSource extends RedboothBaseSource {
         RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
-        Map base = (Map) queryList("/api/1/projects?count=0", redboothCompositeSource, httpClient);
+        List<Map> organizations = (List<Map>) queryList("/api/3/projects?per_page=1000", redboothCompositeSource, httpClient);
         Set<String> projectIDs = new HashSet<String>();
-        List<Map> organizations = (List<Map>) base.get("objects");
         for (Map org : organizations) {
             IRow row = dataSet.createRow();
             String name = getJSONValue(org, "name");
@@ -62,11 +63,12 @@ public class RedboothProjectSource extends RedboothBaseSource {
                 continue;
             }
             String archived = getJSONValue(org, "archived");
-            Value createdAt = getDate(org, "created_at");
-            Value updatedAt = getDate(org, "created_at");
+            Value createdAt = getDateFromLong(org, "created_at");
+            Value updatedAt = getDateFromLong(org, "updated_at");
             String id = getJSONValue(org, "id");
             projectIDs.add(id);
             row.addValue(keys.get(ID), id);
+            row.addValue(keys.get(ORGANIZATION_ID), getJSONValue(org, "organization_id"));
             row.addValue(keys.get(CREATED_AT), createdAt);
             row.addValue(keys.get(UPDATED_AT), updatedAt);
             row.addValue(keys.get(ARCHIVED), archived);

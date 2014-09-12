@@ -40,7 +40,7 @@ public class TrelloCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Set<FeedType> getFeedTypes() {
-        Set<FeedType> types = new HashSet<FeedType>();
+        Set<FeedType> types = new HashSet<>();
         types.add(FeedType.TRELLO_BOARD);
         types.add(FeedType.TRELLO_CARD);
         types.add(FeedType.TRELLO_LIST);

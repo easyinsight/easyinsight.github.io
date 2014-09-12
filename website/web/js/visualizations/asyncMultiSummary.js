@@ -24,9 +24,9 @@ AsyncMultiSummary = {
     createTable: function (targetDiv, properties, columnData, postData, tableHTML, params, uid, fullFilters, drillthroughKey) {
 
 
-        if (typeof(List.availableDataTables[targetDiv]) != "undefined" && List.availableDataTables[targetDiv] != null) {
-            List.availableDataTables[targetDiv].fnDestroy();
-            List.availableDataTables[targetDiv] = null;
+        if (typeof(AsyncMultiSummary.availableDataTables[targetDiv]) != "undefined" && AsyncMultiSummary.availableDataTables[targetDiv] != null) {
+            AsyncMultiSummary.availableDataTables[targetDiv].fnDestroy();
+            AsyncMultiSummary.availableDataTables[targetDiv] = null;
         }
         var i = 1;
         var a = [];
@@ -68,12 +68,12 @@ AsyncMultiSummary = {
                 afterRefresh();
             }
         }
-        List.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bServerSide: true, sAjaxSource: "/app/asyncMultiSummary" + params,
+        AsyncMultiSummary.availableDataTables[targetDiv] = $('#' + targetDiv + ' .reportArea table').dataTable({bFilter: false, bServerSide: true, sAjaxSource: "/app/asyncMultiSummary" + params,
             fnServerParams: function (aoData) {
                 aoData.push({ "name": "filters", "value": postData }, {"name": "uid", "value": uid})
             }, sServerMethod: "POST", bPaginate: paging, sPaginationType: "full_numbers", bInfo: false, aaSorting: a, aoColumns: array,
             fnDrawCallback: function( oSettings ) {
-                var nTrs = $('tbody tr');
+                var nTrs = $('#' + targetDiv + ' tbody tr');
                 for ( var i=0 ; i<nTrs.length ; i++ )
                 {
                     if (oSettings != null) {
@@ -180,12 +180,12 @@ AsyncMultiSummary = {
         }
     },
     createClasses: function (properties, target, columnClasses) {
-        var curStyleSheet = List.findDynamicStyleSheet();
+        var curStyleSheet = AsyncMultiSummary.findDynamicStyleSheet();
         if (curStyleSheet == null) {
             var s = document.createElement("style");
             s.title = "customDataGridValues";
             $("head").append(s);
-            curStyleSheet = List.findDynamicStyleSheet();
+            curStyleSheet = AsyncMultiSummary.findDynamicStyleSheet();
         }
 
         for (var colClass in columnClasses) {

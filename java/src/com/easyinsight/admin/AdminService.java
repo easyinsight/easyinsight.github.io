@@ -48,6 +48,28 @@ public class AdminService {
         Database.outputStackElements();
     }
 
+    public void emails(long userID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement userStmt = conn.prepareStatement("SELECT FIRST_NAME, EMAIL FROM USER WHERE USER_ID = ?");
+            userStmt.setLong(1, userID);
+            ResultSet rs = userStmt.executeQuery();
+            rs.next();
+            String firstName = rs.getString(1);
+            String email = rs.getString(2);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FIRST_EMAIL, firstName);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.SECOND_EMAIL, firstName);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.THIRD_EMAIL, firstName);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FOURTH_EMAIL, firstName);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FIFTH_EMAIL, firstName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     /*public void testUserPasswords() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();

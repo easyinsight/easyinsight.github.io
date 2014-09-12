@@ -28,6 +28,21 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
     private transient DateTimeFormatter altDF = DateTimeFormat.forPattern("yyyy-MM-dd");
     private transient DateTimeFormatter yetAnotherDF = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
+    protected Value getDateFromLong(Map n, String key) {
+        String value = getJSONValue(n, key);
+        if (value != null) {
+            try {
+                long time = Long.parseLong(value) * 1000;
+                return new DateValue(new Date(time));
+                /*Date date = df.parseDateTime(value).toDate();
+                return new DateValue(date);*/
+            } catch (Exception e) {
+                return new EmptyValue();
+            }
+        }
+        return new EmptyValue();
+    }
+
     protected Value getDate(Map n, String key) {
         if (df == null) {
             df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss Z");

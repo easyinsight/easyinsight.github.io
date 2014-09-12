@@ -92,7 +92,7 @@ public class FreshdeskTimeEntrySource extends FreshdeskBaseSource {
             return dataSet;
         } catch (Exception e) {
             // we can ignore for now because it may not be supported for their freshdesk account
-            LogClass.error(e);
+            //LogClass.error(e);
             return new DataSet();
         }
     }

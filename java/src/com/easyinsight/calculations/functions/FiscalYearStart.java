@@ -3,6 +3,8 @@ package com.easyinsight.calculations.functions;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
 
 import java.sql.PreparedStatement;
@@ -41,21 +43,44 @@ public class FiscalYearStart extends Function {
         }
         ZonedDateTime zdt = instant.atZone(zoneId);
         try {
-            PreparedStatement ps = calculationMetadata.getConnection().prepareStatement("SELECT fiscal_year_start_month FROM account WHERE account_id = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            int fiscalYearStartMonth = rs.getInt(1);
-            int month = zdt.getMonthValue();
-            if (fiscalYearStartMonth <= month) {
-                zdt = zdt.withMonth(fiscalYearStartMonth).withDayOfMonth(1);
+            if (calculationMetadata.getConnection() == null) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement ps = conn.prepareStatement("SELECT fiscal_year_start_month FROM account WHERE account_id = ?");
+                    ps.setLong(1, SecurityUtil.getAccountID());
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    int fiscalYearStartMonth = rs.getInt(1);
+                    int month = zdt.getMonthValue();
+                    if (fiscalYearStartMonth <= month) {
+                        zdt = zdt.withMonth(fiscalYearStartMonth).withDayOfMonth(1);
+                    } else {
+                        zdt = zdt.withMonth(fiscalYearStartMonth).minusYears(1).withDayOfMonth(1);
+                    }
+                    instant = zdt.toInstant();
+                    Date endDate = Date.from(instant);
+                    ps.close();
+                    return new DateValue(endDate);
+                } finally {
+                    Database.closeConnection(conn);
+                }
             } else {
-                zdt = zdt.withMonth(fiscalYearStartMonth).minusYears(1).withDayOfMonth(1);
+                PreparedStatement ps = calculationMetadata.getConnection().prepareStatement("SELECT fiscal_year_start_month FROM account WHERE account_id = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                int fiscalYearStartMonth = rs.getInt(1);
+                int month = zdt.getMonthValue();
+                if (fiscalYearStartMonth <= month) {
+                    zdt = zdt.withMonth(fiscalYearStartMonth).withDayOfMonth(1);
+                } else {
+                    zdt = zdt.withMonth(fiscalYearStartMonth).minusYears(1).withDayOfMonth(1);
+                }
+                instant = zdt.toInstant();
+                Date endDate = Date.from(instant);
+                ps.close();
+                return new DateValue(endDate);
             }
-            instant = zdt.toInstant();
-            Date endDate = Date.from(instant);
-            ps.close();
-            return new DateValue(endDate);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

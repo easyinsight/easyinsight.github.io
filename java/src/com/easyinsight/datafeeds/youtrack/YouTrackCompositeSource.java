@@ -6,6 +6,7 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
@@ -38,6 +39,13 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
 
     public YouTrackCompositeSource() {
         setFeedName("YouTrack");
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Youtrack URL:", "url", "Your Youtrack URL is the browser URL you normally use to connect to Youtrack. For example, if you access Zendesk as easyinsight.myjetbrains.com/youtrack, put easyinsight.myjetbrains.com/youtrack in as the Zendesk URL.");
+        factory.addField("Youtrack User Name:", "ytUserName");
+        factory.addPassword("Youtrack Password:", "ytPassword", true);
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
     public String getUrl() {
@@ -87,14 +95,26 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         this.timeEntries = timeEntries;
     }
 
-    public String createURL() {
+    public String createURL(String path) {
         String target;
         if (!url.startsWith("http")) {
-            target = "http://" + url;
+            target = "https://" + url;
         } else {
             target = url;
         }
-        return target;
+        int youtrackIndex = target.indexOf("youtrack");
+        if (youtrackIndex == -1) {
+            if (!target.endsWith("/")) {
+                target += "/";
+            }
+            target += "youtrack/";
+        } else {
+            target = target.substring(0, youtrackIndex + "youtrack".length()) + "/";
+        }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return target + path;
     }
 
     @Override
@@ -103,11 +123,17 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         try {
             if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
                 HttpClient httpClient = new HttpClient();
-                PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
+                PostMethod postMethod = new PostMethod(createURL("/rest/user/login?login="+ytUserName+"&password="+ytPassword)) {
+                    @Override
+                    public boolean getFollowRedirects() {
+                        return true;
+                    }
+                };;
                 postMethod.setRequestHeader("Connection", "keep-alive");
                 postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 httpClient.executeMethod(postMethod);
                 cookie = postMethod.getResponseHeader("Set-Cookie").getValue();
+
             }
         } catch (IOException e) {
             throw new ReportException(new DataSourceConnectivityReportFault("Invalid credentials.", this));
@@ -120,7 +146,12 @@ public class YouTrackCompositeSource extends CompositeServerDataSource {
         try {
             if (ytUserName != null && !"".equals(ytUserName) && ytPassword != null && !"".equals(ytPassword)) {
                 HttpClient httpClient = new HttpClient();
-                PostMethod postMethod = new PostMethod(url+"/rest/user/login?login="+ytUserName+"&password="+ytPassword);
+                PostMethod postMethod = new PostMethod(createURL("/rest/user/login?login="+ytUserName+"&password="+ytPassword)) {
+                    @Override
+                    public boolean getFollowRedirects() {
+                        return true;
+                    }
+                };
                 postMethod.setRequestHeader("Connection", "keep-alive");
                 postMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 httpClient.executeMethod(postMethod);

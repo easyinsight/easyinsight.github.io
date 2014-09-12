@@ -67,11 +67,13 @@ public class ZendeskOrganizationSource extends ZendeskBaseSource {
                 Map m = queryList(nextPage, zendeskCompositeSource, httpClient);
 
                 JSONArray organizationNodes = (JSONArray) m.get("organizations");
-                for (int i = 0; i < organizationNodes.size(); i++) {
-                    JSONObject organizationNode = (JSONObject) organizationNodes.get(i);
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(NAME), (String) organizationNode.get("name"));
-                    row.addValue(keys.get(ID), String.valueOf(organizationNode.get("id")));
+                if (organizationNodes != null) {
+                    for (int i = 0; i < organizationNodes.size(); i++) {
+                        JSONObject organizationNode = (JSONObject) organizationNodes.get(i);
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(NAME), (String) organizationNode.get("name"));
+                        row.addValue(keys.get(ID), String.valueOf(organizationNode.get("id")));
+                    }
                 }
                 nextPage = (String) m.get("next_page");
             } while (nextPage != null);

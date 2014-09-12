@@ -2,8 +2,6 @@ package com.easyinsight.datafeeds.redbooth;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.StringValue;
-import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
@@ -38,6 +36,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
     public static final String TOTAL_SUBTASKS = "Total Subtasks";
     public static final String RESOLVED_SUBTASKS = "Resolved Subtasks";
     public static final String TASK_URL = "Task URL";
+    public static final String DESCRIPTION = "Task Description";
 
     public RedboothTaskSource() {
         setFeedName("Tasks");
@@ -46,6 +45,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
         fieldBuilder.addField(NAME, new AnalysisDimension());
+        fieldBuilder.addField(DESCRIPTION, new AnalysisDimension());
         fieldBuilder.addField(PROJECT_ID, new AnalysisDimension());
         fieldBuilder.addField(TASK_LIST_ID, new AnalysisDimension());
         fieldBuilder.addField(POSITION, new AnalysisDimension());
@@ -75,68 +75,27 @@ public class RedboothTaskSource extends RedboothBaseSource {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
 
-        List<Map>  people = (List<Map>) queryList("/api/2/people?count=0", redboothCompositeSource, httpClient);
-        Map map = (Map) queryList("/api/1/users", redboothCompositeSource, httpClient);
+        List<Map>  people = (List<Map>) queryList("/api/3/users", redboothCompositeSource, httpClient);
+        List<Map>  personList = (List<Map>) queryList("/api/3/people", redboothCompositeSource, httpClient);
 
         Map<String, String> users = new HashMap<>();
+
         Map<String, String> persons = new HashMap<>();
-        for (Map ref : (List<Map>) map.get("objects")) {
+        for (Map ref : people) {
             users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
         }
-        // average # of days by project type - first due date and project creation date
-        //
-        for (Map ref : people) {
+        for (Map ref : personList) {
             persons.put(ref.get("id").toString(), ref.get("user_id").toString());
         }
 
-        long endID = 0;
         int count;
-        Map<String, Value> idToCompletionDate = new HashMap<>();
-        Map<String, Value> idToName = new HashMap<>();
-
+        int page = 1;
         do {
             count = 0;
-            Object obj;
-            if (endID == 0) {
-                obj = queryList("/api/1/tasks", redboothCompositeSource, httpClient);
-            } else {
-                obj = queryList("/api/1/tasks?max_id="+endID, redboothCompositeSource, httpClient);
-            }
-            Map results = (Map) obj;
-
-            List<Map>  v1TaskList = (List<Map>) results.get("objects");
-
-            for (Map org : v1TaskList) {
-                count++;
-                String id = getJSONValue(org, "id");
-                long numID = Long.parseLong(id);
-                if (endID == 0) {
-                    endID = numID;
-                } else {
-                    endID = Math.min(numID, endID);
-                }
-                Value completedAt = getYetAnotherDate(org, "completed_at");
-                idToCompletionDate.put(id, completedAt);
-                idToName.put(id, new StringValue(getJSONValue(org, "name")));
-
-            }
-        }  while (count == 20);
-        endID = 0;
-        do {
-            count = 0;
-            List<Map>  taskList;
-            if (endID == 0) {
-                taskList = (List<Map>) queryList("/api/2/tasks?count=30&scope=all", redboothCompositeSource, httpClient);
-            } else {
-                taskList = (List<Map>) queryList("/api/2/tasks?count=30&scope=all&max_id="+endID, redboothCompositeSource, httpClient);
-            }
-
-            // resolved_subtasks_count
-            // subtasks_count
-            //List<Map> organizations = (List<Map>) base.get("objects");
+            String debug = "/api/3/tasks?page="+page+"&per_page=1000";
+            List<Map> taskList = (List<Map>) queryList("/api/3/tasks?page="+page+"&per_page=1000", redboothCompositeSource, httpClient);
             Set<String> validIDs = redboothCompositeSource.getValidProjects();
             for (Map org : taskList) {
-
                 count++;
                 String projectID = getJSONValue(org, "project_id");
                 if (!validIDs.contains(projectID)) {
@@ -144,14 +103,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
                 }
                 IRow row = dataSet.createRow();
                 String id = getJSONValue(org, "id");
-                long numID = Long.parseLong(id);
-                if (endID == 0) {
-                    endID = numID;
-                } else {
-                    endID = Math.min(numID, endID);
-                }
                 row.addValue(keys.get(ID), id);
-                row.addValue(keys.get(NAME), idToName.get(id));
+                row.addValue(keys.get(NAME), getJSONValue(org, "name"));
                 //row.addValue(keys.get(NAME), getJSONValue(org, "name"));
                 row.addValue(keys.get(PROJECT_ID), projectID);
                 row.addValue(keys.get(TASK_LIST_ID), getJSONValue(org, "task_list_id"));
@@ -160,18 +113,9 @@ public class RedboothTaskSource extends RedboothBaseSource {
                 row.addValue(keys.get(URGENT), getJSONValue(org, "urgent"));
                 row.addValue(keys.get(TYPE), getJSONValue(org, "type"));
                 row.addValue(keys.get(DUE_ON), getAlt(org, "due_on"));
-                String statusCode = getJSONValue(org, "status");
-                String status = "";
-                if ("0".equals(statusCode)) {
-                    status = "New";
-                } else if ("1".equals(statusCode)) {
-                    status = "Open";
-                } else if ("2".equals(statusCode)) {
-                    status = "Hold";
-                } else if ("3".equals(statusCode)) {
-                    status = "Resolved";
-                } else if ("4".equals(statusCode)) {
-                    status = "Rejected";
+                String status = getJSONValue(org, "status");
+                if (status != null && status.length() > 0) {
+                    status = Character.toUpperCase(status.charAt(0)) + status.substring(1);
                 }
                 String assignedID = getJSONValue(org, "assigned_id");
                 if (assignedID != null) {
@@ -180,19 +124,22 @@ public class RedboothTaskSource extends RedboothBaseSource {
                         row.addValue(ASSIGNED_TO, users.get(userID));
                     }
                 }
-                Value completionDate = idToCompletionDate.get(id);
                 row.addValue(TOTAL_SUBTASKS, getJSONValue(org, "subtasks_count"));
+                row.addValue(DESCRIPTION, getJSONValue(org, "description"));
                 row.addValue(RESOLVED_SUBTASKS, getJSONValue(org, "resolved_subtasks_count"));
-                row.addValue(COMPLETED_AT, completionDate);
                 row.addValue(keys.get(STATUS), status);
                 String url = "https://redbooth.com/a/#!/projects/" + projectID + "/tasks/" + id;
                 row.addValue(TASK_URL, url);
-                row.addValue(CREATED_AT, getDate(org, "created_at"));
-                row.addValue(UPDATED_AT, getDate(org, "updated_at"));
+                row.addValue(CREATED_AT, getDateFromLong(org, "created_at"));
+                row.addValue(UPDATED_AT, getDateFromLong(org, "updated_at"));
+                if ("Resolved".equals(status)) {
+                    row.addValue(COMPLETED_AT, getDateFromLong(org, "updated_at"));
+                }
                 row.addValue(COUNT, 1);
 
             }
-        } while (count == 30);
+            page++;
+        } while (count == 1000);
         return dataSet;
     }
 }

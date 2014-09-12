@@ -14,7 +14,6 @@ public class FirstDayOfWeek extends Function {
     @Override
     public Value evaluate() {
         int day = SecurityUtil.getFirstDayOfWeek();
-        System.out.println("start = " + day);
         return new NumericValue(day);
     }
 

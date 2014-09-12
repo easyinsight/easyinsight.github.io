@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.happyfox;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 
@@ -22,7 +23,14 @@ public class HappyFoxCompositeSource extends CompositeServerDataSource {
     private String hfApiKey;
 
     public HappyFoxCompositeSource() {
-        setFeedName("Happy Fox");
+        setFeedName("HappyFox");
+    }
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("HappyFox URL", "url", "Your HappyFox URL is the browser URL you normally use to connect to HappyFox. For example, if you access HappyFox as yourcompanyname.happyfox.com, put yourcompanyname in as the HappyFox URL.");
+        factory.addField("HappyFox API Authentication Token:", "authKey");
+        factory.addField("HappyFox API Key:", "hfApiKey");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
     @Override

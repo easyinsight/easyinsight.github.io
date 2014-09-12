@@ -34,7 +34,9 @@ public class TrelloCardSource extends TrelloBaseSource {
     public static final String CARD_ID = "Card ID";
     public static final String CARD_BOARD_ID = "Card Board ID";
     public static final String CARD_LIST_ID = "Card List ID";
+    public static final String CARD_LAST_ACTIVITY_DATE = "Card Last Activity Date";
     public static final String CARD_COUNT = "Card Count";
+    public static final String CARD_CREATED_AT = "Card Count";
 
     public TrelloCardSource() {
         setFeedName("Cards");
@@ -49,6 +51,7 @@ public class TrelloCardSource extends TrelloBaseSource {
         fieldBuilder.addField(CARD_DUE_AT, new AnalysisDateDimension());
         fieldBuilder.addField(CARD_DESCRIPTION, new AnalysisDimension());
         fieldBuilder.addField(CARD_CLOSED, new AnalysisDimension());
+        fieldBuilder.addField(CARD_LAST_ACTIVITY_DATE, new AnalysisDateDimension());
         fieldBuilder.addField(CARD_COUNT, new AnalysisMeasure());
     }
 
@@ -70,8 +73,6 @@ public class TrelloCardSource extends TrelloBaseSource {
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
             for (int i = 0 ; i < boards.length(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
-                System.out.println(board.get("id") + " - " + board.get("name") + " - " + board.get("description") + " - " + board.get("url"));
-
                 String id = (String) board.get("id");
                 JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/cards?checklists=all", httpClient, (TrelloCompositeSource) parentDefinition);
                 for (int j = 0; j < cards.length(); j++) {
