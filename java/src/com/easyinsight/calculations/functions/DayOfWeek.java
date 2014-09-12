@@ -45,7 +45,7 @@ public class DayOfWeek extends Function {
 
             ZonedDateTime zdt = startDate.toInstant().atZone(ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60))));
 
-            System.out.println(zdt + " - " + zdt.getDayOfWeek() + " - " + zdt.with(ChronoField.DAY_OF_WEEK, java.time.DayOfWeek.SUNDAY.getValue()));
+
 
 
             if (params.size() == 2) {

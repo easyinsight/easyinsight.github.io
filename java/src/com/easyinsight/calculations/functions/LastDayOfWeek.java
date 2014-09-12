@@ -18,7 +18,6 @@ public class LastDayOfWeek extends Function {
     public Value evaluate() {
         int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
         java.time.DayOfWeek dayOfWeek = LocalDate.now().with(ChronoField.DAY_OF_WEEK, firstDayOfWeek).minusDays(1).getDayOfWeek();
-        System.out.println("end = " + dayOfWeek.getValue());
         return new NumericValue(dayOfWeek.getValue());
     }
 
