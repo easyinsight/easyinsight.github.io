@@ -70,11 +70,8 @@ public class DataSourceType {
     public static const NETSUITE:int = 252;
     public static const ORACLE_SALESCLOUD:int = 257;
     public static const HAPPY_FOX:int = 281;
+    public static const INFUSIONSOFT_REPORT:int = 286;
 
-    public static const OWNER:int = 1;
-    public static const EDITOR:int = 2;
-
-    public static const SUBSCRIBER:int = 3;
     public function DataSourceType() {
     }
 }

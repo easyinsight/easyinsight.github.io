@@ -18,11 +18,13 @@ import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
+import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.json.JSONSetup;
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
+import com.easyinsight.goals.InstallationSystem;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.scorecard.ScorecardDescriptor;
 import com.easyinsight.scorecard.ScorecardInternalService;
@@ -2177,12 +2179,16 @@ public class UserUploadService {
     }
 
     public CredentialsResponse completeInstallation(final FeedDefinition dataSource) {
+        return completeInstallation(dataSource, null);
+    }
+
+    public CredentialsResponse completeInstallation(final FeedDefinition dataSource, final FeedDefinition withParent) {
         SecurityUtil.authorizeFeed(dataSource.getDataFeedID(), Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             final IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) dataSource;
-            serverDataSourceDefinition.create(conn, null, null);
+            serverDataSourceDefinition.create(conn, null, withParent);
             CredentialsResponse credentialsResponse = null;
             if (SecurityUtil.getAccountTier() < dataSource.getRequiredAccountTier()) {
                 return new CredentialsResponse(false, "Your account level is no longer valid for this data source connection.", dataSource.getDataFeedID());
@@ -2218,7 +2224,7 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = new DataSourceFactory().createSource(conn, new ArrayList<ReportFault>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
+                            boolean changed = new DataSourceFactory().createSource(conn, new ArrayList<>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
                             conn.commit();
                             DataSourceRefreshResult result = new DataSourceRefreshResult();
                             result.setDate(now);
@@ -2397,6 +2403,42 @@ public class UserUploadService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public InfusionsoftReportInfo getInfusionsoftReports(InfusionsoftCompositeSource infusionsoftCompositeSource) {
+        SecurityUtil.authorizeFeedAccess(infusionsoftCompositeSource.getDataFeedID());
+        try {
+            List<InfusionsoftReport> availableReports = infusionsoftCompositeSource.getAvailableReports();
+            List<InfusionsoftUser> users = infusionsoftCompositeSource.getUsers();
+            return new InfusionsoftReportInfo(availableReports, users);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addInfusionsoftReportSource(InfusionsoftCompositeSource infusionsoftCompositeSource, String reportID, String name, String userID) {
+        SecurityUtil.authorizeFeedAccess(infusionsoftCompositeSource.getDataFeedID());
+        try {
+            EIConnection conn = Database.instance().getConnection();
+            InfusionsoftReportSource reportSource;
+            try {
+                reportSource = (InfusionsoftReportSource) new InstallationSystem(conn).installConnection(FeedType.INFUSIONSOFT_REPORT.getType());
+            } finally {
+                Database.closeConnection(conn);
+            }
+            reportSource.setParentSourceID(infusionsoftCompositeSource.getDataFeedID());
+            reportSource.setReportID(reportID);
+            reportSource.setFeedName(name);
+            reportSource.setUserID(userID);
+            long id = completeInstallation(reportSource, infusionsoftCompositeSource).getDataSourceID();
+            CompositeFeedNode node = new CompositeFeedNode();
+            node.setDataFeedID(id);
+            infusionsoftCompositeSource.getCompositeFeedNodes().add(node);
+            new FeedService().updateFeedDefinition(infusionsoftCompositeSource);
+        } catch (Exception e) {
+            LogClass.error(e);
         }
     }
 }

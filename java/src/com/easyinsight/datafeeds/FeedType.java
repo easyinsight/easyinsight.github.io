@@ -312,6 +312,7 @@ public class FeedType implements Serializable {
     public static final FeedType HAPPYFOX_CONTACTS = new FeedType(283);
     public static final FeedType FRESHDESK_SURVEY = new FeedType(284);
     public static final FeedType SAMPLE_TASKS = new FeedType(285);
+    public static final FeedType INFUSIONSOFT_REPORT = new FeedType(286);
 
     public FeedType() {
     }

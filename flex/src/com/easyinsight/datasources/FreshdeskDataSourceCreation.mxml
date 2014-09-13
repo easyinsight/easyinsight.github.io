@@ -49,4 +49,5 @@
         <mx:Label text="Freshdesk API Key:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="passwordInput" width="350"/>
     </mx:HBox>
+    <mx:Text text="Profile Icon, Profile Settings, Your API Key (on right side of screen)"/>
 </mx:VBox>

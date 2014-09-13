@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:feed="com.easyinsight.administration.feed.*"
+                       xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+
+        override protected function gotSource():void {
+            userUpload.getInfusionsoftReports.send(dataSource);
+        }
+
+        private function gotReports():void {
+            var reportInfo:InfusionsoftReportInfo = userUpload.getInfusionsoftReports.lastResult as InfusionsoftReportInfo;
+            reports = reportInfo.infusionsoftReportList;
+            users = reportInfo.infusionsoftUserList;
+        }
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        [Bindable]
+        private var users:ArrayCollection;
+
+        private function createReportSource():void {
+            var infusionsoftReport:InfusionsoftReport = reportBox.selectedItem as InfusionsoftReport;
+            if (infusionsoftReport == null) {
+                Alert.show("You need to select a report.");
+            } else {
+                var infusionsoftUser:InfusionsoftUser = userBox.selectedItem as InfusionsoftUser;
+                if (infusionsoftUser == null) {
+                    Alert.show("You need to select a user.");
+                } else {
+                    ProgressAlert.alert(this, "Creating...", null, userUpload.addInfusionsoftReportSource);
+                    userUpload.addInfusionsoftReportSource.send(dataSource, infusionsoftReport.reportID, infusionsoftReport.reportName, infusionsoftUser.userID);
+                }
+            }
+        }
+
+        private function created():void {
+            Alert.show("The data source has been successfully added.");
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="userUpload" destination="userUpload">
+        <mx:method name="getInfusionsoftReports" result="gotReports()"/>
+        <mx:method name="addInfusionsoftReportSource" result="created()"/>
+    </mx:RemoteObject>
+    <mx:Text maxWidth="500" text="You can add the results of any Infusionsoft saved report to your Easy Insight connection. Choose the user with access to the report and the saved report in order to create the new data source. The source will be added as a child source to this parent Infusionsoft composite source."/>
+    <mx:Form>
+        <mx:FormItem label="User:">
+            <util:TextInputWithArrow id="userBox" dataProvider="{users}" labelField="email"/>
+        </mx:FormItem>
+        <mx:FormItem label="Report:">
+            <util:TextInputWithArrow id="reportBox" dataProvider="{reports}" labelField="reportName"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Add" click="createReportSource()"/>
+        <util:SaveButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</feed:DataSourceWindow>
