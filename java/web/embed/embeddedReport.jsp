@@ -97,6 +97,9 @@
         HTMLReportMetadata md = new HTMLReportMetadata();
         md.setEmbedded(true);
         jj.put("metadata", report.toJSON(md, new ArrayList<FilterDefinition>()));
+        if (request.getParameter("iframeKey") != null) {
+            jj.getJSONObject("metadata").put("adhoc_execution", false);
+        }
         intermediate.put("report", jj);
 
         String noHeader = request.getParameter("noHeader");
