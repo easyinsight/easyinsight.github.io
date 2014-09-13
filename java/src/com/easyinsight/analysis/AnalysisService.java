@@ -2106,6 +2106,9 @@ public class AnalysisService {
                 }
                 filterValueDefinition.setFilteredValues(objs);
             } else {
+                if (value.type() == Value.EMPTY || "(Empty)".equals(value.toString()) || "(No Value)".equals(value.toString())) {
+                    value = new StringValue("[ No Value ]");
+                }
                 filterValueDefinition.setSingleValue(true);
                 filterValueDefinition.setFilteredValues(Arrays.asList((Object) value));
             }

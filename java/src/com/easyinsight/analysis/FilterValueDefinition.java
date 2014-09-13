@@ -265,7 +265,7 @@ public class FilterValueDefinition extends FilterDefinition {
             }
             if (value instanceof StringValue) {
                 StringValue stringValue = (StringValue) value;
-                if ("(No Value)".equals(stringValue.getValue())) {
+                if ("(No Value)".equals(stringValue.getValue()) || "[ No Value ]".equals(stringValue.getValue())) {
                     value = new EmptyValue();
                 }
             }
@@ -309,10 +309,10 @@ public class FilterValueDefinition extends FilterDefinition {
             Object value = filteredValues.get(0);
             if (value instanceof String) {
                 String string = (String) value;
-                return !"".equals(string) && !"All".equals(string);
+                return !"".equals(string) && !"All".equals(string) && !"[ No Value ]".equals(string) && !"(Empty)".equals(string);
             } else if (value instanceof StringValue) {
                 StringValue stringValue = (StringValue) value;
-                return !"".equals(stringValue.toString()) && !"All".equals(stringValue.toString());
+                return !"".equals(stringValue.toString()) && !"All".equals(stringValue.toString()) && !"[ No Value ]".equals(stringValue.toString()) && !"(Empty)".equals(stringValue.toString());
             } else if (value instanceof EmptyValue) {
                 return false;
             }
@@ -340,7 +340,7 @@ public class FilterValueDefinition extends FilterDefinition {
             }
             if (value instanceof StringValue) {
                 StringValue stringValue = (StringValue) value;
-                if ("(No Value)".equals(stringValue.getValue())) {
+                if ("(No Value)".equals(stringValue.getValue()) || "[ No Value ]".equals(stringValue.getValue())) {
                     value = new EmptyValue();
                 }
             }
@@ -580,6 +580,8 @@ public class FilterValueDefinition extends FilterDefinition {
                     existingChoices.put(obj.toString(), true);
                 }
             }
+
+            System.out.println("values = " + existingChoices);
 
             jo.put("selected", existingChoices);
             if(getParentFilters() != null && !getParentFilters().isEmpty()) {
