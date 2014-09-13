@@ -4,7 +4,9 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +28,7 @@ public class BatchbookCache extends Batchbook2BaseSource {
     }
 
     public void populate(HttpClient client, Batchbook2CompositeSource parentDefinition) throws Exception {
-
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         int count;
         int page = 1;
         List<Person> peopleList = new ArrayList<Person>();
@@ -42,6 +44,8 @@ public class BatchbookCache extends Batchbook2BaseSource {
             for (Object personObject : people) {
                 count++;
                 Map person = (Map) personObject;
+                Date createdAt = getDate(person, "created_at", dateTimeFormat);
+                Date updatedAt = getDate(person, "updated_at", dateTimeFormat);
                 String id = (person.get("id")).toString();
                 String about = getValue(person, "about");
                 String firstName = getValue(person, "first_name");
@@ -140,7 +144,8 @@ public class BatchbookCache extends Batchbook2BaseSource {
                         companyStuff.add(stuff);
                     }
                 }
-                peopleList.add(new Person(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, firstName, lastName, companyStuff, customFieldValues));
+                peopleList.add(new Person(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, firstName, lastName, companyStuff, customFieldValues, createdAt,
+                        updatedAt));
             }
         } while (count == 30);
         this.people = peopleList;
@@ -160,6 +165,8 @@ public class BatchbookCache extends Batchbook2BaseSource {
             for (Object personObject : companies) {
                 count++;
                 Map person = (Map) personObject;
+                Date createdAt = getDate(person, "created_at", dateTimeFormat);
+                Date updatedAt = getDate(person, "updated_at", dateTimeFormat);
                 String id = (person.get("id")).toString();
                 String about = (String) person.get("about");
                 String name = (String) person.get("name");
@@ -241,7 +248,7 @@ public class BatchbookCache extends Batchbook2BaseSource {
                     }
                 }
 
-                companyList.add(new Company(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, name, customFieldValues));
+                companyList.add(new Company(about, id, emailStuff, phoneStuff, websiteStuff, addressList, tagList, name, customFieldValues, createdAt, updatedAt));
             }
         } while (count == 30);
         this.companies = companyList;

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.batchbook2;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,9 +18,11 @@ public class Entity {
     private List<String> tags;
     private List<Address> addresses;
     private List<CustomFieldValue> customFieldValues;
+    private Date createdAt;
+    private Date updatedAt;
 
     public Entity(String about, String id, List<Stuff> emails, List<Stuff> phones, List<Stuff> websites, List<Address> addresses,
-                  List<String> tags, List<CustomFieldValue> customFieldValues) {
+                  List<String> tags, List<CustomFieldValue> customFieldValues, Date createdAt, Date updatedAt) {
         this.about = about;
         this.id = id;
         this.emails = emails;
@@ -28,6 +31,16 @@ public class Entity {
         this.addresses = addresses;
         this.tags = tags;
         this.customFieldValues = customFieldValues;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 
     public List<CustomFieldValue> getCustomFieldValues() {

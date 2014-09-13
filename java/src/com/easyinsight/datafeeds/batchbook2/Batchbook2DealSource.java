@@ -70,7 +70,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
         fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(ARCHIVED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(EXPECTED_CLOSE, new AnalysisDateDimension(true));
-        fieldBuilder.addField(AMOUNT, new AnalysisMeasure());
+        fieldBuilder.addField(AMOUNT, new AnalysisMeasure(FormattingConfiguration.CURRENCY));
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
 
@@ -79,19 +79,7 @@ public class Batchbook2DealSource extends Batchbook2BaseSource {
         return FeedType.BATCHBOOK2_DEALS;
     }
 
-    protected Date getDate(Map map, String value, SimpleDateFormat dateFormat) {
-        Object obj = map.get(value);
-        if (obj == null) {
-            return null;
-        }
-        String string = obj.toString();
-        try {
-            return dateFormat.parse(string);
-        } catch (ParseException e) {
-            LogClass.error(e);
-            return null;
-        }
-    }
+
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
