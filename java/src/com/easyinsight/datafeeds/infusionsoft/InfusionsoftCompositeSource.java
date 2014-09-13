@@ -8,7 +8,9 @@ import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.users.Account;
+import org.apache.xmlrpc.XmlRpcException;
 
+import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,11 +26,20 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     private String infusionApiKey;
     private String url;
+    private String userID;
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Infusionsoft URL", "url");
         factory.addField("Infusionsoft API Key", "infusionApiKey");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     private Map<String, String> userCache;
@@ -237,10 +248,11 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO INFUSIONSOFT (DATA_SOURCE_ID, URL, API_KEY) VALUES (?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO INFUSIONSOFT (DATA_SOURCE_ID, URL, API_KEY, USER_ID) VALUES (?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, url);
         insertStmt.setString(3, infusionApiKey);
+        insertStmt.setString(4, userID);
         insertStmt.execute();
         insertStmt.close();
     }
@@ -248,12 +260,13 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, API_KEY FROM INFUSIONSOFT WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, API_KEY, USER_ID FROM INFUSIONSOFT WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             setUrl(rs.getString(1));
             setInfusionApiKey(rs.getString(2));
+            setUserID(rs.getString(3));
         }
         queryStmt.close();
     }
@@ -305,5 +318,13 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
 
         return connections;
+    }
+
+    public List<InfusionsoftReport> getAvailableReports() throws MalformedURLException, XmlRpcException {
+        return new InfusionsoftSavedFilterSource().getReports(this);
+    }
+
+    public List<InfusionsoftUser> getUsers() throws MalformedURLException, XmlRpcException {
+        return new InfusionsoftUserSource().getUsers(this);
     }
 }

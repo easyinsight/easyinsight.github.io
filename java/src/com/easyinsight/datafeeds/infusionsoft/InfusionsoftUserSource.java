@@ -12,8 +12,10 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import org.apache.xmlrpc.XmlRpcException;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.util.*;
 
@@ -73,5 +75,18 @@ public class InfusionsoftUserSource extends InfusionsoftTableSource {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public List<InfusionsoftUser> getUsers(InfusionsoftCompositeSource parent) throws MalformedURLException, XmlRpcException {
+        AnalysisItem userID = new AnalysisDimension(new NamedKey(USER_ID));
+        AnalysisItem email = new AnalysisDimension(new NamedKey(EMAIL));
+        DataSet savedFilters = query("User", Arrays.asList(userID, email), parent);
+        List<InfusionsoftUser> reports = new ArrayList<>();
+        for (IRow row : savedFilters.getRows()) {
+            String userIDValue = row.getValue(userID).toString();
+            String emailValue = row.getValue(email).toString();
+            reports.add(new InfusionsoftUser(userIDValue, emailValue));
+        }
+        return reports;
     }
 }
