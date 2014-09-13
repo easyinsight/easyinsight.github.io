@@ -19,6 +19,9 @@ public class StringValue extends Value implements Serializable {
     private static PolicyFactory policy = new HtmlPolicyBuilder()
             .allowElements("li")
             .allowElements("ul")
+            .allowElements("p")
+            .allowElements("a")
+            .allowElements("br")
             .allowElements("b")
             .allowElements("i")
             .toFactory();

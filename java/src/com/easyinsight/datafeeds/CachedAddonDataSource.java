@@ -43,10 +43,17 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         this.reportID = reportID;
     }
 
-    public static void triggerUpdates(long dataSourceID) {
+    public static void triggerUpdates(long dataSourceID, EIConnection conn) {
         System.out.println("Triggering updates for " + dataSourceID);
-        EIConnection conn = Database.instance().getConnection();
+        //EIConnection conn = Database.instance().getConnection();
         try {
+            PreparedStatement delayStmt = conn.prepareStatement("SELECT recache_time FROM account WHERE account_id = ?");
+            delayStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet delayRS = delayStmt.executeQuery();
+            delayRS.next();
+            int recacheTime = delayRS.getInt(1);
+            delayStmt.close();
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT data_source_id from cached_addon_report_source, analysis where analysis.data_feed_id = ? and " +
                     "analysis.analysis_id = cached_addon_report_source.report_id");
             PreparedStatement nodeStmt = conn.prepareStatement("SELECT composite_feed.data_feed_id from composite_node, composite_feed where " +
@@ -94,18 +101,29 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             fedStmt.close();
             queryStmt.close();
             nodeStmt.close();
-            long interval = System.currentTimeMillis() + (1000 * 60 * 15);
-            for (Long id : ids) {
-                PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
-                saveLoadStmt.setTimestamp(1, new Timestamp(interval));
-                saveLoadStmt.setLong(2, id);
-                saveLoadStmt.execute();
-                saveLoadStmt.close();
+            if (recacheTime == 0) {
+                for (Long id : ids) {
+                    try {
+                        System.out.println("Running report " + id);
+                        runReport(conn, id);
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                    }
+                }
+            } else {
+                long interval = System.currentTimeMillis() + (1000 * 60 * 15);
+                for (Long id : ids) {
+                    PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) VALUES (?, ?)");
+                    saveLoadStmt.setTimestamp(1, new Timestamp(interval));
+                    saveLoadStmt.setLong(2, id);
+                    saveLoadStmt.execute();
+                    saveLoadStmt.close();
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
-            Database.closeConnection(conn);
+            //Database.closeConnection(conn);
         }
     }
 

@@ -3,12 +3,16 @@ package com.easyinsight.datafeeds.batchbook2;
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import com.easyinsight.logging.LogClass;
 import net.minidev.json.parser.JSONParser;
 import nu.xom.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -39,6 +43,20 @@ public abstract class Batchbook2BaseSource extends ServerDataSourceDefinition {
             return obj.toString();
         else
             return null;
+    }
+
+    protected Date getDate(Map map, String value, SimpleDateFormat dateFormat) {
+        Object obj = map.get(value);
+        if (obj == null) {
+            return null;
+        }
+        String string = obj.toString();
+        try {
+            return dateFormat.parse(string);
+        } catch (ParseException e) {
+            LogClass.error(e);
+            return null;
+        }
     }
 
     protected static Map runRestRequest(String path, HttpClient client, Batchbook2CompositeSource parentDefinition) throws ReportException {

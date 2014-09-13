@@ -27,6 +27,8 @@ public class Batchbook2CompanySource extends Batchbook2BaseSource {
     public static final String TAGS = "Company Tags";
     public static final String COUNT = "Company Count";
     public static final String URL = "Company URL";
+    public static final String CREATED_AT = "Company Created At";
+    public static final String UPDATED_AT = "Company Updated At";
 
     public Batchbook2CompanySource() {
         setFeedName("Companies");
@@ -40,6 +42,8 @@ public class Batchbook2CompanySource extends Batchbook2BaseSource {
         fieldBuilder.addField(URL, new AnalysisDimension());
         fieldBuilder.addField(TAGS, new AnalysisList());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
     }
 
     @Override
@@ -69,6 +73,8 @@ public class Batchbook2CompanySource extends Batchbook2BaseSource {
                     sb.deleteCharAt(sb.length() - 1);
                 }
                 row.addValue(keys.get(TAGS), sb.toString());
+                row.addValue(keys.get(CREATED_AT), company.getCreatedAt());
+                row.addValue(keys.get(UPDATED_AT), company.getUpdatedAt());
             }
             return dataSet;
         } catch (ReportException re) {

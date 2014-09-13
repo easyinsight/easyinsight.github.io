@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
 import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
+import com.easyinsight.analysis.definitions.WSXAxisDefinition;
+import com.easyinsight.analysis.definitions.WSYAxisDefinition;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.functions.DayOfQuarter;
@@ -1094,7 +1096,7 @@ public class AnalysisService {
                 dataStorage.closeConnection();
             }
             if (dataSource.getParentSourceID() > 0) {
-                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID(), conn);
             }
             conn.commit();
             return null;
@@ -1134,7 +1136,7 @@ public class AnalysisService {
             }
             LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " added row.");
             if (dataSource.getParentSourceID() > 0) {
-                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID(), conn);
             }
             conn.commit();
         } catch (Exception e) {
@@ -1163,7 +1165,7 @@ public class AnalysisService {
             }
             LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " deleted row.");
             if (dataSource.getParentSourceID() > 0) {
-                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID(), conn);
             }
             conn.commit();
         } catch (Exception e) {
@@ -1201,7 +1203,7 @@ public class AnalysisService {
             }
             LogClass.info("[AUDIT LOG] " + SecurityUtil.getUserName() + " updated row.");
             if (dataSource.getParentSourceID() > 0) {
-                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID());
+                CachedAddonDataSource.triggerUpdates(dataSource.getParentSourceID(), conn);
             }
             conn.commit();
         } catch (Exception e) {
@@ -1510,6 +1512,26 @@ public class AnalysisService {
                         //
                     }
                 } else {
+                    if (report instanceof WSXAxisDefinition) {
+                        try {
+                            WSXAxisDefinition wsxAxisDefinition = (WSXAxisDefinition) report;
+                            if (wsxAxisDefinition.getMeasures().size() == 1) {
+                                generateFromParent(wsxAxisDefinition.getMeasures().get(0), report, filters);
+                            }
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        }
+                    }
+                    if (report instanceof WSYAxisDefinition) {
+                        try {
+                            WSYAxisDefinition wsyAxisDefinition = (WSYAxisDefinition) report;
+                            if (wsyAxisDefinition.getMeasures().size() == 1) {
+                                generateFromParent(wsyAxisDefinition.getMeasures().get(0), report, filters);
+                            }
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        }
+                    }
                     if (report.getReportType() == WSAnalysisDefinition.HEATMAP) {
                         CoordinateValue coordinateValue = (CoordinateValue) data.get(analysisItem.qualifiedName());
                         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
@@ -1630,31 +1652,7 @@ public class AnalysisService {
                 if (drillThrough.isFilterRowGroupings()) {
 
                     try {
-                        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
-                        if (dataSource instanceof CompositeFeedDefinition) {
-                            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
-                            Long reportID = compositeFeedDefinition.reportIDForField(analysisItem);
-                            if (reportID != null) {
-                                WSAnalysisDefinition fromReport = new AnalysisService().openAnalysisDefinition(reportID);
-                                if (fromReport instanceof WSListDefinition) {
-                                    WSListDefinition cols = (WSListDefinition) fromReport;
-                                    for (AnalysisItem item : cols.getColumns()) {
-                                        if (item.toDisplay().equals(analysisItem.toDisplay())) {
-                                            for (FilterDefinition filterDefinition : item.getFilters()) {
-                                                FilterDefinition clone;
-                                                try {
-                                                    clone = filterDefinition.clone();
-                                                } catch (CloneNotSupportedException e) {
-                                                    throw new RuntimeException(e);
-                                                }
-                                                clone.setToggleEnabled(true);
-                                                filters.add(clone);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        generateFromParent(analysisItem, report, filters);
                     } catch (Exception e) {
                         LogClass.error(e);
                     }
@@ -1692,18 +1690,20 @@ public class AnalysisService {
                                     }
                                 }
                                 Value val;
-                                if (target instanceof Value) {
-                                    val = (Value) target;
-                                } else {
-                                    if ("(Empty)".equals(target.toString())) {
-                                        val = new StringValue("[ No Value ]");
+                                if (target != null) {
+                                    if (target instanceof Value) {
+                                        val = (Value) target;
                                     } else {
-                                        val = new StringValue(target.toString());
+                                        if ("(Empty)".equals(target.toString())) {
+                                            val = new StringValue("[ No Value ]");
+                                        } else {
+                                            val = new StringValue(target.toString());
+                                        }
                                     }
-                                }
-                                FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, grouping, data, val, multiValue, additionalAnalysisItems);
-                                if (filter != null) {
-                                    filters.add(filter);
+                                    FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, grouping, data, val, multiValue, additionalAnalysisItems);
+                                    if (filter != null) {
+                                        filters.add(filter);
+                                    }
                                 }
                             }
                         }
@@ -1821,6 +1821,34 @@ public class AnalysisService {
         }
     }
 
+    protected void generateFromParent(AnalysisItem analysisItem, WSAnalysisDefinition report, List<FilterDefinition> filters) throws SQLException {
+        FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(report.getDataFeedID());
+        if (dataSource instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) dataSource;
+            Long reportID = compositeFeedDefinition.reportIDForField(analysisItem);
+            if (reportID != null) {
+                WSAnalysisDefinition fromReport = new AnalysisService().openAnalysisDefinition(reportID);
+                if (fromReport instanceof WSListDefinition) {
+                    WSListDefinition cols = (WSListDefinition) fromReport;
+                    for (AnalysisItem item : cols.getColumns()) {
+                        if (item.toDisplay().equals(analysisItem.toDisplay())) {
+                            for (FilterDefinition filterDefinition : item.getFilters()) {
+                                FilterDefinition clone;
+                                try {
+                                    clone = filterDefinition.clone();
+                                } catch (CloneNotSupportedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                clone.setToggleEnabled(true);
+                                filters.add(clone);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private static class FilterKey {
         private AnalysisItem field;
         private List<Object> values;
@@ -1860,6 +1888,9 @@ public class AnalysisService {
     }
 
     private FilterDefinition constructDrillthroughFilter(WSAnalysisDefinition report, DrillThrough drillThrough, AnalysisItem analysisItem, Map<String, Object> data, Value value, boolean multiValue, List<AnalysisItem> additionalAnalysisItems) throws SQLException {
+        if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+            return null;
+        }
         FilterDefinition filterDefinition;
         AnalysisItem targetItem;
         boolean hasExpandDates = false;

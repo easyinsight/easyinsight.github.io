@@ -755,28 +755,34 @@ public class ExportService {
 
 
 
-                            try {
-                                String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getColumns().get(0).qualifiedName()), crosstabDefinition.getColumns().get(0), exportMetadata);
-                                sb.append(" data-drillthrough");
-                                sb.append(crosstabDefinition.getColumns().get(0).getAnalysisItemID());
-                                sb.append("=\"");
-                                sb.append(encodedValue);
-                                sb.append("\"");
-                            } catch (UnsupportedEncodingException e) {
-                                throw new RuntimeException(e);
+                            if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getColumns().get(0).qualifiedName())) {
+                                try {
+                                    String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getColumns().get(0).qualifiedName()), crosstabDefinition.getColumns().get(0), exportMetadata);
+                                    sb.append(" data-drillthrough");
+                                    sb.append(crosstabDefinition.getColumns().get(0).getAnalysisItemID());
+                                    sb.append("=\"");
+                                    sb.append(encodedValue);
+                                    sb.append("\"");
+                                } catch (UnsupportedEncodingException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
 
-                            try {
-                                String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getRows().get(0).qualifiedName()), crosstabDefinition.getRows().get(0), exportMetadata);
-                                sb.append(" data-drillthrough");
-                                sb.append(crosstabDefinition.getRows().get(0).getAnalysisItemID());
-                                sb.append("=\"");
-                                sb.append(encodedValue);
-                                sb.append("\"");
-                            } catch (UnsupportedEncodingException e) {
-                                throw new RuntimeException(e);
+                            if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getRows().get(0).qualifiedName())) {
+                                try {
+                                    String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getRows().get(0).qualifiedName()), crosstabDefinition.getRows().get(0), exportMetadata);
+                                    sb.append(" data-drillthrough");
+                                    sb.append(crosstabDefinition.getRows().get(0).getAnalysisItemID());
+                                    sb.append("=\"");
+                                    sb.append(encodedValue);
+                                    sb.append("\"");
+                                } catch (UnsupportedEncodingException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
-
+                            if (crosstabValue.isSummaryValue()) {
+                                sb.append(" style=\"color:").append(summaryTextColor).append("\"");
+                            }
                             sb.append(">");
 
 
@@ -4605,7 +4611,7 @@ public class ExportService {
                             sb.append("\">");
 
                         }
-                    } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed()) {
+                    } else if (defaultLink instanceof DrillThrough && !exportProperties.isEmailed() && !analysisItem.hasType(AnalysisItemTypes.TEXT)) {
                         DrillThrough drillThrough = (DrillThrough) defaultLink;
                         sb.append("<a class=\"list_drillthrough\" href=\"#\" data-reportid=\"");
                         sb.append(report.getUrlKey());

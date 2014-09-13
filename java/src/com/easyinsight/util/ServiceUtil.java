@@ -133,12 +133,13 @@ public class ServiceUtil {
             if (callData == null) {
                 return null;
             }
-            if (callData.getStatus() == DONE || callData.getStatus() == FAILED) {
+            /*if (callData.getStatus() == DONE || callData.getStatus() == FAILED) {
+                System.out.println("Removing call data for  "+ callDataID);
                 PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM refresh_connection_cache WHERE call_data_id = ?");
                 deleteStmt.setString(1, callDataID);
                 deleteStmt.executeUpdate();
                 deleteStmt.close();
-            }
+            }*/
         } catch (Exception e) {
             LogClass.error(e);
         } finally {

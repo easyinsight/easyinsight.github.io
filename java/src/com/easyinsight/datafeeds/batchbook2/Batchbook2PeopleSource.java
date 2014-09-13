@@ -31,6 +31,8 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
     public static final String COMPANY_ID = "Person Company ID";
     public static final String COUNT = "Person Count";
     public static final String PERSON_URL = "Person URL";
+    public static final String CREATED_AT = "Person Created At";
+    public static final String UPDATED_AT = "Person Updated At";
 
     public Batchbook2PeopleSource() {
         setFeedName("People");
@@ -47,6 +49,8 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
         fieldBuilder.addField(COMPANY_ID, new AnalysisDimension());
         fieldBuilder.addField(PERSON_URL, new AnalysisDimension());
         fieldBuilder.addField(COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(CREATED_AT, new AnalysisDateDimension());
+        fieldBuilder.addField(UPDATED_AT, new AnalysisDateDimension());
     }
 
     @Override
@@ -91,6 +95,8 @@ public class Batchbook2PeopleSource extends Batchbook2BaseSource {
                     sb.deleteCharAt(sb.length() - 1);
                 }
                 row.addValue(keys.get(TAGS), sb.toString());
+                row.addValue(keys.get(CREATED_AT), person.getCreatedAt());
+                row.addValue(keys.get(UPDATED_AT), person.getUpdatedAt());
             }
             return dataSet;
         } catch (ReportException re) {
