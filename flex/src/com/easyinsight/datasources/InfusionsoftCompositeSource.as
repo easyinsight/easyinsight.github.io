@@ -21,6 +21,9 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
+        var config:InfusionsoftReportManagement = new InfusionsoftReportManagement();
+        config.label = "Infusionsoft Reports";
+        pages.addItem(config);
         return pages;
     }
 
