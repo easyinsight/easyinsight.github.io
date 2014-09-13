@@ -93,6 +93,9 @@ public class Account {
     @Column(name="addon_storage_units")
     private int addonStorageUnits;
 
+    @Column(name="recache_time")
+    private int recacheTime;
+
     @Column(name="unlimited_quickbase_connections")
     private boolean unlimitedQuickbaseConnections;
     @Column(name="addon_quickbase_connections")
@@ -299,6 +302,14 @@ public class Account {
 
     @Column(name="next_bill_amount")
     private Double nextBillAmount;
+
+    public int getRecacheTime() {
+        return recacheTime;
+    }
+
+    public void setRecacheTime(int recacheTime) {
+        this.recacheTime = recacheTime;
+    }
 
     public String getCachingStorage() {
         return cachingStorage;
