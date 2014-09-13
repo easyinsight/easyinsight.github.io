@@ -1648,6 +1648,7 @@ public class AnalysisService {
                             iter.remove();
                         }
                     }
+                    filters.addAll(reportFilters);
                 }
                 if (drillThrough.isFilterRowGroupings()) {
 
@@ -2032,7 +2033,7 @@ public class AnalysisService {
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(dateValue.getDate());
                     int year = cal.get(Calendar.YEAR);
-                    result = quarter + "-" + year;
+                    result = "0" + quarter + "-" + year;
                 } else if ("qq".equals(format)) {
                     int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
                     result = String.valueOf(quarter);
@@ -2066,7 +2067,7 @@ public class AnalysisService {
                         if ("QQ".equals(format)) {
                             String quarter = String.valueOf(value.toString().charAt(1));
                             String year = value.toString().substring(value.toString().length() - 4);
-                            result = quarter + "-" + year;
+                            result = "0" + quarter + "-" + year;
                         } else if ("qq".equals(format)) {
                             int quarter = Integer.parseInt(String.valueOf(value.toString().charAt(1)));
                             result = String.valueOf(quarter);
