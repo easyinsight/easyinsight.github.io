@@ -337,7 +337,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings, refreshProperties);
 
             refreshDone();
-            CachedAddonDataSource.triggerUpdates(getDataFeedID());
+            CachedAddonDataSource.triggerUpdates(getDataFeedID(), conn);
         }
 
         return changed;

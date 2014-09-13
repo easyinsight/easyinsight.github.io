@@ -509,7 +509,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             timeStmt.setString(5, "");
             timeStmt.execute();
             timeStmt.close();
-            CachedAddonDataSource.triggerUpdates(getDataFeedID());
+            CachedAddonDataSource.triggerUpdates(getDataFeedID(), conn);
         } finally {
             DataTypeMutex.mutex().unlock(getFeedType());
         }
