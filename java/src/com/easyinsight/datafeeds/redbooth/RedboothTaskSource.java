@@ -75,8 +75,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
 
-        List<Map>  people = (List<Map>) queryList("/api/3/users", redboothCompositeSource, httpClient);
-        List<Map>  personList = (List<Map>) queryList("/api/3/people", redboothCompositeSource, httpClient);
+        List<Map>  people = (List<Map>) queryList("/api/3/users?per_page=1000", redboothCompositeSource, httpClient);
+        List<Map>  personList = (List<Map>) queryList("/api/3/people?per_page=1000", redboothCompositeSource, httpClient);
 
         Map<String, String> users = new HashMap<>();
 
