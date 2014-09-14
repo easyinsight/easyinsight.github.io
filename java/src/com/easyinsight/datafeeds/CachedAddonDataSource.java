@@ -111,7 +111,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     }
                 }
             } else {
-                long interval = System.currentTimeMillis() + (1000 * 60 * 15);
+                long interval = System.currentTimeMillis() + (1000 * 60 * recacheTime);
                 for (Long id : ids) {
                     PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) VALUES (?, ?)");
                     saveLoadStmt.setTimestamp(1, new Timestamp(interval));
