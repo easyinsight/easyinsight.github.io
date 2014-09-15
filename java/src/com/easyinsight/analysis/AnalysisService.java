@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
-import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
-import com.easyinsight.analysis.definitions.WSXAxisDefinition;
-import com.easyinsight.analysis.definitions.WSYAxisDefinition;
+import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.functions.DayOfQuarter;
@@ -1814,6 +1811,31 @@ public class AnalysisService {
                         if (child != null && child.equals(obj)) {
                             iter.remove();
                             filter.setField(existingFilter.getField());
+                        }
+                    }
+                }
+            }
+
+            if (report instanceof WSKPIDefinition) {
+                WSKPIDefinition kpiDefinition = (WSKPIDefinition) report;
+                if (kpiDefinition.getPreviousDate() != null && !"".equals(kpiDefinition.getPreviousDate())) {
+                    Iterator<FilterDefinition> iter = endFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition filter = iter.next();
+                        if (kpiDefinition.getPreviousDate().equals(filter.getFilterName())) {
+                            iter.remove();
+                        }
+                    }
+                }
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
+                    TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (trendReportFieldExtension.getDate() != null) {
+                        if (kpiDefinition.getNowDate() != null && !"".equals(kpiDefinition.getNowDate())) {
+                            for (FilterDefinition filter : endFilters) {
+                                if (kpiDefinition.getNowDate().equals(filter.getFilterName())) {
+                                    filter.setField(trendReportFieldExtension.getDate());
+                                }
+                            }
                         }
                     }
                 }
