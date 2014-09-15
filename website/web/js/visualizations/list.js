@@ -22,7 +22,7 @@ $(function () {
 
 List = {
 
-    crosstabCallback: function (targetDiv, properties, fullFilters, drillthroughKey) {
+    crosstabCallback: function (targetDiv, properties, fullFilters, drillthroughKey, dashboardID) {
         return function(data) {
             Utils.noData(data, function() {
                 var report = $('#' + targetDiv + ' .reportArea');
@@ -32,6 +32,9 @@ List = {
                     var x = $(e.target);
                     var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughKey, "filters": fullFilters,
                         "drillthrough_values": {}};
+                    if (dashboardID != -1) {
+                        f["dashboardID"] = dashboardID;
+                    }
                     f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
 
                             if(i.match(/^drillthrough/))
@@ -45,7 +48,7 @@ List = {
         }
     },
 
-    getCallback: function (targetDiv, properties, sorting, numColumns, fullFilters, drillthroughKey) {
+    getCallback: function (targetDiv, properties, sorting, numColumns, fullFilters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noData(data, function () {
                 if (typeof(List.availableDataTables[targetDiv]) != "undefined" && List.availableDataTables[targetDiv] != null) {
@@ -98,6 +101,9 @@ List = {
                     var x = $(e.target);
                     var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughKey, "filters": fullFilters,
                         "drillthrough_values": {}};
+                    if (dashboardID != -1) {
+                        f["dashboardID"] = dashboardID;
+                    }
                     f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
 
                         if(i.match(/^drillthrough/))

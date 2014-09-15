@@ -1,4 +1,4 @@
-window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fullFilters, drillthrough) {
+window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fullFilters, drillthrough, dashboardID) {
     var diagram = j;
 
     function createNode(node, key) {
@@ -14,6 +14,9 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fu
             $(e).bind("click", function (e) {
                 var drillthrough = data["drillthrough"];
                 var f = { "reportID": reportID, "drillthroughID": node["drillthrough"], "embedded": embedded, "source": key, "drillthroughKey": drillthrough, "filters": fullFilters };
+                if (dashboardID != -1) {
+                    f["dashboardID"] = dashboardID;
+                }
                 drillThrough(f);
             })
         }

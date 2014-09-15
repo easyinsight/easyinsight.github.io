@@ -250,7 +250,7 @@ var toFilterString = function (f, store) {
     } else if (f.type == "flat_date_month" || f.type == "flat_date_year") {
         return $.extend(c, {selected: f.selected});
     } else if (f.type == "multi_date") {
-        return $.extend(c, {start: f.start, end: f.end});
+        return $.extend(c, {start: f.start, end: f.end, startLabel: f.startLabel, endLabel: f.endLabel});
     } else if (f.type == "field_filter") {
         return $.extend(c, {selected: f.selected});
     } else if (f.type == "multi_field_filter") {
@@ -459,55 +459,55 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
 
     if (obj.metadata.type == "pie") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3PieChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3PieChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "serverList") {
         var p = postData.url.substr(obj.metadata.url.length);
-        AsyncList.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID);
+        AsyncList.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID, dashboardID);
     } else if (obj.metadata.type == "multi_summary") {
         var p = postData.url.substr(obj.metadata.url.length);
-        AsyncMultiSummary.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID);
+        AsyncMultiSummary.createTable(id, obj.metadata.properties, obj.metadata.columnData, JSON.stringify(fullFilters), obj.metadata.tableHTML, p, obj.metadata.uid, fullFilters, drillthroughID, dashboardID);
     } else if (obj.metadata.type == "diagram") {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
-            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID));
+            window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID, dashboardID));
         }) }));
     }
     else if (obj.metadata.type == "list" || obj.metadata.type == "trend_grid") {
         $.ajax($.extend(postData, {
             dataType: "text",
-            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID))
+            success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID, dashboardID))
         }));
     } else if (obj.metadata.type == "crosstab") {
         $.ajax($.extend(postData, {
             dataType: "text",
-            success: confirmRender(o, List.crosstabCallback(id, obj.metadata.properties, fullFilters, drillthroughID))
+            success: confirmRender(o, List.crosstabCallback(id, obj.metadata.properties, fullFilters, drillthroughID, dashboardID))
         }));
     } else if (obj.metadata.type == "bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3BarChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3BarChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "column") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ColumnChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ColumnChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "plot" || obj.metadata.type == "bubble") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ScatterCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ScatterCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "line") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3LineCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3LineCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "area") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3AreaCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3AreaCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "topomap") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Map.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, iframeKey != ""))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Map.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, iframeKey != "", dashboardID))}));
     } else if (obj.metadata.type == "stacked_bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedBarChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedBarChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "stacked_column") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedColumnChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedColumnChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "bullet") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
-        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBulletChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID))}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getBulletChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "gauge") {
         $("#" + id + " .reportArea").html(gaugeTemplate({id: id, benchmark: obj.metadata.benchmark }));
         $.ajax($.extend(postData, {success: confirmRender(o, Gauge.getCallback(id + "ReportArea", id))}));
@@ -521,6 +521,9 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
                 var x = $(e.target);
                 var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughID, "filters": fullFilters,
                     "drillthrough_values": {}};
+                if (dashboardID != -1) {
+                    f["dashboardID"] = dashboardID;
+                }
                 f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
 
                     if(i.match(/^drillthrough/))
@@ -1052,8 +1055,10 @@ $(function () {
                 var max = $(".multi_flat_month_end", a).val();
                 f.filter.start = parseInt(min);
                 f.filter.end = parseInt(max);
-                var startLabel = f.filter.lookup[min];
-                var endLabel = f.filter.lookup[max];
+                var startLabel = f.filter.displayLookup[min];
+                var endLabel = f.filter.displayLookup[max];
+                f.filter.startLabel = startLabel;
+                f.filter.endLabel = endLabel;
                 $("#" + a.attr("id").replace(/_modal$/g, "")).html(startLabel + " to " + endLabel);
                 if (f.parent == null) {
                     renderReports(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
