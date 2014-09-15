@@ -11,7 +11,9 @@ Utils = {
             $("#" + target + " .noData").show();
         }
         if(typeof(afterRefresh) != "undefined") {
-            if(afterRefresh.length > 0) {
+            if (afterRefresh.length > 1) {
+                afterRefresh($("#" + target + " .loading"), target)();
+            } else if(afterRefresh.length > 0) {
                 afterRefresh($("#" + target + " .loading"))();
             } else {
                 afterRefresh();
