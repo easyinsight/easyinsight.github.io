@@ -30,10 +30,11 @@ public class HighriseCompany {
     private String homeEmail;
     private String otherEmail;
     private Map<String, String> customFields;
+    private String url;
 
     public HighriseCompany(String companyName, String companyID, String tags, String owner, Date createdAt, Date updatedAt, String zipCode, String background,
                            String country, String state, String city, String street, String officePhone, String homePhone, String mobilePhone, String faxPhone,
-                           String officeEmail, String homeEmail, String otherEmail, Map<String, String> customFields) {
+                           String officeEmail, String homeEmail, String otherEmail, Map<String, String> customFields, String url) {
         this.companyName = companyName;
         this.companyID = companyID;
         this.tags = tags;
@@ -54,6 +55,11 @@ public class HighriseCompany {
         this.mobilePhone = mobilePhone;
         this.faxPhone = faxPhone;
         this.customFields = customFields;
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public String getStreet() {
