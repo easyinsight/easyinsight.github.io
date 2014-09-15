@@ -1624,15 +1624,17 @@ public class AnalysisService {
                                 multiValue = true;
                             }
                         }
-                        Value val;
-                        if (target instanceof Value) {
-                            val = (Value) target;
-                        } else {
-                            val = new StringValue(target.toString());
-                        }
-                        FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
-                        if (filter != null) {
-                            filters.add(filter);
+                        if (target != null) {
+                            Value val;
+                            if (target instanceof Value) {
+                                val = (Value) target;
+                            } else {
+                                val = new StringValue(target.toString());
+                            }
+                            FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
+                            if (filter != null) {
+                                filters.add(filter);
+                            }
                         }
                     }
 
@@ -1644,8 +1646,10 @@ public class AnalysisService {
                     Iterator<FilterDefinition> iter = reportFilters.iterator();
                     while (iter.hasNext()) {
                         FilterDefinition filter = iter.next();
-                        if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
-                            iter.remove();
+                        if (filter != null && filter.getField() != null) {
+                            if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
+                                iter.remove();
+                            }
                         }
                     }
                     filters.addAll(reportFilters);
@@ -1798,6 +1802,21 @@ public class AnalysisService {
             List<FilterDefinition> endFilters = new ArrayList<>(others);
             for (FilterDefinition filter : dupeMap.values()) {
                 endFilters.add(filter);
+            }
+
+            for (FilterDefinition filter : new ArrayList<>(endFilters)) {
+                String obj = filter.getParentChildLabel();
+                if (obj != null) {
+                    Iterator<FilterDefinition> iter = endFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition existingFilter = iter.next();
+                        String child = existingFilter.getChildToParentLabel();
+                        if (child != null && child.equals(obj)) {
+                            iter.remove();
+                            filter.setField(existingFilter.getField());
+                        }
+                    }
+                }
             }
 
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
