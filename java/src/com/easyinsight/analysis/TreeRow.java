@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.export.TreeData;
@@ -9,7 +10,11 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +113,130 @@ public class TreeRow {
 
     public void setChildren(List<TreeRow> children) {
         this.children = children;
+    }
+
+    public int toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Sheet sheet, int rowNumber,
+                       Map<ExportService.StyleKey, ExportService.Style> styleMap, ExportMetadata exportMetadata, WSTreeDefinition treeDefinition) throws SQLException {
+
+        rowNumber++;
+
+        org.apache.poi.ss.usermodel.Row row = sheet.createRow(rowNumber);
+
+        int columnCount = 0;
+        if (getChildren().size() == 0) {
+            if (groupingField == null) {
+                Cell cell = row.createCell(columnCount++);
+                cell.setCellValue("");
+            } else {
+                Cell cell = row.createCell(columnCount++);
+                cell.setCellValue(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+            }
+            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                com.easyinsight.core.Value value =  (Value) values.get(analysisItem.qualifiedName());
+                if (value == null) {
+                    Cell cell = row.createCell(columnCount++);
+                    cell.setCellValue("");
+                } else {
+                    Cell cell = row.createCell(columnCount++);
+                    cell.setCellValue(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true));
+                    //
+                }
+            }
+        } else {
+            Cell headerCell = row.createCell(columnCount++);
+            headerCell.setCellValue(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
+
+            for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+                Cell cell = row.createCell(columnCount++);
+                StringBuilder styleString = new StringBuilder(TreeData.tdStyle);
+                String align = "left";
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                    TextReportFieldExtension textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (textReportFieldExtension.getAlign() != null) {
+                        if ("Left".equals(textReportFieldExtension.getAlign())) {
+                            align = "left";
+                        } else if ("Center".equals(textReportFieldExtension.getAlign())) {
+                            align = "center";
+                        } else if ("Right".equals(textReportFieldExtension.getAlign())) {
+                            align = "right";
+                        }
+                    }
+                    styleString.append(align);
+                    if (textReportFieldExtension.getFixedWidth() > 0) {
+                        styleString.append(";width:").append(textReportFieldExtension.getFixedWidth()).append("px");
+                    }
+                } else {
+                    styleString.append(align);
+                }
+                com.easyinsight.core.Value value =  (Value) values.get(analysisItem.qualifiedName());
+                if (value == null) {
+                    cell.setCellValue("");
+
+                } else {
+                    /*if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
+                        TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
+                        if (textValueExtension.getColor() != 0) {
+                            String hexString = ExportService.createHexString(textValueExtension.getColor());
+                            styleString.append(";color:").append(hexString);
+                        }
+                    }*/
+                    /*if (backgroundColor != null) {
+                        styleString.append(";background-color:").append(ExportService.createHexString(backgroundColor));
+                    }
+                    if (textColor != null) {
+                        styleString.append(";color:").append(ExportService.createHexString(textColor));
+                    }*/
+                    cell.setCellValue(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true));
+                    /*font = new Font(Font.FontFamily.HELVETICA, treeDefinition.getFontSize());
+                    font.setColor(new BaseColor(textColor));
+                    valueCell = new PdfPCell(new Phrase(com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false), font));
+                    valueCell.setBackgroundColor(new BaseColor(backgroundColor));
+                    valueCell.setMinimumHeight(20f);
+                    table.addCell(valueCell);*/
+                }
+            }
+
+            for (TreeRow child : getChildren()) {
+                rowNumber = child.toExcel(insightRequestMetadata, conn, sheet, rowNumber, styleMap, exportMetadata, treeDefinition);
+            }
+        }
+
+        return rowNumber;
+
+
+        /*org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(0);
+        int i = 0;
+        for (AnalysisItem analysisItem : report.getCoreItems()) {
+
+            TextReportFieldExtension textReportFieldExtension = null;
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+            }
+
+            int width;
+            if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
+                width = textReportFieldExtension.getFixedWidth() / 15 * 256;
+            } else if (analysisItem.getWidth() > 0) {
+                width = Math.max((analysisItem.getWidth() / 15 * 256), 5000);
+            } else {
+                width = 5000;
+            }
+
+            sheet.setColumnWidth(i, width);
+
+            Cell headerCell = headerRow.createCell(i++);
+            headerCell.setCellValue(ExportService.createRichTextString(analysisItem.toUnqualifiedDisplay(), headerCell));
+            org.apache.poi.ss.usermodel.Font font = workbook.createFont();
+            font.setBoldweight(org.apache.poi.ss.usermodel.Font.BOLDWEIGHT_BOLD);
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFont(font);
+            headerCell.setCellStyle(cellStyle);
+        }
+        int rowCount = 1;
+        for (TreeRow child : getChildren()) {
+            child.toPDF(treeDefinition, exportMetadata, table);
+        }
+        return workbook;*/
     }
 
     public void toPDF(WSTreeDefinition treeDefinition, ExportMetadata exportMetadata, PdfPTable table) {
