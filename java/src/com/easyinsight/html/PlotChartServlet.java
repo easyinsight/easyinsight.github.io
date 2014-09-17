@@ -70,6 +70,7 @@ public class PlotChartServlet extends HtmlServlet {
             JSONObject p1 = new JSONObject();
             p1.put("x", row.getValue(plotDefinition.getXaxisMeasure()).toDouble());
             p1.put("y", row.getValue(plotDefinition.getYaxisMeasure()).toDouble());
+            p1.put("a", row.getValue(dimension).toString());
             points.put(p1);
         }
 

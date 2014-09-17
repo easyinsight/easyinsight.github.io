@@ -60,6 +60,10 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                     String tagString = "";
                     String street = "";
 
+                    if ("A Company".equals(name)) {
+                        System.out.println("...");
+                    }
+
                     Nodes contactDataNodes = companyNode.query("contact-data/addresses/address");
                     if (contactDataNodes.size() > 0) {
                         Node contactDataNode = contactDataNodes.get(0);
@@ -69,6 +73,14 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
                         city = queryField(contactDataNode, "city/text()");
                         street = queryField(contactDataNode, "street/text()");
                     }
+
+                    String website = "";
+                    contactDataNodes = companyNode.query("contact-data/web-addresses/web-address");
+                    if (contactDataNodes.size() > 0) {
+                        Node contactDataNode = contactDataNodes.get(0);
+                        website = queryField(contactDataNode, "url/text()");
+                    }
+
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
 
                     Date updatedAt = deadlineFormat.parse(queryField(companyNode, "updated-at/text()"));
@@ -137,7 +149,7 @@ public class HighriseCompanyCache extends HighRiseBaseSource {
 
 
                     companyList.add(new HighriseCompany(name, id, tagString, responsiblePartyName, createdAt, updatedAt, zip, background,
-                            country, state, city, street, workPhone, homePhone, mobilePhone, faxPhone, workEmail, homeEmail, otherEmail, customFields));
+                            country, state, city, street, workPhone, homePhone, mobilePhone, faxPhone, workEmail, homeEmail, otherEmail, customFields, website));
                     companyIDs.add(id);
                     companyCount++;
                 }

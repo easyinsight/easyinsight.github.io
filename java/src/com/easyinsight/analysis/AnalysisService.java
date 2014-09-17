@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.definitions.WSStackedBarChartDefinition;
-import com.easyinsight.analysis.definitions.WSStackedColumnChartDefinition;
-import com.easyinsight.analysis.definitions.WSXAxisDefinition;
-import com.easyinsight.analysis.definitions.WSYAxisDefinition;
+import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.functions.DayOfQuarter;
@@ -1624,15 +1621,17 @@ public class AnalysisService {
                                 multiValue = true;
                             }
                         }
-                        Value val;
-                        if (target instanceof Value) {
-                            val = (Value) target;
-                        } else {
-                            val = new StringValue(target.toString());
-                        }
-                        FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
-                        if (filter != null) {
-                            filters.add(filter);
+                        if (target != null) {
+                            Value val;
+                            if (target instanceof Value) {
+                                val = (Value) target;
+                            } else {
+                                val = new StringValue(target.toString());
+                            }
+                            FilterDefinition filter = constructDrillthroughFilter(report, drillThrough, analysisItem, data, val, multiValue, additionalAnalysisItems);
+                            if (filter != null) {
+                                filters.add(filter);
+                            }
                         }
                     }
 
@@ -1644,8 +1643,10 @@ public class AnalysisService {
                     Iterator<FilterDefinition> iter = reportFilters.iterator();
                     while (iter.hasNext()) {
                         FilterDefinition filter = iter.next();
-                        if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
-                            iter.remove();
+                        if (filter != null && filter.getField() != null) {
+                            if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
+                                iter.remove();
+                            }
                         }
                     }
                     filters.addAll(reportFilters);
@@ -1798,6 +1799,46 @@ public class AnalysisService {
             List<FilterDefinition> endFilters = new ArrayList<>(others);
             for (FilterDefinition filter : dupeMap.values()) {
                 endFilters.add(filter);
+            }
+
+            for (FilterDefinition filter : new ArrayList<>(endFilters)) {
+                String obj = filter.getParentChildLabel();
+                if (obj != null) {
+                    Iterator<FilterDefinition> iter = endFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition existingFilter = iter.next();
+                        String child = existingFilter.getChildToParentLabel();
+                        if (child != null && child.equals(obj)) {
+                            iter.remove();
+                            filter.setField(existingFilter.getField());
+                        }
+                    }
+                }
+            }
+
+            if (report instanceof WSKPIDefinition) {
+                WSKPIDefinition kpiDefinition = (WSKPIDefinition) report;
+                if (kpiDefinition.getPreviousDate() != null && !"".equals(kpiDefinition.getPreviousDate())) {
+                    Iterator<FilterDefinition> iter = endFilters.iterator();
+                    while (iter.hasNext()) {
+                        FilterDefinition filter = iter.next();
+                        if (kpiDefinition.getPreviousDate().equals(filter.getFilterName())) {
+                            iter.remove();
+                        }
+                    }
+                }
+                if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TrendReportFieldExtension) {
+                    TrendReportFieldExtension trendReportFieldExtension = (TrendReportFieldExtension) analysisItem.getReportFieldExtension();
+                    if (trendReportFieldExtension.getDate() != null) {
+                        if (kpiDefinition.getNowDate() != null && !"".equals(kpiDefinition.getNowDate())) {
+                            for (FilterDefinition filter : endFilters) {
+                                if (kpiDefinition.getNowDate().equals(filter.getFilterName())) {
+                                    filter.setField(trendReportFieldExtension.getDate());
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();

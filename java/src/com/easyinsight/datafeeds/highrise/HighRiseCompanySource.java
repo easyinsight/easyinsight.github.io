@@ -37,6 +37,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
 
     public static final String ZIP_CODE = "Company Zip Code";
     public static final String BACKGROUND = "Company Background";
+    public static final String WEBSITE = "Company Website";
 
     public static final String COUNTRY = "Company Country";
     public static final String STATE = "Company State";
@@ -50,6 +51,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
     public static final String COMPANY_HOME_PHONE = "Company Home Phone";
     public static final String COMPANY_FAX_PHONE = "Company Fax Phone";
     public static final String COMPANY_STREET = "Company Street";
+    public static final String URL = "URL";
 
     public HighRiseCompanySource() {
         setFeedName("Company");
@@ -84,6 +86,18 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        Key url = keys.get(URL);
+        if (url == null) {
+            url = new NamedKey(URL);
+        }
+        analysisItems.add(new AnalysisDimension(url));
+
+        Key websiteKey = keys.get(WEBSITE);
+        if (websiteKey == null) {
+            websiteKey = new NamedKey(WEBSITE);
+        }
+        analysisItems.add(new AnalysisDimension(websiteKey));
+
         try {
             HighRiseCompositeSource compositeSource = (HighRiseCompositeSource) parentDefinition;
             Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false, (EIConnection) conn);
@@ -122,6 +136,8 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
             HighriseCompanyCache highriseCompanyCache = highRiseCompositeSource.getOrCreateCompanyCache(client, lastRefreshDate);
             for (HighriseCompany highriseCompany : highriseCompanyCache.getCompanyList()) {
                 IRow row = ds.createRow();
+                row.addValue(URL, highRiseCompositeSource.getUrl() + "/companies/" + highriseCompany.getCompanyID());
+                row.addValue(WEBSITE, highriseCompany.getUrl());
                 row.addValue(BACKGROUND, highriseCompany.getBackground());
                 row.addValue(COMPANY_ID, highriseCompany.getCompanyID());
                 row.addValue(COMPANY_NAME, highriseCompany.getCompanyName());

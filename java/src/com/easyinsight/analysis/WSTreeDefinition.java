@@ -1,10 +1,16 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
+import com.easyinsight.export.TreeData;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.intention.NewHierarchyIntention;
 import com.easyinsight.pipeline.*;
 import com.easyinsight.preferences.ApplicationSkin;
+import org.apache.poi.ss.usermodel.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -385,5 +391,82 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
                 }
             }
         }
+    }
+
+    public boolean toExcel(InsightRequestMetadata insightRequestMetadata, EIConnection conn, Sheet sheet, Map<ExportService.StyleKey, ExportService.Style> styleMap, Workbook workbook) throws SQLException {
+        ExportMetadata exportMetadata = ExportService.createExportMetadata(conn);
+        DataSet dataSet = DataService.listDataSet(this, insightRequestMetadata, conn);
+        PipelineData pipelineData = dataSet.getPipelineData();
+
+        // create headers on sheet
+
+        int i = 0;
+
+        org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(0);
+
+        {
+            TextReportFieldExtension textReportFieldExtension = null;
+            if (hierarchy.getReportFieldExtension() != null && hierarchy.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                textReportFieldExtension = (TextReportFieldExtension) hierarchy.getReportFieldExtension();
+            }
+
+            int width;
+            if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
+                width = textReportFieldExtension.getFixedWidth() / 15 * 256;
+            } else if (hierarchy.getWidth() > 0) {
+                width = Math.max((hierarchy.getWidth() / 15 * 256), 5000);
+            } else {
+                width = 5000;
+            }
+
+            sheet.setColumnWidth(i, width);
+
+            Cell headerCell = headerRow.createCell(i++);
+            headerCell.setCellValue(ExportService.createRichTextString(hierarchy.toUnqualifiedDisplay(), headerCell));
+            Font font = workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFont(font);
+            headerCell.setCellStyle(cellStyle);
+        }
+
+        for (AnalysisItem analysisItem : getItems()) {
+
+            TextReportFieldExtension textReportFieldExtension = null;
+            if (analysisItem.getReportFieldExtension() != null && analysisItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
+                textReportFieldExtension = (TextReportFieldExtension) analysisItem.getReportFieldExtension();
+            }
+
+            int width;
+            if (textReportFieldExtension != null && textReportFieldExtension.getFixedWidth() > 0) {
+                width = textReportFieldExtension.getFixedWidth() / 15 * 256;
+            } else if (analysisItem.getWidth() > 0) {
+                width = Math.max((analysisItem.getWidth() / 15 * 256), 5000);
+            } else {
+                width = 5000;
+            }
+
+            sheet.setColumnWidth(i, width);
+
+            Cell headerCell = headerRow.createCell(i++);
+            headerCell.setCellValue(ExportService.createRichTextString(analysisItem.toUnqualifiedDisplay(), headerCell));
+            Font font = workbook.createFont();
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+            CellStyle cellStyle = workbook.createCellStyle();
+            cellStyle.setFont(font);
+            headerCell.setCellStyle(cellStyle);
+        }
+
+        TreeData treeData = new TreeData(this, (AnalysisHierarchyItem) hierarchy, exportMetadata, dataSet);
+        for (IRow row : dataSet.getRows()) {
+            treeData.addRow(row);
+        }
+        List<TreeRow> rows = treeData.toTreeRows(pipelineData);
+        int rowNum = 0;
+        for (TreeRow row : rows) {
+            rowNum = row.toExcel(insightRequestMetadata, conn, sheet, rowNum, styleMap, exportMetadata, this);
+        }
+
+        return dataSet.getRows().size() > 0;
     }
 }

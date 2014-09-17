@@ -3201,6 +3201,10 @@ public class ExportService {
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
             WSMultiSummaryDefinition multiSummaryDefinition = (WSMultiSummaryDefinition) listDefinition;
             return multiSummaryDefinition.toExcel(insightRequestMetadata, conn);
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
+            WSTreeDefinition summaryDefinition = (WSTreeDefinition) listDefinition;
+            hasData = summaryDefinition.toExcel(insightRequestMetadata, conn, sheet, styleMap, workbook);
+
         } else {
             hasData = listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
         }

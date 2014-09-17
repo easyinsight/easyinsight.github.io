@@ -17,9 +17,9 @@ public class TopoMapDefinition extends AnalysisDefinition {
     public var pointMeasure:AnalysisItem;
     public var pointGrouping:AnalysisItem;
     public var precision:int;
-    public var regionFillStart:int;
-    public var regionFillEnd:int;
-    public var noDataFill:int;
+    public var regionFillStart:int = 0x000044;
+    public var regionFillEnd:int = 0x66BBFF;
+    public var noDataFill:int = 0xAAAAAA;
     public var pointColors:ArrayCollection = new ArrayCollection();
     public var map:String = "US States";
     public var mapID:int;
