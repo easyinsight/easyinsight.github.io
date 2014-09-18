@@ -16,6 +16,7 @@ import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
+import mx.containers.Box;
 import mx.containers.HBox;
 import mx.controls.AdvancedDataGrid;
 import mx.controls.Button;
@@ -23,6 +24,7 @@ import mx.controls.DataGrid;
 import mx.controls.Image;
 import mx.controls.List;
 import mx.controls.PopUpMenuButton;
+import mx.controls.Text;
 import mx.core.Application;
 import mx.core.DragSource;
 import mx.core.IUIComponent;
@@ -34,7 +36,7 @@ import mx.managers.PopUpManager;
 import mx.states.AddChild;
 import mx.states.State;
 
-public class DropArea extends ArghButton
+public class DropArea extends Box
 {
     private var _analysisItem:AnalysisItem;
 
@@ -66,24 +68,42 @@ public class DropArea extends ArghButton
         }
     }
 
+    private var argh:ArghButton = new ArghButton();
+    private var notDone:Text = new Text();
+    private var notDoneBox:Box = new Box();
+
     public function DropArea()
     {
         super();
-        addChild(createNoDataLabel());
+        //addChild(createNoDataLabel());
         this.setStyle("fontSize", 12);
-        this.styleName = "notConfiguredDropArea";
-        this.setStyle("popUpStyleName", "dropAreaPopup");
+        argh.styleName = "flatWhiteButton";
+        argh.setStyle("popUpStyleName", "dropAreaPopup");
         //horizontalScrollPolicy = "off";
         this.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
         this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
         //this.addEventListener(MouseEvent.CLICK, onClick);
-        this.addEventListener(MenuEvent.ITEM_CLICK, onItemClick);
-        this.labelField = "label";
-        this.openAlways = true;
+        argh.addEventListener(MenuEvent.ITEM_CLICK, onItemClick);
+        argh.labelField = "label";
+        argh.openAlways = true;
         this.addEventListener(KeyboardEvent.KEY_UP, keyPressed);
-        this.label = getNoDataLabel();
+        notDoneBox.setStyle("cornerRadius", 2);
+        notDoneBox.setStyle("borderColor", 0x357ebd);
+        notDoneBox.setStyle("borderWidth", 1);
+        notDoneBox.setStyle("borderStyle", "solid");
+        notDoneBox.height = 27;
+        notDoneBox.setStyle("backgroundColor", 0x0084B4);
+        notDoneBox.setStyle("paddingLeft", 5);
+        notDoneBox.setStyle("paddingRight", 5);
+        notDoneBox.setStyle("paddingTop", 1);
+        notDoneBox.addChild(notDone);
+        notDone.selectable = false;
+        notDone.text = getNoDataLabel();
+        notDone.setStyle("color", 0xFFFFFF);
+        notDone.setStyle("fontSize", 14);
+        addChild(notDoneBox);
 
         /*editButton = new Button();
         editButton.label = "...";
@@ -103,8 +123,8 @@ public class DropArea extends ArghButton
         configured.overrides = [ addChildAction, addDeleteButton ];
         states = [ configured ];*/
 
-        this.setStyle("borderStyle", "solid");
-        this.setStyle("borderThickness", 2);
+        /*this.setStyle("borderStyle", "solid");
+        this.setStyle("borderThickness", 2);*/
         setStyle("verticalAlign", "middle");
         /*setStyle("borderColor", 0xB7BABC);
         setStyle("backgroundColor", 0xFFFFFF);*/
@@ -151,7 +171,7 @@ public class DropArea extends ArghButton
         this._analysisItems = analysisItems;
     }
 
-    protected function supportsDrilldown():Boolean {                         
+    protected function supportsDrilldown():Boolean {
         return true;
     }
 
@@ -195,7 +215,7 @@ public class DropArea extends ArghButton
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
         analysisItemEditor.addEventListener(Event.CLOSE, onClose, false, 0, true);
     }
-    
+
     private function onClose(event:Event):void {
         dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_CLOSED, event.currentTarget as AnalysisItemEditWindow));
     }
@@ -219,39 +239,39 @@ public class DropArea extends ArghButton
         /*if (this._analysisItem != null) {
             getChildAt(0).removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
         }*/
+        if (_analysisItem == null && analysisItem != null) {
+            removeChild(notDoneBox);
+            addChild(argh);
+        } else if (_analysisItem != null && analysisItem == null) {
+            removeChild(argh);
+            addChild(notDoneBox);
+        }
         this._analysisItem = analysisItem;
 
         var options:ArrayCollection = new ArrayCollection([{label: "Edit Field Properties...", data: "editFieldProperties"},
             {label: "Remove the Field from Report", data: "deleteField"}]);
         if (_analysisItem != null && _analysisItem.hasType(AnalysisItemTypes.DATE)) {
+            options.addItem({type: "separator"});
             options.addItem({label: "Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.YEAR_LEVEL});
             options.addItem({label: "Quarter - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.QUARTER_OF_YEAR});
             options.addItem({label: "Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.MONTH_LEVEL});
             options.addItem({label: "Week - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.WEEK_LEVEL});
             options.addItem({label: "Day - Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.DAY_LEVEL});
         }
-        this.dataProvider = options;
+        argh.dataProvider = options;
+
 
         //removeChildAt(0);
         if (analysisItem == null) {
-            this.styleName = "notConfiguredDropArea";
-            this.label = getNoDataLabel();
+            notDone.text = getNoDataLabel();
             //addChildAt(createNoDataLabel(), 0);
             currentState = "";
         } else {
-            this.styleName = "flatWhiteButton";
             var component:UIComponent = DropAreaFactory.createDropItemElement(this, analysisItem);
             component.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            this.label = analysisItem.unqualifiedDisplay;
+            argh.label = analysisItem.unqualifiedDisplay;
             /*addChildAt(component, 0);
             currentState = "Configured";*/
-        }
-        if (analysisItem != null && analysisItem.kpi) {
-            defaultBackgroundColor = 0xDDDDDD;
-            setStyle("backgroundColor", defaultBackgroundColor);
-        } else {
-            defaultBackgroundColor = 0xFFFFFF;
-            setStyle("backgroundColor", defaultBackgroundColor);
         }
     }
 

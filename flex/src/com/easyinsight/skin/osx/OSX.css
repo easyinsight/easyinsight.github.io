@@ -349,8 +349,8 @@ SaveButton {
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
     themeColor : #0084B4;
-    textRollOverColor: #0084B4;
-    textSelectedColor: #0084B4;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     borderColor: #357ebd;
     dropShadow: false;
     shadowDistance: 3;
@@ -368,12 +368,12 @@ SaveButton {
 .flatTransparentMenuButton {
     cornerRadius: 2;
     highlightAlphas: 0, 0;
-    fillColors: #428bca, #428bca, #428bca, #428bca;
-    fillAlphas: 0, 0, 0, 0;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
+    fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
     themeColor : #428bca;
-    textRollOverColor: #357ebd;
-    textSelectedColor: #357ebd;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     borderColor: #357ebd;
     dropShadow: false;
     shadowDistance: 3;
@@ -395,8 +395,8 @@ SaveButton {
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
     themeColor : #0084B4;
-    textRollOverColor: #0084B4;
-    textSelectedColor: #0084B4;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     borderColor: #357ebd;
     dropShadow: false;
     shadowDistance: 3;
@@ -416,8 +416,8 @@ SaveButton {
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
     themeColor : #004474;
-    textRollOverColor: #004474;
-    textSelectedColor: #004474;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     borderColor: #222222;
     dropShadow: false;
     shadowDistance: 3;
@@ -435,7 +435,13 @@ SaveButton {
     backgroundAlpha: 0;
     color: #FFFFFF;
     themeColor: #FFFFFF;
+    rollOverColor: #004484;
+    textRollOverColor: #FFFFFF;
     font-size: 13;
+    upSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
 }
 
 
@@ -447,8 +453,8 @@ SaveButton {
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
     themeColor : #428bca;
-    textRollOverColor: #428bca;
-    textSelectedColor: #428bca;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     borderColor: #428bca;
     dropShadow: false;
     shadowDistance: 3;
