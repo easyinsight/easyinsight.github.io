@@ -9,8 +9,8 @@ import flash.geom.Rectangle;
 import mx.core.UIComponent;
 import mx.graphics.SolidColor;
 
-public class FlatButtonSkin extends UIComponent {
-    public function FlatButtonSkin() {
+public class FlatButtonErrorSkin extends UIComponent {
+    public function FlatButtonErrorSkin() {
     }
 
         protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
@@ -57,7 +57,7 @@ public class FlatButtonSkin extends UIComponent {
             fill.angle = 90;*/
             // fill the rectangle
             g.moveTo(0,0);
-            g.beginFill(0x333333);
+            g.beginFill(0xd9534f);
             g.drawRoundRect(0, 0, w, h, 4, 4);
             //fill.begin(g,new Rectangle(0,0,w,h));
             /*g.lineTo(w,0);

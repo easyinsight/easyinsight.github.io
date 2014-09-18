@@ -168,5 +168,6 @@
     <mx:PopUpMenuButton id="p2" 
             dataProvider="{xmlList}" label="{reportLabel}"
             labelField="@label" width="100" popUpStyleName="CustomPopupMenu"
-            showRoot="false" itemClick="itemClickHandler(event);" open="WindowManagement.manager.hideReport()" close="WindowManagement.manager.restoreReport()"/>
+            showRoot="false" itemClick="itemClickHandler(event);" open="WindowManagement.manager.hideReport()" close="WindowManagement.manager.restoreReport()"
+            styleName="flatWhiteButton" fontSize="13"/>
 </mx:Box>

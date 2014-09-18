@@ -1,6 +1,10 @@
 <?xml version="1.0" ?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-        creationComplete="onCreation()">
+<listing:ArghButton xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:listing="com.easyinsight.listing.*" itemClick="onClick(event)" popUpStyleName="dropAreaPopup">
+    <mx:Metadata>
+        [Event(name="filterSetManage", type="flash.events.Event")]
+        [Event(name="addonReportManage", type="flash.events.Event")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.SimpleReportEditor;
         import com.easyinsight.WindowManagement;
@@ -17,6 +21,8 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.MenuEvent;
 
         import mx.managers.PopUpManager;
 
@@ -31,26 +37,46 @@
             _reportEditor = value;
         }
 
-        private function onCreation():void {
-            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
+        [Bindable]
+        private var options:ArrayCollection = new ArrayCollection();
+
+        private function onClick(event:MenuEvent):void {
+            var target:String = event.item.data;
+            if (target == "editProperties") {
+                editReportProperties();
+            } else if (target == "customizeCode") {
+                customCode();
+            } else if (target == "customizeJoins") {
+                joinControl();
+            } else if (target == "addonReports") {
+                addonReports();
+            } else if (target == "filterSets") {
+                filterSets();
+            }
         }
 
-        override protected function createChildren():void {
-            super.createChildren();
-            if (!_joinsCustomizable) {
-                hbox2.removeChild(customizeJoinsBox);
-                hbox2.removeChild(addonReportsBox);
-            }
-            /*if (_analysisDefinition.urlKey == null) {
-                hbox.removeChild(revisionsBox);
-            }*/
-        }
 
-        private function onMouseDown(event:MouseEvent):void {
-            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
-            if (!result) {
-                close();
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_analysisDefinition != null) {
+                if (!_joinsCustomizable) {
+                    options = new ArrayCollection([
+                        {label: "Edit Properties", data: "editProperties"},
+                        {label: "Customize Code", data: "customizeCode"},
+                        {label: "Filter Sets", data: "filterSets"}
+                    ]);
+                } else {
+                    options = new ArrayCollection([
+                        {label: "Edit Properties", data: "editProperties"},
+                        {label: "Customize Code", data: "customizeCode"},
+                        {label: "Customize Joins", data: "customizeJoins"},
+                        {label: "Addon Reports", data: "addonReports"},
+                        {label: "Filter Sets", data: "filterSets"}
+                    ]);
+                }
+                this.dataProvider = options;
             }
+
         }
 
         public function set wrappers(value:ArrayCollection):void {
@@ -84,20 +110,12 @@
             WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-            PopUpManager.removePopUp(this);
         }
 
         private function onJoinOverride(event:JoinOverrideEvent):void {
             _analysisDefinition.joinOverrides = event.joins;
             _dataView.refresh();
         }
-
-        /*private function revisions():void {
-            var window:RevisionWindow = new RevisionWindow();
-            window.reportURLKey = _analysisDefinition.urlKey;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }*/
 
         private var _joinsCustomizable:Boolean;
 
@@ -110,6 +128,7 @@
         public function set joinsCustomizable(value:Boolean):void {
             if (_joinsCustomizable == value) return;
             _joinsCustomizable = value;
+            invalidateProperties();
             dispatchEvent(new Event("joinsCustomizableChanged"));
         }
 
@@ -121,7 +140,6 @@
             WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-            PopUpManager.removePopUp(this);
         }
 
         private function onPreferences(event:ReportPreferencesEvent):void {
@@ -138,7 +156,6 @@
             WindowManagement.manager.addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-            PopUpManager.removePopUp(this);
         }
 
         private function onScript(event:MarmotScriptEvent):void {
@@ -149,111 +166,11 @@
         }
 
         private function filterSets():void {
-            _reportEditor.filterSetStuff();
-            PopUpManager.removePopUp(this);
+            dispatchEvent(new Event("filterSetManage"));
         }
 
         private function addonReports():void {
-            _reportEditor.addonReportStuff();
-            PopUpManager.removePopUp(this);
+            dispatchEvent(new Event("addonReportManage"));
         }
         ]]></mx:Script>
-    <mx:VBox paddingLeft="10" paddingRight="10" horizontalAlign="center">
-        <mx:HBox id="hbox">
-            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                     backgroundColor="#FFFFFF" height="120"
-                     width="150" cornerRadius="8" buttonMode="true" id="embedBox"
-                     mouseOver="embedBox.setStyle('backgroundColor', 0xDDDDDD)"
-                     mouseOut="embedBox.setStyle('backgroundColor', 0xFFFFFF)"
-                     click="editReportProperties()"
-                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                <mx:Image source="@Embed(source='../../../../assets/table_edit.png')"/>
-                <mx:Text text="Edit Properties" fontSize="14" selectable="false"/>
-                <mx:TextArea
-                        text="Edit advanced report properties such as styling and limits"
-                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                        height="60"
-                        width="130" textAlign="center"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                     backgroundColor="#FFFFFF" height="120"
-                     width="150" cornerRadius="8" buttonMode="true" id="customCodeBox"
-                     mouseOver="customCodeBox.setStyle('backgroundColor', 0xDDDDDD)"
-                     mouseOut="customCodeBox.setStyle('backgroundColor', 0xFFFFFF)"
-                     click="customCode()"
-                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                <mx:Image source="@Embed(source='../../../../assets/code.png')"/>
-                <mx:Text text="Customize Code" fontSize="14" selectable="false"/>
-                <mx:TextArea
-                        text="Apply additional scripting to further customize the report"
-                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                        height="60"
-                        width="130" textAlign="center"/>
-            </mx:VBox>
-            <!--<mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                     backgroundColor="#FFFFFF" height="120"
-                     width="150" cornerRadius="8" buttonMode="true" id="revisionsBox"
-                     mouseOver="revisionsBox.setStyle('backgroundColor', 0xDDDDDD)"
-                     mouseOut="revisionsBox.setStyle('backgroundColor', 0xFFFFFF)"
-                     click="revisions()"
-                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                <mx:Image source="@Embed(source='../../../../assets/branchx16.png')"/>
-                <mx:Text text="Revisions" fontSize="14" selectable="false"/>
-                <mx:TextArea
-                        text="View previous revisions of this report"
-                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                        height="60"
-                        width="130" textAlign="center"/>
-            </mx:VBox>-->
-        </mx:HBox>
-        <mx:HBox id="hbox2">
-            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                     backgroundColor="#FFFFFF" height="120"
-                     width="150" cornerRadius="8" buttonMode="true" id="customizeJoinsBox"
-                     mouseOver="customizeJoinsBox.setStyle('backgroundColor', 0xDDDDDD)"
-                     mouseOut="customizeJoinsBox.setStyle('backgroundColor', 0xFFFFFF)"
-                     click="joinControl()"
-                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                <mx:Image source="@Embed(source='../../../../assets/branchx16.png')"/>
-                <mx:Text text="Customize Joins" fontSize="14" selectable="false"/>
-                <mx:TextArea
-                        text="Customize the connections between data sources"
-                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                        height="60"
-                        width="130" textAlign="center"/>
-            </mx:VBox>
-            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                     backgroundColor="#FFFFFF" height="120"
-                     width="150" cornerRadius="8" buttonMode="true" id="addonReportsBox"
-                     mouseOver="addonReportsBox.setStyle('backgroundColor', 0xDDDDDD)"
-                     mouseOut="addonReportsBox.setStyle('backgroundColor', 0xFFFFFF)"
-                     click="addonReports()"
-                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                <mx:Image source="@Embed(source='../../../../assets/branchx16.png')"/>
-                <mx:Text text="Add on Reports" fontSize="14" selectable="false"/>
-                <mx:TextArea
-                        text="Add another report as a source of fields for this report"
-                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                        height="60"
-                        width="130" textAlign="center"/>
-            </mx:VBox>
-        </mx:HBox>
-        <mx:HBox id="hbox3">
-            <mx:VBox horizontalAlign="center" borderStyle="solid" borderThickness="1" useHandCursor="true"
-                     backgroundColor="#FFFFFF" height="120"
-                     width="150" cornerRadius="8" buttonMode="true" id="filterSetBox"
-                     mouseOver="filterSetBox.setStyle('backgroundColor', 0xDDDDDD)"
-                     mouseOut="filterSetBox.setStyle('backgroundColor', 0xFFFFFF)"
-                     click="filterSets()"
-                     mouseChildren="false" paddingTop="5" dropShadowEnabled="true">
-                <mx:Image source="@Embed(source='../../../../assets/funnel.png')"/>
-                <mx:Text text="Manage Filter Sets" fontSize="14" selectable="false"/>
-                <mx:TextArea
-                        text="Use filter sets to reduce common filters across reports"
-                        fontSize="12" backgroundAlpha="0" editable="false" selectable="false"
-                        height="60"
-                        width="130" textAlign="center"/>
-            </mx:VBox>
-        </mx:HBox>
-    </mx:VBox>
-</util:EISlimWindow>
+</listing:ArghButton>

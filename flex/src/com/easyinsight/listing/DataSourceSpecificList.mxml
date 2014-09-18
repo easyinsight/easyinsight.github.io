@@ -487,6 +487,15 @@
                     case AnalysisDefinition.TREEMAP:
                         label = "Tree Map";
                         break;
+                    case AnalysisDefinition.TOPO:
+                        label = "Map";
+                        break;
+                    case AnalysisDefinition.MULTI_SUMMARY:
+                        label = "Multi Summary";
+                        break;
+                    case AnalysisDefinition.TEXT:
+                        label = "Text";
+                        break;
                 }
             }
             return label;
@@ -1293,13 +1302,13 @@
          horizontalGap="20"
          backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="5" width="100%" height="100%" id="blah">
         <mx:HBox width="100%">
-            <listing:ArghButton label="Create" styleName="grayButton" itemClick="onItemClick(event)" visible="{realDataSource}" width="160" id="newButton"
-                    dataProvider="{createOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-            <listing:ArghButton label="Customize View" styleName="grayButton" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" width="140"
-                    dataProvider="{customizeOptions}" itemClick="onItemClick(event)"/>
-            <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
-                                dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-            <mx:Button label="Delete Selected" styleName="grayButton" click="deleteSelected()" width="140"/>
+            <listing:ArghButton label="Create" styleName="flatSaveButton" itemClick="onItemClick(event)" visible="{realDataSource}" width="160" id="newButton"
+                    dataProvider="{createOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" fontSize="12"/>
+            <listing:ArghButton label="Customize View" styleName="flatSaveButton" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" width="140"
+                    dataProvider="{customizeOptions}" itemClick="onItemClick(event)" fontSize="12"/>
+            <listing:ArghButton label="Tag..." styleName="flatSaveButton" itemClick="onTagItemClick(event)" width="160" id="tagButton"
+                                dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" fontSize="12"/>
+            <mx:Button label="Delete Selected" styleName="flatRedButton" click="deleteSelected()" width="140" fontSize="12"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
         <mx:HRule id="tagUpperRule" width="100%" strokeColor="#CCCCCC"/>

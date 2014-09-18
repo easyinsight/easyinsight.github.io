@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                   xmlns:report="com.easyinsight.report.*"
-                   creationComplete="onCreation()" horizontalAlign="center">
+<listing:ArghButton xmlns:mx="http://www.adobe.com/2006/mxml" label="Export"
+                    dataProvider="{exportOptions}" xmlns:listing="com.easyinsight.listing.*" itemClick="onExportClick(event)"
+        popUpStyleName="dropAreaPopup">
     <mx:Script><![CDATA[
         import com.easyinsight.WindowManagement;
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -14,32 +14,17 @@
         import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.collections.ArrayCollection;
+
+        import mx.events.MenuEvent;
+
         import mx.managers.PopUpManager;
 
         private var _reportType:int;
         private var _dataSourceID:int;
-        private var _reportName:String;
         private var _coreView:DisplayObject;
 
         private var _report:AnalysisDefinition;
-
-        private function onCreation():void {
-            stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, 0, true);
-        }
-
-        private function onMouseDown(event:MouseEvent):void {
-            var result:Boolean = hitTestPoint(event.stageX, event.stageY);
-            if (!result) {
-                close();
-            }
-        }
-
-        protected override function commitProperties():void {
-            super.commitProperties();
-            _reportName = _report.name;
-            _reportType = _report.reportType;
-            _dataSourceID = _report.dataFeedID;
-        }
 
         public function set report(value:AnalysisDefinition):void {
             _report = value;
@@ -89,7 +74,7 @@
         private function embed():void {
             var embedReportWindow:EmbedReportWindow = new EmbedReportWindow();
             embedReportWindow.report = _report;
-            embedReportWindow.reportName = _reportName;
+            embedReportWindow.reportName = _report.name;
             embedReportWindow.urlKey = _report.urlKey;
             embedReportWindow.dataSourceID = _dataSourceID;
             embedReportWindow.reportType = _reportType;
@@ -107,7 +92,7 @@
             var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
             var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
             window.fixedReportID = _report.analysisID;
-            window.fixedReportName = _reportName;
+            window.fixedReportName = _report.name;
             window.fixedReportURLKey = _report.urlKey;
             window.activity = delivery;
             window.x = this.x;
@@ -136,47 +121,44 @@
             PopUpUtil.centerPopUp(window);
             PopUpManager.removePopUp(this);
         }
+
+        private function onExportClick(event:MenuEvent):void {
+            var target:String = event.item.data;
+            if (target == "exportExcel") {
+                excel2007();
+            } else if (target == "exportExcel1997") {
+                excel();
+            } else if (target == "exportPDF") {
+                pdf();
+            } else if (target == "exportPNG") {
+                png();
+            } else if (target == "email") {
+                email();
+            } else if (target == "scheduleForEmail") {
+                schedule();
+            } else if (target == "jsonAPI") {
+                jsonAPI();
+            } else if (target == "url") {
+                url();
+            }  else if (target == "embedReport") {
+                embed();
+            }
+        }
+
+        [Bindable]
+        private var exportOptions:ArrayCollection = new ArrayCollection([
+            {label: "Export to Excel", data: "exportExcel"},
+            {label: "Export to Excel 1997-2004", data: "exportExcel1997"},
+            {label: "Export to PDF", data: "exportPDF"},
+            {label: "Export to PNG", data: "exportPNG"},
+            {label: "Email", data: "email"},
+            {label: "Schedule for Email Delivery", data: "scheduleForEmail"},
+            {label: "Embed Report into Website", data: "embedReport"},
+            {label: "JSON API to Report", data: "jsonAPI"},
+            {label: "URL for Sharing Report", data: "url"}
+        ]);
         ]]></mx:Script>
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
     </mx:RemoteObject>
-    <mx:HBox>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/table.png')"
-                          headerText="Export to Excel"
-                          click="excel2007()"/>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/table.png')"
-                                       headerText="Export to Excel 1997-2004"
-                                       click="excel()"/>
-    </mx:HBox>
-    <mx:HBox>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/document_chart.png')"
-                                       headerText="Export to PDF"
-                                       click="pdf()"/>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/camera.png')"
-                          headerText="Export to PNG"
-                          click="png()"/>
-    </mx:HBox>
-    <mx:HBox>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/mail.png')"
-                          headerText="Email"
-                          click="email()"/>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/calendar.png')"
-                                       headerText="Scheduling"
-                                       click="schedule()"/>
-
-    </mx:HBox>
-    <mx:HBox>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/plasma_tv.png')"
-                                       headerText="Embed Report into Website"
-                                       click="embed()"/>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/code.png')"
-                                       headerText="JSON API to Report"
-                                       click="jsonAPI()"/>
-    </mx:HBox>
-    <mx:HBox>
-        <report:BigButtonNoDescription imageClass="@Embed(source='../../../../assets/plasma_tv.png')"
-                                   headerText="URL"
-                                   click="url()"/>
-    </mx:HBox>
-    <util:CancelButton label="Cancel" click="this.close()"/>
-</util:EISlimWindow>
+</listing:ArghButton>

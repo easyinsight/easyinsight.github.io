@@ -15,9 +15,10 @@ import flash.events.MouseEvent;
 import flash.geom.Point;
 
 import mx.controls.Button;
+import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
 
-public class RefreshButton extends Button {
+public class RefreshButton extends LinkButton {
 
     private var _dataSource:DataSourceInfo;
     private var _viewFactory:IRetrievable;

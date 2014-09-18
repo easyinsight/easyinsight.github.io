@@ -328,6 +328,7 @@ SaveButton {
     fillColors: #333333, #333333, #333333, #333333;
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
+    themeColor : #333333;
     textRollOverColor: #dddddd;
     textSelectedColor: #dddddd;
     borderColor: #333333;
@@ -339,6 +340,146 @@ SaveButton {
     downSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
     overSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
     disabledSkin:ClassReference('com.easyinsight.util.FlatButtonSkin');
+}
+
+.flatWhiteButton {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    themeColor : #0084B4;
+    textRollOverColor: #0084B4;
+    textSelectedColor: #0084B4;
+    borderColor: #357ebd;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+    iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpOverSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpDownSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+}
+
+.flatTransparentMenuButton {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #428bca, #428bca, #428bca, #428bca;
+    fillAlphas: 0, 0, 0, 0;
+    color: #ffffff;
+    themeColor : #428bca;
+    textRollOverColor: #357ebd;
+    textSelectedColor: #357ebd;
+    borderColor: #357ebd;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+    iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpOverSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpDownSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+}
+
+.flatCreateButton {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    themeColor : #0084B4;
+    textRollOverColor: #0084B4;
+    textSelectedColor: #0084B4;
+    borderColor: #357ebd;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 13;
+    fontWeight: normal;
+    iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+}
+
+.htmlGrayButton {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #004474, #004474, #004474, #004474;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    themeColor : #004474;
+    textRollOverColor: #004474;
+    textSelectedColor: #004474;
+    borderColor: #222222;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 13;
+    fontWeight: normal;
+    iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+}
+
+.solidMenuButton {
+    cornerRadius: 2;
+    backgroundAlpha: 0;
+    color: #FFFFFF;
+    themeColor: #FFFFFF;
+    font-size: 13;
+}
+
+
+
+.notConfiguredDropArea {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #428bca, #428bca, #428bca, #428bca;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    themeColor : #428bca;
+    textRollOverColor: #428bca;
+    textSelectedColor: #428bca;
+    borderColor: #428bca;
+    dropShadow: false;
+    shadowDistance: 3;
+    iconColor: #428bca;
+    fontSize: 14;
+    fontWeight: normal;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpOverSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpDownSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+}
+
+.flatRedButton {
+    cornerRadius: 5;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #5cb85c, #5cb85c, #5cb85c, #5cb85c;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #4cae4c;
+    dropShadow: true;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonErrorSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonErrorSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonErrorSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonErrorSkin');
 }
 
 CancelButton {
@@ -627,7 +768,7 @@ EISlimWindow {
     paddingLeft: 10;
     paddingRight: 10;
     backgroundAlpha: 1;
-    backgroundColor: #000000;
+    backgroundColor: #0084B4;
 }
 
 .screenBackground {
@@ -790,4 +931,14 @@ TransformContainer {
 
 .filterChoiceButtonText {
     color: #333333;
+}
+
+.dropAreaPopup {
+    fontSize: 12;
+    fontFamily: "Lucida Grande";
+    textAlign: left;
+    dropShadowEnabled: false;
+    borderStyle: solid;
+    borderThickness: 1;
+    cornerRadius: 0;
 }

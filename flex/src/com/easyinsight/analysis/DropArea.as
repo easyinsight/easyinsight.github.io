@@ -2,6 +2,7 @@ package com.easyinsight.analysis
 {
 import com.easyinsight.WindowManagement;
 import com.easyinsight.commands.CommandEvent;
+import com.easyinsight.listing.ArghButton;
 import com.easyinsight.skin.ImageConstants;
 
 import flash.display.Bitmap;
@@ -21,17 +22,19 @@ import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
 import mx.controls.List;
+import mx.controls.PopUpMenuButton;
 import mx.core.Application;
 import mx.core.DragSource;
 import mx.core.IUIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
+import mx.events.MenuEvent;
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
 import mx.states.AddChild;
 import mx.states.State;
 
-public class DropArea extends HBox
+public class DropArea extends ArghButton
 {
     private var _analysisItem:AnalysisItem;
 
@@ -52,22 +55,40 @@ public class DropArea extends HBox
         _dataSourceID = value;
     }
 
+    private function onItemClick(event:MenuEvent):void {
+        var target:String = event.item.data;
+        if (target == "deleteField") {
+            deletion();
+        } else if (target == "editFieldProperties") {
+            editEvent(null, 0);
+        } else if (target == "dateSwitch") {
+            AnalysisDateDimension(_analysisItem).dateLevel = event.item.dateLevel;
+        }
+    }
+
     public function DropArea()
     {
         super();
         addChild(createNoDataLabel());
-        horizontalScrollPolicy = "off";
+        this.setStyle("fontSize", 12);
+        this.styleName = "notConfiguredDropArea";
+        this.setStyle("popUpStyleName", "dropAreaPopup");
+        //horizontalScrollPolicy = "off";
         this.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
         this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
+        //this.addEventListener(MouseEvent.CLICK, onClick);
+        this.addEventListener(MenuEvent.ITEM_CLICK, onItemClick);
+        this.labelField = "label";
+        this.openAlways = true;
         this.addEventListener(KeyboardEvent.KEY_UP, keyPressed);
+        this.label = getNoDataLabel();
 
-
-        editButton = new Button();
+        /*editButton = new Button();
         editButton.label = "...";
-        editButton.addEventListener(MouseEvent.CLICK, editEvent);
-        var configured:State = new State();
+        editButton.addEventListener(MouseEvent.CLICK, editEvent);*/
+        /*var configured:State = new State();
         configured.name = "Configured";
         var addChildAction:AddChild = new AddChild();
         addChildAction.relativeTo = this;
@@ -80,16 +101,16 @@ public class DropArea extends HBox
         addDeleteButton.relativeTo = this;
         addDeleteButton.target = deleteButton;
         configured.overrides = [ addChildAction, addDeleteButton ];
-        states = [ configured ];
+        states = [ configured ];*/
 
         this.setStyle("borderStyle", "solid");
         this.setStyle("borderThickness", 2);
         setStyle("verticalAlign", "middle");
-        setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", 0xFFFFFF);
-        var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
+        /*setStyle("borderColor", 0xB7BABC);
+        setStyle("backgroundColor", 0xFFFFFF);*/
+        /*var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
         deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
-        PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);
+        PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);*/
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -99,15 +120,15 @@ public class DropArea extends HBox
     public function highlight(analysisItem:AnalysisItem):Boolean {
         var valid:Boolean = recommend(analysisItem);
         if (valid) {
-            setStyle("borderColor", 0x00AA00);
-            setStyle("backgroundColor", 0xBBFFBB);
+            /*setStyle("borderColor", 0x00AA00);
+            setStyle("backgroundColor", 0xBBFFBB);*/
         }
         return valid;
     }
 
     public function normal():void {
-        setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", defaultBackgroundColor);
+        /*setStyle("borderColor", 0xB7BABC);
+        setStyle("backgroundColor", defaultBackgroundColor);*/
     }
 
     private function createNoDataLabel():UIComponent {
@@ -195,20 +216,35 @@ public class DropArea extends HBox
     }
 
     public function set analysisItem(analysisItem:AnalysisItem):void {
-        if (this._analysisItem != null) {
+        /*if (this._analysisItem != null) {
             getChildAt(0).removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-        }
+        }*/
         this._analysisItem = analysisItem;
 
-        removeChildAt(0);
+        var options:ArrayCollection = new ArrayCollection([{label: "Edit Field Properties...", data: "editFieldProperties"},
+            {label: "Remove the Field from Report", data: "deleteField"}]);
+        if (_analysisItem != null && _analysisItem.hasType(AnalysisItemTypes.DATE)) {
+            options.addItem({label: "Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.YEAR_LEVEL});
+            options.addItem({label: "Quarter - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.QUARTER_OF_YEAR});
+            options.addItem({label: "Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.MONTH_LEVEL});
+            options.addItem({label: "Week - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.WEEK_LEVEL});
+            options.addItem({label: "Day - Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.DAY_LEVEL});
+        }
+        this.dataProvider = options;
+
+        //removeChildAt(0);
         if (analysisItem == null) {
-            addChildAt(createNoDataLabel(), 0);
+            this.styleName = "notConfiguredDropArea";
+            this.label = getNoDataLabel();
+            //addChildAt(createNoDataLabel(), 0);
             currentState = "";
         } else {
+            this.styleName = "flatWhiteButton";
             var component:UIComponent = DropAreaFactory.createDropItemElement(this, analysisItem);
             component.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            addChildAt(component, 0);
-            currentState = "Configured";
+            this.label = analysisItem.unqualifiedDisplay;
+            /*addChildAt(component, 0);
+            currentState = "Configured";*/
         }
         if (analysisItem != null && analysisItem.kpi) {
             defaultBackgroundColor = 0xDDDDDD;

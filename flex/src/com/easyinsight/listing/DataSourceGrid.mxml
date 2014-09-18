@@ -465,14 +465,12 @@
 
         [Bindable]
         private var actions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
-            {label: "Customize top reports", op: "customizeTopReports"},
-            {label: "Switch to HTML5 interface", op: "switchToHTML5"}
+            {label: "Customize top reports", op: "customizeTopReports"}
         ]);
 
         [Bindable]
         private var noTagActions:ArrayCollection = new ArrayCollection([ {label: "Join data sources", op: "joinDataSources"},
-            {label: "Customize top reports", op: "customizeTopReports"},
-            {label: "Switch to HTML5 interface", op: "switchToHTML5"}
+            {label: "Customize top reports", op: "customizeTopReports"}
         ]);
 
         protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void
@@ -551,14 +549,15 @@
         <mx:method name="tagDataSources" result="tagChanges()"/>
         <mx:method name="untagDataSource" result="tagChanges()"/>
     </mx:RemoteObject>
-    <mx:HBox width="680" verticalAlign="middle">
+    <mx:HBox width="720" verticalAlign="middle">
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
-        <listing:ArghButton label="Actions..." styleName="grayButton" itemClick="onItemClick(event)" width="160" id="actionButton"
-                             labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}"/>
-        <listing:ArghButton label="Tag..." styleName="grayButton" itemClick="onItemClick(event)" width="160" id="newButton"
-                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}"/>
-        <mx:LinkButton label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}"/>
+        <listing:ArghButton label="Actions..." styleName="flatSaveButton" itemClick="onItemClick(event)" width="120" id="actionButton"
+                             labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}" fontSize="12"/>
+        <listing:ArghButton label="Tag..." styleName="flatSaveButton" itemClick="onItemClick(event)" width="120" id="newButton"
+                            dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}" fontSize="12"/>
+        <mx:Button label="HTML5 View" styleName="flatSaveButton" click="navigateToURL(new URLRequest('/a/home'));" fontSize="12" width="120"/>
+        <mx:Button styleName="flatRedButton" label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}" width="120"/>
     </mx:HBox>
     <mx:Text maxWidth="500" text="These data sources are the different systems you've connected Easy Insight to. Click on a data source name to navigate to the reports and dashboards built on this data source or to create new reports and dashboards."
             styleName="fallThroughFonts"/>
