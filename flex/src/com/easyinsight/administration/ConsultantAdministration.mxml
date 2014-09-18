@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        private function addConsultant():void {
+            var window:AddConsultantWindow = new AddConsultantWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:SaveButton label="Add Consultant" click="addConsultant()"/>
+    </mx:HBox>
+</mx:VBox>
