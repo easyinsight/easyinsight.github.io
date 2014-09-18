@@ -445,7 +445,7 @@ SaveButton {
     borderColor: #357ebd;
     dropShadow: false;
     shadowDistance: 3;
-    fontSize: 13;
+    fontSize: 14;
     fontWeight: normal;
     iconColor: #FFFFFF;
     upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
@@ -466,7 +466,7 @@ SaveButton {
     borderColor: #222222;
     dropShadow: false;
     shadowDistance: 3;
-    fontSize: 13;
+    fontSize: 14;
     fontWeight: normal;
     iconColor: #FFFFFF;
     upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
@@ -482,7 +482,7 @@ SaveButton {
     themeColor: #FFFFFF;
     rollOverColor: #004484;
     textRollOverColor: #FFFFFF;
-    font-size: 13;
+    font-size: 14;
     upSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
     downSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
     overSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
