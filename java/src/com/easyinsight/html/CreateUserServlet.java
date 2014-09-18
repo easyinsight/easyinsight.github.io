@@ -39,6 +39,10 @@ public class CreateUserServlet extends JSONServlet {
     @Override
     protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         UserTransferObject uto = UserTransferObject.fromJSON(jsonObject);
+        if (uto.isConsultant()) {
+            // if the user tries to set the consultant flag, don't allow that...
+            SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        }
         ExportMetadata md = ExportService.createExportMetadata(conn);
         UserAccountAdminService service = new UserAccountAdminService();
 
