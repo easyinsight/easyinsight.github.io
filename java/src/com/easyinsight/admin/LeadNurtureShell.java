@@ -295,6 +295,7 @@ public class LeadNurtureShell {
             "                                                                                        <td valign=\"top\" style=\"margin:10px 0 10px 0;text-align:left;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5em;color:#373737\">\n" +
             "                                                                                            <div>\n" +
             "                                                                                                <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><p style=\"margin-bottom:1em\">Hi{0},</p>\n" +
+            "                                                                                                    <p style=\"margin-bottom:1em\">{1}</p>\n" +
             "                                                                                                    <p style=\"margin-bottom:1em\">Happy Reporting!</p>\n" +
             "                                                                                                    <p style=\"margin-bottom:1em\">The Easy Insight Team</p>\n" +
             "                                                                                                </div>\n" +
