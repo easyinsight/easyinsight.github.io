@@ -30,6 +30,9 @@ public class User {
     @Column(name="name")
     private String name;
 
+    @Column(name="consultant")
+    private boolean consultant;
+
     @Column(name="refresh_reports")
     private boolean refreshReports;
 
@@ -117,6 +120,14 @@ public class User {
         this.password = password;
         this.name = name;
         this.email = email;
+    }
+
+    public boolean isConsultant() {
+        return consultant;
+    }
+
+    public void setConsultant(boolean consultant) {
+        this.consultant = consultant;
     }
 
     public UserTransferObject toUserTransferObject() {

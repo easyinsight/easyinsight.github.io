@@ -28,6 +28,7 @@ public class UserTransferObject {
     private boolean optInEmail;
     private long fixedDashboardID;
     private boolean initialSetupDone;
+    private boolean consultant;
 
     private boolean invoiceRecipient;
     private boolean autoRefreshReports;
@@ -48,6 +49,14 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+    public boolean isConsultant() {
+        return consultant;
+    }
+
+    public void setConsultant(boolean consultant) {
+        this.consultant = consultant;
     }
 
     public boolean isTestAccountVisible() {
@@ -240,13 +249,14 @@ public class UserTransferObject {
         jo.put("all_reports", isTestAccountVisible());
         jo.put("invoice_recipient", isInvoiceRecipient());
         jo.put("newsletter", isOptInEmail());
+        jo.put("consultant", isConsultant());
         return jo;
     }
 
     public static UserTransferObject fromJSON(net.minidev.json.JSONObject jo) {
         UserTransferObject user = new UserTransferObject();
         if(jo.containsKey("id"))
-            user.setUserID(Long.valueOf(String.valueOf((Integer) jo.get("id"))));
+            user.setUserID(Long.valueOf(String.valueOf(jo.get("id"))));
         user.setAccountAdmin((Boolean) jo.get("admin"));
         user.setEmail((String) jo.get("email"));
         user.setFirstName((String) jo.get("first_name"));
@@ -257,6 +267,7 @@ public class UserTransferObject {
         user.setTestAccountVisible((Boolean) jo.get("all_reports"));
         user.setInvoiceRecipient((Boolean) jo.get("invoice_recipient"));
         user.setOptInEmail((Boolean) jo.get("newsletter"));
+        user.setConsultant((Boolean) jo.get("consultant"));
         return user;
     }
 }
