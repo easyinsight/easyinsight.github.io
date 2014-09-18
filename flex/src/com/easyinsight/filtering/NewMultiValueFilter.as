@@ -85,7 +85,7 @@ public class NewMultiValueFilter extends UIComponent implements IFilter {
             window.detailClass = NewMultiValueFilterEditWindow;
             window.analysisItems = _analysisItems;
             window.filterDefinition = _filterDefinition;
-            WindowManagementInstance.getManager().addWindow(window2);
+            WindowManagementInstance.getManager().addWindow(window);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUpWithY(window, 40);
         } else {
