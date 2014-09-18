@@ -421,3 +421,8 @@ h2 {
 .combineSourcesChoices {
     padding: 10px;
 }
+
+.productHeader {
+    color: #333333;
+    font-size: 24px;
+}
