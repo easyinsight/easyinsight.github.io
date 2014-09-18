@@ -21,6 +21,32 @@ public class LeadNurtureShell {
     public static final EmailShell FOURTH_EMAIL = createFourthEmail();
     public static final EmailShell FIFTH_EMAIL = createFifthEmail();
 
+    public String generate(int email) throws SQLException {
+        switch (email) {
+            case 1:
+                return generate(FIRST_EMAIL);
+            case 2:
+                return generate(SECOND_EMAIL);
+            case 3:
+                return generate(THIRD_EMAIL);
+            case 4:
+                return generate(FOURTH_EMAIL);
+            case 5:
+                return generate(FIFTH_EMAIL);
+        }
+        return "";
+    }
+
+    public String generate(EmailShell emailShell) throws SQLException {
+        return this.string.replace("{0}", "").replace("{1}", emailShell.firstParagraph).replace("{2}", emailShell.image1)
+                .replace("{3}", emailShell.header1).replace("{4}", emailShell.headerParagraph1).replace("{5}", emailShell.url1)
+                .replace("{6}", emailShell.image2)
+                .replace("{7}", emailShell.header2).replace("{8}", emailShell.headerParagraph2).replace("{9}", emailShell.url2).
+                        replace("{10}", emailShell.image3)
+                .replace("{11}", emailShell.header3).replace("{12}", emailShell.headerParagraph3).replace("{13}", emailShell.url3).replace("{14}", "").
+                        replace("{15}", "").replace("{17}", "").replace("{18}", "");
+    }
+
     public void generate(EIConnection conn, long userID, String emailAddress, EmailShell emailShell, String name) throws SQLException {
 
         PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
@@ -39,12 +65,21 @@ public class LeadNurtureShell {
         queryUnsubscribeStmt.close();
         insertKeyStmt.close();
 
+        String unsubscribeURL = "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey;
+
+        String replaced = viewAsWebpage.replace("{1}", "https://www.easy-insight.com/app/emailAsWebsite.jsp?email=1");
+
+        String emailLine = this.emailLine.replace("{1}", unsubscribeURL);
+
+        name = "&nbsp;" + name;
+
         String string = this.string.replace("{0}", name).replace("{1}", emailShell.firstParagraph).replace("{2}", emailShell.image1)
                 .replace("{3}", emailShell.header1).replace("{4}", emailShell.headerParagraph1).replace("{5}", emailShell.url1)
                 .replace("{6}", emailShell.image2)
                 .replace("{7}", emailShell.header2).replace("{8}", emailShell.headerParagraph2).replace("{9}", emailShell.url2).
                         replace("{10}", emailShell.image3)
-                .replace("{11}", emailShell.header3).replace("{12}", emailShell.headerParagraph3).replace("{13}", emailShell.url3).replace("{14}", unsubscribeKey);
+                .replace("{11}", emailShell.header3).replace("{12}", emailShell.headerParagraph3).replace("{13}", emailShell.url3).replace("{14}", emailLine).
+                replace("{15}", replaced).replace("{17}", "bgcolor=\"#F2F2F2\"").replace("{18}", "background-color:#f2f2f2");
 
         new SendGridEmail().sendEmail(userID, emailAddress, "", emailShell.subject, string);
 
@@ -54,7 +89,7 @@ public class LeadNurtureShell {
         EmailShell email = new EmailShell();
         email.subject = "Welcome to Easy Insight!";
         email.name = "James";
-        email.firstParagraph = "Welcome to Easy Insight! Below are a few suggestions for ensuring a quick and successful start to getting Easy Insight reports and dashboards up and running on your data. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.";
+        email.firstParagraph = "Welcome to Easy Insight! Try the tips below for a quick and successful start with Easy Insight. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
         email.image1 = "connect.png";
         email.image2 = "monitor.png";
         email.image3 = "hammer.png";
@@ -75,7 +110,7 @@ public class LeadNurtureShell {
         EmailShell email = new EmailShell();
         email.subject = "Building reports in Easy Insight";
         email.name = "James";
-        email.firstParagraph = "We hope you're off to a good start with Easy Insight! We suggest taking a look at the set of guides listed below for getting the most out of building your own reports. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.";
+        email.firstParagraph = "We hope you're off to a good start with Easy Insight! Try the guides below for getting the most out of building your own reports. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
         email.image1 = "image.png";
         email.image2 = "document.png";
         email.image3 = "pyramid.png";
@@ -95,7 +130,7 @@ public class LeadNurtureShell {
         EmailShell email = new EmailShell();
         email.subject = "Sharing your Easy Insight reports and dashboards with the rest of your team";
         email.name = "James";
-        email.firstParagraph = "Once you have good reports and dashboards, you need to be able to share them with the rest of your team! Take a look at the guides below to make sure your team is able to collaborate with the work you've done. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.";
+        email.firstParagraph = "Once you have good reports and dashboards, you need to be able to share them with the rest of your team! Look at the guides below to make sure your team is able to use the work you've done. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
         email.image1 = "briefcase.png";
         email.image2 = "key.png";
         email.image3 = "monitor.png";
@@ -115,7 +150,7 @@ public class LeadNurtureShell {
         EmailShell email = new EmailShell();
         email.subject = "Customizing the look and feel and locale of your Easy Insight reports";
         email.name = "James";
-        email.firstParagraph = "Make sure you're able to customize the look and feel of your reports to match with your company's standards and make sure you have the right formats for your location by taking a look at the guides below. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.";
+        email.firstParagraph = "Make sure you're able to customize the look and feel of your reports to match with your company's standards and make sure you have the right formats for your location by taking a look at the guides below. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
         email.image1 = "brushes.png";
         email.image2 = "technical_wrench.png";
         email.image3 = "world.png";
@@ -135,7 +170,7 @@ public class LeadNurtureShell {
         EmailShell email = new EmailShell();
         email.subject = "Extending your Easy Insight reporting with more systems";
         email.name = "James";
-        email.firstParagraph = "Even if you're just using Easy Insight for simple reporting on one SaaS system, you have full business intelligence functionality available to you to extend your reporting across multiple systems. Take a look at the guides below to see some of the more advanced functionality you can use. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.";
+        email.firstParagraph = "Even if you're just using Easy Insight for simple reporting on one SaaS system, you have full business intelligence functionality available to you to extend your reporting across multiple systems. Take a look at the guides below to see some of the more advanced functionality you can use. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
         email.image1 = "connect.png";
         email.image2 = "companies.png";
         email.image3 = "boxes.png";
@@ -169,37 +204,41 @@ public class LeadNurtureShell {
         private String subject;
     }
 
-    private String string = "<html>\n" +
-            "<body>\n" +
-            "\n" +
-            "<div bgcolor=\"#F2F2F2\" style=\"margin:0;padding:0;background-color:#f2f2f2\" marginheight=\"0\" marginwidth=\"0\">\n" +
-            "\n" +
-            "\n" +
-            "<p style=\"margin-bottom:1em;display:none!important\"></p>\n" +
-            "\n" +
-            "\n" +
-            "<table bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\">\n" +
-            "\n" +
-            "\n" +
-            "    <tbody><tr>\n" +
-            "        <td bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2\">\n" +
+    private String viewAsWebpage = "<tr>\n" +
+            "        <td {17} style=\"{18}\">\n" +
             "            <div align=\"center\">\n" +
             "                <table cellpadding=\"0\" width=\"600\" cellspacing=\"0\" border=\"0\">\n" +
             "                    <tbody><tr>\n" +
-            "                        <td bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2\">\n" +
+            "                        <td {17} style=\"{18}\">\n" +
             "                            <div style=\"padding-top:15px;font-family:Geneva,Verdana,Arial,Helvetica,sans-serif;text-align:right;font-size:9px;line-height:1.34em;color:#999999\">\n" +
-            "                                Not rendering correctly? View this email as a web page <a href=\"\" style=\"color:#999999;text-decoration:underline;white-space:nowrap\" target=\"_blank\">here</a>.\n" +
+            "                                Not rendering correctly? View this email as a web page <a href=\"{1}\" style=\"color:#999999;text-decoration:underline;white-space:nowrap\" target=\"_blank\">here</a>.\n" +
             "                            </div>\n" +
             "                        </td>\n" +
             "                    </tr>\n" +
             "                    </tbody></table>\n" +
             "            </div>\n" +
             "        </td>\n" +
-            "    </tr>\n" +
+            "    </tr>\n";
+
+    private String emailLine = "                                You are receiving this email because your organization has a Easy Insight account to which you have access. If you prefer not to receive Easy Insight emails like this, <a href=\"{1}\" target=\"_blank\">click here</a>.\n";
+
+    private String string = "<html>\n" +
+            "<body>\n" +
+            "\n" +
+            "<div {17} style=\"margin:0;padding:0;{18}\" marginheight=\"0\" marginwidth=\"0\">\n" +
+            "\n" +
+            "\n" +
+            "<p style=\"margin-bottom:1em;display:none!important\"></p>\n" +
+            "\n" +
+            "\n" +
+            "<table {17} style=\"{18}\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\">\n" +
+            "\n" +
+            "\n" +
+            "    <tbody>{15}"+
             "\n" +
             "\n" +
             "    <tr>\n" +
-            "        <td bgcolor=\"#F2F2F2\" style=\"padding:10px 20px;background-color:#f2f2f2\">\n" +
+            "        <td {17} style=\"padding:10px 20px;{18}\">\n" +
             "            <div align=\"center\">\n" +
             "                <table cellpadding=\"0\" width=\"600\" cellspacing=\"0\" border=\"0\">\n" +
             "                    <tbody><tr>\n" +
@@ -213,7 +252,6 @@ public class LeadNurtureShell {
             "                                            <a style=\"text-decoration:none;vertical-align:top;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#373737\" href=\"https://www.easy-insight.com/app/whatsnewweb\" target=\"_blank\">What's New</a>\n" +
             "                                        </td>\n" +
             "                                    </tr>\n" +
-            "\n" +
             "\n" +
             "\n" +
             "                                    <tr>\n" +
@@ -256,67 +294,7 @@ public class LeadNurtureShell {
             "                                                                                    <tbody><tr>\n" +
             "                                                                                        <td valign=\"top\" style=\"margin:10px 0 10px 0;text-align:left;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5em;color:#373737\">\n" +
             "                                                                                            <div>\n" +
-            "                                                                                                <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><p style=\"margin-bottom:1em\">Hi&nbsp;{0},</p>\n" +
-            "\n" +
-            "                                                                                                    <!-- getting started (immediate) -->\n" +
-            "                                                                                                    <p style=\"margin-bottom:1em\">{1}</p>\n" +
-            "                                                                                                    <!-- Learn how to register your email domain and allow all employees in your company to access apps as users. -->\n" +
-            "                                                                                                    <!-- Connecting Your Data -->\n" +
-            "                                                                                                    <!-- Create connections from Easy Insight to your data in a couple of clicks to get started. (creating connection) -->\n" +
-            "                                                                                                    <!-- Navigating the Easy Insight Interface -->\n" +
-            "                                                                                                    <!-- Learn how to navigate the Easy Insight user interface, from the data source list to reports and dashboards. (navigating) ->\n" +
-            "                                                                                                    <!-- Building Reports -->\n" +
-            "                                                                                                    <!-- Watch a quick screencast around building a simple report from scratch as your introduction to the report editor. (building reports) -->\n" +
-            "\n" +
-            "\n" +
-            "                                                                                                    <!-- customizing reports (one day) -->\n" +
-            "\n" +
-            "                                                                                                    <!--<p style=\"margin-bottom:1em\">From simple tables to charts to pivot tables to maps and process diagrams, Easy Insight offers you a wide variety of options for visualizing your data.</p>-->\n" +
-            "\n" +
-            "                                                                                                    <!-- Gallery of report types ->\n" +
-            "                                                                                                    <!-- Explore a gallery of the report types available to you in Easy Insight to find the right visualization for your needs. (need gallery) -->\n" +
-            "                                                                                                    <!-- Tips and tricks of manipulating list reports -->\n" +
-            "                                                                                                    <!-- List reports provide the backbone to everything else--learn how to use them to their best. (manipulating list reports) -->\n" +
-            "                                                                                                    <!-- Filter Options -->\n" +
-            "                                                                                                    <!-- Easy Insight gives you many different ways to slice and dice your data, as explained by this reference. (filter details) -->\n" +
-            "\n" +
-            "                                                                                                    <!-- collaboration (one week) -->\n" +
-            "\n" +
-            "                                                                                                    <!--<p style=\"margin-bottom:1em\">You can share your reports and dashboards with the rest of your team by scheduling email deliveries, managing access permissions, and even embedding into external portals and systems. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.</p>-->\n" +
-            "\n" +
-            "                                                                                                    <!-- Scheduling emails -->\n" +
-            "                                                                                                    <!-- Set up recurring emails of reports and dashboards to your team on the schedule you want and in the format you want. (scheduling) -->\n" +
-            "                                                                                                    <!-- Permissions on viewing -->\n" +
-            "                                                                                                    <!-- Make it easy for your coworkers to view the reports and dashboards you've labored to build by setting the right permissions for them to easily see your work. (how permissions work) -->\n" +
-            "                                                                                                    <!-- Embedding into external -->\n" +
-            "                                                                                                    <!-- Learn how to embed your reports and dashboards into external systems to make things even more seamless. -->\n" +
-            "\n" +
-            "                                                                                                    <!-- styling reports -->\n" +
-            "\n" +
-            "                                                                                                    <!--<p style=\"margin-bottom:1em\">Make sure your reports match your company's requirements by using the various formatting options available to you inside of Easy Insight, whether it's color schemes or date and number formats. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.</p>-->\n" +
-            "\n" +
-            "                                                                                                    <!-- Color schemes -->\n" +
-            "                                                                                                    <!-- Set up color schemes to automatically apply your company's branding and colors to your reports and dashboards. -->\n" +
-            "                                                                                                    <!-- Additional report properties -->\n" +
-            "                                                                                                    <!-- Learn how to apply specific formatting options to the various report types to enable more advanced behaviors and get exactly what you need. -->\n" +
-            "                                                                                                    <!-- Account settings for formatting -->\n" +
-            "                                                                                                    <!-- Customize the formats used for currencies, numbers, and date formats to get the right formatting for your business and locale. -->\n" +
-            "\n" +
-            "                                                                                                    <!--combining data sources (three weeks) -->\n" +
-            "\n" +
-            "                                                                                                    <!--<p style=\"margin-bottom:1em\">Extend your reporting by adding on additional systems--you can combine different connections into different reports on the same dashboard, or even create reports joined on data from those different connections. If you have any questions at all, don't hesitate to contact us at support@easy-insight.com or 1-(720)-316-8174.</p>-->\n" +
-            "\n" +
-            "                                                                                                    <!-- Combining data sources -->\n" +
-            "                                                                                                    <!-- Learn how to combine and join different data sources into a single combined source to extend your reporting across your entire business. -->\n" +
-            "                                                                                                    <!-- Federating data sources -->\n" +
-            "                                                                                                    <!-- If you have multiple accounts on a single system, you can federate those sources together to report across different teams or divisions. -->\n" +
-            "                                                                                                    <!-- Building data sources off of reports -->\n" +
-            "                                                                                                    <!-- You can even create additional data sources off of your reports to simplify report creation for additional end users. -->\n" +
-            "\n" +
-            "                                                                                                    <!-- end of trial/pro services (four weeks) -->\n" +
-            "\n" +
-            "\n" +
-            "\n" +
+            "                                                                                                <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><p style=\"margin-bottom:1em\">Hi{0},</p>\n" +
             "                                                                                                    <p style=\"margin-bottom:1em\">Happy Reporting!</p>\n" +
             "                                                                                                    <p style=\"margin-bottom:1em\">The Easy Insight Team</p>\n" +
             "                                                                                                </div>\n" +
@@ -405,15 +383,15 @@ public class LeadNurtureShell {
             "    </tr>\n" +
             "\n" +
             "    <tr>\n" +
-            "        <td bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2;padding:13px 30px\">\n" +
+            "        <td {17} style=\"{18};padding:13px 30px\">\n" +
             "            <div align=\"center\">\n" +
             "                <table cellpadding=\"0\" width=\"600\" cellspacing=\"0\" border=\"0\">\n" +
             "                    <tbody><tr>\n" +
-            "                        <td align=\"center\" bgcolor=\"#F2F2F2\" style=\"background-color:#f2f2f2\">\n" +
+            "                        <td align=\"center\" {17} style=\"{18}\">\n" +
             "                            <p style=\"margin-bottom:1em;font-family:Geneva,Verdana,Arial,Helvetica,sans-serif;text-align:center;font-size:9px;line-height:1.34em;color:#999999;display:block\">\n" +
             "                                2014 Easy Insight LLC. All Rights Reserved.&nbsp;&nbsp;1401 Wewatta St Unit 606&nbsp;&nbsp;Denver&nbsp;CO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
             "                                <br><br>\n" +
-            "                                You are receiving this email because your organization has a Easy Insight account to which you have access. If you prefer not to receive Easy Insight emails like this, <a href=\"{14}\" target=\"_blank\">click here</a>.\n" +
+            "{14}"+
             "                                <br><br>\n" +
             "                                Copyright 2014 Easy Insight Inc. All rights reserved. Registration and Internet access required. Terms, conditions, pricing, features and service options subject to change.\n" +
             "                            </p>\n" +
