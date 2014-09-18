@@ -3,16 +3,15 @@ package com.easyinsight.analysis
 import com.easyinsight.WindowManagement;
 import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.listing.ArghButton;
-import com.easyinsight.skin.ImageConstants;
+
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
-import flash.events.ContextMenuEvent;
+
 import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.geom.Point;
-import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
@@ -33,25 +32,16 @@ import mx.events.DragEvent;
 import mx.events.MenuEvent;
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
-import mx.states.AddChild;
-import mx.states.State;
 
 public class DropArea extends Box
 {
     private var _analysisItem:AnalysisItem;
-
-
-
-    private var editButton:Button;
-    private var deleteButton:Button;
 
     private var _analysisItems:ArrayCollection;
 
     private var _report:AnalysisDefinition;
 
     private var _dataSourceID:int;
-
-    public var defaultBackgroundColor:uint = 0xFFFFFF;
 
     public function set dataSourceID(value:int):void {
         _dataSourceID = value;
@@ -65,6 +55,8 @@ public class DropArea extends Box
             editEvent(null, 0);
         } else if (target == "dateSwitch") {
             AnalysisDateDimension(_analysisItem).dateLevel = event.item.dateLevel;
+        } else if (target == "filterOnField") {
+            dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, new AnalysisItemWrapper(new AnalysisItemNode(_analysisItem))));
         }
     }
 
@@ -75,7 +67,6 @@ public class DropArea extends Box
     public function DropArea()
     {
         super();
-        //addChild(createNoDataLabel());
         this.setStyle("fontSize", 12);
         argh.styleName = "flatWhiteButton";
         argh.setStyle("popUpStyleName", "dropAreaPopup");
@@ -104,33 +95,7 @@ public class DropArea extends Box
         notDone.setStyle("color", 0xFFFFFF);
         notDone.setStyle("fontSize", 14);
         addChild(notDoneBox);
-
-        /*editButton = new Button();
-        editButton.label = "...";
-        editButton.addEventListener(MouseEvent.CLICK, editEvent);*/
-        /*var configured:State = new State();
-        configured.name = "Configured";
-        var addChildAction:AddChild = new AddChild();
-        addChildAction.relativeTo = this;
-        addChildAction.target = editButton;
-        var addDeleteButton:AddChild = new AddChild();
-        deleteButton = new Button();
-        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
-        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
-        deleteButton.toolTip = "Clear This Field";
-        addDeleteButton.relativeTo = this;
-        addDeleteButton.target = deleteButton;
-        configured.overrides = [ addChildAction, addDeleteButton ];
-        states = [ configured ];*/
-
-        /*this.setStyle("borderStyle", "solid");
-        this.setStyle("borderThickness", 2);*/
         setStyle("verticalAlign", "middle");
-        /*setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", 0xFFFFFF);*/
-        /*var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
-        deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
-        PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);*/
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -140,21 +105,11 @@ public class DropArea extends Box
     public function highlight(analysisItem:AnalysisItem):Boolean {
         var valid:Boolean = recommend(analysisItem);
         if (valid) {
-            /*setStyle("borderColor", 0x00AA00);
-            setStyle("backgroundColor", 0xBBFFBB);*/
         }
         return valid;
     }
 
     public function normal():void {
-        /*setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", defaultBackgroundColor);*/
-    }
-
-    private function createNoDataLabel():UIComponent {
-        var label:EmptyDropAreaLabel = new EmptyDropAreaLabel();
-        label.text = getNoDataLabel();
-        return label;
     }
 
     private function onDelete(event:Event):void {
@@ -248,7 +203,8 @@ public class DropArea extends Box
         }
         this._analysisItem = analysisItem;
 
-        var options:ArrayCollection = new ArrayCollection([{label: "Edit Field Properties...", data: "editFieldProperties"},
+        var options:ArrayCollection = new ArrayCollection([{label: "Filter on the Field...", data: "filterOnField"},
+            {label: "Edit Field Properties...", data: "editFieldProperties"},
             {label: "Remove the Field from Report", data: "deleteField"}]);
         if (_analysisItem != null && _analysisItem.hasType(AnalysisItemTypes.DATE)) {
             options.addItem({type: "separator"});

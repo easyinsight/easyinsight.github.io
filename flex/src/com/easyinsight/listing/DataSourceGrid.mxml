@@ -552,9 +552,9 @@
     <mx:HBox width="720" verticalAlign="middle">
         <mx:Label text="Data Sources" fontSize="20" maxWidth="300"/>
         <mx:Spacer width="100%"/>
-        <listing:ArghButton label="Actions..." styleName="flatSaveButton" itemClick="onItemClick(event)" width="120" id="actionButton"
+        <listing:ArghButton label="Actions..." styleName="flatSaveMenuButton" itemClick="onItemClick(event)" width="120" id="actionButton"
                              labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}" fontSize="12"/>
-        <listing:ArghButton label="Tag..." styleName="flatSaveButton" itemClick="onItemClick(event)" width="120" id="newButton"
+        <listing:ArghButton label="Tag..." styleName="flatSaveMenuButton" itemClick="onItemClick(event)" width="120" id="newButton"
                             dataProvider="{tagOptions}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{actionsVisible}" fontSize="12"/>
         <mx:Button label="HTML5 View" styleName="flatSaveButton" click="navigateToURL(new URLRequest('/a/home'));" fontSize="12" width="120"/>
         <mx:Button styleName="flatRedButton" label="Delete Selected" click="deleteSelected()" fontSize="12" visible="{customizeVisible}" width="120"/>
