@@ -4684,6 +4684,9 @@ public class ExportService {
             if (list.isSummaryTotal()) {
                 sb.append("<tfoot>");
                 sb.append("<tr style=\"").append(summaryTRStyle).append("\">");
+                if (lineNumbers) {
+                    sb.append("<td></td>");
+                }
                 for (AnalysisItem analysisItem : items) {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[j];
