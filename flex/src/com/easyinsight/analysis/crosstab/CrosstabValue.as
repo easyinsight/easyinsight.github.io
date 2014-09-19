@@ -19,6 +19,8 @@ public class CrosstabValue {
     public var summaryValue:Boolean;
     public var measure:AnalysisItem;
 
+    public var dtMap:Object;
+
     public function CrosstabValue() {
     }
 }

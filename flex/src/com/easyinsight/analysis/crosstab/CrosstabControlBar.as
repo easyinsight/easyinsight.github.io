@@ -7,6 +7,7 @@ import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DimensionDropArea;
+import com.easyinsight.analysis.DropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
@@ -43,6 +44,14 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
     }
 
+    public function swapGroupings():void {
+        var rowDropArea:DropArea = rowGrouping.dropAreas.getItemAt(0) as DropArea;
+        var colDropArea:DropArea = columnGrouping.dropAreas.getItemAt(0) as DropArea;
+        var rowItem:AnalysisItem = rowDropArea.analysisItem;
+        rowDropArea.analysisItem = colDropArea.analysisItem;
+        colDropArea.analysisItem = rowItem;
+    }
+
     private function onUpdate(event:AnalysisItemUpdateEvent):void {
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
@@ -53,18 +62,21 @@ public class CrosstabControlBar extends ReportControlBar implements IReportContr
         var rowGroupingLabel:Label = new Label();
         rowGroupingLabel.text = "Row Grouping:";
         rowGroupingLabel.setStyle("fontSize", 14);
+        rowGrouping.report = xAxisDefinition;
         addChild(rowGroupingLabel);
         addDropAreaGrouping(rowGrouping, this);
 
         var columnGroupingLabel:Label = new Label();
         columnGroupingLabel.text = "Column Grouping:";
         columnGroupingLabel.setStyle("fontSize", 14);
+        columnGrouping.report = xAxisDefinition;
         addChild(columnGroupingLabel);
         addDropAreaGrouping(columnGrouping, this);
 
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure:";
         measureLabel.setStyle("fontSize", 14);
+        measureGrouping.report = xAxisDefinition;
         addChild(measureLabel);
         addDropAreaGrouping(measureGrouping, this);
 

@@ -47,9 +47,9 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
         text.alpha = 1;
         percentHeight = 100;
         percentWidth = 100;
-        /*addEventListener(MouseEvent.ROLL_OVER, onRollOver);
+        addEventListener(MouseEvent.ROLL_OVER, onRollOver);
         addEventListener(MouseEvent.ROLL_OUT, onRollOut);
-        addEventListener(MouseEvent.CLICK, onClick);*/
+        addEventListener(MouseEvent.CLICK, onClick);
         mouseChildren = false;
         mouseEnabled = true;
     }
@@ -66,7 +66,7 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                 }
             } else if (defaultLink is DrillThrough) {
                 var drillThrough:DrillThrough = defaultLink as DrillThrough;
-                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, crosstabValue.value, analysisItem, _report);
+                var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough, crosstabValue.dtMap, analysisItem, _report);
                 executor.addEventListener(DrillThroughEvent.DRILL_THROUGH, onDrill);
                 executor.send();
             }
@@ -150,14 +150,17 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
     public function set data(value:Object):void {
         crosstabValue = value[_cellProperty];
         if (crosstabValue != null) {
+            if (crosstabValue.dtMap != null) {
+                hyperlinked = true;
+                defaultLink = crosstabValue.measure.links.getItemAt(0) as Link;
+            } else {
+                hyperlinked = false;
+                defaultLink = null;
+            }
             if (crosstabValue.header == null) {
                 if (crosstabValue.measure != null) {
                     _valText = crosstabValue.measure.getFormatter().format(crosstabValue.value);
                     analysisItem = crosstabValue.measure;
-                    if (crosstabValue.measure.links != null && crosstabValue.measure.links.length > 0) {
-                        hyperlinked = true;
-                        defaultLink = crosstabValue.measure.links.getItemAt(0) as Link;
-                    }
                 } else {
                     _valText = "";
                 }
@@ -197,7 +200,11 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                     var headerColor:uint;
                     if (crosstabValue.value.valueExtension != null) {
                         var ext2:TextValueExtension = crosstabValue.value.valueExtension as TextValueExtension;
-                        headerColor = ext2.color;
+                        if (ext2.color > 0) {
+                            headerColor = ext2.color;
+                        } else {
+                            headerColor = _report.headerTextColor;
+                        }
                     } else {
                         headerColor = _report.headerTextColor;
                     }
