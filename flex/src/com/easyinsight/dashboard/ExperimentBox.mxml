@@ -7,7 +7,6 @@
         import com.easyinsight.report.BreadCrumb;
         import com.easyinsight.report.EmbeddedReportExportWindow;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.report.ReportExportWindow;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
@@ -23,21 +22,21 @@
 
         private function exportReport():void {
             viewFactory.updateExportMetadata();
-            if (dashboardReportViewComponent.dashboardEditorMetadata.fixedID) {
+            //if (dashboardReportViewComponent.dashboardEditorMetadata.fixedID) {
                 var embedWindow:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
                 embedWindow.report = viewFactory.report;
                 embedWindow.coreView = viewFactory.getChildAt(0);
                 PopUpManager.addPopUp(embedWindow, Application(Application.application), true);
                 PopUpUtil.centerPopUp(embedWindow);
                 PopUpManager.removePopUp(this);
-            } else {
-                var window:ReportExportWindow = new ReportExportWindow();
+            /*} else {
+                var window:ReportExportButton = new ReportExportButton();
                 window.report = viewFactory.report;
                 window.coreView = viewFactory.getChildAt(0);
                 PopUpManager.addPopUp(window, Application(Application.application), true);
                 PopUpUtil.centerPopUp(window);
                 PopUpManager.removePopUp(this);
-            }
+            }*/
         }
 
         protected static function adapterFlowBoxUpdateCompleteHandler(event:FlexEvent):void {
