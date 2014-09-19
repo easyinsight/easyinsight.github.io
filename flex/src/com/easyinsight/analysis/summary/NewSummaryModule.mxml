@@ -549,21 +549,23 @@
         }
 
         private function updateItem(item:AnalysisItem, columnIndex:int):void {
-            item.itemPosition = columnIndex;
-            var column:AdvancedDataGridColumn = coreGrid.columns[columnIndex];
+            if (item != null) {
+                item.itemPosition = columnIndex;
+                var column:AdvancedDataGridColumn = coreGrid.columns[columnIndex];
 
-            if (column != null) {
-                item.width = column.width;
-                var sortInfo:SortInfo = coreGrid.getFieldSortInfo(column);
-                if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
-                    item.sortSequence = sortInfo.sequenceNumber;
-                    if (sortInfo.descending) {
-                        item.sort = 2;
+                if (column != null) {
+                    item.width = column.width;
+                    var sortInfo:SortInfo = coreGrid.getFieldSortInfo(column);
+                    if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
+                        item.sortSequence = sortInfo.sequenceNumber;
+                        if (sortInfo.descending) {
+                            item.sort = 2;
+                        } else {
+                            item.sort = 1;
+                        }
                     } else {
-                        item.sort = 1;
+                        item.sort = 0;
                     }
-                } else {
-                    item.sort = 0;
                 }
             }
         }
