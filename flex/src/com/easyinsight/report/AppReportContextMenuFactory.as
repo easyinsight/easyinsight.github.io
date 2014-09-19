@@ -38,11 +38,11 @@ public class AppReportContextMenuFactory extends EventDispatcher implements IRep
         var exportItem:ContextMenuItem = new ContextMenuItem("Export " + insightDescriptor.name);
         exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(event:ContextMenuEvent):void {
             viewFactory.updateExportMetadata();
-            var window:ReportExportWindow = new ReportExportWindow();
-            window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);
-            PopUpManager.addPopUp(window, dObj, true);
-            PopUpUtil.centerPopUp(window);
+            var embedWindow:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
+            embedWindow.report = viewFactory.report;
+            embedWindow.coreView = viewFactory.getChildAt(0);
+            PopUpManager.addPopUp(embedWindow, dObj, true);
+            PopUpUtil.centerPopUp(embedWindow);
         });
         var menu:ContextMenu = new ContextMenu();
         menu.hideBuiltInItems();

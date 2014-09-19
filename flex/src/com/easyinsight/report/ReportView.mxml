@@ -29,7 +29,6 @@
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.EIGlobalTimer;
-        import com.easyinsight.framework.GlobalDataSourceEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -92,18 +91,6 @@
         private var _forceDefault:Boolean = false;
 
         public var urlKey:String;
-
-        private function exportExcel():void {
-            viewFactory.updateExportMetadata();
-            var window:ReportExportWindow = new ReportExportWindow();
-            window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);
-            window.reportView = this;
-            WindowManagement.manager.addWindow(window);
-            PopUpManager.addPopUp(window, this, true);
-            window.x = exportButton.x - 20;
-            window.y = exportButton.y + exportButton.height + 10;
-        }
 
         private function onCreation():void {
             // initializeTransformContainer();
@@ -301,15 +288,6 @@
             if (Keyboard.ESCAPE == event.keyCode) {
                 currentState = "";
             }
-        }
-
-        private function onExport(event:Event):void {
-            viewFactory.updateExportMetadata();
-            var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
-            window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function toReportEditor():void {
@@ -515,7 +493,6 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
             viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-            viewFactory.addEventListener("export", onExport);
             viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
             viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
             this.reportHeaderImage = User.getInstance().reportLogo;
@@ -620,19 +597,6 @@
                  }*/
                 retrievalState = new LocalStorageRetrievalState(report.urlKey, 0, null);
             }
-
-            var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
-            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                toReportEditor();
-            });
-            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
-            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                exportExcel();
-            });
-            var menu:ContextMenu = new ContextMenu();
-            menu.hideBuiltInItems();
-            menu.customItems = [ editItem, exportItem ];
-            viewFactory.contextMenu = menu;
 
             reportName = report.name;
             description = report.description;
@@ -970,7 +934,7 @@
         <report:RefreshButton labelPlacement="right"
                    id="refreshButton" label="Refresh" styleName="solidMenuButton"
                 viewFactory="{viewFactory}" dataSource="{dataSource}"/>
-        <report:ReportExportWindow click="exportExcel()"
+        <easyinsight:ReportEndUserExportButton
                    labelPlacement="right"
                    id="exportButton" label="Export" styleName="flatTransparentMenuButton"/>
         <mx:LinkButton click="toggleFilters()"  labelPlacement="right"

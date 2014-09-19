@@ -174,7 +174,7 @@
         public var feedMetadata:FeedMetadata;
 
         [Bindable]
-        private var dataView:DataViewFactory;
+        public var dataView:DataViewFactory;
 
         private var commandProcessor:ReportEditorCommandProcessor;
 
@@ -1611,16 +1611,15 @@
                    toolTip="Save As" enabled="{saveAsEnabled &amp;&amp; !loadingReport}" label="Save As"
                    labelPlacement="right" styleName="solidMenuButton"/>
         <report:RefreshButton id="refreshButton" toolTip="Refresh Data"
-
                               label="Refresh" labelPlacement="right" styleName="solidMenuButton"
                               dataSource="{dataSourceInfo}" viewFactory="{dataView}"/>
         <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right"
                             label="Ad Hoc Mode"
                             styleName="adHocMenuButton"/>
-        <report:ReportExportWindow
+        <easyinsight:ReportEditorExportButton
                    label="Export" labelPlacement="right" styleName="flatTransparentMenuButton"
                    id="exportButton"
-                   enabled="{!loadingReport}" report="{analysisDefinition}" coreView="{dataView}"/>
+                   enabled="{!loadingReport}"/>
         <report:AdditionalPropsWindow
                    id="propsButton"
                    label="Additional Configuration" labelPlacement="right"
