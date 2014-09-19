@@ -21,14 +21,14 @@ import java.util.*;
  */
 public class FlatFileUploadContext extends UploadContext {
     private String uploadKey;
-    private int type;
+    private String fileName;
 
-    public int getType() {
-        return type;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getUploadKey() {
@@ -43,27 +43,14 @@ public class FlatFileUploadContext extends UploadContext {
 
     @Override
     public String validateUpload(EIConnection conn) throws SQLException {
-
-        switch (type) {
-            case 1:
-                uploadFormat = new CsvFileUploadFormat();
-                break;
-            case 2:
-                uploadFormat = new ExcelUploadFormat();
-                break;
-            case 3:
-                uploadFormat = new XSSFExcelUploadFormat();
-                break;
-            default:
-                uploadFormat = null;
-                break;
-        }
-
-        if (uploadFormat == null) {
-            return "Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2008 and delimited text files.";
+        if (fileName.endsWith(".xlsx")) {
+            uploadFormat = new XSSFExcelUploadFormat();
+        } else if (fileName.endsWith(".xls")) {
+            uploadFormat = new ExcelUploadFormat();
         } else {
-            return null;
+            uploadFormat = new CsvFileUploadFormat();
         }
+        return null;
     }
 
     private Map<Key, Set<String>> sampleMap;
