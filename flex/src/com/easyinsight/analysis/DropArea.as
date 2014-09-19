@@ -58,6 +58,15 @@ public class DropArea extends Box
             dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, new AnalysisItemWrapper(new AnalysisItemNode(_analysisItem))));
         } else if (target == "xtabSwap") {
             dispatchEvent(new CommandEvent(new DropAreaCrosstabSwapCommand()));
+        } else if (target == "moveField") {
+            var dragSource:DragSource = new DragSource();
+            var bd:BitmapData = new BitmapData(this.width, this.height);
+            bd.draw(this);
+            var bitmap:Bitmap = new Bitmap(bd);
+            var image:Image = new Image();
+            image.source = bitmap;
+            var mouseEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_DOWN);
+            DragManager.doDrag(this, dragSource, mouseEvent, image);
         }
     }
 
@@ -206,7 +215,8 @@ public class DropArea extends Box
 
         var options:ArrayCollection = new ArrayCollection([{label: "Filter on the Field...", data: "filterOnField"},
             {label: "Edit Field Properties...", data: "editFieldProperties"},
-            {label: "Remove the Field from Report", data: "deleteField"}]);
+            {label: "Remove the Field from Report", data: "deleteField"},
+            {label: "Move the Field in the Report", data: "moveField"}]);
         if (_analysisItem != null && _analysisItem.hasType(AnalysisItemTypes.DATE)) {
             options.addItem({type: "separator"});
             options.addItem({label: "Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.YEAR_LEVEL});
@@ -227,18 +237,11 @@ public class DropArea extends Box
         }
         argh.dataProvider = options;
 
-
-        //removeChildAt(0);
         if (analysisItem == null) {
             notDone.text = getNoDataLabel();
-            //addChildAt(createNoDataLabel(), 0);
             currentState = "";
         } else {
-            var component:UIComponent = DropAreaFactory.createDropItemElement(this, analysisItem);
-            component.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             argh.label = analysisItem.unqualifiedDisplay;
-            /*addChildAt(component, 0);
-            currentState = "Configured";*/
         }
     }
 
@@ -305,16 +308,6 @@ public class DropArea extends Box
     public function deletion():void {
         dispatchEvent(new AnalysisChangedEvent());
         dispatchEvent(new DropAreaDeletionEvent(this));
-    }
-
-    private function onMouseDown(event:MouseEvent):void {
-        var dragSource:DragSource = new DragSource();
-        var bd:BitmapData = new BitmapData(this.width, this.height);
-        bd.draw(this);
-        var bitmap:Bitmap = new Bitmap(bd);
-        var image:Image = new Image();
-        image.source = bitmap;
-        DragManager.doDrag(this, dragSource, event, image);
     }
 
     public function dragDropHandler(event:DragEvent):void {
