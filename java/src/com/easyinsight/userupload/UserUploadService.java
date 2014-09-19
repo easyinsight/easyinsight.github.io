@@ -44,7 +44,6 @@ import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.scheduler.*;
-import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.io.*;
 import java.util.*;
@@ -1350,6 +1349,7 @@ public class UserUploadService {
                 bufOS = null;
                 fout = null;
             }
+            System.out.println("bytes size = " + bytes.length);
             long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
             uploadResponse = new UploadResponse(dataSourceID);
             conn.commit();
@@ -2021,14 +2021,34 @@ public class UserUploadService {
             fout = null;
 
             System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
+
+            PreparedStatement dbStmt = conn.prepareStatement("SELECT special_storage FROM account WHERE account_id = ?");
+            dbStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = dbStmt.executeQuery();
+            rs.next();
+            String specialStorage = rs.getString(1);
+            dbStmt.close();
+
             if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
-                FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
-                task.setFeedID(feedID);
-                task.setNewFields(newFields);
-                task.setUpdate(update);
-                task.setUserID(SecurityUtil.getUserID());
-                task.setAccountID(SecurityUtil.getAccountID());
-                task.updateData(feedID, update, conn, bytes);
+                if (specialStorage != null) {
+                    System.out.println("Using Redshift file update...");
+                    RedshiftFileUpdate task = new RedshiftFileUpdate();
+                    task.setFeedID(feedID);
+                    task.setNewFields(newFields);
+                    task.setUpdate(update);
+                    task.setUserID(SecurityUtil.getUserID());
+                    task.setAccountID(SecurityUtil.getAccountID());
+                    task.updateData(feedID, update, conn, bytes);
+                } else {
+                    System.out.println("Using legacy file update...");
+                    FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
+                    task.setFeedID(feedID);
+                    task.setNewFields(newFields);
+                    task.setUpdate(update);
+                    task.setUserID(SecurityUtil.getUserID());
+                    task.setAccountID(SecurityUtil.getAccountID());
+                    task.updateData(feedID, update, conn, bytes);
+                }
             } else {
                 FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
                 task.setFeedID(feedID);

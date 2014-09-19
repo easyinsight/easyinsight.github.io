@@ -6,8 +6,11 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.FileProcessCreateScheduledTask;
 
 import com.easyinsight.scheduler.FileProcessOptimizedCreateScheduledTask;
+import com.easyinsight.scheduler.RedshiftFileCreate;
 import com.easyinsight.security.SecurityUtil;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -74,13 +77,30 @@ public class FlatFileUploadContext extends UploadContext {
 
     public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception {
         UploadFormat uploadFormat = new UploadFormatTester().determineFormat(bytes);
+        PreparedStatement dbStmt = conn.prepareStatement("SELECT special_storage FROM account WHERE account_id = ?");
+        dbStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet rs = dbStmt.executeQuery();
+        rs.next();
+        String specialStorage = rs.getString(1);
+        dbStmt.close();
         if (uploadFormat instanceof CsvFileUploadFormat) {
-            FileProcessOptimizedCreateScheduledTask task = new FileProcessOptimizedCreateScheduledTask();
-            task.setName(name);
-            task.setUserID(SecurityUtil.getUserID());
-            task.setAccountID(SecurityUtil.getAccountID());
-            task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
-            return task.getFeedID();
+            if (specialStorage != null) {
+                System.out.println("Using Redshift file creation...");
+                RedshiftFileCreate task = new RedshiftFileCreate();
+                task.setName(name);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
+                return task.getFeedID();
+            } else {
+                System.out.println("Using legacy file creation...");
+                FileProcessOptimizedCreateScheduledTask task = new FileProcessOptimizedCreateScheduledTask();
+                task.setName(name);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
+                return task.getFeedID();
+            }
         } else {
             FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
             task.setName(name);
