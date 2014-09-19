@@ -9,14 +9,13 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.logging.LogClass;
+
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.sql.Connection;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -123,6 +122,14 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         HttpClient client = getHttpClient(freshdeskCompositeSource.getFreshdeskApiKey());
         int ctr;
         int page = 1;
+
+        LocalDateTime anchorStartDate = LocalDateTime.now().minusDays(7).withHour(0).withMinute(0);
+        Date asDate = Date.from(anchorStartDate.toInstant(ZoneOffset.UTC));
+
+        if (lastRefreshDate == null || lastRefreshDate.before(asDate)) {
+            lastRefreshDate = asDate;
+        }
+
         List<String> ticketIDs = new ArrayList<>();
         Map<String, List<Map>> statusUpdates = new HashMap<>();
         Map<String, List<Map>> assignmentUpdates = new HashMap<>();
@@ -146,7 +153,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
                 IRow row = dataSet.createRow();
                 Date updatedAt = createTicket(keys, map, id, row, freshdeskCompositeSource);
-                //if (lastRefreshDate == null || lastRefreshDate.before(updatedAt)) {
+                if (lastRefreshDate.before(updatedAt)) {
                     List<Map> activities = runRestRequestForList("tickets/activities/" + displayID + ".json", client, freshdeskCompositeSource);
                     ticketIDs.add(displayID);
                     List<Map> statusUpdateList = new LinkedList<>();
@@ -178,54 +185,52 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                     assignmentUpdates.put(displayID, assignmentUpdateList);
                     addedNotes.put(displayID, noteList);
 
-                try {
-                    List<Map> surveys = runRestRequestForList("tickets/" + displayID + "/surveys.json", client, freshdeskCompositeSource);
-                    surveyMap.put(displayID, surveys);
-                } catch (Exception e) {
-                    //LogClass.error(e);
-                    // ignore, feature is locked
-                }
+                    try {
+                        List<Map> surveys = runRestRequestForList("tickets/" + displayID + "/surveys.json", client, freshdeskCompositeSource);
+                        surveyMap.put(displayID, surveys);
+                    } catch (Exception e) {
+                        //LogClass.error(e);
+                        // ignore, feature is locked
+                    }
 
-                boolean closed = false;
-                int reopenCount = 0;
-                Value resolvedAt = null;
-                DateValue createdAt = (DateValue) getDate(map, "created_at");
-                ZonedDateTime zdt = createdAt.getDate().toInstant().atZone(ZoneId.systemDefault());
-                TicketAnalysis ticketAnalysis = new TicketAnalysis(zdt);
-                for (Object activityObject : statusUpdateList) {
-                    // calculate # of times issues was reopened
-                    Map m = (Map) activityObject;
-                    Map ticketActivityMap = (Map) m.get("ticket_activity");
-                    List<String> list = (List<String>) ticketActivityMap.get("activity");
-                    DateValue performedTime = (DateValue) getDate(ticketActivityMap, "performed_time");
-                    for (String activityBody : list) {
+                    boolean closed = false;
+                    Value resolvedAt = null;
+                    DateValue createdAt = (DateValue) getDate(map, "created_at");
+                    ZonedDateTime zdt = createdAt.getDate().toInstant().atZone(ZoneId.systemDefault());
+                    TicketAnalysis ticketAnalysis = new TicketAnalysis(zdt);
+                    for (Object activityObject : statusUpdateList) {
+                        // calculate # of times issues was reopened
+                        Map m = (Map) activityObject;
+                        Map ticketActivityMap = (Map) m.get("ticket_activity");
+                        List<String> list = (List<String>) ticketActivityMap.get("activity");
+                        DateValue performedTime = (DateValue) getDate(ticketActivityMap, "performed_time");
+                        for (String activityBody : list) {
 
-                        int index = activityBody.lastIndexOf(" ");
-                        String status = activityBody.substring(index).trim();
+                            int index = activityBody.lastIndexOf(" ");
+                            String status = activityBody.substring(index).trim();
 
-                        if ("Resolved".equals(status) || "Closed".equals(status)) {
-                            ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, performedTime.getDate());
-                            if (!closed) {
-                                resolvedAt = getDate(ticketActivityMap, "performed_time");
+                            if ("Resolved".equals(status) || "Closed".equals(status)) {
+                                ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, performedTime.getDate());
+                                if (!closed) {
+                                    resolvedAt = getDate(ticketActivityMap, "performed_time");
+                                }
+                                closed = true;
+                            } else if ("Waiting on Customer".equals(status) || "Waiting on Third Party".equals(status)) {
+                                ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, performedTime.getDate());
+                            } else {
+                                ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, performedTime.getDate());
+                                resolvedAt = new EmptyValue();
+                                closed = false;
                             }
-                            closed = true;
-                        } else if ("Waiting on Customer".equals(status) || "Waiting on Third Party".equals(status)) {
-                            ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, performedTime.getDate());
-                        } else {
-                            ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, performedTime.getDate());
-                            resolvedAt = new EmptyValue();
-                            closed = false;
                         }
                     }
+                    ticketAnalysis.calculate();
+                    row.addValue(keys.get(AGENT_TIME), ticketAnalysis.getElapsedAgentTime());
+                    row.addValue(keys.get(CUSTOMER_TIME), ticketAnalysis.getElapsedCustomerTime());
+                    row.addValue(keys.get(AGENT_TOUCHES), ticketAnalysis.getAgentHandles());
+                    row.addValue(keys.get(CUSTOMER_TOUCHES), ticketAnalysis.getCustomerHandles());
+                    row.addValue(keys.get(RESOLVED_AT), resolvedAt);
                 }
-                ticketAnalysis.calculate();
-                row.addValue(keys.get(AGENT_TIME), ticketAnalysis.getElapsedAgentTime());
-                row.addValue(keys.get(CUSTOMER_TIME), ticketAnalysis.getElapsedCustomerTime());
-                row.addValue(keys.get(AGENT_TOUCHES), ticketAnalysis.getAgentHandles());
-                row.addValue(keys.get(CUSTOMER_TOUCHES), ticketAnalysis.getCustomerHandles());
-                //row.addValue(keys.get(REOPEN_COUNT), reopenCount);
-                row.addValue(keys.get(RESOLVED_AT), resolvedAt);
-                //}
             }
             page++;
         } while (ctr == 30);
