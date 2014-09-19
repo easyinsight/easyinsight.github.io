@@ -151,6 +151,9 @@ public class FlatButtonBarButtonSkin extends Border
         var overThemeColor:Number =
                 ColorUtil.adjustBrightness2(themeColor, -25);
 
+        var overThemeColor2:Number =
+                ColorUtil.adjustBrightness2(themeColor, -50);
+
         var emph:Boolean = false;
 
         if (parent is IButton)
@@ -321,22 +324,22 @@ public class FlatButtonBarButtonSkin extends Border
                 // button border/edge
                 drawRoundRect(
                         0, 0, w, h, cr,
-                        [ themeColor, derStyles.themeColDrk1 ], 1,
+                        [ overThemeColor2, overThemeColor2 ], 1,
                         verticalGradientMatrix(0, 0, w, h));
 
                 // button fill
                 drawRoundRect(
                         1, 1, w - 2, h - 2, cr1,
-                        [ derStyles.fillColorPress1, derStyles.fillColorPress2 ], 1,
+                        [ overThemeColor2, overThemeColor2 ], 1,
                         verticalGradientMatrix(0, 0, w - 2, h - 2));
 
                 // top highlight
-                if (!(radius is Number))
+                /*if (!(radius is Number))
                 { radius.bl = radius.br = 0;}
                 drawRoundRect(
                         1, 1, w - 2, (h - 2) / 2, radius,
                         [ 0xFFFFFF, 0xFFFFFF ], highlightAlphas,
-                        verticalGradientMatrix(1, 1, w - 2, (h - 2) / 2));
+                        verticalGradientMatrix(1, 1, w - 2, (h - 2) / 2));*/
 
                 break;
             }
