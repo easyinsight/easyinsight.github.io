@@ -75,7 +75,8 @@
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.list.ListDefinition;
         import com.easyinsight.commands.CommandEvent;
-        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.commands.IReportEditorCommand;
+        import com.easyinsight.commands.ReportEditorCommandProcessor;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.datasources.DataSourceType;
@@ -175,7 +176,7 @@
         [Bindable]
         private var dataView:DataViewFactory;
 
-        private var commandProcessor:CommandProcessor;
+        private var commandProcessor:ReportEditorCommandProcessor;
 
         [Bindable]
         private var wrappers:ArrayCollection;
@@ -833,7 +834,12 @@
         }
 
         private function onCommand(event:CommandEvent):void {
-            commandProcessor.addCommand(event.command);
+            if (event.command is IReportEditorCommand) {
+                commandProcessor.addReportEditorCommand(event.command as IReportEditorCommand, dataView);
+
+            } else {
+                commandProcessor.addCommand(event.command);
+            }
         }
 
         private function onAnalysisChanged(event:AnalysisChangedEvent):void {
@@ -895,7 +901,7 @@
                     dataService.dataFeedID = dataSourceID;
                 }
                 loading = true;
-                commandProcessor = new CommandProcessor();
+                commandProcessor = new ReportEditorCommandProcessor();
                 quickActionButton.simpleReportEditor = this;
                 addEventListener("explainReport", explain);
                 addEventListener(FieldEditorEvent.FIELD_EDITOR_OPENED, onFieldEditorOpen);
@@ -1030,7 +1036,6 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
-
 
 
         private function saved(event:SavedAnalysisEvent):void {

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.WindowManagement;
+import com.easyinsight.analysis.crosstab.CrosstabDefinition;
 import com.easyinsight.commands.CommandEvent;
 import com.easyinsight.listing.ArghButton;
 
@@ -16,13 +17,10 @@ import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
 import mx.containers.Box;
-import mx.containers.HBox;
 import mx.controls.AdvancedDataGrid;
-import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
 import mx.controls.List;
-import mx.controls.PopUpMenuButton;
 import mx.controls.Text;
 import mx.core.Application;
 import mx.core.DragSource;
@@ -55,8 +53,11 @@ public class DropArea extends Box
             editEvent(null, 0);
         } else if (target == "dateSwitch") {
             AnalysisDateDimension(_analysisItem).dateLevel = event.item.dateLevel;
+            dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, this.analysisItem)));
         } else if (target == "filterOnField") {
             dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, new AnalysisItemWrapper(new AnalysisItemNode(_analysisItem))));
+        } else if (target == "xtabSwap") {
+            dispatchEvent(new CommandEvent(new DropAreaCrosstabSwapCommand()));
         }
     }
 
@@ -213,6 +214,16 @@ public class DropArea extends Box
             options.addItem({label: "Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.MONTH_LEVEL});
             options.addItem({label: "Week - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.WEEK_LEVEL});
             options.addItem({label: "Day - Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.DAY_LEVEL});
+        }
+        if (_report is CrosstabDefinition && CrosstabDefinition(_report).columns != null && CrosstabDefinition(_report).columns.length > 0 &&
+                _analysisItem == CrosstabDefinition(_report).columns.getItemAt(0) && CrosstabDefinition(_report).rows != null && CrosstabDefinition(_report).rows.length > 0) {
+            options.addItem({type: "separator"});
+            options.addItem({label: "Swap with Column", data: "xtabSwap"});
+
+        } else if (_report is CrosstabDefinition && CrosstabDefinition(_report).rows != null && CrosstabDefinition(_report).rows.length > 0 &&
+                _analysisItem == CrosstabDefinition(_report).rows.getItemAt(0) && CrosstabDefinition(_report).columns != null && CrosstabDefinition(_report).columns.length > 0) {
+            options.addItem({type: "separator"});
+            options.addItem({label: "Swap with Row", data: "xtabSwap"});
         }
         argh.dataProvider = options;
 
