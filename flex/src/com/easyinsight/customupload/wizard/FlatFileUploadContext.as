@@ -6,7 +6,7 @@ import flash.utils.ByteArray;
 public class FlatFileUploadContext extends UploadContext {
 
     public var uploadKey:String;
-    public var type:int;
+    public var fileName:String;
 
     public function FlatFileUploadContext() {
         super();
