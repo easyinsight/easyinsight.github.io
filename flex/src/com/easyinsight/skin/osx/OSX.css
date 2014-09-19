@@ -263,8 +263,8 @@ ToggleButtonBar {
     fillColors: #FFFFFF, #FFFFFF;
     fillAlphas: 1, 1;
     color: #222222;
-    textRollOverColor: #dddddd;
-    textSelectedColor: #dddddd;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     borderColor: #FFFFFF;
     borderThickness: 0;
     borderStyle: none;
@@ -284,6 +284,8 @@ ToggleButtonBar {
     backgroundAlpha: 0;
     highlightAlphas: 0, 0;
     color: #000000;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
     fillColors: #FFFFFF, #FFFFFF;
     fillAlphas: 1, 1, 1, 1;
     borderColor: #FFFFFF;
@@ -487,6 +489,20 @@ SaveButton {
     downSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
     overSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
     disabledSkin:ClassReference('com.easyinsight.util.HTMLLinkButtonSkin');
+}
+
+.adHocMenuButton {
+    cornerRadius: 2;
+    backgroundAlpha: 0;
+    color: #FFFFFF;
+    themeColor: #FFFFFF;
+    rollOverColor: #004484;
+    textRollOverColor: #FFFFFF;
+    font-size: 14;
+    upSkin:ClassReference('com.easyinsight.util.AdHocButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.AdHocButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.AdHocButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.AdHocButtonSkin');
 }
 
 

@@ -51,5 +51,5 @@
 	</mx:Script>
 	<mx:RemoteObject id="authService" destination="login">
 	</mx:RemoteObject>
-	<mx:LinkButton label="Log Out" click="logout()" color="#222222" themeColor="#222222" fontSize="16"/>
+	<mx:LinkButton label="Log Out" click="logout()" color="#222222" themeColor="#222222" fontSize="16" styleName="solidMenuButton"/>
 </mx:HBox>

@@ -91,8 +91,8 @@
                             top="0" bottom="0" id="toggleBar" themeColor="#FFFFFF">
         </mx:ToggleButtonBar>
         <mx:Spacer width="100%"/>
-        <listing:WhatsNewButton/>
-        <listing:SearchButton/>
+        <listing:WhatsNewButton styleName="solidMenuButton"/>
+        <listing:SearchButton styleName="solidMenuButton"/>
         <!--<easyinsight:NewLoggedOnStatus/>-->
         <easyinsight:AltLoggedOnStatus/>
     </mx:HBox>

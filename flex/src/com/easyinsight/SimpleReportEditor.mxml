@@ -1616,7 +1616,7 @@
                               dataSource="{dataSourceInfo}" viewFactory="{dataView}"/>
         <analysis:AdHocMode id="adHocButton" modeChange="dataView.forceRetrieve()" labelPlacement="right"
                             label="Ad Hoc Mode"
-                            styleName="solidMenuButton"/>
+                            styleName="adHocMenuButton"/>
         <report:ReportExportWindow
                    label="Export" labelPlacement="right" styleName="flatTransparentMenuButton"
                    id="exportButton"

@@ -148,6 +148,8 @@ public class FlatButtonBarButtonSkin extends Border
 
         var themeColorDrk1:Number = themeColor;
 
+        var overThemeColor:Number =
+                ColorUtil.adjustBrightness2(themeColor, -25);
 
         var emph:Boolean = false;
 
@@ -181,7 +183,6 @@ public class FlatButtonBarButtonSkin extends Border
         switch (name)
         {
             case "selectedUpSkin":
-            case "selectedOverSkin":
             {
                 // button border/edge
                 drawRoundRect(
@@ -195,6 +196,25 @@ public class FlatButtonBarButtonSkin extends Border
                 drawRoundRect(
                         1, 1, w - 2, h - 2, cr1,
                         [ fillColors[1], fillColors[1] ],
+                        [ fillAlphas[0], fillAlphas[1] ],
+                        verticalGradientMatrix(0, 0, w - 2, h - 2));
+
+                break;
+            }
+            case "selectedOverSkin":
+            {
+                // button border/edge
+                drawRoundRect(
+                        0, 0, w, h, cr,
+                        [ overThemeColor, overThemeColor ], 1,
+                        verticalGradientMatrix(0, 0, w, h ),
+                        GradientType.LINEAR, null,
+                        { x: 2, y: 2, w: w - 4, h: h - 4, r: cr2 });
+
+                // button fill
+                drawRoundRect(
+                        1, 1, w - 2, h - 2, cr1,
+                        [ overThemeColor, overThemeColor ],
                         [ fillAlphas[0], fillAlphas[1] ],
                         verticalGradientMatrix(0, 0, w - 2, h - 2));
 
@@ -274,7 +294,7 @@ public class FlatButtonBarButtonSkin extends Border
                 // button border/edge
                 drawRoundRect(
                         0, 0, w, h, cr,
-                        [ themeColor, themeColorDrk1 ], 1,
+                        [ overThemeColor, overThemeColor ], 1,
                         verticalGradientMatrix(0, 0, w, h),
                         GradientType.LINEAR, null,
                         { x: 1, y: 1, w: w - 2, h: h - 2, r: cr1 });
@@ -282,7 +302,7 @@ public class FlatButtonBarButtonSkin extends Border
                 // button fill
                 drawRoundRect(
                         1, 1, w - 2, h - 2, cr1,
-                        overFillColors, overFillAlphas,
+                        [ overThemeColor, overThemeColor ], overFillAlphas,
                         verticalGradientMatrix(0, 0, w - 2, h - 2));
 
                 // top highlight

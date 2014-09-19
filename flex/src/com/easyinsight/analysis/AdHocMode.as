@@ -32,8 +32,10 @@ public class AdHocMode extends LinkButton {
         _adHoc = value;
         if (_adHoc) {
             toolTip = "Ad Hoc Report Mode";
+            setStyle("adHocSelected", false);
         } else {
             toolTip = "Manual Report Mode";
+            setStyle("adHocSelected", true);
         }
         dispatchEvent(new Event("adHocChanged"));
     }
