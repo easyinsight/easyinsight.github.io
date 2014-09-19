@@ -9,9 +9,8 @@
 
         import mx.managers.PopUpManager;
 
-        private function install(type:int):void {
+        private function install():void {
             var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
-            userUpload.type = type;
             userUpload.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
             PopUpUtil.centerPopUp(userUpload);
         }
@@ -36,13 +35,8 @@
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:HBox id="controlsBox" width="100%" horizontalAlign="center">
-                <mx:Button label="Upload a CSV" fontSize="20" click="install(1)" styleName="grayButton"
+                <mx:Button label="Upload an .xlsx, .xls, or .csv File" fontSize="20" click="install()" styleName="grayButton"
                            id="installButton"/>
-                <mx:Button label="Upload an Excel (.xls) File" fontSize="20" click="install(2)" styleName="grayButton"
-                           id="installButton2"/>
-                <mx:Button label="Upload an Excel (.xlsx) File" fontSize="20" click="install(3)" styleName="grayButton"
-                           id="installButton3"/>
-
             </mx:HBox>
             <mx:HRule width="100%" strokeColor="#333333"/>
             <mx:TextArea
