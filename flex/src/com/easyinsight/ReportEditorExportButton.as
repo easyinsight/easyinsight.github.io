@@ -4,8 +4,11 @@
 package com.easyinsight {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.report.ReportExportButton;
+import com.easyinsight.report.ReportURLWindow;
 
 import flash.display.DisplayObject;
+
+import mx.managers.PopUpManager;
 
 public class ReportEditorExportButton extends ReportExportButton {
     public function ReportEditorExportButton() {
@@ -24,6 +27,15 @@ public class ReportEditorExportButton extends ReportExportButton {
 
     override protected function getCoreView():DisplayObject {
         return getReportEditor(this).dataView.getCoreView();
+    }
+
+    override protected function url():void {
+        var urlWindow:ReportURLWindow = new ReportURLWindow();
+        urlWindow.report = getReport();
+        urlWindow.x = this.x;
+        urlWindow.y = this.y;
+        PopUpManager.addPopUp(urlWindow, this, true);
+        PopUpManager.removePopUp(this);
     }
 }
 }
