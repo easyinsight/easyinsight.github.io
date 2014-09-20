@@ -54,17 +54,9 @@
         }
 
 
-        private function url():void {
-            var urlWindow:ReportURLWindow = new ReportURLWindow();
-            urlWindow.report = getReport();
-            urlWindow.reportView = reportView;
-            urlWindow.x = this.x;
-            urlWindow.y = this.y;
-            PopUpManager.addPopUp(urlWindow, this, true);
-            PopUpManager.removePopUp(this);
-        }
+        protected function url():void {
 
-        public var reportView:ReportView;
+        }
 
         private function embed():void {
             var embedReportWindow:EmbedReportWindow = new EmbedReportWindow();
