@@ -1207,10 +1207,63 @@ public class UserUploadService {
         }
     }
 
-    // three contexts here
-    // excel/csv upload
-    // google documents
-    // unchecked API
+    public UploadResponse analyzeUploadWithConn(UploadContext uploadContext, EIConnection conn) throws Exception {
+        UploadResponse uploadResponse;
+            String validation = uploadContext.validateUpload(conn);
+
+            if (validation != null) {
+                uploadResponse = new UploadResponse(validation);
+            } else {
+                byte[] bytes = null;
+                if (uploadContext instanceof FlatFileUploadContext) {
+                    AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                    S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
+                    byte retrieveBuf[];
+                    retrieveBuf = new byte[1];
+                    InputStream bfis = object.getObjectContent();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    while (bfis.read(retrieveBuf) != -1) {
+                        baos.write(retrieveBuf);
+                    }
+                    byte[] resultBytes = baos.toByteArray();
+                    ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+                    ZipInputStream zin = new ZipInputStream(bais);
+                    zin.getNextEntry();
+
+                    byte[] buffer = new byte[8192];
+                    ByteArrayOutputStream fout = new ByteArrayOutputStream();
+                    BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+                    int nBytes;
+                    while ((nBytes = zin.read(buffer)) != -1) {
+                        bufOS.write(buffer, 0, nBytes);
+                    }
+                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                        bufOS.write(c);
+                    }*/
+                    bufOS.close();
+                    fout.close();
+
+                    bytes = fout.toByteArray();
+
+                    baos = null;
+                    bufOS = null;
+                    fout = null;
+                }
+                List<AnalysisItem> fields = uploadContext.guessFields(conn, bytes);
+                List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
+                for (AnalysisItem field : fields) {
+                    FieldUploadInfo fieldUploadInfo = new FieldUploadInfo();
+                    fieldUploadInfo.setGuessedItem(field);
+                    fieldUploadInfo.setSampleValues(uploadContext.getSampleValues(field.getKey()));
+                    fieldInfos.add(fieldUploadInfo);
+                }
+                uploadResponse = new UploadResponse();
+                uploadResponse.setSuccessful(true);
+                uploadResponse.setInfos(fieldInfos);
+            }
+
+        return uploadResponse;
+    }
 
     public UploadResponse analyzeUpload(UploadContext uploadContext) {
         UploadResponse uploadResponse;
@@ -1306,6 +1359,55 @@ public class UserUploadService {
         }
         return uploadResponse;
     }*/
+
+
+    public UploadResponse createDataSourceWithConn(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible, EIConnection conn)
+        throws Exception{
+        UploadResponse uploadResponse;
+
+            byte[] bytes = null;
+            if (uploadContext instanceof FlatFileUploadContext) {
+                FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
+
+                byte retrieveBuf[];
+                retrieveBuf = new byte[1];
+                InputStream bfis = object.getObjectContent();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while (bfis.read(retrieveBuf) != -1) {
+                    baos.write(retrieveBuf);
+                }
+                byte[] resultBytes = baos.toByteArray();
+                ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+                ZipInputStream zin = new ZipInputStream(bais);
+                zin.getNextEntry();
+
+                byte[] buffer = new byte[8192];
+                ByteArrayOutputStream fout = new ByteArrayOutputStream();
+                BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+                int nBytes;
+                while ((nBytes = zin.read(buffer)) != -1) {
+                    bufOS.write(buffer, 0, nBytes);
+                }
+                /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                    bufOS.write(c);
+                }*/
+                bufOS.close();
+                fout.close();
+
+                bytes = fout.toByteArray();
+
+                baos = null;
+                bufOS = null;
+                fout = null;
+            }
+            System.out.println("bytes size = " + bytes.length);
+            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
+            uploadResponse = new UploadResponse(dataSourceID);
+
+            return uploadResponse;
+    }
 
     public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
         UploadResponse uploadResponse;
@@ -1509,6 +1611,52 @@ public class UserUploadService {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public List<EIDescriptor> getAccountReportsWithConn(EIConnection conn) throws SQLException {
+
+            List<EIDescriptor> reports = new ArrayList<EIDescriptor>();
+            PreparedStatement getReportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE, ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE," +
+                    "ANALYSIS.URL_KEY, ANALYSIS.DESCRIPTION FROM " +
+                    "ANALYSIS, ACCOUNT_TO_REPORT WHERE ACCOUNT_TO_REPORT.ACCOUNT_ID = ? AND ACCOUNT_TO_REPORT.REPORT_ID = ANALYSIS.ANALYSIS_ID");
+            getReportStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet reportRS = getReportStmt.executeQuery();
+            while (reportRS.next()) {
+                String title = reportRS.getString(1);
+                long reportID = reportRS.getLong(2);
+                long dataSourceID = reportRS.getLong(3);
+                int reportType = reportRS.getInt(4);
+                String urlKey = reportRS.getString(5);
+                try {
+                    InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
+                    id.setDescription(reportRS.getString(6));
+                    reports.add(id);
+                } catch (com.easyinsight.security.SecurityException e) {
+                    // ignore
+                }
+            }
+            getReportStmt.close();
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
+                    "DASHBOARD.URL_KEY, DASHBOARD.DESCRIPTION FROM " +
+                    "DASHBOARD, ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_TO_DASHBOARD.ACCOUNT_ID = ? AND ACCOUNT_TO_DASHBOARD.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+            getDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dashboardRS = getDashboardStmt.executeQuery();
+            while (dashboardRS.next()) {
+                String title = dashboardRS.getString(1);
+                long reportID = dashboardRS.getLong(2);
+                long dataSourceID = dashboardRS.getLong(3);
+                String urlKey = dashboardRS.getString(4);
+                try {
+                    SecurityUtil.authorizeDashboard(reportID);
+                    DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
+                    dd.setDescription(dashboardRS.getString(5));
+                    reports.add(dd);
+                } catch (com.easyinsight.security.SecurityException e) {
+                    // ignore
+                }
+            }
+            getDashboardStmt.close();
+            return reports;
     }
 
     public static RawUploadData retrieveRawData(long uploadID) {

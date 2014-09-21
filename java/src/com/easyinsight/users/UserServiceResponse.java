@@ -2,18 +2,22 @@ package com.easyinsight.users;
 
 
 import com.easyinsight.analysis.ReportTypeOptions;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.*;
+import com.easyinsight.userupload.UserUploadService;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,6 +76,24 @@ public class UserServiceResponse {
     private String thousandsSeperator;
     private String decimalSeperator;
     private String defaultFontFamily;
+    private String newsSubject;
+    private List<EIDescriptor> topReports;
+
+    public String getNewsSubject() {
+        return newsSubject;
+    }
+
+    public void setNewsSubject(String newsSubject) {
+        this.newsSubject = newsSubject;
+    }
+
+    public List<EIDescriptor> getTopReports() {
+        return topReports;
+    }
+
+    public void setTopReports(List<EIDescriptor> topReports) {
+        this.topReports = topReports;
+    }
 
     public String getDefaultFontFamily() {
         return defaultFontFamily;
@@ -188,16 +210,19 @@ public class UserServiceResponse {
         LogClass.info("Log in from " + user.getUserID() + " - " + user.getEmail());
         byte[] bytes = null;
         Date newsDate = null;
+        String newsTitle = null;
         boolean accountOverSize = false;
+        List<EIDescriptor> topReports = new ArrayList<>();
         EIConnection conn = Database.instance().getConnection();
         try {
             if (applicationSkin.getReportHeaderImage() != null) {
                 bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
             }
-            PreparedStatement dateStmt = conn.prepareStatement("SELECT MAX(ENTRY_TIME) FROM NEWS_ENTRY");
+            PreparedStatement dateStmt = conn.prepareStatement("SELECT ENTRY_TIME, NEWS_ENTRY.news_entry_title FROM NEWS_ENTRY ORDER BY NEWS_ENTRY.ENTRY_TIME DESC LIMIT 1");
             ResultSet rs = dateStmt.executeQuery();
             if (rs.next()) {
                 newsDate = new Date(rs.getTimestamp(1).getTime());
+                newsTitle = rs.getString(2);
             }
             if (account.getPricingModel() == 0) {
                 if (account.getMaxDaysOverSizeBoundary() != -1) {
@@ -208,6 +233,7 @@ public class UserServiceResponse {
                     accountOverSize = account.getUsedSize() > (account.getCoreStorage() + account.getAddonStorageUnits() * 250000000L);
                 }
             }
+            topReports = new UserUploadService().getAccountReportsWithConn(conn);
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -222,7 +248,7 @@ public class UserServiceResponse {
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
-                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily());
+                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily(), topReports, newsTitle);
         response.setReportImage(bytes);
         String accountLocale;
         if (!"0".equals(user.getUserLocale())) {
@@ -269,7 +295,7 @@ public class UserServiceResponse {
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
                                Date newsDate, Date newsDismissDate, boolean accountOverSize, boolean accountReports, boolean tagsAndCopyEnabled,
-                               boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily) {
+                               boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily, List<EIDescriptor> topReports, String newsTitle) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -316,6 +342,8 @@ public class UserServiceResponse {
         this.hourlyRefreshEnabled = hourlyRefreshEnabled;
         this.defaultHTML = defaultHTML;
         this.defaultFontFamily = defaultFontFamily;
+        this.topReports = topReports;
+        this.newsSubject = newsTitle;
     }
 
     public boolean isAccountOverSize() {
