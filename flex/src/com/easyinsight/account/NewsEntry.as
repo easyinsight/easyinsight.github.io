@@ -17,6 +17,7 @@ public class NewsEntry {
     public var date:Date;
     public var id:int;
     public var tags:String;
+    public var author:String;
 
     public function NewsEntry() {
     }
