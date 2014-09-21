@@ -57,5 +57,5 @@
     <mx:Spacer width="100%"/>
     <mx:Label text="{Constants.instance().userName}" color="{textColor}"/>
     <mx:VRule height="20"/>
-	<mx:Button label="Log Out" click="logout()" styleName="grayButton"/>
+	<mx:LinkButton label="Log Out" click="logout()" styleName="solidMenuButton"/>
 </mx:HBox>

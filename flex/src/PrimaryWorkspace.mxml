@@ -595,7 +595,7 @@
             box.y = 38;
             masterCanvas.addChild(box);*/
             var hbox:HBox = new HBox();
-            hbox.y = 38;
+            hbox.y = 42;
             hbox.percentWidth = 100;
             hbox.percentHeight = 100;
             hbox.setStyle("paddingLeft", 0);

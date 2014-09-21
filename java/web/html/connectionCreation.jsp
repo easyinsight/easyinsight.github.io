@@ -16,13 +16,17 @@
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
         int connectionID = Integer.parseInt(request.getParameter("connectionID"));
-        if (connectionID == FeedType.SERVER_MYSQL.getType()) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID));
+        if (connectionID == FeedType.SERVER_MYSQL.getType() || connectionID == FeedType.SERVER_SQL_SERVER.getType() || connectionID == FeedType.SERVER_POSTGRES.getType()) {
+            if (request.getParameter("error") == null) {
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID));
+            } else {
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID + "&error=" + request.getParameter("error")));
+            }
             return;
-        } else if (connectionID == FeedType.STATIC.getType()) {
-            response.sendRedirect(RedirectUtil.getURL(request, "/app/html/fileUpload.jsp?connectionID=" + connectionID));
+        } /*else if (connectionID == FeedType.STATIC.getType()) {
+            response.sendRedirect(RedirectUtil.getURL(request, "/a/connection"));
             return;
-        }
+        }*/
         HTMLConnectionFactory factory;
         try {
             factory = new HTMLConnectionFactory(connectionID);

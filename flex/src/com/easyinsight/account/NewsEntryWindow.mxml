@@ -16,6 +16,9 @@
         [Bindable]
         private var newsEntryTitle:String;
 
+        [Bindable]
+        private var author:String = "James Boe";
+
         override protected function commitProperties():void {
             super.commitProperties();
             if (newsEntry != null) {
@@ -23,6 +26,7 @@
                 date = newsEntry.date;
                 newsEntryTitle = newsEntry.title;
                 tags = newsEntry.tags;
+                author = newsEntry.author;
             }
         }
 
@@ -34,6 +38,7 @@
             newsEntry.date = dateChooser.selectedDate;
             newsEntry.title = titleInput.text;
             newsEntry.tags = tagsInput.text;
+            newsEntry.author = newsAuthorPicker.selectedItem as String;
             ProgressAlert.alert(this, "Saving...", null, adminService.addNews);
             adminService.addNews.send(newsEntry);
         }
@@ -48,14 +53,35 @@
     <mx:RemoteObject destination="admin" id="adminService">
         <mx:method name="addNews" result="saved()"/>
     </mx:RemoteObject>
-    <mx:VBox backgroundColor="#FFFFFF">
-        <mx:DateField id="dateChooser" selectedDate="{date}"/>
-        <mx:TextInput text="{newsEntryTitle}" id="titleInput" width="700"/>
-        <mx:TextInput text="{tags}" id="tagsInput" width="700"/>
-        <mx:TextArea width="700" height="400" text="{text}" id="textArea" editable="true" borderStyle="solid" borderThickness="1"/>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <util:SaveButton label="Save" click="save()"/>
-            <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
-        </mx:HBox>
-    </mx:VBox>
+    <mx:Form backgroundColor="#FFFFFF">
+        <mx:FormItem label="Date:">
+            <mx:DateField id="dateChooser" selectedDate="{date}"/>
+        </mx:FormItem>
+        <mx:FormItem label="TItle:">
+            <mx:TextInput text="{newsEntryTitle}" id="titleInput" width="700"/>
+        </mx:FormItem>
+        <mx:FormItem label="Author:">
+            <mx:ComboBox labelField="name" id="newsAuthorPicker" selectedItem="{author}">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>James Boe</mx:String>
+                            <mx:String>Cendie Lee</mx:String>
+                            <mx:String>Alan Baldwin</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+        </mx:FormItem>
+        <mx:FormItem label="Tags:">
+            <mx:TextInput text="{tags}" id="tagsInput" width="700"/>
+        </mx:FormItem>
+        <mx:FormItem label="Content:">
+            <mx:TextArea width="700" height="400" text="{text}" id="textArea" editable="true" borderStyle="solid" borderThickness="1"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
 </util:EITitleWindow>

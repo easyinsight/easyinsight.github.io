@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<listing:ArghButton xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:listing="com.easyinsight.listing.*" itemClick="onClick(event)" dataProvider="{suggestions}"
+        labelField="description" popUpStyleName="dropAreaPopup">
+    <mx:Script><![CDATA[
+        import com.easyinsight.SimpleReportEditor;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.datasources.DataSourceInfo;
+        import com.easyinsight.filtering.TransformContainer;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.MenuEvent;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var suggestions:ArrayCollection;
+
+        private var _report:AnalysisDefinition;
+
+        private var _dataView:DataViewFactory;
+
+        private var _transformContainer:TransformContainer;
+
+        private var _allFields:ArrayCollection;
+
+        private var _wrappers:ArrayCollection;
+
+        private var _dataSourceDisplay:DataSourceInfo;
+
+        private var _simpleReportEditor:SimpleReportEditor;
+
+
+        public function get simpleReportEditor():SimpleReportEditor {
+            return _simpleReportEditor;
+        }
+
+        public function set simpleReportEditor(value:SimpleReportEditor):void {
+            _simpleReportEditor = value;
+        }
+
+        public function set dataSourceDisplay(value:DataSourceInfo):void {
+            _dataSourceDisplay = value;
+        }
+
+        public function set allFields(value:ArrayCollection):void {
+            _allFields = value;
+        }
+
+        public function set wrappers(value:ArrayCollection):void {
+            _wrappers = value;
+        }
+
+        public function set transformContainer(value:TransformContainer):void {
+            _transformContainer = value;
+        }
+        public function set dataView(value:DataViewFactory):void {
+            _dataView = value;
+        }
+
+
+
+        private function onClick(event:MenuEvent):void {
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _wrappers) {
+                items.addItem(wrapper.analysisItem);
+            }
+            var target:IntentionSuggestion = event.item as IntentionSuggestion;
+            if (target.requiresServerCallback) {
+                analysisService.getIntentions.send(_report, items, target.scope, target.type);
+            } else {
+                if (_report != null) {
+                    new SuggestionFactory(simpleReportEditor).argh(target.type, items, _report.dataFeedID);
+                }
+            }
+        }
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        private function gotIntentions():void {
+            var intentions:ArrayCollection = analysisService.getIntentions.lastResult as ArrayCollection;
+            var metadata:SuggestionMetadata = new SuggestionMetadata(_report, _transformContainer, _allFields, _wrappers, _dataSourceDisplay, _simpleReportEditor);
+            for each (var intention:Intention in intentions) {
+                intention.addEventListener(IntentionTriggerEvent.INTENTION_TRIGGER, onIntentionEvent);
+                intention.apply(metadata);
+            }
+            if (_dataView != null) {
+                _dataView.refresh();
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onIntentionEvent(event:IntentionTriggerEvent):void {
+            dispatchEvent(event);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getIntentions" result="gotIntentions()"/>
+    </mx:RemoteObject>
+</listing:ArghButton>

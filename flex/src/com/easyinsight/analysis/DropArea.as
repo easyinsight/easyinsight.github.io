@@ -1,44 +1,39 @@
 package com.easyinsight.analysis
 {
 import com.easyinsight.WindowManagement;
+import com.easyinsight.analysis.crosstab.CrosstabDefinition;
 import com.easyinsight.commands.CommandEvent;
-import com.easyinsight.skin.ImageConstants;
+import com.easyinsight.listing.ArghButton;
+
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
-import flash.events.ContextMenuEvent;
+
 import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.geom.Point;
-import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
-import mx.containers.HBox;
+import mx.containers.Box;
 import mx.controls.AdvancedDataGrid;
-import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
 import mx.controls.List;
+import mx.controls.Text;
 import mx.core.Application;
 import mx.core.DragSource;
 import mx.core.IUIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
+import mx.events.MenuEvent;
 import mx.managers.DragManager;
 import mx.managers.PopUpManager;
-import mx.states.AddChild;
-import mx.states.State;
 
-public class DropArea extends HBox
+public class DropArea extends Box
 {
     private var _analysisItem:AnalysisItem;
-
-
-
-    private var editButton:Button;
-    private var deleteButton:Button;
 
     private var _analysisItems:ArrayCollection;
 
@@ -46,50 +41,71 @@ public class DropArea extends HBox
 
     private var _dataSourceID:int;
 
-    public var defaultBackgroundColor:uint = 0xFFFFFF;
-
     public function set dataSourceID(value:int):void {
         _dataSourceID = value;
     }
 
+    private function onItemClick(event:MenuEvent):void {
+        var target:String = event.item.data;
+        if (target == "deleteField") {
+            deletion();
+        } else if (target == "editFieldProperties") {
+            editEvent(null, 0);
+        } else if (target == "dateSwitch") {
+            AnalysisDateDimension(_analysisItem).dateLevel = event.item.dateLevel;
+            dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, this.analysisItem)));
+        } else if (target == "filterOnField") {
+            dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, new AnalysisItemWrapper(new AnalysisItemNode(_analysisItem))));
+        } else if (target == "xtabSwap") {
+            dispatchEvent(new CommandEvent(new DropAreaCrosstabSwapCommand()));
+        } else if (target == "moveField") {
+            var dragSource:DragSource = new DragSource();
+            var bd:BitmapData = new BitmapData(this.width, this.height);
+            bd.draw(this);
+            var bitmap:Bitmap = new Bitmap(bd);
+            var image:Image = new Image();
+            image.source = bitmap;
+            var mouseEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_DOWN);
+            DragManager.doDrag(this, dragSource, mouseEvent, image);
+        }
+    }
+
+    private var argh:ArghButton = new ArghButton();
+    private var notDone:Text = new Text();
+    private var notDoneBox:Box = new Box();
+
     public function DropArea()
     {
         super();
-        addChild(createNoDataLabel());
-        horizontalScrollPolicy = "off";
+        this.setStyle("fontSize", 12);
+        argh.styleName = "flatWhiteButton";
+        argh.setStyle("popUpStyleName", "dropAreaPopup");
+        //horizontalScrollPolicy = "off";
         this.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
         this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
         this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
         this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);
+        //this.addEventListener(MouseEvent.CLICK, onClick);
+        argh.addEventListener(MenuEvent.ITEM_CLICK, onItemClick);
+        argh.labelField = "label";
+        argh.openAlways = true;
         this.addEventListener(KeyboardEvent.KEY_UP, keyPressed);
-
-
-        editButton = new Button();
-        editButton.label = "...";
-        editButton.addEventListener(MouseEvent.CLICK, editEvent);
-        var configured:State = new State();
-        configured.name = "Configured";
-        var addChildAction:AddChild = new AddChild();
-        addChildAction.relativeTo = this;
-        addChildAction.target = editButton;
-        var addDeleteButton:AddChild = new AddChild();
-        deleteButton = new Button();
-        deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
-        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
-        deleteButton.toolTip = "Clear This Field";
-        addDeleteButton.relativeTo = this;
-        addDeleteButton.target = deleteButton;
-        configured.overrides = [ addChildAction, addDeleteButton ];
-        states = [ configured ];
-
-        this.setStyle("borderStyle", "solid");
-        this.setStyle("borderThickness", 2);
+        notDoneBox.setStyle("cornerRadius", 2);
+        notDoneBox.setStyle("borderColor", 0x357ebd);
+        notDoneBox.setStyle("borderWidth", 1);
+        notDoneBox.setStyle("borderStyle", "solid");
+        notDoneBox.height = 27;
+        notDoneBox.setStyle("backgroundColor", 0x0084B4);
+        notDoneBox.setStyle("paddingLeft", 5);
+        notDoneBox.setStyle("paddingRight", 5);
+        notDoneBox.setStyle("paddingTop", 1);
+        notDoneBox.addChild(notDone);
+        notDone.selectable = false;
+        notDone.text = getNoDataLabel();
+        notDone.setStyle("color", 0xFFFFFF);
+        notDone.setStyle("fontSize", 14);
+        addChild(notDoneBox);
         setStyle("verticalAlign", "middle");
-        setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", 0xFFFFFF);
-        var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
-        deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
-        PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);
     }
 
     public function set report(value:AnalysisDefinition):void {
@@ -99,21 +115,11 @@ public class DropArea extends HBox
     public function highlight(analysisItem:AnalysisItem):Boolean {
         var valid:Boolean = recommend(analysisItem);
         if (valid) {
-            setStyle("borderColor", 0x00AA00);
-            setStyle("backgroundColor", 0xBBFFBB);
         }
         return valid;
     }
 
     public function normal():void {
-        setStyle("borderColor", 0xB7BABC);
-        setStyle("backgroundColor", defaultBackgroundColor);
-    }
-
-    private function createNoDataLabel():UIComponent {
-        var label:EmptyDropAreaLabel = new EmptyDropAreaLabel();
-        label.text = getNoDataLabel();
-        return label;
     }
 
     private function onDelete(event:Event):void {
@@ -130,7 +136,7 @@ public class DropArea extends HBox
         this._analysisItems = analysisItems;
     }
 
-    protected function supportsDrilldown():Boolean {                         
+    protected function supportsDrilldown():Boolean {
         return true;
     }
 
@@ -174,7 +180,7 @@ public class DropArea extends HBox
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited, false, 0, true);
         analysisItemEditor.addEventListener(Event.CLOSE, onClose, false, 0, true);
     }
-    
+
     private function onClose(event:Event):void {
         dispatchEvent(new FieldEditorEvent(FieldEditorEvent.FIELD_EDITOR_CLOSED, event.currentTarget as AnalysisItemEditWindow));
     }
@@ -195,27 +201,47 @@ public class DropArea extends HBox
     }
 
     public function set analysisItem(analysisItem:AnalysisItem):void {
-        if (this._analysisItem != null) {
+        /*if (this._analysisItem != null) {
             getChildAt(0).removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+        }*/
+        if (_analysisItem == null && analysisItem != null) {
+            removeChild(notDoneBox);
+            addChild(argh);
+        } else if (_analysisItem != null && analysisItem == null) {
+            removeChild(argh);
+            addChild(notDoneBox);
         }
         this._analysisItem = analysisItem;
 
-        removeChildAt(0);
+        var options:ArrayCollection = new ArrayCollection([{label: "Filter on the Field...", data: "filterOnField"},
+            {label: "Edit Field Properties...", data: "editFieldProperties"},
+            {label: "Remove the Field from Report", data: "deleteField"},
+            {label: "Move the Field in the Report", data: "moveField"}]);
+        if (_analysisItem != null && _analysisItem.hasType(AnalysisItemTypes.DATE)) {
+            options.addItem({type: "separator"});
+            options.addItem({label: "Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.YEAR_LEVEL});
+            options.addItem({label: "Quarter - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.QUARTER_OF_YEAR});
+            options.addItem({label: "Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.MONTH_LEVEL});
+            options.addItem({label: "Week - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.WEEK_LEVEL});
+            options.addItem({label: "Day - Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.DAY_LEVEL});
+        }
+        if (_report is CrosstabDefinition && CrosstabDefinition(_report).columns != null && CrosstabDefinition(_report).columns.length > 0 &&
+                _analysisItem == CrosstabDefinition(_report).columns.getItemAt(0) && CrosstabDefinition(_report).rows != null && CrosstabDefinition(_report).rows.length > 0) {
+            options.addItem({type: "separator"});
+            options.addItem({label: "Swap with Column", data: "xtabSwap"});
+
+        } else if (_report is CrosstabDefinition && CrosstabDefinition(_report).rows != null && CrosstabDefinition(_report).rows.length > 0 &&
+                _analysisItem == CrosstabDefinition(_report).rows.getItemAt(0) && CrosstabDefinition(_report).columns != null && CrosstabDefinition(_report).columns.length > 0) {
+            options.addItem({type: "separator"});
+            options.addItem({label: "Swap with Row", data: "xtabSwap"});
+        }
+        argh.dataProvider = options;
+
         if (analysisItem == null) {
-            addChildAt(createNoDataLabel(), 0);
+            notDone.text = getNoDataLabel();
             currentState = "";
         } else {
-            var component:UIComponent = DropAreaFactory.createDropItemElement(this, analysisItem);
-            component.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            addChildAt(component, 0);
-            currentState = "Configured";
-        }
-        if (analysisItem != null && analysisItem.kpi) {
-            defaultBackgroundColor = 0xDDDDDD;
-            setStyle("backgroundColor", defaultBackgroundColor);
-        } else {
-            defaultBackgroundColor = 0xFFFFFF;
-            setStyle("backgroundColor", defaultBackgroundColor);
+            argh.label = analysisItem.unqualifiedDisplay;
         }
     }
 
@@ -282,16 +308,6 @@ public class DropArea extends HBox
     public function deletion():void {
         dispatchEvent(new AnalysisChangedEvent());
         dispatchEvent(new DropAreaDeletionEvent(this));
-    }
-
-    private function onMouseDown(event:MouseEvent):void {
-        var dragSource:DragSource = new DragSource();
-        var bd:BitmapData = new BitmapData(this.width, this.height);
-        bd.draw(this);
-        var bitmap:Bitmap = new Bitmap(bd);
-        var image:Image = new Image();
-        image.source = bitmap;
-        DragManager.doDrag(this, dragSource, event, image);
     }
 
     public function dragDropHandler(event:DragEvent):void {

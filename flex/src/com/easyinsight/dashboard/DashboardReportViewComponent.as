@@ -19,7 +19,7 @@ import com.easyinsight.util.PNGEnc;
 import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.SaveButton;
 
-import flash.display.Bitmap;
+
 
 import flash.display.BitmapData;
 
@@ -33,7 +33,6 @@ import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.HBox;
 import mx.containers.VBox;
-import mx.controls.Alert;
 
 import mx.controls.Label;
 import mx.controls.LinkButton;

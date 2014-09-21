@@ -93,6 +93,7 @@
 <div class="container corePageWell">
     <div class="row">
         <%
+            String article = request.getParameter("article");
 
             List<NewsEntry> newsEntryList = new AdminService().getNews();
             Set<String> tags = new HashSet<String>();
@@ -101,6 +102,7 @@
                 if (tagString == null) {
                     continue;
                 }
+
                 String[] tagArray = tagString.split(",");
                 for (String tag : tagArray) {
                     String trimmedTag = tag.trim();
@@ -120,9 +122,9 @@
                         <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" style="margin-top: 20px">
                     <div class="col-md-3">
-                        <div class="well">
+                        <div class="well" style="text-align: left">
                             <div><a href="/app/news/" style="font-size:16px">All</a></div>
                             <%
                                 for (String tag : tagList) {
@@ -142,7 +144,15 @@
 
                 Collections.reverse(newsEntryList);
                 for (NewsEntry newsEntry : newsEntryList) {
-                    if (tag != null) {
+                    if (newsEntry.getTitle() == null) {
+                        continue;
+                    }
+                    if (article != null) {
+                        String aliased = newsEntry.getTitle().replace(" ", "-").replace(",", "").toLowerCase();
+                        if (!article.equals(aliased)) {
+                            continue;
+                        }
+                    } else if (tag != null) {
                         boolean valid = false;
                         String tagString = newsEntry.getTags();
                         if (tagString == null) {
@@ -159,21 +169,26 @@
                             continue;
                         }
                     }
+                    String permalink = "/app/whatsnewweb.jsp?article="+newsEntry.getTitle().replace(" ", "-").replace(",", "").toLowerCase();
             %>
             <div class="row" style="padding-top:10px">
-                <div class="col-md-12">
-                    <div style="width:100%;text-align:center">
-                        <h4><%= newsEntry.getTitle() %> - <%= new SimpleDateFormat("yyyy-MM-dd").format(newsEntry.getDate()) %></h4>
-                    </div>
+                <div class="col-md-12" style="text-align:left">
+                    <a class="productHeader" style="color: #0084B4" href="<%=permalink%>"><%= newsEntry.getTitle() %></a>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" style="padding-top:10px">
+                <div class="col-md-12" style="text-align: left">
+                    Posted on <a href="<%=permalink%>" style="color: #0084B4"><%=new SimpleDateFormat("MMMM dd, yyyy").format(newsEntry.getDate()) %></a> by <a style="color:#0084B4" href="<%=permalink%>"><%=newsEntry.getAuthor()%></a>
+                </div>
+            </div>
+            <div class="row" style="padding-top:10px">
                 <div class="col-md-12" style="padding-top:10px">
-                    <div style="width:100%;text-align:center">
+                    <div style="width:100%;text-align:left">
                         <p><%= newsEntry.getNews() %></p>
                     </div>
                 </div>
             </div>
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
             <%
                 }
             %>

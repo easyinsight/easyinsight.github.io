@@ -289,16 +289,18 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                         account.getBillingInfo().add(info);
                         transactions.add(t.getId());
                         String invoiceBody = info.toInvoiceText(account);
-                        if (account.isNewPricingModelInvoice()) {
-                            account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
-                                try {
-                                    byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
-                                    new SendGridEmail().sendAttachmentEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, bytes, "invoice.pdf", false, "support@easy-insight.com", "Easy Insight",
-                                            "application/pdf");
-                                } catch (Exception e) {
-                                    LogClass.error(e);
-                                }
-                            });
+                        if (t.getProcessorResponseCode().equals("1000")) {
+                            if (account.isNewPricingModelInvoice()) {
+                                account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
+                                    try {
+                                        byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
+                                        new SendGridEmail().sendAttachmentEmail(user.getEmail(), "Easy Insight - New Invoice", invoiceBody, bytes, "invoice.pdf", false, "support@easy-insight.com", "Easy Insight",
+                                                "application/pdf");
+                                    } catch (Exception e) {
+                                        LogClass.error(e);
+                                    }
+                                });
+                            }
                         }
                     });
                     account.setNextBillAmount(ss.getNextBillingPeriodAmount().doubleValue());

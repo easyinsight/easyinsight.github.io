@@ -1,0 +1,151 @@
+<?xml version="1.0" ?>
+<listing:ArghButton xmlns:mx="http://www.adobe.com/2006/mxml" label="Export"
+                    dataProvider="{exportOptions}" xmlns:listing="com.easyinsight.listing.*" itemClick="onExportClick(event)"
+        popUpStyleName="dropAreaPopup">
+    <mx:Script><![CDATA[
+        import com.easyinsight.WindowManagement;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.EmailReportWindow;
+        import com.easyinsight.analysis.EmbedReportWindow;
+        import com.easyinsight.analysis.ExcelCreator;
+        import com.easyinsight.analysis.PDFCreator;
+        import com.easyinsight.analysis.PNGCreator;
+        import com.easyinsight.schedule.ReportDelivery;
+        import com.easyinsight.schedule.ReportDeliveryScheduleWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.events.MenuEvent;
+
+        import mx.managers.PopUpManager;
+
+        
+        protected function getReport():AnalysisDefinition {
+            return null;
+        }
+
+        protected function getCoreView():DisplayObject {
+            return null;
+        }
+
+        private function excel():void {
+            new ExcelCreator().exportExcel(getReport(), this, false);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function excel2007():void {
+            new ExcelCreator().exportExcel(getReport(), this, true);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function csv():void {
+
+        }
+
+        private function png():void {
+            new PNGCreator().exportPNG(getCoreView(), this, getReport().name);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function pdf():void {
+            new PDFCreator().exportReportToPDF(getReport(), this, getCoreView());
+            PopUpManager.removePopUp(this);
+        }
+
+
+        protected function url():void {
+
+        }
+
+        private function embed():void {
+            var embedReportWindow:EmbedReportWindow = new EmbedReportWindow();
+            embedReportWindow.report = getReport();
+            embedReportWindow.reportName = getReport().name;
+            embedReportWindow.urlKey = getReport().urlKey;
+            embedReportWindow.dataSourceID = getReport().dataFeedID;
+            embedReportWindow.reportType = getReport().reportType;
+            PopUpManager.addPopUp(embedReportWindow, this, true);
+            WindowManagement.manager.addWindow(embedReportWindow);
+            PopUpUtil.centerPopUp(embedReportWindow);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function schedule():void {
+            exportService.getReportDelivery.send(getReport().analysisID, new Date().getTimezoneOffset());
+        }
+
+        private function gotReportDelivery():void {
+            var delivery:ReportDelivery = exportService.getReportDelivery.lastResult as ReportDelivery;
+            var window:ReportDeliveryScheduleWindow = new ReportDeliveryScheduleWindow();
+            window.fixedReportID = getReport().analysisID;
+            window.fixedReportName = getReport().name;
+            window.fixedReportURLKey = getReport().urlKey;
+            window.activity = delivery;
+            window.x = this.x;
+            window.y = this.y;
+            PopUpManager.addPopUp(window, this, true);
+            WindowManagement.manager.addWindow(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function email():void {
+            var window:EmailReportWindow = new EmailReportWindow();
+            window.report = getReport();
+            window.coreView = getCoreView();
+            window.x = this.x;
+            window.y = this.y;
+            PopUpManager.addPopUp(window, this, true);
+            WindowManagement.manager.addWindow(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function jsonAPI():void {
+            var window:JSONReportWindow = new JSONReportWindow();
+            window.urlKey = getReport().urlKey;
+            PopUpManager.addPopUp(window, this, true);
+            WindowManagement.manager.addWindow(window);
+            PopUpUtil.centerPopUp(window);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onExportClick(event:MenuEvent):void {
+            var target:String = event.item.data;
+            if (target == "exportExcel") {
+                excel2007();
+            } else if (target == "exportExcel1997") {
+                excel();
+            } else if (target == "exportPDF") {
+                pdf();
+            } else if (target == "exportPNG") {
+                png();
+            } else if (target == "email") {
+                email();
+            } else if (target == "scheduleForEmail") {
+                schedule();
+            } else if (target == "jsonAPI") {
+                jsonAPI();
+            } else if (target == "url") {
+                url();
+            }  else if (target == "embedReport") {
+                embed();
+            }
+        }
+
+        [Bindable]
+        private var exportOptions:ArrayCollection = new ArrayCollection([
+            {label: "Export to Excel", data: "exportExcel"},
+            {label: "Export to Excel 1997-2004", data: "exportExcel1997"},
+            {label: "Export to PDF", data: "exportPDF"},
+            {label: "Export to PNG", data: "exportPNG"},
+            {label: "Email", data: "email"},
+            {label: "Schedule for Email Delivery", data: "scheduleForEmail"},
+            {label: "Embed Report into Website", data: "embedReport"},
+            {label: "JSON API to Report", data: "jsonAPI"},
+            {label: "URL for Sharing Report", data: "url"}
+        ]);
+        ]]></mx:Script>
+    <mx:RemoteObject id="exportService" destination="exportService">
+        <mx:method name="getReportDelivery" result="gotReportDelivery()"/>
+    </mx:RemoteObject>
+</listing:ArghButton>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
-                xmlns:solutions="com.easyinsight.solutions.*" layout="absolute"
+                xmlns:solutions="com.easyinsight.solutions.*" xmlns:administration="com.easyinsight.administration.*"
+                layout="absolute"
                 creationComplete="setup()"
                 xmlns:system="com.easyinsight.administration.system.*">
     <mx:states>
@@ -38,6 +39,7 @@
                     </mx:VBox>
                     <account:Newsletter label="Newsletter"/>
                     <account:NewsUpdate label="News Update"/>
+                    <administration:ConsultantAdministration label="Consultant Management"/>
                 </mx:TabNavigator>
             </mx:AddChild>
         </mx:State>

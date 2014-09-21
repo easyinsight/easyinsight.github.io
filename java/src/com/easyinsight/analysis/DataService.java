@@ -567,20 +567,22 @@ public class DataService {
                     Instant instant = zdt.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
                     Date date = Date.from(instant);
                     String result;
+                    String displayResult;
                     if ("QQ".equals(format)) {
                         int quarter = DayOfQuarter.quarter(date);
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(date);
                         int year = cal.get(Calendar.YEAR);
-                        result = "Q" + (quarter + 1) + "-" + year;
+                        displayResult = result = "Q" + (quarter + 1) + "-" + year;
                     } else if ("qq".equals(format)) {
                         int quarter = DayOfQuarter.quarter(date);
-                        result = String.valueOf(quarter);
+                        displayResult = result = String.valueOf(quarter);
                     } else {
                         result = simpleDateFormat.format(date);
+                        displayResult = simpleDateFormat.format(date);
                     }
                     DateLevelWrapper dateLevelWrapper = new DateLevelWrapper();
-                    dateLevelWrapper.setDisplay(result);
+                    dateLevelWrapper.setDisplay(displayResult);
                     dateLevelWrapper.setShortDisplay(result);
                     wrappers.add(dateLevelWrapper);
                 }
@@ -590,6 +592,7 @@ public class DataService {
                 for (int i = 0; i < wrappers.size(); i++) {
                     wrappers.get(i).setDateLevel(wrappers.size() - i);
                 }
+
                 if (filterDefinition.isIncludeRelative()) {
                     if (filterDefinition.getLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
                         DateLevelWrapper lastQuarter = new DateLevelWrapper();
@@ -599,16 +602,29 @@ public class DataService {
                         int year = cal.get(Calendar.YEAR);
                         String result = "Q" + (quarter + 1) + "-" + year;
                         lastQuarter.setShortDisplay(result);
+                        String first = "Q1-" + year;
+                        DateLevelWrapper startOfYear = new DateLevelWrapper();
+                        startOfYear.setDisplay("First Quarter of Year");
+                        startOfYear.setShortDisplay(first);
                         for (DateLevelWrapper wrapper : wrappers) {
                             if (wrapper.getShortDisplay().equals(result)) {
                                 lastQuarter.setDateLevel(wrapper.getDateLevel());
-                                break;
+                            }
+                            if (wrapper.getShortDisplay().equals(first)) {
+                                startOfYear.setDateLevel(wrapper.getDateLevel());
                             }
                         }
+
+
+
+                        wrappers.add(0, startOfYear);
+
                         lastQuarter.setDisplay("Last Full Quarter");
                         wrappers.add(0, lastQuarter);
                         DateLevelWrapper thisQuarter = new DateLevelWrapper();
                         thisQuarter.setDisplay("This Quarter");
+
+
 
                         cal.add(Calendar.MONTH, 3);
                         quarter = DayOfQuarter.quarter(cal.getTime());
@@ -628,12 +644,22 @@ public class DataService {
                         cal.add(Calendar.MONTH, -1);
                         String result = simpleDateFormat.format(cal.getTime());
                         lastQuarter.setShortDisplay(result);
+                        DateLevelWrapper startOfYear = new DateLevelWrapper();
+                        startOfYear.setDisplay("First Month of Year");
+                        String first = cal.get(Calendar.YEAR) + "-01";
+                        startOfYear.setShortDisplay(first);
+                        wrappers.add(0, startOfYear);
                         for (DateLevelWrapper wrapper : wrappers) {
                             if (wrapper.getShortDisplay().equals(result)) {
                                 lastQuarter.setDateLevel(wrapper.getDateLevel());
-                                break;
+                            }
+                            if (wrapper.getShortDisplay().equals(first)) {
+                                startOfYear.setDateLevel(wrapper.getDateLevel());
                             }
                         }
+
+
+
                         lastQuarter.setDisplay("Last Full Month");
                         wrappers.add(0, lastQuarter);
                         DateLevelWrapper thisQuarter = new DateLevelWrapper();
@@ -655,12 +681,22 @@ public class DataService {
                         cal.add(Calendar.WEEK_OF_YEAR, -1);
                         String result = simpleDateFormat.format(cal.getTime());
                         lastQuarter.setShortDisplay(result);
+                        DateLevelWrapper startOfYear = new DateLevelWrapper();
+                        startOfYear.setDisplay("First Week of Year");
+                        String first = cal.get(Calendar.YEAR) + "-01";
+                        startOfYear.setShortDisplay(first);
+                        wrappers.add(0, startOfYear);
                         for (DateLevelWrapper wrapper : wrappers) {
                             if (wrapper.getShortDisplay().equals(result)) {
                                 lastQuarter.setDateLevel(wrapper.getDateLevel());
-                                break;
+                            }
+                            if (wrapper.getShortDisplay().equals(first)) {
+                                startOfYear.setDateLevel(wrapper.getDateLevel());
                             }
                         }
+
+
+
                         lastQuarter.setDisplay("Last Full Week");
                         wrappers.add(0, lastQuarter);
                         DateLevelWrapper thisQuarter = new DateLevelWrapper();

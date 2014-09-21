@@ -197,7 +197,8 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         } else {
             customIntervals = new ArrayCollection();
         }
-        intervalDG.dataProvider = customIntervals;
+        BindingUtils.bindProperty(intervalDG, "dataProvider", this, "customIntervals");
+        //intervalDG.dataProvider = customIntervals;
         intervalDG.rowHeight = 28;
         var labelColumn:DataGridColumn = new DataGridColumn();
         labelColumn.headerText = "Interval Name";
@@ -215,7 +216,19 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         addEventListener(CustomRollingIntervalEvent.FILTER_DELETED, onIntervalDeleted);
     }
 
-    private var customIntervals:ArrayCollection;
+    private var _customIntervals:ArrayCollection;
+
+
+    [Bindable(event="customIntervalsChanged")]
+    public function get customIntervals():ArrayCollection {
+        return _customIntervals;
+    }
+
+    public function set customIntervals(value:ArrayCollection):void {
+        if (_customIntervals == value) return;
+        _customIntervals = value;
+        dispatchEvent(new Event("customIntervalsChanged"));
+    }
 
     private function onIntervalAdded(event:CustomRollingIntervalEvent):void {
         customIntervals.addItem(event.interval);

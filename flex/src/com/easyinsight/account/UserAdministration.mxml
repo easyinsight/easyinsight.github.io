@@ -262,7 +262,7 @@
                 <mx:HBox>
                     <mx:Button label="Add Designer..." click="addUser()" enabled="{enableAddDesigner}" styleName="grayButton"/>
                     <mx:Button label="Add Viewer..." click="addBasicUser()" styleName="grayButton" enabled="{enableAddReportViewer}"/>
-                    <mx:Button label="Delete Selected" click="deleteSelected()" styleName="grayButton"/>
+                    <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
                 </mx:HBox>
             </mx:VBox>
             <mx:Spacer width="100%"/>

@@ -10,6 +10,7 @@ public class ReportException extends RuntimeException {
     private ReportFault reportFault;
 
     public ReportException(ReportFault reportFault) {
+        super(reportFault.toString());
         this.reportFault = reportFault;
     }
 

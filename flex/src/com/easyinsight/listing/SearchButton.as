@@ -32,9 +32,9 @@ public class SearchButton extends LinkButton {
 
     public function SearchButton() {
         // color="#FFFFFF" themeColor="#FFFFFF" fontSize="14"
-        setStyle("color", 0xFFFFFF);
-        setStyle("themeColor", 0xFFFFFF);
-        setStyle("fontSize", 14);
+        setStyle("color", 0x222222);
+        setStyle("themeColor", 0x222222);
+        setStyle("fontSize", 16);
         label = "Search";
         addEventListener(MouseEvent.CLICK, onClick);
     }

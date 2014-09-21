@@ -193,10 +193,9 @@
         </mx:Canvas>
         <mx:HBox width="1000">
             <mx:HBox>
-                <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="grayButton"/>
-                <mx:Button label="Add Scorecard Delivery..." click="newScorecard()" styleName="grayButton"/>
-                <mx:Button label="Add Multi Report/Scorecard Delivery..." click="newGeneral()" styleName="grayButton"/>
-                <mx:Button label="Delete Selected" click="deleteSelected()" styleName="grayButton"/>
+                <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="flatSaveButton"/>
+                <mx:Button label="Add Multi Report/Dashboard Delivery..." click="newGeneral()" styleName="flatSaveButton"/>
+                <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
             </mx:HBox>
         </mx:HBox>
         <mx:ViewStack selectedIndex="{index}" creationPolicy="all" width="100%" height="100%">

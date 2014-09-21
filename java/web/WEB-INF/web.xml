@@ -326,6 +326,18 @@
     </servlet>
 
     <servlet>
+        <servlet-name>Reactivation</servlet-name>
+        <display-name>Reactivation</display-name>
+        <servlet-class>com.easyinsight.users.ReactivationServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SetupReactivation</servlet-name>
+        <display-name>SetupReactivation</display-name>
+        <servlet-class>com.easyinsight.users.SetupReactivationServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ExportExcel</servlet-name>
         <display-name>ExportExcel</display-name>
         <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
@@ -1116,6 +1128,16 @@
     <servlet-mapping>
         <servlet-name>UpdateRowsByPK</servlet-name>
         <url-pattern>/xml/updateRowsByPK</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Reactivation</servlet-name>
+        <url-pattern>/reactivation</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SetupReactivation</servlet-name>
+        <url-pattern>/setupReactivation</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

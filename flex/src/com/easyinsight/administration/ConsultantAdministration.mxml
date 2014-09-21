@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="adminService.getConsultants.send()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        private function addConsultant():void {
+            var window:AddConsultantWindow = new AddConsultantWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        [Bindable]
+        private var consultants:ArrayCollection;
+
+        private function gotConsultants():void {
+            consultants = adminService.getConsultants.lastResult as ArrayCollection;
+        }
+        ]]></mx:Script>
+    <mx:HBox>
+        <util:SaveButton label="Add Consultant" click="addConsultant()"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{consultants}">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Email" dataField="consultantName" width="350"/>
+            <mx:DataGridColumn headerText="Account Name" dataField="account" width="350"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:RemoteObject id="adminService" destination="eiAdmin">
+        <mx:method name="getConsultants" result="gotConsultants()"/>
+    </mx:RemoteObject>
+</mx:VBox>

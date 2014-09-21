@@ -4,9 +4,7 @@ import com.easyinsight.PasswordStorage;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -28,6 +26,17 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
     private String databaseName;
     private String dbUserName;
     private String dbPassword;
+
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.addField("Host", "host");
+        factory.addFieldWithDefault("Port", "port", HTMLConnectionProperty.INTEGER, "1433");
+        factory.addField("Database Name", "databaseName");
+        factory.addField("Database User Name", "dbUserName");
+        factory.addPassword("Database Password", "dbPassword", true);
+        factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
+        factory.addFieldWithDefault("Connection Timeout (minutes)", "timeout", HTMLConnectionProperty.INTEGER, "20");
+        factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
 
     public String getHost() {
         return host;

@@ -421,3 +421,50 @@ h2 {
 .combineSourcesChoices {
     padding: 10px;
 }
+
+.productHeader {
+    color: #333333;
+    font-size: 24px;
+}
+
+.btn-alt-primary {
+    color: #fff;
+    background-color: #0084B4;
+    border-color: #0074A4;
+}
+.btn-alt-primary:hover,
+.btn-alt-primary:focus,
+.btn-alt-primary:active,
+.btn-alt-primary.active,
+.open .dropdown-toggle.btn-alt-primary {
+    color: #fff;
+    background-color: #005494;
+    border-color: #004484;
+}
+.btn-alt-primary:active,
+.btn-alt-primary.active,
+.open .dropdown-toggle.btn-alt-primary {
+    background-image: none;
+}
+.btn-alt-primary.disabled,
+.btn-alt-primary[disabled],
+fieldset[disabled] .btn-alt-primary,
+.btn-alt-primary.disabled:hover,
+.btn-alt-primary[disabled]:hover,
+fieldset[disabled] .btn-alt-primary:hover,
+.btn-alt-primary.disabled:focus,
+.btn-alt-primary[disabled]:focus,
+fieldset[disabled] .btn-alt-primary:focus,
+.btn-alt-primary.disabled:active,
+.btn-alt-primary[disabled]:active,
+fieldset[disabled] .btn-alt-primary:active,
+.btn-alt-primary.disabled.active,
+.btn-alt-primary[disabled].active,
+fieldset[disabled] .btn-alt-primary.active {
+    background-color: #0084B4;
+    border-color: #0074A4;
+}
+.btn-alt-primary .badge {
+    color: #0084B4;
+    background-color: #fff;
+}

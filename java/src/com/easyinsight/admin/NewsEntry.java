@@ -13,6 +13,15 @@ public class NewsEntry {
     private Date date;
     private long id;
     private String tags;
+    private String author;
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public String getTags() {
         return tags;

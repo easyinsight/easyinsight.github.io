@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.datasources {
+import com.easyinsight.WindowManagementInstance;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
@@ -31,6 +32,7 @@ public class DataSourceRefreshExecutor extends EventDispatcher {
             var setupWindow:DataSourceRefreshSetupWindow = new DataSourceRefreshSetupWindow();
             setupWindow.dataSourceInfo = dataSource;
             setupWindow.addEventListener("done", forceRefresh);
+            WindowManagementInstance.getManager().addWindow(setupWindow);
             PopUpManager.addPopUp(setupWindow, UIComponent(Application.application), true);
             PopUpUtil.centerPopUp(setupWindow);
         }
@@ -40,6 +42,7 @@ public class DataSourceRefreshExecutor extends EventDispatcher {
         var dsRefreshWindow:DataSourceRefreshWindow = new DataSourceRefreshWindow();
         dsRefreshWindow.dataSourceID = dataSource.dataSourceID;
         dsRefreshWindow.addEventListener(DataSourceRefreshEvent.DATA_SOURCE_REFRESH, onRefresh);
+        WindowManagementInstance.getManager().addWindow(dsRefreshWindow);
         PopUpManager.addPopUp(dsRefreshWindow, UIComponent(Application.application), true);
         PopUpUtil.centerPopUp(dsRefreshWindow);
     }

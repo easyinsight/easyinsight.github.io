@@ -32,4 +32,9 @@ public class AnalysisItemFault extends ReportFault {
     public void setAnalysisItem(AnalysisItem analysisItem) {
         this.analysisItem = analysisItem;
     }
+
+    @Override
+    public String toString() {
+        return message;
+    }
 }

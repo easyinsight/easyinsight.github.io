@@ -6,6 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.report {
+import com.easyinsight.WindowManagementInstance;
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.datasources.DataSourceDisplay;
 import com.easyinsight.datasources.DataSourceInfo;
@@ -15,9 +16,10 @@ import flash.events.MouseEvent;
 import flash.geom.Point;
 
 import mx.controls.Button;
+import mx.controls.LinkButton;
 import mx.managers.PopUpManager;
 
-public class RefreshButton extends Button {
+public class RefreshButton extends LinkButton {
 
     private var _dataSource:DataSourceInfo;
     private var _viewFactory:IRetrievable;
@@ -48,6 +50,7 @@ public class RefreshButton extends Button {
             window.y = g.y + 20;
             window.dataSource = _dataSource;
             window.dataView = _viewFactory;
+            WindowManagementInstance.getManager().addWindow(window);
             PopUpManager.addPopUp(window, this);
         } else {
             _viewFactory.refresh();

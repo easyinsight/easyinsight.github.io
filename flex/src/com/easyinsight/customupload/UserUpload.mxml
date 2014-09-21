@@ -86,10 +86,13 @@
             Alert.show(event.text);
         }
 
+        private var fileName:String;
+
         // Called when the user selects a file from disk
         public function doSelect( event:Event ):void
         {
             txtPhoto.text = file.name;
+            fileName = file.name;
             uploadButton.enabled = true;
         }
 
@@ -119,7 +122,7 @@
                 ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpload);
                 var context:FlatFileUploadContext = new FlatFileUploadContext();
                 context.uploadKey = uploadKey;
-                context.type = type;
+                context.fileName = fileName;
                 uploadService.analyzeUpload.send(context);
             }
         }
@@ -128,7 +131,7 @@
             ProgressAlert.alert(this, "Analyzing...", null, uploadService.analyzeUpload);
             var context:FlatFileUploadContext = new FlatFileUploadContext();
             context.uploadKey = uploadKey;
-            context.type = type;
+            context.fileName = fileName;
             uploadService.analyzeUpload.send(context);
         }
 
@@ -179,7 +182,7 @@
 	    <mx:VBox>
             <mx:TextArea text="You can upload Excel (1997-2007) spreadsheets or comma or tab separated text files here. The file should have a header row, with data in the subsequent cells, as shown below:" borderThickness="0"
                     width="260" height="90" backgroundAlpha="0" editable="false"/>
-            <mx:Image source="../assets/excelexample.png"/>
+            <mx:Image source="../assets/excelexample.PNG"/>
             <mx:TextArea width="260" height="50" text="You may experience unexpected results if the data does not match that pattern." borderThickness="0" backgroundAlpha="0" editable="false"/>
 	    </mx:VBox>
 	</mx:HBox>
