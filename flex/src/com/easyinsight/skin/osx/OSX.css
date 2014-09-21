@@ -231,6 +231,21 @@ ToggleButtonBar {
     disabledSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
 }
 
+.oldGrayButton {
+    cornerRadius: 2;
+    highlightAlphas: 0.5, 0.1;
+    fillColors: #333333, #333333, #333333, #333333;
+    fillAlphas: 1, 1, 1, 1;
+    color: #ffffff;
+    textRollOverColor: #dddddd;
+    textSelectedColor: #dddddd;
+    borderColor: #333333;
+    dropShadow: true;
+    shadowDistance: 0;
+    fontSize: 11;
+    fontWeight: normal;
+}
+
 .dashboardGrayButton {
     cornerRadius: 0;
     highlightAlphas: 0.5, 0.1;

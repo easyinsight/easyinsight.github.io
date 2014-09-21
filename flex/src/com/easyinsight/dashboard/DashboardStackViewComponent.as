@@ -205,13 +205,13 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         if (dashboardStack.headerBackground != null && dashboardEditorMetadata.fixedID) {
             shareButton = new Button();
             shareButton.label = "Share";
-            shareButton.styleName = "grayButton";
+            shareButton.styleName = "oldGrayButton";
             shareButton.addEventListener(MouseEvent.CLICK, share);
             headerArea.addChild(shareButton);
 
             logoutButton = new Button();
             logoutButton.label = "Log Out";
-            logoutButton.styleName = "grayButton";
+            logoutButton.styleName = "oldGrayButton";
             logoutButton.addEventListener(MouseEvent.CLICK, logout);
             headerArea.addChild(logoutButton);
         }
@@ -235,13 +235,13 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         if (dashboardStack.headerBackground != null && dashboardEditorMetadata.fixedID) {
             shareButton = new Button();
             shareButton.label = "Share";
-            shareButton.styleName = "grayButton";
+            shareButton.styleName = "oldGrayButton";
             shareButton.addEventListener(MouseEvent.CLICK, share);
             headerArea.addChild(shareButton);
 
             logoutButton = new Button();
             logoutButton.label = "Log Out";
-            logoutButton.styleName = "grayButton";
+            logoutButton.styleName = "oldGrayButton";
             logoutButton.addEventListener(MouseEvent.CLICK, logout);
             headerArea.addChild(logoutButton);
         }
@@ -335,7 +335,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
     private function createHeaderButton(index:int, label:String):UIComponent {
         var topButton:Button = new Button();
         topButton.addEventListener(MouseEvent.CLICK, onButtonClick);
-        topButton.styleName = "grayButton";
+        topButton.styleName = "oldGrayButton";
         topButton.data = index;
         topButton.label = label;
         return topButton;
