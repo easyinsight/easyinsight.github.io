@@ -111,7 +111,7 @@ public class AnalysisItemTypeRenderer extends UIComponent implements IListItemRe
                 typeSource = groupingIcon;
             }
         } else {
-            typeSource = folderIcon;
+            typeSource = null;
         }
         return typeSource;
     }
