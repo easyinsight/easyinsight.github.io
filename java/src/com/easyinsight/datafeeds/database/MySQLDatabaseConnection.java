@@ -27,12 +27,12 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Host", "host");
-        factory.addField("Port", "port", HTMLConnectionProperty.INTEGER);
+        factory.addFieldWithDefault("Port", "port", HTMLConnectionProperty.INTEGER, "3306");
         factory.addField("Database Name", "databaseName");
         factory.addField("Database User Name", "dbUserName");
         factory.addPassword("Database Password", "dbPassword", true);
         factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
-        factory.addField("Connection Timeout", "timeout", HTMLConnectionProperty.INTEGER);
+        factory.addFieldWithDefault("Connection Timeout (minutes)", "timeout", HTMLConnectionProperty.INTEGER, "20");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
@@ -101,6 +101,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         } else {
             setRebuildFields(true);
         }
+        queryStmt.close();
     }
 
     @Override
