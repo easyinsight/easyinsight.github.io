@@ -334,6 +334,8 @@
 
         private var topReports:TopReports;
 
+        private var newsBar:NewsBar;
+
         override protected function createChildren():void {
             super.createChildren();
             if (User.getInstance().accountOverSize) {
@@ -344,8 +346,8 @@
                 }
                 topBox.addChild(mb);
             }
-            if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
-                var newsBar:NewsBar = new NewsBar();
+            if (newsBar == null && (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime())) {
+                newsBar = new NewsBar();
                 newsBar.addEventListener("dismissNews", onDismissed);
                 if (topBox == null) {
                     topBox = new HBox();

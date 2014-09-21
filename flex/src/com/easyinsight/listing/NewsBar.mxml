@@ -17,9 +17,6 @@
             dateString = "<b>New on " + df.format(User.getInstance().newsDate) + "</b> - " + User.getInstance().newsSubject;
         }
 
-        /*[Bindable]
-        private var newText:String = "<b>New on September 21, 2014</b> - We've overhauled the styling of the full interface to match with the HTML5 interface, made significant improvements to the report editor, and much, much more!";*/
-
         [Bindable]
         private var dateString:String;
 
