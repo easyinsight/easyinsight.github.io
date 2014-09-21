@@ -7,6 +7,8 @@ import com.easyinsight.skin.ApplicationSkinTO;
 
 import flash.utils.ByteArray;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.users.UserServiceResponse")]
 public class UserServiceResponse
@@ -58,6 +60,8 @@ public class UserServiceResponse
     public var decimalSeperator:String;
     public var thousandsSeperator:String;
     public var defaultFontFamily:String;
+    public var topReports:ArrayCollection;
+    public var newsSubject:String;
 
     public function UserServiceResponse()
         {
