@@ -212,17 +212,23 @@ ToggleButtonBar {
 
 .grayButton {
     cornerRadius: 2;
-    highlightAlphas: 0.5, 0.1;
-    fillColors: #333333, #333333, #333333, #333333;
+    highlightAlphas: 0, 0;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
-    textRollOverColor: #dddddd;
-    textSelectedColor: #dddddd;
-    borderColor: #333333;
-    dropShadow: true;
-    shadowDistance: 0;
-    fontSize: 11;
+    themeColor : #0084B4;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
+    borderColor: #357ebd;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 14;
     fontWeight: normal;
+    iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
 }
 
 .dashboardGrayButton {
@@ -333,34 +339,41 @@ ToggleButtonBar {
 }
 
 SaveButton {
-    cornerRadius: 5;
-    highlightAlphas: 0.5, 0.1;
-    fillColors: #333333, #333333, #333333, #333333;
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
-    textRollOverColor: #dddddd;
-    textSelectedColor: #dddddd;
-    borderColor: #333333;
-    dropShadow: true;
+    themeColor : #0084B4;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
+    borderColor: #357ebd;
+    dropShadow: false;
     shadowDistance: 3;
     fontSize: 14;
     fontWeight: normal;
+    iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
 }
 
 .flatSaveButton {
     cornerRadius: 2;
     highlightAlphas: 0, 0;
-    fillColors: #333333, #333333, #333333, #333333;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
-    themeColor : #333333;
-    textRollOverColor: #dddddd;
-    textSelectedColor: #dddddd;
-    borderColor: #333333;
-    dropShadow: true;
+    themeColor : #0084B4;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
+    borderColor: #357ebd;
+    dropShadow: false;
     shadowDistance: 3;
     fontSize: 14;
     fontWeight: normal;
+    iconColor: #FFFFFF;
     upSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
     downSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
     overSkin:ClassReference('com.easyinsight.util.FlatHTMLButtonSkin');
@@ -370,13 +383,13 @@ SaveButton {
 .flatSaveMenuButton {
     cornerRadius: 2;
     highlightAlphas: 0, 0;
-    fillColors: #333333, #333333, #333333, #333333;
+    fillColors: #0084B4, #0084B4, #0084B4, #0084B4;
     fillAlphas: 1, 1, 1, 1;
     color: #ffffff;
-    themeColor : #333333;
-    textRollOverColor: #dddddd;
-    textSelectedColor: #dddddd;
-    borderColor: #333333;
+    themeColor : #0084B4;
+    textRollOverColor: #ffffff;
+    textSelectedColor: #ffffff;
+    borderColor: #357ebd;
     dropShadow: true;
     shadowDistance: 3;
     fontSize: 14;
@@ -404,6 +417,29 @@ SaveButton {
     fontSize: 14;
     fontWeight: normal;
     iconColor: #FFFFFF;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpOverSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpDownSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+}
+
+.flatTransparentHeaderBarButton {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #FFFFFF, #FFFFFF, #FFFFFF, #FFFFFF;
+    fillAlphas: 1, 1, 1, 1;
+    color: #333333;
+    themeColor : #FFFFFF;
+    textRollOverColor: #FFFFFF;
+    textSelectedColor: #FFFFFF;
+    borderColor: #FFFFFF;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 16;
+    fontWeight: normal;
+    iconColor: #333333;
     upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
     downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
     overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');

@@ -132,7 +132,7 @@
             <mx:HBox verticalAlign="bottom" height="100%">
                 <mx:Button label="Create a New Group..."
                            click="createNewGroup()" labelPlacement="bottom" styleName="grayButton"/>
-                <mx:Button label="Delete Selected" styleName="grayButton" click="deleteSelected()"/>
+                <mx:Button label="Delete Selected" styleName="flatRedButton" click="deleteSelected()"/>
             </mx:HBox>
             <mx:Spacer width="100%"/>
             <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="5" dropShadowEnabled="true" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">

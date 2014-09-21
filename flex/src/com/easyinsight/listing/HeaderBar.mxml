@@ -91,6 +91,7 @@
                             top="0" bottom="0" id="toggleBar" themeColor="#FFFFFF">
         </mx:ToggleButtonBar>
         <mx:Spacer width="100%"/>
+        <listing:TopReportsDropdown/>
         <listing:WhatsNewButton styleName="solidMenuButton"/>
         <listing:SearchButton styleName="solidMenuButton"/>
         <!--<easyinsight:NewLoggedOnStatus/>-->

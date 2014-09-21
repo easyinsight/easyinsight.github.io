@@ -336,13 +336,6 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            if (topReports == null && topItems.length > 0) {
-                topReports = new TopReports();
-                topReports.addEventListener(TopReportsEvent.TOP_REPORTS, onChange);
-                topReports.topItems = topItems;
-                addChildAt(topReports, 0);
-            }
-
             if (User.getInstance().accountOverSize) {
                 var mb:AccountMessageBar = new AccountMessageBar();
                 if (topBox == null) {
@@ -351,7 +344,15 @@
                 }
                 topBox.addChild(mb);
             }
-
+            if (User.getInstance().newsDismissDate == null || User.getInstance().newsDismissDate.getTime() < User.getInstance().newsDate.getTime()) {
+                var newsBar:NewsBar = new NewsBar();
+                newsBar.addEventListener("dismissNews", onDismissed);
+                if (topBox == null) {
+                    topBox = new HBox();
+                    addChildAt(topBox, 0);
+                }
+                topBox.addChildAt(newsBar, 0);
+            }
         }
 
         private var topBox:HBox;
@@ -393,8 +394,7 @@
          PopUpUtil.centerPopUp(window);
          }*/
 
-        [Bindable]
-        public var topItems:ArrayCollection = new ArrayCollection();
+
 
         private function blah1():void {
             var window:AccountReportWindow = new AccountReportWindow();
@@ -404,18 +404,7 @@
         }
 
         private function onChange(event:TopReportsEvent):void {
-            topItems.removeAll();
-            topItems.addAll(event.descriptors);
-            if (event.descriptors.length > 0 && topReports == null) {
-                topReports = new TopReports();
-                topReports.addEventListener(TopReportsEvent.TOP_REPORTS, onChange);
-                topReports.topItems = topItems;
-                addChildAt(topReports, 0);
-            } else if (event.descriptors.length == 0 && topReports != null) {
-                removeChild(topReports);
-                topReports.removeEventListener(TopReportsEvent.TOP_REPORTS, onChange);
-                topReports = null;
-            }
+            User.getInstance().topReports = event.descriptors;
         }
 
         [Bindable]

@@ -273,10 +273,10 @@
         <mx:method name="getFeedMetadata" result="gotDefinition()"/>
     </mx:RemoteObject>
     <mx:HBox width="100%" styleName="topButtonBar">
-        <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="cancel()"
-                   toolTip="Close" labelPlacement="right" label="Close Editor" styleName="grayButton"/>
-        <mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()"
-                   toolTip="Save" labelPlacement="right" label="Save" styleName="grayButton"/>
+        <mx:LinkButton id="wrapButton"  click="cancel()"
+                   toolTip="Close" labelPlacement="right" label="Close Editor" styleName="solidMenuButton"/>
+        <mx:LinkButton id="saveButton"  click="save()"
+                   toolTip="Save" labelPlacement="right" label="Save" styleName="solidMenuButton"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
