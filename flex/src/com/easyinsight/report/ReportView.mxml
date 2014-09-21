@@ -952,7 +952,7 @@
     <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
         <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
                 borderStyle="solid" visible="{logoVisible}">
-            <mx:Image id="logoImage"/>
+            <mx:Image id="logoImage" maxHeight="200"/>
         </mx:Box>
         <mx:Spacer width="100%"/>
         <mx:HBox id="breadCrumbBox"/>

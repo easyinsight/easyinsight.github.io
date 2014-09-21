@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                    xmlns:skin="com.easyinsight.skin.*"
                    creationComplete="onCreation()">
     <mx:Script><![CDATA[
@@ -234,4 +234,4 @@
             <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-</util:EISlimWindow>
+</util:EITitleWindow>

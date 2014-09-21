@@ -394,6 +394,7 @@ SaveButton {
     shadowDistance: 3;
     fontSize: 14;
     fontWeight: normal;
+    iconColor: #ffffff;
     upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
     downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
     overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
