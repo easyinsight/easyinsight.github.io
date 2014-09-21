@@ -178,7 +178,7 @@
             </div>
             <div class="row" style="padding-top:10px">
                 <div class="col-md-12" style="text-align: left">
-                    Posted on <a href="<%=permalink%>" style="color: #0084B4"><%=new SimpleDateFormat("MMMM dd, yyyy").format(newsEntry.getDate()) %></a> by <a style="color:#0084B4" href="<%=permalink%>">James Boe</a>
+                    Posted on <a href="<%=permalink%>" style="color: #0084B4"><%=new SimpleDateFormat("MMMM dd, yyyy").format(newsEntry.getDate()) %></a> by <a style="color:#0084B4" href="<%=permalink%>"><%=newsEntry.getAuthor()%></a>
                 </div>
             </div>
             <div class="row" style="padding-top:10px">
