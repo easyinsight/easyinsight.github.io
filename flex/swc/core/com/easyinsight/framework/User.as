@@ -17,6 +17,8 @@ import flash.events.EventDispatcher;
 import flash.net.SharedObject;
 import flash.utils.ByteArray;
 
+import mx.collections.ArrayCollection;
+
 public class User extends EventDispatcher
 {
     private var name:String;
@@ -58,11 +60,13 @@ public class User extends EventDispatcher
     public var pricingModel:int;
     public var newsDate:Date;
     public var newsDismissDate:Date;
+    public var newsSubject:String;
     public var accountOverSize:Boolean;
     public var hourlyRefreshEnabled:Boolean;
     public var accountReports:Boolean;
     public var decimalSeperator:String;
     public var thousandsSeperator:String;
+    public var topReports:ArrayCollection;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -169,6 +173,8 @@ public class User extends EventDispatcher
         _user.accountReports = response.accountReports;
         _user.thousandsSeperator = response.thousandsSeperator;
         _user.decimalSeperator = response.decimalSeperator;
+        _user.topReports = response.topReports;
+        _user.newsSubject = response.newsSubject;
         if (response.reportImage != null) {
             _user.loadBytes(response.reportImage);
         }

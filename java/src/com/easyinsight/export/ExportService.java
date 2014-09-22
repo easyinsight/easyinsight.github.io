@@ -3201,6 +3201,10 @@ public class ExportService {
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
             WSMultiSummaryDefinition multiSummaryDefinition = (WSMultiSummaryDefinition) listDefinition;
             return multiSummaryDefinition.toExcel(insightRequestMetadata, conn);
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
+            WSTreeDefinition summaryDefinition = (WSTreeDefinition) listDefinition;
+            hasData = summaryDefinition.toExcel(insightRequestMetadata, conn, sheet, styleMap, workbook);
+
         } else {
             hasData = listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
         }
@@ -4680,6 +4684,9 @@ public class ExportService {
             if (list.isSummaryTotal()) {
                 sb.append("<tfoot>");
                 sb.append("<tr style=\"").append(summaryTRStyle).append("\">");
+                if (lineNumbers) {
+                    sb.append("<td></td>");
+                }
                 for (AnalysisItem analysisItem : items) {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[j];

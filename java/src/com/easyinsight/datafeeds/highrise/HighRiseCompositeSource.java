@@ -518,6 +518,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
         for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem == null) {
+                continue;
+            }
             if (analysisItem.getKey() instanceof ReportKey) {
                 continue;
             }

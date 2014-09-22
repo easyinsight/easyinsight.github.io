@@ -2,7 +2,7 @@ Chart = {
 
 
 
-    getD3StackedColumnChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3StackedColumnChart:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -54,6 +54,9 @@ Chart = {
                                     "drillthrough_values": {}};
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
                                 f["drillthrough_values"][drillthrough["stack"]] = e.series.key;
+                                if (dashboardID != -1) {
+                                    f["dashboardID"] = dashboardID;
+                                }
                                 drillThrough(f);
                             });
                         }
@@ -84,7 +87,7 @@ Chart = {
         };
     },
 
-    getD3StackedBarChart:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey, iframedInUI) {
+    getD3StackedBarChart:function (target, params, showLabels, styleProps, filters, drillthroughKey, iframedInUI, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -164,6 +167,9 @@ Chart = {
                                     "drillthrough_values": {}};
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
                                 f["drillthrough_values"][drillthrough["stack"]] = e.series.key;
+                                if (dashboardID != -1) {
+                                    f["dashboardID"] = dashboardID;
+                                }
                                 drillThrough(f);
                             });
                         }
@@ -194,7 +200,7 @@ Chart = {
         };
     },
 
-    getBulletChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getBulletChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -229,7 +235,7 @@ Chart = {
         };
     },
 
-    getD3PieChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3PieChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -297,6 +303,9 @@ Chart = {
                                 var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
                                     "drillthrough_values": {}};
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.label;
+                                if (dashboardID != -1) {
+                                    f["dashboardID"] = dashboardID;
+                                }
                                 drillThrough(f);
                             });
                         }
@@ -320,7 +329,7 @@ Chart = {
         };
     },
 
-    getD3ColumnChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey) {
+    getD3ColumnChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -380,6 +389,9 @@ Chart = {
                                     var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
                                         "drillthrough_values": {}};
                                     f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                    if (dashboardID != -1) {
+                                        f["dashboardID"] = dashboardID;
+                                    }
                                     drillThrough(f);
                                 });
                             }
@@ -404,6 +416,9 @@ Chart = {
                                     var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
                                         "drillthrough_values": {}};
                                     f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                    if (dashboardID != -1) {
+                                        f["dashboardID"] = dashboardID;
+                                    }
                                     drillThrough(f);
                                 });
                             }
@@ -441,7 +456,7 @@ Chart = {
         };
     },
 
-    getD3BarChartCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3BarChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -511,7 +526,14 @@ Chart = {
                                 var drillthrough = data["drillthrough"];
                                 var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
                                     "drillthrough_values": {}};
+
+                                if (dashboardID != -1) {
+                                    f["dashboardID"] = dashboardID;
+                                }
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
+                                if (dashboardID != -1) {
+                                    f["dashboardID"] = dashboardID;
+                                }
                                 drillThrough(f);
                             });
                         }
@@ -634,7 +656,7 @@ Chart = {
         return height;
     },
 
-    getD3ScatterCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3ScatterCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -669,7 +691,10 @@ Chart = {
                                 var drillthrough = data["drillthrough"];
                                 var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
                                     "drillthrough_values": {}};
-                                f["drillthrough_values"][dtOptions["xaxis"]] = e.key;
+                                f["drillthrough_values"][dtOptions["xaxis"]] = e.point.a;
+                                if (dashboardID != -1) {
+                                    f["dashboardID"] = dashboardID;
+                                }
                                 drillThrough(f);
                             });
                         }
@@ -818,7 +843,7 @@ Chart = {
         return String(result);
     },
 
-    getD3LineCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3LineCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -907,7 +932,7 @@ Chart = {
         };
     },
 
-    getD3AreaCallback:function (target, params, showLabels, styleProps, filters, extras, drillthroughKey) {
+    getD3AreaCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({

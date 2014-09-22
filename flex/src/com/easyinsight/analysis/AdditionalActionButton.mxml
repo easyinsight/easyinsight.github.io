@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Button xmlns:mx="http://www.adobe.com/2006/mxml" click="createAndShow()" styleName="grayButton" label="Navigate">
+<listing:ArghButton xmlns:mx="http://www.adobe.com/2006/mxml" styleName="flatTransparentMenuButton"
+                    label="Navigate" xmlns:listing="com.easyinsight.listing.*" itemClick="onClick(event)" dataProvider="{navigateOptions}"
+                    popUpStyleName="dropAreaPopup">
 	<mx:Metadata>
 		[Event(name="newReportAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
 		[Event(name="newDashboardAction", type="com.easyinsight.analysis.AdditionalActionEvent")]
@@ -10,7 +12,6 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.WindowManagement;
         import com.easyinsight.dashboard.DashboardContextWindow;
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.framework.PerspectiveInfo;
@@ -24,6 +25,9 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.collections.ArrayCollection;
+        import mx.events.MenuEvent;
+
         import mx.managers.PopUpManager;
 
         private function search(event:Event):void {
@@ -34,29 +38,31 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function createAndShow():void {
-            var window:AdditionalActionWindow = new AdditionalActionWindow();
-            window.addEventListener(AdditionalActionEvent.NEW_REPORT, function (event:AdditionalActionEvent):void {
-                dispatchEvent(event);
-            }, false, 0, true);
-            window.addEventListener(AdditionalActionEvent.REPORT_VIEW, function (event:AdditionalActionEvent):void {
-                dispatchEvent(event);
-            }, false, 0, true);
-            window.addEventListener(AdditionalActionEvent.NEW_DASHBOARD, function (event:AdditionalActionEvent):void {
-                dispatchEvent(event);
-            }, false, 0, true);
-            window.addEventListener(AdditionalActionEvent.VIEW_IN_HTML, function (event:AdditionalActionEvent):void {
-                dispatchEvent(event);
-            }, false, 0, true);
-            window.addEventListener(AdditionalActionEvent.CONFIGURE_DATA_SOURCE, function (event:AdditionalActionEvent):void {
-                dispatchEvent(event);
-            }, false, 0, true);
-            window.addEventListener(AdditionalActionEvent.SEARCH, search, false, 0, true);
+        [Bindable]
+        private var navigateOptions:ArrayCollection = new ArrayCollection([
+            {label: "End User View", data: "endUserView"},
+            {label: "Create a New Report", data: "newReport"},
+            {label: "Create a New Dashboard", data: "newDashboard"},
+            {label: "View in HTML", data: "viewInHTML"},
+            {label: "Navigate to Another Report", data: "navigateToReport"},
+            {label: "Configure the Data Source", data: "configureDataSource"}
+        ]);
 
-            window.x = this.x - 300;
-            window.y = this.y + 10;
-            WindowManagement.manager.addWindow(window);
-            PopUpManager.addPopUp(window, this);
+        private function onClick(event:MenuEvent):void {
+            var target:String = event.item.data;
+            if (target == "newReport") {
+                dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.NEW_REPORT));
+            } else if (target == "newDashboard") {
+                dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.NEW_DASHBOARD));
+            } else if (target == "viewInHTML") {
+                dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.VIEW_IN_HTML));
+            } else if (target == "navigateToReport") {
+                search(null);
+            } else if (target == "configureDataSource") {
+                dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.CONFIGURE_DATA_SOURCE));
+            } else if (target == "endUserView") {
+                dispatchEvent(new AdditionalActionEvent(AdditionalActionEvent.REPORT_VIEW));
+            }
         }
 
         private function onQuickSearch(event:QuickSearchEvent):void {
@@ -90,4 +96,4 @@
         }
         ]]>
 	</mx:Script>
-</mx:Button>
+</listing:ArghButton>

@@ -2,18 +2,26 @@ package com.easyinsight.users;
 
 
 import com.easyinsight.analysis.ReportTypeOptions;
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.dashboard.DashboardDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.preferences.*;
+import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.userupload.UserUploadService;
 import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,6 +80,24 @@ public class UserServiceResponse {
     private String thousandsSeperator;
     private String decimalSeperator;
     private String defaultFontFamily;
+    private String newsSubject;
+    private List<EIDescriptor> topReports;
+
+    public String getNewsSubject() {
+        return newsSubject;
+    }
+
+    public void setNewsSubject(String newsSubject) {
+        this.newsSubject = newsSubject;
+    }
+
+    public List<EIDescriptor> getTopReports() {
+        return topReports;
+    }
+
+    public void setTopReports(List<EIDescriptor> topReports) {
+        this.topReports = topReports;
+    }
 
     public String getDefaultFontFamily() {
         return defaultFontFamily;
@@ -188,16 +214,19 @@ public class UserServiceResponse {
         LogClass.info("Log in from " + user.getUserID() + " - " + user.getEmail());
         byte[] bytes = null;
         Date newsDate = null;
+        String newsTitle = null;
         boolean accountOverSize = false;
+        List<EIDescriptor> topReports = new ArrayList<>();
         EIConnection conn = Database.instance().getConnection();
         try {
             if (applicationSkin.getReportHeaderImage() != null) {
                 bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
             }
-            PreparedStatement dateStmt = conn.prepareStatement("SELECT MAX(ENTRY_TIME) FROM NEWS_ENTRY");
+            PreparedStatement dateStmt = conn.prepareStatement("SELECT ENTRY_TIME, NEWS_ENTRY.news_entry_title FROM NEWS_ENTRY ORDER BY NEWS_ENTRY.ENTRY_TIME DESC LIMIT 1");
             ResultSet rs = dateStmt.executeQuery();
             if (rs.next()) {
                 newsDate = new Date(rs.getTimestamp(1).getTime());
+                newsTitle = rs.getString(2);
             }
             if (account.getPricingModel() == 0) {
                 if (account.getMaxDaysOverSizeBoundary() != -1) {
@@ -208,6 +237,7 @@ public class UserServiceResponse {
                     accountOverSize = account.getUsedSize() > (account.getCoreStorage() + account.getAddonStorageUnits() * 250000000L);
                 }
             }
+            topReports = getAccountReportsWithConn(conn, user.getAccount().getAccountID());
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -222,7 +252,7 @@ public class UserServiceResponse {
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
-                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily());
+                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily(), topReports, newsTitle);
         response.setReportImage(bytes);
         String accountLocale;
         if (!"0".equals(user.getUserLocale())) {
@@ -269,7 +299,7 @@ public class UserServiceResponse {
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
                                Date newsDate, Date newsDismissDate, boolean accountOverSize, boolean accountReports, boolean tagsAndCopyEnabled,
-                               boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily) {
+                               boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily, List<EIDescriptor> topReports, String newsTitle) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -316,6 +346,8 @@ public class UserServiceResponse {
         this.hourlyRefreshEnabled = hourlyRefreshEnabled;
         this.defaultHTML = defaultHTML;
         this.defaultFontFamily = defaultFontFamily;
+        this.topReports = topReports;
+        this.newsSubject = newsTitle;
     }
 
     public boolean isAccountOverSize() {
@@ -655,5 +687,51 @@ public class UserServiceResponse {
 
     public void setSubdomainEnabled(boolean subdomainEnabled) {
         this.subdomainEnabled = subdomainEnabled;
+    }
+
+    public static List<EIDescriptor> getAccountReportsWithConn(EIConnection conn, long accountID) throws SQLException {
+
+        List<EIDescriptor> reports = new ArrayList<EIDescriptor>();
+        PreparedStatement getReportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE, ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE," +
+                "ANALYSIS.URL_KEY, ANALYSIS.DESCRIPTION FROM " +
+                "ANALYSIS, ACCOUNT_TO_REPORT WHERE ACCOUNT_TO_REPORT.ACCOUNT_ID = ? AND ACCOUNT_TO_REPORT.REPORT_ID = ANALYSIS.ANALYSIS_ID");
+        getReportStmt.setLong(1, accountID);
+        ResultSet reportRS = getReportStmt.executeQuery();
+        while (reportRS.next()) {
+            String title = reportRS.getString(1);
+            long reportID = reportRS.getLong(2);
+            long dataSourceID = reportRS.getLong(3);
+            int reportType = reportRS.getInt(4);
+            String urlKey = reportRS.getString(5);
+            /*try {*/
+                InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
+                id.setDescription(reportRS.getString(6));
+                reports.add(id);
+            /*} catch (com.easyinsight.security.SecurityException e) {
+                // ignore
+            }*/
+        }
+        getReportStmt.close();
+        PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
+                "DASHBOARD.URL_KEY, DASHBOARD.DESCRIPTION FROM " +
+                "DASHBOARD, ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_TO_DASHBOARD.ACCOUNT_ID = ? AND ACCOUNT_TO_DASHBOARD.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+        getDashboardStmt.setLong(1, accountID);
+        ResultSet dashboardRS = getDashboardStmt.executeQuery();
+        while (dashboardRS.next()) {
+            String title = dashboardRS.getString(1);
+            long reportID = dashboardRS.getLong(2);
+            long dataSourceID = dashboardRS.getLong(3);
+            String urlKey = dashboardRS.getString(4);
+            /*try {
+                SecurityUtil.authorizeDashboard(reportID);*/
+                DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
+                dd.setDescription(dashboardRS.getString(5));
+                reports.add(dd);
+            /*} catch (com.easyinsight.security.SecurityException e) {
+                // ignore
+            }*/
+        }
+        getDashboardStmt.close();
+        return reports;
     }
 }

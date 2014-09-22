@@ -57,7 +57,7 @@ public class FlatButtonSkin extends UIComponent {
             fill.angle = 90;*/
             // fill the rectangle
             g.moveTo(0,0);
-            g.beginFill(0x555555);
+            g.beginFill(0x333333);
             g.drawRoundRect(0, 0, w, h, 4, 4);
             //fill.begin(g,new Rectangle(0,0,w,h));
             /*g.lineTo(w,0);

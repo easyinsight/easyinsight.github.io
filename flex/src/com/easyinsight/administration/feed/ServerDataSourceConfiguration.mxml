@@ -89,7 +89,7 @@
             var toRemove:ArrayCollection = new ArrayCollection();
             for each (var node:CompositeFeedNode in CompositeServerDataSource(dataSource).compositeFeedNodes) {
                 if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
-                        node.dataSourceType == DataSourceType.GOOGLE) {
+                        node.dataSourceType == DataSourceType.GOOGLE || node.dataSourceType == DataSourceType.INFUSIONSOFT_REPORT) {
                     if (!dataSources.contains(node)) {
                         toRemove.addItem(node);
                     }
@@ -117,7 +117,7 @@
             allSources = new ArrayCollection();
             for each (var node:CompositeFeedNode in CompositeServerDataSource(dataSource).compositeFeedNodes) {
                 if (node.dataSourceType == DataSourceType.DISTINCT_CACHED || node.dataSourceType == DataSourceType.STATIC || node.dataSourceType == DataSourceType.EMPTY ||
-                        node.dataSourceType == DataSourceType.GOOGLE) {
+                        node.dataSourceType == DataSourceType.GOOGLE || node.dataSourceType == DataSourceType.INFUSIONSOFT_REPORT) {
                     nonIntrinsicNodes.addItem(node);
                 }
                 var ds:DataSourceDescriptor = new DataSourceDescriptor();

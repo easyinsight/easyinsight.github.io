@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
-                xmlns:solutions="com.easyinsight.solutions.*" layout="absolute"
+                xmlns:solutions="com.easyinsight.solutions.*" xmlns:account="com.easyinsight.account.*"
+                xmlns:administration="com.easyinsight.administration.*"
+                layout="absolute"
                 creationComplete="setup()">
     <mx:states>
         <mx:State name="loggedIn">
             <mx:RemoveChild target="{loginForm}"/>
             <mx:AddChild relativeTo="{coreBox}">
-                <solutions:SolutionAdministration width="100%" height="100%"/>
+                <mx:TabNavigator width="100%" height="100%">
+                    <mx:VBox width="100%" height="100%" label="Connections">
+                        <solutions:SolutionAdministration width="100%" height="100%"/>
+                    </mx:VBox>
+                    <account:NewsUpdate label="News Update"/>
+                    <administration:ConsultantAdministration label="Consultant Management"/>
+                </mx:TabNavigator>
             </mx:AddChild>
         </mx:State>
     </mx:states>

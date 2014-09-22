@@ -17,7 +17,7 @@ public class CustomRollingIntervalEvent extends Event {
     public var interval:CustomRollingInterval;
 
     public function CustomRollingIntervalEvent(type:String, interval:CustomRollingInterval) {
-        super(type);
+        super(type, true);
         this.interval = interval;
     }
 

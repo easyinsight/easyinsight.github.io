@@ -120,16 +120,22 @@ public class HtmlServlet extends HttpServlet {
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
                     long drillthroughSaveID = rs.getLong(1);
+                    queryStmt.close();
                     PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id FROM drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
                     filterStmt.setLong(1, drillthroughSaveID);
                     ResultSet filterRS = filterStmt.executeQuery();
                     while (filterRS.next()) {
                         Session hibernateSession = Database.instance().createSession(conn);
+                        boolean fieldIsDrillthroughAddition = filterRS.getBoolean(1);
                         FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
                         filter.afterLoad();
+                        /*if (fieldIsDrillthroughAddition) {
+                            report.getAddedItems().add(filter.getField());
+                        }*/
                         drillthroughFilters.add(filter);
                         hibernateSession.close();
                     }
+                    filterStmt.close();
                 }
 
                 Object fromDTObject = filterObject.get("drillthroughKey");
@@ -141,6 +147,7 @@ public class HtmlServlet extends HttpServlet {
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
                     long drillthroughSaveID = rs.getLong(1);
+                    queryStmt.close();
                     PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id FROM drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
                     filterStmt.setLong(1, drillthroughSaveID);
                     ResultSet filterRS = filterStmt.executeQuery();
@@ -154,6 +161,7 @@ public class HtmlServlet extends HttpServlet {
                             report.getFilterDefinitions().add(filter);
                         }
                     }
+                    filterStmt.close();
                 }
 
 
@@ -161,6 +169,12 @@ public class HtmlServlet extends HttpServlet {
                 filters.addAll(drillthroughFilters);
 
                 String dashboardIDString = req.getParameter("dashboardID");
+                if(dashboardIDString == null && filterObject != null) {
+                    Object dashboardIDStringObj = filterObject.get("dashboardID");
+                    if (dashboardIDStringObj != null) {
+                        dashboardIDString = dashboardIDStringObj.toString();
+                    }
+                }
                 if (dashboardIDString != null) {
                     long dashboardID = Long.parseLong(dashboardIDString);
                     Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
@@ -191,6 +205,7 @@ public class HtmlServlet extends HttpServlet {
                             //filterDefinition.setShowOnReportView(false);
                             seleniumFilters.add(filterDefinition);
                         }
+                        query.close();
                     } finally {
                         hibernateSession.close();
 

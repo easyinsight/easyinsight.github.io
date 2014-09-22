@@ -73,7 +73,14 @@ public class HTMLConnectionFactory {
 
                 if (property.getType() == HTMLConnectionProperty.INTEGER) {
                     Method method = dataSource.getClass().getMethod(setter, int.class);
-                    int intValue = Integer.parseInt(value);
+                    int intValue = 0;
+                    try {
+                        intValue = Integer.parseInt(value);
+                    } catch (NumberFormatException e) {
+                        request.getSession().setAttribute("connectionError", "You'll need to specify a numeric value for " + property.getField() + ".");
+                        servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/connections/"+ dataSource.getFeedType().getType() + "?error=true"));
+                        return;
+                    }
                     method.invoke(dataSource, intValue);
                 } else {
                     Method method = dataSource.getClass().getMethod(setter, String.class);
@@ -112,22 +119,32 @@ public class HTMLConnectionFactory {
     }
 
     public HTMLConnectionFactory addField(String field, String property) {
-        properties.add(new HTMLConnectionProperty(field, property, null, false, HTMLConnectionProperty.STRING));
+        properties.add(new HTMLConnectionProperty(field, property, null, false, HTMLConnectionProperty.STRING, ""));
+        return this;
+    }
+
+    public HTMLConnectionFactory addFieldWithDefault(String field, String property, String defaultValue) {
+        properties.add(new HTMLConnectionProperty(field, property, null, false, HTMLConnectionProperty.STRING, defaultValue));
         return this;
     }
 
     public HTMLConnectionFactory addField(String field, String property, int type) {
-        properties.add(new HTMLConnectionProperty(field, property, null, false, type));
+        properties.add(new HTMLConnectionProperty(field, property, null, false, type, ""));
+        return this;
+    }
+
+    public HTMLConnectionFactory addFieldWithDefault(String field, String property, int type, String defaultValue) {
+        properties.add(new HTMLConnectionProperty(field, property, null, false, type, defaultValue));
         return this;
     }
 
     public HTMLConnectionFactory addPassword(String field, String property, boolean password) {
-        properties.add(new HTMLConnectionProperty(field, property, null, password, HTMLConnectionProperty.STRING));
+        properties.add(new HTMLConnectionProperty(field, property, null, password, HTMLConnectionProperty.STRING, ""));
         return this;
     }
 
     public HTMLConnectionFactory addField(String field, String property, String explanation) {
-        properties.add(new HTMLConnectionProperty(field, property, explanation, false, HTMLConnectionProperty.STRING));
+        properties.add(new HTMLConnectionProperty(field, property, explanation, false, HTMLConnectionProperty.STRING, ""));
         return this;
     }
 }

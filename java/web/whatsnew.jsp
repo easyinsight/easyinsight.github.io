@@ -20,6 +20,7 @@
     <meta name="author" content="">
     <title>What's New with Easy Insight</title>
     <jsp:include page="html/bootstrapHeader.jsp"/>
+    <jsp:include page="html/reportDashboardHeader.jsp"/>
 </head>
 <body>
 <%
@@ -36,16 +37,20 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.WHATS_NEW %>"/>
 </jsp:include>
-<div class="container corePageWell">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-12">
-            <div class="col-md-6 col-md-offset-3">
-                <div style="width:100%;text-align: center">
-                    <h2>What's New with Easy Insight</h2>
+        <div class="col-md-12" style="background-color:#0084b4">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2" style="text-align:center">
+                    <h2 style="color:#FFFFFF;margin-top: 20px;margin-bottom: 20px">
+                        What's New With Easy Insight
+                    </h2>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<div class="container corePageWell" style="margin-top:20px">
     <div class="row">
         <%
             if (userName != null) {
@@ -60,6 +65,7 @@
                     Database.closeConnection(conn);
                 }
             }
+            String article = request.getParameter("article");
             List<NewsEntry> newsEntryList = new AdminService().getNews();
             Set<String> tags = new HashSet<String>();
             for (NewsEntry newsEntry : newsEntryList) {
@@ -86,7 +92,7 @@
                         <img src="/images/logo2.png" alt="Easy Insight Logo"/>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" style="margin-top: 20px">
                     <div class="col-md-3">
                         <div class="well">
                             <div><a href="whatsnew.jsp" style="font-size:16px">All</a></div>
@@ -116,7 +122,15 @@
 
                 Collections.reverse(newsEntryList);
                 for (NewsEntry newsEntry : newsEntryList) {
-                    if (tag != null) {
+                    if (newsEntry.getTitle() == null) {
+                        continue;
+                    }
+                    if (article != null) {
+                        String aliased = newsEntry.getTitle().replace(" ", "-").replace(",", "").toLowerCase();
+                        if (!article.equals(aliased)) {
+                            continue;
+                        }
+                    } else if (tag != null) {
                         boolean valid = false;
                         String tagString = newsEntry.getTags();
                         if (tagString == null) {
@@ -133,21 +147,26 @@
                             continue;
                         }
                     }
+                    String permalink = "/app/whatsnew.jsp?article="+newsEntry.getTitle().replace(" ", "-").replace(",", "").toLowerCase();
             %>
             <div class="row" style="padding-top:10px">
-                <div class="col-md-12">
-                    <div style="width:100%;text-align:center">
-                        <h4><%= newsEntry.getTitle() %> - <%= new SimpleDateFormat("yyyy-MM-dd").format(newsEntry.getDate()) %></h4>
-                    </div>
+                <div class="col-md-12" style="text-align:left">
+                    <a class="productHeader" style="color: #0084B4" href="<%=permalink%>"><%= newsEntry.getTitle() %></a>
                 </div>
+            </div>
+            <div class="row" style="padding-top:10px">
+                <div class="col-md-12" style="text-align: left">
+                    Posted on <a href="<%=permalink%>" style="color: #0084B4"><%=new SimpleDateFormat("MMMM dd, yyyy").format(newsEntry.getDate()) %></a> by <a style="color:#0084B4" href="<%=permalink%>"><%=newsEntry.getAuthor()%></a>
                 </div>
-            <div class="row">
+            </div>
+            <div class="row" style="padding-top:10px">
                 <div class="col-md-12" style="padding-top:10px">
-                    <div style="width:100%;text-align:center">
-                        <p><%= newsEntry.getNews() %></p>
+                    <div style="width:100%;text-align:left">
+                        <p style="text-align: left"><%= newsEntry.getNews() %></p>
                     </div>
                 </div>
             </div>
+            <hr style="color: #DDDDDD; border-color: #DDDDDD; background-color: #DDDDDD; height: 1px; border: 0"/>
             <%
                 }
             %>

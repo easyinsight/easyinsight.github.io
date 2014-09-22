@@ -80,7 +80,7 @@
         <mx:HBox width="1000">
             <mx:HBox height="100%" verticalAlign="bottom">
                 <mx:Button label="Create Persona..." click="createPersona()" styleName="grayButton"/>
-                <mx:Button label="Delete Selected" click="deleteSelected()" styleName="grayButton"/>
+                <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
             </mx:HBox>
             <mx:Spacer width="100%"/>
             <mx:Box borderStyle="solid" borderThickness="1" cornerRadius="8" dropShadowEnabled="true" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#FFFFFF">

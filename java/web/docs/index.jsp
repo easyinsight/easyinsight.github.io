@@ -8,10 +8,10 @@
     String html = DocReader.toHTML(doc, request, DocReader.APP);
     String main = null;
     if (doc != null && !"".equals(doc)) {
-        main = DocReader.toHTML(null, request, DocReader.WEBSITE);
+        main = DocReader.toHTML(null, request, DocReader.APP);
     } else {
         main = html;
-        html = DocReader.toHTML("DocWelcome", request, DocReader.WEBSITE);
+        html = DocReader.toHTML("DocWelcome", request, DocReader.APP);
     }
     String userName = (String) session.getAttribute("userName");
     if (userName != null) {
@@ -36,11 +36,11 @@
 </jsp:include>
 <div class="container corePageWell">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-7 col-md-offset-1">
             <%= html %>
         </div>
         <% if (main != null) { %>
-        <div class="col-md-offset-1 col-md-3">
+        <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12" style="background-color: #F5F5F5;border-color: #DCDCDC;border-style: ridge;border-width: 1px;border-radius: 3px">
                     <%= main %>

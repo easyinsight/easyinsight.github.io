@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function onCreation():void {
+            ProgressAlert.alert(this, "Getting accounts...", null, adminService.getAccounts);
+            adminService.getAccounts.send();
+        }
+
+        [Bindable]
+        private var accounts:ArrayCollection;
+
+        private function gotAccounts():void {
+            accounts = adminService.getAccounts.lastResult as ArrayCollection;
+        }
+
+        private function addConsultant():void {
+            ProgressAlert.alert(this, "Adding consultant...", null, adminService.addConsultant);
+            adminService.addConsultant.send(accountBox.selectedItem.accountID, consultantEmail.text, consultantPassword.text);
+        }
+
+        private function added():void {
+            var str:String = adminService.addConsultant.lastResult as String;
+            if (str != null) {
+                Alert.show(str);
+            } else {
+                Alert.show("The user has been added.");
+                PopUpManager.removePopUp(this);
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="adminService" destination="eiAdmin">
+        <mx:method name="getAccounts" result="gotAccounts()"/>
+        <mx:method name="addConsultant" result="added()"/>
+    </mx:RemoteObject>
+    <util:TextInputWithArrow dataProvider="{accounts}" labelField="name" id="accountBox"/>
+    <mx:Form>
+        <mx:FormItem label="Consultant Email:">
+            <mx:TextInput id="consultantEmail"/>
+        </mx:FormItem>
+        <mx:FormItem label="Consultant Password:">
+            <mx:TextInput id="consultantPassword" displayAsPassword="true"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:HBox>
+        <util:SaveButton label="Add" click="addConsultant()"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

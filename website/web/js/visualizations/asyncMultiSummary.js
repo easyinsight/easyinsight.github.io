@@ -21,7 +21,7 @@ $(function () {
 })
 
 AsyncMultiSummary = {
-    createTable: function (targetDiv, properties, columnData, postData, tableHTML, params, uid, fullFilters, drillthroughKey) {
+    createTable: function (targetDiv, properties, columnData, postData, tableHTML, params, uid, fullFilters, drillthroughKey, dashboardID) {
 
 
         if (typeof(AsyncMultiSummary.availableDataTables[targetDiv]) != "undefined" && AsyncMultiSummary.availableDataTables[targetDiv] != null) {
@@ -92,6 +92,9 @@ AsyncMultiSummary = {
                     var x = $(e.target);
                     var f = {"reportID": x.data("reportid"), "drillthroughID": x.data("drillthroughid"), "embedded": x.data("embedded"), "source": x.data("source"), "drillthroughKey": drillthroughKey, "filters": fullFilters,
                         "drillthrough_values": {}};
+                    if (dashboardID != -1) {
+                        f["dashboardID"] = dashboardID;
+                    }
                     f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
 
                             if(i.match(/^drillthrough/))

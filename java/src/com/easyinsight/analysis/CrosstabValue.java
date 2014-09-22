@@ -48,6 +48,9 @@ public class CrosstabValue {
         this.measure = measure;
     }
 
+    public void setDtMap(Map<String, Value> dtMap) {
+        this.dtMap = dtMap;
+    }
 
     public Map<String, Value> getDtMap() {
         return dtMap;

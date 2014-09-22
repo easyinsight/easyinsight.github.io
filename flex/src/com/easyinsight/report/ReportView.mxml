@@ -29,7 +29,6 @@
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.EIGlobalTimer;
-        import com.easyinsight.framework.GlobalDataSourceEvent;
         import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -50,6 +49,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.controls.Button;
         import mx.core.Container;
         import mx.core.UIComponent;
         import mx.events.CloseEvent;
@@ -92,18 +92,6 @@
 
         public var urlKey:String;
 
-        private function exportExcel():void {
-            viewFactory.updateExportMetadata();
-            var window:ReportExportWindow = new ReportExportWindow();
-            window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);
-            window.reportView = this;
-            WindowManagement.manager.addWindow(window);
-            PopUpManager.addPopUp(window, this, true);
-            window.x = exportButton.x - 20;
-            window.y = exportButton.y + exportButton.height + 10;
-        }
-
         private function onCreation():void {
             // initializeTransformContainer();
             commandProcessor = new CommandProcessor();
@@ -143,30 +131,6 @@
             _filterDefinitions = value;
             dispatchEvent(new Event("filterDefinitionsChanged"));
         }
-
-        [Bindable]
-        [Embed(source='../../../../assets/table.png')]
-        private var exportToExcelIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/document_out.png")]
-        private var closeIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/plasma_tv.png")]
-        private var fullScreenIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/edit.png")]
-        private var reportEditorIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/funnel.png")]
-        private var filterIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/earth.png")]
-        private var htmlIcon:Class;
-        [Bindable]
-        [Embed(source="../../../../assets/refresh.png")]
-        private var refreshIcon:Class;
 
         [Bindable]
         private var dataSource:DataSourceInfo;
@@ -324,15 +288,6 @@
             if (Keyboard.ESCAPE == event.keyCode) {
                 currentState = "";
             }
-        }
-
-        private function onExport(event:Event):void {
-            viewFactory.updateExportMetadata();
-            var window:EmbeddedReportExportWindow = new EmbeddedReportExportWindow();
-            window.report = viewFactory.report;
-            window.coreView = viewFactory.getChildAt(0);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function toReportEditor():void {
@@ -538,7 +493,6 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
             viewFactory.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onRetrievalFault);
-            viewFactory.addEventListener("export", onExport);
             viewFactory.addEventListener(EIErrorEvent.ERROR, onError);
             viewFactory.addEventListener(ReportSetupEvent.REPORT_SETUP, onSetup);
             this.reportHeaderImage = User.getInstance().reportLogo;
@@ -643,19 +597,6 @@
                  }*/
                 retrievalState = new LocalStorageRetrievalState(report.urlKey, 0, null);
             }
-
-            var editItem:ContextMenuItem = new ContextMenuItem("Edit " + report.name);
-            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                toReportEditor();
-            });
-            var exportItem:ContextMenuItem = new ContextMenuItem("Export " + report.name);
-            exportItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function (event:ContextMenuEvent):void {
-                exportExcel();
-            });
-            var menu:ContextMenu = new ContextMenu();
-            menu.hideBuiltInItems();
-            menu.customItems = [ editItem, exportItem ];
-            viewFactory.contextMenu = menu;
 
             reportName = report.name;
             description = report.description;
@@ -807,13 +748,12 @@
                 removeChild(box);
             }
             box.visible = true;
-
-            if (selectedConfiguration != null) {
+            if (selectedConfiguration != null && selectedConfiguration.urlKey != null) {
                 var feedFragmentObject:Object = new Object();
                 feedFragmentObject.reportConfigurationID = selectedConfiguration.urlKey;
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
-            } else if (stackPositions == null) {
+            } else {
                 var feedFragmentObject:Object = new Object();
                 feedFragmentObject.reportID = report.urlKey;
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
@@ -989,30 +929,30 @@
         }
     </mx:Style>
     <mx:HBox width="100%" id="leftButtonBar" styleName="topButtonBar" verticalAlign="middle">
-        <mx:Button click="toMyData(event)" icon="{closeIcon}" labelPlacement="right" id="backButton"
-                   toolTip="Close the report" label="Close Report" styleName="grayButton"/>
-        <report:RefreshButton icon="{refreshIcon}" labelPlacement="right"
-                   id="refreshButton" toolTip="Refresh this report" label="Refresh" styleName="grayButton"
+        <mx:LinkButton click="toMyData(event)" labelPlacement="right" id="backButton"
+                   label="Close Report" styleName="solidMenuButton"/>
+        <report:RefreshButton labelPlacement="right"
+                   id="refreshButton" label="Refresh" styleName="solidMenuButton"
                 viewFactory="{viewFactory}" dataSource="{dataSource}"/>
-        <mx:Button icon="{exportToExcelIcon}" click="exportExcel()"
+        <easyinsight:ReportEndUserExportButton
                    labelPlacement="right"
-                   id="exportButton" toolTip="Export the report..." label="Export" styleName="grayButton"/>
-        <mx:Button click="toggleFilters()" icon="{filterIcon}" labelPlacement="right"
-                   id="filterButton" toolTip="{filterTooltip}" label="Toggle Filters" styleName="grayButton"/>
-        <mx:Button icon="{reportEditorIcon}" click="toReportEditor()"
+                   id="exportButton" label="Export" styleName="flatTransparentMenuButton"/>
+        <mx:LinkButton click="toggleFilters()"  labelPlacement="right"
+                   id="filterButton" label="Toggle Filters" styleName="solidMenuButton"/>
+        <mx:LinkButton click="toReportEditor()"
                    labelPlacement="right" id="editReportButton"
-                   toolTip="Open this report in the report editor..." label="Edit Report" styleName="grayButton"/>
-        <mx:Button labelPlacement="right" label="View in HTML" styleName="grayButton" click="viewInHTML()" icon="{htmlIcon}"/>
-        <listing:ArghButton label="{configLabel}" styleName="grayButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
+                   toolTip="Open this report in the report editor..." label="Edit Report" styleName="solidMenuButton"/>
+        <mx:LinkButton labelPlacement="right" label="View in HTML" styleName="solidMenuButton" click="viewInHTML()"/>
+        <listing:ArghButton label="{configLabel}" styleName="flatTransparentMenuButton" itemClick="onConfigurationClick(event)" width="160" id="newButton"
                             dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
-        <mx:Button labelPlacement="right" label="Add Row..." styleName="grayButton" click="addRow()" visible="{showAddRow}"/>
+        <mx:LinkButton labelPlacement="right" label="Add Row..." styleName="solidMenuButton" click="addRow()" visible="{showAddRow}"/>
         <mx:Spacer width="100%"/>
         <easyinsight:LoggedOnStatus textColor="#FFFFFF"/>
     </mx:HBox>
     <mx:HBox width="100%" id="headerArea" paddingTop="5" paddingBottom="5" paddingLeft="10" verticalAlign="middle">
         <mx:Box backgroundColor="#FFFFFF" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" borderColor="#FFFFFF" borderThickness="1" cornerRadius="5"
                 borderStyle="solid" visible="{logoVisible}">
-            <mx:Image id="logoImage"/>
+            <mx:Image id="logoImage" maxHeight="200"/>
         </mx:Box>
         <mx:Spacer width="100%"/>
         <mx:HBox id="breadCrumbBox"/>

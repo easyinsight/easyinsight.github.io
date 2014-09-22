@@ -14,6 +14,13 @@ public class AvailableFieldRenderer extends AdvancedDataGridGroupItemRenderer {
         super();
         mouseEnabled = true;
         addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+        addEventListener(MouseEvent.CLICK, onClick);
+    }
+
+    private function onClick(event:MouseEvent):void {
+        if (AvailableFieldTextRenderer(label).data.analysisItem == null) {
+            dispatchEvent(new FieldClickEvent(AnalysisItemWrapper(AvailableFieldTextRenderer(label).data)));
+        }
     }
 
     private var _tags:ArrayCollection;

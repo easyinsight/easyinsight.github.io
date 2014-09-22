@@ -19,14 +19,20 @@ public class HTMLConnectionProperty {
     private String explanation;
     private boolean password;
     private int type;
+    private String defaultValue;
 
-    HTMLConnectionProperty(String field, String property, @Nullable String explanation, boolean password, int type) {
+    HTMLConnectionProperty(String field, String property, @Nullable String explanation, boolean password, int type, String defaultValue) {
         this.field = field;
         this.property = property;
         safeProperty = "p" + property;
         this.explanation = explanation;
         this.password = password;
         this.type = type;
+        this.defaultValue = defaultValue;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
     }
 
     public int getType() {

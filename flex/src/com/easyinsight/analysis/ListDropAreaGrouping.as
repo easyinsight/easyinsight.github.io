@@ -14,7 +14,7 @@ import mx.events.FlexEvent;
 
 [Event(name="analysisItemUpdate", type="com.easyinsight.analysis.AnalysisItemUpdateEvent")]
 public class ListDropAreaGrouping extends FlowBox {
-    private var dropAreas:ArrayCollection = new ArrayCollection();
+    public var dropAreas:ArrayCollection = new ArrayCollection();
     private var _dropAreaType:Class = ListDropArea;
 
     private var _unlimited:Boolean = false;

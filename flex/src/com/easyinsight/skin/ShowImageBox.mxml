@@ -62,5 +62,5 @@
             }
         }
         ]]></mx:Script>
-    <mx:Image id="image" mouseEnabled="false"/>
+    <mx:Image id="image" mouseEnabled="false" maxHeight="200"/>
 </mx:Box>

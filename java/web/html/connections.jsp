@@ -33,14 +33,21 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.CONNECTIONS %>"/>
 </jsp:include>
-<div class="container corePageWell" style="margin-top: 20px;">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-md-8 col-md-offset-2" style="text-align:center">
-            <h2>
-                Click on a connection below to pull data into Easy Insight and get started!
-            </h2>
+        <div class="col-md-12" style="background-color:#0084b4">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2" style="text-align:center">
+                    <h2 style="color:#FFFFFF;margin-top: 20px;margin-bottom: 20px">
+                        Click on a connection to get started!
+                    </h2>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+<div class="container corePageWell" style="margin-top: 20px;">
+
     <div class="row">
         <div class="col-md-12">
     <%--<div class="row">--%>

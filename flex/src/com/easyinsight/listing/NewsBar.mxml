@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  borderStyle="solid" borderThickness="1" cornerRadius="8" verticalAlign="middle" width="100%" backgroundColor="#333333" borderColor="#333333">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  backgroundColor="#dff0d8" borderColor="#d6e9c6" cornerRadius="3" verticalAlign="middle" fontSize="14" borderThickness="1" borderStyle="solid"
+         paddingLeft="5" paddingTop="5" paddingBottom="5" paddingRight="5">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
 
@@ -12,8 +13,8 @@
         override protected function commitProperties():void {
             super.commitProperties();
             var df:DateFormatter = new DateFormatter();
-            df.formatString = "MMM DD YYYY";
-            dateString = "New on " + df.format(User.getInstance().newsDate) + "!";
+            df.formatString = "MMMM DD, YYYY";
+            dateString = "<b>New on " + df.format(User.getInstance().newsDate) + "</b> - " + User.getInstance().newsSubject;
         }
 
         [Bindable]
@@ -32,9 +33,9 @@
     <mx:RemoteObject destination="login" id="userService">
         <mx:method name="dismissNews" result="dismissed()"/>
     </mx:RemoteObject>
-    <mx:Spacer width="100%"/>
-    <mx:Label text="{dateString}" fontSize="14" color="#FFFFFF"/>
-    <mx:LinkButton label="Take a look at what's new with Easy Insight" fontSize="14" color="#FFFFFF" textDecoration="underline" click="showNews()"/>
-    <mx:Spacer width="100%"/>
-    <mx:LinkButton label="Dismiss" fontSize="12" color="#FFFFFF" textDecoration="underline" click="dismiss()"/>
+    <mx:Text maxWidth="550" htmlText="{dateString}" color="#3c763d" styleName="fallThroughFonts"/>
+    <mx:VBox>
+        <mx:LinkButton label="More Information" color="#2b542c" fontSize="14" styleName="fallThroughFonts" click="showNews()" fontWeight="bold"/>
+        <mx:LinkButton label="Dismiss" color="#2b542c" fontSize="14" styleName="fallThroughFonts" click="dismiss()" fontWeight="bold"/>
+    </mx:VBox>
 </mx:HBox>

@@ -6,8 +6,11 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.FileProcessCreateScheduledTask;
 
 import com.easyinsight.scheduler.FileProcessOptimizedCreateScheduledTask;
+import com.easyinsight.scheduler.RedshiftFileCreate;
 import com.easyinsight.security.SecurityUtil;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -18,14 +21,14 @@ import java.util.*;
  */
 public class FlatFileUploadContext extends UploadContext {
     private String uploadKey;
-    private int type;
+    private String fileName;
 
-    public int getType() {
-        return type;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getUploadKey() {
@@ -40,27 +43,14 @@ public class FlatFileUploadContext extends UploadContext {
 
     @Override
     public String validateUpload(EIConnection conn) throws SQLException {
-
-        switch (type) {
-            case 1:
-                uploadFormat = new CsvFileUploadFormat();
-                break;
-            case 2:
-                uploadFormat = new ExcelUploadFormat();
-                break;
-            case 3:
-                uploadFormat = new XSSFExcelUploadFormat();
-                break;
-            default:
-                uploadFormat = null;
-                break;
-        }
-
-        if (uploadFormat == null) {
-            return "Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2008 and delimited text files.";
+        if (fileName.endsWith(".xlsx")) {
+            uploadFormat = new XSSFExcelUploadFormat();
+        } else if (fileName.endsWith(".xls")) {
+            uploadFormat = new ExcelUploadFormat();
         } else {
-            return null;
+            uploadFormat = new CsvFileUploadFormat();
         }
+        return null;
     }
 
     private Map<Key, Set<String>> sampleMap;
@@ -74,13 +64,30 @@ public class FlatFileUploadContext extends UploadContext {
 
     public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception {
         UploadFormat uploadFormat = new UploadFormatTester().determineFormat(bytes);
+        PreparedStatement dbStmt = conn.prepareStatement("SELECT special_storage FROM account WHERE account_id = ?");
+        dbStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet rs = dbStmt.executeQuery();
+        rs.next();
+        String specialStorage = rs.getString(1);
+        dbStmt.close();
         if (uploadFormat instanceof CsvFileUploadFormat) {
-            FileProcessOptimizedCreateScheduledTask task = new FileProcessOptimizedCreateScheduledTask();
-            task.setName(name);
-            task.setUserID(SecurityUtil.getUserID());
-            task.setAccountID(SecurityUtil.getAccountID());
-            task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
-            return task.getFeedID();
+            if (specialStorage != null) {
+                System.out.println("Using Redshift file creation...");
+                RedshiftFileCreate task = new RedshiftFileCreate();
+                task.setName(name);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
+                return task.getFeedID();
+            } else {
+                System.out.println("Using legacy file creation...");
+                FileProcessOptimizedCreateScheduledTask task = new FileProcessOptimizedCreateScheduledTask();
+                task.setName(name);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.createFeed(conn, bytes, uploadFormat, analysisItems, accountVisible);
+                return task.getFeedID();
+            }
         } else {
             FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
             task.setName(name);

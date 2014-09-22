@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.security.SecurityUtil;
@@ -48,6 +49,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public static final String STATUS_CHANGED_ON = "Status Changed On";
     public static final String COUNT = "Count";
     public static final String TOTAL_DEAL_VALUE = "Total Deal Value";
+    public static final String URL = "Deal URL";
 
     public HighRiseDealSource() {
         setFeedName("Deals");
@@ -87,6 +89,11 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDateDimension(keys.get(STATUS_CHANGED_ON), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        Key url = keys.get(URL);
+        if (url == null) {
+            url = new NamedKey(URL);
+        }
+        analysisItems.add(new AnalysisDimension(url));
         return analysisItems;
     }
 
@@ -163,6 +170,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     row.addValue(DEAL_NAME, dealName);
                     String dealID = queryField(currDeal, "id/text()");
                     row.addValue(DEAL_ID, dealID);
+                    row.addValue(URL, highRiseCompositeSource.getUrl() + "/deals/" + dealID);
                     String price = queryField(currDeal, "price/text()");
                     row.addValue(PRICE, price);
                     String status = queryField(currDeal, "status/text()");

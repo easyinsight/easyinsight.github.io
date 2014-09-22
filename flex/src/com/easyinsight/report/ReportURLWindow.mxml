@@ -21,13 +21,11 @@
         }
 
         private function createLink():void {
-            var pos:DashboardStackPositions = new DashboardStackPositions();
-            reportView.positionsPopulate(pos);
             analysisService.saveReportLink.send(report.analysisID, pos);
         }
 
         public var report:AnalysisDefinition;
-        public var reportView:ReportView;
+        public var pos:DashboardStackPositions;
 
         private function createdLink():void {
             var key:String = analysisService.saveReportLink.lastResult as String;

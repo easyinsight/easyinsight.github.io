@@ -1,6 +1,7 @@
 package com.easyinsight.filtering
 {
-	import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.WindowManagementInstance;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRetrievalState;
 import com.easyinsight.framework.User;
 import com.easyinsight.skin.ImageConstants;
@@ -62,7 +63,8 @@ import mx.managers.PopUpManager;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
             window.detailClass = PatternFilterWindow;
 			window.analysisItems = _analysisItems;
-			window.filterDefinition = _filterDefinition;			
+			window.filterDefinition = _filterDefinition;
+            WindowManagementInstance.getManager().addWindow(window);
 			PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
 		}

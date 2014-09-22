@@ -144,7 +144,7 @@
         <mx:VBox>
             <mx:HBox>
                 <mx:Button label="Add User..." click="addUser()" styleName="grayButton" fontSize="12"/>
-                <mx:Button label="Remove Selected from Group..." click="deleteSelected()" styleName="grayButton" fontSize="12"/>
+                <mx:Button label="Remove Selected from Group..." click="deleteSelected()" styleName="flatRedButton" fontSize="12"/>
             </mx:HBox>
             <mx:DataGrid dataProvider="{users}" id="userGrid">
                 <mx:columns>

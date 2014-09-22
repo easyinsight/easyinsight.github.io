@@ -196,11 +196,13 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
         JSONArray values = new JSONArray();
         JSONObject map = new JSONObject();
+        JSONObject displayMap = new JSONObject();
         for (DateLevelWrapper dateLevelWrapper : wrappers) {
             JSONObject o = new JSONObject();
             o.put("display", dateLevelWrapper.getDisplay());
             o.put("dateLevel", dateLevelWrapper.getDateLevel());
             map.put(String.valueOf(dateLevelWrapper.getDateLevel()), dateLevelWrapper.getShortDisplay());
+            displayMap.put(String.valueOf(dateLevelWrapper.getDateLevel()), dateLevelWrapper.getDisplay());
             values.put(o);
         }
 
@@ -221,6 +223,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
         }
 
         jo.put("lookup", map);
+        jo.put("displayLookup", map);
         jo.put("values", values);
         jo.put("startLevel", minLevel);
         if (startWrapper != null) {

@@ -1237,8 +1237,9 @@ public class UserAccountAdminService {
         List<DataSourceStats> statsList = sizeDataSources(conn, accountID, pricingModel);
         long usedSize = usedSize(statsList);
 
-        PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id), analyst from user where account_id = ? group by analyst");
+        PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id), analyst from user where account_id = ? and consultant = ? group by analyst");
         usersStmt.setLong(1, accountID);
+        usersStmt.setBoolean(2, false);
         ResultSet usersRS = usersStmt.executeQuery();
         int designers = 0;
         int viewers = 0;
