@@ -1,0 +1,11 @@
+<div cg-busy="deleting" />
+<div style="padding:10px;font-size: 16px">
+
+    <div style="padding:5px;margin-bottom:20px" class="alert-danger">Are you sure you want to delete the following joins from this data source?</div>
+        <ul>
+            <li ng-repeat="join in to_delete">{{ join.source_ds.name }} - {{ join.source_field.name }} to {{ join.target_ds.name }} - {{ join.target_field.name }}</li>
+        </ul>
+    <div style="text-align: center">
+        <button ng-click="confirmDelete()" class="btn btn-danger">Remove Selected</button> <button ng-click="$dismiss()" class="btn btn-default">Cancel</button>
+    </div>
+</div>
