@@ -44,6 +44,7 @@ public class FieldsServlet extends JSONServlet {
                 type = "grouping";
             }
             fieldObject.put("type", type);
+            fieldObject.put("id", field.getAnalysisItemID());
             fieldList.add(fieldObject);
         }
         responseObject.put("fields", fieldList);
