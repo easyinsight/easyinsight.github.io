@@ -67,6 +67,16 @@
     </rule>
 
     <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/edit$</from>
+        <to>/embeddedReportEditor.jsp?reportID=$1</to>
+    </rule>
+    <rule>
+        <from>^/html/dashboard/([A-Za-z0-9]+)/edit$</from>
+        <to>/embeddedDashboardEditor.jsp?dashboardID=$1</to>
+    </rule>
+
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)/usage.json$</from>
         <to>/html/usageData?reportID=$1</to>
     </rule>

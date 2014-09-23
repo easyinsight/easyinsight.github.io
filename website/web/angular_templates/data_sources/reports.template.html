@@ -114,6 +114,7 @@
 
             </th>
             <th>Name</th>
+            <th style="width:40px"></th>
             <th style="width:120px">Type</th>
         </tr>
         </thead>
@@ -129,6 +130,7 @@
                 <input ui-keyup="{'enter': 'add_report_tag(report, null, new_tag)'}" type="text" ng-init="new_tag={}" ng-model="new_tag.text" typeahead="tag.name for tag in tags | filter: {name: $viewValue} | not_tagged:report.tags | limitTo: 8" typeahead-on-select="add_report_tag(report, $item, new_tag)" />
                 <i class="glyphicon glyphicon-plus tag-value" ng-click="add_report_tag(report, null, new_tag)" /></div>
             </td>
+            <td><a href="/app/html/{{report.type}}/{{report.url_key}}/edit" ng-click="$event.stopPropagation()">Edit</a></td>
             <td>
                 <a href="/app/html/{{report.type}}/{{report.url_key}}" ng-click="$event.stopPropagation()">{{ report.type.capitalize() }}</a>
             </td>
