@@ -267,7 +267,7 @@ public class UserTransferObject {
         user.setTestAccountVisible((Boolean) jo.get("all_reports"));
         user.setInvoiceRecipient((Boolean) jo.get("invoice_recipient"));
         user.setOptInEmail((Boolean) jo.get("newsletter"));
-        user.setConsultant((Boolean) jo.get("consultant"));
+        //user.setConsultant((Boolean) jo.get("consultant"));
         return user;
     }
 }
