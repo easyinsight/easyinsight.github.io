@@ -797,6 +797,11 @@
         <servlet-class>com.easyinsight.api.v3.DataSourceInfoServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>CompositeSource</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.CompositeSourceServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -994,6 +999,11 @@
     <servlet-mapping>
         <servlet-name>ReportListServlet</servlet-name>
         <url-pattern>/html/reportListServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CompositeSource</servlet-name>
+        <url-pattern>/html/composite</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>DataSourceTags</servlet-name>

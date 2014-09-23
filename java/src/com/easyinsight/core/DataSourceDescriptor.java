@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.tag.Tag;
@@ -166,11 +167,19 @@ public class DataSourceDescriptor extends EIDescriptor {
                 ja.put(to);
             }
         jo.put("tags", ja);
+
         if (lastDataTime != null) {
             jo.put("last_refresh_time", dateFormat.format(lastDataTime));
         } else {
             jo.put("last_refresh_time", "");
         }
+        if(FeedType.valueOf(getDataSourceType()).equals(FeedType.COMPOSITE)) {
+            jo.put("type", "composite");
+        } else {
+            jo.put("type", "other");
+        }
+
+
         return jo;
     }
 }
