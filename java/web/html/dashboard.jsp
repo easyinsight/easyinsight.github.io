@@ -158,7 +158,7 @@
                     </div>
                     <% if (designer && !iPad && !phone) { %>
                     <div class="btn-group reportControlBtnGroup" style="margin-right: 5px">
-                        <a href="<%= RedirectUtil.getURL(request, "/app/embeddedDashboardEditor.jsp?dashboardID=" + dashboard.getUrlKey())%>"
+                        <a href="<%= RedirectUtil.getURL(request, "/app/html/dashboard/" + dashboard.getUrlKey()) + "/edit" %>"
                            class="reportControl">Edit Dashboard</a>
                     </div>
                     <% } %>
