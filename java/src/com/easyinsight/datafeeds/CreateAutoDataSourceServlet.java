@@ -88,10 +88,16 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
 
                     conn = Database.instance().getConnection();
                     try {
+                        conn.setAutoCommit(false);
                         String urlKey = new AutoComposite(compositeFeedDefinition.getDataFeedID(), conn).doSomething();
                         responseURL = "/app/html/dashboard/" + urlKey;
                         responseCode = ResponseInfo.ALL_GOOD;
+                        conn.commit();
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw e;
                     } finally {
+                        conn.setAutoCommit(true);
                         Database.closeConnection(conn);
                     }
                 }

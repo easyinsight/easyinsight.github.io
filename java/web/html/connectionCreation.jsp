@@ -23,10 +23,10 @@
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID + "&error=" + request.getParameter("error")));
             }
             return;
-        } /*else if (connectionID == FeedType.STATIC.getType()) {
+        } else if (connectionID == FeedType.STATIC.getType()) {
             response.sendRedirect(RedirectUtil.getURL(request, "/a/connection"));
             return;
-        }*/
+        }
         HTMLConnectionFactory factory;
         try {
             factory = new HTMLConnectionFactory(connectionID);

@@ -2,9 +2,37 @@
     var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy', 'ui.bootstrap', 'ui.keypress']);
 
     eiDataSources.controller("homeBaseController", ["$scope", "$http", function ($scope, $http) {
-        $http.get("/app/recentActions.json").then(function (d) {
-            $scope.actions = d.data.actions;
-        })
+
+        $scope.suggestionClicked = function (suggestion) {
+            $scope.loading = $http.get(suggestion.url);
+            $scope.loading.then(function(c) {
+                window.location = c.data.url;
+            });
+        };
+
+        $scope.loadActions = function() {
+            $http.get("/app/recentActions.json").then(function (d) {
+                $scope.actions = d.data.actions;
+            })
+        };
+        $scope.loadActions();
+
+        $scope.loadSuggestions = function() {
+            $http.get("/app/dataSourceSuggestions.json").then(function (d) {
+
+                for (var i = 0; i < d.data.suggestions.length; i++) {
+                    console.log(d.data.suggestions[i].url + "&utc=" + new Date().getTimezoneOffset());
+                    d.data.suggestions[i].url = d.data.suggestions[i].url + "&utc=" + new Date().getTimezoneOffset();
+                }
+
+                $scope.suggestions = d.data.suggestions;
+            })
+        };
+        $scope.loadSuggestions();
+
+        /*$http.get("/app/dataSourceSuggestions.json").then(function (d) {
+            $scope.suggestions = d.data.suggestions;
+        })*/
     }]);
 
     eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", function ($scope, $http, PageInfo, $filter, $modal) {
@@ -36,6 +64,9 @@
                     $scope.data_sources = $scope.data_sources.filter(function (e, i, l) {
                         return !e.selected;
                     });
+                });
+                m.result.then(function (r) {
+                    $scope.loadSuggestions();
                 });
                 m.result.finally(function(r) {
                     delete $scope.to_delete;
@@ -114,21 +145,25 @@
             });
 
             $scope.refresh_data_source = function () {
-                $scope.refresh_status_line = "Starting the refresh...";
-                $http.get("/app/refreshDataSource?urlKey=" + $scope.data_source.url_key).then(function (d) {
-                    if (d.data && d.data.callDataID) {
-                        $scope.refresh_interval = $interval(function () {
-                            $http.get("/app/refreshStatus?callDataID=" + d.data.callDataID).then(function (a) {
-                                if (a.data.status == 4) {
-                                    $scope.refresh_status_line = "";
-                                    $interval.cancel($scope.refresh_interval);
-                                    $scope.refresh_interval = null;
-                                }
-                                $scope.refresh_status_line = a.data.statusMessage;
-                            });
-                        }, 5000);
-                    }
-                });
+                if ($scope.data_source.data_source_type == 2) {
+                    window.location = "/a/dataSource/" + $scope.data_source.url_key + "/refresh";
+                } else {
+                    $scope.refresh_status_line = "Starting the refresh...";
+                    $http.get("/app/refreshDataSource?urlKey=" + $scope.data_source.url_key).then(function (d) {
+                        if (d.data && d.data.callDataID) {
+                            $scope.refresh_interval = $interval(function () {
+                                $http.get("/app/refreshStatus?callDataID=" + d.data.callDataID).then(function (a) {
+                                    if (a.data.status == 4) {
+                                        $scope.refresh_status_line = "";
+                                        $interval.cancel($scope.refresh_interval);
+                                        $scope.refresh_interval = null;
+                                    }
+                                    $scope.refresh_status_line = a.data.statusMessage;
+                                });
+                            }, 5000);
+                        }
+                    });
+                }
             }
 
             $scope.$on("$destroy", function () {
