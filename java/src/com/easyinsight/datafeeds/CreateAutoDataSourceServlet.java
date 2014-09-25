@@ -46,7 +46,7 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
             List<DataSourceDescriptor> compositeSources = new ArrayList<>();
             DataSourceDescriptor autoDataSourceDescriptor = null;
             for (DataSourceDescriptor dataSource : dataSources) {
-                if (new DataSourceTypeRegistry().isExchangeType(dataSource.getDataSourceType()) && !types.contains(dataSource.getDataSourceType())) {
+                if (new DataSourceTypeRegistry().billingInfoForType(FeedType.valueOf(dataSource.getDataSourceType())) == ConnectionBillingType.SMALL_BIZ && !types.contains(dataSource.getDataSourceType())) {
                     existingIDs.add(dataSource.getId());
                     types.add(dataSource.getType());
                     dataSourceTypes++;
