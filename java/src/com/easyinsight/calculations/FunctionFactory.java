@@ -336,8 +336,6 @@ public class FunctionFactory {
             return new FirstDayOfWeek();
         } else if (s.equals("lastdayofweek")) {
             return new LastDayOfWeek();
-        } else if (s.equals("filterstring")) {
-            return new FilterString();
         } else if (s.equals("stddev")) {
             return new StandardDeviation();
         } else {
