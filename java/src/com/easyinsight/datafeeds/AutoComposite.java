@@ -672,8 +672,16 @@ public class AutoComposite {
             for (DashboardStackItem item : childStack.getGridItems()) {
                 if ("Overview".equals(item.getDashboardElement().getLabel()) || "What's Happening".equals(item.getDashboardElement().getLabel()) ||
                         "What's Happening Now".equals(item.getDashboardElement().getLabel())) {
-                    DashboardStackItem clone = item.clone();
-                    masterStackChildren.add(clone);
+                    if (item.getDashboardElement() instanceof DashboardGrid) {
+                        DashboardStackItem clone = item.clone();
+                        masterStackChildren.add(clone);
+                    } else if (item.getDashboardElement() instanceof DashboardStack) {
+                        DashboardStack analyzeStack = (DashboardStack) item.getDashboardElement();
+                        for (DashboardStackItem analyzeItem : analyzeStack.getGridItems()) {
+                            DashboardStackItem clone = analyzeItem.clone();
+                            masterStackChildren.add(clone);
+                        }
+                    }
                 } else if ("Analyze".equals(item.getDashboardElement().getLabel())) {
                     if (item.getDashboardElement() instanceof DashboardStack) {
                         DashboardStack analyzeStack = (DashboardStack) item.getDashboardElement();
