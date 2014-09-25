@@ -644,6 +644,61 @@ public class DashboardService {
         }
     }
 
+    public Dashboard saveDashboardWithConn(Dashboard dashboard, EIConnection conn) {
+        if (dashboard.getId() > 0) {
+            SecurityUtil.authorizeDashboard(dashboard.getId(), Roles.EDITOR);
+        } else {
+            SecurityUtil.authorizeFeedAccess(dashboard.getDataSourceID());
+        }
+        try {
+            if (dashboard.getUrlKey() == null) {
+                dashboard.setUrlKey(RandomTextGenerator.generateText(15));
+                dashboard.setCreationDate(new Date());
+                dashboard.setAuthorName(SecurityUtil.getUserName());
+            }
+            dashboard.setUpdateDate(new Date());
+            if (dashboard.getAdministrators() == null || dashboard.getAdministrators().isEmpty()) {
+                UserStub userStub = new UserStub();
+                userStub.setUserID(SecurityUtil.getUserID());
+                dashboard.setAdministrators(Arrays.asList((FeedConsumer) userStub));
+            }
+            dashboardStorage.saveDashboard(dashboard, conn);
+
+            /*if (dashboardCache != null) {
+                dashboardCache.remove(cacheKey);
+            }*/
+            MemCachedManager.delete("dashboard" + dashboard.getId());
+
+            Set<Long> reportIDs = dashboard.containedReports();
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE, ACCOUNT_VISIBLE, PUBLIC_WITH_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                boolean accessProblem = false;
+                for (Long reportID : reportIDs) {
+                    queryStmt.setLong(1, reportID);
+                    ResultSet rs = queryStmt.executeQuery();
+                    if (rs.next()) {
+                        boolean publicVisible = rs.getBoolean(1);
+                        boolean accountVisible = rs.getBoolean(2);
+                        boolean publicWithKey = rs.getBoolean(3);
+                        if (dashboard.isPublicVisible() && !publicVisible) {
+                            accessProblem = true;
+                        }
+                        if (dashboard.isAccountVisible() && !accountVisible) {
+                            accessProblem = true;
+                        }
+                        if (dashboard.isPublicWithKey() && !publicWithKey) {
+                            accessProblem = true;
+                        }
+                    }
+                }
+                dashboard.setReportAccessProblem(accessProblem);
+
+            return dashboard;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void updateReportVisibility(long dashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID, Roles.EDITOR);
         EIConnection conn = Database.instance().getConnection();
