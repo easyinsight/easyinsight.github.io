@@ -450,7 +450,7 @@ public class AutoComposite {
 
         List<WSColumnChartDefinition> fullTrendReports = allReports.stream().filter(report -> report.getReportType() == WSAnalysisDefinition.COLUMN).
                 map(report -> (WSColumnChartDefinition) new AnalysisStorage().getAnalysisDefinition(report.getId(), conn)).
-                filter(WSColumnChartDefinition::seemsLikeDashboardTrendReport).
+                filter(WSColumnChartDefinition::seemsLikeDashboardTrendReport).filter(report -> (!report.getName().contains("- Trend QoQ") && !report.getName().contains("- Trend MoM"))).
                 collect(Collectors.toList());
 
         List<WSColumnChartDefinition> qoqTrends = new ArrayList<>();
@@ -459,14 +459,14 @@ public class AutoComposite {
         for (WSColumnChartDefinition chart : fullTrendReports) {
             AnalysisDateDimension qoqDate = (AnalysisDateDimension) chart.getXaxis();
             qoqDate.setDateLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
-            WSColumnChartDefinition qoqCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - QoQ");
+            WSColumnChartDefinition qoqCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - Trend QoQ");
 
             //new AnalysisService().saveReportWithConn(qoqCopy, conn);
             qoqTrends.add(qoqCopy);
 
             AnalysisDateDimension momDate = (AnalysisDateDimension) chart.getXaxis();
             momDate.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
-            WSColumnChartDefinition momCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - MoM");
+            WSColumnChartDefinition momCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - Trend MoM");
             //new AnalysisService().saveReportWithConn(momCopy, conn);
             momTrends.add(momCopy);
         }
@@ -493,6 +493,8 @@ public class AutoComposite {
                 qoqTrendGrid.setRows(newRows);
                 for (InsightDescriptor gauge : trendReports) {
                     DashboardGridItem dashboardGridItem = createReportInGrid(gauge, 0, 0);
+                    DashboardReport dashboardReport = (DashboardReport) dashboardGridItem.getDashboardElement();
+                    dashboardReport.setPreferredHeight(300);
                     qoqTrendGrid.getGridItems().add(dashboardGridItem);
                 }
                 int totalCtr = 0;
