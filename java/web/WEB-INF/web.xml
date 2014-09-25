@@ -234,8 +234,23 @@
     </servlet>
 
     <servlet>
+        <servlet-name>CSVUpload</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.CSVUploadServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>CreateUser</servlet-name>
         <servlet-class>com.easyinsight.html.CreateUserServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CreateFlatFileSource</servlet-name>
+        <servlet-class>com.easyinsight.html.CreateFlatFileSourceServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>RefreshFlatFileSource</servlet-name>
+        <servlet-class>com.easyinsight.html.RefreshFlatFileSourceServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -257,6 +272,11 @@
     <servlet>
         <servlet-name>FieldServlet</servlet-name>
         <servlet-class>com.easyinsight.api.v3.FieldsServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>DataSourceSuggestions</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.SuggestedActionsServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -364,6 +384,21 @@
     <servlet>
         <servlet-name>HtmlDashboardPDF</servlet-name>
         <servlet-class>com.easyinsight.export.DashboardPDFServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CreateAutoDashboard</servlet-name>
+        <servlet-class>com.easyinsight.datafeeds.DataSourceSuggestionServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>QuickReportDeliverySetup</servlet-name>
+        <servlet-class>com.easyinsight.export.QuickReportDeliveryServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CreateAutoDataSource</servlet-name>
+        <servlet-class>com.easyinsight.datafeeds.CreateAutoDataSourceServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -885,6 +920,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>CSVUpload</servlet-name>
+        <url-pattern>/connection/csvupload</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>DeleteUsersServlet</servlet-name>
         <url-pattern>/html/account/deleteUsers</url-pattern>
     </servlet-mapping>
@@ -923,6 +963,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>DataSourceSuggestions</servlet-name>
+        <url-pattern>/json/dataSourceSuggestions</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>JSONMeServlet</servlet-name>
         <url-pattern>/me.json</url-pattern>
     </servlet-mapping>
@@ -949,6 +994,16 @@
     <servlet-mapping>
         <servlet-name>CreateUser</servlet-name>
         <url-pattern>/html/account/createUser</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CreateFlatFileSource</servlet-name>
+        <url-pattern>/html/connection/createFlatFileSource</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>RefreshFlatFileSource</servlet-name>
+        <url-pattern>/html/connection/refreshFlatFileSource</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -1012,6 +1067,21 @@
     <servlet-mapping>
         <servlet-name>ReportTags</servlet-name>
         <url-pattern>/html/reportTags.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CreateAutoDashboard</servlet-name>
+        <url-pattern>/createAuthDashboard</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>QuickReportDeliverySetup</servlet-name>
+        <url-pattern>/quickReportDeliverySetup</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CreateAutoDataSource</servlet-name>
+        <url-pattern>/autoDataSourceAction</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -1258,7 +1328,7 @@
     <servlet-mapping>
         <servlet-name>ConnectionInstalled</servlet-name>
         <url-pattern>/connectionInstalled</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>                                                                                                                                                                      a
 
     <servlet-mapping>
         <servlet-name>CompleteInstallation</servlet-name>
