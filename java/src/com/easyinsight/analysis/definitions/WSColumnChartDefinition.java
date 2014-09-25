@@ -222,4 +222,21 @@ public class WSColumnChartDefinition extends WSXAxisDefinition {
     protected List<MultiColor> configuredMultiColors() {
         return multiColors;
     }
+
+    public boolean seemsLikeDashboardTrendReport() {
+        if (!getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            return false;
+        }
+        if (getFilterDefinitions().size() == 0) {
+            return false;
+        }
+
+        for (FilterDefinition filter : getFilterDefinitions()) {
+            if (filter.getChildToParentLabel() != null && "Date".equals(filter.getChildToParentLabel())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
