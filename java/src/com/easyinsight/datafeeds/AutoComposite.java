@@ -1,10 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
-import com.easyinsight.analysis.definitions.WSLineChartDefinition;
-import com.easyinsight.analysis.definitions.WSTrendDefinition;
-import com.easyinsight.analysis.definitions.WSYTDDefinition;
+import com.easyinsight.analysis.definitions.*;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.core.DerivedKey;
@@ -17,6 +14,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -153,8 +151,44 @@ public class AutoComposite {
         DashboardStackItem overviewItem = new DashboardStackItem();
         overviewItem.setDashboardElement(overview);
         overviewItems.add(overviewItem);
-        overview.setRows(2);
+        overview.setRows(3);
         overview.setColumns(1);
+
+        List<DashboardGridItem> overviewGridItems = new ArrayList<>();
+
+        WSTextDefinition kpiTime = new WSTextDefinition();
+        kpiTime.setReportType(WSAnalysisDefinition.TEXT);
+        kpiTime.setName("KPI Time");
+        kpiTime.setText("The KPIs below show values for the current quarter to date ('''{[Now]}''') as compared to their values in the last quarter to date ('''{[Previous]}''').");
+        kpiTime.setDataFeedID(parent.getDataFeedID());
+        {
+            RollingFilterDefinition previousFilter = new RollingFilterDefinition();
+            previousFilter.setFilterName("Previous");
+            RollingFilterDefinition newFilter = new RollingFilterDefinition();
+            newFilter.setFilterName("Now");
+            DerivedAnalysisDateDimension comparison = new DerivedAnalysisDateDimension();
+            comparison.setConcrete(false);
+            comparison.setApplyBeforeAggregation(true);
+            comparison.setDerivationCode("nowdate()");
+            comparison.setKey(new NamedKey("Date"));
+            previousFilter.setField(comparison);
+            newFilter.setField(comparison);
+            previousFilter.setInterval(MaterializedRollingFilterDefinition.LAST_QUARTER_TO_NOW);
+            previousFilter.setShowOnReportView(false);
+            newFilter.setInterval(MaterializedRollingFilterDefinition.QUARTER_TO_NOW);
+            newFilter.setShowOnReportView(false);
+            kpiTime.setAddedItems(Arrays.asList(comparison));
+            kpiTime.setFilterDefinitions(Arrays.asList(newFilter, previousFilter));
+        }
+        kpiTime.setColumns(new ArrayList<>());
+        long kpiTimeID = new AnalysisService().saveReportWithConn(kpiTime, conn).getAnalysisID();
+        InsightDescriptor kpiTimeDescriptor = new InsightDescriptor();
+        kpiTimeDescriptor.setId(kpiTimeID);
+        DashboardReport kpiTimeReport = new DashboardReport();
+        kpiTimeReport.setReport(kpiTimeDescriptor);
+        DashboardGridItem kpiTimeGridItem = new DashboardGridItem();
+        kpiTimeGridItem.setDashboardElement(kpiTimeReport);
+        overviewGridItems.add(kpiTimeGridItem);
 
         DashboardGrid gaugesGrid = new DashboardGrid();
 
@@ -184,12 +218,31 @@ public class AutoComposite {
         int ctr = 0;
         List<DashboardGridItem> gaugeGridItems = new ArrayList<>();
         for (Map.Entry<AnalysisItem, Long> entry : kpiMap.entrySet()) {
+            AnalysisItem clone = entry.getKey().clone();
             WSTrendDefinition newTrendDefinition = new WSTrendDefinition();
+            RollingFilterDefinition previousFilter = new RollingFilterDefinition();
+            previousFilter.setFilterName("Previous");
+            RollingFilterDefinition newFilter = new RollingFilterDefinition();
+            newFilter.setFilterName("Now");
+            DerivedAnalysisDateDimension comparison = new DerivedAnalysisDateDimension();
+            comparison.setConcrete(false);
+            comparison.setApplyBeforeAggregation(true);
+            comparison.setDerivationCode("nowdate()");
+            comparison.setKey(new NamedKey("Date"));
+            newTrendDefinition.setAddedItems(Arrays.asList(comparison));
+            newTrendDefinition.setNowDate("Now");
+            newTrendDefinition.setPreviousDate("Previous");
+            previousFilter.setField(comparison);
+            newFilter.setField(comparison);
+            previousFilter.setInterval(MaterializedRollingFilterDefinition.LAST_QUARTER_TO_NOW);
+            previousFilter.setShowOnReportView(false);
+            newFilter.setInterval(MaterializedRollingFilterDefinition.QUARTER_TO_NOW);
+            newFilter.setShowOnReportView(false);
             newTrendDefinition.setDataFeedID(entry.getValue());
-            newTrendDefinition.setMeasures(Arrays.asList(entry.getKey()));
+            newTrendDefinition.setMeasures(Arrays.asList(clone));
             newTrendDefinition.setName(entry.getKey().toDisplay());
             newTrendDefinition.setReportType(WSTrendDefinition.TREND);
-            newTrendDefinition.setFilterDefinitions(new ArrayList<>());
+            newTrendDefinition.setFilterDefinitions(Arrays.asList(previousFilter, newFilter));
             newTrendDefinition.setMajorFontSize(24);
             newTrendDefinition.setMinorFontSize(12);
             WSAnalysisDefinition savedTrend = new AnalysisService().saveReportWithConn(newTrendDefinition, conn);
@@ -208,13 +261,13 @@ public class AutoComposite {
         gaugesGrid.setColumns(gaugeGridItems.size());
         gaugesGrid.setRows(1);
 
-        List<DashboardGridItem> overviewGridItems = new ArrayList<>();
+
 
         gaugesGrid.setGridItems(gaugeGridItems);
 
         DashboardGridItem gaugesGridGridItem = new DashboardGridItem();
         gaugesGridGridItem.setColumnIndex(0);
-        gaugesGridGridItem.setRowIndex(0);
+        gaugesGridGridItem.setRowIndex(1);
         gaugesGridGridItem.setDashboardElement(gaugesGrid);
         overviewGridItems.add(gaugesGridGridItem);
 
@@ -286,7 +339,7 @@ public class AutoComposite {
 
         DashboardGridItem coolChartGridItem = new DashboardGridItem();
         coolChartGridItem.setColumnIndex(0);
-        coolChartGridItem.setRowIndex(1);
+        coolChartGridItem.setRowIndex(2);
 
         DashboardGrid coolChartGrid = new DashboardGrid();
         coolChartGrid.setGridItems(new ArrayList<>());
@@ -352,26 +405,27 @@ public class AutoComposite {
         }
 
         overview.setGridItems(overviewGridItems);
+        overview.setRows(overviewGridItems.size());
         return overviewPlacerHolderItem;
     }
 
-    private DashboardStackItem createTrends(long lineChartID, long ytdID) throws SQLException {
+    private DashboardStackItem createTrends(long lineChartID, long ytdID) throws SQLException, CloneNotSupportedException {
 
         DashboardStack trendStack = new DashboardStack();
         trendStack.setLabel("What's Happened");
 
         MultiFlatDateFilter trendFilter = new MultiFlatDateFilter();
         trendFilter.setIncludeRelative(true);
-        trendFilter.setLevel(AnalysisDateDimension.MONTH_LEVEL);
+        trendFilter.setLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
         trendFilter.setUnitsBack(50);
         trendFilter.setUnitsForward(2);
         List<DateLevelWrapper> levels = new DataService().getMultiDateOptions(trendFilter);
         int startLevel = 0;
         int endLevel = 0;
         for (DateLevelWrapper level : levels) {
-            if ("First Month of Year".equals(level.getDisplay())) {
+            if ("First Quarter of Year".equals(level.getDisplay())) {
                 startLevel = level.getDateLevel();
-            } else if ("This Month".equals(level.getDisplay())) {
+            } else if ("This Quarter".equals(level.getDisplay())) {
                 endLevel = level.getDateLevel();
             }
         }
@@ -389,56 +443,129 @@ public class AutoComposite {
         trendFilter.setParentChildLabel("Date");
         trendStack.setFilters(Arrays.asList(trendFilter));
 
-        DashboardGrid trendGrid = new DashboardGrid();
-        trendGrid.setGridItems(new ArrayList<>());
-        trendGrid.setLabel("Trends");
+        List<DashboardStackItem> trendStackItems = new ArrayList<>();
+
 
         // find any report of type trend chart...
 
-        List<InsightDescriptor> trendReports = allReports.stream().filter(report -> report.getReportType() == WSAnalysisDefinition.COLUMN).
+        List<WSColumnChartDefinition> fullTrendReports = allReports.stream().filter(report -> report.getReportType() == WSAnalysisDefinition.COLUMN).
                 map(report -> (WSColumnChartDefinition) new AnalysisStorage().getAnalysisDefinition(report.getId(), conn)).
                 filter(WSColumnChartDefinition::seemsLikeDashboardTrendReport).
-                map(report -> new InsightDescriptor(report.getAnalysisID(), report.getName(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), Roles.OWNER, true)).
                 collect(Collectors.toList());
 
-        if (trendReports.size() > 6) {
-            trendReports = trendReports.subList(0, 6);
+        List<WSColumnChartDefinition> qoqTrends = new ArrayList<>();
+        List<WSColumnChartDefinition> momTrends = new ArrayList<>();
+
+        for (WSColumnChartDefinition chart : fullTrendReports) {
+            AnalysisDateDimension qoqDate = (AnalysisDateDimension) chart.getXaxis();
+            qoqDate.setDateLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
+            WSColumnChartDefinition qoqCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - QoQ");
+
+            //new AnalysisService().saveReportWithConn(qoqCopy, conn);
+            qoqTrends.add(qoqCopy);
+
+            AnalysisDateDimension momDate = (AnalysisDateDimension) chart.getXaxis();
+            momDate.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
+            WSColumnChartDefinition momCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - MoM");
+            //new AnalysisService().saveReportWithConn(momCopy, conn);
+            momTrends.add(momCopy);
         }
 
-        if (trendReports.size() > 0) {
-            int currentCapacity = trendGrid.getGridItems().size();
-            int newMaxSize = currentCapacity + trendReports.size();
-            int newColumns = 2;
-            int newRows = (int) Math.ceil((double) newMaxSize / 2);
-            trendGrid.setColumns(newColumns);
-            trendGrid.setRows(newRows);
-            for (InsightDescriptor gauge : trendReports) {
-                DashboardGridItem dashboardGridItem = createReportInGrid(gauge, 0, 0);
-                trendGrid.getGridItems().add(dashboardGridItem);
+        {
+            DashboardGrid qoqTrendGrid = new DashboardGrid();
+            qoqTrendGrid.setGridItems(new ArrayList<>());
+            qoqTrendGrid.setLabel("QoQ Trends");
+
+            List<InsightDescriptor> trendReports = qoqTrends.stream().
+                    map(report -> new InsightDescriptor(report.getAnalysisID(), report.getName(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), Roles.OWNER, true)).
+                    collect(Collectors.toList());
+
+            if (trendReports.size() > 8) {
+                trendReports = trendReports.subList(0, 8);
             }
-            int totalCtr = 0;
-            for (int rowCtr = 0; rowCtr < newRows; rowCtr++) {
-                for (int colCtr = 0; colCtr < newColumns; colCtr++) {
-                    DashboardGridItem gridItem;
-                    if (totalCtr < trendGrid.getGridItems().size()) {
-                        gridItem = trendGrid.getGridItems().get(totalCtr++);
-                    } else {
-                        DashboardText ph = new DashboardText();
-                        ph.setText("");
-                        gridItem = new DashboardGridItem();
-                        gridItem.setDashboardElement(ph);
-                        trendGrid.getGridItems().add(gridItem);
+
+            if (trendReports.size() > 0) {
+                int currentCapacity = qoqTrendGrid.getGridItems().size();
+                int newMaxSize = currentCapacity + trendReports.size();
+                int newColumns = 2;
+                int newRows = (int) Math.ceil((double) newMaxSize / 2);
+                qoqTrendGrid.setColumns(newColumns);
+                qoqTrendGrid.setRows(newRows);
+                for (InsightDescriptor gauge : trendReports) {
+                    DashboardGridItem dashboardGridItem = createReportInGrid(gauge, 0, 0);
+                    qoqTrendGrid.getGridItems().add(dashboardGridItem);
+                }
+                int totalCtr = 0;
+                for (int rowCtr = 0; rowCtr < newRows; rowCtr++) {
+                    for (int colCtr = 0; colCtr < newColumns; colCtr++) {
+                        DashboardGridItem gridItem;
+                        if (totalCtr < qoqTrendGrid.getGridItems().size()) {
+                            gridItem = qoqTrendGrid.getGridItems().get(totalCtr++);
+                        } else {
+                            DashboardText ph = new DashboardText();
+                            ph.setText("");
+                            gridItem = new DashboardGridItem();
+                            gridItem.setDashboardElement(ph);
+                            qoqTrendGrid.getGridItems().add(gridItem);
+                        }
+                        gridItem.setColumnIndex(colCtr);
+                        gridItem.setRowIndex(rowCtr);
                     }
-                    gridItem.setColumnIndex(colCtr);
-                    gridItem.setRowIndex(rowCtr);
                 }
             }
+
+            DashboardStackItem trendStackItem = new DashboardStackItem();
+            trendStackItem.setDashboardElement(qoqTrendGrid);
+            trendStackItems.add(trendStackItem);
         }
 
-        DashboardStackItem trendStackItem = new DashboardStackItem();
-        trendStackItem.setDashboardElement(trendGrid);
-        List<DashboardStackItem> trendStackItems = new ArrayList<>();
-        trendStackItems.add(trendStackItem);
+        {
+            DashboardGrid momTrendGrid = new DashboardGrid();
+            momTrendGrid.setGridItems(new ArrayList<>());
+            momTrendGrid.setLabel("MoM Trends");
+
+            List<InsightDescriptor> trendReports = momTrends.stream().
+                    map(report -> new InsightDescriptor(report.getAnalysisID(), report.getName(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), Roles.OWNER, true)).
+                    collect(Collectors.toList());
+
+            if (trendReports.size() > 8) {
+                trendReports = trendReports.subList(0, 8);
+            }
+
+            if (trendReports.size() > 0) {
+                int currentCapacity = momTrendGrid.getGridItems().size();
+                int newMaxSize = currentCapacity + trendReports.size();
+                int newColumns = 2;
+                int newRows = (int) Math.ceil((double) newMaxSize / 2);
+                momTrendGrid.setColumns(newColumns);
+                momTrendGrid.setRows(newRows);
+                for (InsightDescriptor gauge : trendReports) {
+                    DashboardGridItem dashboardGridItem = createReportInGrid(gauge, 0, 0);
+                    momTrendGrid.getGridItems().add(dashboardGridItem);
+                }
+                int totalCtr = 0;
+                for (int rowCtr = 0; rowCtr < newRows; rowCtr++) {
+                    for (int colCtr = 0; colCtr < newColumns; colCtr++) {
+                        DashboardGridItem gridItem;
+                        if (totalCtr < momTrendGrid.getGridItems().size()) {
+                            gridItem = momTrendGrid.getGridItems().get(totalCtr++);
+                        } else {
+                            DashboardText ph = new DashboardText();
+                            ph.setText("");
+                            gridItem = new DashboardGridItem();
+                            gridItem.setDashboardElement(ph);
+                            momTrendGrid.getGridItems().add(gridItem);
+                        }
+                        gridItem.setColumnIndex(colCtr);
+                        gridItem.setRowIndex(rowCtr);
+                    }
+                }
+            }
+
+            DashboardStackItem trendStackItem = new DashboardStackItem();
+            trendStackItem.setDashboardElement(momTrendGrid);
+            trendStackItems.add(trendStackItem);
+        }
 
         {
             if (lineChartID > 0) {
@@ -477,6 +604,25 @@ public class AutoComposite {
         DashboardStackItem t = new DashboardStackItem();
         t.setDashboardElement(trendStack);
         return t;
+    }
+
+    private WSAnalysisDefinition copyReport(WSAnalysisDefinition source, String newName) throws SQLException, CloneNotSupportedException {
+        AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(source);
+        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(source.getDataFeedID(), conn);
+        List<AnalysisItem> allFields = feedDefinition.allFields(conn);
+        AnalysisDefinition.SaveMetadata metadata = analysisDefinition.clone(allFields, false);
+        AnalysisDefinition clone = metadata.analysisDefinition;
+        AnalysisDefinition.updateFromMetadata(null, metadata.replacementMap, clone, allFields, metadata.added);
+        clone.setAuthorName(SecurityUtil.getUserName());
+        clone.setTitle(newName);
+        List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
+        bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
+        clone.setUserBindings(bindings);
+        Session session = Database.instance().createSession(conn);
+        new AnalysisStorage().saveAnalysis(clone, session);
+        session.flush();
+        session.close();
+        return clone.createBlazeDefinition();
     }
 
     private void createDataSourceStack() throws SQLException, CloneNotSupportedException {
