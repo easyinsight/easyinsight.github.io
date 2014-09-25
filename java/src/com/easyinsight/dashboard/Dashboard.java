@@ -79,6 +79,15 @@ public class Dashboard implements Cloneable, Serializable {
     private String colorSet;
     private int reportHeaderBackgroundColor = 0xDDDDDD;
     private int reportHeaderTextColor;
+    private boolean autoCombined;
+
+    public boolean isAutoCombined() {
+        return autoCombined;
+    }
+
+    public void setAutoCombined(boolean autoCombined) {
+        this.autoCombined = autoCombined;
+    }
 
     public int getReportHeaderBackgroundColor() {
         return reportHeaderBackgroundColor;

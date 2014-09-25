@@ -49,6 +49,9 @@ public class DashboardGridItem implements Cloneable, Serializable {
     }
 
     public void save(EIConnection conn, long dashboardGridID) throws SQLException {
+        if (dashboardElement == null) {
+            System.out.println(".");
+        }
         dashboardElement.save(conn);
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DASHBOARD_GRID_ITEM (COLUMN_POSITION, ROW_POSITION," +
                 "DASHBOARD_ELEMENT_ID, DASHBOARD_GRID_ID) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);

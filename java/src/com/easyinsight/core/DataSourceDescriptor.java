@@ -35,7 +35,16 @@ public class DataSourceDescriptor extends EIDescriptor {
     private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
     private List<Tag> tags;
     private int rowCount;
+    private boolean autoCombined;
     private Collection<EIDescriptor> prebuilts;
+
+    public boolean isAutoCombined() {
+        return autoCombined;
+    }
+
+    public void setAutoCombined(boolean autoCombined) {
+        this.autoCombined = autoCombined;
+    }
 
     public Collection<EIDescriptor> getPrebuilts() {
         return prebuilts;
@@ -167,7 +176,6 @@ public class DataSourceDescriptor extends EIDescriptor {
                 ja.put(to);
             }
         jo.put("tags", ja);
-
         if (lastDataTime != null) {
             jo.put("last_refresh_time", dateFormat.format(lastDataTime));
         } else {
@@ -180,6 +188,7 @@ public class DataSourceDescriptor extends EIDescriptor {
         }
 
 
+        jo.put("data_source_type", dataSourceType);
         return jo;
     }
 }

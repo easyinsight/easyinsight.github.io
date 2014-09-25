@@ -2967,6 +2967,153 @@ public class AnalysisService {
         }
     }
 
+    public WSAnalysisDefinition saveReportWithConn(WSAnalysisDefinition wsAnalysisDefinition, EIConnection conn) {
+
+        long userID = SecurityUtil.getUserID();
+        if (wsAnalysisDefinition.getAnalysisID() > 0) {
+            SecurityUtil.authorizeReport(wsAnalysisDefinition.getAnalysisID(), Roles.EDITOR);
+        } else {
+            SecurityUtil.authorizeFeedAccess(wsAnalysisDefinition.getDataFeedID());
+        }
+        try {
+            if (wsAnalysisDefinition.getJoinOverrides() != null) {
+                Map<Long, AnalysisItem> dupeMap = new HashMap<Long, AnalysisItem>();
+                for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                    if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                        dupeMap.put(joinOverride.getSourceItem().getAnalysisItemID(), joinOverride.getSourceItem());
+                    }
+                    if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                        dupeMap.put(joinOverride.getTargetItem().getAnalysisItemID(), joinOverride.getTargetItem());
+                    }
+                }
+                for (JoinOverride joinOverride : wsAnalysisDefinition.getJoinOverrides()) {
+                    if (joinOverride.getSourceItem() != null && joinOverride.getSourceItem().getAnalysisItemID() > 0) {
+                        joinOverride.setSourceItem(dupeMap.get(joinOverride.getSourceItem().getAnalysisItemID()));
+                    }
+                    if (joinOverride.getTargetItem() != null && joinOverride.getTargetItem().getAnalysisItemID() > 0) {
+                        joinOverride.setTargetItem(dupeMap.get(joinOverride.getTargetItem().getAnalysisItemID()));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        long reportID;
+
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement getBindingsStmt = conn.prepareStatement("SELECT USER_ID, RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE ANALYSIS_ID = ?");
+            getBindingsStmt.setLong(1, wsAnalysisDefinition.getAnalysisID());
+            ResultSet rs = getBindingsStmt.executeQuery();
+            List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
+            while (rs.next()) {
+                long bindingUserID = rs.getLong(1);
+                int relationshipType = rs.getInt(2);
+                bindings.add(new UserToAnalysisBinding(bindingUserID, relationshipType));
+            }
+            if (bindings.isEmpty()) {
+                bindings.add(new UserToAnalysisBinding(userID, UserPermission.OWNER));
+            }
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM USER_TO_ANALYSIS WHERE ANALYSIS_ID = ?");
+            stmt.setLong(1, wsAnalysisDefinition.getAnalysisID());
+            stmt.executeUpdate();
+
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
+            analysisDefinition.setUserBindings(bindings);
+            analysisDefinition.setAuthorName(SecurityUtil.getUserName());
+            analysisStorage.saveAnalysis(analysisDefinition, session);
+            XMLMetadata xmlMetadata = new XMLMetadata();
+            xmlMetadata.setConn(conn);
+            /*String xml = analysisDefinition.toXML(xmlMetadata);
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO REPORT_HISTORY (INSERT_TIME, URL_KEY, REPORT_XML, ACCOUNT_ID) VALUES (?, ?, ?, ?)");
+            saveStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+            saveStmt.setString(2, analysisDefinition.getUrlKey());
+            saveStmt.setString(3, xml);
+            saveStmt.setLong(4, SecurityUtil.getAccountID());
+            saveStmt.execute();*/
+            session.flush();
+            reportID = analysisDefinition.getAnalysisID();
+        } catch (NonUniqueObjectException noe) {
+            if (noe.getMessage().contains("Analysis")) {
+                String idString = noe.getMessage().substring(noe.getMessage().lastIndexOf("#") + 1, noe.getMessage().length() - 1);
+                long id = Long.parseLong(idString);
+                try {
+                    Feed feed = FeedRegistry.instance().getFeed(wsAnalysisDefinition.getDataFeedID());
+                    Set<AnalysisItem> items = wsAnalysisDefinition.getColumnItems(feed.getFields(), new AnalysisItemRetrievalStructure(null), new InsightRequestMetadata());
+                    for (AnalysisItem item : items) {
+                        if (item.getAnalysisItemID() == id) {
+                            LogClass.error("Error included item " + item.toDisplay() + " - " + item.getAnalysisItemID());
+                        }
+                    }
+                } catch (Throwable t) {
+                    LogClass.error(t);
+                }
+            }
+            LogClass.error(noe);
+            throw new RuntimeException(noe);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+
+        }
+        if (wsAnalysisDefinition.isPersistedCache()) {
+            createCachedAddon(reportID, wsAnalysisDefinition.getName());
+        } else {
+
+            try {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE REPORT_ID = ?");
+                queryStmt.setLong(1, reportID);
+                ResultSet rs = queryStmt.executeQuery();
+                if (rs.next()) {
+                    long existingID = rs.getLong(1);
+                    new UserUploadService().deleteUserUpload(existingID);
+                }
+                queryStmt.close();
+                // TODO: maybe pare back?
+                PreparedStatement parentStmt = conn.prepareStatement("SELECT COMPOSITE_FEED.DATA_FEED_ID FROM COMPOSITE_FEED, COMPOSITE_NODE WHERE " +
+                        "COMPOSITE_FEED.COMPOSITE_FEED_ID = COMPOSITE_NODE.COMPOSITE_FEED_ID AND COMPOSITE_NODE.DATA_FEED_ID = ?");
+                PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
+                reportSourceQuery.setLong(1, reportID);
+                ResultSet reportRS = reportSourceQuery.executeQuery();
+                Set<Long> parents = new HashSet<Long>();
+                while (reportRS.next()) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(reportRS.getLong(1), conn);
+                    ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) dataSource;
+                    serverDataSourceDefinition.migrations(conn, null);
+                    parentStmt.setLong(1, dataSource.getDataFeedID());
+                    ResultSet parentRS = parentStmt.executeQuery();
+                    while (parentRS.next()) {
+                        parents.add(parentRS.getLong(1));
+                    }
+                }
+                for (Long parentID : parents) {
+                    FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(parentID, conn);
+                    new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+                }
+                reportSourceQuery.close();
+                parentStmt.close();
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+        }
+        if (wsAnalysisDefinition.isDataSourceFieldReport()) {
+            MemCachedManager.delete("ds" + wsAnalysisDefinition.getDataFeedID());
+        }
+        session = Database.instance().createSession(conn);
+        try {
+            AnalysisDefinition savedReport = analysisStorage.getPersistableReport(reportID, session);
+            WSAnalysisDefinition result = savedReport.createBlazeDefinition();
+            return result;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     private void createCachedAddon(final long reportID, final String name) {
         final String userName = SecurityUtil.getUserName();
         final long userID = SecurityUtil.getUserID();

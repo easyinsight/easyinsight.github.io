@@ -1,15 +1,11 @@
 package com.easyinsight.dashboard;
 
-import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.Link;
 import com.easyinsight.core.RolePrioritySet;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.CompositeFeedNode;
-import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedConsumer;
-import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.security.Roles;
@@ -268,8 +264,8 @@ public class DashboardStorage {
                     "recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
                     "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, " +
                     "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id, color_set," +
-                    "report_header_background_color, report_header_text_color) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "report_header_background_color, report_header_text_color, auto_dashboard) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     PreparedStatement.RETURN_GENERATED_KEYS);
             insertStmt.setString(1, dashboard.getName());
             insertStmt.setString(2, dashboard.getUrlKey());
@@ -325,6 +321,7 @@ public class DashboardStorage {
             insertStmt.setString(36, dashboard.getColorSet());
             insertStmt.setInt(37, dashboard.getReportHeaderBackgroundColor());
             insertStmt.setInt(38, dashboard.getReportHeaderTextColor());
+            insertStmt.setBoolean(39, dashboard.isAutoCombined());
             insertStmt.execute();
             dashboard.setId(Database.instance().getAutoGenKey(insertStmt));
             insertStmt.close();
@@ -335,7 +332,8 @@ public class DashboardStorage {
                     "recommended_exchange = ?, ytd_date = ?, ytd_override = ?, marmotscript = ?, folder = ?, absolute_sizing = ?," +
                     "stack_fill1_start = ?, stack_fill1_end = ?, stack_fill2_start = ?, stack_fill2_end = ?, stack_fill_enabled = ?, report_horizontal_padding = ?," +
                     "default_link = ?, image_full_header = ?, header_image_id = ?, dashboard_version = ?, persist_state = ?, embed_with_key = ?," +
-                    "tablet_dashboard_id = ?, phone_dashboard_id = ?, color_set = ?, report_header_background_color = ?, report_header_text_color = ? WHERE DASHBOARD_ID = ?");
+                    "tablet_dashboard_id = ?, phone_dashboard_id = ?, color_set = ?, report_header_background_color = ?, report_header_text_color = ?," +
+                    "auto_dashboard = ? WHERE DASHBOARD_ID = ?");
             updateStmt.setString(1, dashboard.getName());
             updateStmt.setString(2, dashboard.getUrlKey());
             updateStmt.setBoolean(3, dashboard.isAccountVisible());
@@ -388,7 +386,8 @@ public class DashboardStorage {
             updateStmt.setString(34, dashboard.getColorSet());
             updateStmt.setInt(35, dashboard.getReportHeaderBackgroundColor());
             updateStmt.setInt(36, dashboard.getReportHeaderTextColor());
-            updateStmt.setLong(37, dashboard.getId());
+            updateStmt.setBoolean(37, dashboard.isAutoCombined());
+            updateStmt.setLong(38, dashboard.getId());
             updateStmt.executeUpdate();
             updateStmt.close();
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ?");
@@ -449,7 +448,7 @@ public class DashboardStorage {
                 "background_color, padding, recommended_exchange, ytd_date, ytd_override, marmotscript, folder, absolute_sizing," +
                 "stack_fill1_start, stack_fill1_end, stack_fill2_start, stack_fill2_end, stack_fill_enabled, report_horizontal_padding, " +
                 "default_link, image_full_header, header_image_id, dashboard_version, persist_state, embed_with_key, tablet_dashboard_id, phone_dashboard_id, color_set, " +
-                "report_header_background_color, report_header_text_color FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+                "report_header_background_color, report_header_text_color, auto_dashboard FROM DASHBOARD WHERE DASHBOARD_ID = ?");
         queryStmt.setLong(1, dashboardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -522,6 +521,7 @@ public class DashboardStorage {
             dashboard.setColorSet(rs.getString(36));
             dashboard.setReportHeaderBackgroundColor(rs.getInt(37));
             dashboard.setReportHeaderTextColor(rs.getInt(38));
+            dashboard.setAutoCombined(rs.getBoolean(39));
             PreparedStatement findElementsStmt = conn.prepareStatement("SELECT DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID, ELEMENT_TYPE FROM " +
                     "DASHBOARD_ELEMENT, DASHBOARD_TO_DASHBOARD_ELEMENT WHERE DASHBOARD_ID = ? AND DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID = DASHBOARD_TO_DASHBOARD_ELEMENT.DASHBOARD_ELEMENT_ID");
             findElementsStmt.setLong(1, dashboardID);

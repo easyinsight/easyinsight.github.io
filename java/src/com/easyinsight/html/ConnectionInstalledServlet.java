@@ -33,9 +33,9 @@ public class ConnectionInstalledServlet extends HttpServlet {
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
             String endURL;
-            if (dataSource.rebuildFieldWindow()) {
+            /*if (dataSource.rebuildFieldWindow()) {
                 endURL = RedirectUtil.getURL(req, "/app/html/fieldSetup.jsp?dataSourceID=" + dataSourceKey);
-            } else {
+            } else {*/
                 SolutionKPIData solutionKPIData = new SolutionKPIData();
                 solutionKPIData.setDataSourceID(dataSourceID);
                 PostInstallSteps steps = new SolutionService().addKPIData(solutionKPIData);
@@ -44,7 +44,7 @@ public class ConnectionInstalledServlet extends HttpServlet {
                 } else {
                     endURL = RedirectUtil.getURL(req, "/a/data_sources/" + dataSource.getApiKey());
                 }
-            }
+            //}
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("url", endURL);
             response.setContentType("application/json");

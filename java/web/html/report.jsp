@@ -251,7 +251,7 @@
                     %>
                     <% if (designer && !iPad && !phone) { %>
                     <div class="btn-group reportControlBtnGroup" style="margin-right:5px">
-                        <a href="<%= RedirectUtil.getURL(request, "/app/embeddedReportEditor.jsp?reportID=" + report.getUrlKey())%>"
+                        <a href="<%= RedirectUtil.getURL(request, "/app/html/report/" + report.getUrlKey()) + "/edit" %>"
                            class="reportControl">Edit Report</a>
                     </div>
                     <% } %>
