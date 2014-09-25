@@ -20,6 +20,7 @@ import mx.collections.ArrayCollection;
 		public var size:int;
 		public var dateCreated:Date;
 		public var dateUpdated:Date;
+        public var autoCombined:Boolean;
 
 		public var ownerName:String;
 		public var attribution:String;
