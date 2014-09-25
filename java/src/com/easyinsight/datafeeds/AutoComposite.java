@@ -670,7 +670,7 @@ public class AutoComposite {
             List<DashboardStackItem> masterStackChildren = new ArrayList<>();
 
             for (DashboardStackItem item : childStack.getGridItems()) {
-                if ("Overview".equals(item.getDashboardElement().getLabel())) {
+                if ("Overview".equals(item.getDashboardElement().getLabel()) || "What's Happening Now".equals(item.getDashboardElement().getLabel())) {
                     DashboardStackItem clone = item.clone();
                     masterStackChildren.add(clone);
                 } else if ("Analyze".equals(item.getDashboardElement().getLabel())) {
