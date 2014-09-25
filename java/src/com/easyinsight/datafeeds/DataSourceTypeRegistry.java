@@ -137,6 +137,7 @@ public class DataSourceTypeRegistry {
         connectionBillingInfoMap.put(FeedType.PIVOTAL_V5_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.FRESHDESK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.HAPPYFOX_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.SAMPLE_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
 
         connectionBillingInfoMap.put(FeedType.CLEARDB_COMPOSITE, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.DATABASE_CONNECTION, ConnectionBillingType.CUSTOM_DATA);
