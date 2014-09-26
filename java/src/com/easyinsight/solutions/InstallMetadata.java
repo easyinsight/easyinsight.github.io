@@ -432,7 +432,6 @@ public class InstallMetadata {
         AnalysisDefinition clonedReport = metadata.analysisDefinition;
         clonedReport.setSolutionVisible(false);
         clonedReport.setRecommendedExchange(false);
-        clonedReport.setAutoSetupDelivery(false);
         clonedReport.setDataFeedID(localDefinition.getDataFeedID());
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
         return metadata;
