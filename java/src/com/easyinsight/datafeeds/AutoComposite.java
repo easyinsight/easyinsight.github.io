@@ -435,6 +435,7 @@ public class AutoComposite {
         trendFilter.setLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
         trendFilter.setUnitsBack(50);
         trendFilter.setUnitsForward(2);
+        trendFilter.setToggleEnabled(true);
         List<DateLevelWrapper> levels = new DataService().getMultiDateOptions(trendFilter);
         int startLevel = 0;
         int endLevel = 0;
