@@ -60,6 +60,20 @@ public class AutoComposite {
         queryStmt.close();
     }
 
+    private void createYTDFieldRules() throws SQLException {
+        List<FieldRule> rules = FieldRule.load(conn, dataSourceID);
+        for (CompositeFeedNode node : parent.getCompositeFeedNodes()) {
+            long id = node.getDataFeedID();
+            FieldRule fieldRule = new FieldRule();
+            fieldRule.setDataSourceID(id);
+            YTDReportFieldExtension ytdReportFieldExtension = new YTDReportFieldExtension();
+            ytdReportFieldExtension.setSection(node.getDataSourceName());
+            fieldRule.setExtension(ytdReportFieldExtension);
+            rules.add(fieldRule);
+        }
+        new FeedService().saveFieldRules(dataSourceID, rules, conn);
+    }
+
     private long createTimeComparisonChart() throws SQLException {
         MultiFieldFilterDefinition multiFieldFilterDefinition = new MultiFieldFilterDefinition();
         multiFieldFilterDefinition.setAvailableHandles(new ArrayList<>());
@@ -117,6 +131,7 @@ public class AutoComposite {
         comparison.setApplyBeforeAggregation(true);
         comparison.setDerivationCode("nowdate()");
         comparison.setKey(new NamedKey("Date"));
+        comparison.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
         lineChartDefinition.setAddedItems(Arrays.asList(comparison));
         lineChartDefinition.setTimeDimension(comparison);
         lineChartDefinition.setBaseDate("Date");
@@ -836,6 +851,7 @@ public class AutoComposite {
         long ytdID;
         if (timeMeasureTagID > 0) {
             lineChartID = createTimeComparisonChart();
+            createYTDFieldRules();
             ytdID = createYTDComparisonChart();
         } else {
             lineChartID = 0;
