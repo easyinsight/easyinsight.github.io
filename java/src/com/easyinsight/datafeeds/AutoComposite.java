@@ -98,6 +98,7 @@ public class AutoComposite {
         lineChartDefinition.setXaxis(comparison);
         lineChartDefinition.setBaseDate("Date");
         lineChartDefinition.setReportType(WSAnalysisDefinition.LINE);
+        lineChartDefinition.setRelativeScale(true);
         List<FilterDefinition> filters = new ArrayList<>();
         filters.add(multiFieldFilterDefinition);
         RollingFilterDefinition trendFilter = new RollingFilterDefinition();
