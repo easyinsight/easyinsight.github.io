@@ -4,6 +4,8 @@ import com.easyinsight.analysis.definitions.WSKPIDefinition;
 import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.CompositeFeedDefinition;
+import com.easyinsight.datafeeds.CompositeFeedNode;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
@@ -87,6 +89,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int MULTI_SUMMARY = 43;
 
     private String name;
+    private String collapseOn;
     private boolean persistedCache;
     private String authorName;
     private String cachePartitionFilter;
@@ -1117,6 +1120,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
         baseDate = findStringProperty(properties, "baseDate", "");
+        collapseOn = findStringProperty(properties, "collapseOn", "");
     }
 
     public List<ReportProperty> createProperties() {
@@ -1137,6 +1141,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportBooleanProperty("noAggregation", noAggregation));
         properties.add(new ReportStringProperty("exportString", exportString));
+        properties.add(new ReportStringProperty("collapseOn", collapseOn));
         properties.add(new ReportStringProperty("baseDate", baseDate));
         properties.add(new ReportBooleanProperty("adHocExecution", adHocExecution));
         properties.add(new ReportBooleanProperty("cacheable", cacheable));
@@ -1157,6 +1162,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         properties.add(new ReportBooleanProperty("enableLocalStorage", enableLocalStorage));
         return properties;
+    }
+
+    public String getCollapseOn() {
+        return collapseOn;
+    }
+
+    public void setCollapseOn(String collapseOn) {
+        this.collapseOn = collapseOn;
     }
 
     public boolean isFullJoins() {
@@ -1512,12 +1525,37 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         }
                     }
                 }
+                if (dataSource instanceof CompositeFeedDefinition) {
+                    CompositeFeedDefinition c = (CompositeFeedDefinition) dataSource;
+                    for (CompositeFeedNode n : c.getCompositeFeedNodes()) {
+                        Map<String, AnalysisItem> rMap = new HashMap<>();
+                        dataSource.getFields().stream().filter(item -> item.getKey() instanceof DerivedKey).forEach(item -> {
+                            DerivedKey derivedKey = (DerivedKey) item.getKey();
+                            if (derivedKey.getFeedID() == n.getDataFeedID()) {
+                                rMap.put(item.toOriginalDisplayName(), item);
+                            }
+                        });
+                        for (WeNeedToReplaceHibernateTag tag : tags) {
+                            queryStmt.setLong(1, tag.getTagID());
+                            queryStmt.setLong(2, n.getDataFeedID());
+                            ResultSet rs = queryStmt.executeQuery();
+                            while (rs.next()) {
+                                String fieldName = rs.getString(1);
+                                AnalysisItem analysisItem = rMap.get(fieldName);
+                                if (analysisItem != null) {
+                                    positions.put(analysisItem, i++);
+                                    set.add(analysisItem);
+                                }
+                            }
+                        }
+                    }
+                }
                 queryStmt.close();
             } finally {
                 Database.closeConnection(conn);
             }
 
-            fields = new ArrayList<AnalysisItem>(set);
+            fields = new ArrayList<>(set);
         } else {
             int i = 0;
             for (AnalysisItemHandle field : multiFieldFilterDefinition.getSelectedItems()) {
