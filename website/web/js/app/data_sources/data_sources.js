@@ -21,7 +21,6 @@
             $http.get("/app/dataSourceSuggestions.json").then(function (d) {
 
                 for (var i = 0; i < d.data.suggestions.length; i++) {
-                    console.log(d.data.suggestions[i].url + "&utc=" + new Date().getTimezoneOffset());
                     d.data.suggestions[i].url = d.data.suggestions[i].url + "&utc=" + new Date().getTimezoneOffset();
                 }
 
@@ -320,6 +319,7 @@
                 var aa = e.selected;
                 if(!aa && $scope.composite.data_sources.some(function(ee, ii, ll) {
                     return ee.url_key == e.url_key
+
                 })) {
                     flagged.push(e);
                 }
@@ -425,7 +425,9 @@
 
     })
 
-    eiDataSources.controller("combineDifferentSourcesBaseController", ["$scope", "$http", "$rootScope", "$location", function($scope, $http, $rootScope, $location) {
+    eiDataSources.controller("combineDifferentSourcesBaseController", ["$scope", "$http", "$rootScope", "$location", "$modal",
+        function($scope, $http, $rootScope, $location, $modal) {
+            $scope.leaving = false;
         $rootScope.user_promise.then(function(u) {
             if(!u.designer) {
                 $location.path("/missing");
@@ -433,6 +435,33 @@
         });
 
         $scope.composite = {"data_sources": [], "joins": []}
+        $scope.$on("$locationChangeStart", function(event, newString, oldString) {
+
+            var common = "";
+            var i;
+            var r = document.getElementsByTagName("base")[0].href;
+            oldString = oldString.replace(r, "");
+            newString = newString.replace(r, "");
+            for(i = 0;i < Math.min(oldString.length, newString.length);i++) {
+                if(oldString[i] == newString[i])
+                    common = common + oldString[i];
+                else
+                    break;
+            }
+            if(!$scope.leaving && common.indexOf("composite/new") == -1) {
+                event.preventDefault();
+
+                var m = $modal.open({
+                    templateUrl: "/angular_templates/data_sources/navigate_away.template.html",
+                })
+                m.result.then(function() {
+                    $scope.leaving = true;
+                    var a = document.createElement('a');
+                    a.href = "/" + newString;
+                    $location.path(a.pathname);
+                })
+            }
+        })
 
     }]);
 
