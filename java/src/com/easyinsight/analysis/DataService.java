@@ -1815,7 +1815,9 @@ public class DataService {
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
-                date.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
+                if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                    date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+                }
             }
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
@@ -1858,7 +1860,9 @@ public class DataService {
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) report;
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
-                date.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
+                if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                    date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+                }
             }
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
