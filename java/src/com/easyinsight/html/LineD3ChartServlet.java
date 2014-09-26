@@ -4,10 +4,12 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,11 +67,36 @@ public class LineD3ChartServlet extends HtmlServlet {
         List<String> colors = twoAxisDefinition.createMultiColors();
         if (twoAxisDefinition.isMultiMeasure()) {
             List<AnalysisItem> measures = twoAxisDefinition.getMeasures();
+            //calculateScale(measures, dataSet);
             AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
+
+
 
             int i = 0;
             for (AnalysisItem measure : measures) {
                 List<JSONObject> pointList = new ArrayList<JSONObject>();
+
+                double maxMultiplier = 0;
+
+                if (twoAxisDefinition.isRelativeScale()) {
+                    double min = Double.MAX_VALUE;
+                    double max = Double.MIN_VALUE;
+                    for (IRow row : dataSet.getRows()) {
+                        Double doubleValue = row.getValue(measure).toDouble();
+                        if (doubleValue > max) {
+                            max = doubleValue;
+                        }
+                        if (doubleValue < min) {
+                            min = doubleValue;
+                        }
+                    }
+
+                    // we're scaling to where the max should be 100 and the min should 1
+
+
+                    maxMultiplier = max / 100;
+                }
+
                 for (IRow row : dataSet.getRows()) {
 
                     Value v = row.getValue(date);
@@ -80,7 +107,12 @@ public class LineD3ChartServlet extends HtmlServlet {
                         //point.put("x", dateValue.getDate().getTime());
                         point.put("x", dFormat.format(dateValue.getDate()));
                         point.put("dx", dateValue.getDate().getTime());
-                        point.put("y", row.getValue(measure).toDouble());
+                        if (twoAxisDefinition.isRelativeScale()) {
+                            point.put("y", row.getValue(measure).toDouble() / maxMultiplier);
+                            point.put("sy", row.getValue(measure).toDouble());
+                        } else {
+                            point.put("y", row.getValue(measure).toDouble());
+                        }
                     }
                 }
                 Collections.sort(pointList, new Comparator<JSONObject>() {
@@ -191,6 +223,8 @@ public class LineD3ChartServlet extends HtmlServlet {
             configureAxes(object, twoAxisDefinition, twoAxisDefinition.getXaxis(), twoAxisDefinition.getMeasures(), md);
         }
 
+        object.put("relative_line", twoAxisDefinition.isRelativeScale());
+
         if (events.length() > 0) {
             object.put("events", events);
         }
@@ -244,5 +278,53 @@ public class LineD3ChartServlet extends HtmlServlet {
             }
         }
         return sdf;
+    }
+
+    private class Scale {
+        private double min;
+        private double max;
+
+        private Scale(double min, double max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
+
+    private Map<AnalysisItem, Scale> calculateScale(List<AnalysisItem> measures, DataSet dataSet) {
+
+
+        Map<AnalysisItem, Scale> map = new HashMap<>();
+        for (AnalysisItem measure : measures) {
+            double min = Double.MAX_VALUE;
+            double max = Double.MIN_VALUE;
+            for (IRow row : dataSet.getRows()) {
+                Double doubleValue = row.getValue(measure).toDouble();
+                if (doubleValue > max) {
+                    max = doubleValue;
+                }
+                if (doubleValue < min) {
+                    min = doubleValue;
+                }
+            }
+
+            // we're scaling to where the max should be 100 and the min should 1
+
+            double maxMultiplier = max / 100;
+
+            // so 2000 = multiplier of 20, divide values by that
+
+            //
+
+            double multipler = 100 / (max - min);
+
+            System.out.println("got multiplier of " + multipler + " for " + measure.toDisplay());
+
+            for (IRow row : dataSet.getRows()) {
+                Double doubleValue = row.getValue(measure).toDouble();
+                row.addValue(measure.createAggregateKey(), new NumericValue(doubleValue / maxMultiplier));
+            }
+            map.put(measure, new Scale(min, max));
+        }
+        return map;
     }
 }

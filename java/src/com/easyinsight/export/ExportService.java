@@ -2681,7 +2681,9 @@ public class ExportService {
         WSYTDDefinition verticalList = (WSYTDDefinition) report;
         if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
             AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
-            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            }
         }
         ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
         YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());
@@ -2881,7 +2883,9 @@ public class ExportService {
         WSYTDDefinition verticalList = (WSYTDDefinition) listDefinition;
         if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
             AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
-            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            }
         }
         ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
         YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());
@@ -3016,7 +3020,9 @@ public class ExportService {
         WSYTDDefinition verticalList = (WSYTDDefinition) listDefinition;
         if (verticalList.getTimeDimension() instanceof AnalysisDateDimension) {
             AnalysisDateDimension date = (AnalysisDateDimension) verticalList.getTimeDimension();
-            date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            }
         }
         ExtendedDataSet dataSet = DataService.extendedListDataSet(verticalList, insightRequestMetadata, conn);
         YTDStuff ytdStuff = YTDUtil.getYTDStuff(verticalList, dataSet.getDataSet(), insightRequestMetadata, conn, dataSet.getPipelineData(), dataSet.getReportItems());

@@ -252,6 +252,19 @@ public class AdminService {
         }
     }
 
+    public List<EIDescriptor> getAutoEmailReports(int dataSourceType) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            return getAutoEmailReports(dataSourceType, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public ReportResults getAvailableReports(int dataSourceType) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
@@ -376,6 +389,26 @@ public class AdminService {
         }
     }
 
+    private List<EIDescriptor> getAutoEmailReports(int dataSourceType, EIConnection conn) throws SQLException {
+        List<EIDescriptor> descriptors = new ArrayList<EIDescriptor>();
+        PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE FROM ANALYSIS, DATA_FEED WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID " +
+                "AND FEED_TYPE = ? AND RECOMMENDED_EXCHANGE = ? AND AUTO_SETUP_DELIVERY = ?");
+        ps.setInt(1, dataSourceType);
+        ps.setBoolean(2, true);
+        ps.setBoolean(3, true);
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            long reportID = rs.getLong(1);
+            String title = rs.getString(2);
+            InsightDescriptor insightDescriptor = new InsightDescriptor();
+            insightDescriptor.setId(reportID);
+            insightDescriptor.setName(title);
+            descriptors.add(insightDescriptor);
+        }
+        ps.close();
+        return descriptors;
+    }
+
     private List<EIDescriptor> getConnectionReports(int dataSourceType, EIConnection conn) throws SQLException {
         List<EIDescriptor> descriptors = new ArrayList<EIDescriptor>();
         PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE FROM ANALYSIS, DATA_FEED WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID " +
@@ -409,6 +442,37 @@ public class AdminService {
         return descriptors;
     }
 
+    public void updateAutoEmailReports(int dataSourceType, List<EIDescriptor> descriptors) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<EIDescriptor> existingConnectionReports = getAutoEmailReports(dataSourceType, conn);
+            Set<EIDescriptor> set = new HashSet<EIDescriptor>(existingConnectionReports);
+            PreparedStatement ps = conn.prepareStatement("UPDATE ANALYSIS SET AUTO_SETUP_DELIVERY = ? WHERE ANALYSIS_ID = ?");
+
+            for (EIDescriptor desc : descriptors) {
+                if (existingConnectionReports.remove(desc)) {
+                    set.remove(desc);
+                } else {
+                    ps.setBoolean(1, true);
+                    ps.setLong(2, desc.getId());
+                    ps.executeUpdate();
+                }
+            }
+            for (EIDescriptor remaining : set) {
+                ps.setBoolean(1, false);
+                ps.setLong(2, remaining.getId());
+                ps.executeUpdate();
+            }
+            ps.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void updateConnectionReports(int dataSourceType, List<EIDescriptor> descriptors) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
@@ -419,7 +483,7 @@ public class AdminService {
             PreparedStatement dashboardUpdate = conn.prepareStatement("UPDATE DASHBOARD SET RECOMMENDED_EXCHANGE = ? WHERE DASHBOARD_ID = ?");
             for (EIDescriptor desc : descriptors) {
                 if (existingConnectionReports.remove(desc)) {
-
+                    set.remove(desc);
                 } else {
                     if (desc.getType() == EIDescriptor.REPORT) {
                         ps.setBoolean(1, true);
@@ -1022,7 +1086,7 @@ public class AdminService {
 
             PreparedStatement queryActionStmt = conn.prepareStatement("SELECT GENERAL_ACTION_TYPE, ACTION_TYPE, ACTION_DATE, DATA_SOURCE_ID, REPORT_ID, DASHBOARD_ID FROM REVISED_ACTION_LOG " +
                     "WHERE REVISED_ACTION_LOG.USER_ID = ? AND REVISED_ACTION_LOG.ACTION_TYPE = ? ORDER BY REVISED_ACTION_LOG.ACTION_DATE DESC LIMIT 30");
-            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, url_key, data_source_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, url_key, data_source_id, data_feed_id FROM DASHBOARD, DATA_FEED WHERE DASHBOARD_ID = ? AND DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID");
             PreparedStatement reportStmt = conn.prepareStatement("SELECT DATA_FEED_ID, REPORT_TYPE, TITLE, URL_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             queryActionStmt.setLong(1, SecurityUtil.getUserID());

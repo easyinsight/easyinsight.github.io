@@ -60,6 +60,20 @@ public class AutoComposite {
         queryStmt.close();
     }
 
+    private void createYTDFieldRules() throws SQLException {
+        List<FieldRule> rules = FieldRule.load(conn, dataSourceID);
+        for (CompositeFeedNode node : parent.getCompositeFeedNodes()) {
+            long id = node.getDataFeedID();
+            FieldRule fieldRule = new FieldRule();
+            fieldRule.setDataSourceID(id);
+            YTDReportFieldExtension ytdReportFieldExtension = new YTDReportFieldExtension();
+            ytdReportFieldExtension.setSection(node.getDataSourceName());
+            fieldRule.setExtension(ytdReportFieldExtension);
+            rules.add(fieldRule);
+        }
+        new FeedService().saveFieldRules(dataSourceID, rules, conn);
+    }
+
     private long createTimeComparisonChart() throws SQLException {
         MultiFieldFilterDefinition multiFieldFilterDefinition = new MultiFieldFilterDefinition();
         multiFieldFilterDefinition.setAvailableHandles(new ArrayList<>());
@@ -84,6 +98,7 @@ public class AutoComposite {
         lineChartDefinition.setXaxis(comparison);
         lineChartDefinition.setBaseDate("Date");
         lineChartDefinition.setReportType(WSAnalysisDefinition.LINE);
+        lineChartDefinition.setRelativeScale(true);
         List<FilterDefinition> filters = new ArrayList<>();
         filters.add(multiFieldFilterDefinition);
         RollingFilterDefinition trendFilter = new RollingFilterDefinition();
@@ -117,6 +132,7 @@ public class AutoComposite {
         comparison.setApplyBeforeAggregation(true);
         comparison.setDerivationCode("nowdate()");
         comparison.setKey(new NamedKey("Date"));
+        comparison.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
         lineChartDefinition.setAddedItems(Arrays.asList(comparison));
         lineChartDefinition.setTimeDimension(comparison);
         lineChartDefinition.setBaseDate("Date");
@@ -419,6 +435,7 @@ public class AutoComposite {
         trendFilter.setLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
         trendFilter.setUnitsBack(50);
         trendFilter.setUnitsForward(2);
+        trendFilter.setToggleEnabled(true);
         List<DateLevelWrapper> levels = new DataService().getMultiDateOptions(trendFilter);
         int startLevel = 0;
         int endLevel = 0;
@@ -670,9 +687,18 @@ public class AutoComposite {
             List<DashboardStackItem> masterStackChildren = new ArrayList<>();
 
             for (DashboardStackItem item : childStack.getGridItems()) {
-                if ("Overview".equals(item.getDashboardElement().getLabel())) {
-                    DashboardStackItem clone = item.clone();
-                    masterStackChildren.add(clone);
+                if ("Overview".equals(item.getDashboardElement().getLabel()) || "What's Happening".equals(item.getDashboardElement().getLabel()) ||
+                        "What's Happening Now".equals(item.getDashboardElement().getLabel())) {
+                    if (item.getDashboardElement() instanceof DashboardGrid) {
+                        DashboardStackItem clone = item.clone();
+                        masterStackChildren.add(clone);
+                    } else if (item.getDashboardElement() instanceof DashboardStack) {
+                        DashboardStack analyzeStack = (DashboardStack) item.getDashboardElement();
+                        for (DashboardStackItem analyzeItem : analyzeStack.getGridItems()) {
+                            DashboardStackItem clone = analyzeItem.clone();
+                            masterStackChildren.add(clone);
+                        }
+                    }
                 } else if ("Analyze".equals(item.getDashboardElement().getLabel())) {
                     if (item.getDashboardElement() instanceof DashboardStack) {
                         DashboardStack analyzeStack = (DashboardStack) item.getDashboardElement();
@@ -827,6 +853,7 @@ public class AutoComposite {
         long ytdID;
         if (timeMeasureTagID > 0) {
             lineChartID = createTimeComparisonChart();
+            createYTDFieldRules();
             ytdID = createYTDComparisonChart();
         } else {
             lineChartID = 0;
@@ -835,6 +862,7 @@ public class AutoComposite {
 
         Dashboard dashboard = new Dashboard();
         dashboard.setAutoCombined(true);
+        dashboard.setEnableLocalStorage(true);
         dashboard.setFolder(1);
         dashboard.setFillStackHeaders(true);
         dashboard.setDescription("");

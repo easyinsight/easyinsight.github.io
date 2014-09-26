@@ -26,6 +26,68 @@ import java.util.ArrayList;
  */
 public class EIAccountManagementService {
 
+    public List<Consultant> getConsultants() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List<User> consultants = (List<User>) session.createQuery("from User where consultant = ?").setBoolean(0, true).list();
+            List<Consultant> consList = new ArrayList<>();
+            for (User user : consultants) {
+                Consultant consultant = new Consultant();
+                consultant.setAccount(user.getAccount().getName());
+                consultant.setConsultantName(user.getUserName());
+                consList.add(consultant);
+            }
+            session.getTransaction().commit();
+            return consList;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public String addConsultant(long accountID, String consultantUser, String consultantPassword) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from User where email = ? or userName = ?").setString(0, consultantUser).setString(1, consultantUser).list();
+            if (results.size() > 0) {
+                return "User already exists by email or user name of " + consultantUser + ".";
+            }
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            User user = new User();
+            user.setEmail(consultantUser);
+            user.setUserName(consultantUser);
+            user.setFirstName(consultantUser);
+            user.setName(consultantUser);
+            user.setConsultant(true);
+            user.setAccountAdmin(true);
+            user.setAnalyst(true);
+            user.setAccount(account);
+            user.setCreatedOn(new Date());
+            user.setPassword(PasswordService.getInstance().encrypt(consultantPassword, user.getHashSalt(), "SHA-256"));
+            user.setHashType("SHA-256");
+            user.setInitialSetupDone(true);
+            user.setUserKey(RandomTextGenerator.generateText(20));
+            user.setUserSecretKey(RandomTextGenerator.generateText(20));
+            session.save(user);
+            session.flush();
+            session.getTransaction().commit();
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public void applyReactivation(int accountID) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();

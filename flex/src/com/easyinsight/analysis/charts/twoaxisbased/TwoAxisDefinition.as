@@ -14,8 +14,11 @@ public class TwoAxisDefinition extends ChartDefinition{
     public var measures:ArrayCollection;
     public var eventPoint:AnalysisItem;
     public var eventPointLabel:AnalysisItem;
+    public var eventPointLineColor:uint;
 
     public var multiMeasure:Boolean = false;
+
+    public var relativeScale:Boolean;
 
     public var form:String = "segment";
     public var baseAtZero:String = "true";

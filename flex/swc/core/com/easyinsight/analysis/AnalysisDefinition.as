@@ -72,6 +72,7 @@ import mx.collections.ArrayCollection;
         public var reportStateID:int;
         public var authorName:String;
         public var description:String;
+        public var collapseOn:String;
         public var headerFontSize:int = 24;
         public var dataSourceFields:Boolean;
         public var solutionVisible:Boolean;

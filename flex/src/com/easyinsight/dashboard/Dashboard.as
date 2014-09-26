@@ -52,7 +52,7 @@ public class Dashboard {
     public var reportHeaderBackgroundColor:int = 0xDDDDDD;
     public var reportHeaderTextColor:int;
 
-    public var enableLocalStorage:Boolean = false;
+    public var enableLocalStorage:Boolean = true;
 
     public var headerImage:ImageDescriptor;
     public var headerTextColor:int;
@@ -67,6 +67,7 @@ public class Dashboard {
 
     public var tabletVersion:int;
     public var phoneVersion:int;
+    public var autoCombined:Boolean;
 
     public var version:int;
 
