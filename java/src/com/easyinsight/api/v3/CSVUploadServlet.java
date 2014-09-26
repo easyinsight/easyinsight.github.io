@@ -7,10 +7,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.export.ExportMetadata;
-import com.easyinsight.export.ExportService;
-import com.easyinsight.preferences.ImageDescriptor;
-import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.util.RandomTextGenerator;
 import net.minidev.json.JSONObject;
@@ -18,8 +14,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,10 +23,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -65,7 +57,7 @@ public class CSVUploadServlet extends JSONServlet {
             }
 
             org.json.JSONObject jo = new org.json.JSONObject();
-            if(bytes != null && bytes.length > 0 && bytes.length < 1024 * 1024 * 10 && fileName != null && fileName.length() > 0 && isImage(contentType)) {
+            if(bytes != null && bytes.length > 0 && bytes.length < 1024 * 1024 * 10 && fileName != null && fileName.length() > 0 && isAcceptableUpload(contentType)) {
 
                 ByteArrayOutputStream dest = new ByteArrayOutputStream();
 
@@ -106,19 +98,16 @@ public class CSVUploadServlet extends JSONServlet {
         }));
     }
 
-    private boolean isImage(String contentType) {
-        /* image/gif: GIF image; Defined in RFC 2045 and RFC 2046
-        image/jpeg: JPEG JFIF image; Defined in RFC 2045 and RFC 2046
-        image/pjpeg: JPEG JFIF image; Associated with Internet Explorer; Listed in ms775147(v=vs.85) - Progressive JPEG, initiated before global browser support for progressive JPEGs (Microsoft and Firefox).
-        image/png: Portable Network Graphics; Registered,[12] Defined in RFC 2083
-        image/svg+xml: SVG vector image; Defined in SVG Tiny 1.2 Specification Appendix M
-        image/vnd.djvu: DjVu image and multipage document format.[13]
-        image/example: example in documentation, Defined in RFC 4735 */
-        //return contentType != null && contentType.matches("^image/(gif|jpeg|pjpeg|png|svg\\+xml)$");
-
-        // todo: impl
-
-        return true;
+    private boolean isAcceptableUpload(String contentType) {
+        boolean valid = false;
+        if ("application/vnd.ms-excel".equals(contentType)) {
+            valid = true;
+        } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)) {
+            valid = true;
+        } else if ("text/plain".equals(contentType)) {
+            valid = true;
+        }
+        return valid;
     }
 
     @Override

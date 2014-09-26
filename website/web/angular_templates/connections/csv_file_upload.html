@@ -7,7 +7,7 @@
             </div>
         </div>
         <form role="form" method="POST" name="skinForm" ng-submit="submit()" novalidate ng-file-drop-available="dropSupported=true">
-            <input type="file" capture="camera" ng-file-select="onFileSelect($files)">
+            <input type="file" accept=".csv,.xls,.xlsx" capture="camera" ng-file-select="onFileSelect($files)">
             <div ng-file-drop="onFileSelect($files)" ng-class="{'disabled_drop': !skin.report_header}" ng-show="dropSupported" class="droppable_area" ng-file-drag-over-class="'droppable_files'">Drop file here</div>
         </form>
     </div>
