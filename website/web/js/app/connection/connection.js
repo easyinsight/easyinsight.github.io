@@ -22,7 +22,7 @@
         $scope.onFileSelect = function(files) {
             if(files.length > 0) {
                 var file = files[0];
-                if(file.size < 1024*1024*10) {
+                if(file.size < 1024*1024*10 && file.name.match(/.(xlsx?|csv)$/)) {
                     $scope.upload = $upload.upload({
                         url: '/app/connection/csvupload',
                         file: file,
