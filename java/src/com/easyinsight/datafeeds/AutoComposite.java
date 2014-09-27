@@ -88,6 +88,7 @@ public class AutoComposite {
         tags.add(tag);
         multiFieldFilterDefinition.setAvailableTags(tags);
         WSLineChartDefinition lineChartDefinition = new WSLineChartDefinition();
+        lineChartDefinition.setFilterDateLevels(true);
         DerivedAnalysisDateDimension comparison = new DerivedAnalysisDateDimension();
         comparison.setConcrete(false);
         comparison.setApplyBeforeAggregation(true);
@@ -136,6 +137,7 @@ public class AutoComposite {
         lineChartDefinition.setAddedItems(Arrays.asList(comparison));
         lineChartDefinition.setTimeDimension(comparison);
         lineChartDefinition.setBaseDate("Date");
+        lineChartDefinition.setFilterDateLevels(true);
         lineChartDefinition.setReportType(WSAnalysisDefinition.YTD);
         List<FilterDefinition> filters = new ArrayList<>();
         filters.add(multiFieldFilterDefinition);
@@ -476,6 +478,7 @@ public class AutoComposite {
         for (WSColumnChartDefinition chart : fullTrendReports) {
             AnalysisDateDimension qoqDate = (AnalysisDateDimension) chart.getXaxis();
             qoqDate.setDateLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
+            chart.setFilterDateLevels(true);
             WSColumnChartDefinition qoqCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - Trend QoQ");
 
             //new AnalysisService().saveReportWithConn(qoqCopy, conn);

@@ -97,6 +97,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String urlKey;
     private long analysisID;
     private long dataFeedID;
+    private boolean filterDateLevels;
     private int reportType;
     private long reportStateID;
     private List<FilterDefinition> filterDefinitions;
@@ -204,6 +205,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setBaseDate(String baseDate) {
         this.baseDate = baseDate;
+    }
+
+    public boolean isFilterDateLevels() {
+        return filterDateLevels;
+    }
+
+    public void setFilterDateLevels(boolean filterDateLevels) {
+        this.filterDateLevels = filterDateLevels;
     }
 
     private List<FilterDefinition> filtersForDrillthrough;
@@ -1116,6 +1125,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         cacheFilters = findBooleanProperty(properties, "cacheFilters", false);
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
+        filterDateLevels = findBooleanProperty(properties, "filterDateLevels", false);
         dataDiscoveryEnabled = findBooleanProperty(properties, "dataDiscoveryEnabled", false);
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
@@ -1154,6 +1164,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("noDataOnNoJoin", noDataOnNoJoin));
         properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
         properties.add(new ReportBooleanProperty("htmlInFlash", htmlInFlash));
+        properties.add(new ReportBooleanProperty("filterDateLevels", filterDateLevels));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
         properties.add(new ReportStringProperty("reportColorScheme", colorScheme));
