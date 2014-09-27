@@ -69,6 +69,7 @@ import mx.collections.ArrayCollection;
 		public var canSaveDirectly:Boolean;
 		public var publiclyVisible:Boolean;
 		public var marketplaceVisible:Boolean;
+		public var filterDateLevels:Boolean;
         public var reportStateID:int;
         public var authorName:String;
         public var description:String;
