@@ -99,7 +99,7 @@
             visible="{suggestions.length > 0}" width="200" horizontalScrollPolicy="off" verticalScrollPolicy="off">
         <mx:Label text="Getting Started" fontSize="16" styleName="fallThroughFonts" fontWeight="bold"/>
         <mx:List dataProvider="{suggestions}" backgroundAlpha="0" borderStyle="none" height="100%"
-                 itemRenderer="com.easyinsight.listing.SuggestionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false"
+                 itemRenderer="com.easyinsight.listing.SuggestionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false" horizontalScrollPolicy="off"
                 rowCount="{suggestions.length}"/>
     </mx:VBox>
 
@@ -107,7 +107,7 @@
             paddingBottom="10" paddingTop="10" borderThickness="1" borderColor="#DCDCDC" width="200" horizontalScrollPolicy="off" verticalScrollPolicy="off">
         <mx:Label text="Recent Actions" fontSize="16" styleName="fallThroughFonts" fontWeight="bold"/>
         <mx:List dataProvider="{recentActions}" backgroundAlpha="0" borderStyle="none" height="100%"
-                itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false"
+                itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false" horizontalScrollPolicy="off"
                 rowCount="{recentActions.length}"/>
     </mx:VBox>
 </mx:VBox>
