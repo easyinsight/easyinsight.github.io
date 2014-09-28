@@ -222,7 +222,13 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new PipelinePlaceholderComponent("End of Pipeline " + name));
         }
 
-
+        if (report.getCollapseOn() != null && !"".equals(report.getCollapseOn().trim())) {
+            for (AnalysisItem analysisItem : allNeededAnalysisItems) {
+                if (report.getCollapseOn().equals(analysisItem.toDisplay())) {
+                    components.add(new CollapseComponent(analysisItem));
+                }
+            }
+        }
 
         for (INestedComponent endComponent : report.endComponents()) {
 
