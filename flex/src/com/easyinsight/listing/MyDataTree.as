@@ -12,6 +12,7 @@ public class MyDataTree {
     public var dataSourceCount:int;
     public var accountOverSize:Boolean;
     public var tags:ArrayCollection;
+    public var suggestions:ArrayCollection;
 
     public function MyDataTree() {
     }

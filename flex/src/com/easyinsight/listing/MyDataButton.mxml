@@ -1,35 +1,30 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10"
-                         paddingBottom="10" horizontalAlign="center" verticalScrollPolicy="off">
+                         paddingBottom="10" horizontalAlign="center" verticalScrollPolicy="off" creationComplete="onCreation()">
     <mx:Metadata>
         [Event(name="uiChange", type="flash.events.Event")]
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.feedassembly.CompositeCreator;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.PerspectiveInfo;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.skin.ApplicationSkin;
-        import com.easyinsight.skin.HomeConfigWindow;
-        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
 
-        import mx.managers.PopUpManager;
-        import mx.states.RemoveChild;
         import mx.states.State;
 
-        [Bindable]
-        [Embed(source="../../../../assets/preferences.png")]
-        private var configIcon:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/earth.png")]
-        private var globeIcon:Class;
+        private function onSuggestion(event:DataSourceSuggestionEvent):void {
+            ProgressAlert.alert(this, "Applying...", null, uploadService.applySuggestion);
+            uploadService.applySuggestion.send(event.suggestionType, new Date().getTimezoneOffset());
+        }
 
-        [Bindable]
-        [Embed(source="../../../../assets/data_table.png")]
-        private var joinIcon:Class;
+        private function onCreation():void {
+            addEventListener(DataSourceSuggestionEvent.DATA_SOURCE_SUGGESTION, onSuggestion);
+        }
 
         public function refreshActions():void {
             adminService.getRecentActions.send()
@@ -44,24 +39,20 @@
         }
 
         [Bindable]
-        private var recentActions:ArrayCollection;
+        private var recentActions:ArrayCollection = new ArrayCollection();
 
         private function gotRecentActions():void {
             recentActions = adminService.getRecentActions.lastResult as ArrayCollection;
         }
+
+        [Bindable]
+        public var suggestions:ArrayCollection = new ArrayCollection();
 
         public function updateUI(event:Event = null):void {
             currentState = "";
             var showState:State = new State();
             showState.name = "buttonConfig";
             var ops:Array = [];
-            /*if (!User.getInstance().analyst) {
-                var removeConfig:RemoveChild = new RemoveChild();
-                removeConfig.target = customizeButton;
-                var removeComposite:RemoveChild = new RemoveChild();
-                removeComposite.target = compositeFeedButton;
-                ops.push(removeConfig, removeComposite);
-            }*/
             showState.overrides = ops;
             states = [ showState ];
             this.currentState = "buttonConfig";
@@ -82,6 +73,16 @@
         private static function switched():void {
             navigateToURL(new URLRequest("/a/home"), "_self");
         }
+
+        private function applied():void {
+            var result:SuggestionResult = uploadService.applySuggestion.lastResult as SuggestionResult;
+            if (result.responseType == 2) {
+                User.getInstance().notifyProp = result.emailName;
+                User.getEventNotifier().dispatchEvent(new NavigationEvent('Scheduling'));
+            } else if (result.responseType == 1) {
+                User.getEventNotifier().dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: result.dashboardID})));
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="getRecentActions" result="gotRecentActions()"/>
@@ -89,8 +90,24 @@
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="switchHtmlFlex" result="switched()"/>
     </mx:RemoteObject>
-        <mx:Label text="Recent Actions" fontSize="16"/>
-    <mx:HRule width="50" strokeColor="#CCCCCC"/>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="applySuggestion" result="applied()"/>
+    </mx:RemoteObject>
+
+    <mx:VBox cornerRadius="4" backgroundColor="#FFFFD1" borderStyle="solid" paddingLeft="10" paddingRight="10"
+             paddingBottom="10" paddingTop="10" borderThickness="1" borderColor="#DCDCDC" includeInLayout="{suggestions.length > 0}"
+            visible="{suggestions.length > 0}" width="200">
+        <mx:Label text="Getting Started" fontSize="16" styleName="fallThroughFonts" fontWeight="bold"/>
+        <mx:List dataProvider="{suggestions}" backgroundAlpha="0" borderStyle="none" height="100%"
+                 itemRenderer="com.easyinsight.listing.SuggestionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false"
+                rowCount="{suggestions.length}"/>
+    </mx:VBox>
+
+    <mx:VBox cornerRadius="4" backgroundColor="#FCFCFC" borderStyle="solid" paddingLeft="10" paddingRight="10"
+            paddingBottom="10" paddingTop="10" borderThickness="1" borderColor="#DCDCDC" width="200">
+        <mx:Label text="Recent Actions" fontSize="16" styleName="fallThroughFonts" fontWeight="bold"/>
         <mx:List dataProvider="{recentActions}" backgroundAlpha="0" borderStyle="none" height="100%"
-                itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false"/>
+                itemRenderer="com.easyinsight.listing.LastActionLink" variableRowHeight="true" verticalScrollPolicy="off" selectable="false"
+                rowCount="{recentActions.length}"/>
+    </mx:VBox>
 </mx:VBox>

@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.api.v3.ResponseInfo;
 import com.easyinsight.core.DataSourceDescriptor;
+import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
@@ -29,18 +30,63 @@ import java.util.Set;
  */
 public class CreateAutoDataSourceServlet extends HttpServlet {
 
+    public static final String CREATE_COMPOSITE = "create_composite";
+    public static final String CREATE_DASHBOARD = "create_dashboard";
+    public static final String ADD_TO_COMPOSITE = "add_to_composite";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
 
         int responseCode;
-        String responseURL = null;
+        String responseURL;
 
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
+            AutoDataSourceAnalysis autoDataSourceAnalysis = new AutoDataSourceAnalysis(action).invoke();
+            responseURL = autoDataSourceAnalysis.getResponseURL();
+            responseCode = autoDataSourceAnalysis.getResponseCode();
+            JSONObject jo = new JSONObject();
+            if (responseURL != null) {
+                jo.put("url", responseURL);
+            }
+            ResponseInfo responseInfo = new ResponseInfo(responseCode, jo.toString());
+            resp.setContentType("application/json");
+            resp.setStatus(responseInfo.getCode());
+            resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
+            resp.getOutputStream().flush();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            SecurityUtil.clearThreadLocal();
+        }
+    }
+
+    public static class AutoDataSourceAnalysis {
+        private String action;
+        private String responseURL;
+        private int responseCode;
+        private long responseDashboardID;
+
+        public AutoDataSourceAnalysis(String action) {
+            this.action = action;
+        }
+
+        public int getResponseCode() {
+            return responseCode;
+        }
+
+        public String getResponseURL() {
+            return responseURL;
+        }
+
+        public long getResponseDashboardID() {
+            return responseDashboardID;
+        }
+
+        public AutoDataSourceAnalysis invoke() throws Exception {
             List<DataSourceDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
 
-            int dataSourceTypes = 0;
             Set<Integer> types = new HashSet<>();
             Set<Long> existingIDs = new HashSet<>();
             List<DataSourceDescriptor> compositeSources = new ArrayList<>();
@@ -49,7 +95,6 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
                 if (new DataSourceTypeRegistry().billingInfoForType(FeedType.valueOf(dataSource.getDataSourceType())) == ConnectionBillingType.SMALL_BIZ && !types.contains(dataSource.getDataSourceType())) {
                     existingIDs.add(dataSource.getId());
                     types.add(dataSource.getType());
-                    dataSourceTypes++;
                 } else if (dataSource.getDataSourceType() == FeedType.COMPOSITE.getType()) {
                     compositeSources.add(dataSource);
                     if (dataSource.isAutoCombined()) {
@@ -58,7 +103,7 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
                 }
             }
 
-            if ("create_composite".equals(action)) {
+            if (CREATE_COMPOSITE.equals(action)) {
                 if (autoDataSourceDescriptor != null) {
                     responseCode = ResponseInfo.BAD_REQUEST;
                 } else {
@@ -78,19 +123,26 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
                     compositeFeedDefinition.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
                     EIConnection conn = Database.instance().getConnection();
                     try {
+                        conn.setAutoCommit(false);
                         compositeFeedDefinition.populateFields(conn);
                         compositeFeedDefinition.setApiKey(RandomTextGenerator.generateText(12));
                         long feedID = new FeedStorage().addFeedDefinitionData(compositeFeedDefinition, conn);
                         DataStorage.liveDataSource(feedID, conn, compositeFeedDefinition.getFeedType().getType());
+                        conn.commit();
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw e;
                     } finally {
+                        conn.setAutoCommit(true);
                         Database.closeConnection(conn);
                     }
 
                     conn = Database.instance().getConnection();
                     try {
                         conn.setAutoCommit(false);
-                        String urlKey = new AutoComposite(compositeFeedDefinition.getDataFeedID(), conn).doSomething();
-                        responseURL = "/app/html/dashboard/" + urlKey;
+                        Dashboard dashboard = new AutoComposite(compositeFeedDefinition.getDataFeedID(), conn).doSomething();
+                        responseDashboardID = dashboard.getId();
+                        responseURL = "/app/html/dashboard/" + dashboard.getUrlKey();
                         responseCode = ResponseInfo.ALL_GOOD;
                         conn.commit();
                     } catch (Exception e) {
@@ -101,27 +153,35 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
                         Database.closeConnection(conn);
                     }
                 }
-            } else if ("create_dashboard".equals(action)) {
+            } else if (CREATE_DASHBOARD.equals(action)) {
                 if (autoDataSourceDescriptor == null) {
                     // error
                     responseCode = ResponseInfo.BAD_REQUEST;
                 } else {
                     EIConnection conn = Database.instance().getConnection();
                     try {
-                        String urlKey = new AutoComposite(autoDataSourceDescriptor.getId(), conn).doSomething();
-                        responseURL = "/app/html/dashboard/" + urlKey;
+                        conn.setAutoCommit(false);
+                        Dashboard dashboard = new AutoComposite(autoDataSourceDescriptor.getId(), conn).doSomething();
+                        responseURL = "/app/html/dashboard/" + dashboard.getUrlKey();
+                        responseDashboardID = dashboard.getId();
                         responseCode = ResponseInfo.ALL_GOOD;
+                        conn.commit();
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw e;
                     } finally {
+                        conn.setAutoCommit(true);
                         Database.closeConnection(conn);
                     }
                 }
-            } else if ("add_to_composite".equals(action)) {
+            } else if (ADD_TO_COMPOSITE.equals(action)) {
                 if (autoDataSourceDescriptor == null) {
                     // error
                     responseCode = ResponseInfo.BAD_REQUEST;
                 } else {
                     EIConnection conn = Database.instance().getConnection();
                     try {
+                        conn.setAutoCommit(false);
                         PreparedStatement ps = conn.prepareStatement("SELECT COMPOSITE_NODE.DATA_FEED_ID FROM COMPOSITE_FEED, COMPOSITE_NODE WHERE " +
                                 "COMPOSITE_NODE.COMPOSITE_FEED_ID = COMPOSITE_FEED.COMPOSITE_FEED_ID AND COMPOSITE_FEED.DATA_FEED_ID = ?");
                         ps.setLong(1, autoDataSourceDescriptor.getId());
@@ -140,36 +200,28 @@ public class CreateAutoDataSourceServlet extends HttpServlet {
                                 dataSource.getCompositeFeedNodes().add(node);
                             }
                             new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
-                            String urlKey = null;
+                            Dashboard dashboard = null;
                             for (Long id : existingIDs) {
                                 CompositeFeedNode c = new CompositeFeedNode();
                                 c.setDataFeedID(id);
-                                urlKey = new AutoComposite(autoDataSourceDescriptor.getId(), conn).attach(c);
+                                dashboard = new AutoComposite(autoDataSourceDescriptor.getId(), conn).attach(c);
                             }
-                            responseURL = "/app/html/dashboard/" + urlKey;
+                            responseURL = "/app/html/dashboard/" + dashboard.getUrlKey();
+                            responseDashboardID = dashboard.getId();
                             responseCode = ResponseInfo.ALL_GOOD;
                         }
-
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw e;
                     } finally {
+                        conn.setAutoCommit(true);
                         Database.closeConnection(conn);
                     }
                 }
             } else {
                 responseCode = ResponseInfo.BAD_REQUEST;
             }
-            JSONObject jo = new JSONObject();
-            if (responseURL != null) {
-                jo.put("url", responseURL);
-            }
-            ResponseInfo responseInfo = new ResponseInfo(responseCode, jo.toString());
-            resp.setContentType("application/json");
-            resp.setStatus(responseInfo.getCode());
-            resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
-            resp.getOutputStream().flush();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            SecurityUtil.clearThreadLocal();
+            return this;
         }
     }
 }

@@ -89,6 +89,7 @@
 
         public function set analysisDefinition(value:AnalysisDefinition):void {
             _analysisDefinition = value;
+            invalidateProperties();
         }
 
         public function set dataView(value:DataViewFactory):void {

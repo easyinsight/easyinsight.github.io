@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.easyinsight.api.v3.SuggestedActionsServlet;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.DataSourceDescriptor;
@@ -24,6 +25,7 @@ import com.easyinsight.datafeeds.json.JSONSetup;
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
+import com.easyinsight.export.QuickReportDeliveryServlet;
 import com.easyinsight.goals.InstallationSystem;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
 import com.easyinsight.scorecard.ScorecardDescriptor;
@@ -1081,7 +1083,11 @@ public class UserUploadService {
             int dataSourceCount = 0;
             int reportCount = 0;
             int dashboardCount = 0;
+
+            List<DataSourceSuggestion> suggestions = SuggestedActionsServlet.getDataSourceSuggestions(conn);
+
             MyDataTree myDataTree = new MyDataTree(results, onlyMyData);
+            myDataTree.setSuggestions(suggestions);
             myDataTree.setDashboardCount(dashboardCount);
             myDataTree.setTags(new ArrayList<Tag>(tags.values()));
             myDataTree.setDataSourceCount(dataSourceCount);
@@ -1611,52 +1617,6 @@ public class UserUploadService {
         } finally {
             Database.closeConnection(conn);
         }
-    }
-
-    public List<EIDescriptor> getAccountReportsWithConn(EIConnection conn) throws SQLException {
-
-            List<EIDescriptor> reports = new ArrayList<EIDescriptor>();
-            PreparedStatement getReportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE, ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE," +
-                    "ANALYSIS.URL_KEY, ANALYSIS.DESCRIPTION FROM " +
-                    "ANALYSIS, ACCOUNT_TO_REPORT WHERE ACCOUNT_TO_REPORT.ACCOUNT_ID = ? AND ACCOUNT_TO_REPORT.REPORT_ID = ANALYSIS.ANALYSIS_ID");
-            getReportStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet reportRS = getReportStmt.executeQuery();
-            while (reportRS.next()) {
-                String title = reportRS.getString(1);
-                long reportID = reportRS.getLong(2);
-                long dataSourceID = reportRS.getLong(3);
-                int reportType = reportRS.getInt(4);
-                String urlKey = reportRS.getString(5);
-                try {
-                    InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
-                    id.setDescription(reportRS.getString(6));
-                    reports.add(id);
-                } catch (com.easyinsight.security.SecurityException e) {
-                    // ignore
-                }
-            }
-            getReportStmt.close();
-            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
-                    "DASHBOARD.URL_KEY, DASHBOARD.DESCRIPTION FROM " +
-                    "DASHBOARD, ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_TO_DASHBOARD.ACCOUNT_ID = ? AND ACCOUNT_TO_DASHBOARD.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
-            getDashboardStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet dashboardRS = getDashboardStmt.executeQuery();
-            while (dashboardRS.next()) {
-                String title = dashboardRS.getString(1);
-                long reportID = dashboardRS.getLong(2);
-                long dataSourceID = dashboardRS.getLong(3);
-                String urlKey = dashboardRS.getString(4);
-                try {
-                    SecurityUtil.authorizeDashboard(reportID);
-                    DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
-                    dd.setDescription(dashboardRS.getString(5));
-                    reports.add(dd);
-                } catch (com.easyinsight.security.SecurityException e) {
-                    // ignore
-                }
-            }
-            getDashboardStmt.close();
-            return reports;
     }
 
     public static RawUploadData retrieveRawData(long uploadID) {
@@ -2608,5 +2568,42 @@ public class UserUploadService {
         } catch (Exception e) {
             LogClass.error(e);
         }
+    }
+
+    public SuggestionResult applySuggestion(int suggestionType, int utc) {
+        SuggestionResult suggestionResult = new SuggestionResult();
+        try {
+            if (suggestionType == DataSourceSuggestion.SUGGEST_DELIVER_REPORTS) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    QuickReportDeliveryServlet.QuickReportResult result = new QuickReportDeliveryServlet.QuickReportResult(conn, utc).invoke();
+                    suggestionResult.setEmailName(result.getName());
+                    suggestionResult.setResponseType(SuggestionResult.NAVIGATE_TO_SCHEDULING);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+            } else if (suggestionType == DataSourceSuggestion.SUGGEST_CREATE_COMPOSITE) {
+                CreateAutoDataSourceServlet.AutoDataSourceAnalysis autoDataSourceAnalysis = new CreateAutoDataSourceServlet.
+                        AutoDataSourceAnalysis(CreateAutoDataSourceServlet.CREATE_COMPOSITE).invoke();
+                long dashboardID = autoDataSourceAnalysis.getResponseDashboardID();
+                suggestionResult.setResponseType(SuggestionResult.NAVIGATE_TO_DASHBOARD);
+                suggestionResult.setDashboardID(dashboardID);
+            } else if (suggestionType == DataSourceSuggestion.SUGGEST_CREATE_DASHBOARD) {
+                CreateAutoDataSourceServlet.AutoDataSourceAnalysis autoDataSourceAnalysis = new CreateAutoDataSourceServlet.
+                        AutoDataSourceAnalysis(CreateAutoDataSourceServlet.CREATE_DASHBOARD).invoke();
+                long dashboardID = autoDataSourceAnalysis.getResponseDashboardID();
+                suggestionResult.setResponseType(SuggestionResult.NAVIGATE_TO_DASHBOARD);
+                suggestionResult.setDashboardID(dashboardID);
+            } else if (suggestionType == DataSourceSuggestion.SUGGEST_ADD_TO_COMPOSITE) {
+                CreateAutoDataSourceServlet.AutoDataSourceAnalysis autoDataSourceAnalysis = new CreateAutoDataSourceServlet.
+                        AutoDataSourceAnalysis(CreateAutoDataSourceServlet.ADD_TO_COMPOSITE).invoke();
+                long dashboardID = autoDataSourceAnalysis.getResponseDashboardID();
+                suggestionResult.setResponseType(SuggestionResult.NAVIGATE_TO_DASHBOARD);
+                suggestionResult.setDashboardID(dashboardID);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return suggestionResult;
     }
 }

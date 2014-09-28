@@ -11,7 +11,6 @@ import com.easyinsight.dashboard.*;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
@@ -88,6 +87,7 @@ public class AutoComposite {
         tags.add(tag);
         multiFieldFilterDefinition.setAvailableTags(tags);
         WSLineChartDefinition lineChartDefinition = new WSLineChartDefinition();
+        lineChartDefinition.setFilterDateLevels(true);
         DerivedAnalysisDateDimension comparison = new DerivedAnalysisDateDimension();
         comparison.setConcrete(false);
         comparison.setApplyBeforeAggregation(true);
@@ -110,6 +110,7 @@ public class AutoComposite {
         lineChartDefinition.setFilterDefinitions(filters);
         lineChartDefinition.setDataFeedID(dataSourceID);
         lineChartDefinition.setName("Line Chart");
+        lineChartDefinition.setFolder(2);
         return new AnalysisService().saveReportWithConn(lineChartDefinition, conn).getAnalysisID();
     }
 
@@ -136,6 +137,7 @@ public class AutoComposite {
         lineChartDefinition.setAddedItems(Arrays.asList(comparison));
         lineChartDefinition.setTimeDimension(comparison);
         lineChartDefinition.setBaseDate("Date");
+        lineChartDefinition.setFilterDateLevels(true);
         lineChartDefinition.setReportType(WSAnalysisDefinition.YTD);
         List<FilterDefinition> filters = new ArrayList<>();
         filters.add(multiFieldFilterDefinition);
@@ -148,6 +150,7 @@ public class AutoComposite {
         lineChartDefinition.setFilterDefinitions(filters);
         lineChartDefinition.setDataFeedID(dataSourceID);
         lineChartDefinition.setName("Month over Month");
+        lineChartDefinition.setFolder(2);
         return new AnalysisService().saveReportWithConn(lineChartDefinition, conn).getAnalysisID();
     }
 
@@ -197,11 +200,13 @@ public class AutoComposite {
             kpiTime.setFilterDefinitions(Arrays.asList(newFilter, previousFilter));
         }
         kpiTime.setColumns(new ArrayList<>());
+        kpiTime.setFolder(2);
         long kpiTimeID = new AnalysisService().saveReportWithConn(kpiTime, conn).getAnalysisID();
         InsightDescriptor kpiTimeDescriptor = new InsightDescriptor();
         kpiTimeDescriptor.setId(kpiTimeID);
         DashboardReport kpiTimeReport = new DashboardReport();
         kpiTimeReport.setReport(kpiTimeDescriptor);
+        kpiTimeReport.setAutoCalculateHeight(true);
         DashboardGridItem kpiTimeGridItem = new DashboardGridItem();
         kpiTimeGridItem.setDashboardElement(kpiTimeReport);
         overviewGridItems.add(kpiTimeGridItem);
@@ -261,6 +266,7 @@ public class AutoComposite {
             newTrendDefinition.setFilterDefinitions(Arrays.asList(previousFilter, newFilter));
             newTrendDefinition.setMajorFontSize(24);
             newTrendDefinition.setMinorFontSize(12);
+            newTrendDefinition.setFolder(2);
             WSAnalysisDefinition savedTrend = new AnalysisService().saveReportWithConn(newTrendDefinition, conn);
             InsightDescriptor kpi = new InsightDescriptor();
             kpi.setId(savedTrend.getAnalysisID());
@@ -458,6 +464,8 @@ public class AutoComposite {
         trendDate.setKey(new NamedKey("Date"));
         trendFilter.setField(trendDate);
         trendFilter.setParentChildLabel("Date");
+        trendStack.setFilterBorderStyle("none");
+        trendStack.setFilterBorderColor(0xFFFFFF);
         trendStack.setFilters(Arrays.asList(trendFilter));
 
         List<DashboardStackItem> trendStackItems = new ArrayList<>();
@@ -476,6 +484,8 @@ public class AutoComposite {
         for (WSColumnChartDefinition chart : fullTrendReports) {
             AnalysisDateDimension qoqDate = (AnalysisDateDimension) chart.getXaxis();
             qoqDate.setDateLevel(AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL);
+            chart.setFilterDateLevels(true);
+            chart.setFolder(2);
             WSColumnChartDefinition qoqCopy = (WSColumnChartDefinition) copyReport(chart, chart.getName() + " - Trend QoQ");
 
             //new AnalysisService().saveReportWithConn(qoqCopy, conn);
@@ -820,7 +830,7 @@ public class AutoComposite {
 
     }
 
-    public String doSomething() throws SQLException, CloneNotSupportedException {
+    public Dashboard doSomething() throws SQLException, CloneNotSupportedException {
 
         parent = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
 
@@ -889,10 +899,10 @@ public class AutoComposite {
 
         MemCachedManager.delete("dashboard" + dashboard.getId());
 
-        return saved.getUrlKey();
+        return saved;
     }
 
-    public String attach(CompositeFeedNode newNode) throws Exception {
+    public Dashboard attach(CompositeFeedNode newNode) throws Exception {
 
         parent = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
 
@@ -913,7 +923,8 @@ public class AutoComposite {
         {
             if (overviewGrid.getGridItems().size() < 4) {
 
-                List<WSAnalysisDefinition> gauges = allReports.stream().filter(report -> report.getReportType() == WSAnalysisDefinition.TREND).
+                List<WSAnalysisDefinition> gauges = allReports.stream().filter(report -> report.getDataFeedID() == newNode.getDataFeedID()).
+                        filter(report -> report.getReportType() == WSAnalysisDefinition.TREND).
                         map(report -> new AnalysisStorage().getAnalysisDefinition(report.getId(), conn)).collect(Collectors.toList());
 
 
@@ -956,38 +967,40 @@ public class AutoComposite {
             }
         }
 
-        DashboardGrid coolChartGrid = (DashboardGrid) overviewGrid.getGridItems().get(1).getDashboardElement();
-        if (coolCharts.size() > 0) {
-            int currentCapacity = coolChartGrid.getGridItems().size();
-            int newMaxSize = currentCapacity + coolCharts.size();
-            int newColumns = 2;
-            int newRows = (int) Math.ceil((double) newMaxSize / 2);
-            coolChartGrid.setColumns(newColumns);
-            coolChartGrid.setRows(newRows);
-            for (InsightDescriptor gauge : coolCharts) {
-                DashboardGridItem dashboardGridItem = createReportInGrid(gauge, 0, 0);
-                coolChartGrid.getGridItems().add(dashboardGridItem);
-            }
-            int totalCtr = 0;
-            for (int rowCtr = 0; rowCtr < newRows; rowCtr++) {
-                for (int colCtr = 0; colCtr < newColumns; colCtr++) {
-                    DashboardGridItem gridItem;
-                    if (totalCtr < coolChartGrid.getGridItems().size()) {
-                        gridItem = coolChartGrid.getGridItems().get(totalCtr++);
-                    } else {
-                        DashboardText ph = new DashboardText();
-                        ph.setText("");
-                        gridItem = new DashboardGridItem();
-                        gridItem.setDashboardElement(ph);
-                        coolChartGrid.getGridItems().add(gridItem);
+        if (overviewGrid != null && overviewGrid.getGridItems().size() > 1) {
+            DashboardGrid coolChartGrid = (DashboardGrid) overviewGrid.getGridItems().get(1).getDashboardElement();
+            if (coolCharts.size() > 0) {
+                int currentCapacity = coolChartGrid.getGridItems().size();
+                int newMaxSize = currentCapacity + coolCharts.size();
+                int newColumns = 2;
+                int newRows = (int) Math.ceil((double) newMaxSize / 2);
+                coolChartGrid.setColumns(newColumns);
+                coolChartGrid.setRows(newRows);
+                for (InsightDescriptor gauge : coolCharts) {
+                    DashboardGridItem dashboardGridItem = createReportInGrid(gauge, 0, 0);
+                    coolChartGrid.getGridItems().add(dashboardGridItem);
+                }
+                int totalCtr = 0;
+                for (int rowCtr = 0; rowCtr < newRows; rowCtr++) {
+                    for (int colCtr = 0; colCtr < newColumns; colCtr++) {
+                        DashboardGridItem gridItem;
+                        if (totalCtr < coolChartGrid.getGridItems().size()) {
+                            gridItem = coolChartGrid.getGridItems().get(totalCtr++);
+                        } else {
+                            DashboardText ph = new DashboardText();
+                            ph.setText("");
+                            gridItem = new DashboardGridItem();
+                            gridItem.setDashboardElement(ph);
+                            coolChartGrid.getGridItems().add(gridItem);
+                        }
+                        gridItem.setColumnIndex(colCtr);
+                        gridItem.setRowIndex(rowCtr);
                     }
-                    gridItem.setColumnIndex(colCtr);
-                    gridItem.setRowIndex(rowCtr);
                 }
             }
         }
 
-        DashboardStack trends = (DashboardStack) primaryStack.findElementByLabel("What's Happened");
+        /*DashboardStack trends = (DashboardStack) primaryStack.findElementByLabel("What's Happened");
         DashboardGrid trendGrid = (DashboardGrid) trends.getGridItems().get(0).getDashboardElement();
         List<InsightDescriptor> trendReports = allReports.stream().filter(report -> report.getDataFeedID() == newNode.getDataFeedID()).
                 filter(report -> report.getReportType() == WSAnalysisDefinition.COLUMN).
@@ -1023,7 +1036,7 @@ public class AutoComposite {
                     gridItem.setRowIndex(rowCtr);
                 }
             }
-        }
+        }*/
         // modify the gauges
         // modify the diagram
         // modify the trends
@@ -1035,7 +1048,7 @@ public class AutoComposite {
         primaryStack.setCount(primaryStack.getGridItems().size());
         new DashboardService().saveDashboardWithConn(dashboard, conn);
 
-        return dashboard.getUrlKey();
+        return dashboard;
     }
 
     protected InsightDescriptor createKPIReport(CompositeFeedNode newNode, WSTrendDefinition firstKPIReport) throws CloneNotSupportedException {
@@ -1049,6 +1062,7 @@ public class AutoComposite {
         newTrendDefinition.setFilterDefinitions(new ArrayList<>());
         newTrendDefinition.setMajorFontSize(24);
         newTrendDefinition.setMinorFontSize(12);
+        newTrendDefinition.setFolder(2);
         WSAnalysisDefinition savedTrend = new AnalysisService().saveReportWithConn(newTrendDefinition, conn);
         InsightDescriptor kpi = new InsightDescriptor();
         kpi.setId(savedTrend.getAnalysisID());

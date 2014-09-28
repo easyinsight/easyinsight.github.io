@@ -39,6 +39,7 @@ public class User extends EventDispatcher
     public var firstName:String;
     public var freeUpgradePossible:Boolean;
     public var analyst:Boolean;
+    public var notifyProp:String;
     public var lastLoginDate:Date;
     public var reportMode:Boolean;
     public var firstLogin:Boolean;
