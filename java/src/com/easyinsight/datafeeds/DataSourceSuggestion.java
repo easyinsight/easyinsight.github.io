@@ -15,14 +15,30 @@ public class DataSourceSuggestion {
     public static final int SUGGEST_CREATE_DASHBOARD = 2;
     public static final int SUGGEST_IMPORT_USERS = 3;
     public static final int SUGGEST_DELIVER_REPORTS = 4;
+    public static final int SUGGEST_ADD_TO_COMPOSITE = 5;
 
     private int suggestionType;
     private String suggestionLabel;
     private String suggestionURL;
 
+    public DataSourceSuggestion() {
+    }
+
     public DataSourceSuggestion(int suggestionType, String suggestionLabel, String suggestionURL) {
         this.suggestionType = suggestionType;
         this.suggestionLabel = suggestionLabel;
+        this.suggestionURL = suggestionURL;
+    }
+
+    public void setSuggestionType(int suggestionType) {
+        this.suggestionType = suggestionType;
+    }
+
+    public void setSuggestionLabel(String suggestionLabel) {
+        this.suggestionLabel = suggestionLabel;
+    }
+
+    public void setSuggestionURL(String suggestionURL) {
         this.suggestionURL = suggestionURL;
     }
 
