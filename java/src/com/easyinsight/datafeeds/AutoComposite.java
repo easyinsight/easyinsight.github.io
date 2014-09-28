@@ -698,7 +698,7 @@ public class AutoComposite {
 
             for (DashboardStackItem item : childStack.getGridItems()) {
                 if ("Overview".equals(item.getDashboardElement().getLabel()) || "What's Happening".equals(item.getDashboardElement().getLabel()) ||
-                        "What's Happening Now".equals(item.getDashboardElement().getLabel())) {
+                        "What's Happening Now".equals(item.getDashboardElement().getLabel()) || "What's Happening In Deals".equals(item.getDashboardElement().getLabel())) {
                     if (item.getDashboardElement() instanceof DashboardGrid) {
                         DashboardStackItem clone = item.clone();
                         masterStackChildren.add(clone);
@@ -709,7 +709,7 @@ public class AutoComposite {
                             masterStackChildren.add(clone);
                         }
                     }
-                } else if ("Analyze".equals(item.getDashboardElement().getLabel())) {
+                } else if ("Analyze".equals(item.getDashboardElement().getLabel()) || "Discover".equals(item.getDashboardElement().getLabel())) {
                     if (item.getDashboardElement() instanceof DashboardStack) {
                         DashboardStack analyzeStack = (DashboardStack) item.getDashboardElement();
                         for (DashboardStackItem analyzeItem : analyzeStack.getGridItems()) {
@@ -951,6 +951,9 @@ public class AutoComposite {
                 DashboardElement container = dashboard1.getRootElement().findElementByLabel("Overview");
                 if (container == null) {
                     container = dashboard1.getRootElement().findElementByLabel("What's Happening");
+                }
+                if (container == null) {
+                    container = dashboard1.getRootElement().findElementByLabel("What's Happening in Deals");
                 }
                 if (container != null) {
                     Set<Long> containedReports = container.containedReports();
