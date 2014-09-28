@@ -302,7 +302,22 @@ public class InstallMetadata {
                     Dashboard dashboard = installMetadata.installedDashboardMap.get(install.getId());
                     return new DashboardDescriptor(dashboard.getName(), dashboard.getId(), dashboard.getUrlKey(), dashboard.getDataSourceID(), Roles.OWNER, null, true);
                 }
-                install.getId();
+            }
+        } else if (installing.size() > 1) {
+            for (EIDescriptor install : installing) {
+                if (install.getType() == EIDescriptor.DASHBOARD) {
+                    Dashboard dashboard = installMetadata.installedDashboardMap.get(install.getId());
+                    return new DashboardDescriptor(dashboard.getName(), dashboard.getId(), dashboard.getUrlKey(), dashboard.getDataSourceID(), Roles.OWNER, null, true);
+                }
+            }
+            for (EIDescriptor install : installing) {
+                if (install.getType() == EIDescriptor.REPORT) {
+                    AnalysisDefinition report = installMetadata.installedReportMap.get(install.getId());
+                    return new InsightDescriptor(report.getAnalysisID(), report.getTitle(), report.getDataFeedID(), report.getReportType(), report.getUrlKey(), Roles.OWNER, true);
+                } else if (install.getType() == EIDescriptor.DASHBOARD) {
+                    Dashboard dashboard = installMetadata.installedDashboardMap.get(install.getId());
+                    return new DashboardDescriptor(dashboard.getName(), dashboard.getId(), dashboard.getUrlKey(), dashboard.getDataSourceID(), Roles.OWNER, null, true);
+                }
             }
         }
         return null;
