@@ -853,12 +853,15 @@ Chart = {
 
                         var format = d3.time.format("%m/%d/%Y");
 
+                        var map = [];
                         var minY = null;
                         var maxY = null;
                         for (var i = 0; i < s1.length; i++) {
                             var keyVals = s1[i];
+                            map[i] = {};
                             for (var j = 0; j < keyVals.values.length; j++) {
                                 var row = keyVals.values[j];
+                                map[i][row.y] = row.sy;
                                 row.x = format.parse(row.x);
                                 if (minY == null || minY > row.y) {
                                     minY = row.y;
@@ -884,6 +887,16 @@ Chart = {
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {
                             chart.width(customWidth);
+                        }
+
+
+
+
+                        if (data["relative_line"]) {
+                            chart.showYAxis(false);
+                            chart.yAxis.tickFormat(function(d, i) {
+                                return map[i][d];
+                            });
                         }
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65);
