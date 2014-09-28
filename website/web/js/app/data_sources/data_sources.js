@@ -21,7 +21,7 @@
             $http.get("/app/dataSourceSuggestions.json").then(function (d) {
 
                 for (var i = 0; i < d.data.suggestions.length; i++) {
-                    d.data.suggestions[i].url = d.data.suggestions[i].url + "&utc=" + $scope.getOffset();
+                    d.data.suggestions[i].url = d.data.suggestions[i].url + "&utc=" + new Date().getTimezoneOffset();
                 }
 
                 $scope.suggestions = d.data.suggestions;

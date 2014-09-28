@@ -85,6 +85,7 @@ public class QuickReportDeliveryServlet extends JSONServlet {
                 ReportDelivery reportDelivery = new ReportDelivery();
                 reportDelivery.setReportID(reports.get(0).getId());
                 reportDelivery.setSubject("Weekly Delivery of " + reports.get(0).getName());
+                reportDelivery.setUserID(SecurityUtil.getUserID());
                 String body = "This report has been generated for weekly delivery by Easy Insight. You can configure this report's format, delivery, and recipients through the <a href=\"https://www.easy-insight.com/app/scheduling\">Scheduling</a> page on your Easy Insight interface.";
                 reportDelivery.setBody(body);
                 reportDelivery.setHtmlEmail(true);
