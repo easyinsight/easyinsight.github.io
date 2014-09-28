@@ -899,6 +899,12 @@ public class AutoComposite {
 
         MemCachedManager.delete("dashboard" + dashboard.getId());
 
+        PreparedStatement saveDashboardStmt = conn.prepareStatement("INSERT INTO ACCOUNT_TO_DASHBOARD (ACCOUNT_ID, DASHBOARD_ID) VALUES (?, ?)");
+        saveDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+        saveDashboardStmt.setLong(2, saved.getId());
+        saveDashboardStmt.execute();
+        saveDashboardStmt.close();
+
         return saved;
     }
 
