@@ -186,9 +186,14 @@
                 toNoData();
             }
 
+            suggestions = myDataTree.suggestions;
+
             loadingIndex = 0;
             showLoading = false;
         }
+
+        [Bindable]
+        private var suggestions:ArrayCollection;
 
         private function toNoData():void {
             currentState = "noData";
@@ -287,7 +292,7 @@
         <mx:HBox backgroundColor="#FFFFFF" paddingTop="5" paddingBottom="10" paddingLeft="10" paddingRight="10" cornerRadius="5" borderStyle="solid" borderThickness="1" verticalGap="10"
                 top="10">
 
-            <listing:MyDataButton uiChange="updateUI()" id="buttonBox" />
+            <listing:MyDataButton uiChange="updateUI()" id="buttonBox" suggestions="{suggestions}"/>
             <mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off">
                 <mx:VBox paddingLeft="0" paddingRight="10" paddingBottom="10" width="100%"
                         height="100%" id="blah" verticalScrollPolicy="auto" horizontalScrollPolicy="off">
