@@ -698,7 +698,8 @@ public class AutoComposite {
 
             for (DashboardStackItem item : childStack.getGridItems()) {
                 if ("Overview".equals(item.getDashboardElement().getLabel()) || "What's Happening".equals(item.getDashboardElement().getLabel()) ||
-                        "What's Happening Now".equals(item.getDashboardElement().getLabel()) || "What's Happening In Deals".equals(item.getDashboardElement().getLabel())) {
+                        "What's Happening Now".equals(item.getDashboardElement().getLabel()) || "What's Happening In Deals".equals(item.getDashboardElement().getLabel()) ||
+                        "Projects".equals(item.getDashboardElement().getLabel())) {
                     if (item.getDashboardElement() instanceof DashboardGrid) {
                         DashboardStackItem clone = item.clone();
                         masterStackChildren.add(clone);
@@ -706,6 +707,10 @@ public class AutoComposite {
                         DashboardStack analyzeStack = (DashboardStack) item.getDashboardElement();
                         for (DashboardStackItem analyzeItem : analyzeStack.getGridItems()) {
                             DashboardStackItem clone = analyzeItem.clone();
+                            DashboardElement iChild = clone.getDashboardElement();
+                            if (iChild.getLabel() == null || "".equals(iChild.getLabel())) {
+                                iChild.setLabel(analyzeStack.getLabel());
+                            }
                             masterStackChildren.add(clone);
                         }
                     }
