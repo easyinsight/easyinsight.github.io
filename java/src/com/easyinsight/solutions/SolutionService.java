@@ -164,16 +164,7 @@ public class SolutionService {
             dataSource.setAccountVisible(true);
             new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
             if (solutionKPIData.getActivity() != null) {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_DATA_SOURCE_REFRESH.SCHEDULED_DATA_SOURCE_REFRESH_ID FROM SCHEDULED_DATA_SOURCE_REFRESH, DATA_FEED, SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
-                        "SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = data_feed.data_feed_id and data_feed.feed_type = ? AND " +
-                        "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and " +
-                        "scheduled_account_activity.account_id = ?");
-                queryStmt.setInt(1, dataSource.getFeedType().getType());
-                queryStmt.setLong(2, SecurityUtil.getAccountID());
-                ResultSet rs = queryStmt.executeQuery();
-                if (!rs.next() || dataSource.getFeedType().getType() != FeedType.SMARTSHEET_TABLE.getType()) {
-                    new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
-                }
+                new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
             }
 
             Set<Long> idSet = new HashSet<Long>();
