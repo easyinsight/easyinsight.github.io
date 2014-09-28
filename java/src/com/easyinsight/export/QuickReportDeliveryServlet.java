@@ -92,6 +92,7 @@ public class QuickReportDeliveryServlet extends JSONServlet {
                 reportDelivery.setReportFormat(ReportDelivery.HTML_TABLE);
                 reportDelivery.setSendIfNoData(false);
                 UserStub myself = new UserStub();
+                myself.setUserID(SecurityUtil.getUserID());
                 reportDelivery.setUsers(Arrays.asList(myself));
                 WeeklyScheduleType weeklyScheduleType = new WeeklyScheduleType();
                 weeklyScheduleType.setDayOfWeek(Calendar.MONDAY);
@@ -120,6 +121,7 @@ public class QuickReportDeliveryServlet extends JSONServlet {
                 generalDelivery.setBody(body);
                 generalDelivery.setHtmlEmail(true);
                 UserStub myself = new UserStub();
+                myself.setUserID(SecurityUtil.getUserID());
                 generalDelivery.setUsers(Arrays.asList(myself));
                 WeeklyScheduleType weeklyScheduleType = new WeeklyScheduleType();
                 weeklyScheduleType.setDayOfWeek(Calendar.MONDAY);
