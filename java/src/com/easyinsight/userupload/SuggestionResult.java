@@ -12,6 +12,7 @@ public class SuggestionResult {
 
     private int responseType;
     private long dashboardID;
+    private String emailName;
 
     public SuggestionResult() {
     }
@@ -19,6 +20,14 @@ public class SuggestionResult {
     public SuggestionResult(int responseType, long dashboardID) {
         this.responseType = responseType;
         this.dashboardID = dashboardID;
+    }
+
+    public String getEmailName() {
+        return emailName;
+    }
+
+    public void setEmailName(String emailName) {
+        this.emailName = emailName;
     }
 
     public int getResponseType() {

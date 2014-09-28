@@ -2577,6 +2577,7 @@ public class UserUploadService {
                 EIConnection conn = Database.instance().getConnection();
                 try {
                     QuickReportDeliveryServlet.QuickReportResult result = new QuickReportDeliveryServlet.QuickReportResult(conn, utc).invoke();
+                    suggestionResult.setEmailName(result.getName());
                     suggestionResult.setResponseType(SuggestionResult.NAVIGATE_TO_SCHEDULING);
                 } finally {
                     Database.closeConnection(conn);

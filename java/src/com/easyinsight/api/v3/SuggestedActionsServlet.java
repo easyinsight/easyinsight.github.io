@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,9 +21,18 @@ public class SuggestedActionsServlet extends JSONServlet {
     protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject responseObject = new JSONObject();
 
+        List<DataSourceSuggestion> suggestions = getDataSourceSuggestions(conn);
+
+
+        JSONArray array = new JSONArray(suggestions.stream().sequential().map(DataSourceSuggestion::toJSON).toArray(JSONObject[]::new));
+        responseObject.put("suggestions", array);
+        return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
+    }
+
+    public static List<DataSourceSuggestion> getDataSourceSuggestions(EIConnection conn) throws SQLException {
         List<DataSourceSuggestion> suggestions = new ArrayList<>();
 
-         // does the user have any report deliveries set up?
+        // does the user have any report deliveries set up?
 
         PreparedStatement ps = conn.prepareStatement("SELECT scheduled_account_activity.scheduled_account_activity_id FROM scheduled_account_activity WHERE " +
                 "account_id = ? AND (scheduled_account_activity.activity_type = ? OR scheduled_account_activity.activity_type = ?)");
@@ -44,7 +54,7 @@ public class SuggestedActionsServlet extends JSONServlet {
             boolean autoSetupPossible = rs.next();
             autoSetupPossibleStmt.close();
             if (autoSetupPossible) {
-                suggestions.add(new DataSourceSuggestion(0, "Set up recurring emails of reports", "/app/quickReportDeliverySetup?action=create_email"));
+                suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_DELIVER_REPORTS, "Set up recurring emails of reports", "/app/quickReportDeliverySetup?action=create_email"));
             }
         }
 
@@ -55,16 +65,12 @@ public class SuggestedActionsServlet extends JSONServlet {
         if (autoState == AutoComposite.NADA) {
             // no suggestion
         } else if (autoState == AutoComposite.CREATE_COMPOSITE) {
-            suggestions.add(new DataSourceSuggestion(0, "Combine sources into a dashboard", "/app/autoDataSourceAction?action=create_composite"));
+            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_CREATE_COMPOSITE, "Combine sources into a dashboard", "/app/autoDataSourceAction?action=create_composite"));
         } else if (autoState == AutoComposite.ADD_TO_COMPOSITE) {
-            suggestions.add(new DataSourceSuggestion(0, "Add new connections to single dashboard", "/app/autoDataSourceAction?action=create_dashboard"));
+            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_ADD_TO_COMPOSITE, "Add new connections to single dashboard", "/app/autoDataSourceAction?action=add_to_composite"));
         } else if (autoState == AutoComposite.CREATE_DASHBOARD_ON_COMPOSITE) {
-            suggestions.add(new DataSourceSuggestion(0, "Create a dashboard on combined data source", "/app/autoDataSourceAction?action=add_to_composite"));
+            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_CREATE_DASHBOARD, "Create a dashboard on combined data source", "/app/autoDataSourceAction?action=create_dashboard"));
         }
-
-
-        JSONArray array = new JSONArray(suggestions.stream().sequential().map(DataSourceSuggestion::toJSON).toArray(JSONObject[]::new));
-        responseObject.put("suggestions", array);
-        return new ResponseInfo(ResponseInfo.ALL_GOOD, responseObject.toString());
+        return suggestions;
     }
 }
