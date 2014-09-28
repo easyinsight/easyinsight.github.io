@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <h2>Join Sources</h2>
+    </div>
+</div>
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <p>Search for the data sources you want to join together, and select the fields and cardinality for the join of the data sources.</p>
+            </div>
+        </div>
+<form name="joinForm">
+<div class="row" style="padding-top:10px;padding-bottom: 10px;">
+    <div class="col-md-2 col-md-offset-1">
+        Source Data Source:
+    </div>
+    <div class="col-md-2">
+        <input ng-model="join.source_ds" type="text" class="form-control" typeahead="data_source as data_source.name for data_source in composite.data_sources | remove_other_source: join.target_ds | filter: {name: $viewValue}" typeahead-min-length="0"
+                           typeahead-editable="false" typeahead-on-select="select_source_data_source($item, $model, $label)" required />
+    </div>
+    <div class="col-md-2">
+        Target Data Source:
+    </div>
+    <div class="col-md-2">
+        <input ng-model="join.target_ds" type="text" class="form-control" typeahead="data_source as data_source.name for data_source in composite.data_sources | remove_other_source: join.source_ds | filter: {name: $viewValue}" typeahead-min-length="0"
+                                   typeahead-editable="false" typeahead-on-select="select_target_data_source($item, $model, $label)" required />
+    </div>
+</div>
+<div class="row" style="padding-top:10px;padding-bottom: 10px;">
+    <div class="col-md-2 col-md-offset-1">
+        Source Field:
+    </div>
+    <div class="col-md-2"><input ng-model="join.source_field" ng-disabled="!join.source_ds" type="text" class="form-control" typeahead="field as field.name for field in source_fields.fields"
+            typeahead-editable="false" required /></div>
+    <div class="col-md-2">
+        Target Field:
+    </div>
+    <div class="col-md-2">
+        <input type="text" ng-model="join.target_field" ng-disabled="!join.target_ds" class="form-control" typeahead="field as field.name for field in target_fields.fields"
+                typeahead-editable="false" required />
+    </div>
+</div>
+<div class="row" style="padding-top:10px;padding-bottom: 10px;">
+    <div class="col-md-1 col-md-offset-1">Cardinality:</div>
+    <div class="col-md-1">
+        <select ng-model="join.source_cardinality" class="form-control">
+            <option value="one">One</option>
+            <option value="many">Many</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        to
+    </div>
+    <div class="col-md-1">
+        <select ng-model="join.target_cardinality" class="form-control">
+            <option value="one">One</option>
+            <option value="many">Many</option>
+        </select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-md-offset-1"><input ng-model="join.outer_join" id="outer_join" type="checkbox" /> <label for="outer_join">Ensure Outer Join</label></div>
+</div>
+<div class="row">
+    <div class="col-md-8 col-md-offset-1">
+        <a href="/a/composite/new" class="pull-right"><button class="btn btn-default">Cancel</button></a> <a class="pull-right" ng-click="add_join()"><button ng-disabled="!joinForm.$valid" class="btn btn-primary">Add</button></a>
+    </div>
+</div>
+</form>

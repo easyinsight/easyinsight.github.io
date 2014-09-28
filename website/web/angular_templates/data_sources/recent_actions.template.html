@@ -1,10 +1,25 @@
+<div cg-busy="loading" />
+
 <img src="/images/logo2.png"/>
 
-<div class="well sidebar-nav">
+<div ng-if="(suggestions && suggestions.length > 0)" class="well sidebar-nav two-column-nav-left" style="background-color:#ffffd1;margin-top:15px;padding:0">
+    <div style="padding: 10px">
+        <h2 class="two-column-nav-h2">Getting Started</h2>
+    </div>
     <ul class="nav nav-list">
-        <li class="nav-header">Recent Actions</li>
+        <li ng-repeat="suggestion in suggestions">
+            <button class="btn btn-link two-column-nav-action" ng-click="suggestionClicked(suggestion)" style="padding-top:3px;padding-bottom:3px;">{{ suggestion.label }}</button>
+        </li>
+    </ul>
+</div>
+
+<div ng-if="(actions && actions.length > 0)" class="well sidebar-nav two-column-nav-left" style="padding:0">
+    <div style="padding: 10px">
+        <h2 class="two-column-nav-h2">Recent Actions</h2>
+    </div>
+    <ul class="nav nav-list">
         <li ng-repeat="action in actions">
-            <a href="/app/html/{{action.source_type}}/{{action.source.url_key}}" ng-click="$event.stopPropagation()">View {{ action.source.name }}</a>
+            <a class="two-column-nav-action" href="/app/html/{{action.source_type}}/{{action.source.url_key}}" style="padding-top:3px;padding-bottom:3px;" ng-click="$event.stopPropagation()">View {{ action.source.name }}</a>
         </li>
     </ul>
 </div>

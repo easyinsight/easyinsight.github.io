@@ -468,3 +468,25 @@ fieldset[disabled] .btn-alt-primary.active {
     color: #0084B4;
     background-color: #fff;
 }
+
+.two-column-nav-left {
+    padding:0;
+    background-color:#fcfcfe;
+    margin-top:40px;
+}
+
+.two-column-nav-h2 {
+    font-weight: bold;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 18px;
+    padding-top: 0;
+}
+
+.two-column-nav-action {
+    padding-top:3px;
+    padding-bottom:3px;
+    font-weight:normal;
+    font-size: 14px;
+}

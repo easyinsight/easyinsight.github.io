@@ -4,6 +4,7 @@
                       xmlns:skin="com.easyinsight.skin.*" implements="com.easyinsight.listing.IPerspective">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.ArchiveWindow;
+        import com.easyinsight.framework.User;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -136,6 +137,10 @@
         private var index:int;
 
         public function gotFocus():void {
+            if (User.getInstance().notifyProp) {
+                notifyText = "We've automatically set up <b>"+User.getInstance().notifyProp+"</b> to email you at <b>6:00</b> every <b>Monday</b> morning and sent you a test of that email now so that you can see what it looks like. You can customize that scheduling below.";
+                User.getInstance().notifyProp = null;
+            }
             if (!embedded) {
                 var fragmentObject:Object = new Object();
                 fragmentObject.page = "scheduling";
@@ -180,6 +185,9 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        [Bindable]
+        private var notifyText:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="getScheduledActivities" result="gotActivities()"/>
@@ -188,6 +196,10 @@
     </mx:RemoteObject>
     <mx:VBox backgroundColor="#FFFFFF" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" cornerRadius="5" borderStyle="solid" borderThickness="1" verticalGap="10"
             height="100%" backgroundAlpha="1" horizontalAlign="center" top="10">
+        <mx:Box visible="{notifyText != null}" includeInLayout="{notifyText != null}" backgroundColor="#dff0d8" borderColor="#d6e9c6" borderThickness="1" cornerRadius="4"
+                borderStyle="solid" paddingBottom="10" paddingLeft="10" paddingTop="10" paddingRight="10">
+            <mx:Text htmlText="{notifyText}" maxWidth="600" fontSize="14" color="#3c763d" styleName="fallThroughFonts"/>
+        </mx:Box>
         <mx:Canvas width="100%" maxHeight="200">
             <mx:VBox id="dataSourceWarnings"/>
         </mx:Canvas>

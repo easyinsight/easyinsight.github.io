@@ -115,11 +115,22 @@ public class DropArea extends Box
     public function highlight(analysisItem:AnalysisItem):Boolean {
         var valid:Boolean = recommend(analysisItem);
         if (valid) {
+            if (notDoneBox.parent) {
+                notDoneBox.setStyle("backgroundColor", "green");
+            } else if (argh.parent) {
+                argh.setStyle("fillColors", [0x008800, 0x008800, 0x008800, 0x008800]);
+                argh.setStyle("themeColor", 0x008800);
+            }
         }
         return valid;
     }
 
     public function normal():void {
+        if (notDoneBox.parent) {
+            notDoneBox.setStyle("backgroundColor", 0x0084B4);
+        } else if (argh.parent) {
+            argh.setStyle("fillColors", [0x0084B4, 0x0084B4, 0x0084B4, 0x0084B4]);
+        }
     }
 
     private function onDelete(event:Event):void {
@@ -273,7 +284,12 @@ public class DropArea extends Box
             }
         }
         if (okay && accept(analysisItem)) {
-            //setStyle("borderColor", "green");
+            if (notDoneBox.parent) {
+                notDoneBox.setStyle("backgroundColor", "green");
+            } else if (argh.parent) {
+                argh.setStyle("fillColors", ["green", "green", "green", "green"]);
+            }
+
             DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
         }
     }
@@ -346,6 +362,7 @@ public class DropArea extends Box
     }
 
     protected function dragExitHandler(event:DragEvent):void {
+        normal();
         //setStyle("borderColor", 0xB7BABC);
     }
 }

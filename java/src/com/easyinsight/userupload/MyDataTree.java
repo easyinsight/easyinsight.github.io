@@ -1,6 +1,7 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.datafeeds.DataSourceSuggestion;
 import com.easyinsight.tag.Tag;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class MyDataTree {
     private int dashboardCount;
     private int dataSourceCount;
     private boolean accountOverSize;
+    private List<DataSourceSuggestion> suggestions;
     private List<Tag> tags;
 
     public MyDataTree() {
@@ -25,6 +27,14 @@ public class MyDataTree {
     public MyDataTree(List<EIDescriptor> objects, boolean includeGroup) {
         this.objects = objects;
         this.includeGroup = includeGroup;
+    }
+
+    public List<DataSourceSuggestion> getSuggestions() {
+        return suggestions;
+    }
+
+    public void setSuggestions(List<DataSourceSuggestion> suggestions) {
+        this.suggestions = suggestions;
     }
 
     public List<Tag> getTags() {

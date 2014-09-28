@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -51,12 +52,20 @@ public class ColorCache implements ICalculationCache {
             List<MultiColor> multiColors = applicationSkin.getMultiColors();
             List<Integer> colors = createMultiColors(multiColors);
             //Map<String, MultiColor> initColorMap = new HashMap<>();
+            boolean emptyValueAdded = false;
             int i = 0;
             for (IRow row : rowSet.getRows()) {
                 Value value = row.getValue(column.createAggregateKey());
+                if (value.type() == Value.EMPTY) {
+                    emptyValueAdded = true;
+                }
                 Integer color = colors.get(i % colors.size());
                 colorMap.put(value, color);
                 i++;
+            }
+            if (!emptyValueAdded) {
+                Integer color = colors.get(i % colors.size());
+                colorMap.put(new EmptyValue(), color);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

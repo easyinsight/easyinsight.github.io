@@ -183,6 +183,32 @@ public class DataService {
                 }
             }
 
+            if (dataSource instanceof CompositeFeedDefinition) {
+                CompositeFeedDefinition c = (CompositeFeedDefinition) dataSource;
+                for (CompositeFeedNode n : c.getCompositeFeedNodes()) {
+                    Map<String, AnalysisItem> rMap = new HashMap<>();
+                    dataSource.getFields().stream().filter(item -> item.getKey() instanceof DerivedKey).forEach(item -> {
+                        DerivedKey derivedKey = (DerivedKey) item.getKey();
+                        if (derivedKey.getFeedID() == n.getDataFeedID()) {
+                            rMap.put(item.toOriginalDisplayName(), item);
+                        }
+                    });
+                    for (WeNeedToReplaceHibernateTag tag : tags) {
+                        queryStmt.setLong(1, tag.getTagID());
+                        queryStmt.setLong(2, n.getDataFeedID());
+                        ResultSet rs = queryStmt.executeQuery();
+                        while (rs.next()) {
+                            String fieldName = rs.getString(1);
+                            AnalysisItem analysisItem = rMap.get(fieldName);
+                            if (analysisItem != null) {
+                                positions.put(analysisItem, i++);
+                                set.add(analysisItem);
+                            }
+                        }
+                    }
+                }
+            }
+
             queryStmt.close();
 
             Map<String, Integer> customLevel = new HashMap<String, Integer>();
@@ -1789,7 +1815,9 @@ public class DataService {
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
-                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+                if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                    date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+                }
             }
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
             DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
@@ -1832,7 +1860,9 @@ public class DataService {
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) report;
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
-                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+                if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                    date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+                }
             }
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
@@ -2992,7 +3022,8 @@ public class DataService {
             feed.getDataSource().decorateLinks(new ArrayList<>(items));
 
             try {
-                if (analysisDefinition instanceof WSAreaChartDefinition) {
+                if (analysisDefinition instanceof WSAreaChartDefinition || analysisDefinition instanceof WSLineChartDefinition ||
+                        analysisDefinition instanceof WSYTDDefinition || analysisDefinition instanceof WSColumnChartDefinition) {
                     Map<String, AnalysisItem> filterMap = new HashMap<>();
                     for (AnalysisItem reportItem : items) {
                         if (reportItem != null) {

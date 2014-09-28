@@ -510,6 +510,13 @@ public abstract class DashboardElement implements Cloneable, Serializable {
         return null;
     }
 
+    public DashboardElement findElementByLabel(String label) {
+        if (label.equals(getLabel())) {
+            return this;
+        }
+        return null;
+    }
+
     public int requiredInitCount() {
         return 0;
     }

@@ -1018,6 +1018,19 @@ $(function () {
                     return m;
                 }, {});
                 selectionMap[f.id] = $.extend({}, m, f.selected);
+                var selMap = {};
+                selectionMap[target] = selMap;
+                if (f.selected["All"]) {
+                    selMap["All"] = true;
+                }
+                for (var mo in m) {
+                    var selected = f.selected[mo];
+                    if (selected) {
+                        selMap[mo] = true;
+                    } else {
+                        selMap[mo] = false;
+                    }
+                }
             });
 
             $(".cb_all_choice", target).click(allCheck);

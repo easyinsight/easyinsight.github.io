@@ -383,6 +383,7 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Show Points", "showPoints", LineChartDefinition(report).showPoints, report));
             items.addItem(new CheckBoxReportFormItem("Line Shadow", "lineShadow", LineChartDefinition(report).lineShadow, report));
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
+            items.addItem(new CheckBoxReportFormItem("Relative Scale", "relativeScale", LineChartDefinition(report).relativeScale, report));
 
             items.addItem(new ComboBoxReportFormItem("Trend Line Interval", "trendLineTimeInterval", LineChartDefinition(report).trendLineTimeInterval, report,
                     ["None", "Year", "Month", "Week"]));
@@ -618,6 +619,8 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("No Aggregation", "noAggregation", report.noAggregation, report));
         items.addItem(new NumericReportFormItem("Fetch Size", "fetchSize", report.fetchSize, report, 0, 5000));
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
+        items.addItem(new CheckBoxReportFormItem("Filter Date Levels", "filterDateLevels", report.filterDateLevels, report));
+        items.addItem(new TextReportFormItem("Collapse On", "collapseOn", report.collapseOn, report));
         return items;
     }
 }

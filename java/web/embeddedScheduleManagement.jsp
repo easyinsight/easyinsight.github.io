@@ -1,5 +1,9 @@
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <html lang="en">
 
 <head>
@@ -32,7 +36,7 @@
 
 
 
-    <script src="AC_OETags.js" language="javascript"></script>
+    <script src="/app/AC_OETags.js" language="javascript"></script>
 
     <!--  BEGIN Browser History required section -->
     <script src="history/history.js" language="javascript"></script>
@@ -85,6 +89,19 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.SCHEDULING %>"/>
 </jsp:include>
+<%
+    if (request.getSession().getAttribute("autoScheduleName") != null) {
+        String name = (String) request.getSession().getAttribute("autoScheduleName");
+        request.getSession().setAttribute("autoScheduleName", null);
+%>
+<div class="container" style="margin-top:20px;width: 100%;text-align: center">
+    <div class="alert alert-success alert-dismissible">
+        We've automatically set up <b><%=StringEscapeUtils.escapeHtml(name)%></b> to email you at <b>6:00</b> every <b>Monday</b> morning and sent you a test of that email now so that you can see what it looks like. You can customize that scheduling below.
+    </div>
+</div>
+<%
+    }
+%>
 <div>
 <script language="JavaScript" type="text/javascript">
     <!--
@@ -121,7 +138,7 @@
         // if we've detected an acceptable version
         // embed the Flash Content SWF when all tests are passed
         AC_FL_RunContent(
-                "src", "<%=versionDir%>/<%=swf%>",
+                "src", "/app/<%=versionDir%>/<%=swf%>",
                 "width", "100%",
                 "height", "100%",
                 "align", "middle",
@@ -153,7 +170,7 @@
         <param name="bgcolor" value="#ffffff"/>
         <param name="allowScriptAccess" value="sameDomain"/>
         <param name="allowFullScreen" value="true"/>
-        <embed src="<%= versionDir%>/<%=swf%>.swf" quality="high" bgcolor="#ffffff"
+        <embed src="/app/<%= versionDir%>/<%=swf%>.swf" quality="high" bgcolor="#ffffff"
                width="100%" height="100%" name="<%=swf%>" align="middle"
                play="true"
                loop="false"

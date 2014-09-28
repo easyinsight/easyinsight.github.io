@@ -30,7 +30,7 @@ public class DashboardStack extends DashboardElement {
     private int effectType;
     private int stackControl;
     private boolean consolidateHeaderElements;
-    private String selectionType;
+    private String selectionType = "Buttons";
     private int stackFontSize = 16;
     private int defaultIndex;
 
@@ -486,6 +486,20 @@ public class DashboardStack extends DashboardElement {
         }
         for (DashboardStackItem stackItem : getGridItems()) {
             element = stackItem.getDashboardElement().findElement(dashboardElementID);
+            if (element != null) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    public DashboardElement findElementByLabel(String label) {
+        DashboardElement element = super.findElementByLabel(label);
+        if (element != null) {
+            return element;
+        }
+        for (DashboardStackItem stackItem : getGridItems()) {
+            element = stackItem.getDashboardElement().findElementByLabel(label);
             if (element != null) {
                 return element;
             }

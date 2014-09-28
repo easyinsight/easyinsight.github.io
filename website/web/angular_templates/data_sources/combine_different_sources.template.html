@@ -1,22 +1,25 @@
-<div class="container corePageWell">
+<form name="composite_form" ng-submit="save_composite()">
     <div class="row">
-        <div class="col-md-2 col-md-offset-1">
-            Data Source:
-        </div>
-        <div class="col-md-3">
-            <input ng-model="selected_data_source" type="text" class="form-control" typeahead="data_source as data_source.name for data_source in data_sources | filter: {name: $viewValue}"
-                   typeahead-editable="false" />
-        </div>
+        <div class="col-md-10 col-md-offset-1"><h2>New Composite Data Source</h2></div>
     </div>
-
     <div class="row">
-        <div class="col-md-8 col-md-offset-3">
-            <button class="btn btn-default" ng-click="addDataSource()">Add</button>
-        </div>
+        <div class="col-md-10 col-md-offset-1"><p>Combine different data sources by selecting the data sources you want to combine, then adding joins to decide how the data is related between the data sources.</p></div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1"><label for="composite_name">Name:</label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1"><input ng-model="composite.name" type="text" class="form-control" id="composite_name" required /></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align: center"><h2>Data Sources</h2></div>
     </div>
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <button class="btn btn-danger pull-right">Remove Selected</button>
+            <p>
+            <a href="/a/composite/new/data_sources"><button class="btn btn-primary">Add Data Source</button></a>
+            <button class="btn btn-danger pull-right" ng-click="removeSelectedDS()">Remove Selected</button>
+            </p>
         </div>
     </div>
     <div class="row">
@@ -40,4 +43,50 @@
         </table>
         </div>
     </div>
-</div>
+    <div class="row">
+        <div class="col-md-12" style="text-align: center"><h2>Joins</h2></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <p>
+            <a href="/a/composite/new/joins/new"><button class="btn btn-primary">Add Join</button></a>
+
+            <button class="btn btn-danger pull-right" ng-click="removeSelectedJoins()">Remove Selected</button>
+            </p>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <table class="table table-striped table-bordered table-condensed reportDashboardTable">
+                <thead>
+                <tr>
+                    <th style="width: 11px;"></th>
+                    <th>Source Data Source</th><th>Source Field</th>
+                    <th>Target Field</th><th>Target Data Source</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="join in composite.joins">
+                    <td>
+                        <input type="checkbox" ng-model="join.selected" />
+                    </td>
+                    <td><a href="/a/composite/new/joins/{{$index}}">{{ join.source_ds.name }}</a></td>
+                    <td><a href="/a/composite/new/joins/{{$index}}">{{ join.source_field.name }}</a></td>
+                    <td><a href="/a/composite/new/joins/{{$index}}">{{ join.target_field.name }}</a></td>
+                    <td><a href="/a/composite/new/joins/{{$index}}">{{ join.target_ds.name }}</a></td>
+                </tr>
+                <tr ng-if="composite.joins.length == 0">
+                    <td colspan="5">There are no joins for this composite.  Add one now.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <input type="submit" class="btn btn-primary" ng-disabled="!composite_form.$valid" value="Save" />
+        </div>
+    </div>
+</form>

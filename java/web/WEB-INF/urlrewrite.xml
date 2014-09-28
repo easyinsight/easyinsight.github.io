@@ -67,6 +67,21 @@
     </rule>
 
     <rule>
+        <from>^/html/scheduleManagement</from>
+        <to>/embeddedScheduleManagement.jsp</to>
+    </rule>
+
+    <rule>
+        <from>^/html/report/([A-Za-z0-9]+)/edit$</from>
+        <to>/embeddedReportEditor.jsp?reportID=$1</to>
+    </rule>
+    <rule>
+        <from>^/html/dashboard/([A-Za-z0-9]+)/edit$</from>
+        <to>/embeddedDashboardEditor.jsp?dashboardID=$1</to>
+    </rule>
+
+
+    <rule>
         <from>^/html/report/([A-Za-z0-9]+)/usage.json$</from>
         <to>/html/usageData?reportID=$1</to>
     </rule>
@@ -316,6 +331,13 @@
         <from>/recentActions.json</from>
         <to>/json/recentActions</to>
     </rule>
+
+
+    <rule>
+        <from>/dataSourceSuggestions.json</from>
+        <to>/json/dataSourceSuggestions</to>
+    </rule>
+
     <rule>
         <from>/dataSources/([A-Za-z0-9]+)/fields.json</from>
         <to>/json/fieldList?dataSourceID=$1</to>

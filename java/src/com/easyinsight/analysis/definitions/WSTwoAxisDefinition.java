@@ -20,6 +20,16 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
     private boolean multiMeasure;
     private AnalysisItem eventPoint;
     private AnalysisItem eventPointLabel;
+    private int eventPointLineColor;
+    private boolean relativeScale;
+
+    public boolean isRelativeScale() {
+        return relativeScale;
+    }
+
+    public void setRelativeScale(boolean relativeScale) {
+        this.relativeScale = relativeScale;
+    }
 
     public List<ReportAuditEvent> validate() {
         List<ReportAuditEvent> events = super.validate();
@@ -115,6 +125,14 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         } else {
             return super.applyLimits(dataSet);
         }
+    }
+
+    public int getEventPointLineColor() {
+        return eventPointLineColor;
+    }
+
+    public void setEventPointLineColor(int eventPointLineColor) {
+        this.eventPointLineColor = eventPointLineColor;
     }
 
     public AnalysisItem getEventPoint() {
@@ -243,6 +261,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         baseAtZero = findStringProperty(properties, "baseAtZero", "true");
         interpolateValues = findStringProperty(properties, "interpolateValues", "false");
         multiMeasure = findBooleanProperty(properties, "multiMeasure", false);
+        relativeScale = findBooleanProperty(properties, "relativeScale", false);
     }
 
     @Override
@@ -252,6 +271,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         properties.add(new ReportStringProperty("baseAtZero", baseAtZero));
         properties.add(new ReportStringProperty("interpolateValues", interpolateValues));
         properties.add(new ReportBooleanProperty("multiMeasure", multiMeasure));
+        properties.add(new ReportBooleanProperty("relativeScale", relativeScale));
         return properties;
     }
 }

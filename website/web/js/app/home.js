@@ -1,4 +1,4 @@
-var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
+var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
 easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
 

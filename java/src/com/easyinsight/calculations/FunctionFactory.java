@@ -336,6 +336,10 @@ public class FunctionFactory {
             return new FirstDayOfWeek();
         } else if (s.equals("lastdayofweek")) {
             return new LastDayOfWeek();
+        } else if (s.equals("stddev")) {
+            return new StandardDeviation();
+        } else if (s.equals("split")) {
+            return new Split();
         } else {
             return null;
         }

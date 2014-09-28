@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.tag.Tag;
@@ -34,7 +35,16 @@ public class DataSourceDescriptor extends EIDescriptor {
     private List<CustomFolder> customFolders = new ArrayList<CustomFolder>();
     private List<Tag> tags;
     private int rowCount;
+    private boolean autoCombined;
     private Collection<EIDescriptor> prebuilts;
+
+    public boolean isAutoCombined() {
+        return autoCombined;
+    }
+
+    public void setAutoCombined(boolean autoCombined) {
+        this.autoCombined = autoCombined;
+    }
 
     public Collection<EIDescriptor> getPrebuilts() {
         return prebuilts;
@@ -171,6 +181,14 @@ public class DataSourceDescriptor extends EIDescriptor {
         } else {
             jo.put("last_refresh_time", "");
         }
+        if(FeedType.valueOf(getDataSourceType()).equals(FeedType.COMPOSITE)) {
+            jo.put("type", "composite");
+        } else {
+            jo.put("type", "other");
+        }
+
+
+        jo.put("data_source_type", dataSourceType);
         return jo;
     }
 }

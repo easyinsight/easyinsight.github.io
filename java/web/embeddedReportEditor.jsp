@@ -47,7 +47,7 @@
 
 
 
-    <script src="AC_OETags.js" language="javascript"></script>
+    <script src="/app/AC_OETags.js" language="javascript"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -137,7 +137,7 @@
         // if we've detected an acceptable version
         // embed the Flash Content SWF when all tests are passed
         AC_FL_RunContent(
-                "src", "<%=versionDir%>/<%=swf%>",
+                "src", "/app/<%=versionDir%>/<%=swf%>",
                 "width", "100%",
                 "height", "100%",
                 "align", "middle",
@@ -169,7 +169,7 @@
         <param name="bgcolor" value="#ffffff"/>
         <param name="allowScriptAccess" value="sameDomain"/>
         <param name="allowFullScreen" value="true"/>
-        <embed src="<%= versionDir%>/<%=swf%>.swf" quality="high" bgcolor="#ffffff"
+        <embed src="/app/<%= versionDir%>/<%=swf%>.swf" quality="high" bgcolor="#ffffff"
                width="100%" height="100%" name="<%=swf%>" align="middle"
                play="true"
                loop="false"

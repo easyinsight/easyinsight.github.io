@@ -2,9 +2,36 @@
     var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy', 'ui.bootstrap', 'ui.keypress']);
 
     eiDataSources.controller("homeBaseController", ["$scope", "$http", function ($scope, $http) {
-        $http.get("/app/recentActions.json").then(function (d) {
-            $scope.actions = d.data.actions;
-        })
+
+        $scope.suggestionClicked = function (suggestion) {
+            $scope.loading = $http.get(suggestion.url);
+            $scope.loading.then(function(c) {
+                window.location = c.data.url;
+            });
+        };
+
+        $scope.loadActions = function() {
+            $http.get("/app/recentActions.json").then(function (d) {
+                $scope.actions = d.data.actions;
+            })
+        };
+        $scope.loadActions();
+
+        $scope.loadSuggestions = function() {
+            $http.get("/app/dataSourceSuggestions.json").then(function (d) {
+
+                for (var i = 0; i < d.data.suggestions.length; i++) {
+                    d.data.suggestions[i].url = d.data.suggestions[i].url + "&utc=" + $scope.getOffset();
+                }
+
+                $scope.suggestions = d.data.suggestions;
+            })
+        };
+        $scope.loadSuggestions();
+
+        /*$http.get("/app/dataSourceSuggestions.json").then(function (d) {
+            $scope.suggestions = d.data.suggestions;
+        })*/
     }]);
 
     eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", function ($scope, $http, PageInfo, $filter, $modal) {
@@ -36,6 +63,9 @@
                     $scope.data_sources = $scope.data_sources.filter(function (e, i, l) {
                         return !e.selected;
                     });
+                });
+                m.result.then(function (r) {
+                    $scope.loadSuggestions();
                 });
                 m.result.finally(function(r) {
                     delete $scope.to_delete;
@@ -114,21 +144,25 @@
             });
 
             $scope.refresh_data_source = function () {
-                $scope.refresh_status_line = "Starting the refresh...";
-                $http.get("/app/refreshDataSource?urlKey=" + $scope.data_source.url_key).then(function (d) {
-                    if (d.data && d.data.callDataID) {
-                        $scope.refresh_interval = $interval(function () {
-                            $http.get("/app/refreshStatus?callDataID=" + d.data.callDataID).then(function (a) {
-                                if (a.data.status == 4) {
-                                    $scope.refresh_status_line = "";
-                                    $interval.cancel($scope.refresh_interval);
-                                    $scope.refresh_interval = null;
-                                }
-                                $scope.refresh_status_line = a.data.statusMessage;
-                            });
-                        }, 5000);
-                    }
-                });
+                if ($scope.data_source.data_source_type == 2) {
+                    window.location = "/a/dataSource/" + $scope.data_source.url_key + "/refresh";
+                } else {
+                    $scope.refresh_status_line = "Starting the refresh...";
+                    $http.get("/app/refreshDataSource?urlKey=" + $scope.data_source.url_key).then(function (d) {
+                        if (d.data && d.data.callDataID) {
+                            $scope.refresh_interval = $interval(function () {
+                                $http.get("/app/refreshStatus?callDataID=" + d.data.callDataID).then(function (a) {
+                                    if (a.data.status == 4) {
+                                        $scope.refresh_status_line = "";
+                                        $interval.cancel($scope.refresh_interval);
+                                        $scope.refresh_interval = null;
+                                    }
+                                    $scope.refresh_status_line = a.data.statusMessage;
+                                });
+                            }, 5000);
+                        }
+                    });
+                }
             }
 
             $scope.$on("$destroy", function () {
@@ -223,6 +257,17 @@
         }
     });
 
+    eiDataSources.filter("not_already_selected", function() {
+        return function(input, selected_list) {
+            return input.filter(function(e, i, l) {
+                return !selected_list.some(function(ee, ii, ll) {
+                        return e == ee;
+                    }
+                )
+            });
+        }
+    })
+
     eiDataSources.filter("not_tagged", function () {
         return function (input, data_source_tags) {
             if (!input || !data_source_tags)
@@ -235,32 +280,222 @@
         }
     })
 
+    eiDataSources.filter("remove_other_source", function() {
+        return function(input, data_source) {
+            var output = input.slice(0);
+            if(data_source) {
+                var i;
+                var index = -1;
+                for(i = 0;i < output.length;i++) {
+                    if(output[i].url_key == data_source.url_key)
+                        index = i;
+                }
+                if(index != -1)
+                    output.splice(index, 1);
+            }
+            return output;
+        }
+
+
+    })
+
+    eiDataSources.controller("addDataSourceController", ["$scope", "$http", "$location", "$modal", function($scope, $http, $location, $modal) {
+        $scope.loadingSources = $http.get("/app/dataSources.json");
+        $scope.loadingSources.then(function(c) {
+            $scope.all_data_sources = c.data.data_sources.map(function(e, i, l) {
+                e.selected = $scope.composite.data_sources.some(function(ee, ii, ll) {
+                    return ee.url_key == e.url_key;
+                });
+
+                return e;
+            }).filter(function(e, i, l) {
+                return e.type != "composite";
+            });
+
+        });
+        $scope.add_join = function() {
+            var flagged = [];
+            var a = $scope.all_data_sources.filter(function(e, i, l) {
+                var aa = e.selected;
+                if(!aa && $scope.composite.data_sources.some(function(ee, ii, ll) {
+                    return ee.url_key == e.url_key
+
+                })) {
+                    flagged.push(e);
+                }
+                return aa;
+            })
+            var flagged_joins = $scope.composite.joins.filter(function(e, i, l) {
+                return flagged.some(function(ee, ii, ll) {
+                    return e.source_ds.url_key == ee.url_key || e.target_ds.url_key == ee.url_key;
+                })
+            })
+            var i;
+            if(flagged_joins.length == 0) {
+                $scope.composite.data_sources = a;
+                for(i = 0;i < $scope.all_data_sources.length;i++) {
+                    $scope.all_data_sources[i].selected = false;
+                }
+                $location.path("/composite/new")
+            } else {
+                $scope.to_delete = flagged;
+                var m = $modal.open({
+                    templateUrl: "/angular_templates/data_sources/composite/delete_data_sources.template.html",
+                    scope: $scope,
+                    controller: "compositeRemoveSelectedDataSourcesController"
+                })
+                m.result.then(function() {
+                    $scope.composite.data_sources = a;
+                    $location.path("/composite/new");
+                })
+
+                m.result.finally(function() {
+                    delete $scope.to_delete;
+                })
+            }
+        }
+    }])
+
+    eiDataSources.controller("compositeRemoveSelectedDataSourcesController", ["$scope", function($scope) {
+        $scope.delete_joins = $scope.composite.joins.filter(function(e, i, l) {
+            return $scope.to_delete.some(function(ee, ii, ll) {
+                return e.source_ds.url_key == ee.url_key || e.target_ds.url_key == ee.url_key;
+            });
+        })
+        $scope.confirmDelete = function() {
+            $scope.composite.data_sources = $scope.composite.data_sources.filter(function(e,i,l) {
+                return !e.selected;
+            });
+            $scope.composite.joins = $scope.composite.joins.filter(function(e, i, l) {
+                return !$scope.delete_joins.some(function(ee, ii, ll) {
+                    return ee == e;
+                })
+            })
+            $scope.$close();
+        }
+    }])
+
+    eiDataSources.controller("compositeRemovaSelectedJoinsController", ["$scope", function($scope) {
+            $scope.confirmDelete = function() {
+                $scope.composite.joins = $scope.composite.joins.filter(function(e,i,l) {
+                    return !e.selected;
+                });
+                $scope.$close();
+            }
+        }])
+
+    eiDataSources.controller("combineDifferentSourcesController", ["$scope", "$modal", "$http", function($scope, $modal, $http) {
+        $scope.removeSelectedDS = function() {
+            $scope.to_delete = $scope.composite.data_sources.filter(function(e, i, l) {
+                return e.selected;
+            })
+            if($scope.to_delete.length == 0)
+                return;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/data_sources/composite/delete_data_sources.template.html",
+                scope: $scope,
+                controller: "compositeRemoveSelectedDataSourcesController"
+            })
+            m.result.finally(function() {
+                delete $scope.to_delete;
+            })
+        }
+        $scope.removeSelectedJoins = function() {
+            $scope.to_delete = $scope.composite.joins.filter(function(e, i, l) {
+                return e.selected;
+            })
+            if($scope.to_delete.length == 0)
+                return;
+            var m = $modal.open({
+                templateUrl: "/angular_templates/data_sources/composite/delete_joins.template.html",
+                scope: $scope,
+                controller: "compositeRemovaSelectedJoinsController"
+            })
+            m.result.finally(function(){
+                delete $scope.to_delete;
+            })
+        }
+        $scope.save_composite = function() {
+            $scope.saving = $http.post("/app/html/composite", JSON.stringify($scope.composite));
+
+        }
+    }])
+
     eiDataSources.controller("combineDataSourcesSplashController", function() {
 
     })
 
-    eiDataSources.controller("combineDifferentSourcesController", ["$scope", "$http", "$rootScope", "$location", function($scope, $http, $rootScope, $location) {
+    eiDataSources.controller("combineDifferentSourcesBaseController", ["$scope", "$http", "$rootScope", "$location", "$modal",
+        function($scope, $http, $rootScope, $location, $modal) {
+            $scope.leaving = false;
         $rootScope.user_promise.then(function(u) {
             if(!u.designer) {
                 $location.path("/missing");
             }
         });
 
-        $scope.composite = {"data_sources": []}
+        $scope.composite = {"data_sources": [], "joins": []}
+        $scope.$on("$locationChangeStart", function(event, newString, oldString) {
 
-        $scope.loadingSources = $http.get("/app/dataSources.json");
-        $scope.loadingSources.then(function(c) {
-            $scope.data_sources = c.data.data_sources;
-        });
+            var common = "";
+            var i;
+            var r = document.getElementsByTagName("base")[0].href;
+            oldString = oldString.replace(r, "");
+            newString = newString.replace(r, "");
+            for(i = 0;i < Math.min(oldString.length, newString.length);i++) {
+                if(oldString[i] == newString[i])
+                    common = common + oldString[i];
+                else
+                    break;
+            }
+            if(!$scope.leaving && common.indexOf("composite/new") == -1) {
+                event.preventDefault();
 
-        $scope.addDataSource = function() {
-            if(typeof($scope.selected_data_source) != "object")
-                return;
+                var m = $modal.open({
+                    templateUrl: "/angular_templates/data_sources/navigate_away.template.html",
+                })
+                m.result.then(function() {
+                    $scope.leaving = true;
+                    var a = document.createElement('a');
+                    a.href = "/" + newString;
+                    $location.path(a.pathname);
+                })
+            }
+        })
 
-            $scope.composite.data_sources.push($scope.selected_data_source);
-            console.log($scope.composite);
+    }]);
+
+    eiDataSources.controller("joinEditController", ["$scope", "$http", "$location", "$routeParams",
+        function($scope, $http, $location, $routeParams) {
+            if($routeParams.id == "new")
+                $scope.join = {
+                    "source_cardinality": "one",
+                    "target_cardinality": "one",
+                    "outer_join": false
+                }
+            else
+                $scope.join = angular.copy($scope.composite.joins[$routeParams.id])
+        $scope.select_target_data_source = function (item, model, label) {
+            $scope.loading_target_fields = $http.get("/app/html/reports/" + item.url_key + "/fields.json");
+            $scope.loading_target_fields.then(function(c) {
+                $scope.target_fields = c.data;
+            })
         }
-
+        $scope.select_source_data_source = function (item, model, label) {
+            $scope.loading_source_fields = $http.get("/app/html/reports/" + item.url_key + "/fields.json");
+            $scope.loading_source_fields.then(function(c) {
+                $scope.source_fields = c.data;
+            })
+        }
+        $scope.add_join = function() {
+            if(!$scope.joinForm.$valid)
+                return;
+            if($routeParams.id == "new")
+                $scope.composite.joins.push($scope.join);
+            else
+                $scope.composite.joins[$routeParams.id] = $scope.join;
+            $location.path("/composite/new");
+        }
     }])
 
     eiDataSources.config(["$routeSegmentProvider", function ($routeSegmentProvider) {
@@ -268,7 +503,9 @@
             when("/", "two_column.data_sources").
             when("/data_sources/:id", "two_column.reports").
             when("/combine_sources", "combine_sources").
-            when("/combine_sources/different", "combine_different_sources").
+            when("/composite/new", "combine_different_sources.new_source").
+            when("/composite/new/joins/:id", "combine_different_sources.edit_join").
+            when("/composite/new/data_sources", "combine_different_sources.edit_data_sources").
             segment("two_column", {
                 templateUrl: "/angular_templates/data_sources/home_base.template.html",
                 controller: "homeBaseController"
@@ -288,8 +525,22 @@
                 controller: "combineDataSourcesSplashController"
             }).
             segment("combine_different_sources", {
+                templateUrl: "/angular_templates/data_sources/composite_base.template.html",
+                controller: "combineDifferentSourcesBaseController"
+            }).
+            within().
+            segment("new_source", {
                 templateUrl: "/angular_templates/data_sources/combine_different_sources.template.html",
                 controller: "combineDifferentSourcesController"
+            }).
+            segment("edit_join", {
+                templateUrl: "/angular_templates/data_sources/join_sources.template.html",
+                controller: "joinEditController",
+                depends: ["id"]
+            }).
+            segment("edit_data_sources", {
+                templateUrl: "/angular_templates/data_sources/composite/add_data_sources.template.html",
+                controller: "addDataSourceController"
             })
     }])
 

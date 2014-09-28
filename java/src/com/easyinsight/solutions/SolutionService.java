@@ -40,6 +40,7 @@ import org.hibernate.Session;
 public class SolutionService {
 
     public List<FieldAssignment> determineFields(DashboardDescriptor dashboardDescriptor, long targetID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -90,6 +91,7 @@ public class SolutionService {
     }
 
     public void saveTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM copy_template WHERE dashboard_id = ? AND target_source_id = ?");
@@ -121,6 +123,7 @@ public class SolutionService {
     }
 
     public void installTemplate(DashboardDescriptor dashboardDescriptor, long targetSource, List<FieldAssignment> fieldAssignments, String targetName) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -152,6 +155,7 @@ public class SolutionService {
     }
 
     public PostInstallSteps addKPIData(SolutionKPIData solutionKPIData) {
+        SecurityUtil.authorizeFeedAccess(solutionKPIData.getDataSourceID());
         EIConnection conn = Database.instance().getConnection();
         try {
             System.out.println("Invoking ADD KPI data on " + solutionKPIData.getDataSourceID());
@@ -160,16 +164,7 @@ public class SolutionService {
             dataSource.setAccountVisible(true);
             new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
             if (solutionKPIData.getActivity() != null) {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_DATA_SOURCE_REFRESH.SCHEDULED_DATA_SOURCE_REFRESH_ID FROM SCHEDULED_DATA_SOURCE_REFRESH, DATA_FEED, SCHEDULED_ACCOUNT_ACTIVITY WHERE " +
-                        "SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = data_feed.data_feed_id and data_feed.feed_type = ? AND " +
-                        "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and " +
-                        "scheduled_account_activity.account_id = ?");
-                queryStmt.setInt(1, dataSource.getFeedType().getType());
-                queryStmt.setLong(2, SecurityUtil.getAccountID());
-                ResultSet rs = queryStmt.executeQuery();
-                if (!rs.next() || dataSource.getFeedType().getType() != FeedType.SMARTSHEET_TABLE.getType()) {
-                    new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
-                }
+                new ExportService().addOrUpdateSchedule(solutionKPIData.getActivity(), solutionKPIData.getUtcOffset(), conn);
             }
 
             Set<Long> idSet = new HashSet<Long>();
@@ -510,37 +505,6 @@ public class SolutionService {
         }
     }
 
-    public List<ReportValidation> validations(EIDescriptor descriptor, long targetID) {
-        EIConnection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        try {
-            FeedDefinition target = new FeedStorage().getFeedDefinitionData(targetID, conn);
-            FeedDefinition source;
-            if (descriptor.getType() == EIDescriptor.DASHBOARD) {
-                PreparedStatement dashboardQuery = conn.prepareStatement("SELECT DASHBOARD.data_source_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
-                dashboardQuery.setLong(1, descriptor.getId());
-                ResultSet rs = dashboardQuery.executeQuery();
-                rs.next();
-                long dataSourceID = rs.getLong(1);
-                source = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-            } else {
-                PreparedStatement dashboardQuery = conn.prepareStatement("SELECT ANALYSIS.data_feed_id FROM ANALYSIS WHERE ANALYSIS_ID = ?");
-                dashboardQuery.setLong(1, descriptor.getId());
-                ResultSet rs = dashboardQuery.executeQuery();
-                rs.next();
-                long dataSourceID = rs.getLong(1);
-                source = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-            }
-            return InstallMetadata.determine(source, target, conn, session, Arrays.asList(descriptor));
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            Database.closeConnection(conn);
-        }
-    }
-
     public List<DataSourceDescriptor> determineDataSourceForEntity(EIDescriptor descriptor) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -824,6 +788,7 @@ public class SolutionService {
     }
 
     public InsightDescriptor installReport(long reportID, long dataSourceID) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);

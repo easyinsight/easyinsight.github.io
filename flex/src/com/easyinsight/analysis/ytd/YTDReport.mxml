@@ -6,6 +6,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.StringValue;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
@@ -16,6 +17,7 @@
         import mx.collections.ArrayCollection;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.events.FlexEvent;
+        import mx.formatters.DateFormatter;
         import mx.formatters.Formatter;
 
         [Bindable]
@@ -116,8 +118,15 @@
             var underlines:Array = [];
 
             var timeIntervals:ArrayCollection = additionalProperties["timeIntervals"];
+            var df:DateFormatter = new DateFormatter();
+            df.formatString = "MMM YYYY";
             for each (var interval:Value in timeIntervals) {
-                columns.addItem(createColumn(interval.toString()));
+                if (interval is StringValue) {
+                    columns.addItem(createColumn(interval.toString()));
+                } else {
+                    columns.addItem(createColumn(df.format(interval.getValue())));
+                }
+
             }
 
             columns.addItem(createColumn(vert.ytdLabel));
@@ -157,7 +166,11 @@
                 if (ytdValue.timeIntervalValues.length > 0) {
                     for (var y:int = 0; y < ytdValue.timeIntervalValues.length; y++) {
                         var timeIntervalValue:TimeIntervalValue = ytdValue.timeIntervalValues.getItemAt(y) as TimeIntervalValue;
-                        var label:String = timeIntervalValue.dateValue.toString();
+                        if (timeIntervalValue.dateValue is StringValue) {
+                            label = timeIntervalValue.dateValue.toString();
+                        } else {
+                            label = df.format(timeIntervalValue.dateValue.getValue());
+                        }
                         if (timeIntervalValue.value.toNumber() != 0) {
                             hasValue = true;
                         }

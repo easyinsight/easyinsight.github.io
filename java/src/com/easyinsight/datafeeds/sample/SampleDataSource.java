@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.ReportFault;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.dataset.DataSet;
@@ -35,6 +36,10 @@ public class SampleDataSource extends CompositeServerDataSource {
     private List<OpportunityData> opportunities;
 
     String[] reps = { "Jim", "Amy", "Mark", "Lisa"};
+
+    @Override
+    public void configureFactory(HTMLConnectionFactory factory) {
+    }
 
     public List<OpportunityData> getOrCreateOpportunities() {
         if (opportunities == null) {

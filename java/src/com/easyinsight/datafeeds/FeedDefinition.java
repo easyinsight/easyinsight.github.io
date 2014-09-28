@@ -84,6 +84,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean visibleWithinParentConfiguration;
     private boolean defaultToFullJoins;
     private boolean defaultToOptimized;
+    private boolean autoCombined;
+
+    public boolean isAutoCombined() {
+        return autoCombined;
+    }
+
+    public void setAutoCombined(boolean autoCombined) {
+        this.autoCombined = autoCombined;
+    }
 
     public boolean isAvoidKeyDisplayCollisions() {
         return avoidKeyDisplayCollisions;
