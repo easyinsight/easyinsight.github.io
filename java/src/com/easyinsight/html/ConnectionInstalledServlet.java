@@ -4,6 +4,8 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.export.DailyScheduleType;
+import com.easyinsight.export.DataSourceRefreshActivity;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.PostInstallSteps;
 import com.easyinsight.solutions.SolutionKPIData;
@@ -36,14 +38,38 @@ public class ConnectionInstalledServlet extends HttpServlet {
             /*if (dataSource.rebuildFieldWindow()) {
                 endURL = RedirectUtil.getURL(req, "/app/html/fieldSetup.jsp?dataSourceID=" + dataSourceKey);
             } else {*/
-                SolutionKPIData solutionKPIData = new SolutionKPIData();
-                solutionKPIData.setDataSourceID(dataSourceID);
-                PostInstallSteps steps = new SolutionService().addKPIData(solutionKPIData);
-                if (steps.getResult() != null) {
-                    endURL = RedirectUtil.getURL(req, "/app/html/dashboard/" + steps.getResult().getUrlKey());
-                } else {
-                    endURL = RedirectUtil.getURL(req, "/a/data_sources/" + dataSource.getApiKey());
-                }
+            SolutionKPIData solutionKPIData = new SolutionKPIData();
+            solutionKPIData.setDataSourceID(dataSourceID);
+                /*
+                var activity:DataSourceRefreshActivity = new DataSourceRefreshActivity();
+            activity.dataSourceID = _dataSourceDefinition.dataFeedID;
+            activity.dataSourceName = _dataSourceDefinition.feedName;
+            var schedule:DailyScheduleType = new DailyScheduleType();
+            var morningOrEvening:int = int(Math.random() * 2);
+            if (morningOrEvening == 0) {
+                schedule.hour = int(Math.random() * 6);
+            } else {
+                schedule.hour = int(Math.random() * 6) + 18;
+            }
+            schedule.minute = int(Math.random() * 60);
+            activity.scheduleType = schedule;
+            kpiData.utcOffset = new Date().getTimezoneOffset();
+            kpiData.activity = activity;
+                 */
+            DataSourceRefreshActivity dataSourceRefreshActivity = new DataSourceRefreshActivity();
+            dataSourceRefreshActivity.setDataSourceID(dataSourceID);
+            dataSourceRefreshActivity.setDataSourceName(dataSource.getFeedName());
+            DailyScheduleType dailyScheduleType = new DailyScheduleType();
+            dailyScheduleType.setHour((int) (Math.random() * 22 + 1));
+            dailyScheduleType.setMinute((int) (Math.random() * 58 + 1));
+            dataSourceRefreshActivity.setScheduleType(dailyScheduleType);
+            solutionKPIData.setActivity(dataSourceRefreshActivity);
+            PostInstallSteps steps = new SolutionService().addKPIData(solutionKPIData);
+            if (steps.getResult() != null) {
+                endURL = RedirectUtil.getURL(req, "/app/html/dashboard/" + steps.getResult().getUrlKey());
+            } else {
+                endURL = RedirectUtil.getURL(req, "/a/data_sources/" + dataSource.getApiKey());
+            }
             //}
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("url", endURL);
