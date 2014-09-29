@@ -58,8 +58,8 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            if (_analysisDefinition != null) {
-                if (!_joinsCustomizable) {
+            if (_analysisDefinition != null && _joinsCustomizable >0) {
+                if (_joinsCustomizable == 1) {
                     options = new ArrayCollection([
                         {label: "Edit Properties      ", data: "editProperties"},
                         {label: "Customize Code", data: "customizeCode"},
@@ -118,15 +118,15 @@
             _dataView.refresh();
         }
 
-        private var _joinsCustomizable:Boolean;
+        private var _joinsCustomizable:int;
 
 
         [Bindable(event="joinsCustomizableChanged")]
-        public function get joinsCustomizable():Boolean {
+        public function get joinsCustomizable():int {
             return _joinsCustomizable;
         }
 
-        public function set joinsCustomizable(value:Boolean):void {
+        public function set joinsCustomizable(value:int):void {
             if (_joinsCustomizable == value) return;
             _joinsCustomizable = value;
             invalidateProperties();
