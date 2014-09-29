@@ -374,6 +374,11 @@
     </rule>
 
     <rule>
+        <from>/html/connections/</from>
+        <to>/html/connections.jsp</to>
+    </rule>
+
+    <rule>
         <from>/html/dataSources/([A-Za-z0-9]+)/createConnection</from>
         <to>/html/connectionCreating.jsp?dataSourceID=$1</to>
     </rule>
