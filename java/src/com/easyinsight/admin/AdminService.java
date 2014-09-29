@@ -58,11 +58,11 @@ public class AdminService {
             rs.next();
             String firstName = rs.getString(1);
             String email = rs.getString(2);
-            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FIRST_EMAIL, firstName);
-            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.SECOND_EMAIL, firstName);
-            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.THIRD_EMAIL, firstName);
-            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FOURTH_EMAIL, firstName);
-            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FIFTH_EMAIL, firstName);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FIRST_EMAIL, firstName, 1);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.SECOND_EMAIL, firstName, 2);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.THIRD_EMAIL, firstName, 3);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FOURTH_EMAIL, firstName, 4);
+            new LeadNurtureShell().generate(conn, userID, email, LeadNurtureShell.FIFTH_EMAIL, firstName, 5);
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -1013,7 +1013,7 @@ public class AdminService {
 
             PreparedStatement queryActionStmt = conn.prepareStatement("SELECT GENERAL_ACTION_TYPE, ACTION_TYPE, ACTION_DATE, DATA_SOURCE_ID, REPORT_ID, DASHBOARD_ID FROM REVISED_ACTION_LOG " +
                     "WHERE REVISED_ACTION_LOG.USER_ID = ? ORDER BY REVISED_ACTION_LOG.ACTION_DATE DESC LIMIT 30");
-            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, url_key, data_source_id FROM DASHBOARD WHERE DASHBOARD_ID = ?");
+            PreparedStatement dashboardStmt = conn.prepareStatement("SELECT DASHBOARD_NAME, url_key, data_source_id, data_feed_id FROM DASHBOARD, DATA_FEED WHERE DASHBOARD_ID = ? AND DASHBOARD.DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID");
             PreparedStatement reportStmt = conn.prepareStatement("SELECT DATA_FEED_ID, REPORT_TYPE, TITLE, URL_KEY FROM ANALYSIS WHERE ANALYSIS_ID = ?");
             PreparedStatement dataSourceStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             queryActionStmt.setLong(1, SecurityUtil.getUserID());
