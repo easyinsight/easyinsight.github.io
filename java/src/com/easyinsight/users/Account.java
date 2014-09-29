@@ -122,7 +122,7 @@ public class Account {
     private String googleSecretToken;
 
     @Column(name="fiscal_year_start_month")
-    private int fiscalYearStartMonth;
+    private int fiscalYearStartMonth = 1;
 
     @Column(name="google_oauth_token")
     private String googleToken;
