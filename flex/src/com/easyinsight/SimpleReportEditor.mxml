@@ -156,7 +156,7 @@
         private var selectedMode:int;
 
         [Bindable]
-        private var joinsCustomizable:Boolean;
+        private var joinsCustomizable:int;
 
         private var _analysisDefinition:AnalysisDefinition;
 
@@ -599,7 +599,7 @@
                 cFactory.properties = { dataSourceID: dataSourceID, calcRefactor: feedMetadata.allowRefactor, tags: feedMetadata.tags };
                 rendererFactory = cFactory;
                 dataSourceName = this.feedMetadata.dataSourceName;
-                joinsCustomizable = this.feedMetadata.customJoinsAllowed;
+                joinsCustomizable = this.feedMetadata.customJoinsAllowed ? 2 : 1;
                 defaultManualRun = feedMetadata.defaultManualRun;
                 if (defaultManualRun) {
                     adHocButton.parent.removeChild(adHocButton);
