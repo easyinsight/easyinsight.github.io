@@ -71,58 +71,63 @@ public class PivotalTrackerV5StorySource extends PivotalTrackerV5BaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = new HttpClient();
+        httpClient.setTimeout(30000);
         PivotalTrackerV5CompositeSource p = (PivotalTrackerV5CompositeSource) parentDefinition;
         Map<String, List<String>> storyIDToLabelMap = new HashMap<String, List<String>>();
         List<Map> projects = runRequestForList("projects", p, httpClient);
 
 
         for (Map project : projects) {
-            int page = 0;
-            String projectID = getJSONValue(project, "id");
-            List<Map> stories;
-            do {
-                stories = runRequestForList("/projects/" + projectID + "/stories?limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), p, httpClient);
-                for (Map story : stories) {
-                    String storyID = getJSONValue(story, "id");
-                    List<Map> labels = (List<Map>) story.get("labels");
-                    for (Map label : labels) {
-                        String labelID = label.get("id").toString();
-                        List<String> labelList = storyIDToLabelMap.get(storyID);
-                        if (labelList == null) {
-                            labelList = new ArrayList<String>();
-                            storyIDToLabelMap.put(storyID, labelList);
+            try {
+                int page = 0;
+                String projectID = getJSONValue(project, "id");
+                List<Map> stories;
+                do {
+                    stories = runRequestForList("/projects/" + projectID + "/stories?limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), p, httpClient);
+                    for (Map story : stories) {
+                        String storyID = getJSONValue(story, "id");
+                        List<Map> labels = (List<Map>) story.get("labels");
+                        for (Map label : labels) {
+                            String labelID = label.get("id").toString();
+                            List<String> labelList = storyIDToLabelMap.get(storyID);
+                            if (labelList == null) {
+                                labelList = new ArrayList<String>();
+                                storyIDToLabelMap.put(storyID, labelList);
+                            }
+                            labelList.add(labelID);
                         }
-                        labelList.add(labelID);
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(ID), storyID);
+                        String iterationID = p.getIterationToStoryMap().get(storyID);
+                        String state = null;
+                        if (iterationID != null) {
+                            row.addValue(keys.get(ITERATION_ID), iterationID);
+                            state = p.getIterationToStateMap().get(iterationID);
+                        }
+                        if (state == null) {
+                            state = "Icebox";
+                        }
+                        row.addValue(keys.get(ITERATION_STATE), state);
+                        row.addValue(keys.get(PROJECT_ID), projectID);
+                        row.addValue(keys.get(NAME), getJSONValue(story, "name"));
+                        row.addValue(keys.get(KIND), getJSONValue(story, "kind"));
+                        row.addValue(keys.get(URL), getJSONValue(story, "url"));
+                        row.addValue(keys.get(CURRENT_STATE), getJSONValue(story, "current_state"));
+                        row.addValue(keys.get(REQUESTED_BY), p.getUser(getJSONValue(story, "requested_by_id")));
+                        row.addValue(keys.get(ACCEPTED_AT), getDate(story, "accepted_at"));
+                        row.addValue(keys.get(CREATED_AT), getDate(story, "created_at"));
+                        row.addValue(keys.get(STORY_TYPE), getJSONValue(story, "story_type"));
+                        row.addValue(keys.get(OWNER), p.getUser(getJSONValue(story, "owned_by_id")));
+                        row.addValue(keys.get(DEADLINE), getDate(story, "deadline"));
+                        row.addValue(keys.get(UPDATED_AT), getDate(story, "updated_at"));
+                        row.addValue(keys.get(ESTIMATE), getJSONValue(story, "estimate"));
+                        row.addValue(keys.get(COUNT), 1);
                     }
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(ID), storyID);
-                    String iterationID = p.getIterationToStoryMap().get(storyID);
-                    String state = null;
-                    if (iterationID != null) {
-                        row.addValue(keys.get(ITERATION_ID), iterationID);
-                        state = p.getIterationToStateMap().get(iterationID);
-                    }
-                    if (state == null) {
-                        state = "Icebox";
-                    }
-                    row.addValue(keys.get(ITERATION_STATE), state);
-                    row.addValue(keys.get(PROJECT_ID), projectID);
-                    row.addValue(keys.get(NAME), getJSONValue(story, "name"));
-                    row.addValue(keys.get(KIND), getJSONValue(story, "kind"));
-                    row.addValue(keys.get(URL), getJSONValue(story, "url"));
-                    row.addValue(keys.get(CURRENT_STATE), getJSONValue(story, "current_state"));
-                    row.addValue(keys.get(REQUESTED_BY), p.getUser(getJSONValue(story, "requested_by_id")));
-                    row.addValue(keys.get(ACCEPTED_AT), getDate(story, "accepted_at"));
-                    row.addValue(keys.get(CREATED_AT), getDate(story, "created_at"));
-                    row.addValue(keys.get(STORY_TYPE), getJSONValue(story, "story_type"));
-                    row.addValue(keys.get(OWNER), p.getUser(getJSONValue(story, "owned_by_id")));
-                    row.addValue(keys.get(DEADLINE), getDate(story, "deadline"));
-                    row.addValue(keys.get(UPDATED_AT), getDate(story, "updated_at"));
-                    row.addValue(keys.get(ESTIMATE), getJSONValue(story, "estimate"));
-                    row.addValue(keys.get(COUNT), 1);
-                }
-                page = page + 1;
-            } while (stories.size() > 0);
+                    page = page + 1;
+                } while (stories.size() > 0);
+            } catch (Exception e) {
+                System.out.println("ergh");
+            }
         }
 
         p.setStoryIDToLabelMap(storyIDToLabelMap);
