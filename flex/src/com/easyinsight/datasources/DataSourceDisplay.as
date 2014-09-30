@@ -1,5 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.administration.feed.BulkFieldWindow;
+import com.easyinsight.analysis.DataViewFactory;
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.User;
 import com.easyinsight.util.AutoSizeTextArea;
@@ -17,6 +18,7 @@ import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
 import mx.controls.Button;
+import mx.controls.Text;
 import mx.controls.TextArea;
 import mx.controls.VRule;
 import mx.core.Application;
@@ -31,7 +33,7 @@ import mx.managers.PopUpManager;
 public class DataSourceDisplay extends HBox {
 
     private var _dataSource:DataSourceInfo;
-    public var sourceLabel:TextArea;
+    public var sourceLabel:Text;
 
     private var _labelText:String;
 
@@ -182,18 +184,18 @@ public class DataSourceDisplay extends HBox {
     private var viewStack:ViewStack;
 
     private function vanillaRetrieval(event:MouseEvent):void {
-        _dataView.refresh();
+        if (_dataView is DataViewFactory) {
+            DataViewFactory(_dataView).forceRetrieve();
+        } else {
+            _dataView.refresh();
+        }
         close();
     }
 
     override protected function createChildren():void {
         super.createChildren();
-        /*if (sourceBox == null) {
-            sourceBox = new HBox();
-        }
-        addChild(sourceBox);*/
-        var refreshButton:Button = new MultiLineButton();
-        refreshButton.label = "Rerun the Report Against Existing Data";
+        var refreshButton:Button = new Button();
+        refreshButton.label = "Rerun Report";
         refreshButton.styleName = "grayButton";
         refreshButton.width = 120;
         refreshButton.setStyle("fontSize", 12);
@@ -205,14 +207,9 @@ public class DataSourceDisplay extends HBox {
         var vbox:VBox = new VBox();
         vbox.setStyle("horizontalAlign", "center");
         if (sourceLabel == null) {
-            sourceLabel = new AutoSizeTextArea();
+            sourceLabel = new Text();
             sourceLabel.width = 250;
             sourceLabel.setStyle("fontSize", 12);
-            sourceLabel.setStyle("backgroundAlpha", 0);
-            sourceLabel.setStyle("borderThickness", 0);
-            sourceLabel.horizontalScrollPolicy = "off";
-            sourceLabel.verticalScrollPolicy = "off";
-            sourceLabel.editable = false;
             sourceLabel.selectable = false;
             BindingUtils.bindProperty(sourceLabel, "text", this, "labelText");
         }

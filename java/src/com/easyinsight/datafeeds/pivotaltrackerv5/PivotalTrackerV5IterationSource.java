@@ -30,7 +30,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
     public static final String FINISH = "Finish Date";
     public static final String CURRENT_STATE = "Iteration State";
 
-    public static final int PAGE_SIZE = 15;
+    public static final int PAGE_SIZE = 50;
 
     public PivotalTrackerV5IterationSource() {
         setFeedName("Iterations");
@@ -54,6 +54,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = new HttpClient();
+        httpClient.setTimeout(30000);
         Map<String, String> iterationToStoryMap = new HashMap<String, String>();
         Map<String, String> userMap = new HashMap<String, String>();
         Map<String, String> iterationToStateMap = new HashMap<String, String>();
@@ -61,7 +62,7 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
         for (Map project : projects) {
             String projectID = getJSONValue(project, "id");
             try {
-                List<Map> memberships = runRequestForList("/projects/" + projectID + "/memberships", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+                List<Map> memberships = runRequestForList("projects/" + projectID + "/memberships", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
                 for (Map membership : memberships) {
                     Map person = (Map) membership.get("person");
                     String name = person.get("name").toString();
@@ -72,44 +73,54 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                 System.out.println("!");
                 // they may not have access to membership information for this project
             }
-            {
-                int page = 0;
-                List<Map> iterations;
-                do {
-                    iterations = runRequestForList("/projects/" + projectID + "/iterations?scope=done&limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
-                    for (Map story : iterations) {
-                        String id = projectID + "-" + getJSONValue(story, "number");
-                        parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "done");
-                        iterationToStateMap.put(id, "Done");
-                    }
-                    page++;
-                } while (iterations.size() > 0);
-            }
-            {
-                int page = 0;
-                List<Map> iterations;
-                do {
-                    iterations = runRequestForList("/projects/" + projectID + "/iterations?scope=current&limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
-                    for (Map story : iterations) {
-                        String id = projectID + "-" + getJSONValue(story, "number");
-                        parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "current");
-                        iterationToStateMap.put(id, "Current");
-                    }
-                    page++;
-                } while (iterations.size() > 0);
-            }
-            {
-                int page = 0;
-                List<Map> iterations;
-                do {
-                    iterations = runRequestForList("/projects/" + projectID + "/iterations?scope=backlog&limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
-                    for (Map story : iterations) {
-                        String id = projectID + "-" + getJSONValue(story, "number");
-                        parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "backlog");
-                        iterationToStateMap.put(id, "Backlog");
-                    }
-                    page++;
-                } while (iterations.size() > 0);
+
+            try {
+
+                {
+                    int page = 0;
+                    List<Map> iterations;
+                    do {
+                        iterations = runRequestForList("projects/" + projectID + "/iterations?scope=done&limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+                        for (Map story : iterations) {
+                            String id = projectID + "-" + getJSONValue(story, "number");
+                            parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "done");
+                            iterationToStateMap.put(id, "Done");
+                        }
+                        page++;
+                        System.out.println("got back " + iterations.size());
+                    } while (iterations.size() > 0);
+                }
+                {
+                    int page = 0;
+                    List<Map> iterations;
+                    do {
+                        iterations = runRequestForList("projects/" + projectID + "/iterations?scope=current&limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+                        for (Map story : iterations) {
+                            String id = projectID + "-" + getJSONValue(story, "number");
+                            parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "current");
+                            iterationToStateMap.put(id, "Current");
+                        }
+                        page++;
+                        System.out.println("got back " + iterations.size());
+                    } while (iterations.size() > 0);
+                }
+                {
+                    int page = 0;
+                    List<Map> iterations;
+                    do {
+                        iterations = runRequestForList("projects/" + projectID + "/iterations?scope=backlog&limit=" + PAGE_SIZE + "&offset=" + (page * PAGE_SIZE), (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+                        for (Map story : iterations) {
+                            String id = projectID + "-" + getJSONValue(story, "number");
+                            parseIterations(keys, dataSet, iterationToStoryMap, projectID, story, "backlog");
+                            iterationToStateMap.put(id, "Backlog");
+                        }
+                        page++;
+                        System.out.println("got back " + iterations.size());
+                    } while (iterations.size() > 0);
+                }
+
+            } catch (Exception e) {
+                System.out.println("blah");
             }
         }
         ((PivotalTrackerV5CompositeSource) parentDefinition).setIterationToStoryMap(iterationToStoryMap);

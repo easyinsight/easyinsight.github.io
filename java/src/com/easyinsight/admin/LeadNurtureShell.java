@@ -24,14 +24,19 @@ public class LeadNurtureShell {
     public String generate(int email) throws SQLException {
         switch (email) {
             case 1:
+                // immediate
                 return generate(FIRST_EMAIL);
             case 2:
+                // week 1
                 return generate(SECOND_EMAIL);
             case 3:
+                // week 2
                 return generate(THIRD_EMAIL);
             case 4:
+                // week 3
                 return generate(FOURTH_EMAIL);
             case 5:
+                // week 4
                 return generate(FIFTH_EMAIL);
         }
         return "";
@@ -47,7 +52,7 @@ public class LeadNurtureShell {
                         replace("{15}", "").replace("{17}", "").replace("{18}", "");
     }
 
-    public void generate(EIConnection conn, long userID, String emailAddress, EmailShell emailShell, String name) throws SQLException {
+    public void generate(EIConnection conn, long userID, String emailAddress, EmailShell emailShell, String name, int sequence) throws SQLException {
 
         PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
         PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
@@ -67,10 +72,15 @@ public class LeadNurtureShell {
 
         String unsubscribeURL = "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey;
 
-        String replaced = viewAsWebpage.replace("{1}", "https://www.easy-insight.com/app/emailAsWebsite.jsp?email=1");
+        String replaced = viewAsWebpage.replace("{1}", "https://www.easy-insight.com/app/emailAsWebsite/" + sequence);
 
         String emailLine = this.emailLine.replace("{1}", unsubscribeURL);
 
+        if (name.length() > 1) {
+            if (Character.isLowerCase(name.charAt(0))) {
+                name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+            }
+        }
         name = "&nbsp;" + name;
 
         String string = this.string.replace("{0}", name).replace("{1}", emailShell.firstParagraph).replace("{2}", emailShell.image1)
@@ -168,9 +178,9 @@ public class LeadNurtureShell {
 
     private static EmailShell createFifthEmail() {
         EmailShell email = new EmailShell();
-        email.subject = "Extending your Easy Insight reporting with more systems";
+        email.subject = "Your Easy Insight trial is almost over";
         email.name = "James";
-        email.firstParagraph = "Even if you're just using Easy Insight for simple reporting on one SaaS system, you have full business intelligence functionality available to you to extend your reporting across multiple systems. Take a look at the guides below to see some of the more advanced functionality you can use. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
+        email.firstParagraph = "Your 30 day of Easy Insight is coming to its end, but we hope you'll be staying with us! Even if you're just using Easy Insight for simple reporting on one SaaS system, you have full business intelligence functionality available to you to extend your reporting across multiple systems. Take a look at the guides below to see some of the more advanced functionality you can use. If you have any questions at all, please contact us at support@easy-insight.com or 1-(720)-316-8174.";
         email.image1 = "connect.png";
         email.image2 = "companies.png";
         email.image3 = "boxes.png";

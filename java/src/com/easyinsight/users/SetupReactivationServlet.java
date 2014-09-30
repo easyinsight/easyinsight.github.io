@@ -23,10 +23,11 @@ public class SetupReactivationServlet extends HttpServlet {
         try {
             SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
             long accountID = Long.parseLong(req.getParameter("id"));
+            String bucket = req.getParameter("bucket");
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
-                new ReactivationAccount().generate(accountID, conn);
+                new ReactivationAccount().generate(accountID, conn, bucket);
                 conn.commit();
             } catch (Exception e) {
                 LogClass.error(e);

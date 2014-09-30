@@ -45,20 +45,25 @@ public class PivotalTrackerV5EpicSource extends PivotalTrackerV5BaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = new HttpClient();
+        httpClient.setTimeout(30000);
         Map<String, List<String>> epicIDToLabelMap = new HashMap<String, List<String>>();
         List<Map> projects = runRequestForList("projects", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
         for (Map project : projects) {
             String projectID = getJSONValue(project, "id");
-            List<Map> epics = runRequestForList("/projects/" + projectID  + "/epics", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
-            for (Map epic : epics) {
-                IRow row = dataSet.createRow();
-                String epicID = getJSONValue(epic, "id");
-                row.addValue(keys.get(ID), epicID);
-                row.addValue(keys.get(PROJECT_ID), projectID);
-                row.addValue(keys.get(NAME), getJSONValue(epic, "name"));
-                Map label = (Map) epic.get("label");
-                String labelID = label.get("id").toString();
-                row.addValue(keys.get(LABEL_ID), labelID);
+            try {
+                List<Map> epics = runRequestForList("/projects/" + projectID  + "/epics", (PivotalTrackerV5CompositeSource) parentDefinition, httpClient);
+                for (Map epic : epics) {
+                    IRow row = dataSet.createRow();
+                    String epicID = getJSONValue(epic, "id");
+                    row.addValue(keys.get(ID), epicID);
+                    row.addValue(keys.get(PROJECT_ID), projectID);
+                    row.addValue(keys.get(NAME), getJSONValue(epic, "name"));
+                    Map label = (Map) epic.get("label");
+                    String labelID = label.get("id").toString();
+                    row.addValue(keys.get(LABEL_ID), labelID);
+                }
+            } catch (Exception e) {
+                System.out.println("...");
             }
 
         }

@@ -39,7 +39,7 @@ public class ReactivationAccount {
         }
     }
 
-    public void generate(long accountID, EIConnection conn) throws SQLException {
+    public void generate(long accountID, EIConnection conn, String bucket) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT EMAIL, USER_ID, FIRST_NAME, USER.NAME, ACCOUNT.NAME FROM USER, ACCOUNT WHERE ACCOUNT.ACCOUNT_ID = ? AND ACCOUNT_ADMIN = ? AND ACCOUNT.ACCOUNT_ID = USER.ACCOUNT_ID");
         stmt.setLong(1, accountID);
         stmt.setBoolean(2, true);
@@ -57,16 +57,16 @@ public class ReactivationAccount {
         }
         PreparedStatement aliasStmt = conn.prepareStatement("UPDATE USER SET EMAIL = ?, USERNAME = ?, OPT_IN_EMAIL = ? WHERE USER_ID = ?");
         PreparedStatement aliasAccountStmt = conn.prepareStatement("UPDATE ACCOUNT SET NAME = ? WHERE ACCOUNT_ID = ?");
-        aliasAccountStmt.setString(1, accountName + "x");
+        aliasAccountStmt.setString(1, accountName + "reactivation");
         aliasAccountStmt.setLong(2, accountID);
         aliasAccountStmt.executeUpdate();
         aliasAccountStmt.close();
         PreparedStatement createReactivationStmt = conn.prepareStatement("INSERT INTO reactivation_data (email_address, user_id, " +
-                "activation_key, date_generated, became_user_id, first_name, last_name) " +
-                "values (?, ?, ?, ?, ?, ?, ?)");
+                "activation_key, date_generated, became_user_id, first_name, last_name, bucket) " +
+                "values (?, ?, ?, ?, ?, ?, ?, ?)");
         for (UserInfo userInfo : userInfos) {
-            aliasStmt.setString(1, userInfo.email + "x");
-            aliasStmt.setString(2, userInfo.email + "x");
+            aliasStmt.setString(1, userInfo.email + "reactivation");
+            aliasStmt.setString(2, userInfo.email + "reactivation");
             aliasStmt.setBoolean(3, false);
             aliasStmt.setLong(4, userInfo.userID);
             aliasStmt.executeUpdate();
@@ -79,6 +79,7 @@ public class ReactivationAccount {
             createReactivationStmt.setLong(5, 0);
             createReactivationStmt.setString(6, userInfo.firstName);
             createReactivationStmt.setString(7, userInfo.lastName);
+            createReactivationStmt.setString(8, bucket);
             createReactivationStmt.execute();
             System.out.println("https://localhost:4443/app/reactivation?activationKey="+activationKey);
         }
