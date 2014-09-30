@@ -20,29 +20,6 @@ import java.io.IOException;
  * Time: 10:38 AM
  */
 public class SetupReactivationServlet extends JSONServlet {
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        SecurityUtil.populateThreadLocalFromSession(req);
-        try {
-            SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-            long accountID = Long.parseLong(req.getParameter("id"));
-            String bucket = req.getParameter("bucket");
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                conn.setAutoCommit(false);
-                new ReactivationAccount().generate(accountID, conn, bucket);
-                conn.commit();
-            } catch (Exception e) {
-                LogClass.error(e);
-                conn.rollback();
-            } finally {
-                conn.setAutoCommit(true);
-                Database.closeConnection(conn);
-            }
-        } finally {
-            SecurityUtil.clearThreadLocal();
-        }
-    }
 
     @Override
     protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
