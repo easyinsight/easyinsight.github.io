@@ -1,7 +1,6 @@
 package com.easyinsight.email;
 
 import com.easyinsight.admin.ConstantContactSync;
-import com.easyinsight.admin.LeadNurtureShell;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.util.RandomTextGenerator;
@@ -130,13 +129,51 @@ public class AccountMemberInvitation {
     }
 
     public void sendWelcomeEmail(String to, EIConnection conn, long userID, String firstName, long accountID) throws Exception {
-        /*PreparedStatement salesStmt = conn.prepareStatement("INSERT INTO emails_to_send (account_id, email_sent) values (?, ?)");
+        PreparedStatement salesStmt = conn.prepareStatement("INSERT INTO emails_to_send (account_id, email_sent) values (?, ?)");
         salesStmt.setLong(1, accountID);
         salesStmt.setBoolean(2, false);
         salesStmt.execute();
-        salesStmt.close();*/
+        salesStmt.close();
+        PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
+        PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
+        queryUnsubscribeStmt.setLong(1, userID);
+        ResultSet unsubscribeRS = queryUnsubscribeStmt.executeQuery();
+        String unsubscribeKey;
+        if (unsubscribeRS.next()) {
+            unsubscribeKey = unsubscribeRS.getString(1);
+        } else {
+            unsubscribeKey = RandomTextGenerator.generateText(25);
+            insertKeyStmt.setLong(1, userID);
+            insertKeyStmt.setString(2, unsubscribeKey);
+            insertKeyStmt.execute();
+        }
+        HttpClient sendWithUsClient = new HttpClient();
+        sendWithUsClient.getParams().setAuthenticationPreemptive(true);
+        Credentials defaultcreds = new UsernamePasswordCredentials("live_2d56944c0596aea84504bd0947e0421ab3e1c56c", "");
+        sendWithUsClient.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
 
-        new LeadNurtureShell().generate(conn, userID, to, LeadNurtureShell.FIRST_EMAIL, firstName, 1);
+        JSONObject json = new JSONObject();
+        json.put("email_id", "tem_RMZQDewvrB2GRX4fUGWLYN");
+        JSONObject recipient = new JSONObject();
+        recipient.put("address", to);
+        json.put("recipient", recipient);
+        JSONObject sender = new JSONObject();
+        sender.put("address", "sales@easy-insight.com");
+        sender.put("reply_to", "sales@easy-insight.com");
+        sender.put("name", "Easy Insight Marketing");
+        json.put("sender", sender);
+
+        JSONObject emailData = new JSONObject();
+        emailData.put("user_name", firstName);
+        emailData.put("unsubscribeLink", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
+        json.put("email_data", emailData);
+
+        PostMethod method = new PostMethod("https://api.sendwithus.com/api/v1/send");
+        StringRequestEntity entity = new StringRequestEntity(json.toString(), "application/json", "UTF-8");
+        method.setRequestEntity(entity);
+        sendWithUsClient.executeMethod(method);
+        Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(method.getResponseBodyAsStream());
+        System.out.println(obj);
     }
 
     public void salesNotification(String userName, String email, String company, String additionalInfo) throws MessagingException, UnsupportedEncodingException {
