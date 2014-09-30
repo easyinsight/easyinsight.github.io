@@ -14,6 +14,10 @@
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="com.easyinsight.analysis.definitions.WSDiagramDefinition" %>
+<%@ page import="com.easyinsight.core.InsightDescriptor" %>
+<%@ page import="java.sql.Statement" %>
+<%@ page import="com.easyinsight.util.RandomTextGenerator" %>
+<%@ page import="java.sql.Timestamp" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -72,6 +76,7 @@
         WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
 
+        String dtUrlKey;
         conn = Database.instance().getConnection();
         org.hibernate.Session hibernateSession = Database.instance().createSession(conn);
         try {
@@ -85,6 +90,26 @@
                 //filterDefinition.setShowOnReportView(false);
                 filters.add(filterDefinition);
             }
+
+            PreparedStatement saveDrillStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_SAVE (REPORT_ID, URL_KEY, SAVE_TIME) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            saveDrillStmt.setLong(1, report.getAnalysisID());
+            dtUrlKey = RandomTextGenerator.generateText(40);
+            saveDrillStmt.setString(2, dtUrlKey);
+            saveDrillStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            saveDrillStmt.execute();
+            long drillID = Database.instance().getAutoGenKey(saveDrillStmt);
+            saveDrillStmt.close();
+            PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_REPORT_SAVE_FILTER (DRILLTHROUGH_SAVE_ID, FILTER_ID) VALUES (?, ?)");
+            for (FilterDefinition filter : filters) {
+                filter.beforeSave(hibernateSession);
+                hibernateSession.save(filter);
+                hibernateSession.flush();
+                saveStmt.setLong(1, drillID);
+                saveStmt.setLong(2, filter.getFilterID());
+                saveStmt.execute();
+            }
+            saveStmt.close();
         } finally {
             hibernateSession.close();
             Database.closeConnection(conn);
@@ -95,6 +120,7 @@
         reportJSON.put("name", report.getName());
         reportJSON.put("id", -1);
         reportJSON.put("filters", new JSONArray());
+        reportJSON.put("drillthroughID", dtUrlKey);
 
         JSONObject styleJSON = new JSONObject();
         styleJSON.put("main_stack_start", "#FFFFFF");
