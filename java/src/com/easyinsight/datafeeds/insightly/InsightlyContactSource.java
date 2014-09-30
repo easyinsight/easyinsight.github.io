@@ -192,11 +192,11 @@ public class InsightlyContactSource extends InsightlyBaseSource {
                     for (Object contactInfoObj : contactInfos) {
                         Map contactInfoMap = (Map) contactInfoObj;
                         String type = getValue(contactInfoMap, "TYPE").toString();
-                        String label = getValue(contactInfoMap, "LABEL").toString();
+                        String label = getValue(contactInfoMap, "LABEL").toString().toLowerCase();
                         Value detail = getValue(contactInfoMap, "DETAIL");
-                        if ("PHONE".equals(type) && "Work".equals(label)) {
+                        if ("PHONE".equals(type) && "work".equals(label)) {
                             row.addValue(keys.get(WORK_PHONE), detail);
-                        } else if ("EMAIL".equals(type) && "Work".equals(label)) {
+                        } else if ("EMAIL".equals(type) && "work".equals(label)) {
                             row.addValue(keys.get(WORK_EMAIL), detail);
                         }
                     }
