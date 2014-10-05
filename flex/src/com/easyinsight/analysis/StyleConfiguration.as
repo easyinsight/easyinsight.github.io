@@ -309,6 +309,7 @@ public class StyleConfiguration {
 
         items.addItem(new NumericReportFormItem("Fixed Report Width", "fixedWidth", report.fixedWidth, report, 0, 5000));
         if (report is ListDefinition) {
+            items.addItem(new NumericReportFormItem("HTML Max Row Height", "htmlMaxRowHeight", ListDefinition(report).htmlMaxRowHeight, report, 0, 10000));
             items.addItem(new CheckBoxReportFormItem("Summary Row", "summaryTotal", ListDefinition(report).summaryTotal, report, null, true));
             items.addItem(new CheckBoxReportFormItem("Show Line Numbers", "showLineNumbers", ListDefinition(report).showLineNumbers, report));
             items.addItem(new CheckBoxReportFormItem("Lock Headers", "lockHeaders", ListDefinition(report).lockHeaders, report));
