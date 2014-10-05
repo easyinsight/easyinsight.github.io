@@ -1456,8 +1456,9 @@ public class UserUploadService {
                 baos = null;
                 bufOS = null;
                 fout = null;
+                System.out.println("bytes size = " + bytes.length);
             }
-            System.out.println("bytes size = " + bytes.length);
+
             long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
             uploadResponse = new UploadResponse(dataSourceID);
             conn.commit();
