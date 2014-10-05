@@ -32,6 +32,15 @@ public class FieldRule {
     private String dataSourceName;
     private String drillthroughName;
     private String defaultDate;
+    private String sortField;
+
+    public String getSortField() {
+        return sortField;
+    }
+
+    public void setSortField(String sortField) {
+        this.sortField = sortField;
+    }
 
     public long getFieldRuleID() {
         return fieldRuleID;
@@ -58,7 +67,7 @@ public class FieldRule {
     }
 
     public static List<FieldRule> load(EIConnection conn, long dataSourceID) throws SQLException {
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT FIELD_RULE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, EXTENSION_ID, TAG_ID, DISPLAY_NAME, RULE_DATA_SOURCE_ID, DEFAULT_DATE FROM FIELD_RULE WHERE DATA_SOURCE_ID = ? ORDER BY FIELD_ORDER ASC");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT FIELD_RULE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, EXTENSION_ID, TAG_ID, DISPLAY_NAME, RULE_DATA_SOURCE_ID, DEFAULT_DATE, SORT_FIELD FROM FIELD_RULE WHERE DATA_SOURCE_ID = ? ORDER BY FIELD_ORDER ASC");
         PreparedStatement getTagStmt = conn.prepareStatement("SELECT TAG_NAME FROM ACCOUNT_TAG WHERE ACCOUNT_TAG_ID = ?");
         loadStmt.setLong(1, dataSourceID);
         ResultSet rs = loadStmt.executeQuery();
@@ -71,6 +80,7 @@ public class FieldRule {
             long extensionID = rs.getLong(5);
             long tagID = rs.getLong(6);
             String displayName = rs.getString(7);
+            String sortField = rs.getString("sort_field");
             FieldRule fieldRule = new FieldRule();
             fieldRule.setType(type);
             fieldRule.setAll(all);
@@ -139,6 +149,7 @@ public class FieldRule {
                 }
                 nameStmt.close();
             }
+            fieldRule.setSortField(sortField);
             fieldRule.setDefaultDate(rs.getString(9));
             rules.add(fieldRule);
         }
@@ -165,7 +176,7 @@ public class FieldRule {
 
     public void save(EIConnection conn, long dataSourceID, int order) throws SQLException {
         PreparedStatement ps = conn.prepareStatement("INSERT INTO FIELD_RULE (DATA_SOURCE_ID, FIELD_TYPE, ALL_FIELDS, LINK_ID, FIELD_ORDER, " +
-                "EXTENSION_ID, TAG_ID, DISPLAY_NAME, rule_data_source_id, default_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "EXTENSION_ID, TAG_ID, DISPLAY_NAME, rule_data_source_id, default_date, sort_field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         ps.setLong(1, dataSourceID);
         ps.setInt(2, type);
@@ -213,6 +224,7 @@ public class FieldRule {
             ps.setNull(9, Types.BIGINT);
         }
         ps.setString(10, getDefaultDate());
+        ps.setString(11, getSortField());
         ps.execute();
         ps.close();
     }
@@ -294,6 +306,10 @@ public class FieldRule {
     }
 
     public void update(AnalysisItem analysisItem, WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        update(analysisItem, report, insightRequestMetadata, null);
+    }
+
+    public void update(AnalysisItem analysisItem, WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> fields) {
         try {
             if (link != null) {
                 if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && !(analysisItem.getLinks().get(0)).isDefinedByRule() &&
@@ -332,6 +348,19 @@ public class FieldRule {
                 if (analysisItem.getDefaultDate() == null || "".equals(analysisItem.getDefaultDate())) {
                     analysisItem.setDefaultDate(defaultDate);
                     insightRequestMetadata.addAudit(analysisItem, "Field rule set default date to " + defaultDate);
+                }
+            }
+            if (fields != null && sortField != null && !"".equals(sortField)) {
+                AnalysisItem toSort = null;
+                for (AnalysisItem field : fields) {
+                    if (sortField.equals(field.toDisplay())) {
+                        toSort = field;
+                        break;
+                    }
+                }
+                if (toSort != null && analysisItem.getSortItem() == null) {
+                    analysisItem.setSortItem(toSort);
+                    insightRequestMetadata.addAudit(analysisItem, "Field rule set default sort to " + sortField);
                 }
             }
         } catch (Exception e) {
