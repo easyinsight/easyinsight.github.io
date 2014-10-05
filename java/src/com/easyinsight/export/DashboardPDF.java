@@ -339,7 +339,15 @@ public class DashboardPDF {
                 // if not, we'll need to retrieve via selenium or phantomjs
                 PDFImageData imageData = images.get(dashboardReport.getUrlKey());
 
-                if (imageData.getBytes() == null) {
+                if (imageData == null) {
+                    PdfPTable tempResult = new PdfPTable(1);
+                    PdfPCell cell = new PdfPCell();
+                    cell.setBorder(PdfPCell.NO_BORDER);
+                    Phrase phrase = new Phrase("");
+                    cell.addElement(phrase);
+                    tempResult.addCell(cell);
+                    result = tempResult;
+                } else if (imageData.getBytes() == null) {
                     result = generatePDF(report, imageData.getWidth(), imageData.getHeight(), conn);
                 } else {
                     Image image = Image.getInstance(imageData.getBytes());
