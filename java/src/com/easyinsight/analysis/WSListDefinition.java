@@ -43,6 +43,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private boolean multiLineHeaders;
     private boolean async;
     private boolean lockHeaders;
+    private int htmlMaxRowHeight;
+
+    public int getHtmlMaxRowHeight() {
+        return htmlMaxRowHeight;
+    }
+
+    public void setHtmlMaxRowHeight(int htmlMaxRowHeight) {
+        this.htmlMaxRowHeight = htmlMaxRowHeight;
+    }
 
     public boolean isLockHeaders() {
         return lockHeaders;
@@ -447,6 +456,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         defaultMeasureAlignment = findStringProperty(properties, "defaultMeasureAlignment", "none");
         defaultDateAlignment = findStringProperty(properties, "defaultDateAlignment", "none");
         defaultGroupingAlignnment = findStringProperty(properties, "defaultGroupingAlignment", "none");
+        htmlMaxRowHeight = (int) findNumberProperty(properties, "htmlMaxRowHeight", 0);
     }
 
     public JSONObject jsonProperties() {
@@ -475,6 +485,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("headerColor2", headerColor2));
         properties.add(new ReportNumericProperty("textColor", textColor));
         properties.add(new ReportNumericProperty("headerTextColor", headerTextColor));
+        properties.add(new ReportNumericProperty("htmlMaxRowHeight", htmlMaxRowHeight));
         properties.add(new ReportNumericProperty("summaryRowTextColor", summaryRowTextColor));
         properties.add(new ReportNumericProperty("summaryRowBackgroundColor", summaryRowBackgroundColor));
         properties.add(new ReportBooleanProperty("rolloverIcon", rolloverIcon));
