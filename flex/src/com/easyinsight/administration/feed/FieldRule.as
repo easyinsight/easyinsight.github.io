@@ -31,6 +31,7 @@ public class FieldRule {
     public var selected:Boolean;
     public var drillthroughName:String;
     public var defaultDate:String;
+    public var sortField:String;
 
     public function FieldRule() {
     }
@@ -59,8 +60,10 @@ public class FieldRule {
             } else if (ext is TextReportFieldExtension) {
                 str += "configure text properties."
             }
-        } else {
+        } else if (defaultDate != null) {
             str += "set default trend analysis date to " + defaultDate + ".";
+        } else if (sortField != null) {
+            str += "set default sort field to " + sortField + ".";
         }
         return str;
     }
