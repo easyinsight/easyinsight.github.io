@@ -52,6 +52,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
     public static final String CUSTOMER_TOUCHES = "Customer Touches";
     public static final String AGENT_TIME = "Agent Time";
     public static final String CUSTOMER_TIME = "Customer Time";
+    public static final String SUBJECT = "Subject";
 
 
 
@@ -63,6 +64,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(SUBJECT, new AnalysisDimension());
         fieldBuilder.addField(DISPLAY_ID, new AnalysisDimension());
         fieldBuilder.addField(TICKET_URL, new AnalysisDimension());
         fieldBuilder.addField(DESCRIPTION, new AnalysisText());
@@ -123,7 +125,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         int ctr;
         int page = 1;
 
-        LocalDateTime anchorStartDate = LocalDateTime.now().minusDays(7).withHour(0).withMinute(0);
+        LocalDateTime anchorStartDate = LocalDateTime.now().minusDays(3).withHour(0).withMinute(0);
         Date asDate = Date.from(anchorStartDate.toInstant(ZoneOffset.UTC));
 
         if (lastRefreshDate == null || lastRefreshDate.before(asDate)) {
@@ -143,6 +145,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
             } else {
                 responseList = runRestRequestForList("tickets.json?filter_name=all_tickets&page=" + page, client, freshdeskCompositeSource);
             }
+            boolean surveysLocked = false;
             for (Object obj : responseList) {
                 ctr++;
                 Map map = (Map) obj;
@@ -185,12 +188,15 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                     assignmentUpdates.put(displayID, assignmentUpdateList);
                     addedNotes.put(displayID, noteList);
 
-                    try {
-                        List<Map> surveys = runRestRequestForList("tickets/" + displayID + "/surveys.json", client, freshdeskCompositeSource);
-                        surveyMap.put(displayID, surveys);
-                    } catch (Exception e) {
-                        //LogClass.error(e);
-                        // ignore, feature is locked
+                    if (!surveysLocked) {
+                        try {
+                            List<Map> surveys = runRestRequestForList("tickets/" + displayID + "/surveys.json", client, freshdeskCompositeSource);
+                            surveyMap.put(displayID, surveys);
+                        } catch (Exception e) {
+                            surveysLocked = true;
+                            //LogClass.error(e);
+                            // ignore, feature is locked
+                        }
                     }
 
                     boolean closed = false;
@@ -244,7 +250,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
     private Date createTicket(Map<String, Key> keys, Map map, String id, IRow row, FreshdeskCompositeSource freshdeskCompositeSource) {
         row.addValue(keys.get(ID), id);
-
+        row.addValue(keys.get(SUBJECT), getJSONValue(map, "subject"));
         row.addValue(keys.get(DISPLAY_ID), getJSONValue(map, "display_id"));
         row.addValue(keys.get(DESCRIPTION), getJSONValue(map, "description"));
         row.addValue(keys.get(REQUESTER_NAME), getJSONValue(map, "requester_name"));
