@@ -867,7 +867,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     }
                     //}
                 }
-                List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems);
+                List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems, analysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 for (AnalysisItem item : linkItems) {
                     if (!map.keySet().contains(item)) {
                         populate(map, item, insightRequestMetadata);
