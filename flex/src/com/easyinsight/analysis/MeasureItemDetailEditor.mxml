@@ -98,11 +98,15 @@
             analysisMeasure.minPrecision = minPrecisionInput.value;
             if (dateComparisonBox.selectedItem is AnalysisItem) {
                 analysisMeasure.defaultDate = dateComparisonBox.selectedItem.display;
+            } else {
+                analysisMeasure.defaultDate = null;
             }
 
             var currencyField:AnalysisItem = currencyBox.selectedItem as AnalysisItem;
             if (currencyField != null) {
                 analysisMeasure.currencyField = currencyField;
+            } else {
+                analysisMeasure.currencyField = null;
             }
         }
 
