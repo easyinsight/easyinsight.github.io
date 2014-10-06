@@ -259,7 +259,7 @@ public class LeadNurtureShell {
             "                                        <td style=\"text-align:right;vertical-align:top\">\n" +
             "                                            <a style=\"text-decoration:none;vertical-align:top;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#373737\" href=\"https://www.easy-insight.com/app/login.jsp\" target=\"_blank\">Sign In |</a>\n" +
             "                                            <a style=\"text-decoration:none;vertical-align:top;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#373737\" href=\"https://www.easy-insight.com/contactus.html\" target=\"_blank\">Support |</a>\n" +
-            "                                            <a style=\"text-decoration:none;vertical-align:top;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#373737\" href=\"https://www.easy-insight.com/app/whatsnewweb\" target=\"_blank\">What's New</a>\n" +
+            "                                            <a style=\"text-decoration:none;vertical-align:top;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#373737\" href=\"https://www.easy-insight.com/app/news/\" target=\"_blank\">What's New</a>\n" +
             "                                        </td>\n" +
             "                                    </tr>\n" +
             "\n" +
@@ -269,7 +269,7 @@ public class LeadNurtureShell {
             "                                            <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\">\n" +
             "                                                <tbody><tr>\n" +
             "                                                    <td>\n" +
-            "                                                        <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><a href=\"\" style=\"border-width:0px;border:0px\" target=\"_blank\"><img src=\"https://www.easy-insight.com/images/logo2.png\" style=\"border-width:0px;border:0px\" alt=\"\" title=\"\"></a></div>\n" +
+            "                                                        <div style=\"color:inherit;font-size:inherit;line-height:inherit;margin:inherit;padding:inherit\"><a href=\"http://www.easy-insight.com/\" style=\"border-width:0px;border:0px\" target=\"_blank\"><img src=\"https://www.easy-insight.com/images/logo2.png\" style=\"border-width:0px;border:0px\" alt=\"\" title=\"\"></a></div>\n" +
             "                                                    </td>\n" +
             "                                                </tr>\n" +
             "                                                </tbody></table>\n" +

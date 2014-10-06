@@ -31,6 +31,7 @@ import mx.collections.ArrayCollection;
         public var defaultMeasureAlignment:String = "none";
         public var defaultGroupingAlignnment:String = "none";
         public var defaultDateAlignment:String = "none";
+        public var htmlMaxRowHeight:int;
 
 		public function ListDefinition()
 		{

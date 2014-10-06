@@ -122,63 +122,17 @@ public class SalesEmail implements Runnable {
 
         if (accountState != Account.TRIAL) return;
 
-        String templateID = null;
-        if (number == ONE_DAY) {
-            return;
-        } else if (number == ONE_WEEK) {
-            templateID = "KDHcbfhYgAzzknYb8qoc4T";
-        } else if (number == TWO_WEEKS) {
-            templateID = "tem_mKA67sxJGVmjwqpGPDRcAi";
-        } else if (number == THREE_WEEKS) {
-            templateID = "tem_RF7aHmobQnESaT7jeiAuzj";
-        } else if (number == END_OF_TRIAL) {
-            templateID = "tem_TEaKcEQXdzqzFkxBCJSPh4";
+        if (number == ONE_WEEK) {
+            leadNurture(SecurityUtil.getUserID(), ONE_WEEK, conn);
         }
-
-        if (templateID != null) {
-            PreparedStatement queryUnsubscribeStmt = conn.prepareStatement("SELECT unsubscribe_key from user_unsubscribe_key WHERE USER_ID = ?");
-            PreparedStatement insertKeyStmt = conn.prepareStatement("INSERT INTO USER_UNSUBSCRIBE_KEY (USER_ID, UNSUBSCRIBE_KEY) VALUES (?, ?)");
-            queryUnsubscribeStmt.setLong(1, userID);
-            ResultSet unsubscribeRS = queryUnsubscribeStmt.executeQuery();
-            String unsubscribeKey;
-            if (unsubscribeRS.next()) {
-                unsubscribeKey = unsubscribeRS.getString(1);
-            } else {
-                unsubscribeKey = RandomTextGenerator.generateText(25);
-                insertKeyStmt.setLong(1, userID);
-                insertKeyStmt.setString(2, unsubscribeKey);
-                insertKeyStmt.execute();
-            }
-            queryUnsubscribeStmt.close();
-            insertKeyStmt.close();
-
-            HttpClient sendWithUsClient = new HttpClient();
-            sendWithUsClient.getParams().setAuthenticationPreemptive(true);
-            Credentials defaultcreds = new UsernamePasswordCredentials("live_2d56944c0596aea84504bd0947e0421ab3e1c56c", "");
-            sendWithUsClient.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-
-            JSONObject json = new JSONObject();
-            json.put("email_id", templateID);
-            JSONObject recipient = new JSONObject();
-            recipient.put("address", email);
-            json.put("recipient", recipient);
-            JSONObject sender = new JSONObject();
-            sender.put("address", "sales@easy-insight.com");
-            sender.put("reply_to", "sales@easy-insight.com");
-            sender.put("name", "Easy Insight Marketing");
-            json.put("sender", sender);
-
-            JSONObject emailData = new JSONObject();
-            emailData.put("user_name", firstName);
-            emailData.put("unsubscribeLink", "https://www.easy-insight.com/app/unsubscribe?user=" + unsubscribeKey);
-            json.put("email_data", emailData);
-
-            PostMethod method = new PostMethod("https://api.sendwithus.com/api/v1/send");
-            StringRequestEntity entity = new StringRequestEntity(json.toString(), "application/json", "UTF-8");
-            method.setRequestEntity(entity);
-            sendWithUsClient.executeMethod(method);
-            Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(method.getResponseBodyAsStream());
-            System.out.println(obj);
+        if (number == TWO_WEEKS) {
+            leadNurture(SecurityUtil.getUserID(), TWO_WEEKS, conn);
+        }
+        if (number == THREE_WEEKS) {
+            leadNurture(SecurityUtil.getUserID(), THREE_WEEKS, conn);
+        }
+        if (number == END_OF_TRIAL) {
+            leadNurture(SecurityUtil.getUserID(), END_OF_TRIAL, conn);
         }
     }
 }

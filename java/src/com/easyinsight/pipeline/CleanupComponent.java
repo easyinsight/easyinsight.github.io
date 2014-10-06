@@ -52,7 +52,7 @@ public class CleanupComponent implements IComponent {
             if (item.isValid()) {
                 List<AnalysisItem> baseItems = item.getAnalysisItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, allNeededAnalysisItems, structure);
                 allNeededAnalysisItems.addAll(baseItems);
-                List<AnalysisItem> linkItems = item.addLinkItems(pipelineData.getAllItems());
+                List<AnalysisItem> linkItems = item.addLinkItems(pipelineData.getAllItems(), allRequestedAnalysisItems, false, keepFilters, allNeededAnalysisItems, structure);
                 allNeededAnalysisItems.addAll(linkItems);
             }
         }

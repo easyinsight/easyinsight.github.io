@@ -586,11 +586,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
                         } else {
                             deliveryName = deliveryInfo.getName();
                         }
-                        if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
-                            return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
-                        } else {
+                        //if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
+                        return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
+                        /*} else {
                             return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
-                        }
+                        }*/
                     } else {
                         System.out.println("does not match, ignoring");
                     }

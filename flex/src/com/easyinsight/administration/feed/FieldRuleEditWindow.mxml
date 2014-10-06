@@ -36,6 +36,9 @@
         private var defaultDate:String;
 
         [Bindable]
+        private var defaultSort:String;
+
+        [Bindable]
         private var ruleType:String = "[ Choose an Option ]";
 
         [Bindable]
@@ -98,6 +101,10 @@
                     selectedAction = "set default date";
                     index2 = 3;
                     defaultDate = fieldRule.defaultDate;
+                } else if (fieldRule.sortField != null && fieldRule.sortField != "") {
+                    selectedAction = "set default sort";
+                    index2 = 4;
+                    defaultSort = fieldRule.sortField;
                 }
             }
         }
@@ -151,14 +158,22 @@
                 fieldRule.link = link;
                 fieldRule.extension = null;
                 fieldRule.defaultDate = null;
+                fieldRule.sortField = null;
             } else if (index2 == 2) {
                 fieldRule.extension = reportFieldExtension;
                 fieldRule.link = null;
                 fieldRule.defaultDate = null;
+                fieldRule.sortField = null;
             } else if (index2 == 3) {
                 fieldRule.link = null;
                 fieldRule.extension = null;
                 fieldRule.defaultDate = defaultDateBox.selectedItem.display;
+                fieldRule.sortField = null;
+            } else if (index2 == 4) {
+                fieldRule.link = null;
+                fieldRule.extension = null;
+                fieldRule.defaultDate = null;
+                fieldRule.sortField = sortBox.selectedItem.display;
             } else {
                 Alert.show("You need to choose an action.");
             }
@@ -193,6 +208,8 @@
                 index2 = 2;
             } else if (selectedRule == "set default date") {
                 index2 = 3;
+            } else if (selectedRule == "set default sort") {
+                index2 = 4;
             } else {
                 index2 = 0;
             }
@@ -345,6 +362,7 @@
                     <mx:String>add a link</mx:String>
                     <mx:String>configure</mx:String>
                     <mx:String>set default date</mx:String>
+                    <mx:String>set default sort</mx:String>
                 </mx:Array>
             </mx:ArrayCollection>
         </mx:dataProvider>
@@ -376,6 +394,9 @@
         </mx:HBox>
         <mx:HBox>
             <util:SmartComboBox id="defaultDateBox" selectedValue="{defaultDate}" selectedProperty="display" dataProvider="{dates}" labelField="display"/>
+        </mx:HBox>
+        <mx:HBox>
+            <util:SmartComboBox id="sortBox" selectedValue="{defaultSort}" selectedProperty="display" dataProvider="{fields}" labelField="display"/>
         </mx:HBox>
     </mx:ViewStack>
     </mx:HBox>

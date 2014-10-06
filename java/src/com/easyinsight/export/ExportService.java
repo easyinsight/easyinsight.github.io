@@ -4463,11 +4463,13 @@ public class ExportService {
         String backgroundColor1 = "#f9f9f9";
         String backgroundColor2 = "#ffffff";
         boolean lineNumbers = false;
+        int maxRowHeight = 0;
         if (report instanceof WSListDefinition) {
             WSListDefinition list = (WSListDefinition) report;
             backgroundColor1 = createHexString(list.getRowColor1());
             backgroundColor2 = createHexString(list.getRowColor2());
             lineNumbers = list.isShowLineNumbers();
+            maxRowHeight = list.getHtmlMaxRowHeight();
         }
         sb.append("<style type=\"text/css\">").
                 append(".reportTable").append(report.getAnalysisID()).append(" > tbody > tr:nth-child(odd) > td,\n" +
@@ -4606,6 +4608,9 @@ public class ExportService {
                     sb.append("</span>");
                 }
 
+                if (maxRowHeight > 0) {
+                    sb.append("<div style=\"max-height:"+maxRowHeight+"px; overflow:hidden\">");
+                }
                 Link defaultLink = linkMap.get(analysisItem);
                 boolean showLink = false;
                 if (defaultLink != null) {
@@ -4677,6 +4682,9 @@ public class ExportService {
                 sb.append(createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                 if (showLink) {
                     sb.append("</a>");
+                }
+                if (maxRowHeight > 0) {
+                    sb.append("</div>");
                 }
                 sb.append("</td>");
             }

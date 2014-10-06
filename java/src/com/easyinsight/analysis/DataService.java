@@ -3006,7 +3006,7 @@ public class DataService {
             items.stream().filter(analysisItem -> analysisItem != null).forEach(analysisItem -> {
                 for (FieldRule rule : rules) {
                     if (rule.matches(analysisItem)) {
-                        rule.update(analysisItem, analysisDefinition, insightRequestMetadata);
+                        rule.update(analysisItem, analysisDefinition, insightRequestMetadata, feed.getFields());
                     }
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
@@ -3022,8 +3022,7 @@ public class DataService {
             feed.getDataSource().decorateLinks(new ArrayList<>(items));
 
             try {
-                if (analysisDefinition instanceof WSAreaChartDefinition || analysisDefinition instanceof WSLineChartDefinition ||
-                        analysisDefinition instanceof WSYTDDefinition || analysisDefinition instanceof WSColumnChartDefinition) {
+                if (analysisDefinition instanceof WSAreaChartDefinition || analysisDefinition.isFilterDateLevels()) {
                     Map<String, AnalysisItem> filterMap = new HashMap<>();
                     for (AnalysisItem reportItem : items) {
                         if (reportItem != null) {

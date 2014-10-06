@@ -746,7 +746,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return analysisItemList;
     }
 
-    public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems) {
+    public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything,
+                                           boolean includeFilters, Collection<AnalysisItem> analysisItemSet, AnalysisItemRetrievalStructure structure) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (getLinks().size() > 0) {
             Key myKey = getKey();
@@ -779,7 +780,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 List<AnalysisItem> keys = link.neededKeys(keyMap, displayMap);
                 //Set<Key> keys = variableVisitor.getVariableList();
                 for (AnalysisItem key : keys) {
-                    items.add(key);
+                    items.addAll(key.getAnalysisItems(allItems, insightItems, getEverything, includeFilters, analysisItemSet, structure));
                 }
             }
         }

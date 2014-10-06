@@ -29,7 +29,11 @@ public class InfusionsoftContactActionSource extends InfusionsoftTableSource {
     public static final String COMPLETION_DATE = "CompletionDate";
     public static final String ACTION_DATE = "ActionDate";
     public static final String END_DATE = "EndDate";
-
+    public static final String OWNER_ID = "UserID";
+    public static final String OWNER_NAME = "Action Owner Name";
+    public static final String PRIORITY = "Priority";
+    public static final String APPOINTMENT = "IsAppointment";
+    public static final String ACTION_COUNT = "Action Count";
 
     public InfusionsoftContactActionSource() {
         setFeedName("Contact Actions");
@@ -47,24 +51,37 @@ public class InfusionsoftContactActionSource extends InfusionsoftTableSource {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ACTION_ID), "Action ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(CONTACT_ID), "Action Contact ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID), "Action Opportunity ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(ACTION_TYPE), "Action Type"));
-        analysisitems.add(new AnalysisDimension(keys.get(ACTION_DESCRIPTION), "Action Description"));
-        analysisitems.add(new AnalysisDateDimension(keys.get(CREATION_DATE), "Action Creation Date", AnalysisDateDimension.DAY_LEVEL, true));
-        analysisitems.add(new AnalysisDateDimension(keys.get(COMPLETION_DATE), "Action Completion Date", AnalysisDateDimension.DAY_LEVEL, true));
-        analysisitems.add(new AnalysisDateDimension(keys.get(ACTION_DATE), "Action Date", AnalysisDateDimension.DAY_LEVEL, true));
-        analysisitems.add(new AnalysisDateDimension(keys.get(END_DATE), "Action End Date", AnalysisDateDimension.DAY_LEVEL, true));
-        return analysisitems;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(CONTACT_ACTION_ID, new AnalysisDimension("Action ID"));
+        fieldBuilder.addField(OWNER_ID, new AnalysisDimension("Action Owner ID"));
+        fieldBuilder.addField(PRIORITY, new AnalysisDimension("Action Priority"));
+        fieldBuilder.addField(APPOINTMENT, new AnalysisDimension("Action is Appointment"));
+        fieldBuilder.addField(OWNER_NAME, new AnalysisDimension("Action Owner Name"));
+        fieldBuilder.addField(CONTACT_ID, new AnalysisDimension("Action Contact ID"));
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension("Action Opportunity ID"));
+        fieldBuilder.addField(ACTION_TYPE, new AnalysisDimension("Action Type"));
+        fieldBuilder.addField(ACTION_DESCRIPTION, new AnalysisDimension("Action Description"));
+        fieldBuilder.addField(CREATION_DATE, new AnalysisDateDimension("Action Creation Date"));
+        fieldBuilder.addField(COMPLETION_DATE, new AnalysisDateDimension("Action Completion Date"));
+        fieldBuilder.addField(ACTION_DATE, new AnalysisDateDimension("Action Date"));
+        fieldBuilder.addField(END_DATE, new AnalysisDateDimension("Action End Date"));
+        fieldBuilder.addField(ACTION_COUNT, new AnalysisMeasure("Number of Actions"));
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("ContactAction", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+            DataSet dataSet = query("ContactAction", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(ACTION_COUNT, OWNER_NAME));
+            for (IRow row : dataSet.getRows()) {
+                String ownerID = row.getValue(keys.get(OWNER_ID)).toString();
+                String ownerName = infusionsoftCompositeSource.getUserCache().get(ownerID);
+                if (ownerName != null) {
+                    row.addValue(keys.get(OWNER_NAME), ownerName);
+                }
+                row.addValue(keys.get(ACTION_COUNT), 1);
+            }
+            return dataSet;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

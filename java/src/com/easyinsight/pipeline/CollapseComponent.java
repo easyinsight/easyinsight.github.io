@@ -39,7 +39,7 @@ public class CollapseComponent implements IComponent {
         for (Map.Entry<Value, List<IRow>> entry : map.entrySet()) {
             IRow newRow = newSet.createRow();
             for (IRow row : entry.getValue()) {
-                for (AnalysisItem item : pipelineData.getAllRequestedItems()) {
+                for (AnalysisItem item : pipelineData.getReportItems()) {
                     Value value = row.getValue(item);
                     if (value.type() != Value.EMPTY) {
                         newRow.addValue(item.createAggregateKey(), value);

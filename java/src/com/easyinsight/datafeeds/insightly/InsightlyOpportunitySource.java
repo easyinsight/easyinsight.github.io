@@ -85,7 +85,9 @@ public class InsightlyOpportunitySource extends InsightlyBaseSource {
                 String customFieldID = customFieldMap.get("CUSTOM_FIELD_ID").toString();
                 String fieldType = customFieldMap.get("FIELD_TYPE").toString();
                 if ("DATE".equals(fieldType)) {
-                    fieldBuilder.addField(customFieldID, new AnalysisDateDimension(customFieldMap.get("FIELD_NAME").toString()));
+                    AnalysisDateDimension date = new AnalysisDateDimension(customFieldMap.get("FIELD_NAME").toString());
+                    date.setDateOnlyField(true);
+                    fieldBuilder.addField(customFieldID, date);
                 } else {
                     fieldBuilder.addField(customFieldID, new AnalysisDimension(customFieldMap.get("FIELD_NAME").toString()));
                 }

@@ -159,7 +159,7 @@ public abstract class Pipeline {
                     if (analysisCalculation.getAggregation() == AggregationTypes.AVERAGE) {
                         List<AnalysisItem> baseItems = analysisItem.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                         allRequestedAnalysisItems.addAll(baseItems);
-                        List<AnalysisItem> linkItems = analysisItem.addLinkItems(allFields);
+                        List<AnalysisItem> linkItems = analysisItem.addLinkItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                         allRequestedAnalysisItems.addAll(linkItems);
                         if (analysisItem.isVirtual()) {
                             allRequestedAnalysisItems.add(analysisItem);
@@ -182,7 +182,7 @@ public abstract class Pipeline {
             if (item.isValid()) {
                 List<AnalysisItem> baseItems = item.getAnalysisItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 allNeededAnalysisItems.addAll(baseItems);
-                List<AnalysisItem> linkItems = item.addLinkItems(allFields);
+                List<AnalysisItem> linkItems = item.addLinkItems(allFields, allRequestedAnalysisItems, false, true, new HashSet<AnalysisItem>(), structure);
                 allNeededAnalysisItems.addAll(linkItems);
                 if (item.isVirtual()) {
                     allNeededAnalysisItems.add(item);

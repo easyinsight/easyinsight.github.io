@@ -37,6 +37,8 @@ public class InfusionsoftCompanySource extends InfusionsoftTableSource {
     public static final String POSTAL_CODE = "PostalCode";
     public static final String COMPANY_COUNT = "Company Count";
     public static final String COMPANY_URL = "Company URL";
+    public static final String OWNER_ID = "OwnerID";
+    public static final String OWNER_NAME = "Company Owner Name";
 
     public InfusionsoftCompanySource() {
         setFeedName("Companies");
@@ -59,6 +61,8 @@ public class InfusionsoftCompanySource extends InfusionsoftTableSource {
         fieldBuilder.addField(DATE_CREATED, new AnalysisDimension());
         fieldBuilder.addField(LAST_UPDATED, new AnalysisDimension());
         fieldBuilder.addField(STATE, new AnalysisDimension());
+        fieldBuilder.addField(OWNER_ID, new AnalysisDimension("Company Owner ID"));
+        fieldBuilder.addField(OWNER_NAME, new AnalysisDimension());
         fieldBuilder.addField(CITY, new AnalysisDimension());
         fieldBuilder.addField(POSTAL_CODE, new AnalysisDimension());
         fieldBuilder.addField(COMPANY_URL, new AnalysisDimension());
@@ -76,10 +80,16 @@ public class InfusionsoftCompanySource extends InfusionsoftTableSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
-            DataSet dataSet = query("Company", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(COMPANY_COUNT, COMPANY_URL));
+            DataSet dataSet = query("Company", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition,
+                    Arrays.asList(COMPANY_COUNT, COMPANY_URL, OWNER_NAME));
             for (IRow row : dataSet.getRows()) {
                 row.addValue(keys.get(COMPANY_URL), infusionsoftCompositeSource.getUrl() + "/Company/manageCompany.jsp?view=edit&id=" + row.getValue(keys.get(ID)));
                 row.addValue(keys.get(COMPANY_COUNT), 1);
+                String ownerID = row.getValue(keys.get(OWNER_ID)).toString();
+                String ownerName = infusionsoftCompositeSource.getUserCache().get(ownerID);
+                if (ownerName != null) {
+                    row.addValue(keys.get(OWNER_NAME), ownerName);
+                }
             }
             return dataSet;
         } catch (Exception e) {

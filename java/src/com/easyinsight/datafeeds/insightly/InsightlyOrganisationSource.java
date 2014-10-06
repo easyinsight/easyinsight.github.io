@@ -123,7 +123,7 @@ public class InsightlyOrganisationSource extends InsightlyBaseSource {
 
                 String fieldType = customFieldMap.get("FIELD_TYPE").toString();
                 if ("DATE".equals(fieldType)) {
-                    fields.add(new AnalysisDateDimension(key, customFieldMap.get("FIELD_NAME").toString(), AnalysisDateDimension.DAY_LEVEL));
+                    fields.add(new AnalysisDateDimension(key, customFieldMap.get("FIELD_NAME").toString(), AnalysisDateDimension.DAY_LEVEL, true));
                 } else {
                     fields.add(new AnalysisDimension(key, customFieldMap.get("FIELD_NAME").toString()));
                 }
