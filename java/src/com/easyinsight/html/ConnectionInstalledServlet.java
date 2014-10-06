@@ -20,6 +20,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -32,6 +36,7 @@ public class ConnectionInstalledServlet extends HttpServlet {
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
             String dataSourceKey = req.getParameter("dataSourceID");
+            int offset = Integer.parseInt(req.getParameter("utcOffset"));
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
             String endURL;
@@ -60,10 +65,12 @@ public class ConnectionInstalledServlet extends HttpServlet {
             dataSourceRefreshActivity.setDataSourceID(dataSourceID);
             dataSourceRefreshActivity.setDataSourceName(dataSource.getFeedName());
             DailyScheduleType dailyScheduleType = new DailyScheduleType();
-            dailyScheduleType.setHour((int) (Math.random() * 22 + 1));
+            dailyScheduleType.setTimeOffset(offset);
+            dailyScheduleType.setHour((int) (Math.random() * 4 + 1));
             dailyScheduleType.setMinute((int) (Math.random() * 58 + 1));
             dataSourceRefreshActivity.setScheduleType(dailyScheduleType);
             solutionKPIData.setActivity(dataSourceRefreshActivity);
+            solutionKPIData.setUtcOffset(offset);
             PostInstallSteps steps = new SolutionService().addKPIData(solutionKPIData);
             if (steps.getResult() != null) {
                 endURL = RedirectUtil.getURL(req, "/app/html/dashboard/" + steps.getResult().getUrlKey());
