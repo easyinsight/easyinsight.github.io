@@ -234,6 +234,9 @@ public class SolutionService {
             PostInstallSteps postInstallSteps = new PostInstallSteps();
             postInstallSteps.setResult(result);
             copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
+
+            new QuickReportDeliveryServlet.QuickReportResult(conn, solutionKPIData.getUtcOffset(), solutionKPIData.getDataSourceID()).invoke();
+
             conn.commit();
             return postInstallSteps;
         } catch (Exception e) {

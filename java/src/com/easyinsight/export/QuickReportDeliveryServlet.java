@@ -44,10 +44,17 @@ public class QuickReportDeliveryServlet extends JSONServlet {
         private int utc;
         private List<InsightDescriptor> reports;
         private String name;
+        private long dataSourceID;
 
         public QuickReportResult(EIConnection conn, int utc) {
             this.conn = conn;
             this.utc = utc;
+        }
+
+        public QuickReportResult(EIConnection conn, int utc, long dataSourceID) {
+            this.conn = conn;
+            this.utc = utc;
+            this.dataSourceID = dataSourceID;
         }
 
         public List<InsightDescriptor> getReports() {
@@ -59,12 +66,23 @@ public class QuickReportDeliveryServlet extends JSONServlet {
         }
 
         public QuickReportResult invoke() throws Exception {
-            PreparedStatement ps = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE FROM ANALYSIS, USER_TO_ANALYSIS WHERE ANALYSIS.AUTO_SETUP_DELIVERY = ? AND " +
-                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.USER_ID = ? AND " +
-                    "ANALYSIS.ACCOUNT_VISIBLE = ?");
-            ps.setBoolean(1, true);
-            ps.setLong(2, SecurityUtil.getUserID());
-            ps.setBoolean(3, true);
+            PreparedStatement ps;
+            if (dataSourceID == 0) {
+                ps = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE FROM ANALYSIS, USER_TO_ANALYSIS WHERE ANALYSIS.AUTO_SETUP_DELIVERY = ? AND " +
+                        "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.USER_ID = ? AND " +
+                        "ANALYSIS.ACCOUNT_VISIBLE = ?");
+                ps.setBoolean(1, true);
+                ps.setLong(2, SecurityUtil.getUserID());
+                ps.setBoolean(3, true);
+            } else {
+                ps = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE FROM ANALYSIS, USER_TO_ANALYSIS WHERE ANALYSIS.AUTO_SETUP_DELIVERY = ? AND " +
+                        "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.USER_ID = ? AND " +
+                        "ANALYSIS.ACCOUNT_VISIBLE = ? AND ANALYSIS.DATA_FEED_ID = ?");
+                ps.setBoolean(1, true);
+                ps.setLong(2, SecurityUtil.getUserID());
+                ps.setBoolean(3, true);
+                ps.setLong(4, dataSourceID);
+            }
             ResultSet rs = ps.executeQuery();
 
             reports = new ArrayList<>();
@@ -77,6 +95,8 @@ public class QuickReportDeliveryServlet extends JSONServlet {
                 report.setName(title);
                 reports.add(report);
             }
+
+            ps.close();
 
             name = null;
 
@@ -145,6 +165,9 @@ public class QuickReportDeliveryServlet extends JSONServlet {
                 new ExportService().addOrUpdateSchedule(generalDelivery, utc, conn);
                 generalDelivery.taskNow(conn);
             }
+
+
+
             return this;
         }
     }
