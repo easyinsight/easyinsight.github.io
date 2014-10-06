@@ -53,7 +53,7 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
         for (Object customFieldObject : customFields) {
             Map customField = (Map) customFieldObject;
             String customFieldID = customField.get("id").toString();
-            if (customFieldID.equals(customFieldID)) {
+            if (customFieldID.equals(this.customFieldID)) {
                 List attributes = (List) customField.get("custom_field_definitions_attributes");
                 for (Object attributeObject : attributes) {
                     Map attribute = (Map) attributeObject;
@@ -114,10 +114,12 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM batchbook_custom_field_source WHERE DATA_SOURCE_ID = ?");
         deleteStmt.setLong(1, getDataFeedID());
         deleteStmt.executeUpdate();
+        deleteStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO batchbook_custom_field_source (data_source_id, custom_field_id) VALUES (?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, customFieldID);
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override
