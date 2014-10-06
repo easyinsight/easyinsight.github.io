@@ -398,13 +398,15 @@
     </mx:RemoteObject>
     <mx:HBox>
         <mx:VBox horizontalAlign="center">
+            <mx:Button fontSize="14" label="Calculation Documentation" click="navigateToURL(new URLRequest('https://localhost:4443/app/docs/Scripting'), '_blank')"
+                       styleName="flatCreateButton"/>
             <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
                      dataProvider="{functions}" showRoot="false">
             </mx:Tree>
             <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
                 <mx:Label text="{functionSignature}"/>
-                <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false"
+                <mx:Text text="{functionExplanation}"
                              selectable="true"
                              width="300" height="80"/>
             </mx:VBox>

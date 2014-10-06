@@ -222,7 +222,6 @@
             </mx:HBox>
         </mx:VBox>
         <mx:VBox>
-            <mx:Text text="You can define drillthroughs based on a single field or based on filters."/>
             <mx:HBox>
                 <mx:Label text="Target Report:" width="200" fontFamily="Tahoma" fontWeight="bold"/>
                 <util:SmartComboBox id="reportChooser" dataProvider="{reports}" labelField="name"
