@@ -12,6 +12,7 @@ public class HTMLConnectionProperty {
     public static final int STRING = 0;
     public static final int INTEGER = 1;
     public static final int TEXT = 2;
+    public static final int CHECKBOX = 3;
 
     private String field;
     private String property;
