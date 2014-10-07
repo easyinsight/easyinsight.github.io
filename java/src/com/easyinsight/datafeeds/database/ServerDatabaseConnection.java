@@ -135,6 +135,9 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                             fields.add(analysisItem);
                         }
                     } catch (Exception e) {
+                        if (e.getMessage() != null && e.getMessage().contains("SSL Connection required, but not supported by server")) {
+                            throw new ReportException(new DataSourceConnectivityReportFault("The target database does not support SSL connections.", this));
+                        }
                         throw new RuntimeException(e);
                     }
                 }
@@ -291,32 +294,5 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
 
     public boolean rebuildFieldWindow() {
         return true;
-    }
-
-    public List<SchemaTable> exploreSchema() throws SQLException {
-        Connection conn = createConnection();
-        try {
-            DatabaseMetaData databaseMetaData = conn.getMetaData();
-            ResultSet tableRS = databaseMetaData.getTables(null, null, null, null);
-            List<SchemaTable> schemaTables = new ArrayList<SchemaTable>();
-            while (tableRS.next()) {
-                String tableName = tableRS.getString("TABLE_NAME");
-                SchemaTable schemaTable = new SchemaTable();
-                schemaTable.setName(tableName);
-                schemaTables.add(schemaTable);
-                List<SchemaColumn> schemaColumns = new ArrayList<SchemaColumn>();
-                ResultSet columnRS = databaseMetaData.getColumns(null, null, tableName, null);
-                while (columnRS.next()) {
-                    String columnName = columnRS.getString("COLUMN_NAME");
-                    SchemaColumn schemaColumn = new SchemaColumn();
-                    schemaColumn.setName(columnName);
-                    schemaColumns.add(schemaColumn);
-                }
-                schemaTable.setSchemaColumns(schemaColumns);
-            }
-            return schemaTables;
-        } finally {
-            conn.close();
-        }
     }
 }
