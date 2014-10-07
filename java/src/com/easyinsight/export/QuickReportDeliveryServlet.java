@@ -44,6 +44,7 @@ public class QuickReportDeliveryServlet extends JSONServlet {
         private int utc;
         private List<InsightDescriptor> reports;
         private String name;
+        private String dataSourceName;
         private long dataSourceID;
 
         public QuickReportResult(EIConnection conn, int utc) {
@@ -51,10 +52,11 @@ public class QuickReportDeliveryServlet extends JSONServlet {
             this.utc = utc;
         }
 
-        public QuickReportResult(EIConnection conn, int utc, long dataSourceID) {
+        public QuickReportResult(EIConnection conn, int utc, long dataSourceID, String dataSourceName) {
             this.conn = conn;
             this.utc = utc;
             this.dataSourceID = dataSourceID;
+            this.dataSourceName = dataSourceName;
         }
 
         public List<InsightDescriptor> getReports() {
@@ -135,8 +137,14 @@ public class QuickReportDeliveryServlet extends JSONServlet {
                 }
                 name = sb.toString();
                 GeneralDelivery generalDelivery = new GeneralDelivery();
-                generalDelivery.setDeliveryLabel("Weekly Delivery of Reports");
-                generalDelivery.setSubject("Weekly Delivery of Reports");
+                if (dataSourceName == null) {
+                    generalDelivery.setDeliveryLabel("Weekly Delivery of Reports");
+                    generalDelivery.setSubject("Weekly Delivery of Reports");
+                } else {
+                    generalDelivery.setDeliveryLabel("Weekly Delivery of Reports for " + dataSourceName);
+                    generalDelivery.setSubject("Weekly Delivery of Reports for " + dataSourceName);
+                }
+                generalDelivery.setSenderID(0);
                 String body = "This report has been generated for weekly delivery by Easy Insight. You can configure this report's format, delivery, and recipients through the <a href=\"https://www.easy-insight.com/app/html/scheduleManagement\">Scheduling</a> page on your Easy Insight interface.";
                 generalDelivery.setBody(body);
                 generalDelivery.setHtmlEmail(true);

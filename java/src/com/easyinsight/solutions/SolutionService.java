@@ -3,6 +3,7 @@ package com.easyinsight.solutions;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
@@ -155,6 +156,7 @@ public class SolutionService {
     }
 
     public PostInstallSteps addKPIData(SolutionKPIData solutionKPIData) {
+        PostInstallSteps postInstallSteps = new PostInstallSteps();
         SecurityUtil.authorizeFeedAccess(solutionKPIData.getDataSourceID());
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -231,14 +233,16 @@ public class SolutionService {
                 saveDashboardStmt.close();
             }
 
-            PostInstallSteps postInstallSteps = new PostInstallSteps();
-            postInstallSteps.setResult(result);
+
+            if (result != null && result.getType() == EIDescriptor.DASHBOARD) {
+                postInstallSteps.setResult(result);
+            }
             copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
 
-            new QuickReportDeliveryServlet.QuickReportResult(conn, solutionKPIData.getUtcOffset(), solutionKPIData.getDataSourceID()).invoke();
+            new QuickReportDeliveryServlet.QuickReportResult(conn, solutionKPIData.getUtcOffset(), solutionKPIData.getDataSourceID(), dataSource.getFeedName()).invoke();
 
             conn.commit();
-            return postInstallSteps;
+
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -247,6 +251,10 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+        if (postInstallSteps.getResult() != null && postInstallSteps.getResult().getType() == EIDescriptor.DASHBOARD) {
+            new DashboardService().getDashboard(postInstallSteps.getResult().getId());
+        }
+        return postInstallSteps;
     }
 
     private void copyLookAndFeel(SolutionKPIData solutionKPIData, EIConnection conn, PostInstallSteps postInstallSteps) throws SQLException {
