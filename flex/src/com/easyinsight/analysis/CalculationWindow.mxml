@@ -398,7 +398,7 @@
     </mx:RemoteObject>
     <mx:HBox>
         <mx:VBox horizontalAlign="center">
-            <mx:Button fontSize="14" label="Calculation Documentation" click="navigateToURL(new URLRequest('https://localhost:4443/app/docs/Scripting'), '_blank')"
+            <mx:Button fontSize="14" label="Calculation Documentation" click="navigateToURL(new URLRequest('https:/www.easy-insight.com/app/docs/Scripting'), '_blank')"
                        styleName="flatCreateButton"/>
             <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
