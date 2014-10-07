@@ -489,6 +489,12 @@
     </rule>
 
     <rule>
+        <from>^/emailAsWebsite/([A-Za-z0-9]+)</from>
+        <to>/emailAsWebsite.jsp?email=$1</to>
+    </rule>
+
+
+    <rule>
         <from>^/groups.json$</from>
         <to>/json/groups</to>
     </rule>
