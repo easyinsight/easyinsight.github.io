@@ -21,6 +21,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     public var databaseName:String;
     public var dbUserName:String;
     public var dbPassword:String;
+    public var useSSL:Boolean = true;
 
     public function MySQLDatabaseConnection() {
     }
