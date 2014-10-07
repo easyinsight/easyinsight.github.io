@@ -6,6 +6,7 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.export.DailyScheduleType;
 import com.easyinsight.export.DataSourceRefreshActivity;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.PostInstallSteps;
 import com.easyinsight.solutions.SolutionKPIData;
@@ -33,9 +34,9 @@ import java.util.Date;
 public class ConnectionInstalledServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+        String dataSourceKey = req.getParameter("dataSourceID");
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            String dataSourceKey = req.getParameter("dataSourceID");
             int offset = Integer.parseInt(req.getParameter("utcOffset"));
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
@@ -84,7 +85,16 @@ public class ConnectionInstalledServlet extends HttpServlet {
             response.getOutputStream().write(jsonObject.toString().getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            LogClass.error(e);
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("url", "/a/data_sources/"  + dataSourceKey);
+            } catch (JSONException e1) {
+                throw new RuntimeException(e1);
+            }
+            response.setContentType("application/json");
+            response.getOutputStream().write(jsonObject.toString().getBytes());
+            response.getOutputStream().flush();
         } finally {
             SecurityUtil.clearThreadLocal();
         }
