@@ -90,14 +90,14 @@
         <div class="col-md-6 col-md-offset-3">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="row">
+                    <div class="row" style="margin-top:30px">
                         <div class="col-md-12">
-                            <div id="messageDiv" style="font-weight: bold;margin-bottom: 10px">Refreshing the data source...</div>
+                            <p style="font-weight: normal;margin-bottom: 10px">Easy Insight is pulling over the data from your target connection. Depending on how much data you have, this process may take several minutes.</div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <p style="font-weight: normal;margin-bottom: 10px">Easy Insight is pulling over the data from your target connection. Depending on how much data you have, this process may take several minutes.</div>
+                            <div id="messageDiv" style="font-weight: bold;margin-bottom: 10px">Refreshing the data source...</div>
                         </div>
                     </div>
                     <div class="row">
