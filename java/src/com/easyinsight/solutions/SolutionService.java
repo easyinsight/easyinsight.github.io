@@ -158,11 +158,12 @@ public class SolutionService {
     public PostInstallSteps addKPIData(SolutionKPIData solutionKPIData) {
         PostInstallSteps postInstallSteps = new PostInstallSteps();
         SecurityUtil.authorizeFeedAccess(solutionKPIData.getDataSourceID());
+        FeedDefinition dataSource;
         EIConnection conn = Database.instance().getConnection();
         try {
             System.out.println("Invoking ADD KPI data on " + solutionKPIData.getDataSourceID());
             conn.setAutoCommit(false);
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(solutionKPIData.getDataSourceID(), conn);
+            dataSource = new FeedStorage().getFeedDefinitionData(solutionKPIData.getDataSourceID(), conn);
             dataSource.setAccountVisible(true);
             new FeedStorage().updateDataFeedConfiguration(dataSource, conn);
             if (solutionKPIData.getActivity() != null) {
@@ -239,7 +240,7 @@ public class SolutionService {
             }
             copyLookAndFeel(solutionKPIData, conn, postInstallSteps);
 
-            new QuickReportDeliveryServlet.QuickReportResult(conn, solutionKPIData.getUtcOffset(), solutionKPIData.getDataSourceID(), dataSource.getFeedName()).invoke();
+
 
             conn.commit();
 
@@ -254,6 +255,18 @@ public class SolutionService {
         /*if (postInstallSteps.getResult() != null && postInstallSteps.getResult().getType() == EIDescriptor.DASHBOARD) {
             new DashboardService().getDashboard(postInstallSteps.getResult().getId());
         }*/
+        conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            new QuickReportDeliveryServlet.QuickReportResult(conn, solutionKPIData.getUtcOffset(), solutionKPIData.getDataSourceID(), dataSource.getFeedName()).invoke();
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
         return postInstallSteps;
     }
 
