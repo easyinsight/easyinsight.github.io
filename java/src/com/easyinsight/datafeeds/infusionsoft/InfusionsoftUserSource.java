@@ -68,6 +68,7 @@ public class InfusionsoftUserSource extends InfusionsoftTableSource {
                 String lastName = row.getValue(new NamedKey(InfusionsoftUserSource.LAST_NAME)).toString();
                 String name = firstName + " " + lastName;
                 map.put(userID, name);
+                row.addValue(keys.get(NAME), name);
             }
             ((InfusionsoftCompositeSource) parentDefinition).setUserCache(map);
             return dataSet;

@@ -8,7 +8,6 @@ import com.easyinsight.datafeeds.composite.CustomFieldTag;
 import com.easyinsight.datafeeds.composite.FederatedDataSource;
 import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.constantcontact.CCContactSource;
-import com.easyinsight.datafeeds.database.SchemaResponse;
 import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.freshbooks.FreshbooksClientSource;
 import com.easyinsight.datafeeds.harvest.HarvestProjectSource;
@@ -1379,19 +1378,6 @@ public class FeedService {
             Database.closeConnection(conn);
         }
         return dataSources;
-    }
-
-    public SchemaResponse exploreSchema(ServerDatabaseConnection serverDatabaseConnection) {
-        SchemaResponse schemaResponse = new SchemaResponse();
-        try {
-            schemaResponse.setSchemaTables(serverDatabaseConnection.exploreSchema());
-        } catch (SQLException e) {
-            schemaResponse.setError(e.getMessage());
-        } catch (Exception e) {
-            LogClass.error(e);
-            schemaResponse.setError("An internal server error occurred on trying to retrieve the schema.");
-        }
-        return schemaResponse;
     }
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {

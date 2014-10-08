@@ -60,7 +60,7 @@
             again(callDataID, message);
         } else if (status == 2) {
             // done
-            $.getJSON('/app/connectionInstalled?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
+            $.getJSON('/app/connectionInstalled?dataSourceID=<%= request.getParameter("dataSourceID") %>&utcOffset=' + new Date().getTimezoneOffset(), function(data) {
                 // redirect to result specified by data
                 window.location.replace(data["url"]);
             });
@@ -89,14 +89,31 @@
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <div class="row">
-                <div id="messageDiv" style="font-weight: bold;margin-bottom: 10px">Refreshing the data source...</div>
-                <div class="progress progress-striped active">
-                    <div class="progress-bar"
-                         style="width: 100%;"></div>
-                </div>
-                <div></div>
-                </div>
-                <div class="col-md-12" style="text-align:center" id="problemHTML">
+                <div class="col-md-12">
+                    <div class="row" style="margin-top:30px">
+                        <div class="col-md-12">
+                            <p style="font-weight: normal;margin-bottom: 10px">Easy Insight is pulling over the data from your target connection. Depending on how much data you have, this process may take several minutes.</div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:30px">
+                        <div class="col-md-12">
+                            <div id="messageDiv" style="font-weight: bold;margin-bottom: 10px">Refreshing the data source...</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar"
+                                     style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="problemHTML">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

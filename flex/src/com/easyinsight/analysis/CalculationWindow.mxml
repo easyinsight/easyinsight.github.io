@@ -232,12 +232,30 @@
 
         protected var items:ArrayCollection;
 
+        [Bindable]
+        protected var sortItems:ArrayCollection;
+
+        [Bindable]
+        protected var dateFields:ArrayCollection;
+
         public function set analysisItems(analysisItems:ArrayCollection):void {
             var items:ArrayCollection = new ArrayCollection();
+            var dates:ArrayCollection = new ArrayCollection();
+            var sortItems:ArrayCollection;
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
                 items.addItem(analysisItemWrapper.analysisItem);
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dates.addItem(analysisItemWrapper.analysisItem);
+                }
             }
+            sortItems = new ArrayCollection(items.toArray());
+            var noDate:Object = { display: "[ No Date ]"};
+            dates.addItemAt(noDate, 0);
+            var noSort:Object = { display: "[ No Sort ]"};
+            sortItems.addItemAt(noSort, 0);
+            this.sortItems = sortItems;
             this.items = items;
+            this.dateFields = dates;
         }
 
         public function set dataSourceID(dataSourceID:int):void {
@@ -367,6 +385,12 @@
                 this.enabled = false;
             }
         }
+
+        [Bindable]
+        protected var sortDimension:String;
+
+        [Bindable]
+        protected var defaultDate:String;
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
@@ -374,13 +398,15 @@
     </mx:RemoteObject>
     <mx:HBox>
         <mx:VBox horizontalAlign="center">
+            <mx:Button fontSize="14" label="Calculation Documentation" click="navigateToURL(new URLRequest('https:/www.easy-insight.com/app/docs/Scripting'), '_blank')"
+                       styleName="flatCreateButton"/>
             <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
                      dataProvider="{functions}" showRoot="false">
             </mx:Tree>
             <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
                 <mx:Label text="{functionSignature}"/>
-                <mx:TextArea text="{functionExplanation}" borderStyle="none" backgroundAlpha="0" editable="false"
+                <mx:Text text="{functionExplanation}"
                              selectable="true"
                              width="300" height="80"/>
             </mx:VBox>
@@ -446,14 +472,15 @@
                         </util:dataProvider>
                     </util:SmartComboBox>
                 </mx:FormItem>
-                <mx:FormItem label="Underline:">
-                    <mx:CheckBox id="underlineCheckbox" selected="{underline}"/>
-                </mx:FormItem>
                 <mx:FormItem label="Floating Point Precision:">
                     <mx:NumericStepper id="precisionInput" value="{precision}" minimum="0" maximum="50"/>
                 </mx:FormItem>
                 <mx:FormItem label="Minimum Precision:">
                     <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
+                </mx:FormItem>
+                <mx:FormItem label="Date Comparison:">
+                    <util:SmartComboBox id="dateComparisonBox" labelField="display" dataProvider="{dateFields}"
+                                        selectedProperty="display" selectedValue="{defaultDate}"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:Form>
@@ -493,6 +520,10 @@
                 </mx:FormItem>
                 <mx:FormItem label="Apply Before Aggregation:">
                     <mx:CheckBox id="groupingApplyBeforeAggregationCheckbox" selected="{groupingApplyBeforeAggregation}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Use Sort Field:">
+                    <util:SmartComboBox id="sortComboBox" labelField="display" dataProvider="{sortItems}"
+                                        selectedValue="{sortDimension}" selectedProperty="display"/>
                 </mx:FormItem>
             </mx:Form>
          </mx:ViewStack>

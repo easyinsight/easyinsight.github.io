@@ -20,6 +20,9 @@ public class DerivedGroupingWindow extends CalculationWindow {
             wordWrap = derivedGrouping.wordWrap;
             groupingApplyBeforeAggregation = derivedGrouping.applyBeforeAggregation;
             html = derivedGrouping.html;
+            if (derivedGrouping.sortItem != null) {
+                sortDimension = derivedGrouping.sortItem.display;
+            }
         }
         detailIndex = 3;
         example1 = "namedbracketvalue([Deal Description], \"Channel\")";
@@ -47,6 +50,12 @@ public class DerivedGroupingWindow extends CalculationWindow {
             }
             derivedGrouping.displayName = nameInput.text;
             derivedGrouping.unqualifiedDisplayName = nameInput.text;
+        }
+        var sortItem:AnalysisItem = sortComboBox.selectedItem as AnalysisItem;
+        if (sortItem != null) {
+            derivedGrouping.sortItem = sortItem;
+        } else {
+            derivedGrouping.sortItem = null;
         }
         derivedGrouping.derivationCode = calculationInput.text;
         derivedGrouping.html = htmlCheckbox.selected;

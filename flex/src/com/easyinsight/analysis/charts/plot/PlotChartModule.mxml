@@ -28,6 +28,7 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.FillProvider;
         import com.easyinsight.analysis.Link;
+        import com.easyinsight.analysis.MultiColor;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EIDataTip;
         import com.easyinsight.filtering.FilterRawData;
@@ -44,6 +45,7 @@
         import mx.collections.ArrayCollection;
         import mx.formatters.Formatter;
         import mx.formatters.NumberFormatter;
+        import mx.graphics.SolidColor;
 
         [Bindable]
         private var correlation:String;
@@ -122,6 +124,18 @@
                 dimensionItem = plotChartDef.dimension;
                 briefLabels = plotChartDef.briefLabels;
                 this.defaultLink = ChartUtil.setup(plotChartDef.dimension, plotChart, onChartClick);
+                var colors:Array;
+                var useCustomColors:Boolean = (plotChartDef.multiColors != null && plotChartDef.multiColors.length > 0 && MultiColor(plotChartDef.multiColors.getItemAt(0)).color1StartEnabled);
+                if (useCustomColors) {
+                    colors = [];
+                    for each (var mc:MultiColor in plotChartDef.multiColors) {
+                        if (mc.color1StartEnabled) {
+                            colors.push(new SolidColor(mc.color1Start));
+                        }
+                    }
+                } else {
+                    colors = FillProvider.createSolidColors();
+                }
                 if (plotChartDef.iconGrouping != null) {
                     // if an icon grouping is defined, we need to break out items by
                     for each (var obj:Object in dataSet) {
@@ -151,7 +165,7 @@
                     defaultSeries.setStyle("radius", 10);
                     defaultSeries.yField = measure2;
                     defaultSeries.setStyle("itemRenderer", new ClassFactory(CircleItemRenderer));
-                    defaultSeries.setStyle("fills", FillProvider.createRadialGradients2());
+                    defaultSeries.setStyle("fills", colors);
                     defaultSeries.setStyle("stroke", borderStroke);
                     defaultSeries.displayName = plotChartDef.dimension.display;
                     plotChart.series = [ defaultSeries ];

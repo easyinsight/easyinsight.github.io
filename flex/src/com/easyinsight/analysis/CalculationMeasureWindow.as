@@ -1,4 +1,6 @@
 package com.easyinsight.analysis {
+import mx.controls.Alert;
+
 public class CalculationMeasureWindow extends CalculationWindow {
 
     private var analysisCalculation:AnalysisCalculation;
@@ -24,6 +26,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
             underline = analysisCalculation.underline;
             precision = analysisCalculation.precision;
             minPrecision = analysisCalculation.minPrecision;
+            defaultDate = analysisCalculation.defaultDate;
         }
         detailIndex = 1;
         detailItemLabel = "Aggregation:";
@@ -59,7 +62,12 @@ public class CalculationMeasureWindow extends CalculationWindow {
         analysisCalculation.formattingType = formattingSetup.formattingConfiguration;
         analysisCalculation.recalculateSummary = summaryCheckbox.selected;
         analysisCalculation.precision = precisionInput.value;
-        analysisCalculation.underline = underlineCheckbox.selected;
+        analysisCalculation.underline = false;
+        if (dateComparisonBox.selectedItem is AnalysisItem) {
+            analysisCalculation.defaultDate = dateComparisonBox.selectedItem.display;
+        } else {
+            analysisCalculation.defaultDate = null;
+        }
         analysisCalculation.minPrecision = minPrecisionInput.value;
         return analysisCalculation;
     }

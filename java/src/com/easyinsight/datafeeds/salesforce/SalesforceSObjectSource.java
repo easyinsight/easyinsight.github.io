@@ -33,6 +33,7 @@ import java.util.*;
 public class SalesforceSObjectSource extends ServerDataSourceDefinition {
 
     private String sobjectName;
+    private boolean defaultIndex;
 
     public String getSobjectName() {
         return sobjectName;
@@ -54,7 +55,13 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
         return new ArrayList<String>();
     }
 
+    public boolean isDefaultIndex() {
+        return defaultIndex;
+    }
 
+    public void setDefaultIndex(boolean defaultIndex) {
+        this.defaultIndex = defaultIndex;
+    }
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
@@ -67,6 +74,9 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
             List<AnalysisItem> fields = ((SalesforceBaseDataSource) parentDefinition).getFieldMap().get(sobjectName);
             for (AnalysisItem field : fields) {
                 NamedKey key = (NamedKey) field.getKey();
+                if (defaultIndex) {
+                    key.setIndexed(true);
+                }
                 Key existing = keys.get(key.getName());
                 if (existing != null) {
                     field.setKey(existing);
@@ -87,9 +97,10 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SALESFORCE_SUB_DEFINITION (DATA_SOURCE_ID, SOBJECT_NAME) VALUES (?, ?)");
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SALESFORCE_SUB_DEFINITION (DATA_SOURCE_ID, SOBJECT_NAME, DEFAULT_INDEX) VALUES (?, ?, ?)");
         saveStmt.setLong(1, getDataFeedID());
         saveStmt.setString(2, sobjectName);
+        saveStmt.setBoolean(3, defaultIndex);
         saveStmt.execute();
         saveStmt.close();
     }
@@ -97,11 +108,12 @@ public class SalesforceSObjectSource extends ServerDataSourceDefinition {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT SOBJECT_NAME FROM SALESFORCE_SUB_DEFINITION WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT SOBJECT_NAME, DEFAULT_INDEX FROM SALESFORCE_SUB_DEFINITION WHERE DATA_SOURCE_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
             sobjectName = rs.getString(1);
+            defaultIndex = rs.getBoolean(2);
         }
         loadStmt.close();
     }
