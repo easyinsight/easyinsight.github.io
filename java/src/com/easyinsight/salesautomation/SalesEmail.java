@@ -48,11 +48,11 @@ public class SalesEmail implements Runnable {
 
     private static String newAccountNotification =
             "New account created:\r\n\r\n" +
-            "Account Type: {0}\r\n" +
-            "User Name: {1}\r\n" +
-            "First Name: {2}\r\n" +
-            "Last Name: {3}\r\n" +
-            "Email Address: {4}";
+                    "Account Type: {0}\r\n" +
+                    "User Name: {1}\r\n" +
+                    "First Name: {2}\r\n" +
+                    "Last Name: {3}\r\n" +
+                    "Email Address: {4}";
 
     private Account account;
     private User user;
