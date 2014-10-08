@@ -251,9 +251,9 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-        if (postInstallSteps.getResult() != null && postInstallSteps.getResult().getType() == EIDescriptor.DASHBOARD) {
+        /*if (postInstallSteps.getResult() != null && postInstallSteps.getResult().getType() == EIDescriptor.DASHBOARD) {
             new DashboardService().getDashboard(postInstallSteps.getResult().getId());
-        }
+        }*/
         return postInstallSteps;
     }
 
