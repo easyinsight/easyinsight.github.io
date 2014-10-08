@@ -81,18 +81,24 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         this.accessToken = accessToken;
     }
 
+    public void configureFactory(HTMLConnectionFactory factory) {
+        factory.type(HTMLConnectionFactory.TYPE_OAUTH);
+    }
+
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SALESFORCE_DEFINITION WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO SALESFORCE_DEFINITION (DATA_SOURCE_ID, ACCESS_TOKEN, REFRESH_TOKEN, INSTANCE_NAME) VALUES (?, ?, ?, ?)");
         saveStmt.setLong(1, getDataFeedID());
         saveStmt.setString(2, accessToken);
         saveStmt.setString(3, refreshToken);
         saveStmt.setString(4, instanceName);
         saveStmt.execute();
+        saveStmt.close();
     }
 
     @Override
@@ -164,7 +170,10 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
 
     @Override
     public List<CompositeFeedConnection> obtainChildConnections() throws SQLException {
-        return getConnections();
+
+        List<CompositeFeedConnection> conns = getConnections();
+        conns.addAll(getAddonConnections());
+        return conns;
     }
 
     public boolean isConfigured() {
@@ -222,6 +231,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
     protected void beforeRefresh(Date lastRefreshTime) {
         try {
             super.beforeRefresh(lastRefreshTime);
+            System.out.println("before refresh...");
             Document doc;
             try {
                 HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
@@ -301,7 +311,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         for (int i = 0; i < fieldsNodes.size(); i++) {
             Node fieldNode = fieldsNodes.get(i);
             String fieldName = fieldNode.query("name/text()").get(0).getValue();
-            System.out.println("\t" + fieldName);
+            //System.out.println("\t" + fieldName);
             String friendlyName = fieldNode.query("label/text()").get(0).getValue();
             String type = fieldNode.query("type/text()").get(0).getValue().toUpperCase();
             if("BOOLEAN".equals(type) ||
@@ -333,7 +343,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 dateDimension.setCustomDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss'Z'");
                 items.add(dateDimension);
             } else {
-                System.out.println("** NO CLUE HOW TO HANDLE " + type);
+                //System.out.println("** NO CLUE HOW TO HANDLE " + type);
             }
         }
         return items;
@@ -364,6 +374,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         }
 
         if (sobjectNodes == null) {
+            System.out.println("null on child data sources");
             Document doc;
             try {
                 HttpGet httpRequest = new HttpGet(instanceName + "/services/data/v20.0/sobjects/");
@@ -407,7 +418,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         for (int i = 0; i < sobjectNodes.size(); i++) {
             Node sobjectNode = sobjectNodes.get(i);
             String name = sobjectNode.query("name/text()").get(0).getValue();
-            System.out.println(name);
+            //System.out.println(name);
             SalesforceSObjectSource existing = map.get(name);
             if (existing == null) {
                 String searchableString = sobjectNode.query("searchable/text()").get(0).getValue();
@@ -417,6 +428,11 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                     SalesforceSObjectSource salesforceSObjectSource = new SalesforceSObjectSource();
                     salesforceSObjectSource.setSobjectName(name);
                     salesforceSObjectSource.setFeedName(name);
+                    if ("Opportunity".equals(name) || "Account".equals(name) || "Case".equals(name) || "Lead".equals(name) ||
+                            "Note".equals(name) || "OpportunityHistory".equals(name) || "OpportunityStage".equals(name) ||
+                            "User".equals(name) || "UserRole".equals(name)) {
+                        salesforceSObjectSource.setDefaultIndex(true);
+                    }
                     newDefinition(salesforceSObjectSource, conn, "", getUploadPolicy());
                     CompositeFeedNode node = new CompositeFeedNode();
                     node.setDataFeedID(salesforceSObjectSource.getDataFeedID());
@@ -432,7 +448,7 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
         }
 
         boolean connectionsExists = getConnections() != null && getConnections().size() > 0;
-        if (connectionsExists) {
+        //if (!connectionsExists) {
             for (SFConnection connection : connectionList) {
                 if (connection.source.equals(connection.target)) {
                     continue;
@@ -443,12 +459,12 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                     AnalysisItem sourceItem = source.findAnalysisItem(connection.sourceField);
                     AnalysisItem targetItem = target.findAnalysisItem(connection.targetField);
                     if (sourceItem == null) {
-                        System.out.println("Could not find field " + connection.sourceField + " on " + connection.source);
+                        //System.out.println("Could not find field " + connection.sourceField + " on " + connection.source);
                     }
                     if (targetItem == null) {
-                        System.out.println("Could not find field " + connection.targetField + " on " + connection.target);
+                        //System.out.println("Could not find field " + connection.targetField + " on " + connection.target);
                     }
-                    System.out.println("Connecting " + connection.source + " to " + connection.target);
+                    //System.out.println("Connecting " + connection.source + " to " + connection.target);
                     if (sourceItem != null && targetItem != null) {
                         connections.add(new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(), sourceItem, targetItem,
                                 source.getFeedName(), target.getFeedName(), false, false, false, false));
@@ -456,7 +472,8 @@ public class SalesforceBaseDataSource extends CompositeServerDataSource {
                 }
             }
             setConnections(connections);
-        }
+       // }
+
         return defaultChildren;
     }
 

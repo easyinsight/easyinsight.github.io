@@ -78,10 +78,14 @@ public class HTMLConnectionFactory {
                         intValue = Integer.parseInt(value);
                     } catch (NumberFormatException e) {
                         request.getSession().setAttribute("connectionError", "You'll need to specify a numeric value for " + property.getField() + ".");
-                        servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/connections/"+ dataSource.getFeedType().getType() + "?error=true"));
+                        servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/connections/" + dataSource.getFeedType().getType() + "?error=true"));
                         return;
                     }
                     method.invoke(dataSource, intValue);
+                } else if (property.getType() == HTMLConnectionProperty.CHECKBOX) {
+                    Method method = dataSource.getClass().getMethod(setter, boolean.class);
+                    boolean booleanValue = "on".equals(value);
+                    method.invoke(dataSource, booleanValue);
                 } else {
                     Method method = dataSource.getClass().getMethod(setter, String.class);
                     method.invoke(dataSource, value);

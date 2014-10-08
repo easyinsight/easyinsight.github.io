@@ -58,8 +58,8 @@ public class InfusionsoftCompanySource extends InfusionsoftTableSource {
         fieldBuilder.addField(LAST_NAME, new AnalysisDimension());
         fieldBuilder.addField(WEBSITE, new AnalysisDimension());
         fieldBuilder.addField(COMPANY, new AnalysisDimension());
-        fieldBuilder.addField(DATE_CREATED, new AnalysisDimension());
-        fieldBuilder.addField(LAST_UPDATED, new AnalysisDimension());
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension("Date Created"));
+        fieldBuilder.addField(LAST_UPDATED, new AnalysisDateDimension("Date Updated"));
         fieldBuilder.addField(STATE, new AnalysisDimension());
         fieldBuilder.addField(OWNER_ID, new AnalysisDimension("Company Owner ID"));
         fieldBuilder.addField(OWNER_NAME, new AnalysisDimension());

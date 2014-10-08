@@ -80,7 +80,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         try {
             InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
             DataSet dataSet = query("Contact", createAnalysisItems(keys, conn, parentDefinition), infusionsoftCompositeSource, Arrays.asList(NAME, CONTACT_COUNT,
-                    LEAD_SOURCE, CONTACT_URL, OWNER_NAME, POSTAL_CODE, STATE, CITY, OWNER_ID));
+                    LEAD_SOURCE, CONTACT_URL, OWNER_NAME, POSTAL_CODE, STATE, CITY));
             for (IRow row : dataSet.getRows()) {
                 String firstName = row.getValue(keys.get(FIRST_NAME)).toString();
                 String lastName = row.getValue(keys.get(LAST_NAME)).toString();

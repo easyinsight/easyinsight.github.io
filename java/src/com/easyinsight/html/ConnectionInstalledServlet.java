@@ -6,6 +6,7 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.export.DailyScheduleType;
 import com.easyinsight.export.DataSourceRefreshActivity;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.solutions.PostInstallSteps;
 import com.easyinsight.solutions.SolutionKPIData;
@@ -20,6 +21,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -29,9 +34,10 @@ import java.io.IOException;
 public class ConnectionInstalledServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+        String dataSourceKey = req.getParameter("dataSourceID");
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            String dataSourceKey = req.getParameter("dataSourceID");
+            int offset = Integer.parseInt(req.getParameter("utcOffset"));
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
             String endURL;
@@ -60,10 +66,12 @@ public class ConnectionInstalledServlet extends HttpServlet {
             dataSourceRefreshActivity.setDataSourceID(dataSourceID);
             dataSourceRefreshActivity.setDataSourceName(dataSource.getFeedName());
             DailyScheduleType dailyScheduleType = new DailyScheduleType();
-            dailyScheduleType.setHour((int) (Math.random() * 22 + 1));
+            dailyScheduleType.setTimeOffset(offset);
+            dailyScheduleType.setHour((int) (Math.random() * 4 + 1));
             dailyScheduleType.setMinute((int) (Math.random() * 58 + 1));
             dataSourceRefreshActivity.setScheduleType(dailyScheduleType);
             solutionKPIData.setActivity(dataSourceRefreshActivity);
+            solutionKPIData.setUtcOffset(offset);
             PostInstallSteps steps = new SolutionService().addKPIData(solutionKPIData);
             if (steps.getResult() != null) {
                 endURL = RedirectUtil.getURL(req, "/app/html/dashboard/" + steps.getResult().getUrlKey());
@@ -77,7 +85,16 @@ public class ConnectionInstalledServlet extends HttpServlet {
             response.getOutputStream().write(jsonObject.toString().getBytes());
             response.getOutputStream().flush();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            LogClass.error(e);
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("url", "/a/data_sources/"  + dataSourceKey);
+            } catch (JSONException e1) {
+                throw new RuntimeException(e1);
+            }
+            response.setContentType("application/json");
+            response.getOutputStream().write(jsonObject.toString().getBytes());
+            response.getOutputStream().flush();
         } finally {
             SecurityUtil.clearThreadLocal();
         }

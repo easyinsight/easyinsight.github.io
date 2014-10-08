@@ -130,11 +130,11 @@ public class AccountMemberInvitation {
     }
 
     public void sendWelcomeEmail(String to, EIConnection conn, long userID, String firstName, long accountID) throws Exception {
-        /*PreparedStatement salesStmt = conn.prepareStatement("INSERT INTO emails_to_send (account_id, email_sent) values (?, ?)");
+        PreparedStatement salesStmt = conn.prepareStatement("INSERT INTO emails_to_send (account_id, email_sent) values (?, ?)");
         salesStmt.setLong(1, accountID);
         salesStmt.setBoolean(2, false);
         salesStmt.execute();
-        salesStmt.close();*/
+        salesStmt.close();
 
         new LeadNurtureShell().generate(conn, userID, to, LeadNurtureShell.FIRST_EMAIL, firstName, 1);
     }

@@ -377,11 +377,14 @@
             <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
                  paddingTop="5" horizontalAlign="center" width="700" height="380" updateComplete="onEvent(event)" id="linksBox">
                 <mx:Text width="515"  selectable="false" fontSize="14"
-                                       text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs), as well as links to external URLs."/>
+                                       text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs) and links to external URLs."/>
+                <mx:Button fontSize="14" label="Click to view documentation for links" click="navigateToURL(new URLRequest('https://www.easy-insight.com/app/docs/Linking_Reports'), '_blank')"
+                        styleName="flatCreateButton"/>
+                <mx:HRule/>
                 <mx:ViewStack selectedIndex="{linkIndex}" width="100%" height="100%">
                     <mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
                         <mx:Label text="You haven't defined a link from this field yet." fontSize="14"/>
-                        <mx:Button label="Create a link" click="addLink()" fontSize="14"/>
+                        <mx:Button label="Create a link" click="addLink()" fontSize="14" styleName="flatCreateButton"/>
                     </mx:VBox>
                     <analysis:NewLinkPanel id="newLinkPanel" link="{link}" dataSourceID="{dataSourceID}" analysisItems="{analysisItems}"/>
                     <mx:VBox>

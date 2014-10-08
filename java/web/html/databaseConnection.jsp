@@ -96,9 +96,13 @@
                 %>
                 <textarea class="form-control" rows="5" name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>"></textarea>
                 <%
+                } else if (property.getType() == HTMLConnectionProperty.CHECKBOX) {
+                %>
+                <input type="checkbox" class="form-control" style="text-align: left;height:10px" name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>"/>
+                <%
                 } else {
                 %>
-                <input type="text" class="form-control" name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>" value="<%= property.getDefaultValue() %>"/>
+                <input type="text" class="form-control"  name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>" value="<%= property.getDefaultValue() %>"/>
                 <%
                     }
                 %>

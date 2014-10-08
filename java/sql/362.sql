@@ -1,0 +1,1 @@
+alter table field_rule add sort_field varchar(200) default null;

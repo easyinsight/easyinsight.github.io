@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
          implements="com.easyinsight.customupload.IServerDataSourceCreation">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -10,15 +10,11 @@
         import com.easyinsight.datasources.DataSourceType;
         import com.easyinsight.datasources.MySQLDatabaseConnection;
         import com.easyinsight.solutions.DataSourceDescriptor;
-        import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
 
         import mx.controls.Button;
         import mx.controls.ComboBox;
-        import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
         [Bindable]
@@ -48,6 +44,7 @@
             obj.rebuildFields = true;
             obj.timeout = timeoutInput.value;
             obj.copyingFromSource = copyingFrom;
+            obj.useSSL = sslCheckbox.selected;
             return obj;
         }
 
@@ -59,6 +56,7 @@
             userName = ds.dbUserName;
             query = ds.query;
             connTimeout = ds.timeout;
+            requireSSL = ds.useSSL;
             sourceExists = feedDefinition.feedName != null && feedDefinition.feedName != "";
         }
 
@@ -87,6 +85,7 @@
             obj.rebuildFields = true;
             obj.timeout = timeoutInput.value;
             obj.copyingFromSource = copyingFrom;
+            obj.useSSL = sslCheckbox.selected;
         }
 
         public function validate():Boolean {
@@ -140,22 +139,8 @@
 
         private var copyingFrom:int;
 
-        private function exploreSchema():void {
-            ProgressAlert.alert(this, "Retrieving schema...", null, feedService.exploreSchema);
-            feedService.exploreSchema.send(dataSourceDefinition);
-        }
-
-        private function exploredSchema():void {
-            var response:SchemaResponse = feedService.exploreSchema.lastResult as SchemaResponse;
-            if (response.error != null) {
-                Alert.show(response.error);
-            } else {
-                var window:SchemaWindow = new SchemaWindow();
-                window.statsList = response.schemaTables;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
-        }
+        [Bindable]
+        private var requireSSL:Boolean = true;
 
         [Bindable]
         private var password:String;
@@ -164,7 +149,6 @@
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
-        <mx:method name="exploreSchema" result="exploredSchema()"/>
     </mx:RemoteObject>
     <mx:VBox horizontalAlign="center" paddingTop="5" id="vbox">
         <mx:Form id="nameForm">
@@ -192,6 +176,9 @@
             <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
                 <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="30"/>
             </mx:FormItem>
+            <mx:FormItem label="Require SSL:" labelWidth="200">
+                <mx:CheckBox id="sslCheckbox" selected="{requireSSL}"/>
+            </mx:FormItem>
         </mx:Form>
         <mx:HRule width="100%"/>
         <mx:Form>
@@ -205,7 +192,6 @@
         <mx:Text width="300" selectable="true" text="For the server side database connection to work, you'll need to open up your firewall to allow access on the database port to db.easy-insight.com (107.21.250.229). If you can't allow access through the firewall, you'll need to download and use the alternate database connection, hosting that behind your firewall. If you're running on the Amazon Web Services cloud, the configuration will be a little different--please contact us at support@easy-insight.com or 1-720-316-8174 and we'll work with you to complete setup."/>
         <mx:HRule width="100%"/>
         <mx:Text width="300" selectable="true" text="The query defines what fields and data to pull back into Easy Insight. For example, you might do 'select * from table_name', 'select a, b from table_name' or 'select a as A, b as B from table_name where X = Y'."/>
-        <util:SaveButton label="Explore Schema" click="exploreSchema()" fontSize="12"/>
     </mx:VBox>
     <mx:StringValidator id="nameValidator" minLength="1" source="{nameInput}" property="text"/>
     <mx:StringValidator id="hostValidator" minLength="1" source="{hostInput}" property="text"/>

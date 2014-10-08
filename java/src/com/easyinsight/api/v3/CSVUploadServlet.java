@@ -104,7 +104,11 @@ public class CSVUploadServlet extends JSONServlet {
             valid = true;
         } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)) {
             valid = true;
+        } else if ("application/octet-stream".equals(contentType)) {
+            valid = true;
         } else if ("text/plain".equals(contentType)) {
+            valid = true;
+        } else if ("text/csv".equals(contentType)) {
             valid = true;
         }
         return valid;
