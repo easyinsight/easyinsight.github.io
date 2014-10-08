@@ -91,7 +91,9 @@ public class QuickReportDeliveryServlet extends JSONServlet {
 
             while (rs.next()) {
                 long reportID = rs.getLong(1);
+
                 String title = rs.getString(2);
+                System.out.println("Auto setup of " + reportID + " - " + title);
                 InsightDescriptor report = new InsightDescriptor();
                 report.setId(reportID);
                 report.setName(title);
