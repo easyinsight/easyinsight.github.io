@@ -82,7 +82,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     protected Connection createConnection() throws SQLException {
         String url;
         if (useSSL) {
-            url = MessageFormat.format("jdbc:mysql://{0}:{1}/{2}?useSSL=true&requireSSL=true", host, String.valueOf(port), databaseName);
+            url = MessageFormat.format("jdbc:mysql://{0}:{1}/{2}?useSSL=true&requireSSL=true&reconnect=true", host, String.valueOf(port), databaseName);
         } else {
             url = MessageFormat.format("jdbc:mysql://{0}:{1}/{2}", host, String.valueOf(port), databaseName);
         }
