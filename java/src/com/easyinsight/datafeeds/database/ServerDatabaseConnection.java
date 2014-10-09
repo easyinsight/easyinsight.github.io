@@ -68,6 +68,11 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
         this.timeout = timeout;
     }
 
+
+    protected boolean usePaging() {
+        return false;
+    }
+
     @Override
     protected void beforeRefresh(EIConnection conn) {
         if (rebuildFields) {
@@ -87,7 +92,11 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         Connection connection = createConnection();
                         try {
                             Statement statement = connection.createStatement();
-                            ResultSet rs = statement.executeQuery(query);
+                            String pagedQuery = query;
+                            if (usePaging() && !query.contains("limit")) {
+                                pagedQuery = pagedQuery + " limit 100";
+                            }
+                            ResultSet rs = statement.executeQuery(pagedQuery);
                             rs.next();
                             int columnCount = rs.getMetaData().getColumnCount();
                             for (int i = 1; i <= columnCount; i++) {
@@ -199,88 +208,102 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
             Connection connection = createConnection();
             try {
                 Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery(query);
-                int ct = 0;
-                while (rs.next()) {
-                    IRow row = dataSet.createRow();
-                    int columnCount = rs.getMetaData().getColumnCount();
-                    for (int i = 1; i <= columnCount; i++) {
-                        String columnName = rs.getMetaData().getColumnName(i);
-                        AnalysisItem analysisItem = map.get(columnName);
-                        if (analysisItem == null) {
-                            continue;
-                        }
-                        switch (rs.getMetaData().getColumnType(i)) {
-                            case Types.BIGINT:
-                            case Types.TINYINT:
-                            case Types.SMALLINT:
-                            case Types.INTEGER:
-                            case Types.NUMERIC:
-                            case Types.FLOAT:
-                            case Types.DOUBLE:
-                            case Types.DECIMAL:
-                            case Types.REAL:
-                                double number = rs.getDouble(i);
-                                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                                    row.addValue(analysisItem.getKey(), String.valueOf((int) number));
-                                } else {
-                                    row.addValue(analysisItem.getKey(), number);
-                                }
-                                break;
+                String pagedQuery = query;
 
-                            case Types.BOOLEAN:
-                            case Types.BIT:
-                            case Types.CHAR:
-                            case Types.NCHAR:
-                            case Types.NVARCHAR:
-                            case Types.VARCHAR:
-                            case Types.LONGVARCHAR:
-                                String string = rs.getString(i);
-                                row.addValue(analysisItem.getKey(), string);
-                                break;
+                int offset = 0;
 
-                            case Types.DATE:
-                                try {
-                                    Date d = rs.getDate(i);
-                                    if(!rs.wasNull()) {
-                                        row.addValue(analysisItem.getKey(), d);
-                                    }
-                                } catch (SQLException e) {
-                                    if (e.getMessage() != null && e.getMessage().contains("can not be represented as java.sql.Date")) {
-                                        row.addValue(analysisItem.getKey(), new EmptyValue());
+                int ctr;
+                do {
+                    ctr = 0;
+                    if (usePaging() && !query.contains("limit")) {
+                        pagedQuery = query + " limit 100 offset " + offset;
+                    }
+
+                    ResultSet rs = statement.executeQuery(pagedQuery);
+                    int ct = 0;
+                    while (rs.next()) {
+                        ctr++;
+                        IRow row = dataSet.createRow();
+                        int columnCount = rs.getMetaData().getColumnCount();
+                        for (int i = 1; i <= columnCount; i++) {
+                            String columnName = rs.getMetaData().getColumnName(i);
+                            AnalysisItem analysisItem = map.get(columnName);
+                            if (analysisItem == null) {
+                                continue;
+                            }
+                            switch (rs.getMetaData().getColumnType(i)) {
+                                case Types.BIGINT:
+                                case Types.TINYINT:
+                                case Types.SMALLINT:
+                                case Types.INTEGER:
+                                case Types.NUMERIC:
+                                case Types.FLOAT:
+                                case Types.DOUBLE:
+                                case Types.DECIMAL:
+                                case Types.REAL:
+                                    double number = rs.getDouble(i);
+                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                        row.addValue(analysisItem.getKey(), String.valueOf((int) number));
                                     } else {
-                                        LogClass.debug(e.getMessage());
+                                        row.addValue(analysisItem.getKey(), number);
                                     }
-                                }
-                                break;
-                            case Types.TIME:
-                                Time t = rs.getTime(i);
-                                if(!rs.wasNull()) {
-                                    row.addValue(analysisItem.getKey(), new Date(t.getTime()));
-                                }
-                                break;
-                            case Types.TIMESTAMP:
-                                try {
-                                    Timestamp timestamp = rs.getTimestamp(i);
+                                    break;
+
+                                case Types.BOOLEAN:
+                                case Types.BIT:
+                                case Types.CHAR:
+                                case Types.NCHAR:
+                                case Types.NVARCHAR:
+                                case Types.VARCHAR:
+                                case Types.LONGVARCHAR:
+                                    String string = rs.getString(i);
+                                    row.addValue(analysisItem.getKey(), string);
+                                    break;
+
+                                case Types.DATE:
+                                    try {
+                                        Date d = rs.getDate(i);
+                                        if (!rs.wasNull()) {
+                                            row.addValue(analysisItem.getKey(), d);
+                                        }
+                                    } catch (SQLException e) {
+                                        if (e.getMessage() != null && e.getMessage().contains("can not be represented as java.sql.Date")) {
+                                            row.addValue(analysisItem.getKey(), new EmptyValue());
+                                        } else {
+                                            LogClass.debug(e.getMessage());
+                                        }
+                                    }
+                                    break;
+                                case Types.TIME:
+                                    Time t = rs.getTime(i);
                                     if (!rs.wasNull()) {
-                                        java.sql.Date date = new java.sql.Date(timestamp.getTime());
-                                        row.addValue(analysisItem.getKey(), date);
+                                        row.addValue(analysisItem.getKey(), new Date(t.getTime()));
                                     }
-                                } catch (SQLException e) {
-                                    // ignore
-                                }
-                                break;
-                            default:
-                                throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                                    break;
+                                case Types.TIMESTAMP:
+                                    try {
+                                        Timestamp timestamp = rs.getTimestamp(i);
+                                        if (!rs.wasNull()) {
+                                            java.sql.Date date = new java.sql.Date(timestamp.getTime());
+                                            row.addValue(analysisItem.getKey(), date);
+                                        }
+                                    } catch (SQLException e) {
+                                        // ignore
+                                    }
+                                    break;
+                                default:
+                                    throw new RuntimeException("This data type (" + rs.getMetaData().getColumnTypeName(i) + ") is not supported in Easy Insight. Type value: " + rs.getMetaData().getColumnType(i));
+                            }
+                        }
+                        ct++;
+                        if (ct == 1000) {
+                            IDataStorage.insertData(dataSet);
+                            dataSet = new DataSet();
+                            ct = 0;
                         }
                     }
-                    ct++;
-                    if (ct == 1000) {
-                        IDataStorage.insertData(dataSet);
-                        dataSet = new DataSet();
-                        ct = 0;
-                    }
-                }
+                    offset += ctr;
+                } while (ctr == 100);
                 IDataStorage.insertData(dataSet);
             } finally {
                 connection.close();

@@ -119,6 +119,10 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         queryStmt.close();
     }
 
+    protected boolean usePaging() {
+        return useSSL;
+    }
+
     @Override
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
