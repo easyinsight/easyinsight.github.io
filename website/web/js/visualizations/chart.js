@@ -486,7 +486,7 @@ Chart = {
                         var rWidth = $("#d3Div" + target).width();
                         var maxLeft = 150;
                         var maxChars = 15;
-                        if (rWidth < 300) {
+                        if (rWidth < 480) {
                             maxLeft = 70;
                             maxChars = maxLeft / 16;
                         }
