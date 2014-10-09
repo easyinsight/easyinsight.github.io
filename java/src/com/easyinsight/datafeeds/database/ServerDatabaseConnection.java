@@ -303,7 +303,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         }
                     }
                     offset += ctr;
-                } while (ctr == 100);
+                } while (ctr == 100 && usePaging());
                 IDataStorage.insertData(dataSet);
             } finally {
                 connection.close();
