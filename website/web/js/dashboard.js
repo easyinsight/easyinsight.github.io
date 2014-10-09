@@ -1337,7 +1337,7 @@ $(function () {
 
             renderReports(s, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
         });
-        var showFilters = true;
+        var showFilters = screen.width > 480;
         $('.toggle-filters').click(function (e) {
             if (showFilters) {
                 $(".filters").hide();
