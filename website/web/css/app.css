@@ -489,3 +489,10 @@ fieldset[disabled] .btn-alt-primary.active {
     font-weight:normal;
     font-size: 14px;
 }
+
+@media(max-width:480px) {
+    .dashboardBaseCol {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
