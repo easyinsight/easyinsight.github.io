@@ -30,6 +30,12 @@
     vertical-align:middle;
 }
 
+@media (max-width: 480px) {
+    .filters {
+        display: none;
+    }
+}
+
 .filters select {
     width: auto;
     max-width: 300px;
