@@ -157,6 +157,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private int fontSize = 12;
     private double backgroundAlpha = 1;
     private boolean dayAggregation;
+    private boolean includeHeaderInHTML;
 
     private List<AddonReport> addonReports;
 
@@ -166,6 +167,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
+    public boolean isIncludeHeaderInHTML() {
+        return includeHeaderInHTML;
+    }
+
+    public void setIncludeHeaderInHTML(boolean includeHeaderInHTML) {
+        this.includeHeaderInHTML = includeHeaderInHTML;
+    }
 
     public boolean isDayAggregation() {
         return dayAggregation;
@@ -1122,6 +1131,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
         htmlInFlash = findBooleanProperty(properties, "htmlInFlash", false);
+        includeHeaderInHTML = findBooleanProperty(properties, "includeHeaderInHTML", false);
         cacheFilters = findBooleanProperty(properties, "cacheFilters", false);
         cachePartitionFilter = findStringProperty(properties, "cachePartitionFilter", "");
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
@@ -1165,6 +1175,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("aggregateQueryIfPossible", aggregateQueryIfPossible));
         properties.add(new ReportBooleanProperty("htmlInFlash", htmlInFlash));
         properties.add(new ReportBooleanProperty("filterDateLevels", filterDateLevels));
+        properties.add(new ReportBooleanProperty("includeHeaderInHTML", includeHeaderInHTML));
         properties.add(new ReportStringProperty("cachePartitionFilter", cachePartitionFilter));
         properties.add(new ReportBooleanProperty("cacheFilters", cacheFilters));
         properties.add(new ReportStringProperty("reportColorScheme", colorScheme));
