@@ -487,11 +487,11 @@ Chart = {
                         var maxLeft = 150;
                         var maxChars = 15;
                         if (rWidth < 480) {
-                            maxLeft = 120;
-                            maxChars = maxLeft / 16;
+                            maxLeft = 100;
+                            maxChars = maxLeft / 12;
                         }
 
-                        var leftNeeded = maxLen * 16;
+                        var leftNeeded = maxLen * 12;
                         if (leftNeeded > maxLeft) {
                             leftNeeded = maxLeft;
                         } else if (leftNeeded < 50) {
@@ -517,7 +517,7 @@ Chart = {
                             .showControls(false)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             //.margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
-                            .margin({top: 10, right: 20, bottom: 45, left: leftNeeded});
+                            .margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
                         var floatingY = data["floatingY"];
                         if (floatingY) {
                             var vals = s1[0].values;
