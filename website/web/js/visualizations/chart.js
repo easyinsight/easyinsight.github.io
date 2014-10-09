@@ -78,6 +78,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
+
                         //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
@@ -107,17 +108,25 @@ Chart = {
                             }
                         }
 
+                        var rWidth = $("#d3Div" + target).width();
+                        var maxLeft = 150;
+                        var maxChars = 15;
+                        if (rWidth < 300) {
+                            maxLeft = 70;
+                            maxChars = maxLeft / 16;
+                        }
+
                         var leftNeeded = maxLen * 16;
-                        if (leftNeeded > 150) {
-                            leftNeeded = 150;
+                        if (leftNeeded > maxLeft) {
+                            leftNeeded = maxLeft;
                         } else if (leftNeeded < 50) {
                             leftNeeded = 50;
                         }
 
                         var chart = nv.models.multiBarHorizontalChart()
                             .x(function(d) {
-                                if (d.x.length > 15) {
-                                    return d.x.substring(0, 15) + "...";
+                                if (d.x.length > maxChars) {
+                                    return d.x.substring(0, maxChars) + "...";
                                 } else {
                                     return d.x;
                                 }
@@ -191,7 +200,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        //nv.utils.windowResize(function() { chart.update() });
+                        nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -474,9 +483,17 @@ Chart = {
                             }
                         }
 
+                        var rWidth = $("#d3Div" + target).width();
+                        var maxLeft = 150;
+                        var maxChars = 15;
+                        if (rWidth < 300) {
+                            maxLeft = 70;
+                            maxChars = maxLeft / 16;
+                        }
+
                         var leftNeeded = maxLen * 16;
-                        if (leftNeeded > 150) {
-                            leftNeeded = 150;
+                        if (leftNeeded > maxLeft) {
+                            leftNeeded = maxLeft;
                         } else if (leftNeeded < 50) {
                             leftNeeded = 50;
                         }
@@ -490,17 +507,17 @@ Chart = {
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         var chart = nv.models.multiBarHorizontalChart()
                             .x(function(d) {
-                                /*if (d.x.length > 15) {
-                                    return d.x.substring(0, 15) + "...";
+                                if (d.x.length > maxChars) {
+                                    return d.x.substring(0, maxChars) + "...";
                                 } else {
                                     return d.x;
-                                }*/
-                                return d.x;
+                                }
                             })
                             .height(height)
                             .showControls(false)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
-                            .margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
+                            //.margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
+                            .margin({top: 10, right: 0, bottom: 45, left: leftNeeded});
                         var floatingY = data["floatingY"];
                         if (floatingY) {
                             var vals = s1[0].values;
@@ -559,7 +576,7 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        //nv.utils.windowResize(function() { chart.update() });
+                        nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -650,6 +667,9 @@ Chart = {
                     height = raHeight;
                 } else {
                     height = nv.utils.windowSize().height - $('#filterRow').height() - $('#reportHeader').height() - 250;
+                    if (height < 200) {
+                        height = 200;
+                    }
                 }
             }
         }
