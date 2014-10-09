@@ -169,7 +169,7 @@
             </div>
             <div class="col-md-8 col-xs-12 reportControlToolbar">
                 <div class="reportBlah visible-xs pull-left" style="margin-top: 0">
-                    <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>"><%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                    <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Reports</a>
                 </div>
                 <div class="btn-toolbar pull-right">
                     <div id="configuration-dropdown" class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg">
