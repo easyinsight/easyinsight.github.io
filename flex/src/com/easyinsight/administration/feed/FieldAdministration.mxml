@@ -49,6 +49,7 @@
         import mx.collections.SortField;
         import mx.controls.Alert;
         import mx.events.CollectionEvent;
+        import mx.events.CollectionEventKind;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
 
@@ -61,33 +62,33 @@
             concreteFieldsEditable = dataSource.concreteFieldsEditable || dataSource.allowFieldEdit();
             try {
 
-                    var hierarchy:ArrayCollection = new ArrayCollection();
-                    allFields = new ArrayCollection();
-                    var masterItemList:ArrayCollection = new ArrayCollection(dataSource.fields.toArray());
-                    for each (var folder:FeedFolder in dataSource.folders) {
-                        var folderNode:FeedNode = convertFolder(folder, masterItemList);
-                        var folderWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(folderNode);
-                        hierarchy.addItem(folderWrapper);
-                    }
-                    for each (var item:AnalysisItem in masterItemList) {
-                        var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
-                        hierarchy.addItem(analysisWrapper);
-                    }
-                    fieldHierarchy = hierarchy;
-                    populateAllFields(fieldHierarchy, allFields);
-                    var hierarchyData:HierarchicalData = new HierarchicalData();
-                    hierarchyData.source = hierarchy;
-                    var myData:HierarchicalCollectionView = new HierarchicalCollectionView(hierarchyData);
-                    myData.filterFunction = filterFunction;
-                    var sort:Sort = new Sort();
-                    sort.fields = [ new SortField("sortType"), new SortField("displayName", true) ];
-                    myData.sort = sort;
-                    myData.refresh();
+                var hierarchy:ArrayCollection = new ArrayCollection();
+                allFields = new ArrayCollection();
+                var masterItemList:ArrayCollection = new ArrayCollection(dataSource.fields.toArray());
+                for each (var folder:FeedFolder in dataSource.folders) {
+                    var folderNode:FeedNode = convertFolder(folder, masterItemList);
+                    var folderWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(folderNode);
+                    hierarchy.addItem(folderWrapper);
+                }
+                for each (var item:AnalysisItem in masterItemList) {
+                    var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(convertAnalysisItem(item, null));
+                    hierarchy.addItem(analysisWrapper);
+                }
+                fieldHierarchy = hierarchy;
+                populateAllFields(fieldHierarchy, allFields);
+                var hierarchyData:HierarchicalData = new HierarchicalData();
+                hierarchyData.source = hierarchy;
+                var myData:HierarchicalCollectionView = new HierarchicalCollectionView(hierarchyData);
+                myData.filterFunction = filterFunction;
+                var sort:Sort = new Sort();
+                sort.fields = [ new SortField("sortType"), new SortField("displayName", true) ];
+                myData.sort = sort;
+                myData.refresh();
 
-                    theHierarchy = myData;
-                    //availableFields.sort = null;
+                theHierarchy = myData;
+                //availableFields.sort = null;
 
-                    loaded = true;
+                loaded = true;
             } catch (e:Error) {
                 Alert.show(e.message);
                 throw e;
@@ -95,6 +96,20 @@
         }
 
         private function save():void {
+
+            theHierarchy.filterFunction = null;
+
+            if (theHierarchy.refresh()) {
+                var analysisItems:ArrayCollection = new ArrayCollection();
+                dataSource.folders = getFolders(analysisItems);
+                dataSource.fields = analysisItems;
+                saveSource();
+            } else {
+                theHierarchy.addEventListener(CollectionEventKind.REFRESH, saveHandler);
+            }
+        }
+
+        private function saveHandler(event:Event):void {
             var analysisItems:ArrayCollection = new ArrayCollection();
             dataSource.folders = getFolders(analysisItems);
             dataSource.fields = analysisItems;
@@ -382,21 +397,19 @@
             searchText = searchBox.text;
             fieldGrid.dataProvider.refresh();
         }
+
+
         ]]></mx:Script>
     <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"
                                              concreteFieldsEditable="{concreteFieldsEditable}"/>
     <mx:VBox height="100%" width="100%" horizontalAlign="center" paddingTop="5">
         <mx:HBox paddingLeft="5">
-            <mx:Button icon="@Embed(source='../../../../../assets/cubes_blue_add.png')"
-                       toolTip="Add Hierarchy..." click="addHierarchy()" styleName="grayButton" label="Add Hierarchy"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/text_formula.png')"
-                       toolTip="Add Calculation..." click="addCalculation()" styleName="grayButton"
+            <mx:Button toolTip="Add Hierarchy..." click="addHierarchy()" styleName="grayButton" label="Add Hierarchy"/>
+            <mx:Button toolTip="Add Calculation..." click="addCalculation()" styleName="grayButton"
                        label="Add Derived Measure"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/code.png')"
-                       toolTip="Add Derived Grouping..." click="addDerivedGrouping()" styleName="grayButton"
+            <mx:Button toolTip="Add Derived Grouping..." click="addDerivedGrouping()" styleName="grayButton"
                        label="Add Derived Grouping"/>
-            <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')"
-                       toolTip="Add Derived Date..." click="addDerivedDate()" styleName="grayButton"
+            <mx:Button toolTip="Add Derived Date..." click="addDerivedDate()" styleName="grayButton"
                        label="Add Derived Date"/>
 
         </mx:HBox>
