@@ -216,7 +216,8 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                 do {
                     ctr = 0;
                     if (usePaging() && !query.contains("limit")) {
-                        pagedQuery = query + " limit 100 offset " + offset;
+                        pagedQuery = query + " limit 10000 offset " + offset;
+                        System.out.println(pagedQuery);
                     }
 
                     ResultSet rs = statement.executeQuery(pagedQuery);
@@ -303,7 +304,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         }
                     }
                     offset += ctr;
-                } while (ctr == 100 && usePaging());
+                } while (ctr == 10000 && usePaging());
                 IDataStorage.insertData(dataSet);
             } finally {
                 connection.close();
