@@ -488,10 +488,10 @@ Chart = {
                         var maxChars = 15;
                         if (rWidth < 480) {
                             maxLeft = 100;
-                            maxChars = maxLeft / 12;
+                            maxChars = maxLeft / 10;
                         }
 
-                        var leftNeeded = maxLen * 12;
+                        var leftNeeded = maxLen * 10;
                         if (leftNeeded > maxLeft) {
                             leftNeeded = maxLeft;
                         } else if (leftNeeded < 50) {
