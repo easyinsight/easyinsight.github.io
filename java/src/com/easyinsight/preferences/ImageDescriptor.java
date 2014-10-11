@@ -18,8 +18,17 @@ import java.io.Serializable;
 @Table(name="image_data")
 public class ImageDescriptor implements Serializable {
     private long id;
+    private String urlKey;
     private String name;
     private String contentType;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public long getId() {
         return id;
