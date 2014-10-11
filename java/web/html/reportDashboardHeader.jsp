@@ -20,6 +20,7 @@
 <script type="text/javascript" src="/js/visualizations/util.js"></script>
 <script type="text/javascript" src="/js/visualizations/chart.js"></script>
 <script type="text/javascript" src="/js/visualizations/list.js"></script>
+<script type="text/javascript" src="/js/visualizations/trend_grid.js"></script>
 <script type="text/javascript" src="/js/visualizations/asyncList.js"></script>
 <script type="text/javascript" src="/js/visualizations/asyncMultiSummary.js"></script>
 <script type="text/javascript" src="/js/visualizations/d3.legend.js"></script>
