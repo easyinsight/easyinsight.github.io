@@ -41,6 +41,7 @@
             addEventListener(ConnectionDeleteEvent.CONNECTION_DELETE, onConnectionDelete);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_TOP, onMoveToTop);
             addEventListener(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, onMoveToBottom);
+            addEventListener(JoinChangeEvent.JOIN_CHANGE, onJoinChangeEvent);
             ProgressAlert.alert(this, "Retrieving join information from data source...", null, analysisService.determineOverrides);
             analysisService.determineOverrides.send(dataSourceID, fields, report);
             /*if (startJoins == null || startJoins.length == 0) {
@@ -51,6 +52,12 @@
              connections.addItem(startJoin.toConnection());
              }
              }*/
+        }
+
+        private var joinChanged:Boolean;
+
+        private function onJoinChangeEvent(event:JoinChangeEvent):void {
+            joinChanged = true;
         }
 
         [Bindable]
@@ -146,7 +153,7 @@
         private var customConnectionMap:Object = new Object();
 
         private function save():void {
-            if (changed) {
+            if (changed || joinChanged) {
                 var joins:ArrayCollection = new ArrayCollection();
                 var saveJoins:ArrayCollection = new ArrayCollection();
                 for each (var connection:CompositeFeedConnection in connections) {

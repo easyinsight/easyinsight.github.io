@@ -622,6 +622,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Data Source Fields", "dataSourceFields", report.dataSourceFields, report));
         items.addItem(new CheckBoxReportFormItem("Include Header in HTML", "includeHeaderInHTML", report.includeHeaderInHTML, report));
         items.addItem(new CheckBoxReportFormItem("Filter Date Levels", "filterDateLevels", report.filterDateLevels, report));
+        items.addItem(new CheckBoxReportFormItem("Apply Cardinality Earlier", "checkPipelineAfter", report.checkPipelineAfter, report));
         items.addItem(new TextReportFormItem("Collapse On", "collapseOn", report.collapseOn, report));
         return items;
     }
