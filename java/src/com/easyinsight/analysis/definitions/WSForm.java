@@ -3,9 +3,12 @@ package com.easyinsight.analysis.definitions;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -127,35 +130,42 @@ public class WSForm extends WSAnalysisDefinition {
     }
 
     public String toExportHTML(EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean email) {
-        DataSet dataSet = DataService.listDataSet(this, insightRequestMetadata, conn);
-        if (email) {
-            if (dataSet.getRows().size() > 0) {
-                StringBuilder sb = new StringBuilder();
-                for (IRow row : dataSet.getRows()) {
+        try {
+            DataSet dataSet = DataService.listDataSet(this, insightRequestMetadata, conn);
+            ExportMetadata md = ExportService.createExportMetadata(conn);
+            if (email) {
+                if (dataSet.getRows().size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    for (IRow row : dataSet.getRows()) {
 
+                        sb.append("<table>\n");
+                        for (AnalysisItem analysisItem : columns) {
+                            String value = ExportService.createValue(md, analysisItem, row.getValue(analysisItem), false);
+                            sb.append("<tr><td style=\"text-align:right;font-weight:bold;padding:5px\">").append(analysisItem.toUnqualifiedDisplay()).append(":</td>").append("<td style=\"text-align:left;padding:5px\">").append(value).append("</td>").append("</tr>");
+                        }
+                        sb.append("</table>");
+                    }
+                    return sb.toString();
+                } else {
+                    return "";
+                }
+            } else {
+                if (dataSet.getRows().size() > 0) {
+                    IRow row = dataSet.getRow(0);
+                    StringBuilder sb = new StringBuilder();
                     sb.append("<table>\n");
                     for (AnalysisItem analysisItem : columns) {
-                        sb.append("<tr><td style=\"text-align:right;font-weight:bold;padding:5px\">").append(analysisItem.toUnqualifiedDisplay()).append(":</td>").append("<td style=\"text-align:left;padding:5px\">").append(row.getValue(analysisItem).toHTMLString()).append("</td>").append("</tr>");
+                        String value = ExportService.createValue(md, analysisItem, row.getValue(analysisItem), false);
+                        sb.append("<tr><td style=\"text-align:right;font-weight:bold;padding:5px\">").append(analysisItem.toUnqualifiedDisplay()).append(":</td>").append("<td style=\"text-align:left;padding:5px\">").append(value).append("</td>").append("</tr>");
                     }
                     sb.append("</table>");
+                    return sb.toString();
+                } else {
+                    return "";
                 }
-                return sb.toString();
-            } else {
-                return "";
             }
-        } else {
-            if (dataSet.getRows().size() > 0) {
-                IRow row = dataSet.getRow(0);
-                StringBuilder sb = new StringBuilder();
-                sb.append("<table>\n");
-                for (AnalysisItem analysisItem : columns) {
-                    sb.append("<tr><td style=\"text-align:right;font-weight:bold;padding:5px\">").append(analysisItem.toUnqualifiedDisplay()).append(":</td>").append("<td style=\"text-align:left;padding:5px\">").append(row.getValue(analysisItem).toHTMLString()).append("</td>").append("</tr>");
-                }
-                sb.append("</table>");
-                return sb.toString();
-            } else {
-                return "";
-            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

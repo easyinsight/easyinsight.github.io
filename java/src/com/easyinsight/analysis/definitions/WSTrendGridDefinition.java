@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -216,5 +217,34 @@ public class WSTrendGridDefinition extends WSKPIDefinition {
             }
         }*/
         return analysisItemMap;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme())) {
+            if (applicationSkin.isSummaryTextColorEnabled()) {
+                setSummaryRowTextColor(applicationSkin.getSummaryTextColor());
+            }
+            if (applicationSkin.isSummaryBackgroundColorEnabled()) {
+                setSummaryRowBackgroundColor(applicationSkin.getSummaryBackgroundColor());
+            }
+            if (applicationSkin.isHeaderStartEnabled()) {
+                setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isHeaderEndEnabled()) {
+                setHeaderColor2(applicationSkin.getHeaderEnd());
+            }
+            if (applicationSkin.isTableColorStartEnabled()) {
+                setRowColor1(applicationSkin.getTableColorStart());
+            }
+            if (applicationSkin.isTableColorEndEnabled()) {
+                setRowColor2(applicationSkin.getTableColorEnd());
+            }
+            if (applicationSkin.isReportHeaderTextColorEnabled()) {
+                setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
+            }
+            if (applicationSkin.isTextColorEnabled()) {
+                setTextColor(applicationSkin.getTextColor());
+            }
+        }
     }
 }
