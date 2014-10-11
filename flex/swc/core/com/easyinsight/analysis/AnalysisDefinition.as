@@ -113,6 +113,7 @@ import mx.collections.ArrayCollection;
     public var exportString:String;
     public var dayAggregation:Boolean;
     public var htmlInFlash:Boolean;
+    public var includeHeaderInHTML:Boolean;
 
     public var fieldEvents:Object;
     public var filterEvents:Object;

@@ -67,9 +67,9 @@ public class SuggestedActionsServlet extends JSONServlet {
         } else if (autoState == AutoComposite.CREATE_COMPOSITE) {
             suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_CREATE_COMPOSITE, "Combine sources into a dashboard", "/app/autoDataSourceAction?action=create_composite"));
         } else if (autoState == AutoComposite.ADD_TO_COMPOSITE) {
-            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_ADD_TO_COMPOSITE, "Add new connections to single dashboard", "/app/autoDataSourceAction?action=add_to_composite"));
+            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_ADD_TO_COMPOSITE, "Add new connections to dashboard", "/app/autoDataSourceAction?action=add_to_composite"));
         } else if (autoState == AutoComposite.CREATE_DASHBOARD_ON_COMPOSITE) {
-            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_CREATE_DASHBOARD, "Create a dashboard on combined data source", "/app/autoDataSourceAction?action=create_dashboard"));
+            suggestions.add(new DataSourceSuggestion(DataSourceSuggestion.SUGGEST_CREATE_DASHBOARD, "Create a combined dashboard", "/app/autoDataSourceAction?action=create_dashboard"));
         }
         return suggestions;
     }

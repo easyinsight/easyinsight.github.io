@@ -114,6 +114,8 @@
         reportJSON.put("configuration_name", (Object) selectedConfiguration);
         reportJSON.put("configuration_key", (Object) configurationKey);
 
+        boolean showHeader = report.isIncludeHeaderInHTML();
+
         try {
             new AdminService().logAction(new ActionReportLog(SecurityUtil.getUserID(false), ActionReportLog.VIEW, report.getAnalysisID()));
         } catch (Exception e) {
@@ -162,17 +164,24 @@
 <div class="nav navbar-pills reportNav" style="margin-bottom: 0">
     <div class="container-fluid">
         <div class="row controlsRow">
-            <div class="col-md-4 reportBlah">
+            <div class="col-md-4 reportBlah visible-sm visible-md visible-lg">
                 <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
-            <div class="col-md-8 reportControlToolbar">
+            <div class="col-md-8 col-xs-12 reportControlToolbar">
+                <div class="reportBlah visible-xs pull-left" style="margin-top: 0">
+                    <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Reports</a>
+                </div>
                 <div class="btn-toolbar pull-right">
-                    <div id="configuration-dropdown" class="btn-group reportControlBtnGroup">
+                    <div id="configuration-dropdown" class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg">
 
                     </div>
                     <div class="btn-group reportControlBtnGroup">
-                        <a class="reportControl" data-toggle="dropdown" href="#">
+                        <a class="reportControl visible-sm visible-md visible-lg" data-toggle="dropdown" href="#">
                             Export the Report
+                            <span class="caret"></span>
+                        </a>
+                        <a class="reportControl visible-xs" data-toggle="dropdown" href="#">
+                            Export
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
@@ -210,7 +219,11 @@
                         </ul>
                     </div>
                     <div class="btn-group reportControlBtnGroup">
-                        <a class="reportControl" data-toggle="dropdown" href="#">
+                        <a class="reportControl visible-sm visible-md visible-lg" data-toggle="dropdown" href="#">
+                            Refresh Data
+                            <span class="caret"></span>
+                        </a>
+                        <a class="reportControl visible-xs" data-toggle="dropdown" href="#">
                             Refresh Data
                             <span class="caret"></span>
                         </a>
@@ -243,14 +256,17 @@
                         }
                         if (visibleFilter) {
                     %>
-                    <div class="btn-group reportControlBtnGroup">
+                    <div class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg">
                         <a class="reportControl toggle-filters">Toggle Filters</a>
+                    </div>
+                    <div class="btn-group reportControlBtnGroup visible-xs">
+                        <a class="reportControl toggle-filters">Filters</a>
                     </div>
                     <%
                         }
                     %>
                     <% if (designer && !iPad && !phone) { %>
-                    <div class="btn-group reportControlBtnGroup" style="margin-right:5px">
+                    <div class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg" style="margin-right:5px">
                         <a href="<%= RedirectUtil.getURL(request, "/app/html/report/" + report.getUrlKey()) + "/edit" %>"
                            class="reportControl">Edit Report</a>
                     </div>
@@ -267,7 +283,7 @@
         </div>
     </div>
 </div>
-<div class="container">
+<div class="container-fluid">
     <jsp:include page="exportModalWindow.jsp">
         <jsp:param name="reportID" value="<%= report.getUrlKey()%>"/>
     </jsp:include>
@@ -276,6 +292,7 @@
     <jsp:include page="reportJSONWindow.jsp"/>
     <jsp:include page="refreshingDataSource.jsp"/>
     <jsp:include page="modalIndicator.jsp"/>
+    <%= showHeader ? uiData.createHeader(report.getName()) : "" %>
     <div id="base"/>
 </div>
 </body>

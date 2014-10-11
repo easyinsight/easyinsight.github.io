@@ -470,11 +470,15 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
         $.ajax($.extend(postData, {success: confirmRender(o, function (data) {
             window.drawDiagram(data, $("#" + id + " .reportArea"), obj.id, typeof(userJSON.embedded) != "undefined" ? userJSON.embedded : false, afterRefresh($("#" + id + " .loading"), fullFilters, drillthroughID, dashboardID));
         }) }));
-    }
-    else if (obj.metadata.type == "list" || obj.metadata.type == "trend_grid") {
+    } else if (obj.metadata.type == "list") {
         $.ajax($.extend(postData, {
             dataType: "text",
             success: confirmRender(o, List.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID, dashboardID))
+        }));
+    } else if (obj.metadata.type == "trend_grid") {
+        $.ajax($.extend(postData, {
+            dataType: "text",
+            success: confirmRender(o, TrendGrid.getCallback(id, obj.metadata.properties, obj.metadata.sorting, obj.metadata.columns, fullFilters, drillthroughID, dashboardID))
         }));
     } else if (obj.metadata.type == "crosstab") {
         $.ajax($.extend(postData, {
@@ -1337,7 +1341,7 @@ $(function () {
 
             renderReports(s, dashboardJSON["id"], dashboardJSON["drillthroughID"], false);
         });
-        var showFilters = true;
+        var showFilters = screen.width > 480;
         $('.toggle-filters').click(function (e) {
             if (showFilters) {
                 $(".filters").hide();

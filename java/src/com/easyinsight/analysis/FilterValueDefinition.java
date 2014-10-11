@@ -187,7 +187,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 } else if (valueObject instanceof Date) {
                     value = new DateValue((Date) valueObject);
                 } else {
-                    throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+                    value = new EmptyValue();
                 }
                 valueSet.add(value);
             }

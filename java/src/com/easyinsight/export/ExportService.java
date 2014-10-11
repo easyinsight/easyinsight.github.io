@@ -1470,6 +1470,10 @@ public class ExportService {
         return createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false, null, skipSanitize);
     }
 
+    public static String createValue(ExportMetadata exportMetadata, AnalysisItem headerItem, Value value, boolean skipSanitize, boolean pdf) {
+        return createValue(exportMetadata.dateFormat, headerItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, pdf, null, skipSanitize);
+    }
+
     public static String createValue(int dateFormat, AnalysisItem headerItem, Value value, Calendar cal, String currencySymbol, Locale locale, boolean pdf) {
         return createValue(dateFormat, headerItem, value, cal, currencySymbol, locale, pdf, null);
     }
@@ -2277,7 +2281,7 @@ public class ExportService {
 
     public static String kpiReportToHtmlTableWithActualCSS(WSAnalysisDefinition listDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, boolean sendIfNoData, boolean includeTitle) throws SQLException {
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
-        WSKPIDefinition kpiReport = (WSKPIDefinition) listDefinition;
+        WSTrendGridDefinition kpiReport = (WSTrendGridDefinition) listDefinition;
         TrendDataResults trendDataResults = DataService.getTrendDataResults(kpiReport, insightRequestMetadata, conn);
         if (trendDataResults.getTrendOutcomes().size() == 0 && !sendIfNoData) {
             return null;
@@ -2288,7 +2292,8 @@ public class ExportService {
         if (includeTitle && listDefinition.getName() != null) {
             sb.append("<div style=\"" + headerLabelStyle + "\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
         }
-        sb.append("<table class=\"table table-bordered table-condensed\" style=\"font-size:").append(listDefinition.getFontSize()).append("px\">");
+        sb.append("</style>");
+        sb.append("<table class=\"table table-bordered table-condensed reportTable"+kpiReport.getUrlKey()+"\" style=\"font-size:").append(listDefinition.getFontSize()).append("px\">");
         sb.append("<thead>");
         sb.append("<tr>");
         int i;
@@ -2327,38 +2332,40 @@ public class ExportService {
                     AnalysisItem grouping = kpiReport.getGroupings().get(i);
                     Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
                     sb.append("<td style=\"" + tdStyle + "left\">");
-                    sb.append(value);
                     sb.append("<span class='sortData'>");
                     sb.append(value.toString());
                     sb.append("</span>");
+                    sb.append(value);
                     sb.append("</td>");
                 }
             }
             sb.append("<td style=\"" + tdStyle + "left\">");
-            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
             sb.append("<span class='sortData'>");
-            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
+            sb.append(StringEscapeUtils.escapeHtml(trendOutcome.getMeasure().toUnqualifiedDisplay()));
             sb.append("</span>");
+            sb.append(trendOutcome.getMeasure().toUnqualifiedDisplay());
             sb.append("</td>");
             String nowValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
-            sb.append("<td style=\"" + tdStyle + "right\">").append(nowValue);
+            sb.append("<td style=\"" + tdStyle + "right\">");
             sb.append("<span class='sortData'>");
-            sb.append(trendOutcome.getNow().toDouble());
+            sb.append(trendOutcome.getNow().toSortValue().toHTMLString());
             sb.append("</span>");
+            sb.append(nowValue);
             sb.append("</td>");
             String previousValue = ExportService.createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
-            sb.append("<td style=\"" + tdStyle + "right\">").append(previousValue);
+            sb.append("<td style=\"" + tdStyle + "right\">");
             sb.append("<span class='sortData'>");
-            sb.append(trendOutcome.getHistorical().toDouble());
+            sb.append(trendOutcome.getHistorical().toSortValue().toHTMLString());
             sb.append("</span>");
+            sb.append(previousValue);
             sb.append("</td>");
             sb.append("<td style=\"" + tdStyle + "right\">");
             if (trendOutcome.getHistorical().toDouble() != 0) {
                 double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
-                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
                 sb.append("<span class='sortData'>");
                 sb.append(percentChange);
                 sb.append("</span>");
+                sb.append(createValue(exportMetadata.dateFormat, percentMeasure, new NumericValue(percentChange), exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false));
             }
             sb.append("</td>");
             sb.append("</tr>");

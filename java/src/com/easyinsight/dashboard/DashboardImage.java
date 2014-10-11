@@ -61,7 +61,7 @@ public class DashboardImage extends DashboardElement {
     public JSONObject toJSON(FilterHTMLMetadata metadata, List<FilterDefinition> parentFilters) throws JSONException {
         JSONObject textObject = super.toJSON(metadata, parentFilters);
         textObject.put("type", "image");
-        textObject.put("item", imageDescriptor.getId());
+        textObject.put("item", imageDescriptor.getUrlKey());
         return textObject;
     }
 
@@ -91,7 +91,7 @@ public class DashboardImage extends DashboardElement {
 
     public static DashboardElement loadImage(long elementID, EIConnection conn) throws SQLException {
         DashboardImage dashboardImage;
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_IMAGE.user_image_id, USER_IMAGE.image_name from dashboard_image, user_image " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD_IMAGE.user_image_id, USER_IMAGE.image_name, USER_IMAGE.URL_KEY from dashboard_image, user_image " +
                 "where dashboard_element_id = ? and dashboard_image.user_image_id = user_image.user_image_id");
         queryStmt.setLong(1, elementID);
         ResultSet rs = queryStmt.executeQuery();
@@ -100,10 +100,12 @@ public class DashboardImage extends DashboardElement {
             ImageDescriptor imageDescriptor = new ImageDescriptor();
             imageDescriptor.setId(rs.getLong(1));
             imageDescriptor.setName(rs.getString(2));
+            imageDescriptor.setUrlKey(rs.getString(3));
             dashboardImage.setImageDescriptor(imageDescriptor);
         } else {
             dashboardImage = new DashboardImage();
         }
+        queryStmt.close();
         return dashboardImage;
     }
 }

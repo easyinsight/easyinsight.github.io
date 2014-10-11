@@ -117,17 +117,24 @@
     <div class="container-fluid">
         <div class="row controlsRow">
             <div class="col-md-4 reportBlah">
-                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <a class="reportControl visible-sm visible-md visible-lg" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
             </div>
-            <div class="col-md-8 reportControlToolbar">
+            <div class="col-md-8 col-xs-12 reportControlToolbar">
+                <div class="reportBlah visible-xs pull-left" style="margin-top: 0">
+                    <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Reports</a>
+                </div>
                 <div class="btn-toolbar pull-right">
-                    <div id="configuration-dropdown" class="btn-group reportControlBtnGroup">
+                    <div id="configuration-dropdown" class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg">
 
 
                     </div>
                     <div class="btn-group reportControlBtnGroup">
-                        <a class="reportControl" data-toggle="dropdown" href="#">
+                        <a class="reportControl visible-sm visible-md visible-lg" data-toggle="dropdown" href="#">
                             Export the Dashboard
+                            <span class="caret"></span>
+                        </a>
+                        <a class="reportControl visible-xs" data-toggle="dropdown" href="#">
+                            Export
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
@@ -140,8 +147,12 @@
                         </ul>
                     </div>
                     <div class="btn-group reportControlBtnGroup">
-                        <a class="reportControl dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="reportControl dropdown-toggle visible-sm visible-md visible-lg" data-toggle="dropdown" href="#">
                             Refresh Data
+                            <span class="caret"></span>
+                        </a>
+                        <a class="reportControl dropdown-toggle visible-xs" data-toggle="dropdown" href="#">
+                            Refresh
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
@@ -154,10 +165,11 @@
                         </ul>
                     </div>
                     <div class="btn-group reportControlBtnGroup">
-                        <a class="reportControl toggle-filters">Toggle Filters</a>
+                        <a class="reportControl toggle-filters visible-sm visible-md visible-lg">Toggle Filters</a>
+                        <a class="reportControl toggle-filters visible-xs">Filters</a>
                     </div>
                     <% if (designer && !iPad && !phone) { %>
-                    <div class="btn-group reportControlBtnGroup" style="margin-right: 5px">
+                    <div class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg" style="margin-right: 5px">
                         <a href="<%= RedirectUtil.getURL(request, "/app/html/dashboard/" + dashboard.getUrlKey()) + "/edit" %>"
                            class="reportControl">Edit Dashboard</a>
                     </div>
@@ -181,7 +193,7 @@
 </div>
 <% } %>--%>
 
-<div class="container">
+<div class="container-fluid">
 <%--    <%= uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) %>--%>
     <jsp:include page="refreshingDataSource.jsp"/>
     <jsp:include page="embedDashboardWindow.jsp"/>
