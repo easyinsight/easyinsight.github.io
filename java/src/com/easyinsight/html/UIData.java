@@ -57,9 +57,9 @@ public class UIData {
                 sb.append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
             }
             if (properties != null && properties.getHeader() != null) {
-                sb.append("                        <img src=\"/app/reportHeader/").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
+                sb.append("                        <img src=\"/app/reportHeader/").append(properties.getHeader().getUrlKey()).append("\" alt=\"Logo\"/>\n");
             } else if (headerImageDescriptor != null) {
-                sb.append("                        <img src=\"/app/reportHeader/").append(headerImageDescriptor.getId()).append("\" alt=\"Logo\"/>\n");
+                sb.append("                        <img src=\"/app/reportHeader/").append(headerImageDescriptor.getUrlKey()).append("\" alt=\"Logo\"/>\n");
             }
             sb.append("                    </div>\n" +
                     "                </div>\n");
@@ -71,7 +71,7 @@ public class UIData {
             sb.append("</div>\n");
         } else if (properties != null && properties.getHeader() != null) {
             sb.append("            <div style=\"").append(headerStyle).append("\">\n").append("                <div style=\"padding:10px;float:left\">\n").append("                    <div style=\"background-color: #FFFFFF;padding: 5px\">\n");
-            sb.append("                        <img src=\"/app/reportHeader/").append(properties.getHeader().getId()).append("\" alt=\"Logo\"/>\n");
+            sb.append("                        <img src=\"/app/reportHeader/").append(properties.getHeader().getUrlKey()).append("\" alt=\"Logo\"/>\n");
             sb.append("                    </div>\n" +
                     "                </div>\n");
             if(!properties.isImageFullHeader()) {
