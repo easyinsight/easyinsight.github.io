@@ -612,6 +612,7 @@ Chart = {
             d3.selectAll(".nvd3 .nv-multibar .nv-groups rect").style("fill-opacity", 1);
             d3.selectAll(".nvd3 .nv-multibarHorizontal .nv-groups rect").style("fill-opacity", 1);
             d3.selectAll(".nvd3 .nv-discretebar .nv-groups rect").style("fill-opacity", 1);
+            d3.selectAll(".nvd3 .nv-axis line").style("stroke", "#FFFFFF");
         }
     },
 

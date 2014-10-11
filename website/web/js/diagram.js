@@ -22,14 +22,15 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fu
         }
 
         var val = document.createElement("span");
-        var img;
+        /*var img;
         if (node["image"] != null) {
             img = document.createElement("img");
             img.src = "/app/assets/icons/32x32/" + node["image"];
         } else {
             img = document.createElement("div");
             $(img).addClass("spacer");
-        }
+        }*/
+        val.style.fontSize = "16px";
         $(val).html(node["value"]);
 
         var label = document.createElement("span");
@@ -40,7 +41,7 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fu
 
         $(n).append(e);
         $(n).append(label);
-        $(e).append(img);
+        //$(e).append(img);
 
         if (node["type"] == "trend") {
             var trendBox = document.createElement("div");
@@ -56,7 +57,9 @@ window.drawDiagram = function (j, selector, reportID, embedded, afterRefresh, fu
 
             $(e).append(trendBox);
         } else {
-            $(e).append(val);
+            var trendBox = document.createElement("div");
+            $(trendBox).append(val);
+            $(e).append(trendBox);
         }
 
         return n;
