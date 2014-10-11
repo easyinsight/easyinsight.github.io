@@ -131,6 +131,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private List<AnalysisItem> fieldsForDrillthrough;
     private int maxHeaderWidth = 600;
     private int cacheMinutes;
+    private boolean checkPipelineAfter;
     private boolean manualButRunFirst;
     private String customFontFamily;
     private boolean useCustomFontFamily;
@@ -264,6 +265,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setCachePartitionFilter(String cachePartitionFilter) {
         this.cachePartitionFilter = cachePartitionFilter;
+    }
+
+    public boolean isCheckPipelineAfter() {
+        return checkPipelineAfter;
+    }
+
+    public void setCheckPipelineAfter(boolean checkPipelineAfter) {
+        this.checkPipelineAfter = checkPipelineAfter;
     }
 
     public String getExportString() {
@@ -1137,6 +1146,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         enableLocalStorage = findBooleanProperty(properties, "enableLocalStorage", false);
         filterDateLevels = findBooleanProperty(properties, "filterDateLevels", false);
         dataDiscoveryEnabled = findBooleanProperty(properties, "dataDiscoveryEnabled", false);
+        checkPipelineAfter = findBooleanProperty(properties, "checkPipelineAfter", false);
         colorScheme = findStringProperty(properties, "reportColorScheme", "None");
         exportString = findStringProperty(properties, "exportString", "");
         baseDate = findStringProperty(properties, "baseDate", "");
@@ -1160,6 +1170,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportBooleanProperty("dayAggregation", dayAggregation));
         properties.add(new ReportBooleanProperty("lookupTableOptimization", lookupTableOptimization));
         properties.add(new ReportBooleanProperty("noAggregation", noAggregation));
+        properties.add(new ReportBooleanProperty("checkPipelineAfter", checkPipelineAfter));
         properties.add(new ReportStringProperty("exportString", exportString));
         properties.add(new ReportStringProperty("collapseOn", collapseOn));
         properties.add(new ReportStringProperty("baseDate", baseDate));

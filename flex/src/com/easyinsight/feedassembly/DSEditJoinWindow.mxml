@@ -2,6 +2,7 @@
 <util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         creationComplete="onCreation()">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.JoinChangeEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
@@ -85,6 +86,7 @@
             _existingConnection.targetCardinality = targetCardinality.selectedItem == "One" ? CompositeFeedConnection.ONE : CompositeFeedConnection.MANY;
             _existingConnection.forceOuterJoin = ensureOuterJoinCheckbox.selected ? 1 : 0;
             dispatchEvent(new JoinEditEvent(_existingConnection));
+            dispatchEvent(new JoinChangeEvent());
             PopUpManager.removePopUp(this);
         }
 
