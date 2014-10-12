@@ -67,6 +67,8 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
                     }
                     if ("CustomField::Text".equals(type)) {
                         analysisItem = new AnalysisDimension(key, name);
+                    } else if ("CustomField::Boolean".equals(type)) {
+                        analysisItem = new AnalysisDimension(key, name);
                     } else if ("CustomField::Number".equals(type)) {
                         analysisItem = new AnalysisMeasure(key, name, AggregationTypes.SUM);
                     } else if ("Yes or No".equals(type)) {
@@ -75,9 +77,9 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
                         analysisItem = new AnalysisDimension(key, name);
                     } else if ("CustomField::Email".equals(type)) {
                         analysisItem = new AnalysisDimension(key, name);
-                    } else if ("CustomField::URL".equals(type)) {
+                    } else if ("CustomField::Url".equals(type)) {
                         analysisItem = new AnalysisDimension(key, name);
-                    } else if ("CustoField::Date".equals(type)) {
+                    } else if ("CustomField::Date".equals(type)) {
                         analysisItem = new AnalysisDateDimension(key, name, AnalysisDateDimension.DAY_LEVEL);
                     } else if ("CustomField::RecurringDate".equals(type)) {
                         analysisItem = new AnalysisDateDimension(key, name, AnalysisDateDimension.DAY_LEVEL);
@@ -85,8 +87,8 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
                         analysisItem = new AnalysisMeasure(key, name, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY);
                     } else if ("CustomField::AssignedTo".equals(type)) {
                         analysisItem = new AnalysisDimension(key, name);
-                    } else if ("MultipleChoice".equals(type)) {
-
+                    } else if ("CustomField::MultipleChoice".equals(type)) {
+                        analysisItem = new AnalysisDimension(key, name);
                     }
                     if (analysisItem != null) {
                         fieldList.add(analysisItem);

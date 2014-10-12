@@ -123,6 +123,27 @@ public class BatchbookCache extends Batchbook2BaseSource {
                             value = customFieldValueMap.get("decimal_value");
                         }
                         if (value == null) {
+                            value = customFieldValueMap.get("boolean_value");
+                        }
+                        if (value == null) {
+                            value = customFieldValueMap.get("date_value");
+                        }
+                        if (value == null) {
+                            value = customFieldValueMap.get("datetime_value");
+                        }
+                        if (value == null) {
+                            value = customFieldValueMap.get("integer_value");
+                        }
+                        if (value == null) {
+                            Object o = customFieldValueMap.get("serialized_value");
+                            if (o != null && o instanceof List) {
+                                List list = (List) o;
+                                if (list.size() > 0) {
+                                    value = list.get(0);
+                                }
+                            }
+                        }
+                        if (value == null) {
                             System.out.println("No value found!");
                         } else {
                             customFieldValue.addValue(customFieldID, value.toString());
