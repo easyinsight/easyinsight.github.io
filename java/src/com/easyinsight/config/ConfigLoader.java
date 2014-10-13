@@ -50,8 +50,18 @@ public class ConfigLoader {
 
     private String memcachedUrl;
 
+    private String redshiftCSVPath;
+
     private String baseSeleniumQueue = "EISelenium";
     private String baseSeleniumResponseQueue = "EISeleniumResponse";
+
+    public String getRedshiftCSVPath() {
+        return redshiftCSVPath;
+    }
+
+    public void setRedshiftCSVPath(String redshiftCSVPath) {
+        this.redshiftCSVPath = redshiftCSVPath;
+    }
 
     public String getBaseSeleniumQueue() {
         return baseSeleniumQueue;
@@ -273,6 +283,7 @@ public class ConfigLoader {
             billingKey = (String) properties.get("billing.key");
             redirectLocation = (String) properties.get("billing.redirectLocation");
             outputLogPath = (String) properties.get("report.log.path");
+            redshiftCSVPath = (String) properties.get("redshift.csv.path");
 
             googleUserName = (String) properties.get("google.username");
             googlePassword = (String) properties.get("google.password");
