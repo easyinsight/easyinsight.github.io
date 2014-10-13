@@ -246,7 +246,7 @@ public class DataSet implements Serializable, Cloneable {
                 AnalysisItem column = paredDownColumns.get(k);
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
-                    Value value = row.getValueNullOnEmpty(measure.createAggregateKey());
+                    Value value = row.getValue(measure.createAggregateKey());
                     if (value != null) {
                         AnalysisItem keyDim = keyMapping.get(measure);
                         Value keyValue = null;
@@ -257,7 +257,7 @@ public class DataSet implements Serializable, Cloneable {
                     }
                 } else {
                     AnalysisDimension analysisDimension = (AnalysisDimension) column;
-                    Value transformedValue = row.getValueNullOnEmpty(analysisDimension.createAggregateKey());
+                    Value transformedValue = row.getValue(analysisDimension.createAggregateKey());
                     if (transformedValue != null) {
                         listTransform.groupData(key, (AnalysisDimension) column, transformedValue);
                     }
