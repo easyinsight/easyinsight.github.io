@@ -449,6 +449,7 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHDESK_SURVEY, FreshdeskSurveySource.class);
         registerType(FeedType.SAMPLE_TASKS, SampleTaskSource.class);
         registerType(FeedType.INFUSIONSOFT_REPORT, InfusionsoftReportSource.class);
+        registerType(FeedType.SAMPLE_LEADS, SampleLeadSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
