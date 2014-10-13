@@ -376,7 +376,7 @@ public class SampleLeadSource extends ServerDataSourceDefinition {
             "-10.9141,1,Sergipe,-37.6693,Brazil\n" +
             "0.0000,2,(not set),0.0000,Dominican Republic\n" +
             "46.8033,3,Quebec,-71.2428,Canada\n" +
-            "0.0000,2,(not set),0.0000,Curaçao\n" +
+            "0.0000,2,(not set),0.0000,Curacao\n" +
             "39.0639,2,Colorado,-108.5506,United States\n" +
             "34.4208,36,California,-119.6982,United States\n" +
             "0.0000,0,North Carolina,0.0000,United States\n" +
@@ -1274,7 +1274,7 @@ public class SampleLeadSource extends ServerDataSourceDefinition {
             "28.0781,1,Florida,-82.7637,United States\n" +
             "33.1507,2,Texas,-96.8236,United States\n" +
             "54.6872,3,(not set),25.2797,Lithuania\n" +
-            "60.0971,1,(not set),19.9348,Åland Islands\n" +
+            "60.0971,1,(not set),19.9348,Aland Islands\n" +
             "57.7089,7,Vastra Gotaland County,11.9746,Sweden\n" +
             "51.6565,2,England,-0.3903,United Kingdom\n" +
             "33.5179,0,Georgia,-84.6697,United States\n" +
