@@ -49,20 +49,22 @@ public class TypeTransformComponent implements IComponent {
         }
         for (IRow row : dataSet.getRows()) {
             for (AnalysisItem analysisItem : targets) {
-                Value value = row.getValue(analysisItem.createAggregateKey());
-                if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && value.type() == Value.EMPTY) {
-                    value = row.getValueNoAdd(analysisItem.createAggregateKey(false));
-                }
-                boolean shift = false;
-                if (timeShift) {
-                    if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                        shift = ((AnalysisDateDimension) analysisItem).isTimeshift(pipelineData.getInsightRequestMetadata());
+                Value value = row.getValueNullOnEmpty(analysisItem.createAggregateKey());
+                if (value != null) {
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && value.type() == Value.EMPTY) {
+                        value = row.getValueNoAdd(analysisItem.createAggregateKey(false));
                     }
-                }
+                    boolean shift = false;
+                    if (timeShift) {
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            shift = ((AnalysisDateDimension) analysisItem).isTimeshift(pipelineData.getInsightRequestMetadata());
+                        }
+                    }
 
-                Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, map.get(analysisItem));
-                if (transformedValue != value) {
-                    row.addValue(analysisItem.createAggregateKey(), transformedValue);
+                    Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, map.get(analysisItem));
+                    if (transformedValue != value) {
+                        row.addValue(analysisItem.createAggregateKey(), transformedValue);
+                    }
                 }
             }
         }
