@@ -1738,7 +1738,7 @@ public class AnalysisService {
             }*/
 
 
-            if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
+            if (drillThrough.getReportID() != null && drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                 if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                     System.out.println("at least creating hierarchy drillthrough...");
                     AnalysisHierarchyItem hierarchyItem = (AnalysisHierarchyItem) analysisItem;
@@ -1758,7 +1758,7 @@ public class AnalysisService {
                     filters.add(analysisItemFilterDefinition);
                 }
             }
-            if (drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
+            if (drillThrough.getReportID() != null && drillThrough.getReportID() == report.getAnalysisID() && report.isDataDiscoveryEnabled()) {
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
                     AnalysisDateDimension copy;
