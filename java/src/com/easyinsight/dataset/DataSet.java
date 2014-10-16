@@ -205,7 +205,7 @@ public class DataSet implements Serializable, Cloneable {
                 }
             }
         }
-        List<AnalysisItem> paredDownColumns = new ArrayList<>(new HashSet<>(columns));
+        List<AnalysisItem> paredDownColumns = new ArrayList<>(new LinkedHashSet<>(columns));
         List<String> keys = new ArrayList<String>(rows.size());
         int ungroupedDimCount = ungroupedDimensions.size();
         int ourDimCount = ourDimensions.size();
