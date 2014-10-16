@@ -93,6 +93,7 @@ public class MailchimpCampaignResultsSource extends ServerDataSourceDefinition {
                 in.readLine();
 
                 String line;
+                DataSet dataSet = new DataSet();
 
                 while ((line = in.readLine()) != null) {
                     ByteArrayInputStream bais = new ByteArrayInputStream(line.getBytes());
@@ -106,17 +107,18 @@ public class MailchimpCampaignResultsSource extends ServerDataSourceDefinition {
                             String action = event.get("action").toString();
                             String timestamp = event.get("timestamp").toString();
                             Date date = sdf.parse(timestamp);
-                            DataSet dataSet = new DataSet();
+
                             IRow row = dataSet.createRow();
                             row.addValue(keys.get(EMAIL), email);
                             row.addValue(keys.get(ACTION), action);
                             row.addValue(keys.get(TIMESTAMP), date);
                             row.addValue(keys.get(CAMPAIGN_ID), id);
                             row.addValue(keys.get(COUNT), 1);
-                            IDataStorage.insertData(dataSet);
+
                         }
                     }
                 }
+                IDataStorage.insertData(dataSet);
             }
 
         } catch (Exception e) {
