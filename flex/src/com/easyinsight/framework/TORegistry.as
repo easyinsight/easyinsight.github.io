@@ -91,6 +91,7 @@ import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.KashooCompositeDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.LinkedinCompositeDataSource;
+import com.easyinsight.datasources.MailChimpCompositeSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
 import com.easyinsight.datasources.NetsuiteQueryConnection;
 import com.easyinsight.datasources.OracleDatabaseConnection;
@@ -324,6 +325,7 @@ public class TORegistry {
         var lcomp:LinkedinCompositeDataSource;
         var oracleSales:OracleSalesCloudCompositeSource;
         var happyFox:HappyFoxDataSource;
+        var mc:MailChimpCompositeSource;
     }
 }
 }

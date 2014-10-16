@@ -17,7 +17,7 @@ public class ListTransform {
     private Map<String, Aggregation[]> keyMap = new HashMap<String, Aggregation[]>();
     private Map<String, Value[]> dimensionMap = new HashMap<String, Value[]>();
 
-    private Set<String> compositeKeys;
+    private List<String> compositeKeys;
 
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
 
@@ -44,8 +44,8 @@ public class ListTransform {
         list.add(map);
     }
 
-    public void addCompositeKeys(Collection<String> keys) {
-        compositeKeys = new HashSet<String>(keys);
+    public void addCompositeKeys(List<String> keys) {
+        compositeKeys = new ArrayList<>(new HashSet<>(keys));
     }
 
     public void addColumns(Collection<AnalysisItem> paredDownColumns) {
@@ -86,9 +86,9 @@ public class ListTransform {
                 aggregation.keyDimensions.add(keyValue);
             }
             aggregation.addValue(value);
-            if (value.getDrillThroughs() != null && value.getDrillThroughs().size() > 0) {
+            /*if (value.getDrillThroughs() != null && value.getDrillThroughs().size() > 0) {
                 aggregation.addDrillThroughs(value.getDrillThroughs());
-            }
+            }*/
         }
     }
 
@@ -107,8 +107,9 @@ public class ListTransform {
 
     public DataSet aggregate(List<AnalysisItem> derivedItems) {
         DataSet dataSet = new DataSet();
+        EmptyValue emptyValue = new EmptyValue();
         for (String compositeKey : compositeKeys) {
-            IRow row = dataSet.createRow();
+            IRow row = dataSet.createRow(dimensionIndexSize + measureIndexSize);
             Value[] dimensions = dimensionMap.get(compositeKey);
             Value[] measures = keyMap.get(compositeKey);
             for (Map.Entry<AnalysisItem, Integer> entry : dimensionIndexMap.entrySet()) {
@@ -125,48 +126,27 @@ public class ListTransform {
                     Value obj = measures[entry.getValue()];
 
                     if (obj == null) {
-                        obj = new EmptyValue();
+                        obj = emptyValue;
                     } else if (obj instanceof Aggregation) {
                         Aggregation aggregation = (Aggregation) obj;
                         obj = aggregation.getValue();
-                        if (aggregation.getDrills() != null) {
-                            List<Map<String, List<Value>>> drills = aggregation.getDrills();
-                            Map<String, List<Value>> target;
-                            target = new HashMap<String, List<Value>>();
-                            for (Map<String, List<Value>> d : drills) {
-                                for (Map.Entry<String, List<Value>> drillEntry : d.entrySet()) {
-                                    List<Value> values = target.get(drillEntry.getKey());
-                                    if (values == null) {
-                                        values = new ArrayList<Value>();
-                                        target.put(drillEntry.getKey(), values);
-                                    }
-                                    values.addAll(drillEntry.getValue());
-                                }
-                            }
-                            obj.setDrillThroughs(target);
-                        }
                     }
                     row.addValue(entry.getKey().createAggregateKey(), obj);
                 }
             }
-            List<Map<String, Set<Value>>> list = passThroughMap.get(compositeKey);
-            if (list != null) {
-                Map<String, Set<Value>> end = new HashMap<String, Set<Value>>();
-                for (Map<String, Set<Value>> map : list) {
-                    for (Map.Entry<String, Set<Value>> entry : map.entrySet()) {
-                        Set<Value> set = end.get(entry.getKey());
-                        if (set == null) {
-                            set = new HashSet<Value>();
-                            end.put(entry.getKey(), set);
-                        }
-                        set.addAll(entry.getValue());
-                    }
+        }
+
+        boolean hasHierarchy = false;
+        if (derivedItems != null) {
+            for (AnalysisItem analysisItem : derivedItems) {
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    hasHierarchy = true;
+                    break;
                 }
-                row.setPassthroughRow(end);
             }
         }
 
-        if (derivedItems != null) {
+        if (hasHierarchy) {
             for (IRow row : dataSet.getRows()) {
                 for (AnalysisItem analysisItem : derivedItems) {
                     if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {

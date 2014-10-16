@@ -68,7 +68,8 @@ public class CleanupComponent implements IComponent {
                 allNeededAnalysisItems.addAll(items);
             }
         }
-        if (!pipelineName.equals(Pipeline.LAST)) {
+        boolean checkAfter = pipelineData.getReport() != null && pipelineData.getReport().isCheckPipelineAfter() && pipelineName.equals(Pipeline.AFTER);
+        if (!pipelineName.equals(Pipeline.LAST) && !checkAfter) {
             if (pipelineData.getUniqueItems() != null) {
                 allNeededAnalysisItems.addAll(pipelineData.getUniqueItems().values());
             }

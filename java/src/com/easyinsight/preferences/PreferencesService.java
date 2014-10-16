@@ -7,6 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.Session;
 
 import java.io.BufferedInputStream;
@@ -45,7 +46,7 @@ public class PreferencesService {
     public ImageDescriptor createImage(EIConnection conn, String imageName, String contentType, byte[] bytes, boolean publicImage) throws SQLException {
         long userID = SecurityUtil.getUserID();
         conn.setAutoCommit(false);
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, content_type, public_visibility) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, content_type, public_visibility, url_key) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         BufferedInputStream bis = new BufferedInputStream(bais, 1024);
         insertStmt.setBinaryStream(1, bis, bytes.length);
@@ -53,6 +54,7 @@ public class PreferencesService {
         insertStmt.setLong(3, userID);
         insertStmt.setString(4, contentType);
         insertStmt.setBoolean(5, publicImage);
+        insertStmt.setString(6, RandomTextGenerator.generateText(25));
         insertStmt.execute();
         long id = Database.instance().getAutoGenKey(insertStmt);
         ImageDescriptor image = new ImageDescriptor();
@@ -68,13 +70,14 @@ public class PreferencesService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, public_visibility) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_IMAGE (image_bytes, image_name, user_id, public_visibility, url_key) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
             insertStmt.setBinaryStream(1, bis, bytes.length);
             insertStmt.setString(2, imageName);
             insertStmt.setLong(3, userID);
             insertStmt.setBoolean(4, publicImage);
+            insertStmt.setString(5, RandomTextGenerator.generateText(25));
             insertStmt.execute();
             long id = Database.instance().getAutoGenKey(insertStmt);
             conn.commit();
@@ -99,6 +102,32 @@ public class PreferencesService {
         id.data = getImage(imageID);
         id.descriptor = getImageDescriptor(imageID, conn);
         return id;
+    }
+
+    public ImageData getImageDataByURLKey(String urlKey, EIConnection conn) throws SQLException {
+        ImageData id = new ImageData();
+        id.data = getImageByURLKey(urlKey, conn);
+        id.descriptor = getImageDescriptor(urlKey, conn);
+        return id;
+    }
+
+    private byte[] getImageByURLKey(String urlKey, EIConnection conn) throws SQLException {
+        byte[] bytes;
+
+        PreparedStatement queryStmt;
+
+
+        queryStmt = conn.prepareStatement("SELECT IMAGE_BYTES FROM USER_IMAGE WHERE URL_KEY = ?");
+
+        queryStmt.setString(1, urlKey);
+
+        ResultSet rs = queryStmt.executeQuery();
+        if (!rs.next()) {
+            return null;
+        }
+        bytes = rs.getBytes(1);
+        queryStmt.close();
+        return bytes;
     }
 
     public byte[] getImage(long imageID) {
@@ -746,8 +775,25 @@ public class PreferencesService {
     public ImageDescriptor getImageDescriptor(long l, EIConnection conn) throws SQLException {
         long accountID = SecurityUtil.getAccountID();
         ImageDescriptor image = new ImageDescriptor();
-        PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id, USER_IMAGE.content_type FROM USER_IMAGE, USER WHERE USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID");
+        PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id, USER_IMAGE.content_type FROM USER_IMAGE, USER WHERE USER.ACCOUNT_ID = ? AND USER_IMAGE.USER_ID = USER.USER_ID AND USER_IMAGE.USER_IMAGE_ID = ?");
         stmt.setLong(1, accountID);
+        stmt.setLong(2, l);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            image.setName(rs.getString(1));
+            image.setId(rs.getLong(2));
+            return image;
+        } else {
+            return null;
+        }
+
+    }
+
+    private ImageDescriptor getImageDescriptor(String urlKey, EIConnection conn) throws SQLException {
+
+        ImageDescriptor image = new ImageDescriptor();
+        PreparedStatement stmt = conn.prepareStatement("SELECT USER_IMAGE.image_name, USER_IMAGE.user_image_id, USER_IMAGE.content_type FROM USER_IMAGE WHERE USER_IMAGE.URL_KEY = ?");
+        stmt.setString(1, urlKey);
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) {
             image.setName(rs.getString(1));

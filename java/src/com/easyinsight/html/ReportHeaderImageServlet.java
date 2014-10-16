@@ -28,9 +28,16 @@ public class ReportHeaderImageServlet extends HttpServlet {
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
             Database.useConnection(true, (conn) -> {
-                Long imageID = Long.parseLong(req.getParameter("imageID"));
+                PreferencesService.ImageData id;
                 Date d = new Date();
-                PreferencesService.ImageData id = new PreferencesService().getImageData(imageID, conn);
+                try {
+                    Long imageID = Long.parseLong(req.getParameter("imageID"));
+                    id = new PreferencesService().getImageData(imageID, conn);
+                } catch (NumberFormatException e) {
+                    String imageID = req.getParameter("imageID");
+                    id = new PreferencesService().getImageDataByURLKey(imageID, conn);
+                }
+
                 byte[] bytes = id.data;
                 System.out.println("Benchmark: " + (new Date().getTime() - d.getTime()));
                 if (bytes != null) {

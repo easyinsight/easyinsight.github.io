@@ -310,7 +310,7 @@ public abstract class DashboardElement implements Cloneable, Serializable {
     public void loadElement(long elementID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT LABEL, FILTER_BORDER_STYLE, FILTER_BORDER_COLOR, filter_background_color, filter_background_alpha," +
                 "padding_left, padding_right, padding_top, padding_bottom, header_image_id, user_image.image_name, header_background_color, header_background_alpha," +
-                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off, html_width, url_key from dashboard_element " +
+                "preferred_width, preferred_height, dashboard_element_id, force_scrolling_off, html_width, dashboard_element.url_key from dashboard_element " +
                 "left join user_image on dashboard_element.header_image_id = user_image.user_image_id where " +
                 "dashboard_element_id = ?");
         loadStmt.setLong(1, elementID);

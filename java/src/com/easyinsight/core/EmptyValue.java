@@ -40,6 +40,11 @@ public class EmptyValue extends Value {
     }
 
     @Override
+    public String createPerformantString() {
+        return "";
+    }
+
+    @Override
     public int hashCode() {
         return blah;
     }

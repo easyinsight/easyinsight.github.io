@@ -30,6 +30,7 @@ import com.easyinsight.tag.Tag;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.AccountCreditCardBillingInfo;
 import com.easyinsight.users.User;
+import com.easyinsight.util.RandomTextGenerator;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -1584,6 +1585,28 @@ public class AdminService {
             conn.rollback();
         } finally {
             conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void generateURLKeys() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT USER_IMAGE_ID FROM USER_IMAGE WHERE URL_KEY IS NULL");
+            PreparedStatement update = conn.prepareStatement("UPDATE USER_IMAGE SET URL_KEY = ? WHERE USER_IMAGE_ID = ?");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                update.setString(1, RandomTextGenerator.generateText(25));
+                update.setLong(2, rs.getLong(1));
+                update.executeUpdate();
+            }
+            ps.close();
+            update.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
             Database.closeConnection(conn);
         }
     }

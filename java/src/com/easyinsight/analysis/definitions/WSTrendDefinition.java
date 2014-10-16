@@ -208,7 +208,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                                        ExportMetadata exportMetadata) throws SQLException, DocumentException {
 
         TrendDataResults trendDataResults = DataService.getTrendDataResults(this, insightRequestMetadata, conn);
-        PdfPTable table = new PdfPTable(getMeasures().size());
+        PdfPTable table = new PdfPTable(trendDataResults.getTrendOutcomes().size());
         for (TrendOutcome outcome : trendDataResults.getTrendOutcomes()) {
             AnalysisMeasure analysisMeasure = outcome.getMeasure();
             PdfPTable cellTable = new PdfPTable(1);
@@ -234,7 +234,7 @@ public class WSTrendDefinition extends WSKPIDefinition {
                 }
             }
             Font headerFont = new Font(Font.FontFamily.HELVETICA, 24, Font.NORMAL, color);
-            PdfPCell valueCell = new PdfPCell(new Phrase(ExportService.createValue(exportMetadata, analysisMeasure, outcome.getNow(), false), headerFont));
+            PdfPCell valueCell = new PdfPCell(new Phrase(ExportService.createValue(exportMetadata, analysisMeasure, outcome.getNow(), false, true), headerFont));
             valueCell.setBorder(0);
             valueCell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
             if (outcome.getHistorical() != null && outcome.getHistorical().type() != Value.EMPTY) {

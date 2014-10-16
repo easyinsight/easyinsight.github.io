@@ -38,6 +38,10 @@ import com.easyinsight.datafeeds.kashoo.KashooRecordSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
+import com.easyinsight.datafeeds.mailchimp.MailchimpCampaignResultsSource;
+import com.easyinsight.datafeeds.mailchimp.MailchimpCampaignSource;
+import com.easyinsight.datafeeds.mailchimp.MailchimpCompositeSource;
+import com.easyinsight.datafeeds.mailchimp.MailchimpListResultSource;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection;
 import com.easyinsight.datafeeds.oracle.*;
@@ -449,6 +453,11 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.FRESHDESK_SURVEY, FreshdeskSurveySource.class);
         registerType(FeedType.SAMPLE_TASKS, SampleTaskSource.class);
         registerType(FeedType.INFUSIONSOFT_REPORT, InfusionsoftReportSource.class);
+        registerType(FeedType.SAMPLE_LEADS, SampleLeadSource.class);
+        registerType(FeedType.MAILCHIMP_COMPOSITE, MailchimpCompositeSource.class);
+        registerType(FeedType.MAILCHIMP_LIST, MailchimpListResultSource.class);
+        registerType(FeedType.MAILCHIMP_CAMPAIGN_RESULTS, MailchimpCampaignResultsSource.class);
+        registerType(FeedType.MAILCHIMP_CAMPAIGN, MailchimpCampaignSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

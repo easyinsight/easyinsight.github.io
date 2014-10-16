@@ -56,7 +56,7 @@ public class DataSetKeys implements Cloneable, Serializable {
         return position;
     }
 
-    public Collection<Key> getKeys() {
+    public List<Key> getKeys() {
         return keys;
     }
 }

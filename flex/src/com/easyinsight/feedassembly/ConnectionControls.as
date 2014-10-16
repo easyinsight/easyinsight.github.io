@@ -7,8 +7,11 @@
  */
 package com.easyinsight.feedassembly {
 
+import com.easyinsight.analysis.JoinChangeEvent;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
+
+import flash.events.Event;
 
 import flash.events.MouseEvent;
 
@@ -65,8 +68,13 @@ public class ConnectionControls extends HBox {
         var window:DSEditJoinWindow = new DSEditJoinWindow();
         window.metadataFields = _fields;
         window.existingConnection = connection;
+        window.addEventListener(JoinChangeEvent.JOIN_CHANGE, onChange, false, 0, true);
         PopUpManager.addPopUp(window,  this, true);
         PopUpUtil.centerPopUp(window);
+    }
+
+    private function onChange(event:Event):void {
+        dispatchEvent(event);
     }
 
     private var _fields:ArrayCollection;
@@ -76,14 +84,17 @@ public class ConnectionControls extends HBox {
     }
 
     private function toTop(event:MouseEvent):void {
+        dispatchEvent(new JoinChangeEvent());
         dispatchEvent(new ConnectionDeleteEvent(ConnectionDeleteEvent.CONNECTION_TO_TOP, connection));
     }
 
     private function toBottom(event:MouseEvent):void {
+        dispatchEvent(new JoinChangeEvent());
         dispatchEvent(new ConnectionDeleteEvent(ConnectionDeleteEvent.CONNECTION_TO_BOTTOM, connection));
     }
 
     private function onDelete(event:MouseEvent):void {
+        dispatchEvent(new JoinChangeEvent());
         dispatchEvent(new ConnectionDeleteEvent(ConnectionDeleteEvent.CONNECTION_DELETE, connection));
     }
 

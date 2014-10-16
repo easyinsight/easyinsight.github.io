@@ -70,6 +70,7 @@ import mx.collections.ArrayCollection;
 		public var publiclyVisible:Boolean;
 		public var marketplaceVisible:Boolean;
 		public var filterDateLevels:Boolean;
+		public var checkPipelineAfter:Boolean;
         public var reportStateID:int;
         public var authorName:String;
         public var description:String;
@@ -113,6 +114,7 @@ import mx.collections.ArrayCollection;
     public var exportString:String;
     public var dayAggregation:Boolean;
     public var htmlInFlash:Boolean;
+    public var includeHeaderInHTML:Boolean;
 
     public var fieldEvents:Object;
     public var filterEvents:Object;

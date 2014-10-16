@@ -8,9 +8,9 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
-
-
-
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
                         var s1 = data["values"];
                         var maxLabelSize = d3.max(s1, function(d) {
                             return d3.max(d.values, function(e) { return e.x.length } );
@@ -94,6 +94,10 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
                         var height = Chart.chartHeightWithIFrame(target, styleProps, iframedInUI);
+
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var s1 = data["values"];
 
@@ -214,7 +218,6 @@ Chart = {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
                     generate: function() {
-
                         var s1 = data["values"][0];
 
                         var title = s1.title;
@@ -251,7 +254,9 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
-
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
                         var s1 = data["values"];
 
                         var colors = [];
@@ -344,6 +349,9 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
                         var chart;
 
                         var s1 = data["values"];
@@ -486,12 +494,12 @@ Chart = {
                         var rWidth = $("#d3Div" + target).width();
                         var maxLeft = 150;
                         var maxChars = 15;
-                        if (rWidth < 300) {
-                            maxLeft = 70;
-                            maxChars = maxLeft / 16;
+                        if (rWidth < 480) {
+                            maxLeft = 100;
+                            maxChars = maxLeft / 10;
                         }
 
-                        var leftNeeded = maxLen * 16;
+                        var leftNeeded = maxLen * 10;
                         if (leftNeeded > maxLeft) {
                             leftNeeded = maxLeft;
                         } else if (leftNeeded < 50) {
@@ -499,6 +507,12 @@ Chart = {
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
+
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
+
+
                         if (data["variableHeight"]) {
                             var dLen = s1[0].values.length;
                             height = dLen * 25 + 60;
@@ -517,7 +531,7 @@ Chart = {
                             .showControls(false)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             //.margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
-                            .margin({top: 10, right: 0, bottom: 45, left: leftNeeded});
+                            .margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
                         var floatingY = data["floatingY"];
                         if (floatingY) {
                             var vals = s1[0].values;
@@ -612,6 +626,7 @@ Chart = {
             d3.selectAll(".nvd3 .nv-multibar .nv-groups rect").style("fill-opacity", 1);
             d3.selectAll(".nvd3 .nv-multibarHorizontal .nv-groups rect").style("fill-opacity", 1);
             d3.selectAll(".nvd3 .nv-discretebar .nv-groups rect").style("fill-opacity", 1);
+            d3.selectAll(".nvd3 .nv-axis line").style("stroke", "#FFFFFF");
         }
     },
 
@@ -643,7 +658,6 @@ Chart = {
 
     chartHeight:function (target, styleProps) {
         var height;
-        //alert("target height =  " + $('#'+target+"").height());
         var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
         if (customHeight > -1) {
 
@@ -683,6 +697,9 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var chart = nv.models.scatterChart()
                             .height(height)
@@ -893,6 +910,9 @@ Chart = {
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var chart = nv.models.lineChart()
                             //.width(width)
@@ -972,6 +992,9 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var s1 = data["values"];
 

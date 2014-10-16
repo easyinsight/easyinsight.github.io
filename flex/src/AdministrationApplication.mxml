@@ -29,6 +29,7 @@
                         <mx:HBox>
                             <mx:Button label="Flush Cache" click="flushCache()"/>
                             <mx:Button label="Output Stack on Database" click="outputStackOnDatabase()"/>
+                            <mx:Button label="Image URL Keys" click="generateURLKeys()"/>
                         </mx:HBox>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Connections">
@@ -91,7 +92,7 @@
         }
 
         private function emailTest():void {
-            ProgressAlert.alert(this, "Forcing trials to expire...", null, adminService.emails);
+            ProgressAlert.alert(this, "Sending emails...", null, adminService.emails);
             adminService.emails.send(45);
         }
 
@@ -250,6 +251,11 @@
             adminService.clearOrphanData.send();
         }
 
+        private function generateURLKeys():void {
+            ProgressAlert.alert(this, "Generating URL Keys..", null, adminService.generateURLKeys);
+            adminService.generateURLKeys.send();
+        }
+
         private function specialOffer():void {
             ProgressAlert.alert(this, "Updating...", null, authAdminService.specialOffer);
             authAdminService.specialOffer.send();
@@ -293,6 +299,7 @@
         <mx:method name="forceTrialExpire"/>
         <mx:method name="syncInvoices"/>
         <mx:method name="disableGenerators"/>
+        <mx:method name="generateURLKeys"/>
     </mx:RemoteObject>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
     <mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center">

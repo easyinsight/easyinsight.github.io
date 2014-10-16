@@ -42,29 +42,11 @@ public abstract class Value implements Serializable, Comparable<Value>, Cloneabl
     }
 
     private Map<String, String> links;
-    private transient Map<String, List<Value>> drillThroughs;
-    private transient Set<Value> drillThroughValues;
 
     private Value originalValue;
     private transient List<Value> otherValues;
     private Value sortValue;
     private ValueExtension valueExtension;
-
-    public Set<Value> getDrillThroughValues() {
-        return drillThroughValues;
-    }
-
-    public void setDrillThroughValues(Set<Value> drillThroughValues) {
-        this.drillThroughValues = drillThroughValues;
-    }
-
-    public Map<String, List<Value>> getDrillThroughs() {
-        return drillThroughs;
-    }
-
-    public void setDrillThroughs(Map<String, List<Value>> drillThroughs) {
-        this.drillThroughs = drillThroughs;
-    }
 
     public List<Value> getOtherValues() {
         return otherValues;
