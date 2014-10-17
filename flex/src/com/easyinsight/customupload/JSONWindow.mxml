@@ -286,12 +286,12 @@
                 <mx:FormItem label="JSON URL:" fontFamily="Tahoma" fontWeight="bold">
                     <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="500"/>
                 </mx:FormItem>
-                <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
-                </mx:FormItem>
             </mx:Form>
             <mx:Text text="If the target JSON API requires basic HTTP authentication, you can specify credentials here:" width="650"/>
             <mx:Form>
+                <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
+                </mx:FormItem>
                 <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
                     <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
                 </mx:FormItem>
@@ -301,7 +301,7 @@
                     <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
                 </mx:FormItem>
             </mx:Form>
-            <mx:HBox>
+            <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Test Connection" click="testConnection()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
@@ -318,7 +318,7 @@
                 </mx:VBox>
                 <mx:Box id="jsonPathResult"/>
             </mx:HBox>
-            <mx:HBox>
+            <mx:HBox width="100%" horizontalAlign="center">
                 <util:SaveButton label="Back" click="wizardIndex--"/>
                 <util:SaveButton label="Test JSON Path" click="testJSON()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
@@ -329,7 +329,7 @@
             <mx:TextArea width="400" height="200" editable="false" text="{jsonResult}" borderStyle="solid" fontSize="10" borderThickness="1"/>
             <mx:Text text="{fieldLine}" width="400"/>
             <mx:List dataProvider="{fieldNames}" width="400" height="80" visible="{showFieldList}" fontSize="10"/>
-            <mx:HBox>
+            <mx:HBox  width="100%" horizontalAlign="center">
                 <util:SaveButton label="Back" click="wizardIndex--"/>
                 <util:SaveButton label="Set up Paging" click="setUpPaging()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
@@ -392,7 +392,7 @@
                     </mx:Form>
                 </mx:VBox>
             </mx:ViewStack>
-            <mx:HBox>
+            <mx:HBox  width="100%" horizontalAlign="center">
                 <util:SaveButton label="Back" click="wizardIndex--"/>
                 <util:SaveButton label="Next" click="testPaging()"/>
                 <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
