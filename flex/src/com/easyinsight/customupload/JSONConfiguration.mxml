@@ -32,6 +32,12 @@
             httpValue = String(ds.httpMethod);
             nextPage = ds.nextPageString;
             liveSource = ds.liveSource;
+            resultCount = ds.resultsJSONPath;
+            limitField = ds.limitField;
+            pageField = ds.pageField;
+            offsetField = ds.offsetField;
+            maxPerPage = ds.perPageLimit;
+            index = ds.paginationMethod;
         }
 
         private function save():void {
@@ -41,8 +47,25 @@
             ds.userName = userNameInput.text;
             ds.password = passwordInput.text;
             ds.jsonPath = jsonPathInput.text;
-            ds.nextPageString = nextPageInput.text;
-            ds.liveSource = liveSourceCheckbox.selected;
+            if (index == 1) {
+                ds.paginationMethod = 1;
+                ds.nextPageString = nextPageInput.text;
+                ds.resultsJSONPath = resultCountInput.text;
+            } else if (index == 2) {
+                ds.paginationMethod = 2;
+                ds.limitField = limitFieldNameInput.text;
+                ds.pageField = pageFieldNameInput.text;
+                ds.firstPageNumber = int(startPagingOnInput.text);
+                ds.perPageLimit = int(maxItemsPerPageInput.text);
+            } else if (index == 3) {
+                ds.paginationMethod = 3;
+                ds.limitField = limitFieldNameInput2.text;
+                ds.offsetField = offsetFieldNameInput.text;
+                ds.perPageLimit = int(maxItemsPerPageInput2.text);
+            } else {
+                ds.paginationMethod = 0;
+            }
+            //ds.liveSource = liveSourceCheckbox.selected;
             saveSource();
         }
 
@@ -50,39 +73,120 @@
         private var liveSource:Boolean;
 
         [Bindable]
+        private var perPageLimit:int;
+        [Bindable]
+        private var firstPageNumber:int;
+        [Bindable]
+        private var pageField:String;
+        [Bindable]
+        private var limitField:String;
+        [Bindable]
+        private var maxPerPage:int;
+        [Bindable]
+        private var offsetField:String;
+
+        [Bindable]
+        private var index:int;
+
+        private function onChange():void {
+            if (paginationGroup.selectedValue == "noPaging") {
+                index = 0;
+            } else if (paginationGroup.selectedValue == "pageByURL") {
+                index = 1;
+            } else if (paginationGroup.selectedValue == "pageByLimitAndNumber") {
+                index = 2;
+            } else if (paginationGroup.selectedValue == "pageByLimitAndOffset") {
+                index = 3;
+            }
+        }
+
+        [Bindable]
+        private var resultCount:String;
+
+        [Bindable]
         private var instructions:String = "The JSON data source needs to point at an array of objects. For example, the target might look like [{label1:X,date1:2011-09-05,value1:5},{label1:Y,date1:2012-04-03,value1:5}]. If the array is deeper inside the returned JSON, you can use JSONPath to specify how to find the array.";
         ]]></mx:Script>
-    <mx:TextArea text="{instructions}" borderStyle="none" editable="false" width="650" height="50" fontSize="11"/>
     <mx:Form>
         <mx:FormItem label="JSON URL:" fontFamily="Tahoma" fontWeight="bold">
             <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
-        </mx:FormItem>
-        <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
-        </mx:FormItem>
-        <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
         </mx:FormItem>
         <mx:FormItem label="HTTP Method:" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
             <mx:RadioButtonGroup id="methodGroup" selectedValue="{httpValue}"/>
             <mx:RadioButton groupName="methodGroup" label="GET" value="1" id="getOption"/>
             <mx:RadioButton groupName="methodGroup" label="POST" value="2" id="postOption"/>
         </mx:FormItem>
+    </mx:Form>
+    <mx:Text text="If the target JSON API requires basic HTTP authentication, you can specify credentials here:" width="650"/>
+    <mx:Form>
+        <mx:FormItem label="Basic Auth User Name (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonUserName}" width="350"/>
+        </mx:FormItem>
+        <mx:FormItem label="Basic Auth Password (optional):" fontFamily="Tahoma" fontWeight="bold">
+            <mx:TextInput id="passwordInput" displayAsPassword="true" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPassword}" width="350"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Text text="{instructions}" width="650" fontSize="12"/>
+    <mx:Form>
         <mx:FormItem label="JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
             <mx:TextInput id="jsonPathInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPath}" width="350"/>
         </mx:FormItem>
     </mx:Form>
-    <mx:TextArea text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
-    <mx:Form>
-        <mx:FormItem label="Next Page URL (optional):" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
-        </mx:FormItem>
-    </mx:Form>
-    <mx:Form>
-        <mx:FormItem label="Live Source:">
-            <mx:CheckBox id="liveSourceCheckbox" selected="{liveSource}"/>
-        </mx:FormItem>
-    </mx:Form>
+    <mx:Text text="If the target JSON API requires paging, you can choose to page over results by limit/offset, limit/page number, or result count/next page:" width="650"/>
+
+    <mx:RadioButtonGroup id="paginationGroup" change="onChange()"/>
+    <mx:HBox>
+        <mx:RadioButton label="No Paging" value="noPaging" groupName="paginationGroup" selected="{index == 0}"/>
+        <mx:RadioButton label="Use Limit and Offset" value="pageByLimitAndOffset" groupName="paginationGroup" selected="{index == 3}"/>
+        <mx:RadioButton label="Use Limit and Page Number" value="pageByLimitAndNumber" groupName="paginationGroup" selected="{index == 2}"/>
+        <mx:RadioButton label="Use Next Page URL" value="pageByURL" groupName="paginationGroup" selected="{index == 1}"/>
+    </mx:HBox>
+
+    <mx:ViewStack selectedIndex="{index}" creationPolicy="all" resizeToContent="true">
+        <mx:VBox>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="Specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." width="650" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="Result Count JSONPath" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="resultCountInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Next Page URL:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="" width="650" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="What's the parameter name for the limit?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="limitFieldNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{limitField}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="What's the maximum number of items per page?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="maxItemsPerPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{maxPerPage}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="What's the parameter name for the page?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="pageFieldNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{pageField}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="What's the first page number?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="startPagingOnInput" fontWeight="normal" fontFamily="Lucida Grande" text="{firstPageNumber}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="" width="650" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="What's the parameter name for the limit?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="limitFieldNameInput2" fontWeight="normal" fontFamily="Lucida Grande" text="{limitField}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="What's the maximum number of items per page?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="maxItemsPerPageInput2" fontWeight="normal" fontFamily="Lucida Grande" text="{maxPerPage}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="What's the parameter name for the offset?" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="offsetFieldNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{offsetField}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+    </mx:ViewStack>
     <mx:HBox>
         <util:SaveButton label="Save" click="save()"/>
         <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>

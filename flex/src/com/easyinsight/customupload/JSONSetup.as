@@ -14,10 +14,13 @@ public class JSONSetup {
 
     public var result:String;
     public var fields:ArrayCollection;
+    public var generatedFields:ArrayCollection;
     public var fieldLine:String;
     public var results:int;
+    public var suggestedJSONPath:String;
 
     public function JSONSetup() {
     }
 }
 }
+
