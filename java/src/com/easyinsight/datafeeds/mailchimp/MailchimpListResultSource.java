@@ -136,7 +136,8 @@ public class MailchimpListResultSource extends ServerDataSourceDefinition {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = in.readLine()) != null) {
-                sb.append(line).append("\r\n");
+                String fixed = line.substring(line.indexOf("[") + 1);
+                sb.append(fixed).append("\r\n");
             }
 
             sb.deleteCharAt(sb.length() - 1);

@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.mailchimp;
 
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -151,7 +152,42 @@ public class MailchimpCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    protected List<CompositeFeedConnection> getAdditionalConnections() throws SQLException {
+        List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
+        Map<Long, FeedDefinition> map = new HashMap<Long, FeedDefinition>();
+        for (CompositeFeedNode child : getCompositeFeedNodes()) {
+            FeedDefinition childDef = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            map.put(child.getDataFeedID(), childDef);
+        }
+        long campaignResultsID = 0;
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            if (node.getDataSourceType() == FeedType.MAILCHIMP_CAMPAIGN_RESULTS.getType()) {
+                campaignResultsID = node.getDataFeedID();
+            }
+        }
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            if (node.getDataSourceType() == FeedType.MAILCHIMP_LIST.getType()) {
+                {
+                    FeedDefinition sourceDef = map.get(campaignResultsID);
+                    FeedDefinition targetDef = map.get(node.getDataFeedID());
+                    Key sourceKey = sourceDef.getField(MailchimpCampaignResultsSource.EMAIL);
+                    Key targetKey = targetDef.getField("Email Address");
+                    connections.add(new CompositeFeedConnection(node.getDataFeedID(), campaignResultsID, targetKey, sourceKey));
+                }
+            }
+        }
+        return connections;
+    }
+
+    @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return new ArrayList<>();
+        List<ChildConnection> connections = new ArrayList<>();
+        connections.add(new ChildConnection(FeedType.MAILCHIMP_CAMPAIGN, FeedType.MAILCHIMP_CAMPAIGN_RESULTS, MailchimpCampaignSource.CAMPAIGN_ID, MailchimpCampaignResultsSource.CAMPAIGN_ID));
+        return connections;
+    }
+
+    @Override
+    protected Collection<ChildConnection> getLiveChildConnections() {
+        return getChildConnections();
     }
 }
