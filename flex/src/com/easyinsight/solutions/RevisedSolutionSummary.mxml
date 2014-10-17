@@ -192,6 +192,9 @@
                     okay = false;
                     break;
             }
+            if (solution.dataSourceType == DataSourceType.COMPOSITE) {
+                okay = false;
+            }
             return okay;
         }
 
