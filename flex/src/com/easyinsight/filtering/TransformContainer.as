@@ -270,7 +270,7 @@ public class TransformContainer extends HBox
 
     private function xyz(filter:IFilter):void {
 
-        var sequence:Sequence = new Sequence(filter);
+        /*var sequence:Sequence = new Sequence(filter);
         var glow1:Glow = new Glow(filter);
         glow1.color = 0x008800;
         glow1.strength = 10;
@@ -299,7 +299,7 @@ public class TransformContainer extends HBox
         sequence.addChild(glow2);
         sequence.addChild(glow3);
         sequence.addChild(glow4);
-        sequence.play()
+        sequence.play()*/
     }
 
     private function createFilter(filterDefinition:FilterDefinition):IFilter {
