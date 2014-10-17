@@ -11,12 +11,8 @@ import org.owasp.html.PolicyFactory;
 public class HTMLPolicy {
     public static PolicyFactory getPolicyFactory() {
         return new HtmlPolicyBuilder()
-                .allowElements("li")
-                .allowElements("ul")
-                .allowElements("p")
-                .allowElements("a")
-                .allowElements("b")
-                .allowElements("i")
+                .allowElements("li", "ul", "p", "a", "b", "i")
+                .allowAttributes("href").onElements("a").allowStandardUrlProtocols()
                 .toFactory();
     }
 }
