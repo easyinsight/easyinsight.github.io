@@ -46,14 +46,78 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     public static final int GET = 1;
     public static final int POST = 2;
 
+    public static final int NEXT_PAGE_URL = 1;
+    public static final int ITERATE_BY_LIMIT_AND_PAGE = 2;
+    public static final int ITERATE_BY_LIMIT_AND_OFFSET = 3;
+
+
+    private String nextPageString;
+    private int paginationMethod;
+
+
+
+    private int perPageLimit;
+    private int firstPageNumber;
+    private String pageField;
+    private String offsetField;
+    private String limitField;
+
     private String url;
     private String userName;
     private String password;
     private String jsonPath;
-    private String nextPageString;
+
     private int httpMethod = GET;
 
     private boolean liveSource;
+
+    public String getOffsetField() {
+        return offsetField;
+    }
+
+    public void setOffsetField(String offsetField) {
+        this.offsetField = offsetField;
+    }
+
+    public int getFirstPageNumber() {
+        return firstPageNumber;
+    }
+
+    public void setFirstPageNumber(int firstPageNumber) {
+        this.firstPageNumber = firstPageNumber;
+    }
+
+    public int getPaginationMethod() {
+        return paginationMethod;
+    }
+
+    public void setPaginationMethod(int paginationMethod) {
+        this.paginationMethod = paginationMethod;
+    }
+
+    public int getPerPageLimit() {
+        return perPageLimit;
+    }
+
+    public void setPerPageLimit(int perPageLimit) {
+        this.perPageLimit = perPageLimit;
+    }
+
+    public String getPageField() {
+        return pageField;
+    }
+
+    public void setPageField(String pageField) {
+        this.pageField = pageField;
+    }
+
+    public String getLimitField() {
+        return limitField;
+    }
+
+    public void setLimitField(String limitField) {
+        this.limitField = limitField;
+    }
 
     public boolean isLiveSource() {
         return liveSource;
@@ -162,7 +226,8 @@ public class JSONDataSource extends ServerDataSourceDefinition {
         deleteStmt.executeUpdate();
         deleteStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO JSON_SOURCE (URL, DATA_SOURCE_ID, AUTH_USERNAME, AUTH_PASSWORD," +
-                "HTTP_METHOD, JSON_PATH, next_page_string, live_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                "HTTP_METHOD, JSON_PATH, next_page_string, live_source, pagination_method, per_page_limit, first_page_number, page_field, limit_field, offset_field) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, getUrl());
         insertStmt.setLong(2, getDataFeedID());
         insertStmt.setString(3, getUserName());
@@ -171,6 +236,12 @@ public class JSONDataSource extends ServerDataSourceDefinition {
         insertStmt.setString(6, getJsonPath());
         insertStmt.setString(7, getNextPageString());
         insertStmt.setBoolean(8, isLiveSource());
+        insertStmt.setInt(9, getPaginationMethod());
+        insertStmt.setInt(10, getPerPageLimit());
+        insertStmt.setInt(11, getFirstPageNumber());
+        insertStmt.setString(12, getPageField());
+        insertStmt.setString(13, getLimitField());
+        insertStmt.setString(14, getOffsetField());
         insertStmt.execute();
         insertStmt.close();
     }
@@ -178,8 +249,8 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, AUTH_USERNAME, AUTH_PASSWORD, HTTP_METHOD, JSON_PATH, NEXT_PAGE_STRING, LIVE_SOURCE" +
-                " FROM JSON_SOURCE WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, AUTH_USERNAME, AUTH_PASSWORD, HTTP_METHOD, JSON_PATH, NEXT_PAGE_STRING, LIVE_SOURCE," +
+                "pagination_method, per_page_limit, first_page_number, page_field, limit_field, offset_field FROM JSON_SOURCE WHERE DATA_SOURCE_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -193,47 +264,270 @@ public class JSONDataSource extends ServerDataSourceDefinition {
             setJsonPath(rs.getString(5));
             setNextPageString(rs.getString(6));
             setLiveSource(rs.getBoolean(7));
+            setPaginationMethod(rs.getInt(8));
+            setPerPageLimit(rs.getInt(9));
+            setFirstPageNumber(rs.getInt(10));
+            setPageField(rs.getString(11));
+            setLimitField(rs.getString(12));
+            setOffsetField(rs.getString(13));
         }
         loadStmt.close();
     }
 
-    public static JSONSetup jsonString(String userName, String password, int httpMethod, String url, String jsonPath, String resultsJSONPath, String nextPageString,
-                                       int page) throws IOException {
-        HttpClient client = new HttpClient();
-        if (userName != null && !"".equals(userName)) {
-            client.getParams().setAuthenticationPreemptive(true);
-            Credentials defaultcreds = new UsernamePasswordCredentials(userName, password);
-            client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-        }
-        HttpMethod restMethod;
-        if (httpMethod == GET) {
-            if (page == 1) {
-                restMethod = new GetMethod(url);
-            } else {
-                restMethod = new GetMethod(nextPageString.replace("{n}", String.valueOf(page)));
-            }
-        } else if (httpMethod == POST) {
-            if (page == 1) {
-                restMethod = new PostMethod(url);
-            } else {
-                restMethod = new PostMethod(nextPageString.replace("{n}", String.valueOf(page)));
-            }
-        } else {
-            throw new RuntimeException("Unknown http method " + httpMethod);
-        }
-        restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
-        client.executeMethod(restMethod);
+    private class JSONClient {
+        private HttpClient httpClient;
 
-        List<String> fieldNames = new ArrayList<String>();
+        private JSONClient() {
+            HttpClient client = new HttpClient();
+            if (getUserName() != null && !"".equals(getUserName())) {
+                client.getParams().setAuthenticationPreemptive(true);
+                Credentials defaultcreds = new UsernamePasswordCredentials(getUserName(), getPassword());
+                client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
+            }
+            this.httpClient = client;
+        }
+
+        public HttpClient getHttpClient() {
+            return httpClient;
+        }
+
+        private HttpMethod createMethod() {
+            HttpMethod restMethod;
+            if (httpMethod == GET) {
+                restMethod = new GetMethod(getUrl());
+            } else if (httpMethod == POST) {
+                restMethod = new PostMethod(getUrl());
+            } else {
+                throw new RuntimeException("Unknown http method " + httpMethod);
+            }
+            restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+            return restMethod;
+        }
+
+        private HttpMethod createPagedMethod(int page, int ctr) {
+            HttpMethod restMethod;
+            if (paginationMethod == NEXT_PAGE_URL) {
+                if (httpMethod == GET) {
+                    if (page == 1) {
+                        restMethod = new GetMethod(url);
+                    } else {
+                        restMethod = new GetMethod(nextPageString.replace("{n}", String.valueOf(page)));
+                    }
+                } else if (httpMethod == POST) {
+                    if (page == 1) {
+                        restMethod = new PostMethod(url);
+                    } else {
+                        restMethod = new PostMethod(nextPageString.replace("{n}", String.valueOf(page)));
+                    }
+                } else {
+                    throw new RuntimeException("Unknown http method " + httpMethod);
+                }
+            } else if (paginationMethod == ITERATE_BY_LIMIT_AND_PAGE) {
+                if (httpMethod == GET) {
+                    if (url.contains("?")) {
+                        restMethod = new GetMethod(url + "&" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                    } else {
+                        restMethod = new GetMethod(url + "?" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                    }
+                } else if (httpMethod == POST) {
+                    if (url.contains("?")) {
+                        restMethod = new PostMethod(url + "&" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                    } else {
+                        restMethod = new PostMethod(url + "?" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                    }
+                } else {
+                    throw new RuntimeException("Unknown http method " + httpMethod);
+                }
+            } else if (paginationMethod == ITERATE_BY_LIMIT_AND_OFFSET) {
+                if (httpMethod == GET) {
+                    if (url.contains("?")) {
+                        restMethod = new GetMethod(url + "&" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                    } else {
+                        restMethod = new GetMethod(url + "?" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                    }
+                } else if (httpMethod == POST) {
+                    if (url.contains("?")) {
+                        restMethod = new PostMethod(url + "&" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                    } else {
+                        restMethod = new PostMethod(url + "?" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                    }
+                } else {
+                    throw new RuntimeException("Unknown http method " + httpMethod);
+                }
+            } else {
+                throw new RuntimeException("Unknown pagination method.");
+            }
+            return restMethod;
+        }
+    }
+
+    public JSONSetup testJSONConnectivityAndSuggestJSONPath() {
+        String suggestedJSONPath = null;
+        String responseLine;
+        try {
+            JSONClient jsonClient = new JSONClient();
+
+            HttpMethod restMethod = jsonClient.createMethod();
+
+            jsonClient.getHttpClient().executeMethod(restMethod);
+
+            suggestedJSONPath = null;
+            responseLine = "";
+            if (restMethod.getStatusCode() == 404) {
+                responseLine = "We received a 404, Page Not Found when trying to retrieve the specified URL.";
+            } else if (restMethod.getStatusCode() == 401 || restMethod.getStatusCode() == 403) {
+                responseLine = "Authorization with the specified credentials failed when trying to retrieve the specified URL.";
+            } else {
+
+                List<Map> coreArray = null;
+                Map retMap = null;
+
+                Object obj = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                if (obj instanceof List) {
+                    List list = (List) obj;
+                    coreArray = new ArrayList<Map>();
+                    for (Object o : list) {
+                        if (o instanceof Map) {
+                            coreArray.add((Map) o);
+                        }
+                    }
+                } else if (obj instanceof Map) {
+                    retMap = (Map) obj;
+                }
+
+                if (coreArray != null) {
+                    // we think we have the data as is
+                } else if (retMap != null) {
+                    List biggestList = null;
+                    String biggestListKey = null;
+                    for (Object o : retMap.entrySet()) {
+                        Map.Entry entry = (Map.Entry) o;
+                        Object v = entry.getValue();
+                        if (v instanceof List && biggestList == null) {
+                            biggestList = (List) v;
+                            biggestListKey = (String) entry.getKey();
+                        } else if (v instanceof List && ((List) v).size() > biggestList.size()) {
+                            biggestList = (List) v;
+                            biggestListKey = (String) entry.getKey();
+                        }
+                    }
+                    if (biggestListKey != null) {
+                        suggestedJSONPath = "$." + biggestListKey;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            responseLine = "Something went wrong with the requested parameters.";
+        }
+        JSONSetup jsonSetup = new JSONSetup();
+        jsonSetup.setFieldLine(responseLine);
+        jsonSetup.setSuggestedJSONPath(suggestedJSONPath);
+        return jsonSetup;
+    }
+
+    public JSONSetup testJSONPaging() {
+        String errorLine = null;
+        try {
+            JSONClient jsonClient = new JSONClient();
+
+            HttpMethod restMethod = jsonClient.createPagedMethod(getFirstPageNumber(), 0);
+
+            jsonClient.getHttpClient().executeMethod(restMethod);
+            if (restMethod.getStatusCode() == 404) {
+                errorLine = "We received a 404, Page Not Found when trying to retrieve the specified URL.";
+            } else if (restMethod.getStatusCode() == 401) {
+                errorLine = "Authorization with the specified credentials failed when trying to retrieve the specified URL.";
+            } else {
+                String firstResponse = restMethod.getResponseBodyAsString();
+                List<Map> coreArray = null;
+                if (jsonPath == null || "".equals(jsonPath.trim())) {
+                    Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                    if (obj instanceof List) {
+                        List list = (List) obj;
+                        coreArray = new ArrayList<Map>();
+                        for (Object o : list) {
+                            if (o instanceof Map) {
+                                coreArray.add((Map) o);
+                            }
+                        }
+                    }
+                } else {
+                    Object obj = JsonPath.read(restMethod.getResponseBodyAsStream(), jsonPath);
+                    if (obj instanceof List) {
+                        coreArray = (List<Map>) obj;
+                    }
+                }
+                if (coreArray == null) {
+                    errorLine = "We couldn't find data using the combination of the previous configuration and the paging parameters.";
+                } else {
+                    restMethod = jsonClient.createPagedMethod(getFirstPageNumber() + 1, getPerPageLimit());
+                    jsonClient.getHttpClient().executeMethod(restMethod);
+                    if (restMethod.getStatusCode() == 404) {
+                        errorLine = "We received a 404, Page Not Found when trying to retrieve the specified URL for the second page of data.";
+                    } else if (restMethod.getStatusCode() == 401) {
+                        errorLine = "Authorization with the specified credentials failed when trying to retrieve the specified URL for the second page of data.";
+                    } else {
+                        String secondResponse = restMethod.getResponseBodyAsString();
+                        if (firstResponse.equals(secondResponse)) {
+                            errorLine = "The response from the server for the second page of data was identical to the first page of data.";
+                        } else {
+                            coreArray = null;
+                            if (jsonPath == null || "".equals(jsonPath.trim())) {
+                                Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                                if (obj instanceof List) {
+                                    List list = (List) obj;
+                                    coreArray = new ArrayList<Map>();
+                                    for (Object o : list) {
+                                        if (o instanceof Map) {
+                                            coreArray.add((Map) o);
+                                        }
+                                    }
+                                }
+                            } else {
+                                Object obj = JsonPath.read(restMethod.getResponseBodyAsStream(), jsonPath);
+                                if (obj instanceof List) {
+                                    coreArray = (List<Map>) obj;
+                                }
+                            }
+                            if (coreArray == null) {
+                                errorLine = "We couldn't find data on the second page using the combination of the previous configuration and the paging parameters.";
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            errorLine = "Something went wrong with the requested parameters.";
+        }
+        JSONSetup setup = new JSONSetup();
+        setup.setFieldLine(errorLine);
+        return setup;
+    }
+
+    public JSONSetup jsonString() throws IOException {
+        List<String> fieldNames = new ArrayList<>();
+        List<AnalysisItem> generatedFields = new ArrayList<>();
         String responseBody = "";
         int pages = 0;
         String responseLine = "";
-        if (restMethod.getStatusCode() == 404) {
-            responseLine = "We received a 404, Page Not Found when trying to retrieve the specified URL.";
-        } else if (restMethod.getStatusCode() == 401) {
-            responseLine = "Authorization with the specified credentials failed when trying to retrieve the specified URL.";
-        } else {
-            try {
+        String suggestedJSONPath = "";
+        try {
+            JSONClient jsonClient = new JSONClient();
+
+            HttpMethod restMethod = jsonClient.createMethod();
+
+            jsonClient.getHttpClient().executeMethod(restMethod);
+
+
+
+            if (restMethod.getStatusCode() == 404) {
+                responseLine = "We received a 404, Page Not Found when trying to retrieve the specified URL.";
+            } else if (restMethod.getStatusCode() == 401) {
+                responseLine = "Authorization with the specified credentials failed when trying to retrieve the specified URL.";
+            } else {
+
                 responseBody = restMethod.getResponseBodyAsString();
                 List<Map> coreArray = null;
                 if (jsonPath == null || "".equals(jsonPath.trim())) {
@@ -251,8 +545,6 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                     Object obj = JsonPath.read(restMethod.getResponseBodyAsStream(), jsonPath);
                     if (obj instanceof List) {
                         coreArray = (List<Map>) obj;
-                    } else {
-
                     }
                 }
 
@@ -261,7 +553,6 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                 } else if (coreArray.size() == 0) {
                     responseLine = "We couldn't find a JSON array at the specified URL. You might need to try a different URL or specify a different JSONPath to find the array within the returned JSON data.";
                 } else {
-                    responseLine = "We found the following list of fields through the parameters specified.";
                     DataTypeGuesser guesser = new DataTypeGuesser();
                     Map<String, Key> keyMap = new HashMap<String, Key>();
                     for (Object obj : coreArray) {
@@ -281,29 +572,29 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                         }
                     }
 
-                    List<AnalysisItem> fieldList = guesser.createFeedItems();
-                    for (AnalysisItem field : fieldList) {
+                    generatedFields = guesser.createFeedItems();
+                    for (AnalysisItem field : generatedFields) {
                         fieldNames.add(field.toDisplay());
                     }
                 }
-                if (resultsJSONPath != null && !"".equals(resultsJSONPath)) {
-                    Integer pageInt = JsonPath.read(responseBody, resultsJSONPath);
-                    pages = pageInt;
-                }
-            } catch (Exception e) {
-                responseLine = "We encountered an internal server error in trying to process the specified parameters. We've logged the error for our engineers to investigate.";
-                LogClass.error(e);
             }
+        } catch (Exception e) {
+            responseLine = "We encountered an internal server error in trying to process the specified parameters. We've logged the error for our engineers to investigate.";
+            LogClass.error(e);
         }
+
         JSONSetup jsonSetup = new JSONSetup();
+
         if (responseBody.length() > 100000) {
             jsonSetup.setResult("Result too large to display.");
         } else {
             jsonSetup.setResult(responseBody);
         }
         jsonSetup.setResults(pages);
+        jsonSetup.setGeneratedFields(generatedFields);
         jsonSetup.setFields(fieldNames);
         jsonSetup.setFieldLine(responseLine);
+        jsonSetup.setSuggestedJSONPath(suggestedJSONPath);
         return jsonSetup;
     }
 
@@ -411,30 +702,82 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                 client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
             }
             int page = 1;
+            int ctr = 0;
             boolean hasMorePages;
 
+            String lastResult = null;
+
+            boolean continueRetrieval = false;
             do {
                 HttpMethod restMethod;
-                if (httpMethod == GET) {
-                    if (page == 1) {
-                        restMethod = new GetMethod(url);
+                if (paginationMethod == NEXT_PAGE_URL) {
+                    if (httpMethod == GET) {
+                        if (page == 1) {
+                            restMethod = new GetMethod(url);
+                        } else {
+                            restMethod = new GetMethod(nextPageString.replace("{n}", String.valueOf(page)));
+                        }
+                    } else if (httpMethod == POST) {
+                        if (page == 1) {
+                            restMethod = new PostMethod(url);
+                        } else {
+                            restMethod = new PostMethod(nextPageString.replace("{n}", String.valueOf(page)));
+                        }
                     } else {
-                        restMethod = new GetMethod(nextPageString.replace("{n}", String.valueOf(page)));
+                        throw new RuntimeException("Unknown http method " + httpMethod);
                     }
-                } else if (httpMethod == POST) {
-                    if (page == 1) {
+                } else if (paginationMethod == ITERATE_BY_LIMIT_AND_PAGE) {
+                    if (httpMethod == GET) {
+                        if (url.contains("?")) {
+                            restMethod = new GetMethod(url + "&" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                        } else {
+                            restMethod = new GetMethod(url + "?" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                        }
+                    } else if (httpMethod == POST) {
+                        if (url.contains("?")) {
+                            restMethod = new PostMethod(url + "&" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                        } else {
+                            restMethod = new PostMethod(url + "?" + limitField + "=" + perPageLimit + "&" + pageField + "=" + firstPageNumber);
+                        }
+                    } else {
+                        throw new RuntimeException("Unknown http method " + httpMethod);
+                    }
+                } else if (paginationMethod == ITERATE_BY_LIMIT_AND_OFFSET) {
+                    if (httpMethod == GET) {
+                        if (url.contains("?")) {
+                            restMethod = new GetMethod(url + "&" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                        } else {
+                            restMethod = new GetMethod(url + "?" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                        }
+                    } else if (httpMethod == POST) {
+                        if (url.contains("?")) {
+                            restMethod = new PostMethod(url + "&" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                        } else {
+                            restMethod = new PostMethod(url + "?" + limitField + "=" + perPageLimit + "&" + offsetField + "=" + ctr);
+                        }
+                    } else {
+                        throw new RuntimeException("Unknown http method " + httpMethod);
+                    }
+                } else if (paginationMethod == 0) {
+                    if (httpMethod == GET) {
+                        restMethod = new GetMethod(url);
+                    } else if (httpMethod == POST) {
                         restMethod = new PostMethod(url);
                     } else {
-                        restMethod = new PostMethod(nextPageString.replace("{n}", String.valueOf(page)));
+                        throw new RuntimeException("Unknown http method " + httpMethod);
                     }
                 } else {
-                    throw new RuntimeException("Unknown http method " + httpMethod);
+                    throw new RuntimeException("Unknown pagination method " + paginationMethod);
                 }
 
                 restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
                 client.executeMethod(restMethod);
                 List<Map> coreArray = null;
                 String jsonString = restMethod.getResponseBodyAsString();
+                if (jsonString.equals(lastResult)) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("Two API calls in a row returned the same data, indicating a problem with your paging parameters.", this));
+                }
+                lastResult = jsonString;
                 if (jsonPath == null || "".equals(jsonPath.trim())) {
                     Object obj = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(jsonString);
                     if (obj instanceof List) {
@@ -467,6 +810,7 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                 for (Map object : coreArray) {
                     IRow row = dataSet.createRow();
                     pageResults++;
+                    ctr++;
                     for (AnalysisItem item : getFields()) {
                         String keyName = item.getKey().toKeyString();
                         Object value = object.get(keyName);
@@ -499,8 +843,16 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                 if (page > 500) {
                     break;
                 }
-                hasMorePages = pageResults > 0 && nextPageString != null && !"".equals(nextPageString);
-            } while (hasMorePages);
+                Thread.sleep(1000);
+                if (paginationMethod == NEXT_PAGE_URL) {
+                    continueRetrieval = pageResults > 0 && nextPageString != null && !"".equals(nextPageString);
+                } else if (paginationMethod == ITERATE_BY_LIMIT_AND_OFFSET) {
+                    continueRetrieval = pageResults == perPageLimit;
+                } else if (paginationMethod == ITERATE_BY_LIMIT_AND_PAGE) {
+                    continueRetrieval = pageResults == perPageLimit;
+                }
+
+            } while (continueRetrieval);
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
