@@ -491,7 +491,8 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                                 }
                             }
                             if (coreArray == null) {
-                                errorLine = "We couldn't find data on the second page using the combination of the previous configuration and the paging parameters.";
+                                // guess we can' do this?
+                                //errorLine = "We couldn't find data on the second page using the combination of the previous configuration and the paging parameters.";
                             }
                         }
                     }
