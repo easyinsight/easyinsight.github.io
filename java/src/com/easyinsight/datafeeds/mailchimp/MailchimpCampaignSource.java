@@ -79,13 +79,14 @@ public class MailchimpCampaignSource extends ServerDataSourceDefinition {
             List<String> campaignIDs = new ArrayList<>();
             DataSet dataSet = new DataSet();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
             do {
                 count = 0;
                 PostMethod postMethod = new PostMethod("https://"+dataCenter+".api.mailchimp.com/2.0/campaigns/list.json");
                 net.minidev.json.JSONObject jo = new net.minidev.json.JSONObject();
                 jo.put("apikey", mailchimpCompositeSource.getMailchimpApiKey());
+                jo.put("start", offset / 1000);
                 jo.put("limit", 1000);
-                jo.put("start", offset);
                 StringRequestEntity entity = new StringRequestEntity(jo.toString(), "application/json", "UTF-8");
                 postMethod.setRequestEntity(entity);
                 HttpClient httpClient = new HttpClient();
@@ -107,7 +108,7 @@ public class MailchimpCampaignSource extends ServerDataSourceDefinition {
                         row.addValue(keys.get(SEND_TIME), date);
                     }
                 }
-                offset = count;
+                offset += count;
             } while (count == 1000);
             mailchimpCompositeSource.setCampaignIDs(campaignIDs);
             return dataSet;
