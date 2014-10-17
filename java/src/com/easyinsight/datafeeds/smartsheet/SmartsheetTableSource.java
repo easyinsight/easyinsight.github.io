@@ -31,6 +31,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -103,7 +105,7 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     Map results = (Map) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table);
                     List rows = (List) results.get("rows");
                     DataTypeGuesser guesser = new DataTypeGuesser();
-                    for (int i = 0; i < rows.size(); i++ ){
+                    for (int i = 0; i < rows.size(); i++ ) {
                         Object obj = rows.get(i);
 
                         Map rowMap = (Map) obj;
@@ -120,6 +122,7 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                                 }
                             }
                         }
+                    }
                         //for (AnalysisItem item : newFields.values()) {
                         List<AnalysisItem> generatedFields = guesser.createFeedItems();
                         for (AnalysisItem item : generatedFields) {
@@ -129,7 +132,6 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                         }
                         fields.addAll(generatedFields);
                         //}
-                    }
                     List<AnalysisItem> others = new ArrayList<>();
                     for (Map.Entry<String, AnalysisItem> entry : newFields.entrySet()) {
                         if (keys.contains(entry.getKey())) {
@@ -171,6 +173,8 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
             List rows = (List) results.get("rows");
 
             DataSet dataSet = new DataSet();
+            SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf2 = new SimpleDateFormat("MM/dd/yy");
 
             for (int i = 0; i < rows.size(); i++ ){
                 Object obj = rows.get(i);
@@ -184,7 +188,22 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     Object valueObj = cell.get("value");
                     if (key != null && valueObj != null) {
                         AnalysisItem item = fieldMap.get(columnID);
-                        if (item != null && item.hasType(AnalysisItemTypes.DIMENSION)) {
+                        if (item != null && item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            try {
+                                String str = valueObj.toString();
+                                if (str.contains("-")) {
+                                    Date date = sdf1.parse(str);
+                                    row.addValue(key, date);
+                                } else if (str.contains("/")) {
+                                    Date date = sdf2.parse(str);
+                                    row.addValue(key, date);
+                                } else {
+                                    row.addValue(key, str);
+                                }
+                            } catch (ParseException e) {
+                                row.addValue(key, valueObj.toString());
+                            }
+                        } else if (item != null && item.hasType(AnalysisItemTypes.DIMENSION)) {
                             try {
                                 double dVal = Double.parseDouble(valueObj.toString());
                                 int asInt = (int) dVal;
