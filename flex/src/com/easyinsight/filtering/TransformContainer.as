@@ -12,9 +12,13 @@ import com.easyinsight.analysis.AnalysisItemWrapper;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardFilterOverride;
 import com.easyinsight.framework.User;
+import com.easyinsight.tour.Note;
+import com.easyinsight.tour.NoteEvent;
+import com.easyinsight.util.Callout;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.display.DisplayObject;
+import flash.display.DisplayObjectContainer;
 import flash.events.ContextMenuEvent;
 import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
@@ -33,6 +37,8 @@ import mx.controls.Alert;
 import mx.controls.DataGrid;
 import mx.controls.List;
 import mx.core.UIComponent;
+import mx.effects.Glow;
+import mx.effects.Sequence;
 import mx.events.DragEvent;
 import mx.events.FlexEvent;
 import mx.managers.DragManager;
@@ -237,7 +243,7 @@ public class TransformContainer extends HBox
         _reportView = value;
     }
 
-    public function addFilterDefinition(filterDefinition:FilterDefinition):IFilter {
+    public function addFilterDefinition(filterDefinition:FilterDefinition, includeCallout:Boolean = false):IFilter {
         var filter:IFilter = createFilter(filterDefinition);
         commandFilterAdd(filter);
         return filter;
@@ -254,6 +260,46 @@ public class TransformContainer extends HBox
 
     public function set filterStorageKey(value:String):void {
         _filterStorageKey = value;
+    }
+
+    private var callout:Callout;
+
+    private function onClose(event:NoteEvent):void {
+        callout = null;
+    }
+
+    private function xyz(filter:IFilter):void {
+
+        var sequence:Sequence = new Sequence(filter);
+        var glow1:Glow = new Glow(filter);
+        glow1.color = 0x008800;
+        glow1.strength = 10;
+        glow1.duration = 500;
+        glow1.alphaFrom = 1.0;
+        glow1.alphaTo = 0.0;
+        var glow2:Glow = new Glow(filter);
+        glow2.color = 0x008800;
+        glow2.strength = 10;
+        glow2.duration = 500;
+        glow2.alphaFrom = 0.0;
+        glow2.alphaTo = 1.0;
+        var glow3:Glow = new Glow(filter);
+        glow3.color = 0x008800;
+        glow3.strength = 10;
+        glow3.duration = 500;
+        glow3.alphaFrom = 1.0;
+        glow3.alphaTo = 0.0;
+        var glow4:Glow = new Glow(filter);
+        glow4.color = 0x008800;
+        glow4.strength = 10;
+        glow4.duration = 500;
+        glow4.alphaFrom = 0.0;
+        glow4.alphaTo = 1.0;
+        sequence.addChild(glow1);
+        sequence.addChild(glow2);
+        sequence.addChild(glow3);
+        sequence.addChild(glow4);
+        sequence.play()
     }
 
     private function createFilter(filterDefinition:FilterDefinition):IFilter {
@@ -461,7 +507,7 @@ public class TransformContainer extends HBox
             }
         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem, _retrievalState, filterMetadata);
-            initializeFilter(sliderMeasureFilter, true);
+            initializeFilter(sliderMeasureFilter, true, true);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
             dimWindow.item = analysisItem;
@@ -507,7 +553,7 @@ public class TransformContainer extends HBox
     }
 
     private function onFilterSelection(event:FilterCreationEvent):void {
-        initializeFilter(event.filter, true);
+        initializeFilter(event.filter, true, true);
     }
     
     public function reorderFilters():void {
@@ -562,7 +608,7 @@ public class TransformContainer extends HBox
                 UIComponent(existingFilter).parent.removeChild(existingFilter as DisplayObject);
             }
             var newFilter:IFilter = createFilter(event.filterDefinition);
-            initializeFilter(newFilter, false);
+            initializeFilter(newFilter, false, false);
         } else {
             var existingFilter1:IFilter = null;
             for each (var tObj:Object in filterTile.getChildren()) {
@@ -615,7 +661,7 @@ public class TransformContainer extends HBox
         showingHidden = !showingHidden;
     }
 
-    public function commandFilterAdd(filter:IFilter):void {
+    public function commandFilterAdd(filter:IFilter, includeCallout:Boolean = false):void {
         if (noFilters) {
             noFilters = false;
         }
@@ -648,6 +694,10 @@ public class TransformContainer extends HBox
             addFilter(filter);
         }
 
+        if (includeCallout) {
+            xyz(filter);
+        }
+
         if (filter.filterDefinition != null && filter.filterDefinition.filterID == 0 && filter.filterDefinition.fromFilterSet == 0) {
             dispatchEvent(new AnalysisChangedEvent());
         }
@@ -663,9 +713,9 @@ public class TransformContainer extends HBox
         _role = value;
     }
 
-    public function commandFilterAdd2(filter:IFilter, launchWindow:Boolean):void {
+    public function commandFilterAdd2(filter:IFilter, launchWindow:Boolean, includeCallout:Boolean = false):void {
 
-        commandFilterAdd(filter);
+        commandFilterAdd(filter, includeCallout);
         if (launchWindow) {
             if (filter is SliderMeasureFilter) {
                 SliderMeasureFilter(filter).edit(null);
@@ -684,8 +734,8 @@ public class TransformContainer extends HBox
         }
     }
 
-    private function initializeFilter(filter:IFilter, launchWindow:Boolean):void {
-        dispatchEvent(new CommandEvent(new FilterAddCommand(this, filter, launchWindow)));
+    private function initializeFilter(filter:IFilter, launchWindow:Boolean, includeCallout:Boolean):void {
+        dispatchEvent(new CommandEvent(new FilterAddCommand(this, filter, launchWindow, includeCallout)));
     }
 
     private function register(filter:IFilter):void {
