@@ -14,7 +14,7 @@ public class BarChartDefinition extends YAxisDefinition{
     public var chartColor:uint;
     public var gradientColor:uint;
     public var useChartColor:Boolean;
-    public var columnSort:String = ChartDefinition.SORT_UNSORTED;
+    public var columnSort:String = ChartDefinition.SORT_Y_ASCENDING;
     public var axisType:String = "Linear";
     public var labelPosition:String = "auto";
     public var labelFontSize:int = 12;

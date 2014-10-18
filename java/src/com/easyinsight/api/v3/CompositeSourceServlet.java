@@ -76,8 +76,9 @@ public class CompositeSourceServlet extends JSONServlet {
             return cfc;
         }).collect(Collectors.toList());
         String name = String.valueOf(jsonObject.get("name"));
-        new FeedService().createCompositeFeed(compositeFeedNodeList, compositeFeedConnectionList, name, conn);
+        CompositeFeedDefinition ccc = new FeedService().createCompositeFeed(compositeFeedNodeList, compositeFeedConnectionList, name, conn);
 
+        jo.put("url_key", ccc.getApiKey());
         return new ResponseInfo(ResponseInfo.ALL_GOOD, jo.toString());
     }
 

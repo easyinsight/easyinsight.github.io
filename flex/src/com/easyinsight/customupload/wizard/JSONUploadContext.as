@@ -12,6 +12,12 @@ public class JSONUploadContext extends UploadContext {
     public var dataSourceName:String;
     public var nextPagePath:String;
     public var resultsJSONPath:String;
+    public var paginationMethod:int;
+    public var perPageLimit:int;
+    public var firstPageNumber:int;
+    public var pageField:String;
+    public var offsetField:String;
+    public var limitField:String;
 
     public function JSONUploadContext() {
         super();

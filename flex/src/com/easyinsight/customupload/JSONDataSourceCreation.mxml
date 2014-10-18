@@ -62,19 +62,52 @@
             ds.password = passwordInput.text;
             ds.feedName = nameInput.text;
             ds.jsonPath = jsonPathInput.text;
-            ds.nextPageString = nextPageInput.text;
-            ds.resultsJSONPath = resultCountInput.text;
+            if (index == 1) {
+                ds.paginationMethod = 1;
+                ds.nextPageString = nextPageInput.text;
+                ds.resultsJSONPath = resultCountInput.text;
+            } else if (index == 2) {
+                ds.paginationMethod = 2;
+                ds.limitField = limitFieldNameInput.text;
+                ds.pageField = pageFieldNameInput.text;
+                ds.firstPageNumber = int(startPagingOnInput.text);
+                ds.perPageLimit = int(maxItemsPerPageInput.text);
+            } else {
+                ds.paginationMethod = 3;
+            }
         }
 
         public function validate():Boolean {
             nameInput.errorString = null;
             urlInput.errorString = null;
-            var results:Array = Validator.validateAll([nameValidator,  urlValidator]);
+            var results:Array = Validator.validateAll([nameValidator, urlValidator]);
             if (results.length > 0) {
                 Alert.show("There were one or more errors that need to be corrected.");
                 return false;
             }
             return true;
+        }
+
+        [Bindable]
+        private var perPageLimit:int;
+        [Bindable]
+        private var firstPageNumber:int;
+        [Bindable]
+        private var pageField:String;
+        [Bindable]
+        private var limitField:String;
+
+        [Bindable]
+        private var index:int;
+
+        private function onChange():void {
+            if (paginationGroup.selectedValue == "noPaging") {
+                index = 0;
+            } else if (paginationGroup.selectedValue == "pageByResults") {
+                index = 1;
+            } else if (paginationGroup.selectedValue == "pageByURL") {
+                index = 2;
+            }
         }
 
         [Bindable]
@@ -105,13 +138,43 @@
             <mx:TextInput id="jsonPathInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jsonPath}" width="350"/>
         </mx:FormItem>
     </mx:Form>
-    <mx:TextArea text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." borderStyle="none" editable="false" width="650" height="65" fontSize="11"/>
-    <mx:Form>
-        <mx:FormItem label="Result Count JSONPath (optional):" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="resultCountInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
-        </mx:FormItem>
-        <mx:FormItem label="Next Page URL (optional):" fontFamily="Tahoma" fontWeight="bold">
-            <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
-        </mx:FormItem>
-    </mx:Form>
+    <mx:RadioButtonGroup id="paginationGroup" change="onChange()"/>
+    <mx:HBox>
+        <mx:RadioButton label="No Paging" value="noPaging" groupName="paginationGroup"/>
+        <mx:RadioButton label="Page by # of Results" value="pageByResults" groupName="paginationGroup"/>
+        <mx:RadioButton label="Page by Next Page URL" value="pageByURL" groupName="paginationGroup"/>
+    </mx:HBox>
+    <mx:ViewStack selectedIndex="{index}" creationPolicy="all">
+        <mx:VBox>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." width="650" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="Result Count JSONPath" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="resultCountInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Next Page URL:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="nextPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="If the target JSON API requires paging, you can specify how to page through the data with these next two settings. First, specify a JSONPath expression for retrieving the total number of results. For example, $.total to retrieve a property called total. Next, add the paging URL. Use \{n\} to represent the page number, for example http://etc/source.json?page=\{n\}." width="650" fontSize="11"/>
+            <mx:Form>
+                <mx:FormItem label="Limit Field:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="limitFieldNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{resultCount}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Max Items per Page:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="maxItemsPerPageInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Page Field:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="pageFieldNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+                </mx:FormItem>
+                <mx:FormItem label="Start Paging on Number:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput id="startPagingOnInput" fontWeight="normal" fontFamily="Lucida Grande" text="{nextPage}" width="350"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+    </mx:ViewStack>
+
 </mx:VBox>

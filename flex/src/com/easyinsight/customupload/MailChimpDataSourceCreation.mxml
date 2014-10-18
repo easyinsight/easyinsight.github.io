@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.MailChimpCompositeSource;
+
+        import mx.controls.Button;
+
+        [Bindable]
+        private var token:String;
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new MailChimpCompositeSource();
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:MailChimpCompositeSource = feedDefinition as MailChimpCompositeSource;
+
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:MailChimpCompositeSource = feedDefinition as MailChimpCompositeSource;
+            ds.mailchimpApiKey = tokenInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+    <mx:Form>
+		<mx:FormItem label="MailChimp API Key: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="tokenInput" fontWeight="normal" fontFamily="Lucida Grande" text="{token}" width="300"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:HBox>

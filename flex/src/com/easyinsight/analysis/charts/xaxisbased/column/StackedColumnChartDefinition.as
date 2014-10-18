@@ -16,7 +16,7 @@ import mx.collections.SortField;
 public class StackedColumnChartDefinition extends XAxisDefinition{
 
 
-    public var columnSort:String = ChartDefinition.SORT_UNSORTED;
+    public var columnSort:String = ChartDefinition.SORT_X_ASCENDING;
     public var stackItem:AnalysisItem;
     public var labelPosition:String = "inside";
     public var labelInsideFontColor:int = 0x222222;
@@ -25,7 +25,7 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
     public var labelFontWeight:String = "bold";
     public var legendMaxWidth:int = 200;
     public var multiColors:ArrayCollection = new ArrayCollection();
-    public var stackSort:String = ChartDefinition.SORT_UNSORTED;
+    public var stackSort:String = ChartDefinition.STACK_SORT_ASCENDING;
     public var stackLimit:int = 10;
 
     public function StackedColumnChartDefinition() {
@@ -89,10 +89,11 @@ public class StackedColumnChartDefinition extends XAxisDefinition{
                 results.addItem(newObject);
             }
             var stackVal:Value = object[stackItem.qualifiedName()];
-            var dimensionValue:String = stackVal.toString();
+            var dimensionValue:String = stackItem.getFormatter().format(stackVal.getValue());
+            /*var dimensionValue:String = stackVal.toString();
             if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
-            }
+            }*/
             newObject[xaxis.qualifiedName()] = xVal;
             if (stackVal.links != null) {
                 for (var linkKey:String in stackVal.links) {

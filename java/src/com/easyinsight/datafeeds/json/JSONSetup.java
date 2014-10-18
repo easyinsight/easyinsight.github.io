@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds.json;
 
+import com.easyinsight.analysis.AnalysisItem;
+
 import java.util.List;
 
 /**
@@ -11,7 +13,26 @@ public class JSONSetup {
     private String result;
     private String fieldLine;
     private List<String> fields;
+    private List<AnalysisItem> generatedFields;
     private int results;
+    private String suggestedJSONPath;
+
+
+    public String getSuggestedJSONPath() {
+        return suggestedJSONPath;
+    }
+
+    public void setSuggestedJSONPath(String suggestedJSONPath) {
+        this.suggestedJSONPath = suggestedJSONPath;
+    }
+
+    public List<AnalysisItem> getGeneratedFields() {
+        return generatedFields;
+    }
+
+    public void setGeneratedFields(List<AnalysisItem> generatedFields) {
+        this.generatedFields = generatedFields;
+    }
 
     public int getResults() {
         return results;

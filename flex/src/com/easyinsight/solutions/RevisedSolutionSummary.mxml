@@ -126,8 +126,10 @@
                     event.solution.dataSourceType == DataSourceType.YOUTRACK ||
                     event.solution.dataSourceType == DataSourceType.WUFOO ||
                     event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
+                    event.solution.dataSourceType == DataSourceType.MAILCHIMP ||
                     event.solution.dataSourceType == DataSourceType.INFUSIONSOFT ||
                     event.solution.dataSourceType == DataSourceType.SAMPLE ||
+                    event.solution.dataSourceType == DataSourceType.SALESFORCE ||
                     event.solution.dataSourceType == DataSourceType.LINKEDIN_COMPOSITE ||
                     event.solution.dataSourceType == DataSourceType.NETSUITE ||
                     event.solution.dataSourceType == DataSourceType.REDBOOTH ||
@@ -142,7 +144,7 @@
                 var window:JSONWindow = new JSONWindow();
                 window.addEventListener(AnalyzeEvent.ANALYZE, uploadConfigComplete, false, 0, true);
                 PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
+                PopUpUtil.centerPopUpWithY(window, 20);
             } else {
                 var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
                 dispatchEvent(new ListingChangeEvent(detail));
@@ -189,6 +191,9 @@
                 default:
                     okay = false;
                     break;
+            }
+            if (solution.dataSourceType == DataSourceType.COMPOSITE) {
+                okay = false;
             }
             return okay;
         }

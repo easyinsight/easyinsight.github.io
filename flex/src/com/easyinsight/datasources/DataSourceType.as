@@ -71,6 +71,7 @@ public class DataSourceType {
     public static const ORACLE_SALESCLOUD:int = 257;
     public static const HAPPY_FOX:int = 281;
     public static const INFUSIONSOFT_REPORT:int = 286;
+    public static const MAILCHIMP:int = 288;
 
     public function DataSourceType() {
     }

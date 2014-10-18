@@ -2525,7 +2525,51 @@ public class UserUploadService {
         }
     }
 
-    public JSONSetup describeJSON(String userName, String password, int httpMethod, String url, String jsonPath, String jsonResultPath, String nextPageLink, int page) {
+    public long createJSONSource(JSONDataSource jsonDataSource, List<AnalysisItem> fields) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            long id = jsonDataSource.create(conn, fields, null);
+            jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true, new ArrayList<ReportFault>(), null);
+            return id;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public JSONSetup testJSONConnectivityAndSuggestJSONPath(JSONDataSource jsonDataSource) {
+        SecurityUtil.getUserID();
+        try {
+            return jsonDataSource.testJSONConnectivityAndSuggestJSONPath();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JSONSetup testJSONPath(JSONDataSource jsonDataSource) {
+        SecurityUtil.getUserID();
+        try {
+            return jsonDataSource.jsonString();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JSONSetup testJSONPaging(JSONDataSource jsonDataSource) {
+        SecurityUtil.getUserID();
+        try {
+            return jsonDataSource.testJSONPaging();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*public JSONSetup describeJSON(String userName, String password, int httpMethod, String url, String jsonPath, String jsonResultPath, String nextPageLink, int page) {
         SecurityUtil.getUserID();
         try {
             return JSONDataSource.jsonString(userName, password, httpMethod, url, jsonPath, jsonResultPath, nextPageLink, page);
@@ -2533,7 +2577,7 @@ public class UserUploadService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public InfusionsoftReportInfo getInfusionsoftReports(InfusionsoftCompositeSource infusionsoftCompositeSource) {
         SecurityUtil.authorizeFeedAccess(infusionsoftCompositeSource.getDataFeedID());

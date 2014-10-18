@@ -20,6 +20,7 @@
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.charts.ChartUtil;
         import com.easyinsight.analysis.charts.EILegend;
+        import com.easyinsight.analysis.formatter.DimensionValueFormatter;
 
         import mx.binding.utils.BindingUtils;
         import mx.charts.AxisRenderer;
@@ -201,7 +202,7 @@
             else if (fieldName == "xValue")
                 return(item[xAxisItem.qualifiedName()].toString());
             else
-                return null;
+                return(item[stackItem.qualifiedName()].toString());
         }
 
 
@@ -262,7 +263,7 @@
                 dimensionFormatter = columnChartDef.xaxis.getFormatter();
                 columnSet.xAxisFormatter = dimensionFormatter;
                 columnSet.yAxisFormatter = measureFormatter;
-                columnSet.stackFormatter = stackItem.getFormatter();
+                columnSet.stackFormatter = new DimensionValueFormatter();
                 columnSet.type = "stacked";
 
                 var useCustomColors:Boolean;

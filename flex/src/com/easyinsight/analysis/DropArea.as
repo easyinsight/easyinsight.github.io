@@ -54,6 +54,28 @@ public class DropArea extends Box
         } else if (target == "dateSwitch") {
             AnalysisDateDimension(_analysisItem).dateLevel = event.item.dateLevel;
             dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, this.analysisItem)));
+        } else if (target == "toDistinctCount") {
+            var m:AnalysisMeasure = new AnalysisMeasure();
+            /*
+             analysisItem.concrete = startingAnalysisItem.concrete;
+             analysisItem.lookupTableID = startingAnalysisItem.lookupTableID;
+             analysisItem.basedOnReportField = startingAnalysisItem.basedOnReportField;
+             /*if (analysisItem.getType() == existingType) {
+             analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
+             }*/
+            /*analysisItem.originalDisplayName = startingAnalysisItem.originalDisplayName != null ? startingAnalysisItem.originalDisplayName : startingAnalysisItem.display;
+            analysisItem.unqualifiedDisplayName = fieldNameInput.text;
+            analysisItem.displayName = fieldNameInput.text;
+            analysisItem.key = key;*/
+            m.aggregation = AggregationTypes.COUNT_DISTINCT;
+            m.key = _analysisItem.key;
+            m.concrete = _analysisItem.concrete;
+            m.lookupTableID = _analysisItem.lookupTableID;
+            m.basedOnReportField = _analysisItem.basedOnReportField;
+            m.originalDisplayName = _analysisItem.originalDisplayName;
+            m.unqualifiedDisplayName = _analysisItem.unqualifiedDisplayName;
+            m.displayName = _analysisItem.displayName;
+            dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, m)));
         } else if (target == "filterOnField") {
             dispatchEvent(new ReportEditorFieldEvent(ReportEditorFieldEvent.ITEM_FILTER, new AnalysisItemWrapper(new AnalysisItemNode(_analysisItem))));
         } else if (target == "xtabSwap") {
@@ -235,6 +257,9 @@ public class DropArea extends Box
             options.addItem({label: "Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.MONTH_LEVEL});
             options.addItem({label: "Week - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.WEEK_LEVEL});
             options.addItem({label: "Day - Month - Year", data: "dateSwitch", dateLevel: AnalysisItemTypes.DAY_LEVEL});
+        } else if (_analysisItem != null && _analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            options.addItem({type: "separator"});
+            options.addItem({label: "Convert to Distinct Count", data: "toDistinctCount"});
         }
         if (_report is CrosstabDefinition && CrosstabDefinition(_report).columns != null && CrosstabDefinition(_report).columns.length > 0 &&
                 _analysisItem == CrosstabDefinition(_report).columns.getItemAt(0) && CrosstabDefinition(_report).rows != null && CrosstabDefinition(_report).rows.length > 0) {
