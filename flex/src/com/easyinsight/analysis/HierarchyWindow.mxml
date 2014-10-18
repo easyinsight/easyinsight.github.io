@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:feed="com.easyinsight.administration.feed.*"
+<mx:HDividedBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:feed="com.easyinsight.administration.feed.*"
         implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
@@ -122,4 +122,4 @@
     </mx:VBox>
 
 
-</mx:HBox>
+</mx:HDividedBox>

@@ -104,6 +104,21 @@ public class Row implements IRow, Serializable, Cloneable {
         return value;
     }
 
+    public Value getValueNullOnEmpty(Key rowName) {
+        Short key = dataSetKeys.getKeyNoAdd(rowName);
+        if (key == null) {
+            return null;
+        }
+        if (key >= valueMap.length) {
+            return null;
+        }
+        Value value = valueMap[key];
+        if (value == null) {
+            return null;
+        }
+        return value;
+    }
+
     public Value getValueNoAdd(Key rowName) {
         Short key = dataSetKeys.getKeyNoAdd(rowName);
         if (key == null) {
@@ -165,7 +180,7 @@ public class Row implements IRow, Serializable, Cloneable {
         }
     }
 
-    public Collection<Key> getKeys() {
+    public List<Key> getKeys() {
         return dataSetKeys.getKeys();
     }
 
@@ -176,7 +191,8 @@ public class Row implements IRow, Serializable, Cloneable {
     }
 
     public void addValues(IRow row) {
-        for (Key key : row.getKeys()) {
+        for (int i = 0; i < row.getKeys().size(); i++) {
+            Key key = row.getKeys().get(i);
             Value value = row.getValue(key);
             if (value != null) {
                 addValue(key, value);
@@ -186,7 +202,8 @@ public class Row implements IRow, Serializable, Cloneable {
 
     public Map<Key, Value> getValues() {
         Map<Key, Value> values = new HashMap<Key, Value>();
-        for (Key key : dataSetKeys.getKeys()) {
+        for (int i = 0; i < dataSetKeys.getKeys().size(); i++) {
+            Key key = dataSetKeys.getKeys().get(i);
             Value value = getValue(key);
             if (value != null) {
                 values.put(key, value);

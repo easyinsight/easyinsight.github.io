@@ -8,9 +8,9 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
-
-
-
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
                         var s1 = data["values"];
                         var maxLabelSize = d3.max(s1, function(d) {
                             return d3.max(d.values, function(e) { return e.x.length } );
@@ -94,6 +94,10 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
                         var height = Chart.chartHeightWithIFrame(target, styleProps, iframedInUI);
+
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var s1 = data["values"];
 
@@ -214,7 +218,6 @@ Chart = {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
                     generate: function() {
-
                         var s1 = data["values"][0];
 
                         var title = s1.title;
@@ -251,7 +254,9 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
-
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
                         var s1 = data["values"];
 
                         var colors = [];
@@ -344,6 +349,9 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
                         var chart;
 
                         var s1 = data["values"];
@@ -499,6 +507,12 @@ Chart = {
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
+
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
+
+
                         if (data["variableHeight"]) {
                             var dLen = s1[0].values.length;
                             height = dLen * 25 + 60;
@@ -644,7 +658,6 @@ Chart = {
 
     chartHeight:function (target, styleProps) {
         var height;
-        //alert("target height =  " + $('#'+target+"").height());
         var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
         if (customHeight > -1) {
 
@@ -684,6 +697,9 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var chart = nv.models.scatterChart()
                             .height(height)
@@ -894,6 +910,9 @@ Chart = {
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var chart = nv.models.lineChart()
                             //.width(width)
@@ -973,6 +992,9 @@ Chart = {
                     generate: function() {
 
                         var height = Chart.chartHeight(target, styleProps);
+                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
+                            $("#d3Div" + target).height(height);
+                        }
 
                         var s1 = data["values"];
 

@@ -15,7 +15,7 @@ import mx.collections.SortField;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSStackedBarChartDefinition")]
 public class StackedBarChartDefinition extends YAxisDefinition{
 
-    public var columnSort:String = ChartDefinition.SORT_UNSORTED;
+    public var columnSort:String = ChartDefinition.SORT_Y_ASCENDING;
     public var stackItem:AnalysisItem;
     public var labelPosition:String = "inside";
     public var labelInsideFontColor:int = 0x222222;
@@ -24,7 +24,7 @@ public class StackedBarChartDefinition extends YAxisDefinition{
     public var labelFontWeight:String = "bold";
     public var legendMaxWidth:int = 200;
     public var multiColors:ArrayCollection = new ArrayCollection();
-    public var stackSort:String = ChartDefinition.SORT_UNSORTED;
+    public var stackSort:String = ChartDefinition.STACK_SORT_ASCENDING;
     public var stackLimit:int = 10;
     public var dateAxis:Boolean;
 
@@ -88,10 +88,10 @@ public class StackedBarChartDefinition extends YAxisDefinition{
                 results.addItem(newObject);
             }
             var stackVal:Value = object[stackItem.qualifiedName()];
-            var dimensionValue:String = stackVal.toString();
-            if (dimensionValue == null || dimensionValue == "") {
+            var dimensionValue:String = stackItem.getFormatter().format(stackVal.getValue());
+            /*if (dimensionValue == null || dimensionValue == "") {
                 dimensionValue = "(No Value)";
-            }
+            }*/
             if (stackVal.links != null) {
                 for (var linkKey:String in stackVal.links) {
                     newObject[dimensionValue + linkKey + "_link"] = stackVal.links[linkKey];

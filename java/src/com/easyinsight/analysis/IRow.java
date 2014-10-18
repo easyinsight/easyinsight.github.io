@@ -3,11 +3,9 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jboe
@@ -38,6 +36,9 @@ public interface IRow {
 
     public Value getValueNoAdd(Key rowName);
 
+    @Nullable
+    public Value getValueNullOnEmpty(Key rowName);
+
     void addValue(Key tag, Value value);
 
     void addValue(String tag, String value);
@@ -52,7 +53,7 @@ public interface IRow {
 
     IRow merge(IRow row, DataSet dataSet);
 
-    Collection<Key> getKeys();
+    List<Key> getKeys();
 
     void addValues(IRow row);
 

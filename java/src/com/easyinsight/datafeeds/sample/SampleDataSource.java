@@ -92,6 +92,7 @@ public class SampleDataSource extends CompositeServerDataSource {
         types.add(FeedType.SAMPLE_SALES);
         types.add(FeedType.SALES_HISTORY);
         types.add(FeedType.SAMPLE_TASKS);
+        types.add(FeedType.SAMPLE_LEADS);
         return types;
     }
 

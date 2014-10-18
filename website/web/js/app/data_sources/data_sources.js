@@ -384,7 +384,7 @@
             }
         }])
 
-    eiDataSources.controller("combineDifferentSourcesController", ["$scope", "$modal", "$http", function($scope, $modal, $http) {
+    eiDataSources.controller("combineDifferentSourcesController", ["$scope", "$modal", "$http", "$location", function($scope, $modal, $http, $location) {
         $scope.removeSelectedDS = function() {
             $scope.to_delete = $scope.composite.data_sources.filter(function(e, i, l) {
                 return e.selected;
@@ -417,7 +417,10 @@
         }
         $scope.save_composite = function() {
             $scope.saving = $http.post("/app/html/composite", JSON.stringify($scope.composite));
-
+            $scope.saving.then(function(d) {
+                $scope.setLeaving();
+                $location.url("/data_sources/" + d.data.url_key);
+            })
         }
     }])
 
@@ -428,6 +431,9 @@
     eiDataSources.controller("combineDifferentSourcesBaseController", ["$scope", "$http", "$rootScope", "$location", "$modal",
         function($scope, $http, $rootScope, $location, $modal) {
             $scope.leaving = false;
+            $scope.setLeaving = function() {
+                $scope.leaving = true;
+            }
         $rootScope.user_promise.then(function(u) {
             if(!u.designer) {
                 $location.path("/missing");

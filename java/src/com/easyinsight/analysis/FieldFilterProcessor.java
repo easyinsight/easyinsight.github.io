@@ -17,7 +17,7 @@ public class FieldFilterProcessor implements IFilterProcessor {
     }
 
     public void createRow(DataSet resultDataSet, IRow row, FilterDefinition filterDefinition, boolean matched) {
-        IRow newRow = resultDataSet.createRow();
+        IRow newRow = resultDataSet.createRow(row.getKeys().size());
         if (!matched) {
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 row.addValue(analysisItem.createAggregateKey(), new EmptyValue());

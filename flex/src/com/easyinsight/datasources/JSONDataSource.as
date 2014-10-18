@@ -16,6 +16,17 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.datafeeds.json.JSONDataSource")]
 public class JSONDataSource extends ServerDataSourceDefinition {
 
+    /*
+     private int paginationMethod;
+
+     private String nextPageString;
+
+     private int perPageLimit;
+     private int firstPageNumber;
+     private String pageField;
+     private String limitField;
+     */
+
     public var url:String;
     public var userName:String;
     public var password:String;
@@ -24,6 +35,12 @@ public class JSONDataSource extends ServerDataSourceDefinition {
     public var nextPageString:String;
     public var resultsJSONPath:String;
     public var liveSource:Boolean;
+    public var paginationMethod:int;
+    public var perPageLimit:int;
+    public var firstPageNumber:int;
+    public var pageField:String;
+    public var limitField:String;
+    public var offsetField:String;
 
     public function JSONDataSource() {
     }

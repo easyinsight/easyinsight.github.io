@@ -123,15 +123,15 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                             }
                         }
                     }
-                    //for (AnalysisItem item : newFields.values()) {
-                    List<AnalysisItem> generatedFields = guesser.createFeedItems();
-                    for (AnalysisItem item : generatedFields) {
-                        keys.remove(item.getKey().toKeyString());
-                        AnalysisItem existing = newFields.get(item.getKey().toKeyString());
-                        item.setDisplayName(existing.getDisplayName());
-                    }
-                    fields.addAll(generatedFields);
-                    //}
+                        //for (AnalysisItem item : newFields.values()) {
+                        List<AnalysisItem> generatedFields = guesser.createFeedItems();
+                        for (AnalysisItem item : generatedFields) {
+                            keys.remove(item.getKey().toKeyString());
+                            AnalysisItem existing = newFields.get(item.getKey().toKeyString());
+                            item.setDisplayName(existing.getDisplayName());
+                        }
+                        fields.addAll(generatedFields);
+                        //}
                     List<AnalysisItem> others = new ArrayList<>();
                     for (Map.Entry<String, AnalysisItem> entry : newFields.entrySet()) {
                         if (keys.contains(entry.getKey())) {

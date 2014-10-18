@@ -33,6 +33,15 @@ public class JSONUploadContext extends UploadContext {
     private String password;
     private String jsonPath;
     private String nextPagePath;
+    private String offsetField;
+    private int paginationMethod;
+
+
+
+    private int perPageLimit;
+    private int firstPageNumber;
+    private String pageField;
+    private String limitField;
 
     private transient UploadFormat uploadFormat;
     private transient UserUploadService.RawUploadData rawUploadData;
@@ -165,6 +174,12 @@ public class JSONUploadContext extends UploadContext {
         jsonDataSource.setPassword(password);
         jsonDataSource.setJsonPath(jsonPath);
         jsonDataSource.setNextPageString(nextPagePath);
+        jsonDataSource.setPaginationMethod(paginationMethod);
+        jsonDataSource.setLimitField(limitField);
+        jsonDataSource.setOffsetField(offsetField);
+        jsonDataSource.setPageField(pageField);
+        jsonDataSource.setFirstPageNumber(firstPageNumber);
+        jsonDataSource.setPerPageLimit(perPageLimit);
         long id = jsonDataSource.create(conn, analysisItems, null);
         jsonDataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", null, true, new ArrayList<ReportFault>(), null);
         return id;
@@ -221,5 +236,53 @@ public class JSONUploadContext extends UploadContext {
 
     public void setNextPagePath(String nextPagePath) {
         this.nextPagePath = nextPagePath;
+    }
+
+    public int getPaginationMethod() {
+        return paginationMethod;
+    }
+
+    public void setPaginationMethod(int paginationMethod) {
+        this.paginationMethod = paginationMethod;
+    }
+
+    public int getPerPageLimit() {
+        return perPageLimit;
+    }
+
+    public void setPerPageLimit(int perPageLimit) {
+        this.perPageLimit = perPageLimit;
+    }
+
+    public int getFirstPageNumber() {
+        return firstPageNumber;
+    }
+
+    public void setFirstPageNumber(int firstPageNumber) {
+        this.firstPageNumber = firstPageNumber;
+    }
+
+    public String getPageField() {
+        return pageField;
+    }
+
+    public void setPageField(String pageField) {
+        this.pageField = pageField;
+    }
+
+    public String getLimitField() {
+        return limitField;
+    }
+
+    public void setLimitField(String limitField) {
+        this.limitField = limitField;
+    }
+
+    public String getOffsetField() {
+        return offsetField;
+    }
+
+    public void setOffsetField(String offsetField) {
+        this.offsetField = offsetField;
     }
 }

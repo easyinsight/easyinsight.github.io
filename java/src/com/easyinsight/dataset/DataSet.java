@@ -173,9 +173,9 @@ public class DataSet implements Serializable, Cloneable {
 
     public ListTransform listTransform(List<AnalysisItem> columns, Set<Integer> skipAggregations, Map<UniqueKey, AnalysisItem> uniqueItems, Map<String, UniqueKey> fieldToUniques, int tier) {
         ListTransform listTransform = new ListTransform(skipAggregations);
-        Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
-        Collection<AnalysisDimension> ungroupedDimensions = new ArrayList<AnalysisDimension>();
-        Map<AnalysisItem, AnalysisItem> keyMapping = new HashMap<AnalysisItem, AnalysisItem>();
+        List<AnalysisDimension> ourDimensions = new ArrayList<>();
+        List<AnalysisDimension> ungroupedDimensions = new ArrayList<>();
+        Map<AnalysisItem, AnalysisItem> keyMapping = new HashMap<>();
         for (AnalysisItem column : columns) {
             if (column.hasType(AnalysisItemTypes.DIMENSION)) {
                 AnalysisDimension analysisDimension = (AnalysisDimension) column;
@@ -205,26 +205,35 @@ public class DataSet implements Serializable, Cloneable {
                 }
             }
         }
-        Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
-        List<String> keys = new ArrayList<String>();
+        List<AnalysisItem> paredDownColumns = new ArrayList<>(new LinkedHashSet<>(columns));
+        List<String> keys = new ArrayList<String>(rows.size());
+        int ungroupedDimCount = ungroupedDimensions.size();
+        int ourDimCount = ourDimensions.size();
+        int baseLen = ourDimensions.size() + 1;
+        int size = baseLen + (ourDimensions.size() * 10);
         for (int i = 0; i < rows.size(); i++) {
             IRow row = rows.get(i);
-            StringBuilder keyBuilder = new StringBuilder();
-            for (AnalysisDimension dimension : ourDimensions) {
-                Value dimensionValue = row.getValue(dimension.createAggregateKey());
-                keyBuilder.append(dimension.qualifiedName()).append(":").append(dimensionValue.performantString()).append(":");
-            }
-            for (AnalysisDimension dimension : ungroupedDimensions) {
-                if (uniqueItems != null && uniqueItems.size() > 0) {
-                    keyBuilder.append(dimension.qualifiedName());    
+            StringBuilder keyBuilder = new StringBuilder(size);
+            for (int j = 0; j < ourDimCount; j++) {
+                AnalysisDimension dimension = ourDimensions.get(j);
+                Value dimensionValue = row.getValueNullOnEmpty(dimension.createAggregateKey());
+                if (dimensionValue == null) {
+                    keyBuilder.append(j).append(":").append("").append(":");
                 } else {
-                    keyBuilder.append(dimension.qualifiedName()).append(":").append(i);
+                    keyBuilder.append(j).append(":").append(dimensionValue.performantString()).append(":");
+                }
+            }
+            for (int j = 0; j < ungroupedDimCount; j++) {
+                if (uniqueItems != null && uniqueItems.size() > 0) {
+                    keyBuilder.append(j + ourDimCount);
+                } else {
+                    keyBuilder.append(j + ourDimCount).append(":").append(i);
                 }
             }
             String key = keyBuilder.toString();
             keys.add(key);
         }
-        
+
         listTransform.addCompositeKeys(keys);
         listTransform.addColumns(paredDownColumns);
         for (int i = 0; i < rows.size(); i++) {
@@ -233,7 +242,8 @@ public class DataSet implements Serializable, Cloneable {
             if (row.getPassthroughRow() != null) {
                 listTransform.add(key, row.getPassthroughRow());
             }
-            for (AnalysisItem column : paredDownColumns) {
+            for (int k = 0; k < paredDownColumns.size(); k++) {
+                AnalysisItem column = paredDownColumns.get(k);
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
                     Value value = row.getValue(measure.createAggregateKey());
@@ -255,7 +265,7 @@ public class DataSet implements Serializable, Cloneable {
             }
         }
         return listTransform;
-    }    
+    }
 
     public void addRow(IRow row) {
         rows.add(row);
@@ -268,13 +278,10 @@ public class DataSet implements Serializable, Cloneable {
         for (IRow row : getRows()) {
             int columnCount = 0;
             listRows[rowCount] = new ListRow();
-            for (Value value : row.getValues().values()) {
-                value.setDrillThroughValues(null);
-                value.setDrillThroughs(null);
-            }
             Value[] values = new Value[columns.size()];
             listRows[rowCount].setValues(values);
-            for (AnalysisItem analysisItem : columns) {
+            for (int i = 0; i < columns.size(); i++) {
+                AnalysisItem analysisItem = columns.get(i);
                 Key key = analysisItem.createAggregateKey();
                 listRows[rowCount].getValues()[columnCount] = analysisItem.polishValue(row.getValue(key));
                 columnCount++;
@@ -349,14 +356,15 @@ public class DataSet implements Serializable, Cloneable {
             }
         }
 
+        EmptyValue empty = new EmptyValue();
         for (IRow row : rows) {
             for (Key key : keySet) {
-                Value value = row.getValue(key);
+                Value value = row.getValueNullOnEmpty(key);
                 if (value == null) {
-                    row.addValue(key, new EmptyValue());
+                    row.addValue(key, empty);
                 } else if (value.type() == Value.STRING) {
                     if ("".equals(value.toString())) {
-                        row.addValue(key, new EmptyValue());
+                        row.addValue(key, empty);
                     }
                 }
             }

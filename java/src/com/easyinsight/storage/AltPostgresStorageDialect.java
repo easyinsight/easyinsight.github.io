@@ -10,6 +10,7 @@ import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.InsightRequestMetadata;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
@@ -199,8 +200,8 @@ public class AltPostgresStorageDialect implements IStorageDialect {
             //csvWriter.close();
             fos.close();
             files.add(file);
-            System.out.println("starting new file of " + tableName + files.size() + ".csv" );
-            file = new File(tableName + files.size() + ".csv");
+            System.out.println("starting new file of " + tableName + files.size() + ".csv");
+            file = new File(ConfigLoader.instance().getRedshiftCSVPath() + File.separator + tableName + files.size() + ".csv");
             fos = new FileOutputStream(file);
             bos = new BufferedOutputStream(fos, 512);
             //csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));
@@ -323,7 +324,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
 
             fileName = tableName + ".csv";
 
-            file = new File(fileName);
+            file = new File(ConfigLoader.instance().getRedshiftCSVPath() + File.separator + fileName);
             fos = new FileOutputStream(file);
             bos = new BufferedOutputStream(fos, 512);
             //csvWriter = new CsvWriter(bos, '|', Charset.forName("UTF-8"));

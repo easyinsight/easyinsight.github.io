@@ -985,7 +985,7 @@ $(function () {
                                 selMap[mo] = false;
                             }
                         }
-                        if(d.values.length > 100) {
+                        if(d.values.length > 300) {
                             d.error = "Too many values, please refine your search."
                         } else {
                             $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selMap }, results: d }));
