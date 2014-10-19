@@ -93,8 +93,9 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         try {
                             Statement statement = connection.createStatement();
                             String pagedQuery = query;
-                            if (usePaging() && !query.contains("limit")) {
-                                pagedQuery = pagedQuery + " limit 100";
+                            if (usePaging() && !query.toLowerCase().contains(" limit ")) {
+                                pagedQuery = query.replace(";", "") + " limit 100";
+                                System.out.println(pagedQuery);
                             }
                             ResultSet rs = statement.executeQuery(pagedQuery);
                             rs.next();
@@ -215,8 +216,8 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                 int ctr;
                 do {
                     ctr = 0;
-                    if (usePaging() && !query.contains("limit")) {
-                        pagedQuery = query + " limit 10000 offset " + offset;
+                    if (usePaging() && !query.toLowerCase().contains(" limit ")) {
+                        pagedQuery = query.replace(";", "") + " limit 10000 offset " + offset;
                         System.out.println(pagedQuery);
                     }
 
