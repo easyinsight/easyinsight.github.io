@@ -335,6 +335,8 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                         account.setAccountState(Account.BILLING_FAILED);
                     } else if (ss.getStatus() == Subscription.Status.CANCELED) {
                         account.setAccountState(Account.CLOSED);
+                    } else if (ss.getStatus() == Subscription.Status.PENDING) {
+                        // nothing yet
                     } else {
                         account.setAccountState(Account.DELINQUENT);
                     }
