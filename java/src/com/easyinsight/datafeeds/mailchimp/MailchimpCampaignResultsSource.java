@@ -78,9 +78,6 @@ public class MailchimpCampaignResultsSource extends ServerDataSourceDefinition {
             int i = 0;
             for (String id : campaignIDs)
             {
-                if (i == 5) {
-                    break;
-                }
                 loadingProgress(0, 0, "Retrieving results for campaign " + i++ + " of " + campaignIDs.size() + "...", callDataID);
                 String urlString = "https://"+dataCenter+".api.mailchimp.com/export/1.0/campaignSubscriberActivity/?apikey="+apiKey+"&id=" + id + "&include_empty=true";
                 if (lastRefreshDate != null) {
