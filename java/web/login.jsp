@@ -172,7 +172,11 @@
                 <button class="btn btn-inverse" type="submit" value="Sign In">Sign In</button>
                 <%--<button class="btn" id="googleApps">Sign In With <img src="/images/apps_logo_3D_online_medium.png" alt="Google Apps Login" height="16" width="72" /></button>--%>
                 <div class="signInBar" style="padding-top: 10px">
+                    <%
+                        if (request.getParameter("subdomain") == null) {
+                    %>
                     <a href="<%= RedirectUtil.getURL(request, "/app/newaccountb")%>" style="font-size: 12px">No account yet?</a>
+                    <% } %>
                     <a href="<%= RedirectUtil.getURL(request, "/app/forgot.jsp")%>" style="font-size: 12px;float:right">Forgot your password?</a>
                 </div>
             </form>
