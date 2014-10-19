@@ -78,12 +78,16 @@ public class MailchimpCampaignResultsSource extends ServerDataSourceDefinition {
             int i = 0;
             for (String id : campaignIDs)
             {
+                if (i == 5) {
+                    break;
+                }
                 loadingProgress(0, 0, "Retrieving results for campaign " + i++ + " of " + campaignIDs.size() + "...", callDataID);
-                String urlString = "https://"+dataCenter+".api.mailchimp.com/export/1.0/campaignSubscriberActivity/?apikey="+apiKey+"&id=" + id;
+                String urlString = "https://"+dataCenter+".api.mailchimp.com/export/1.0/campaignSubscriberActivity/?apikey="+apiKey+"&id=" + id + "&include_empty=true";
                 if (lastRefreshDate != null) {
                     String since = sdf.format(lastRefreshDate);
                     urlString += "&since="+ URLEncoder.encode(since, "UTF-8");
                 }
+
                 URL url = new URL(urlString);
 
 
@@ -98,12 +102,20 @@ public class MailchimpCampaignResultsSource extends ServerDataSourceDefinition {
                 while ((line = in.readLine()) != null) {
                     ByteArrayInputStream bais = new ByteArrayInputStream(line.getBytes());
                     Map entry = (Map) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(bais);
+
                     for (Object oe : entry.entrySet()) {
 
                         Map.Entry e = (Map.Entry) oe;
                         String email = (String) e.getKey();
+                        IRow sendRow = dataSet.createRow();
+                        sendRow.addValue(keys.get(EMAIL), email);
+                        sendRow.addValue(keys.get(ACTION), "send");
+                        sendRow.addValue(keys.get(COUNT), 1);
+                        sendRow.addValue(keys.get(CAMPAIGN_ID), id);
+
                         List<Map> events = (List<Map>) e.getValue();
                         for (Map event : events) {
+                            //System.out.println(event);
                             String action = event.get("action").toString();
                             String timestamp = event.get("timestamp").toString();
                             Date date = sdf.parse(timestamp);

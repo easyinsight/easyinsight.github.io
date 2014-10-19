@@ -55,7 +55,7 @@ public class UserAccountAdminService {
             final String accountName = admin.getAccount().getName();
             final String loginURL;
             if (user.getAccount().isSubdomainEnabled()) {
-                loginURL = "https://therapyworks.easy-insight.com/";
+                loginURL = "https://"+admin.getAccount().getSubdomain()+".easy-insight.com/";
             } else {
                 loginURL = "https://www.easy-insight.com/app";
             }
@@ -530,16 +530,17 @@ public class UserAccountAdminService {
         long accountID = SecurityUtil.getAccountID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, ACCOUNT.subdomain_enabled FROM USER, ACCOUNT WHERE USER.USER_ID = ? AND ACCOUNT.ACCOUNT_ID = ? AND " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT EMAIL, ACCOUNT.subdomain_enabled, ACCOUNT.subdomain FROM USER, ACCOUNT WHERE USER.USER_ID = ? AND ACCOUNT.ACCOUNT_ID = ? AND " +
                     "USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
             queryStmt.setLong(1, userID);
             queryStmt.setLong(2, accountID);
             ResultSet rs = queryStmt.executeQuery();
             rs.next();
             boolean subdomainEnabled = rs.getBoolean(2);
+            String subdomain = rs.getString(3);
             String loginURL;
             if (subdomainEnabled) {
-                loginURL = "https://therapyworks.easy-insight.com/";
+                loginURL = "https://"+subdomain+".easy-insight.com/";
             } else {
                 loginURL = "https://www.easy-insight.com/";
             }
@@ -625,7 +626,7 @@ public class UserAccountAdminService {
                     final String accountName = account.getName();
                     final String loginURL;
                     if (account.isSubdomainEnabled()) {
-                        loginURL = "https://therapyworks.easy-insight.com/app";
+                        loginURL = "https://"+account.getSubdomain()+".easy-insight.com/app";
                     } else {
                         loginURL = "https://www.easy-insight.com/app";
                     }
