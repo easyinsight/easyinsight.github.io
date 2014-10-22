@@ -114,7 +114,7 @@ public class HtmlServlet extends HttpServlet {
                 List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
 
                 String drillThroughKey = req.getParameter("drillThroughKey");
-                if (drillThroughKey != null) {
+                if (drillThroughKey != null && !"undefined".equals(drillThroughKey)) {
                     PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id FROM drillthrough_save WHERE url_key = ?");
                     queryStmt.setString(1, drillThroughKey);
                     ResultSet rs = queryStmt.executeQuery();
@@ -126,12 +126,8 @@ public class HtmlServlet extends HttpServlet {
                     ResultSet filterRS = filterStmt.executeQuery();
                     while (filterRS.next()) {
                         Session hibernateSession = Database.instance().createSession(conn);
-                        boolean fieldIsDrillthroughAddition = filterRS.getBoolean(1);
                         FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
                         filter.afterLoad();
-                        /*if (fieldIsDrillthroughAddition) {
-                            report.getAddedItems().add(filter.getField());
-                        }*/
                         drillthroughFilters.add(filter);
                         hibernateSession.close();
                     }
@@ -155,7 +151,6 @@ public class HtmlServlet extends HttpServlet {
                         Session hibernateSession = Database.instance().createSession(conn);
                         FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
                         filter.afterLoad();
-                        //drillthroughFilters.add(filter);
                         hibernateSession.close();
                         if (!filter.isShowOnReportView()) {
                             report.getFilterDefinitions().add(filter);
