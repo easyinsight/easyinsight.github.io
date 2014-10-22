@@ -6,12 +6,15 @@ import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStackPositions;
 import com.easyinsight.dashboard.FilterPositionKey;
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.html.FilterUtils;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Session;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -19,7 +22,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -74,8 +81,6 @@ public class DashboardPDFServlet extends HttpServlet {
                 }
             }
 
-
-
             Map<String, FilterDefinition> seriouslyReallyTheRealFilters = new HashMap<>();
             for(Map.Entry<FilterPositionKey, FilterDefinition> e : filters.entrySet()) {
                 seriouslyReallyTheRealFilters.put(e.getKey().createURLKey(), e.getValue());
@@ -101,6 +106,39 @@ public class DashboardPDFServlet extends HttpServlet {
                 }
             }
             Dashboard dashboard = new DashboardService().getDashboardView(dashboardID);
+
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                List<FilterDefinition> drillthroughFilters = new ArrayList<>();
+                String drillthroughID = req.getParameter("drillThroughKey");
+                if (drillthroughID != null && !"undefined".equals(drillthroughID)) {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id FROM drillthrough_save WHERE url_key = ?");
+                    queryStmt.setString(1, drillthroughID);
+                    ResultSet rs = queryStmt.executeQuery();
+                    rs.next();
+                    long drillthroughSaveID = rs.getLong(1);
+                    queryStmt.close();
+                    PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id FROM drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
+                    filterStmt.setLong(1, drillthroughSaveID);
+                    ResultSet filterRS = filterStmt.executeQuery();
+                    while (filterRS.next()) {
+                        Session hibernateSession = Database.instance().createSession(conn);
+                        boolean fieldIsDrillthroughAddition = filterRS.getBoolean(1);
+                        FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
+                        filter.afterLoad();
+                            /*if (fieldIsDrillthroughAddition) {
+                                report.getAddedItems().add(filter.getField());
+                            }*/
+                        drillthroughFilters.add(filter);
+                        hibernateSession.close();
+                    }
+                    filterStmt.close();
+                }
+                dashboard.getFilters().addAll(drillthroughFilters);
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            }
             int timezoneOffset = 0;
             if (req.getParameter("timezoneOffset") != null) {
                 timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
