@@ -15,10 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -35,6 +32,8 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
         return new ArrayList<String>();
     }
 
+    private transient Set<String> assignedTos;
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
         List<AnalysisItem> fieldList = new ArrayList<AnalysisItem>();
         Key personIDKey = keys.get(getFeedName() + " PersonID");
@@ -45,6 +44,7 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
         if (companyIDKey == null) {
             companyIDKey = new NamedKey(getFeedName() + " CompanyID");
         }
+        assignedTos = new HashSet<>();
         fieldList.add(new AnalysisDimension(personIDKey));
         fieldList.add(new AnalysisDimension(companyIDKey));
         Batchbook2CompositeSource batchbookCompositeSource = (Batchbook2CompositeSource) parentDefinition;
@@ -87,6 +87,7 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
                         analysisItem = new AnalysisMeasure(key, name, AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY);
                     } else if ("CustomField::AssignedTo".equals(type)) {
                         analysisItem = new AnalysisDimension(key, name);
+                        assignedTos.add(attributeID);
                     } else if ("CustomField::MultipleChoice".equals(type)) {
                         analysisItem = new AnalysisDimension(key, name);
                     }
@@ -130,6 +131,14 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
         try {
             Batchbook2CompositeSource batchbook2CompositeSource = (Batchbook2CompositeSource) parentDefinition;
             HttpClient httpClient = Batchbook2BaseSource.getHttpClient(batchbook2CompositeSource.getToken(), "");
+            Map<String, String> userMap = new HashMap<String, String>();
+            Map users = runV2RestRequest("/users.json", httpClient, batchbook2CompositeSource);
+            List<Map> contactList = (List<Map>) users.get("contacts");
+            for (Map contact : contactList) {
+                String userID = getJSONValue(contact, "id");
+                String displayName = getJSONValue(contact, "display_name");
+                userMap.put(userID, displayName);
+            }
             List<Person> people = batchbook2CompositeSource.getOrCreateCache(httpClient).getPeople();
             for (Person person : people) {
                 List<CustomFieldValue> values = person.getCustomFieldValues();
@@ -138,7 +147,12 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
                         IRow row = dataSet.createRow();
                         row.addValue(keys.get(getFeedName() + " PersonID"), person.getId());
                         for (Map.Entry<String, String> entry : value.getValueMap().entrySet()) {
-                            row.addValue(keys.get(entry.getKey()), entry.getValue());
+                            if (assignedTos.contains(entry.getKey())) {
+                                String user = userMap.get(entry.getValue());
+                                row.addValue(keys.get(entry.getKey()), user);
+                            } else {
+                                row.addValue(keys.get(entry.getKey()), entry.getValue());
+                            }
                         }
                     }
                 }
@@ -151,7 +165,12 @@ public class Batchbook2CustomFieldSource extends Batchbook2BaseSource {
                         IRow row = dataSet.createRow();
                         row.addValue(keys.get(getFeedName() + " CompanyID"), company.getId());
                         for (Map.Entry<String, String> entry : value.getValueMap().entrySet()) {
-                            row.addValue(keys.get(entry.getKey()), entry.getValue());
+                            if (assignedTos.contains(entry.getKey())) {
+                                String user = userMap.get(entry.getValue());
+                                row.addValue(keys.get(entry.getKey()), user);
+                            } else {
+                                row.addValue(keys.get(entry.getKey()), entry.getValue());
+                            }
                         }
                     }
                 }
