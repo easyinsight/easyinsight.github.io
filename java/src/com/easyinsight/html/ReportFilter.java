@@ -70,7 +70,6 @@ public class ReportFilter implements Filter {
 
         }
         chain.doFilter(req, resp);
-        //https://localhost:4443/app/html/report/DRYhkHdFLhKGZfkIFAHa/embed?showToolbar=1&showFilters=1&embedKey=gzQlrQUkhxkr#
     }
 
     public void init(FilterConfig config) throws ServletException {

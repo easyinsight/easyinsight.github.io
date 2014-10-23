@@ -902,6 +902,9 @@ public class AnalysisService {
                 org.apache.poi.ss.usermodel.Row excelRow = rit.next();
                 Cell headerCell = excelRow.getCell(excelRow.getFirstCellNum());
                 String headerValue = headerCell.toString().trim();
+                if ("".equals(headerValue)) {
+                    continue;
+                }
                 Key key = keyMap.get(headerValue);
                 if (key == null) {
                     return "We couldn't find a field by the name of " + headerValue + ".";
@@ -1022,9 +1025,18 @@ public class AnalysisService {
                 recordIDValues.add(row.getValue(recordID));
             }
             filterValueDefinition.setFilteredValues(recordIDValues);
-            DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID(), useSource.getFeedType());
-            ActualRowSet rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
-            readStorage.closeConnection();
+            ActualRowSet rowSet;
+            if (recordIDValues.size() > 0) {
+                DataStorage readStorage = DataStorage.readConnection(useSource.getFields(), useSource.getDataFeedID(), useSource.getFeedType());
+                rowSet = readStorage.allData(recordIDFilters, useSource.getFields(), null, new InsightRequestMetadata());
+                readStorage.closeConnection();
+            } else {
+                rowSet = new ActualRowSet();
+                rowSet.setAnalysisItems(new ArrayList<>());
+                rowSet.setRows(new ArrayList<>());
+            }
+
+
 
 
             Map<ImportKey, ActualRow> existingMap = new HashMap<ImportKey, ActualRow>();

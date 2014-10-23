@@ -1234,19 +1234,39 @@ public class ExportService {
         table.setHeaderRows(1);
         List<TrendOutcome> outcomes = trendDataResults.getTrendOutcomes();
         int i;
+        Color color;
+        Color headerTextColor;
+        int fontSize;
+        if (analysisDefinition instanceof WSTrendGridDefinition) {
+            WSTrendGridDefinition list = (WSTrendGridDefinition) analysisDefinition;
+            fontSize = list.getFontSize();
+            color = new Color(list.getHeaderColor1());
+            headerTextColor = new Color(list.getHeaderTextColor());
+        } else {
+            fontSize = 10;
+            color = new Color(200, 200, 200);
+            headerTextColor = new Color(0, 0, 0);
+        }
+        com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD,
+                new BaseColor(headerTextColor.getRed(), headerTextColor.getGreen(), headerTextColor.getBlue()));
         if (kpiDefinition.getGroupings() != null) {
             for (i = 0; i < kpiDefinition.getGroupings().size(); i++) {
                 AnalysisItem grouping = kpiDefinition.getGroupings().get(i);
-                PdfPCell cell = new PdfPCell(new Phrase(grouping.toUnqualifiedDisplay()));
+                PdfPCell cell = new PdfPCell(new Phrase(grouping.toUnqualifiedDisplay(), boldFont));
                 cell.setMinimumHeight(20f);
-                cell.setBackgroundColor(new BaseColor(180, 180, 180));
+                cell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
                 table.addCell(cell);
             }
         }
-        PdfPCell labelCell = new PdfPCell(new Phrase("Name"));
-        PdfPCell latestValueCell = new PdfPCell(new Phrase("Latest Value"));
-        PdfPCell previousValueCell = new PdfPCell(new Phrase("Previous Value"));
-        PdfPCell percentChangeCell = new PdfPCell(new Phrase("Percent Change"));
+
+        PdfPCell labelCell = new PdfPCell(new Phrase("Name", boldFont));
+        labelCell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
+        PdfPCell latestValueCell = new PdfPCell(new Phrase("Latest Value", boldFont));
+        latestValueCell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
+        PdfPCell previousValueCell = new PdfPCell(new Phrase("Previous Value", boldFont));
+        previousValueCell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
+        PdfPCell percentChangeCell = new PdfPCell(new Phrase("Percent Change", boldFont));
+        percentChangeCell.setBackgroundColor(new BaseColor(color.getRed(), color.getGreen(), color.getBlue()));
         table.addCell(labelCell);
         table.addCell(latestValueCell);
         table.addCell(previousValueCell);
@@ -1259,21 +1279,25 @@ public class ExportService {
                 for (i = 0; i < kpiDefinition.getGroupings().size(); i++) {
                     AnalysisItem grouping = kpiDefinition.getGroupings().get(i);
                     Value value = trendOutcome.getDimensions().get(grouping.qualifiedName());
-                    PdfPCell groupingCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, grouping, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
+                    PdfPCell groupingCell = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, grouping, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true)));
                     groupingCell.setMinimumHeight(20f);
                     table.addCell(groupingCell);
                 }
             }
             PdfPCell labelDataCell = new PdfPCell(new Phrase(trendOutcome.getMeasure().toUnqualifiedDisplay()));
             PdfPCell nowMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getNow(),
-                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
+                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true)));
             PdfPCell previousMeasureStyle = new PdfPCell(new Phrase(createValue(exportMetadata.dateFormat, trendOutcome.getMeasure(), trendOutcome.getHistorical(),
-                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false)));
+                    exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true)));
 
             String percentChangeString;
             if (trendOutcome.getHistorical().toDouble() != 0) {
-                double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble();
-                percentChangeString = percentChange + "%";
+                AnalysisMeasure percentMeasure = new AnalysisMeasure();
+                percentMeasure.setPrecision(1);
+                percentMeasure.setMinPrecision(1);
+                percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+                double percentChange = (trendOutcome.getNow().toDouble() - trendOutcome.getHistorical().toDouble()) / trendOutcome.getHistorical().toDouble() * 100;
+                percentChangeString = createValue(exportMetadata, percentMeasure, new NumericValue(percentChange), true, true);
             } else {
                 percentChangeString = "";
             }
