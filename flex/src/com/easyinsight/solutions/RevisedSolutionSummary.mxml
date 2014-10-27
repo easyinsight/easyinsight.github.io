@@ -128,6 +128,7 @@
                     event.solution.dataSourceType == DataSourceType.INSIGHTLY ||
                     event.solution.dataSourceType == DataSourceType.MAILCHIMP ||
                     event.solution.dataSourceType == DataSourceType.INFUSIONSOFT ||
+                    event.solution.dataSourceType == DataSourceType.INTERNAL ||
                     event.solution.dataSourceType == DataSourceType.SAMPLE ||
                     event.solution.dataSourceType == DataSourceType.SALESFORCE ||
                     event.solution.dataSourceType == DataSourceType.LINKEDIN_COMPOSITE ||
