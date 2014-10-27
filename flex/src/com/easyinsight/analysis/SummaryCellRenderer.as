@@ -181,7 +181,7 @@ public class SummaryCellRenderer extends UITextField implements IListItemRendere
 
         var rext:TextReportFieldExtension = analysisItem.reportFieldExtension as TextReportFieldExtension;
         var align:String = "left";
-        if (rext != null && rext.align != null) {
+        if (rext != null && rext.align != null && rext.align != "Default") {
             align = rext.align.toLowerCase();
         }
         if (_report.getFont() == "Open Sans" && !bold) {
