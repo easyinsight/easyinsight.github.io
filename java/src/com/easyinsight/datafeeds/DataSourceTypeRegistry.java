@@ -30,6 +30,8 @@ import com.easyinsight.datafeeds.highrise.*;
 import com.easyinsight.datafeeds.kashoo.KashooCompositeSource;*/
 import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.insightly.*;
+import com.easyinsight.datafeeds.internal.InternalCompositeSource;
+import com.easyinsight.datafeeds.internal.InternalDataSource;
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.kashoo.KashooAccountSource;
 import com.easyinsight.datafeeds.kashoo.KashooBusinessSource;
@@ -38,10 +40,7 @@ import com.easyinsight.datafeeds.kashoo.KashooRecordSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInCompositeSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
-import com.easyinsight.datafeeds.mailchimp.MailchimpCampaignResultsSource;
-import com.easyinsight.datafeeds.mailchimp.MailchimpCampaignSource;
-import com.easyinsight.datafeeds.mailchimp.MailchimpCompositeSource;
-import com.easyinsight.datafeeds.mailchimp.MailchimpListResultSource;
+import com.easyinsight.datafeeds.mailchimp.*;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
 import com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection;
 import com.easyinsight.datafeeds.oracle.*;
@@ -141,6 +140,7 @@ public class DataSourceTypeRegistry {
         connectionBillingInfoMap.put(FeedType.PIVOTAL_V5_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.FRESHDESK_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
         connectionBillingInfoMap.put(FeedType.HAPPYFOX_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
+        connectionBillingInfoMap.put(FeedType.MAILCHIMP_COMPOSITE, ConnectionBillingType.SMALL_BIZ);
 
         connectionBillingInfoMap.put(FeedType.CLEARDB_COMPOSITE, ConnectionBillingType.CUSTOM_DATA);
         connectionBillingInfoMap.put(FeedType.DATABASE_CONNECTION, ConnectionBillingType.CUSTOM_DATA);
@@ -458,6 +458,9 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.MAILCHIMP_LIST, MailchimpListResultSource.class);
         registerType(FeedType.MAILCHIMP_CAMPAIGN_RESULTS, MailchimpCampaignResultsSource.class);
         registerType(FeedType.MAILCHIMP_CAMPAIGN, MailchimpCampaignSource.class);
+        registerType(FeedType.MAILCHIMP_CAMPAIGN_DETAILS, MailchimpCampaignDetailSource.class);
+        registerType(FeedType.INTERNAL_DATA_SOURCE, InternalDataSource.class);
+        registerType(FeedType.INTERNAL_COMPOSITE, InternalCompositeSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
