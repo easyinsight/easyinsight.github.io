@@ -2125,7 +2125,24 @@ public class AnalysisService {
                             int quarter = Integer.parseInt(String.valueOf(value.toString().charAt(1)));
                             result = String.valueOf(quarter);
                         } else {
-                            Date date = new SimpleDateFormat(format).parse(value.toString());
+                            Date date;
+                            try {
+                                date = new SimpleDateFormat(format).parse(value.toString());
+                            } catch (ParseException e) {
+                                String tempFormat;
+                                if (md.dateFormat == 0) {
+                                    tempFormat = "MM/dd/yyyy";
+                                } else if (md.dateFormat == 1) {
+                                    tempFormat =  "yyyy-MM-dd";
+                                } else if (md.dateFormat == 2) {
+                                    tempFormat = "dd-MM-yyyy";
+                                } else if (md.dateFormat == 3) {
+                                    tempFormat = "dd/MM/yyyy";
+                                } else {
+                                    tempFormat = "dd.MM.yyyy";
+                                }
+                                date = new SimpleDateFormat(tempFormat).parse(value.toString());
+                            }
                             result = new SimpleDateFormat(format).format(date);
                         }
                         filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
