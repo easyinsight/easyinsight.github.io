@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.InternalCompositeSource;
+
+        import mx.controls.Button;
+
+        private var sampleSource:InternalCompositeSource;
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            sampleSource = feedDefinition as InternalCompositeSource;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return new InternalCompositeSource();
+        }
+
+        public function setupButton(button:Button):Function {
+            return null;
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+        ]]></mx:Script>
+</mx:VBox>

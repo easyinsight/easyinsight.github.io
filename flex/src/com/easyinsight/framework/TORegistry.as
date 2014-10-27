@@ -87,6 +87,7 @@ import com.easyinsight.datasources.HighRiseDataSource;
 import com.easyinsight.datasources.HighriseAdditionalToken;
 import com.easyinsight.datasources.InfusionsoftCompositeSource;
 import com.easyinsight.datasources.InsightlyCompositeSource;
+import com.easyinsight.datasources.InternalCompositeSource;
 import com.easyinsight.datasources.JSONDataSource;
 import com.easyinsight.datasources.KashooCompositeDataSource;
 import com.easyinsight.datasources.LinkedInDataSource;
@@ -310,6 +311,7 @@ public class TORegistry {
         var sqlServer:SQLServerDatabaseConnection;
         var oracle:OracleDatabaseConnection;
         var postgres:PostgresDatabaseConnection;
+        var internalSource:InternalCompositeSource;
         var trello:TrelloCompositeSource;
         var infusion:InfusionsoftCompositeSource;
         var netsuite:NetsuiteQueryConnection;
