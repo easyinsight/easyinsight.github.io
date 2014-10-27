@@ -52,65 +52,45 @@ public class RedboothCommentSource extends RedboothBaseSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
 
-        return new DataSet();
-        /*RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
+        RedboothCompositeSource redboothCompositeSource = (RedboothCompositeSource) parentDefinition;
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
 
-        List<Map>  people = (List<Map>) queryList("/api/2/people?count=0", redboothCompositeSource, httpClient);
-        List<Map>  userList = (List<Map>) queryList("/api/2/users?count=0", redboothCompositeSource, httpClient);
+        List<Map>  people = (List<Map>) queryList("/api/3/users?per_page=1000", redboothCompositeSource, httpClient);
+        //List<Map>  personList = (List<Map>) queryList("/api/3/people?per_page=1000", redboothCompositeSource, httpClient);
 
-        Map<String, String> users = new HashMap<String, String>();
-        Map<String, String> persons = new HashMap<String, String>();
-        for (Map ref : userList) {
+        Map<String, String> users = new HashMap<>();
+
+        //Map<String, String> persons = new HashMap<>();
+        for (Map ref : people) {
             users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
         }
-        // average # of days by project type - first due date and project creation date
-        //
-        for (Map ref : people) {
+        /*for (Map ref : personList) {
             persons.put(ref.get("id").toString(), ref.get("user_id").toString());
-        }
+        }*/
 
-        long endID = 0;
         int count;
+        int page = 1;
         Set<String> validIDs = redboothCompositeSource.getValidProjects();
-        do {
-            count = 0;
-            List<Map> organizations;
-            if (endID == 0) {
-                organizations = (List) queryList("/api/2/comments?count=30", redboothCompositeSource, httpClient);
-            } else {
-                organizations = (List) queryList("/api/2/comments?count=30&max_id="+endID, redboothCompositeSource, httpClient);
-            }
-            *//*List<Map> references = (List<Map>) base.get("references");
-            Map<String, String> users = new HashMap<String, String>();
-            for (Map ref : references) {
-                String type = ref.get("type").toString();
-                if ("User".equals(type)) {
-                    users.put(ref.get("id").toString(), ref.get("first_name").toString() + " " + ref.get("last_name").toString());
-                }
-            }*//*
-            //List<Map> organizations = (List<Map>) base.get("objects");
+        for (String taskID : redboothCompositeSource.getTaskIDs()) {
+            List<Map> organizations = (List<Map>) queryList("/api/3/comments?page="+page+"&per_page=1000&target_type=task&target_id=" + taskID, redboothCompositeSource, httpClient);
             for (Map org : organizations) {
-                count++;
                 String projectID = getJSONValue(org, "project_id");
                 if (!validIDs.contains(projectID)) {
                     continue;
                 }
                 IRow row = dataSet.createRow();
                 String id = getJSONValue(org, "id");
-                long numID = Long.parseLong(id);
-                if (endID == 0) {
-                    endID = numID;
-                } else {
-                    endID = Math.min(numID, endID);
-                }
                 row.addValue(keys.get(ID), id);
                 row.addValue(keys.get(BODY), getJSONValue(org, "body"));
                 row.addValue(keys.get(BODY_HTML), getJSONValue(org, "body_html"));
-                row.addValue(keys.get(CREATED_AT), getDate(org, "created_at"));
+                row.addValue(keys.get(CREATED_AT), getDateFromLong(org, "created_at"));
                 row.addValue(keys.get(PROJECT_ID), projectID);
-                row.addValue(keys.get(HOURS), getJSONValue(org, "hours"));
+                String minutes = getJSONValue(org, "minutes");
+                if (minutes != null) {
+                    double m = Double.parseDouble(minutes) / 60;
+                    row.addValue(keys.get(HOURS), m);
+                }
                 String targetType = getJSONValue(org, "target_type");
                 if ("Conversation".equals(targetType)) {
                     row.addValue(keys.get(CONVERSATION_ID), getJSONValue(org, "target_id"));
@@ -121,10 +101,8 @@ public class RedboothCommentSource extends RedboothBaseSource {
                 if (userID != null) {
                     row.addValue(USER_ID, users.get(userID));
                 }
-                System.out.println(endID);
             }
-            System.out.println("comments = " + endID + " - " + count);
-        } while (count == 30);
-        return dataSet;*/
+        }
+        return dataSet;
     }
 }
