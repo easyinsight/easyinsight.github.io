@@ -72,6 +72,7 @@ public class DataSourceType {
     public static const HAPPY_FOX:int = 281;
     public static const INFUSIONSOFT_REPORT:int = 286;
     public static const MAILCHIMP:int = 288;
+    public static const INTERNAL:int = 294;
 
     public function DataSourceType() {
     }

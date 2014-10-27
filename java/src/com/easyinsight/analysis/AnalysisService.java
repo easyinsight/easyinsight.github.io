@@ -2125,7 +2125,24 @@ public class AnalysisService {
                             int quarter = Integer.parseInt(String.valueOf(value.toString().charAt(1)));
                             result = String.valueOf(quarter);
                         } else {
-                            Date date = new SimpleDateFormat(format).parse(value.toString());
+                            Date date;
+                            try {
+                                date = new SimpleDateFormat(format).parse(value.toString());
+                            } catch (ParseException e) {
+                                String tempFormat;
+                                if (md.dateFormat == 0) {
+                                    tempFormat = "MM/dd/yyyy";
+                                } else if (md.dateFormat == 1) {
+                                    tempFormat =  "yyyy-MM-dd";
+                                } else if (md.dateFormat == 2) {
+                                    tempFormat = "dd-MM-yyyy";
+                                } else if (md.dateFormat == 3) {
+                                    tempFormat = "dd/MM/yyyy";
+                                } else {
+                                    tempFormat = "dd.MM.yyyy";
+                                }
+                                date = new SimpleDateFormat(tempFormat).parse(value.toString());
+                            }
                             result = new SimpleDateFormat(format).format(date);
                         }
                         filterValueDefinition.setFilteredValues(Arrays.asList((Object) result));
@@ -3293,6 +3310,22 @@ public class AnalysisService {
                     report.setReportSourceName(rs.getString(1));
                 }
                 stmt.close();
+
+                if (report instanceof WSMultiSummaryDefinition) {
+                    WSMultiSummaryDefinition multiSummary = (WSMultiSummaryDefinition) report;
+                    if (multiSummary.getReports() != null) {
+                        PreparedStatement reportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE FROM ANALYSIS WHERE ANALYSIS.ANALYSIS_ID = ?");
+                        for (InsightDescriptor insightDescriptor : multiSummary.getReports()) {
+                            reportStmt.setLong(1, insightDescriptor.getId());
+                            ResultSet reportRS = reportStmt.executeQuery();
+                            while (reportRS.next()) {
+                                String reportName = reportRS.getString(1);
+                                insightDescriptor.setName(reportName);
+                            }
+                        }
+                        reportStmt.close();
+                    }
+                }
             } finally {
                 Database.closeConnection(conn);
             }

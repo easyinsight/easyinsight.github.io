@@ -346,7 +346,7 @@ var toPDF = function (o, dashboardID, drillthroughID) {
         fullFilters[curFilters[i].id] = curFilters[i];
     }
 
-    var url =  "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset();
+    var url =  "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() +"&drillThroughKey=" + drillthroughID;
 
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
         obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition") {
@@ -650,7 +650,7 @@ var renderReports = function (obj, dashboardID, drillthroughID, force) {
 var fullRenderPDF = function (obj, dashboardID, drillthroughID, pdfData) {
 
     if (obj.type == "report") {
-        pdfData[obj.id] = captureAndReturn(obj);
+        pdfData[obj.id] = captureAndReturn(obj, drillthroughID);
     } else if (obj.type != "text" && obj.type != "image") {
         for (var i = 0; i < obj.children.length; i++) {
             fullRenderPDF(obj.children[i], dashboardID, drillthroughID, pdfData);
@@ -1493,7 +1493,7 @@ $(function () {
             var postData = {dashboardID: dashboardID, configuration : c, reportImages: pdfData};
             busyIndicator.showPleaseWait();
             $.ajax ( {
-                url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID + "&timezoneOffset=" + new Date().getTimezoneOffset(),
+                url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&drillThroughKey=" + drillthroughID,
                 data: JSON.stringify(postData),
                 success: function(data) {
                     var url = data["urlKey"];

@@ -15,6 +15,7 @@ import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.StringWhere;
 import org.apache.commons.httpclient.HttpClient;
 
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.time.ZoneId;
 import java.util.*;
@@ -92,16 +93,6 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
     }
 
     @Override
-    protected String getUpdateKeyName() {
-        return TICKET_ID;
-    }
-
-    @Override
-    protected boolean clearsData(FeedDefinition parentSource) {
-        return false;
-    }
-
-    @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
             //DataSet dataSet = new DataSet();
@@ -119,9 +110,9 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
             do {
                 Map response;
                 if (page == 1) {
-                    response = runRestRequestForMap("tickets/", client, happyFoxCompositeSource);
+                    response = runRestRequestForMap("tickets/?size=50&show_updates=0", client, happyFoxCompositeSource);
                 } else {
-                    response = runRestRequestForMap("tickets/?size=5000&page=" + page, client, happyFoxCompositeSource);
+                    response = runRestRequestForMap("tickets/?size=50&page=" + page+"&show_updates=0", client, happyFoxCompositeSource);
                 }
 
                 Map pageInfo = (Map) response.get("page_info");
@@ -167,7 +158,12 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
                         row.addValue(keys.get(TICKET_CREATED_BY), getValue(user, "name"));
                         row.addValue(keys.get(TICKET_CREATED_BY_ID), getValue(user, "id"));
                     }
-                    row.addValue(keys.get(ASSIGNED_TO), getJSONValue(ticket, "assignedTo"));
+                    Map assignedToID = (Map) ticket.get("assigned_to");
+                    if (assignedToID != null) {
+                        String email = getJSONValue(assignedToID, "name");
+                        row.addValue(keys.get(ASSIGNED_TO), email);
+                    }
+
 
                     row.addValue(keys.get(TICKET_ID), ticketID);
                     //if (lastRefreshDate != null && lastRefreshDate.before(updateDate)) {
@@ -248,13 +244,7 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
                     }
                 }
 
-                if (lastRefreshDate == null) {
-                    IDataStorage.insertData(fullSet);
-                } else {
-                    for (Map.Entry<String, DataSet> entry : map.entrySet()) {
-                        IDataStorage.updateData(entry.getValue(), Arrays.asList(new StringWhere(keys.get(TICKET_ID), entry.getKey())));
-                    }
-                }
+                IDataStorage.insertData(fullSet);
             } while (page <= pageCount);
             return null;
         } catch (ReportException e) {

@@ -75,7 +75,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(redboothCompositeSource);
 
-        List<Map>  people = (List<Map>) queryList("/api/3/users?per_page=1000", redboothCompositeSource, httpClient);
+        List<Map>  people = (List<Map>) queryList("/api/3/users?per_page=50", redboothCompositeSource, httpClient);
         List<Map>  personList = (List<Map>) queryList("/api/3/people?per_page=1000", redboothCompositeSource, httpClient);
 
         Map<String, String> users = new HashMap<>();
@@ -88,6 +88,8 @@ public class RedboothTaskSource extends RedboothBaseSource {
             persons.put(ref.get("id").toString(), ref.get("user_id").toString());
         }
 
+
+        Set<String> taskIDs = new HashSet<>();
         int count;
         int page = 1;
         do {
@@ -104,6 +106,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
                 IRow row = dataSet.createRow();
                 String id = getJSONValue(org, "id");
                 row.addValue(keys.get(ID), id);
+                taskIDs.add(id);
                 row.addValue(keys.get(NAME), getJSONValue(org, "name"));
                 //row.addValue(keys.get(NAME), getJSONValue(org, "name"));
                 row.addValue(keys.get(PROJECT_ID), projectID);
@@ -121,7 +124,10 @@ public class RedboothTaskSource extends RedboothBaseSource {
                 if (assignedID != null) {
                     String userID = persons.get(assignedID);
                     if (userID != null) {
-                        row.addValue(ASSIGNED_TO, users.get(userID));
+                        String userName = users.get(userID);
+                        row.addValue(ASSIGNED_TO, userName);
+                    } else {
+                       // System.out.println("could not find person " + assignedID);
                     }
                 }
                 row.addValue(TOTAL_SUBTASKS, getJSONValue(org, "subtasks_count"));
@@ -140,6 +146,7 @@ public class RedboothTaskSource extends RedboothBaseSource {
             }
             page++;
         } while (count == 1000);
+        redboothCompositeSource.setTaskIDs(taskIDs);
         return dataSet;
     }
 }

@@ -42,6 +42,7 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
 
     private String accessToken;
     private String refreshToken;
+    private transient Set<String> taskIDs;
 
     public RedboothCompositeSource() {
         setFeedName("Redbooth");
@@ -71,6 +72,14 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
     @Override
     public FeedType getFeedType() {
         return FeedType.REDBOOTH_COMPOSITE;
+    }
+
+    public Set<String> getTaskIDs() {
+        return taskIDs;
+    }
+
+    public void setTaskIDs(Set<String> taskIDs) {
+        this.taskIDs = taskIDs;
     }
 
     @Override
@@ -105,6 +114,12 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
         Set<Integer> set = new HashSet<Integer>();
         for (IServerDataSourceDefinition s : children) {
             if (s.getFeedType().getType() == FeedType.REDBOOTH_PROJECT.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.REDBOOTH_TASK.getType()) {
                 set.add(s.getFeedType().getType());
                 end.add(s);
             }

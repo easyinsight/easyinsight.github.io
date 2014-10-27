@@ -318,6 +318,9 @@ public class FeedType implements Serializable {
     public static final FeedType MAILCHIMP_LIST = new FeedType(289);
     public static final FeedType MAILCHIMP_CAMPAIGN_RESULTS = new FeedType(290);
     public static final FeedType MAILCHIMP_CAMPAIGN = new FeedType(291);
+    public static final FeedType MAILCHIMP_CAMPAIGN_DETAILS = new FeedType(292);
+    public static final FeedType INTERNAL_DATA_SOURCE = new FeedType(293);
+    public static final FeedType INTERNAL_COMPOSITE = new FeedType(294);
 
     public FeedType() {
     }

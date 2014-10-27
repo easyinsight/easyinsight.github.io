@@ -82,7 +82,9 @@ public class LinkedInPeopleSource extends ServerDataSourceDefinition {
             int count;
             do {
                 count = 0;
-                URL url = new URL("http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,headline,industry,public-profile-url,num-connections,positions)?start=" + start + "&count=250");
+                String urlString = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,headline,industry,public-profile-url,num-connections,positions)?start=" + start + "&count=50";
+                System.out.println(urlString);
+                URL url = new URL(urlString);
                 HttpURLConnection request = (HttpURLConnection) url.openConnection();
 
                 // sign the request
@@ -100,7 +102,7 @@ public class LinkedInPeopleSource extends ServerDataSourceDefinition {
                     count++;
                     fromPerson(keys, dataSet, person);
                 }
-            } while (count == 250);
+            } while (count == 50);
         } catch (IOException ioe) {
             ioe.printStackTrace();
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your LinkedIn data.", this));
