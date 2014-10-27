@@ -6,6 +6,7 @@ import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
@@ -25,6 +26,7 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
     public static final String PROJECT_ID = "Project ID";
     public static final String PROJECT_NAME = "Project Name";
     public static final String PROJECT_DETAILS = "Project Details";
+
     public static final String OPPORTUNITY_ID = "Project Opportunity ID";
     public static final String STARTED_DATE = "Project Started Date";
     public static final String COMPLETED_DATE = "Project Completed Date";
@@ -35,24 +37,34 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
     public static final String DATE_UPDATED = "Project Date Updated";
     public static final String PROJECT_COUNT = "Project Count";
 
+    public static final String PROJECT_STATUS = "Project Status";
+    public static final String PROJECT_CURRENT_STAGE = "Project Current Stage";
+    public static final String PROJECT_PIPELINE_NAME = "Project Pipeline Name";
+
     public InsightlyProjectSource() {
         setFeedName("Projects");
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(PROJECT_ID, PROJECT_NAME, DATE_CREATED, DATE_UPDATED, PROJECT_DETAILS, OPPORTUNITY_ID,
-                STARTED_DATE, COMPLETED_DATE, CATEGORY, PROJECT_COUNT);
-    }
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(PROJECT_ID, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_NAME, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_DETAILS, new AnalysisDimension());
+        fieldBuilder.addField(RESPONSIBLE_USER, new AnalysisDimension());
+        fieldBuilder.addField(OPPORTUNITY_ID, new AnalysisDimension());
+        fieldBuilder.addField(CATEGORY, new AnalysisDimension());
+        fieldBuilder.addField(DATE_CREATED, new AnalysisDateDimension());
+        fieldBuilder.addField(DATE_UPDATED, new AnalysisDateDimension());
+        fieldBuilder.addField(STARTED_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(COMPLETED_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(PROJECT_COUNT, new AnalysisMeasure());
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
-        fields.add(new AnalysisDimension(keys.get(PROJECT_ID)));
-        fields.add(new AnalysisDimension(keys.get(PROJECT_NAME)));
-        fields.add(new AnalysisDimension(keys.get(PROJECT_DETAILS)));
-        fields.add(new AnalysisDimension(keys.get(OPPORTUNITY_ID)));
-        fields.add(new AnalysisDimension(keys.get(CATEGORY)));
+        fieldBuilder.addField(PROJECT_STATUS, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_CURRENT_STAGE, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_PIPELINE_NAME, new AnalysisDimension());
+
+
+
         InsightlyCompositeSource insightlyCompositeSource = (InsightlyCompositeSource) parentDefinition;
         HttpClient httpClient = getHttpClient(insightlyCompositeSource.getInsightlyApiKey(), "x");
         List customFields = runJSONRequest("customFields", insightlyCompositeSource, httpClient);
@@ -61,26 +73,16 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
             String fieldFor = customFieldMap.get("FIELD_FOR").toString();
             if ("PROJECT".equals(fieldFor)) {
                 String customFieldID = customFieldMap.get("CUSTOM_FIELD_ID").toString();
-                Key key = keys.get(customFieldID);
-                if (key == null) {
-                    key = new NamedKey(customFieldID);
-                }
+
 
                 String fieldType = customFieldMap.get("FIELD_TYPE").toString();
                 if ("DATE".equals(fieldType)) {
-                    fields.add(new AnalysisDateDimension(key, customFieldMap.get("FIELD_NAME").toString(), AnalysisDateDimension.DAY_LEVEL));
+                    fieldBuilder.addField(customFieldID, new AnalysisDateDimension(customFieldMap.get("FIELD_NAME").toString()));
                 } else {
-                    fields.add(new AnalysisDimension(key, customFieldMap.get("FIELD_NAME").toString()));
+                    fieldBuilder.addField(customFieldID, new AnalysisDimension(customFieldMap.get("FIELD_NAME").toString()));
                 }
             }
-
         }
-        fields.add(new AnalysisDateDimension(keys.get(DATE_CREATED), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(DATE_UPDATED), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(STARTED_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisDateDimension(keys.get(COMPLETED_DATE), true, AnalysisDateDimension.DAY_LEVEL));
-        fields.add(new AnalysisMeasure(keys.get(PROJECT_COUNT), AggregationTypes.SUM));
-        return fields;
     }
 
     private Value getValue(Map map, String param) {
@@ -123,6 +125,19 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
 
                 }
             }
+            Map<String, String> pipelineMap = new HashMap<String, String>();
+            List pipelineList = runJSONRequest("Pipelines", insightlyCompositeSource, httpClient);
+            for (Object pipelineObject : pipelineList) {
+                Map pipelineObj = (Map) pipelineObject;
+                String pipelineID = pipelineObj.get("PIPELINE_ID").toString();
+                pipelineMap.put(pipelineID, pipelineObj.get("PIPELINE_NAME").toString());
+            }
+            List pipelineStageList = runJSONRequest("PipelineStages", insightlyCompositeSource, httpClient);
+            Map<String, String> pipelineStageMap = new HashMap<String, String>();
+            for (Object pipelineObject : pipelineStageList) {
+                Map pipelineStageObject = (Map) pipelineObject;
+                pipelineStageMap.put(pipelineStageObject.get("STAGE_ID").toString(), pipelineStageObject.get("STAGE_NAME").toString());
+            }
             List categoryList = runJSONRequest("projectCategories", insightlyCompositeSource, httpClient);
             Map<String, String> categoryMap = new HashMap<String, String>();
             for (Object categoryObject : categoryList) {
@@ -135,8 +150,21 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
                 Map contactMap = (Map) contactObj;
                 row.addValue(keys.get(PROJECT_ID), contactMap.get("PROJECT_ID").toString());
                 row.addValue(keys.get(PROJECT_NAME), contactMap.get("PROJECT_NAME").toString());
+                row.addValue(keys.get(PROJECT_STATUS), getValue(contactMap, "PROJECT_STATUS"));
                 row.addValue(keys.get(PROJECT_DETAILS), getValue(contactMap, "PROJECT_DETAILS"));
                 row.addValue(keys.get(OPPORTUNITY_ID), getValue(contactMap, "OPPORTUNITY_ID"));
+
+                String pipelineStageID = pipelineStageMap.get(getValue(contactMap, "STAGE_ID").toString());
+                if (pipelineStageID != null) {
+                    row.addValue(keys.get(PROJECT_CURRENT_STAGE), pipelineStageID);
+                }
+                String pipelineID = pipelineMap.get(getValue(contactMap, "PIPELINE_ID").toString());
+                if (pipelineID != null) {
+                    row.addValue(keys.get(PROJECT_PIPELINE_NAME), pipelineID);
+                }
+
+
+
                 String responsibleUser = userMap.get(getValue(contactMap, "RESPONSIBLE_USER_ID").toString());
                 if (responsibleUser != null) {
                     row.addValue(keys.get(RESPONSIBLE_USER), responsibleUser);
