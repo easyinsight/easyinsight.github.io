@@ -43,10 +43,10 @@ public class Dashboard {
     public var reportAccessProblem:Boolean;
 
     public var fillStackHeaders:Boolean = true;
-    public var stackFill1Start:int = 0x848080;
-    public var stackFill1SEnd:int = 0x545050;
-    public var stackFill2Start:int = 0x494444;
-    public var stackFill2End:int = 0x343030;
+    public var stackFill1Start:int = 0x0084B4;
+    public var stackFill1SEnd:int = 0x0084B4;
+    public var stackFill2Start:int = 0x006494;
+    public var stackFill2End:int = 0x006404;
     public var reportHorizontalPadding:int = 20;
 
     public var reportHeaderBackgroundColor:int = 0xDDDDDD;

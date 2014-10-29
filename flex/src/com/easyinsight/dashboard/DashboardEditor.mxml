@@ -7,6 +7,7 @@
          verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.AnalysisDefinition;
 
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemNode;
@@ -146,9 +147,20 @@
             }
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("name", true) ];
+
             availableReports.sort = sort;
+            availableReports.filterFunction = filterReport;
             availableReports.refresh();
             dataSource = metadata.dataSourceInfo;
+        }
+
+        private function filterReport(report:Object):Boolean {
+            var insightDescriptor:InsightDescriptor = report as InsightDescriptor;
+            if (reportTypeBox.selectedItem.data == 0) {
+                return true;
+            } else {
+                return insightDescriptor.reportType == reportTypeBox.selectedItem.data;
+            }
         }
 
         private function gotReports():void {
@@ -159,6 +171,7 @@
             }
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("name", true) ];
+            availableReports.filterFunction = filterReport;
             availableReports.sort = sort;
             availableReports.refresh();
         }
@@ -571,6 +584,10 @@
 
         [Bindable]
         private var saveEnabled:Boolean = false;
+
+        private function filterReportType():void {
+            availableReports.refresh();
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptorsForDataSource" result="gotReports()"/>
@@ -610,15 +627,46 @@
     <mx:HBox width="100%" height="100%" paddingLeft="10" paddingRight="10" verticalScrollPolicy="off"
              horizontalScrollPolicy="off" id="coreHBox">
         <mx:VBox height="100%" horizontalAlign="center" width="200" paddingTop="20" paddingBottom="20" id="controls">
-            <mx:Label text="Controls" fontSize="14"/>
+            <mx:Label text="Controls" fontSize="14" styleName="fallThroughFonts" fontWeight="bold"/>
             <mx:List id="controlsList" dataProvider="{availableControls}" labelField="name" dragEnabled="true"
                      width="100%" rowCount="4"/>
             <mx:HBox verticalAlign="middle">
-                <mx:Label text="Reports" fontSize="14"/>
+                <mx:Label text="Reports" fontSize="14" styleName="fallThroughFonts" fontWeight="bold"/>
                 <mx:LinkButton label="Refresh" click="refreshReports()" fontSize="10"/>
             </mx:HBox>
+            <mx:ComboBox id="reportTypeBox" labelField="label" change="filterReportType()" rowCount="10">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:Object label="Filter by Report Type" data="0"/>
+                            <mx:Object label="List" data="{AnalysisDefinition.LIST}"/>
+                            <mx:Object label="Crosstab" data="{AnalysisDefinition.CROSSTAB}"/>
+                            <mx:Object label="Tree" data="{AnalysisDefinition.TREE}"/>
+                            <mx:Object label="Summary" data="{AnalysisDefinition.SUMMARY}"/>
+                            <mx:Object label="Multi Summary" data="{AnalysisDefinition.MULTI_SUMMARY}"/>
+                            <mx:Object label="Column" data="{AnalysisDefinition.COLUMN}"/>
+                            <mx:Object label="Stacked Column" data="{AnalysisDefinition.STACKED_COLUMN}"/>
+                            <mx:Object label="Bar" data="{AnalysisDefinition.BAR}"/>
+                            <mx:Object label="Stacked Bar" data="{AnalysisDefinition.STACKED_BAR}"/>
+                            <mx:Object label="Pie" data="{AnalysisDefinition.PIE}"/>
+                            <mx:Object label="Line" data="{AnalysisDefinition.LINE}"/>
+                            <mx:Object label="Area" data="{AnalysisDefinition.AREA}"/>
+                            <mx:Object label="Scatter" data="{AnalysisDefinition.PLOT}"/>
+                            <mx:Object label="Trend" data="{AnalysisDefinition.TREND}"/>
+                            <mx:Object label="Trend Grid" data="{AnalysisDefinition.TREND_GRID}"/>
+                            <mx:Object label="Diagram" data="{AnalysisDefinition.DIAGRAM}"/>
+                            <mx:Object label="Gauge" data="{AnalysisDefinition.GAUGE}"/>
+                            <mx:Object label="Map" data="{AnalysisDefinition.TOPO}"/>
+                            <mx:Object label="YTD" data="{AnalysisDefinition.YTD}"/>
+                            <mx:Object label="Vertical List" data="{AnalysisDefinition.VERTICAL_LIST}"/>
+                            <mx:Object label="Compare Years" data="{AnalysisDefinition.COMPARE_YEARS}"/>
+                            <mx:Object label="Form" data="{AnalysisDefinition.FORM}"/>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
             <mx:List id="reportsList" dataProvider="{availableReports}" labelField="name" dragEnabled="true"
-                     width="100%" height="100%"/>
+                     width="100%" height="100%" alternatingItemColors="[0xFCFCFC, 0xF8F8F8]"/>
         </mx:VBox>
         <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalScrollPolicy="off"
                  horizontalScrollPolicy="off">
