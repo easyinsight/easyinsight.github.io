@@ -21,6 +21,7 @@ import mx.controls.Button;
 import mx.controls.Label;
 import mx.controls.LinkButton;
 import mx.controls.List;
+import mx.controls.Text;
 import mx.controls.TextArea;
 import mx.core.IUIComponent;
 import mx.events.DragEvent;
@@ -139,7 +140,7 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
         dropBox.setStyle("paddingTop", 5);*/
         dropBox.percentHeight = 100;
         dropBox.percentWidth = 100;
-        //dropBox.setStyle("verticalAlign", "middle");
+        dropBox.setStyle("verticalAlign", "middle");
         dropBox.setStyle("horizontalAlign", "center");
         addChild(dropBox);
         if (element != null) {
@@ -218,12 +219,11 @@ public class DashboardBox extends VBox implements IDashboardViewComponent {
             dropBox.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
             dropBox.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
             dropBox.setStyle("backgroundColor", 0xFFFFFF);
-            var dropTextArea:TextArea = new TextArea();
-            dropTextArea.setStyle("backgroundAlpha", 0);
+            var dropTextArea:Text = new Text();
+            dropTextArea.selectable = false;
             dropTextArea.setStyle("fontSize", 12);
             dropTextArea.text = "Drag a control or report from the left side options to here.";
             dropTextArea.width = 200;
-            dropTextArea.height = 35;
             dropBox.addChild(dropTextArea);
             dispatchEvent(new DashboardPopulateEvent(DashboardPopulateEvent.DASHBOARD_POPULATE, this));
             dispatchEvent(new DashboardChangedEvent());
