@@ -91,10 +91,18 @@ public class DashboardEditButton extends HBox {
         argh.label = _dashboardBox.element.label;
     }
 
+    private function warn():void {
+        Alert.show("You can't delete all pages of a stack.");
+    }
+
     private function onItemClick(event:MenuEvent):void {
         var target:String = event.item.data;
         if (target == "removeStackEntry") {
-            dispatchEvent(new DashboardStackEvent(DashboardStackEvent.DELETE_PAGE));
+            if (dashboardStack.count == 1) {
+                callLater(warn);
+            } else {
+                dispatchEvent(new DashboardStackEvent(DashboardStackEvent.DELETE_PAGE));
+            }
         } else if (target == "switchToTab") {
             dispatchEvent(new DashboardStackEvent(DashboardStackEvent.CLICK));
         } else if (target == "rename") {
