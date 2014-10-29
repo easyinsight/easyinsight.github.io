@@ -6,9 +6,9 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
-import com.easyinsight.listing.ArghButton;
+
 import com.easyinsight.listing.DashboardArghButton;
-import com.easyinsight.skin.ImageConstants;
+
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
@@ -20,7 +20,6 @@ import mx.collections.ArrayCollection;
 
 import mx.containers.HBox;
 import mx.controls.Alert;
-import mx.controls.Button;
 import mx.events.MenuEvent;
 import mx.managers.PopUpManager;
 
@@ -57,8 +56,7 @@ public class DashboardEditButton extends HBox {
         argh.styleName = "dashboardOpenTabButton";
         argh.setStyle("popUpStyleName", "dropAreaPopup");
 
-        var options:ArrayCollection = new ArrayCollection([,
-            {label: "Remove", data: "removeStackEntry"}]);
+        var options:ArrayCollection = new ArrayCollection([{label: "Remove", data: "removeStackEntry"}]);
 
 
 

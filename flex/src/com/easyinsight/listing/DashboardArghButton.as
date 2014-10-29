@@ -30,10 +30,11 @@ public class DashboardArghButton extends PopUpMenuButton {
 
     override protected function clickHandler(event:MouseEvent):void {
         if (!DragManager.isDragging) {
-            super.clickHandler(event);
-        }
-        if (!overArrowButton(event)) {
-            dispatchEvent(new Event("stackClick"));
+            if (!overArrowButton(event) && (popUp == null || !popUp.visible)) {
+                dispatchEvent(new Event("stackClick"));
+            } else {
+                super.clickHandler(event);
+            }
         }
     }
 
