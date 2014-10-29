@@ -52,6 +52,7 @@ public class SavedConfiguration implements Serializable {
         JSONObject jo = new JSONObject();
         jo.put("name", name);
         jo.put("url", urlKey);
+        jo.put("id", id);
         return jo;
     }
 }

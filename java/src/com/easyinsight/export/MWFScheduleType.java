@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import net.minidev.json.JSONObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
@@ -34,8 +35,13 @@ public class MWFScheduleType extends ScheduleType {
         return null;
     }
 
+    public MWFScheduleType() {}
+    public MWFScheduleType(JSONObject jo) {
+        super(jo);
+    }
+
     @Override
     public String when() {
-        return "M/W/F on " + getHour() + ":" + getMinute() + " GMT";
+        return "M/W/F on " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
     }
 }

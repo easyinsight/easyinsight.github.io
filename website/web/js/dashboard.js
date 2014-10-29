@@ -1441,7 +1441,8 @@ $(function () {
         })
 
         function loadReport(key, dashboardKey) {
-            $.getJSON("/app/html/report/" + key + "/data.json", function(data) {
+            $.getJSON("/app/html/report/" + key + "/data.json", function(data_base) {
+                var data = data_base.report;
                 var cc;
                 for(cc in reportMap[dashboardKey].base_map) {
                     delete filterMap[cc];

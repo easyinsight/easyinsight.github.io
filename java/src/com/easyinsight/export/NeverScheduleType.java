@@ -1,5 +1,7 @@
 package com.easyinsight.export;
 
+import net.minidev.json.JSONObject;
+
 import java.util.Date;
 
 /**
@@ -21,5 +23,12 @@ public class NeverScheduleType extends ScheduleType {
     @Override
     public String when() {
         return "Disabled";
+    }
+
+    public NeverScheduleType() {
+    }
+
+    public NeverScheduleType(JSONObject jsonObject) {
+        super(jsonObject);
     }
 }

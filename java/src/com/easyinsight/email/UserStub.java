@@ -1,6 +1,9 @@
 package com.easyinsight.email;
 
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * User: James Boe
@@ -31,7 +34,7 @@ public class UserStub extends FeedConsumer {
     }
 
     /*
-    public function get displayName():String {
+        pubObject alic function get displayName():String {
             return ;
         }
      */
@@ -114,5 +117,33 @@ public class UserStub extends FeedConsumer {
 
     public int hashCode() {
         return (int) (userID ^ (userID >>> 32));
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("user_id", getUserID());
+        jo.put("last_name", getFullName());
+        jo.put("email", getEmail());
+        jo.put("account_id", getAccountID());
+        jo.put("first_name", getFirstName());
+        jo.put("user_key", getUserKey());
+        jo.put("designer", isDesigner());
+        return jo;
+    }
+
+    public UserStub(net.minidev.json.JSONObject jsonObject) {
+        super(jsonObject);
+        if(jsonObject.containsKey("user_id"))
+            setUserID(Long.parseLong(String.valueOf(jsonObject.get("user_id"))));
+        else if(jsonObject.containsKey("id"))
+            setUserID(Long.parseLong(String.valueOf(jsonObject.get("id"))));
+        setFullName(String.valueOf(jsonObject.get("last_name")));
+        setEmail(String.valueOf(jsonObject.get("email")));
+        if(jsonObject.containsKey("account_id"))
+            setAccountID(Long.valueOf(String.valueOf(jsonObject.get("account_id"))));
+        setFirstName(String.valueOf(jsonObject.get("first_name")));
+        setUserKey(String.valueOf(jsonObject.get("user_key")));
+        if(jsonObject.containsKey("designer"))
+            setDesigner(Boolean.valueOf(String.valueOf(jsonObject.get("designer"))));
     }
 }

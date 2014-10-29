@@ -43,11 +43,7 @@ public class GroupUser extends UserStub {
     }
 
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
-        JSONObject jo = new JSONObject();
-        jo.put("id", getUserID());
-        jo.put("user_name", getName());
-        jo.put("first_name", getFirstName());
-        jo.put("last_name", getFullName());
+        JSONObject jo = super.toJSON(md);
         String role = "";
         switch(getRole()) {
             case 1:

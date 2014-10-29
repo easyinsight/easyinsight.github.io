@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import net.minidev.json.JSONObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
@@ -36,6 +37,13 @@ public class TRScheduleType extends ScheduleType {
 
     @Override
     public String when() {
-        return "T/R on " + getHour() + ":" + getMinute() + " GMT";
+        return "T/R on " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
+    }
+
+    public TRScheduleType() {
+    }
+
+    public TRScheduleType(JSONObject jsonObject) {
+        super(jsonObject);
     }
 }

@@ -172,6 +172,7 @@ public abstract class EIDescriptor implements Serializable {
         jo.put("description", getDescription());
         jo.put("folder", getFolder());
         jo.put("delete_enabled", role == Roles.OWNER);
+        jo.put("id", getId());
         return jo;
     }
 }
