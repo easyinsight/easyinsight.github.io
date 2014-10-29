@@ -7,6 +7,7 @@
  */
 package com.easyinsight.dashboard {
 import com.easyinsight.listing.ArghButton;
+import com.easyinsight.listing.DashboardArghButton;
 import com.easyinsight.skin.ImageConstants;
 import com.easyinsight.util.PopUpUtil;
 
@@ -30,7 +31,7 @@ public class DashboardEditButton extends HBox {
 
     public var dashboardStack:DashboardStack;
 
-    private var argh:ArghButton = new ArghButton();
+    private var argh:DashboardArghButton = new DashboardArghButton();
 
     private var _dashboardBox:DashboardBox;
 
@@ -39,7 +40,7 @@ public class DashboardEditButton extends HBox {
     public function set dashboardBox(value:DashboardBox):void {
         _dashboardBox = value;
         if (_dashboardBox.element is DashboardStack || _dashboardBox.element is DashboardGrid) {
-            var options:ArrayCollection = new ArrayCollection([{label: "Switch to", data: "switchToTab"},
+            var options:ArrayCollection = new ArrayCollection([
                 {label: "Remove", data: "removeStackEntry"},
                 {label: "Rename", data: "rename"}]);
             argh.dataProvider = options;
@@ -49,12 +50,14 @@ public class DashboardEditButton extends HBox {
     public function DashboardEditButton() {
 
         argh.addEventListener(MenuEvent.ITEM_CLICK, onItemClick);
+        argh.addEventListener("stackClick", onStackClick);
         argh.labelField = "label";
-        argh.openAlways = true;
+        argh.openAlways = false;
+
         argh.styleName = "dashboardOpenTabButton";
         argh.setStyle("popUpStyleName", "dropAreaPopup");
 
-        var options:ArrayCollection = new ArrayCollection([{label: "Switch to", data: "switchToTab"},
+        var options:ArrayCollection = new ArrayCollection([,
             {label: "Remove", data: "removeStackEntry"}]);
 
 
@@ -103,6 +106,10 @@ public class DashboardEditButton extends HBox {
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+    }
+
+    private function onStackClick(event:Event):void {
+        dispatchEvent(new DashboardStackEvent(DashboardStackEvent.CLICK));
     }
 
     override protected function createChildren():void {
