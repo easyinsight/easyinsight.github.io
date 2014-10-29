@@ -1,0 +1,27 @@
+<div class="row">
+    <div class="col-md-3">
+        <img src="/images/logo2.png"/>
+
+        <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+                <li class="nav-header">Delivery Options</li>
+                <li><a href="/a/scheduling/delivery/{{schedule.id}}/history">History and Info</a></li>
+                <li><a href="/a/scheduling/delivery/{{schedule.id}}/report">Report Info</a></li>
+                <li><a href="/a/scheduling/delivery/{{schedule.id}}/schedule">Scheduling and Recipients</a></li>
+                <li><a href="/a/scheduling/delivery/{{schedule.id}}/email">Email Details</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>{{ schedule.description }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div app-view-segment="2" />
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+<form ng-submit="save_schedule()">
+    <div class="row">
+        <div class="col-md-4">Data Source Name:</div>
+        <div class="col-md-8"><input class="form-control" type="text" ng-model="ds_name" placeholder="Search for a data source..."
+                           typeahead="data_source as data_source.name for data_source in data_sources | filter: {name: $viewValue}" typeahead-min-length="0"
+                           typeahead-editable="false" typeahead-on-select="select_data_source($item, $model, $label)" autocomplete="false" /></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">Report/Dashboard Name:</div>
+        <div class="col-md-8">
+            <input id="report_select" class="form-control" type="text" ng-model="selected_report" placeholder="Search for a report..."
+               ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue}"
+               typeahead-min-length="0" typeahead-on-select="select_report($item, $modal, $label)" typeahead-editable="false" autocomplete="false" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">Configuration: </div>
+        <div class="col-md-8" ng-if="configurations == null || configurations.length == 0">There are no configurations available.</div>
+        <div class="col-md-8" ng-if="configurations != null && configurations.length > 0">
+            <select class="form-control" ng-model="schedule.configuration_id" ng-options="configuration.id as configuration.name for configuration in default_added(configurations)">
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">Custom Delivery Label:</div>
+        <div class="col-md-8"><input class="form-control" ng-model="schedule.delivery_label" type="text" /></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4"><label>Send if No Data:</label></div>
+        <div class="col-md-8"><input ng-model="schedule.send_if_no_data" type="checkbox" /></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">Output Format:</div>
+        <div class="col-md-8">
+            <select ng-model="schedule.report_format" class="form-control">
+                <option value="excel2007">Excel 2007</option>
+                <option value="excel">Excel</option>
+                <option value="png">PNG</option>
+                <option value="pdf">PDF</option>
+                <option value="html">HTML Table</option>
+            </select>
+        </div>
+    </div>
+    <div class="row" ng-if="schedule.report_format == 'pdf'">
+        <div class="col-md-4">Show Header</div>
+        <div class="col-md-8"><input ng-model="schedule.delivery_info.show_header" type="checkbox"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <input type="submit" value="Save" class="btn btn-primary" />
+        </div>
+    </div>
+</form>

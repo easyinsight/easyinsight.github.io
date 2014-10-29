@@ -1,9 +1,15 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.dashboard.SavedConfiguration;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.preferences.ImageDescriptor;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: James Boe
@@ -73,5 +79,19 @@ public class ReportInfo {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public JSONObject toJSON(HTMLReportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("report", getReport().toJSON(md, new ArrayList<FilterDefinition>()));
+        jo.put("configurations", new JSONArray(getConfigurations().stream().map((a) -> {
+            try {
+                return a.toJSON();
+            } catch(Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList())));
+
+        return jo;
     }
 }

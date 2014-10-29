@@ -10,10 +10,14 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * User: jamesboe
@@ -389,5 +393,27 @@ public class GeneralDelivery extends ScheduledDelivery {
         DeliveryScheduledTask deliveryScheduledTask = new DeliveryScheduledTask();
         deliveryScheduledTask.setActivityID(getScheduledActivityID());
         deliveryScheduledTask.execute(new Date(), connection);
+    }
+
+    public String describe() {
+        return getDeliveryLabel() != null ? getDeliveryLabel() : "Email multiple dashboards and reports";
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("subject", getSubject());
+        jo.put("body", getBody());
+        jo.put("html_email", isHtmlEmail());
+        jo.put("offset", getTimezoneOffset());
+        jo.put("sender_id", getSenderID());
+        jo.put("delivery_info", new JSONArray(getDeliveryInfos().stream().map((a) -> {
+            try {
+                return a.toJSON(md);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList())));
+        return jo;
     }
 }

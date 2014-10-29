@@ -1,6 +1,8 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,5 +47,13 @@ public class DeliveryExtension {
 
     public String toURL() {
         return "";
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        return new JSONObject();
+    }
+
+    public static DeliveryExtension fromJSON(net.minidev.json.JSONObject jsonObject) {
+        return new PDFDeliveryExtension(jsonObject);
     }
 }

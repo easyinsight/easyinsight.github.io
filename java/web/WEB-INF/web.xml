@@ -374,6 +374,10 @@
         <display-name>ListDataSourcesByTag</display-name>
         <servlet-class>com.easyinsight.api.v3.ListDataSourcesServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ScheduledDeliveryHistory</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.ScheduledDeliveryHistoryServlet</servlet-class>
+    </servlet>
 
     <servlet>
         <servlet-name>ExportActivity</servlet-name>
@@ -868,6 +872,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ScheduledActivities</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.ScheduledActivitiesServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>DeleteConfiguration</servlet-name>
         <servlet-class>com.easyinsight.html.DeleteConfigurationServlet</servlet-class>
     </servlet>
@@ -908,6 +917,11 @@
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ScheduledActivities</servlet-name>
+        <url-pattern>/scheduled_tasks.json</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
@@ -1258,6 +1272,11 @@
     <servlet-mapping>
         <servlet-name>AsyncList</servlet-name>
         <url-pattern>/asyncList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ScheduledDeliveryHistory</servlet-name>
+        <url-pattern>/scheduling/history</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

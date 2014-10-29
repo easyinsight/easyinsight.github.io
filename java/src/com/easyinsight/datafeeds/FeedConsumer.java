@@ -1,5 +1,9 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.export.ExportMetadata;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -46,5 +50,15 @@ public abstract class FeedConsumer implements Serializable {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    public FeedConsumer(net.minidev.json.JSONObject jsonObject) {
+        setName(String.valueOf(jsonObject.get("name")));
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", getName());
+        return jo;
     }
 }

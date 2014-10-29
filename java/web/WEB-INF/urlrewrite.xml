@@ -388,6 +388,11 @@
         <to>/html/reportListServlet?dataSourceID=$1</to>
     </rule>
 
+    <rule>
+        <from>/deliveries/([A-Za-z0-9]+)/history.json</from>
+        <to>/scheduling/history?deliveryID=$1</to>
+    </rule>
+
     <!--<rule>
         <from>/json/reports/([0-9]+)</from>
         <to>/json/RunReport?reportID=$1</to>
@@ -501,6 +506,11 @@
     <rule>
         <from>^/groups/([A-Za-z0-9]+).json</from>
         <to>/json/groupInfo?group_id=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/scheduled_tasks/([A-Za-z0-9]+).json</from>
+        <to>/scheduled_tasks.json?schedule_id=$1</to>
     </rule>
 
 

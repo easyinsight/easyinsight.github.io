@@ -1,9 +1,11 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,6 +90,21 @@ public class MonthlyScheduleType extends ScheduleType {
 
     @Override
     public String when() {
-        return "Monthly on " +dayOfMonth + " day of month at " + getHour() + ":" + getMinute() + " GMT";
+        return "Monthly on " +dayOfMonth + " day of month at " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
+    }
+
+    @Override
+    public org.json.JSONObject toJSON(ExportMetadata md) throws JSONException {
+        org.json.JSONObject jo = super.toJSON(md);
+        jo.put("day_of_month", getDayOfMonth());
+        return jo;
+    }
+
+    public MonthlyScheduleType() {
+    }
+
+    public MonthlyScheduleType(JSONObject jsonObject) {
+        super(jsonObject);
+        setDayOfMonth(Integer.parseInt(String.valueOf(jsonObject.get("day_of_month"))));
     }
 }

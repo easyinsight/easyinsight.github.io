@@ -5,6 +5,8 @@ import com.easyinsight.database.EIConnection;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -151,4 +153,71 @@ public abstract class ScheduleType {
     public abstract Date runTime(Date lastTime, Date now);
 
     public abstract String when();
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("schedule_id", getScheduleID());
+        jo.put("hour", getHour());
+        jo.put("minute", getMinute());
+        jo.put("offset", getTimeOffset());
+        jo.put("description", when());
+        jo.put("type", toString(retrieveType()));
+        return jo;
+    }
+
+    public static String toString(int type) {
+        switch(type) {
+            case ScheduleType.DAILY:
+                return "daily";
+            case ScheduleType.MONTHLY:
+                return "monthly";
+            case ScheduleType.MWF:
+                return "mwf";
+            case ScheduleType.NEVER:
+                return "never";
+            case ScheduleType.TR:
+                return "tr";
+            case ScheduleType.WEEKDAYS:
+                return "weekdays";
+            case ScheduleType.WEEKLY:
+                return "weekly";
+            default:
+                throw new RuntimeException("No type of schedule defined.");
+        }
+    }
+
+    public ScheduleType() {
+
+    }
+
+    public ScheduleType(net.minidev.json.JSONObject jsonObject) {
+        setScheduleID(Long.parseLong(String.valueOf(jsonObject.get("schedule_id"))));
+        setHour(Integer.parseInt(String.valueOf(jsonObject.get("hour"))));
+        setMinute(Integer.parseInt(String.valueOf(jsonObject.get("minute"))));
+        setTimeOffset(Integer.parseInt(String.valueOf(jsonObject.get("offset"))));
+    }
+
+    public static ScheduleType fromJSON(net.minidev.json.JSONObject schedule_type) {
+
+        String s = String.valueOf(schedule_type.get("type"));
+        switch(s) {
+            case "daily":
+                return new DailyScheduleType(schedule_type);
+            case "monthly":
+                return new MonthlyScheduleType(schedule_type);
+            case "mwf":
+                return new MWFScheduleType(schedule_type);
+            case "tr":
+                return new TRScheduleType(schedule_type);
+            case "weekdays":
+                return new WeekdayScheduleType(schedule_type);
+            case "weekly":
+                return new WeeklyScheduleType(schedule_type);
+            case "never":
+                return new NeverScheduleType(schedule_type);
+            default:
+                throw new RuntimeException("Unsupported type.");
+        }
+
+    }
 }

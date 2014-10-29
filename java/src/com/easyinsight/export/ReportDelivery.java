@@ -14,6 +14,8 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ public class ReportDelivery extends ScheduledDelivery {
 
     private int reportFormat;
     private long reportID;
+    private String reportUrlKey;
     private String reportName;
     private String subject;
     private String body;
@@ -42,12 +45,38 @@ public class ReportDelivery extends ScheduledDelivery {
     private int timezoneOffset;
     private long senderID;
     private long dataSourceID;
+    private String dataSourceUrlKey;
     private String deliveryLabel;
     private long configurationID;
+    private String configurationUrlKey;
     private boolean sendIfNoData;
     private DeliveryExtension deliveryExtension;
 
     private List<FilterDefinition> customFilters;
+
+    public String getConfigurationUrlKey() {
+        return configurationUrlKey;
+    }
+
+    public void setConfigurationUrlKey(String configurationUrlKey) {
+        this.configurationUrlKey = configurationUrlKey;
+    }
+
+    public String getReportUrlKey() {
+        return reportUrlKey;
+    }
+
+    public void setReportUrlKey(String reportUrlKey) {
+        this.reportUrlKey = reportUrlKey;
+    }
+
+    public String getDataSourceUrlKey() {
+        return dataSourceUrlKey;
+    }
+
+    public void setDataSourceUrlKey(String dataSourceUrlKey) {
+        this.dataSourceUrlKey = dataSourceUrlKey;
+    }
 
     public long getConfigurationID() {
         return configurationID;
@@ -294,9 +323,10 @@ public class ReportDelivery extends ScheduledDelivery {
     protected void customLoad(EIConnection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DELIVERY_FORMAT, REPORT_ID, SUBJECT, BODY, HTML_EMAIL, ANALYSIS.TITLE, " +
-                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, CONFIGURATION_ID FROM " +
-                "REPORT_DELIVERY, ANALYSIS WHERE " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID");
+                "timezone_offset, SENDER_USER_ID, REPORT_DELIVERY_ID, ANALYSIS.DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, CONFIGURATION_ID, DATA_FEED.API_KEY, ANALYSIS.URL_KEY FROM " +
+                "REPORT_DELIVERY, ANALYSIS, DATA_FEED WHERE " +
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND REPORT_DELIVERY.REPORT_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID");
+        PreparedStatement configUrl = conn.prepareStatement("SELECT URL_KEY from SAVED_CONFIGURATION where SAVED_CONFIGURATION_ID = ?");
         queryStmt.setLong(1, getScheduledActivityID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -317,6 +347,13 @@ public class ReportDelivery extends ScheduledDelivery {
             deliveryLabel = rs.getString(11);
             sendIfNoData = rs.getBoolean(12);
             configurationID = rs.getLong(13);
+            dataSourceUrlKey = rs.getString(14);
+            reportUrlKey = rs.getString(15);
+            configUrl.setLong(1, configurationID);
+            ResultSet configRS = configUrl.executeQuery();
+            if(configRS.next()) {
+                configurationUrlKey = configRS.getString(1);
+            }
             Session session = Database.instance().createSession(conn);
             try {
                 PreparedStatement filterStmt = conn.prepareStatement("SELECT FILTER_ID FROM DELIVERY_TO_FILTER_DEFINITION WHERE REPORT_DELIVERY_ID = ?");
@@ -386,6 +423,109 @@ public class ReportDelivery extends ScheduledDelivery {
             session.flush();
         } finally {
             session.close();
+        }
+    }
+
+    public String describe() {
+        String type;
+        switch (reportFormat) {
+            case 1:
+            case 5:
+                type = " as Excel";
+                break;
+            case 2:
+                type = " as PNG";
+                break;
+            case 3:
+                type = " as PDF";
+                break;
+            case 4:
+                type = " as Inline HTML Table";
+                break;
+            default:
+                type = "";
+        }
+        return "Email " + reportName + type;
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);    //To change body of overridden methods use File | Settings | File Templates.
+        jo.put("send_if_no_data", isSendIfNoData());
+        jo.put("report_format", reportFormatValue(getReportFormat()));
+        jo.put("report_id", getReportID());
+        jo.put("report_name", getReportName());
+        jo.put("subject", getSubject());
+        jo.put("body", getBody());
+        jo.put("html_email", isHtmlEmail());
+        jo.put("timezone_offset", getTimezoneOffset());
+        jo.put("sender", getSenderID());
+        jo.put("data_source_id", getDataSourceID());
+        jo.put("delivery_label", getDeliveryLabel());
+        jo.put("configuration_id", getConfigurationID());
+        if(getDeliveryExtension() != null)
+            jo.put("delivery_info", getDeliveryExtension().toJSON(md));
+        return jo;
+    }
+
+    private String reportFormatValue(int value) {
+        switch(value) {
+            case 1:
+                return "excel";
+            case 2:
+                return "png";
+            case 3:
+                return "pdf";
+            case 4:
+                return "html";
+            case 5:
+                return "excel2007";
+            default:
+                return "";
+        }
+    }
+
+    public ReportDelivery() {
+    }
+
+    public ReportDelivery(long id, net.minidev.json.JSONObject jsonObject) {
+        super(id, jsonObject);
+
+        setSendIfNoData(Boolean.valueOf(String.valueOf(jsonObject.get("send_if_no_data"))));
+        setReportID(Long.parseLong(String.valueOf(jsonObject.get("report_id"))));
+        setReportName(String.valueOf(jsonObject.get("report_name")));
+        setSubject(String.valueOf(jsonObject.get("subject")));
+        setBody(String.valueOf(jsonObject.get("body")));
+        setHtmlEmail(Boolean.valueOf(String.valueOf(jsonObject.get("html_email"))));
+        setTimezoneOffset(Integer.parseInt(String.valueOf(jsonObject.get("timezone_offset"))));
+        setSenderID(Long.valueOf(String.valueOf(jsonObject.get("sender"))));
+        setDeliveryLabel(String.valueOf(jsonObject.get("delivery_label")));
+        setConfigurationID(Long.parseLong(String.valueOf(jsonObject.get("configuration_id"))));
+        setCustomFilters(new ArrayList<>());
+        String reportFormat = String.valueOf(jsonObject.get("report_format"));
+        int reportFormatValue = 0;
+        switch(reportFormat) {
+            case "excel":
+                reportFormatValue = 1;
+                break;
+            case "png":
+                reportFormatValue = 2;
+                break;
+            case "pdf":
+                reportFormatValue = 3;
+                break;
+            case "html":
+                reportFormatValue = 4;
+                break;
+            case "excel2007":
+                reportFormatValue = 5;
+                break;
+            default:
+                reportFormatValue = 0;
+        }
+        setReportFormat(reportFormatValue);
+        if(getReportFormat() == 3) {
+            setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) jsonObject.get("delivery_info")));
         }
     }
 }
