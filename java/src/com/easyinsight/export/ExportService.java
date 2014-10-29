@@ -756,29 +756,23 @@ public class ExportService {
 
 
                             if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getColumns().get(0).qualifiedName())) {
-                                try {
+
                                     String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getColumns().get(0).qualifiedName()), crosstabDefinition.getColumns().get(0), exportMetadata);
                                     sb.append(" data-drillthrough");
                                     sb.append(crosstabDefinition.getColumns().get(0).getAnalysisItemID());
                                     sb.append("=\"");
                                     sb.append(encodedValue);
                                     sb.append("\"");
-                                } catch (UnsupportedEncodingException e) {
-                                    throw new RuntimeException(e);
-                                }
                             }
 
                             if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getRows().get(0).qualifiedName())) {
-                                try {
+
                                     String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getRows().get(0).qualifiedName()), crosstabDefinition.getRows().get(0), exportMetadata);
                                     sb.append(" data-drillthrough");
                                     sb.append(crosstabDefinition.getRows().get(0).getAnalysisItemID());
                                     sb.append("=\"");
                                     sb.append(encodedValue);
                                     sb.append("\"");
-                                } catch (UnsupportedEncodingException e) {
-                                    throw new RuntimeException(e);
-                                }
                             }
                             if (crosstabValue.isSummaryValue()) {
                                 sb.append(" style=\"color:").append(summaryTextColor).append("\"");
@@ -1620,13 +1614,13 @@ public class ExportService {
                 if (intValue == doubleValue) {
                     valueString = String.valueOf(intValue);
                 } else {
-                    if(!skipSanitize)
+                    if(!skipSanitize && !pdf)
                         valueString = value.toHTMLString();
                     else
                         valueString = value.toString();
                 }
             } else {
-                if(!skipSanitize)
+                if(!skipSanitize && !pdf)
                     valueString = value.toHTMLString();
                 else
                     valueString = value.toString();
@@ -4676,16 +4670,12 @@ public class ExportService {
                                     int k = unsortedHeaders.indexOf(dataItem);
                                     String encodedValue;
 
-                                    try {
                                         encodedValue = toDrillthroughValue(listRow.getValues()[k], dataItem, exportMetadata);
                                         sb.append(" data-drillthrough");
                                         sb.append(dataItem.getAnalysisItemID());
                                         sb.append("=\"");
                                         sb.append(encodedValue);
                                         sb.append("\"");
-                                    } catch (UnsupportedEncodingException e) {
-                                        throw new RuntimeException(e);
-                                    }
                                 }
 
                             }
@@ -4694,11 +4684,7 @@ public class ExportService {
                             sb.append(analysisItem.getAnalysisItemID());
                             sb.append("=\"");
 
-                            try {
                                 sb.append(toDrillthroughValue(value, analysisItem, exportMetadata));
-                            } catch (UnsupportedEncodingException e) {
-                                throw new RuntimeException(e);
-                            }
                             sb.append("\"");
                         }
                         if (colorString != null) {
@@ -4799,17 +4785,21 @@ public class ExportService {
         return sb.toString();
     }
 
-    private static String toDrillthroughValue(Value value, AnalysisItem item, ExportMetadata md) throws UnsupportedEncodingException {
-        String encodedValue;
-        Value drillthroughValue = value;
-        String drillthroughValueString;
-        if (drillthroughValue.type() == Value.NUMBER) {
-            drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
-        } else {
-            drillthroughValueString= ExportService.createValue(md, item, value, true);
+    public static String toDrillthroughValue(Value value, AnalysisItem item, ExportMetadata md) {
+        try {
+            String encodedValue;
+            Value drillthroughValue = value;
+            String drillthroughValueString;
+            if (drillthroughValue.type() == Value.NUMBER) {
+                drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
+            } else {
+                drillthroughValueString= ExportService.createValue(md, item, value, true);
+            }
+            encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
+            return encodedValue;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
-        encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
-        return encodedValue;
     }
 
     public static String createHexString(int color) {
