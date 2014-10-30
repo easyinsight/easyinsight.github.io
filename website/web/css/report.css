@@ -398,3 +398,11 @@ table.dataTable tfoot td {
     float:left;
     font-weight: bold;
 }
+
+.nv-scatter-label {
+    fill: #000000;
+    fill-opacity: 1;
+    stroke: #000000;
+    stroke-width: 0;
+    font: bold 12px Arial;
+}
