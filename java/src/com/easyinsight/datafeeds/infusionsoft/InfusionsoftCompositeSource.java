@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IJoin;
@@ -40,6 +41,11 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     public void setUserID(String userID) {
         this.userID = userID;
+    }
+
+    @Override
+    public boolean checkDateTime(String name, Key key) {
+        return false;
     }
 
     private Map<String, String> userCache;
