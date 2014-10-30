@@ -6,6 +6,7 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.PipelineData;
 
 import java.awt.*;
@@ -242,13 +243,16 @@ public class TreeData {
                 treeRow.getChildren().add(childRow);
             }
 
-            Collections.sort(treeRow.getChildren(), new Comparator<TreeRow>() {
+            try {
+                Collections.sort(treeRow.getChildren(), new Comparator<TreeRow>() {
 
-                public int compare(TreeRow argh, TreeRow argh1) {
-                    return argh.sortValue().compareTo(argh1.sortValue());
-                }
-            });
-
+                    public int compare(TreeRow argh, TreeRow argh1) {
+                        return argh.sortValue().compareTo(argh1.sortValue());
+                    }
+                });
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
 
 
             boolean addSummaryRow = (treeDefinition instanceof WSSummaryDefinition) && treeDefinition.isHeaderMode();
