@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import com.easyinsight.analysis.Aggregation;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
@@ -229,9 +230,15 @@ public class NumericValue extends Value implements Serializable {
         return value.hashCode();
     }
 
-    public int compareTo(Value value) {
+    public int compareTo(@NotNull Value value) {
         if (value.type() == Value.NUMBER) {
             return this.toDouble().compareTo(value.toDouble());
+        } else if (value.type() == Value.STRING) {
+            return 1;
+        } else if (value.type() == Value.EMPTY) {
+            return -1;
+        } else if (value.type() == Value.DATE) {
+            return 1;
         }
         return 0;
     }

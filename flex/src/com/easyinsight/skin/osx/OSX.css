@@ -418,6 +418,29 @@ SaveButton {
     popUpDownSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
 }
 
+.dashboardOpenTabButton {
+    cornerRadius: 2;
+    highlightAlphas: 0, 0;
+    fillColors: #FFFFFF,#FFFFFF,#FFFFFF,#FFFFFF;
+    fillAlphas: 1, 1, 1, 1;
+    color: #001144;
+    themeColor : #FFFFFF;
+    textRollOverColor: #001144;
+    textSelectedColor: #001144;
+    borderColor: #001144;
+    dropShadow: false;
+    shadowDistance: 3;
+    fontSize: 14;
+    fontWeight: normal;
+    iconColor: #001444;
+    upSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    downSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    overSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    disabledSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpOverSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+    popUpDownSkin:ClassReference('com.easyinsight.util.FlatButtonWhiteSkin');
+}
+
 .flatWhiteButton {
     cornerRadius: 2;
     highlightAlphas: 0, 0;

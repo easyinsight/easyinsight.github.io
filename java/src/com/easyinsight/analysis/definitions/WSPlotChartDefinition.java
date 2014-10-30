@@ -16,9 +16,18 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     private AnalysisItem iconGrouping;
     private AnalysisItem xaxisMeasure;
     private AnalysisItem yaxisMeasure;
+    private AnalysisItem zaxisMeasure;
     private boolean briefLabels;
     private boolean showLabels;
     private List<MultiColor> multiColors;
+
+    public AnalysisItem getZaxisMeasure() {
+        return zaxisMeasure;
+    }
+
+    public void setZaxisMeasure(AnalysisItem zaxisMeasure) {
+        this.zaxisMeasure = zaxisMeasure;
+    }
 
     public List<MultiColor> getMultiColors() {
         return multiColors;
@@ -115,11 +124,15 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         if (iconGrouping != null) {
             addItems("series", Arrays.asList(iconGrouping), structure);
         }
+        if (zaxisMeasure != null) {
+            addItems("zaxisMeasure", Arrays.asList(zaxisMeasure), structure);
+        }
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         xaxisMeasure = firstItem("xAxisMeasure", structure);
         yaxisMeasure = firstItem("yAxisMeasure", structure);
+        zaxisMeasure = firstItem("zaxisMeasure", structure);
         dimension = firstItem("dimension", structure);
         iconGrouping = firstItem("series", structure);
     }
@@ -131,6 +144,9 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         columnList.add(yaxisMeasure);
         if (iconGrouping != null) {
             columnList.add(iconGrouping);
+        }
+        if (zaxisMeasure != null) {
+            columnList.add(zaxisMeasure);
         }
         return columnList;
     }
