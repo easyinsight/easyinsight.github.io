@@ -73,6 +73,9 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {
                         row.addValue(analysisItem.getKey(), new DateValue((Date) value));
+                        if ("ContactAction".equals(table)) {
+                            System.out.println((Date) value);
+                        }
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;
