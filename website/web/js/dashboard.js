@@ -45,7 +45,7 @@ busyIndicator = busyIndicator || (function () {
 function captureAndReturn(o) {
     var obj = o.report.report;
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
-        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend") {
+        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend" || obj.metadata.type == "summary") {
         return null;
     } else if (obj.metadata.type == "gauge") {
         var id = o.report.id;
@@ -349,7 +349,7 @@ var toPDF = function (o, dashboardID, drillthroughID) {
     var url =  "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() +"&drillThroughKey=" + drillthroughID;
 
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
-        obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition") {
+        obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition" || obj.metadata.type == "summary") {
     } else {
         if (obj.metadata.type == "gauge") {
             var gCanvas = $("#gauge" + id);
@@ -488,6 +488,8 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3BarChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
+    } else if (obj.metadata.type == "tree") {
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getTree(id, obj.metadata.properties, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "column") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3ColumnChartCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
