@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportProperties;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.export.TreeData;
 import com.itextpdf.text.BaseColor;
@@ -13,6 +14,9 @@ import com.itextpdf.text.pdf.PdfPTable;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -342,6 +346,54 @@ public class TreeRow {
                 child.toPDF(treeDefinition, exportMetadata, table);
             }
         }
+    }
+
+    public JSONObject toJSON(WSTreeDefinition treeDefinition, ExportMetadata exportMetadata) throws JSONException {
+        JSONObject map = new JSONObject();
+        if (groupingField == null) {
+            map.put("key", "");
+        } else {
+            String string = com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, groupingField, groupingColumn, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+            map.put("key", string);
+        }
+        for (AnalysisItem analysisItem : treeDefinition.getItems()) {
+            com.easyinsight.core.Value value =  (Value) values.get(analysisItem.qualifiedName());
+            if (value == null) {
+                map.put(analysisItem.qualifiedName(), "");
+            } else {
+                if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0) {
+                    Link link = analysisItem.getLinks().get(0);
+                    if (link instanceof URLLink) {
+                        boolean showLink = value.getLinks() != null && value.getLinks().get(analysisItem.toDisplay()) != null;
+                        if (showLink) {
+                            map.put(analysisItem.qualifiedName() + "url", value.getLinks().get(analysisItem.toDisplay()));
+                        }
+                    } else if (link instanceof DrillThrough) {
+                        DrillThrough drillThrough = (DrillThrough) link;
+                        JSONObject dt = new JSONObject();
+                        dt.put("data-reportid", treeDefinition.getUrlKey());
+                        dt.put("data-drillthroughid", drillThrough.createID());
+                        dt.put("data-source", analysisItem.getAnalysisItemID());
+                        if (groupingField != null) {
+                            dt.put("dtfield" + groupingField.getAnalysisItemID(), ExportService.toDrillthroughValue(groupingColumn, groupingField, exportMetadata));
+
+                        }
+                        dt.put("dtfield" + analysisItem.getAnalysisItemID(), ExportService.toDrillthroughValue(value, analysisItem, exportMetadata));
+                        map.put(analysisItem.qualifiedName() + "dt", dt);
+                    }
+                }
+                String string = com.easyinsight.export.ExportService.createValue(exportMetadata.dateFormat, analysisItem, value, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+                map.put(analysisItem.qualifiedName(), string);
+            }
+        }
+        JSONArray values = new JSONArray();
+        for (TreeRow child : getChildren()) {
+            JSONObject obj = child.toJSON(treeDefinition, exportMetadata);
+            values.put(obj);
+        }
+        map.put("_values", values);
+
+        return map;
     }
 
     public String toHTML(WSTreeDefinition treeDefinition, ExportMetadata exportMetadata) {
