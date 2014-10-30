@@ -68,23 +68,32 @@ public class HappyFoxBaseSource extends ServerDataSourceDefinition {
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
 
-        try {
-            client.executeMethod(restMethod);
-            if (restMethod.getStatusCode() == 404) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Happy Fox instance at " + url, parentDefinition));
-            } else if (restMethod.getStatusCode() == 401) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
+
+        int retryCount = 0;
+        do {
+            try {
+                client.executeMethod(restMethod);
+                if (restMethod.getStatusCode() == 404) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a HappyFox instance at " + url, parentDefinition));
+                } else if (restMethod.getStatusCode() == 401) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
+                }
+                Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                if (o instanceof String) {
+                    System.out.println(o);
+                    Thread.sleep(10000);
+                } else if (o instanceof Map) {
+                    return (Map) o;
+                }
+                retryCount++;
+            } catch (ReportException re) {
+                throw re;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
-            if (o instanceof String) {
-                System.out.println(o);
-            }
-            return (Map) o;
-        } catch (ReportException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } while (retryCount < 3);
+
+        throw new ReportException(new DataSourceConnectivityReportFault("Server error on retrieving HappyFox data", parentDefinition));
     }
 
     protected static List runRestRequestForList(String path, HttpClient client, HappyFoxCompositeSource parentDefinition) throws ReportException {
