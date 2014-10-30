@@ -4560,8 +4560,8 @@ nv.models.indentedTree = function() {
     , childIndent = 20
     , columns = [{key:'key', label: 'Name', type:'text'}] //TODO: consider functions like chart.addColumn, chart.removeColumn, instead of a block like this
     , tableClass = null
-    , iconOpen = 'images/grey-plus.png' //TODO: consider removing this and replacing with a '+' or '-' unless user defines images
-    , iconClose = 'images/grey-minus.png'
+    , iconOpen = '/images/grey-plus.png' //TODO: consider removing this and replacing with a '+' or '-' unless user defines images
+    , iconClose = '/images/grey-minus.png'
     , dispatch = d3.dispatch('elementClick', 'elementDblclick', 'elementMouseover', 'elementMouseout')
     , getUrl = function(d) { return d.url }
     ;
@@ -4651,8 +4651,8 @@ nv.models.indentedTree = function() {
       columns.forEach(function(column, index) {
 
         var nodeName = nodeEnter.append('td')
-            .style('padding-left', function(d) { return (index ? 0 : d.depth * childIndent + 12 + (icon(d) ? 0 : 16)) + 'px' }, 'important') //TODO: check why I did the ternary here
-            .style('text-align', column.type == 'numeric' ? 'right' : 'left');
+            .style('padding-left', function(d) { return (index ? 5 : d.depth * childIndent + 12 + (icon(d) ? 0 : 16)) + 'px' }, 'important') //TODO: check why I did the ternary here
+            .style('text-align', column.align);
 
 
         if (index == 0) {
@@ -4669,16 +4669,35 @@ nv.models.indentedTree = function() {
 
 
         nodeName.each(function(d) {
-          if (!index && getUrl(d))
-            d3.select(this)
-              .append('a')
-              .attr('href',getUrl)
-              .attr('class', d3.functor(column.classes))
-              .append('span')
-          else
-            d3.select(this)
-              .append('span')
-
+          if (!index && getUrl(d)) {
+              d3.select(this)
+                  .append('a')
+                  .attr('href', getUrl)
+                  .attr('class', d3.functor(column.classes))
+                  .append('span');
+          } else {
+              var urlExists = d[column.key + "url"];
+              if (urlExists) {
+                  d3.select(this).append('a').attr('href', urlExists).append('span');
+              } else {
+                  var dtExists = d[column.key + "dt"];
+                  if (dtExists) {
+                      d3.select(this).append('a').attr('href', '#').attr('class', 'list_drillthrough').
+                          attr('data-report-id', dtExists["data-report-id"]).
+                          attr('data-drillthroughid', dtExists["data-drillthroughid"]).
+                          attr('data-source', dtExists["data-source"]).append('span').on('click', function(d) {
+                              dispatch.elementClick({
+                                  dt: dtExists, //TODO: decide whether or not this should be consistent with scatter/line events or should be an html link (a href)
+                                  data: d,
+                                  pos: [d.x, d.y]
+                              });
+                          });
+                  } else {
+                      d3.select(this)
+                          .append('span');
+                  }
+              }
+          }
             d3.select(this).select('span')
               .attr('class', d3.functor(column.classes) )
               .text(function(d) { return column.format ? column.format(d) :
@@ -4705,13 +4724,6 @@ nv.models.indentedTree = function() {
 
       node
         .order()
-        .on('click', function(d) { 
-          dispatch.elementClick({
-            row: this, //TODO: decide whether or not this should be consistent with scatter/line events or should be an html link (a href)
-            data: d,
-            pos: [d.x, d.y]
-          });
-        })
         .on('dblclick', function(d) { 
           dispatch.elementDblclick({
             row: this,
@@ -4792,6 +4804,7 @@ nv.models.indentedTree = function() {
   // Expose Public Variables
   //------------------------------------------------------------
   chart.options = nv.utils.optionsFunc.bind(chart);
+  chart.dispatch = dispatch;
   
   chart.margin = function(_) {
     if (!arguments.length) return margin;
@@ -5707,7 +5720,7 @@ nv.models.lineChart = function() {
                   .chartContainer(that.parentNode)
                   .enabled(tooltips)
                   .valueFormatter(function(d,i) {
-                     return yAxis.tickFormat()(d);
+                     return yAxis.tickFormat()(d, i);
                   })
                   .data(
                       {
@@ -11150,6 +11163,7 @@ nv.models.scatter = function() {
     , forceSize    = [] // List of numbers to Force into the Size scale
     , interactive  = true // If true, plots a voronoi overlay for advanced point intersection
     , pointKey     = null
+    , showLabels   = false
     , pointActive  = function(d) { return !d.notActive } // any points that return false will be filtered out
     , padData      = false // If true, adds half a data points width to front and back, for lining up a line chart with a bar chart
     , padDataOuter = .1 //outerPadding to imitate ordinal scale outer padding
@@ -11490,6 +11504,7 @@ nv.models.scatter = function() {
             .attr('cx', function(d,i) { return nv.utils.NaNtoZero(x0(getX(d,i))) })
             .attr('cy', function(d,i) { return nv.utils.NaNtoZero(y0(getY(d,i))) })
             .attr('r', function(d,i) { return Math.sqrt(z(getSize(d,i))/Math.PI) });
+
         points.exit().remove();
         groups.exit().selectAll('path.nv-point').transition()
             .attr('cx', function(d,i) { return nv.utils.NaNtoZero(x(getX(d,i))) })
@@ -11502,10 +11517,33 @@ nv.models.scatter = function() {
             .classed('hover',false)
             ;
         });
+          /*points.enter().append('text').text('blah').attr('x', function(d,i) { return nv.utils.NaNtoZero(x0(getX(d,i))) })
+              .attr('y', function(d,i) { return nv.utils.NaNtoZero(y0(getY(d,i))) });*/
+          points.exit().remove();
         points.transition()
             .attr('cx', function(d,i) { return nv.utils.NaNtoZero(x(getX(d,i))) })
             .attr('cy', function(d,i) { return nv.utils.NaNtoZero(y(getY(d,i))) })
             .attr('r', function(d,i) { return Math.sqrt(z(getSize(d,i))/Math.PI) });
+
+          /*
+           var textEnter = bars.enter().append('g');
+           textEnter.append('text');
+           bars.select('text')
+           .attr('text-anchor', 'middle')
+           .attr('y',  function (d, i) { return x(getX(d,i)) + (x.rangeBand() / 2) })
+           .attr('x', function (d, i) { return y(d.y1) + (Math.abs(y(getY(d,i) + d.y0) - y(d.y0)) / 2) })
+           .attr('dy', '.32em')
+           .text(function (d, i) {
+           var val = valueFormat(getY(d, i));
+           var availableWidth = Math.abs(y(getY(d,i) + d.y0) - y(d.y0));
+           if (availableWidth > (val.length * 7)) {
+           return valueFormat(getY(d, i))
+           } else {
+           return "";
+           }
+           })
+           */
+
 
       } else {
 
@@ -11546,6 +11584,16 @@ nv.models.scatter = function() {
                 .type(getShape)
                 .size(function(d,i) { return z(getSize(d,i)) })
             );
+          if (showLabels) {
+              points.enter().append('g').append('text');
+              points.select('text').attr('text-anchor', 'middle').attr('x', function (d, i) {
+                  return x(getX(d, i))
+              }).attr('y', function (d, i) {
+                      return y(getY(d, i)) + 15
+                  }).classed('nv-scatter-label', true).attr('dy', '.32em').text(function (d, i) {
+                      return d.a;
+                  });
+          }
       }
 
 
@@ -11665,6 +11713,12 @@ nv.models.scatter = function() {
     yDomain = _;
     return chart;
   };
+
+    chart.showLabels = function(_) {
+        if (!arguments.length) return showLabels;
+        showLabels = _;
+        return chart;
+    };
 
   chart.sizeDomain = function(_) {
     if (!arguments.length) return sizeDomain;
@@ -11833,6 +11887,7 @@ nv.models.scatterChart = function() {
     , fisheye      = 0
     , pauseFisheye = false
     , tooltips     = true
+    , showLabels   = false
     , tooltipX     = function(key, x, y) { return '<strong>' + x + '</strong>' }
     , tooltipY     = function(key, x, y) { return '<strong>' + y + '</strong>' }
     , tooltip      = null
@@ -11890,7 +11945,7 @@ nv.models.scatterChart = function() {
       if( tooltipY != null )
           nv.tooltip.show([leftY, topY], tooltipY(e.series.key, xVal, yVal, e, chart), 'e', 1, offsetElement, 'y-nvtooltip');
       if( tooltip != null )
-          nv.tooltip.show([left, top], tooltip(e.series.key, xVal, yVal, e, chart), e.value < 0 ? 'n' : 's', null, offsetElement);
+          nv.tooltip.show([left, top], tooltip(e.series.key, xVal, yVal, e, chart, e.point.a), e.value < 0 ? 'n' : 's', null, offsetElement);
   };
 
   var controlsData = [
@@ -12280,7 +12335,7 @@ nv.models.scatterChart = function() {
   chart.distX = distX;
   chart.distY = distY;
 
-  d3.rebind(chart, scatter, 'id', 'interactive', 'pointActive', 'x', 'y', 'shape', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange', 'sizeDomain', 'sizeRange', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'clipRadius', 'useVoronoi');
+  d3.rebind(chart, scatter, 'id', 'interactive', 'pointActive', 'x', 'y', 'shape', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange', 'sizeDomain', 'sizeRange', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'clipRadius', 'useVoronoi', 'showLabels');
   chart.options = nv.utils.optionsFunc.bind(chart);
   
   chart.margin = function(_) {
@@ -12363,6 +12418,12 @@ nv.models.scatterChart = function() {
     return chart;
   };
 
+    chart.showLabels = function(_) {
+        if (!arguments.length) return showLabels;
+        showLabels = _;
+        return chart;
+    };
+
   chart.xPadding = function(_) {
     if (!arguments.length) return xPadding;
     xPadding = _;
@@ -12380,6 +12441,24 @@ nv.models.scatterChart = function() {
     tooltips = _;
     return chart;
   };
+
+    chart.tooltip = function(_) {
+        if (!arguments.length) return tooltip;
+        tooltip = _;
+        return chart;
+    };
+
+    chart.tooltipX = function(_) {
+        if (!arguments.length) return tooltipX;
+        tooltipX = _;
+        return chart;
+    };
+
+    chart.tooltipY = function(_) {
+        if (!arguments.length) return tooltipY;
+        tooltipY = _;
+        return chart;
+    };
 
   chart.tooltipContent = function(_) {
     if (!arguments.length) return tooltip;

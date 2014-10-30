@@ -6,46 +6,124 @@
  * To change this template use File | Settings | File Templates.
  */
 package com.easyinsight.dashboard {
-import com.easyinsight.skin.ImageConstants;
+
+import com.easyinsight.listing.DashboardArghButton;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.Event;
 
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
+import mx.collections.ArrayCollection;
 
 import mx.containers.HBox;
 import mx.controls.Alert;
-import mx.controls.Button;
+import mx.events.MenuEvent;
+import mx.managers.PopUpManager;
 
 public class DashboardEditButton extends HBox {
     
-    private var stackButton:Button;
-    private var deleteButton:Button;
+    /*private var stackButton:Button;
+    private var deleteButton:Button;*/
 
     public var dashboardStack:DashboardStack;
-    
+
+    private var argh:DashboardArghButton = new DashboardArghButton();
+
+    private var _dashboardBox:DashboardBox;
+
+    private var _selected:Boolean;
+
+    public function set dashboardBox(value:DashboardBox):void {
+        _dashboardBox = value;
+        if (_dashboardBox.element is DashboardStack || _dashboardBox.element is DashboardGrid) {
+            var options:ArrayCollection = new ArrayCollection([
+                {label: "Remove", data: "removeStackEntry"},
+                {label: "Rename", data: "rename"}]);
+            argh.dataProvider = options;
+        }
+    }
+
     public function DashboardEditButton() {
-        stackButton = new Button();
+
+        argh.addEventListener(MenuEvent.ITEM_CLICK, onItemClick);
+        argh.addEventListener("stackClick", onStackClick);
+        argh.labelField = "label";
+        argh.openAlways = false;
+
+        argh.styleName = "dashboardOpenTabButton";
+        argh.setStyle("popUpStyleName", "dropAreaPopup");
+
+        var options:ArrayCollection = new ArrayCollection([{label: "Remove", data: "removeStackEntry"}]);
+
+
+
+        argh.dataProvider = options;
+
+        /*stackButton = new Button();
         stackButton.addEventListener(MouseEvent.CLICK, onClick);
         stackButton.styleName = "grayButton";
 
         deleteButton = new Button();
         deleteButton.setStyle("icon", ImageConstants.DELETE_ICON);
-        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
-        
-        setStyle("borderStyle", "solid");
-        setStyle("borderThickness", 1);
-        setStyle("backgroundColor", 0xFFFFFF);
+        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);*/
+
         setStyle("paddingLeft", 2);
         setStyle("paddingRight", 2);
         setStyle("paddingTop", 2);
         setStyle("paddingBottom", 2);
+
+
+    }
+
+    public function set selected(value:Boolean):void {
+        _selected = value;
+        if (_selected) {
+            argh.setStyle("fillColors", [0xBEBEBE, 0xBEBEBE, 0xBEBEBE, 0xBEBEBE]);
+        } else {
+            argh.setStyle("fillColors", [0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF]);
+        }
+    }
+
+    private function onChange(event:Event):void {
+        argh.label = _dashboardBox.element.label;
+    }
+
+    private function warn():void {
+        Alert.show("You can't delete all pages of a stack.");
+    }
+
+    private function onItemClick(event:MenuEvent):void {
+        var target:String = event.item.data;
+        if (target == "removeStackEntry") {
+            if (dashboardStack.count == 1) {
+                callLater(warn);
+            } else {
+                dispatchEvent(new DashboardStackEvent(DashboardStackEvent.DELETE_PAGE));
+            }
+        } else if (target == "switchToTab") {
+            dispatchEvent(new DashboardStackEvent(DashboardStackEvent.CLICK));
+        } else if (target == "rename") {
+            var window:ElementLabelWindow = new ElementLabelWindow();
+            window.dashboardElement = _dashboardBox.element;
+            window.addEventListener(Event.CHANGE, onChange, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+    }
+
+    private function onStackClick(event:Event):void {
+        dispatchEvent(new DashboardStackEvent(DashboardStackEvent.CLICK));
     }
 
     override protected function createChildren():void {
         super.createChildren();
-        BindingUtils.bindProperty(stackButton, "label", this, "label");
-        addChild(stackButton);
-        addChild(deleteButton);
+        BindingUtils.bindProperty(argh, "label", this, "label");
+        addChild(argh);
+        /*addChild(stackButton);
+        addChild(deleteButton);*/
     }
     
     private function onDelete(event:MouseEvent):void {

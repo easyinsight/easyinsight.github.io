@@ -757,22 +757,22 @@ public class ExportService {
 
                             if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getColumns().get(0).qualifiedName())) {
 
-                                String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getColumns().get(0).qualifiedName()), crosstabDefinition.getColumns().get(0), exportMetadata);
-                                sb.append(" data-drillthrough");
-                                sb.append(crosstabDefinition.getColumns().get(0).getAnalysisItemID());
-                                sb.append("=\"");
-                                sb.append(encodedValue);
-                                sb.append("\"");
+                                    String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getColumns().get(0).qualifiedName()), crosstabDefinition.getColumns().get(0), exportMetadata);
+                                    sb.append(" data-drillthrough");
+                                    sb.append(crosstabDefinition.getColumns().get(0).getAnalysisItemID());
+                                    sb.append("=\"");
+                                    sb.append(encodedValue);
+                                    sb.append("\"");
                             }
 
                             if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getRows().get(0).qualifiedName())) {
 
-                                String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getRows().get(0).qualifiedName()), crosstabDefinition.getRows().get(0), exportMetadata);
-                                sb.append(" data-drillthrough");
-                                sb.append(crosstabDefinition.getRows().get(0).getAnalysisItemID());
-                                sb.append("=\"");
-                                sb.append(encodedValue);
-                                sb.append("\"");
+                                    String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getRows().get(0).qualifiedName()), crosstabDefinition.getRows().get(0), exportMetadata);
+                                    sb.append(" data-drillthrough");
+                                    sb.append(crosstabDefinition.getRows().get(0).getAnalysisItemID());
+                                    sb.append("=\"");
+                                    sb.append(encodedValue);
+                                    sb.append("\"");
                             }
                             if (crosstabValue.isSummaryValue()) {
                                 sb.append(" style=\"color:").append(summaryTextColor).append("\"");
@@ -4670,12 +4670,12 @@ public class ExportService {
                                     int k = unsortedHeaders.indexOf(dataItem);
                                     String encodedValue;
 
-                                    encodedValue = toDrillthroughValue(listRow.getValues()[k], dataItem, exportMetadata);
-                                    sb.append(" data-drillthrough");
-                                    sb.append(dataItem.getAnalysisItemID());
-                                    sb.append("=\"");
-                                    sb.append(encodedValue);
-                                    sb.append("\"");
+                                        encodedValue = toDrillthroughValue(listRow.getValues()[k], dataItem, exportMetadata);
+                                        sb.append(" data-drillthrough");
+                                        sb.append(dataItem.getAnalysisItemID());
+                                        sb.append("=\"");
+                                        sb.append(encodedValue);
+                                        sb.append("\"");
                                 }
 
                             }
@@ -4684,7 +4684,7 @@ public class ExportService {
                             sb.append(analysisItem.getAnalysisItemID());
                             sb.append("=\"");
 
-                            sb.append(toDrillthroughValue(value, analysisItem, exportMetadata));
+                                sb.append(toDrillthroughValue(value, analysisItem, exportMetadata));
                             sb.append("\"");
                         }
                         if (colorString != null) {

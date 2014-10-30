@@ -1,8 +1,8 @@
 <div cg-busy="deleting" />
 <div style="padding:10px;font-size: 16px">
-    <div style="padding:5px;margin-bottom:20px" class="alert-danger">Are you sure you want to delete the following reports?</div>
+    <div style="padding:5px;margin-bottom:20px" class="alert-danger">Are you sure you want to delete the following deliveries?</div>
     <ul>
-        <li ng-repeat="report in to_delete"> {{ report.name }}</li>
+        <li ng-repeat="schedule in to_delete"> {{ schedule.description }}</li>
     </ul>
 
     <div style="text-align: center">

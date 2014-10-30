@@ -1,6 +1,8 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -19,6 +21,15 @@ public class PDFDeliveryExtension extends DeliveryExtension {
     private int width;
     private int height;
     private String orientation = "Landscape";
+
+    public PDFDeliveryExtension() {}
+    public PDFDeliveryExtension(net.minidev.json.JSONObject jsonObject) {
+        setShowHeader(Boolean.valueOf(String.valueOf(jsonObject.get("show_header"))));
+        setDisplayType(Boolean.valueOf(String.valueOf(jsonObject.get("display_type"))));
+        setWidth(Integer.parseInt(String.valueOf(jsonObject.get("width"))));
+        setHeight(Integer.parseInt(String.valueOf(jsonObject.get("height"))));
+        setGenerateByHTML(Integer.parseInt(String.valueOf(jsonObject.get("generate_by_html"))));
+    }
 
     public int getGenerateByHTML() {
         return generateByHTML;
@@ -115,5 +126,16 @@ public class PDFDeliveryExtension extends DeliveryExtension {
             insertStmt.execute();
             insertStmt.close();
         }
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("show_header", isShowHeader());
+        jo.put("display_type", isDisplayType());
+        jo.put("width", getWidth());
+        jo.put("height", getHeight());
+        jo.put("generate_by_html", getGenerateByHTML());
+        return jo;
     }
 }

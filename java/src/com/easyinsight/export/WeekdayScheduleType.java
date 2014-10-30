@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import net.minidev.json.JSONObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
@@ -36,6 +37,13 @@ public class WeekdayScheduleType extends ScheduleType {
 
     @Override
     public String when() {
-        return "Every weekday on " + getHour() + ":" + getMinute() + " GMT";
+        return "Every weekday on " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
+    }
+
+    public WeekdayScheduleType() {
+    }
+
+    public WeekdayScheduleType(JSONObject jsonObject) {
+        super(jsonObject);
     }
 }

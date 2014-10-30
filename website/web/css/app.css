@@ -496,3 +496,11 @@ fieldset[disabled] .btn-alt-primary.active {
         padding-right: 0;
     }
 }
+
+.databaseFormItem {
+    margin-top:5px;
+}
+
+.scheduleRow {
+    margin-top:10px;
+}

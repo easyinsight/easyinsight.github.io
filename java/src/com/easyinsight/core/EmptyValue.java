@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.easyinsight.logging.LogClass;
 
@@ -59,7 +60,11 @@ public class EmptyValue extends Value {
         return "";
     }
 
-    public int compareTo(Value value) {
-        return 0;
+    public int compareTo(@NotNull Value value) {
+        if (value.type() == Value.EMPTY) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 }

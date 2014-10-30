@@ -80,4 +80,11 @@ public class GroupDescriptor extends FeedConsumer {
         jo.put("description", description);
         return jo;
     }
+
+    public GroupDescriptor(net.minidev.json.JSONObject jsonObject) {
+        super(jsonObject);
+        setGroupID(Long.parseLong(String.valueOf(jsonObject.get("id"))));
+        setName(String.valueOf(jsonObject.get("name")));
+        setDescription(String.valueOf(jsonObject.get("description")));
+    }
 }

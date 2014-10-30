@@ -1,6 +1,75 @@
 Chart = {
 
+    getTree:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+        return function (data) {
+            Utils.noDataD3(data["values"], function () {
+                nv.addGraph({
+                    generate: function() {
+                        var chart = nv.models.indentedTree()
+                            .tableClass('table table-bordered table-hover table-condensed') //for bootstrap styling
+                            .columns(data["columns"]);
+                        Chart.createClasses(params, target);
 
+                        d3.select("#" + target + " .reportArea").datum(data["values"]).call(chart);
+
+                        chart.dispatch.on("elementClick", function(e) {
+                            var dt = e.dt;
+                            var f = {"reportID": dt["data-reportid"], "drillthroughID": dt["data-drillthroughid"], "source": dt["data-source"],
+                                "drillthroughKey": drillthroughKey, "filters": filters, "drillthrough_values": {}};
+                            if (dashboardID != -1) {
+                                f["dashboardID"] = dashboardID;
+                            }
+                            f["drillthrough_values"] = _.inject(dt, function(m, e, i, l) {
+
+                                    if(i.match(/^dtfield/))
+                                        m[i.replace(/^dtfield/, "")] = decodeURI(e);
+                                    return m; },
+                                {});
+                            drillThrough(f);
+                        });
+                    }
+                });
+
+            }, Chart.cleanup, target);
+        };
+    },
+
+    createClasses: function (properties, target) {
+        var curStyleSheet = Chart.findDynamicStyleSheet();
+        if (curStyleSheet == null) {
+            var s = document.createElement("style");
+            s.title = "customDataGridValues";
+            $("head").append(s);
+            curStyleSheet = Chart.findDynamicStyleSheet();
+        }
+
+        curStyleSheet.insertRule("#" + target + " table tr.even {background-color:"+ Color.numToStr(properties["rowColor2"]) + ";}", 0);
+
+        // rowColor1
+        curStyleSheet.insertRule("#" + target + " table tr.odd {background-color:" + Color.numToStr(properties["rowColor1"]) + ";}", 0);
+        // rowColor2
+        curStyleSheet.insertRule("#" + target + " table tr.even {background-color:" + Color.numToStr(properties["rowColor2"]) + ";}", 0);
+        curStyleSheet.insertRule("#" + target + " table td {padding: 3px}", 0);
+
+
+        var gradientString = "background-color: " + Color.numToStr(properties["headerColor1"]) + ";background-image: linear-gradient(bottom, " + Color.numToStr(properties["headerColor1"]) + " 30%, " + Color.numToStr(properties["headerColor2"]) + " 70%);" +
+            "background-image: -o-linear-gradient(bottom, " + Color.numToStr(properties["headerColor1"]) + " 30%, " + Color.numToStr(properties["headerColor2"]) + " 70%);" +
+            "background-image: -moz-linear-gradient(bottom, " + Color.numToStr(properties["headerColor1"]) + " 30%, " + Color.numToStr(properties["headerColor2"]) + " 70%);" +
+            "background-image: -webkit-linear-gradient(bottom, " + Color.numToStr(properties["headerColor1"]) + " 30%, " + Color.numToStr(properties["headerColor2"]) + " 70%);" +
+            "background-image: -ms-linear-gradient(bottom, " + Color.numToStr(properties["headerColor1"]) + " 30%, " + Color.numToStr(properties["headerColor2"]) + " 70%);" +
+            "background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0.3, " + Color.numToStr(properties["headerColor1"]) + "),color-stop(0.7, " + Color.numToStr(properties["headerColor2"]) + "));";
+        curStyleSheet.insertRule("#" + target + " table thead tr {" + gradientString + "color:" + Color.numToStr(properties["headerTextColor"]) + ";}", 0);
+    },
+    findDynamicStyleSheet: function () {
+        var i = 0;
+        var curStyleSheet = null;
+        for (i = 0; i < document.styleSheets.length; i++) {
+            if (document.styleSheets[i].title == "customDataGridValues") {
+                curStyleSheet = document.styleSheets[i];
+            }
+        }
+        return curStyleSheet;
+    },
 
     getD3StackedColumnChart:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
@@ -696,6 +765,31 @@ Chart = {
                 nv.addGraph({
                     generate: function() {
 
+                        var s1 = data["values"];
+
+                        var minY = null;
+                        var maxY = null;
+                        var minX = null;
+                        var maxX = null;
+                        for (var i = 0; i < s1.length; i++) {
+                            var keyVals = s1[i];
+                            for (var j = 0; j < keyVals.values.length; j++) {
+                                var row = keyVals.values[j];
+                                if (minY == null || minY > row.y) {
+                                    minY = row.y;
+                                }
+                                if (maxY == null || row.y > maxY) {
+                                    maxY = row.y;
+                                }
+                                if (minX == null || minX > row.x) {
+                                    minX = row.x;
+                                }
+                                if (maxX == null || row.x > maxX) {
+                                    maxX = row.x;
+                                }
+                            }
+                        }
+
                         var height = Chart.chartHeight(target, styleProps);
                         if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) {
                             $("#d3Div" + target).height(height);
@@ -705,6 +799,16 @@ Chart = {
                             .height(height)
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             .margin({top: 20, right: 40, bottom: 60, left: 80});
+                        chart.tooltipX(null);
+                        chart.tooltipY(null);
+                        chart.tooltip(function(key, x, y, e, c, a) { return '<h3>' + key + '</h3>' + '<h3>' + a + "</h3>" + '<p>'+data["xTitle"]+': <b>' + x + '</b></p>' + '<p>'+data["yTitle"]+': <b>' + y + '</b></p>' });
+
+                        /*
+                         .tooltipContent(function(key, x, e, graph) {
+                         return '<h3>' + key + '</h3>' +
+                         '<p><b>' +  x + '</b></p>' +
+                         '<h4><b>' + e.point.percent + '%</b> of <b>' + e.point.total + '</b></h4>';
+                         */
 
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {
@@ -718,6 +822,8 @@ Chart = {
 
 
                         chart.scatter.onlyCircles(false);
+
+                        chart.scatter.showLabels(true);
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
@@ -739,13 +845,27 @@ Chart = {
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 50, -70);
                         Chart.assignAxisMinMaxValues(chart, data, true);
 
-                        var s1 = data["values"];
+
 
                         d3.select('#d3Div' + target)
                             //.attr('width', width)
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
+
+
+
+                        var calcYMax = chart.yAxis.scale()(maxY);
+                        var calcYMin = chart.yAxis.scale()(minY);
+                        var midPointY = (calcYMin - calcYMax) / 2;
+                        var calcXMax = chart.xAxis.scale()(maxX);
+                        var calcXMin = chart.xAxis.scale()(minX);
+                        var midPointX = (calcXMax - calcXMin) / 2;
+
+                        var targ = d3.select('#d3Div' + target + " .nv-scatterWrap");
+                        targ.append("g").append("rect").attr("height", (calcYMin - calcYMax)).attr("width", 1).style("fill", "#000000").attr("x", midPointX).attr("y", 0);
+                        targ.append("g").append("rect").attr("width", (calcXMax - calcXMin)).attr("height", 1).style("fill", "#000000").attr("y", midPointY).attr("x", 0);
+                        //targ.append("g").append("rect").attr("width", midPointX).attr("height", midPointY).style("fill", "#AACCAA").style('fill-opacity',.1).attr("y", 0).attr("x", midPointX);
 
                         Chart.canvasHeights(target, styleProps);
 
@@ -893,6 +1013,8 @@ Chart = {
                         var map = [];
                         var minY = null;
                         var maxY = null;
+                        var minX = null;
+                        var maxX = null;
                         for (var i = 0; i < s1.length; i++) {
                             var keyVals = s1[i];
                             map[i] = {};
@@ -905,6 +1027,12 @@ Chart = {
                                 }
                                 if (maxY == null || row.y > maxY) {
                                     maxY = row.y;
+                                }
+                                if (minX == null || minX > row.t) {
+                                    minX = row.x;
+                                }
+                                if (maxX == null || row.t > maxX) {
+                                    maxX = row.x;
                                 }
                             }
                         }
@@ -968,6 +1096,18 @@ Chart = {
                             }
 
                         }
+
+                        var singleGoalValue = data["single_goal_value"];
+                        if (typeof(singleGoalValue) != "undefined") {
+                            var goal = singleGoalValue["goal"];
+                            var calcXMax = chart.xAxis.scale()(maxX);
+                            var calcXMin = chart.xAxis.scale()(minX);
+                            var calcY = chart.yAxis.scale()(goal);
+                            var goalTarg = d3.select('#d3Div' + target + " .nv-linesWrap");
+                            var calcXWidth = (calcXMax - calcXMin);
+                            goalTarg.append("g").append("rect").attr("width", calcXWidth).attr("height", 3).style("fill", "#0000FF").attr("x", 0).attr("y", calcY);
+                        }
+                        //goalTarg.append("foreignObject").attr("width", 100).attr("height", 100).attr("y", (calcYMin - calcYMax) / 2).attr("x", calcX + 5).append("xhtml:body").attr("class", "report_annotation").style("font", "12px 'Helvetica Neue'").html("<p>"+event.label+"</p>");
 
                         /*var seriesIndex = 0;
                         var selector = 'g.nv-series-'+seriesIndex+' circle';

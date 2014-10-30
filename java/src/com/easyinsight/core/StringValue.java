@@ -1,6 +1,7 @@
 package com.easyinsight.core;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.owasp.html.*;
 
@@ -105,12 +106,16 @@ public class StringValue extends Value implements Serializable {
         return value.hashCode();
     }
 
-    public int compareTo(Value value) {
+    public int compareTo(@NotNull Value value) {
         if (value.type() == Value.STRING) {
             StringValue stringValue2 = (StringValue) value;
             return this.getValue().compareTo(stringValue2.getValue());
         } else if (value.type() == Value.EMPTY) {
             return -1;
+        } else if (value.type() == Value.NUMBER) {
+            return -1;
+        } else if (value.type() == Value.DATE) {
+            return 1;
         }
         return 0;
     }

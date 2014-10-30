@@ -1,3 +1,4 @@
+
 package com.easyinsight.export;
 
 import com.easyinsight.core.XMLMetadata;
@@ -5,6 +6,8 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
 import nu.xom.Element;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -191,54 +194,61 @@ public abstract class ScheduledActivity {
 
     public abstract boolean authorize();
 
-    /*public static void main(String[] args) throws Exception {
-        Class.forName("com.mysql.jdbc.Driver");
-        //Connection connection = DriverManager.getConnection("jdbc:mysql://ec2-23-22-252-83.compute-1.amazonaws.com:3306/dms", "dms", "dms");
-        Database.initialize("ec2-23-22-252-83.compute-1.amazonaws.com", "3306", "dms", "dms", "dms");
-        EIConnection conn = Database.instance().getConnection();
-        //EIConnection conn = new EIConnection(connection);
-        XMLMetadata xmlMetadata = new XMLMetadata();
-        xmlMetadata.setConn(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCHEDULED_ACCOUNT_ACTIVITY.scheduled_account_activity_id," +
-                "SCHEDULED_ACCOUNT_ACTIVITY.activity_type FROM SCHEDULED_ACCOUNT_ACTIVITY WHERE USER_ID = ?");
-        queryStmt.setLong(1, 2467);
-        ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            long activityID = rs.getLong(1);
-            int activityType = rs.getInt(2);
-            try {
-                ScheduledActivity scheduledActivity = ScheduledActivity.createActivity(activityType, activityID, conn);
-                if (scheduledActivity instanceof GeneralDelivery) {
-                    GeneralDelivery generalDelivery = (GeneralDelivery) scheduledActivity;
-                    for (DeliveryInfo info : generalDelivery.getDeliveryInfos()) {
-                        if (info.getType() == DeliveryInfo.SCORECARD) {
-                            //System.out.println("*** Found scorecard");
-                        }
-                    }
-                }
-                Element element = scheduledActivity.toXML(xmlMetadata);
-                if (element != null) {
-                    System.out.println(element.toXML());
-                    ExportTester.processLine(element.toXML());
-                }
-            } catch (Exception e) {
-                if (e.getMessage() != null && e.getMessage().contains("Orphan")) {
-
-                } else {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-            }
-        }
-
-
-    }*/
-
     public void taskNow(EIConnection connection) throws Exception {
 
     }
 
     public String when() {
         return scheduleType.when();
+    }
+
+    public abstract String describe();
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("id", getScheduledActivityID());
+        jo.put("schedule_type", getScheduleType().toJSON(md));
+        jo.put("problem_message", getProblemMessage());
+        jo.put("problem_level", getProblemLevel());
+        jo.put("type", valueOf(retrieveType()));
+        jo.put("description", describe());
+        jo.put("when", when());
+        return jo;
+    }
+
+    private static String valueOf(int scheduleType) {
+        switch(scheduleType) {
+            case ScheduledActivity.DATA_SOURCE_REFRESH:
+                return "data_source";
+            case ScheduledActivity.GENERAL_DELIVERY:
+                return "general";
+            case ScheduledActivity.REPORT_DELIVERY:
+                return "report";
+            default:
+        }
+        return null;  //To change body of created methods use File | Settings | File Templates.
+    }
+
+    public ScheduledActivity() {
+
+    }
+
+    public static ScheduledActivity fromJSON(long id, net.minidev.json.JSONObject jsonObject) {
+        ScheduledActivity sa = null;
+        String type = String.valueOf(jsonObject.get("type"));
+        switch(type) {
+            case "data_source":
+                return new DataSourceRefreshActivity(id, jsonObject);
+            case "report":
+                return new ReportDelivery(id, jsonObject);
+        }
+        return sa;
+    }
+
+    public ScheduledActivity(long id, net.minidev.json.JSONObject jsonObject) {
+        setScheduledActivityID(id);
+        setScheduleType(ScheduleType.fromJSON((net.minidev.json.JSONObject) jsonObject.get("schedule_type")));
+
     }
 
     public String toURL() {

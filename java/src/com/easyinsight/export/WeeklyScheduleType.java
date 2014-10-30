@@ -4,13 +4,13 @@ import com.easyinsight.database.EIConnection;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -108,6 +108,50 @@ public class WeeklyScheduleType extends ScheduleType {
         } else {
             day = "";
         }
-        return "Every " + day + "  on " + getHour() + ":" + getMinute() + " GMT";
+        return "Every " + day + "  on " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        String day;
+        switch(dayOfWeek) {
+            case 1:
+                day = "sunday";
+                break;
+            case 2:
+                day = "monday";
+                break;
+            case 3:
+                day = "tuesday";
+                break;
+            case 4:
+                day = "wednesday";
+                break;
+            case 5:
+                day = "thursday";
+                break;
+            case 6:
+                day = "friday";
+                break;
+            case 7:
+                day = "saturday";
+                break;
+            default:
+                day = "";
+        }
+
+        jo.put("day", day);
+        return jo;
+    }
+
+    public WeeklyScheduleType() {
+    }
+
+    public WeeklyScheduleType(net.minidev.json.JSONObject jsonObject) {
+        super(jsonObject);
+        List<String> DAYS = Arrays.asList("sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday");
+        int day = DAYS.indexOf(String.valueOf(jsonObject.get("day"))) + 1;
+        setDayOfWeek(day);
     }
 }

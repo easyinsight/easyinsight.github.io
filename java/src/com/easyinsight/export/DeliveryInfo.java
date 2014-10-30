@@ -8,6 +8,8 @@ import com.easyinsight.datafeeds.FeedStorage;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -172,5 +174,21 @@ public class DeliveryInfo {
 
     public void setDeliveryExtension(DeliveryExtension deliveryExtension) {
         this.deliveryExtension = deliveryExtension;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = new JSONObject();
+        jo.put("name", getName());
+        jo.put("id", getId());
+        jo.put("data_source_id", getDataSourceID());
+        jo.put("label", getLabel());
+        jo.put("type", getType());
+        jo.put("index", getIndex());
+        jo.put("format", getFormat());
+        jo.put("configuration_id", getConfigurationID());
+        jo.put("send_if_no_data", isSendIfNoData());
+        if(getDeliveryExtension() != null)
+            jo.put("delivery_extension", getDeliveryExtension());
+        return jo;
     }
 }

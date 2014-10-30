@@ -3,12 +3,16 @@ package com.easyinsight.export;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: jamesboe
@@ -120,5 +124,42 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
         setUsers(users);
         setEmails(emails);
         setGroups(groups);
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("emails", new JSONArray(getEmails()));
+        jo.put("users", new JSONArray(getUsers().stream().map((a) -> {
+
+            try {
+                return a.toJSON(md);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList())));
+
+        jo.put("groups", new JSONArray(getGroups().stream().map((a) -> {
+            try {
+                return a.toJSON(md);
+            } catch(JSONException e) {
+                return new RuntimeException(e);
+            }
+        }).collect(Collectors.toList())));
+        return jo;
+    }
+
+    public ScheduledDelivery() {
+    }
+
+    public ScheduledDelivery(long id, net.minidev.json.JSONObject jsonObject) {
+        super(id, jsonObject);
+        net.minidev.json.JSONArray ja = ((net.minidev.json.JSONArray) jsonObject.get("emails"));
+        List<String> emailList = ja.stream().map((a) -> String.valueOf(a)).collect(Collectors.toList());
+        setEmails(emailList);
+        ja = ((net.minidev.json.JSONArray) jsonObject.get("users"));
+        setUsers(ja.stream().map((a) -> new UserStub((net.minidev.json.JSONObject) a)).collect(Collectors.toList()));
+        ja = ((net.minidev.json.JSONArray) jsonObject.get("groups"));
+        setGroups(ja.stream().map((a) -> new GroupDescriptor((net.minidev.json.JSONObject) a)).collect(Collectors.toList()));
     }
 }

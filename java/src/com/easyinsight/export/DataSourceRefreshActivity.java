@@ -2,10 +2,13 @@ package com.easyinsight.export;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,14 +91,17 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID, DATA_FEED.FEED_NAME, INTERVAL_TYPE, INTERVAL_UNITS FROM " +
                 "SCHEDULED_DATA_SOURCE_REFRESH, DATA_FEED WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ? AND DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID");
-        queryStmt.setLong(1, getScheduledActivityID());
-        ResultSet rs = queryStmt.executeQuery();
-        rs.next();
-        dataSourceID = rs.getLong(1);
-        dataSourceName = rs.getString(2);
-        intervalNumber = rs.getInt(3);
-        intervalUnits = rs.getInt(4);
-        queryStmt.close();
+        try {
+            queryStmt.setLong(1, getScheduledActivityID());
+            ResultSet rs = queryStmt.executeQuery();
+            rs.next();
+            dataSourceID = rs.getLong(1);
+            dataSourceName = rs.getString(2);
+            intervalNumber = rs.getInt(3);
+            intervalUnits = rs.getInt(4);
+        } finally {
+            queryStmt.close();
+        }
         PreparedStatement queryProblemStmt = conn.prepareStatement("SELECT problem_text FROM DATA_SOURCE_PROBLEM WHERE DATA_SOURCE_ID = ?");
         queryProblemStmt.setLong(1, getDataSourceID());
         ResultSet problemRS = queryProblemStmt.executeQuery();
@@ -160,7 +166,27 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
     }
 
     @Override
-    public String toString() {
+    public String describe() {
         return "Refresh " + dataSourceName;
+    }
+
+    @Override
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        JSONObject jo = super.toJSON(md);
+        jo.put("data_source", dataSourceID);
+        jo.put("label", toString());
+        jo.put("interval_number", getIntervalNumber());
+        jo.put("interval_units", getIntervalUnits());
+        return jo;
+    }
+
+    public DataSourceRefreshActivity() {
+    }
+
+    public DataSourceRefreshActivity(long id, net.minidev.json.JSONObject jsonObject) {
+        super(id, jsonObject);
+        setDataSourceID(Long.parseLong(String.valueOf(jsonObject.get("data_source"))));
+        setIntervalNumber(Integer.parseInt(String.valueOf(jsonObject.get("interval_number"))));
+        setIntervalUnits(Integer.parseInt(String.valueOf(jsonObject.get("interval_units"))));
     }
 }
