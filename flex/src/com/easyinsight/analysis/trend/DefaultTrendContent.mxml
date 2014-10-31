@@ -13,11 +13,13 @@
         import mx.collections.ArrayCollection;
 
         import mx.collections.ArrayCollection;
+        import mx.collections.ICollectionView;
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
         import mx.events.FlexEvent;
+        import mx.utils.ObjectUtil;
 
         private var firstLoad:Boolean = true;
 
@@ -77,6 +79,9 @@
                     }
                     trendOutcome.dataSourceID = trendDef.dataFeedID;
                     trendOutcome.report = trendDef;
+                    for each (var g:AnalysisItem in trendDef.groupings) {
+                        trendOutcome[g.qualifiedName()] = trendOutcome.dimensions[g.qualifiedName()];
+                    }
                     trends.addItem(trendOutcome);
                 }
 
@@ -90,6 +95,8 @@
                     column.sortable = true;
                     column.width = maxGroupingSize;
                     column.headerText = grouping.display;
+
+                    column.dataField = grouping.qualifiedName();
                     columns.push(column);
                 }
 

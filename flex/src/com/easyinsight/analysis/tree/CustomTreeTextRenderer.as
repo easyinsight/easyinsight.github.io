@@ -174,7 +174,7 @@ public class CustomTreeTextRenderer extends UITextField implements IListItemRend
             styleName = "myFontStyle";
         }
 
-        var color:uint = depth == 0 ? 0xFFFFFF : 0x000000;
+        var color:uint = depth == 0 ? 0x000000 : 0x000000;
         utf = new UITextFormat(this.systemManager, _report.getFont(), _report.fontSize, color);
         _format = utf;
         _changed = true;
