@@ -392,6 +392,10 @@
         <from>/deliveries/([A-Za-z0-9]+)/history.json</from>
         <to>/scheduling/history?deliveryID=$1</to>
     </rule>
+    <rule>
+        <from>/deliveries/([A-Za-z0-9]+)/run</from>
+        <to>/scheduling/run?deliveryID=$1</to>
+    </rule>
 
     <!--<rule>
         <from>/json/reports/([0-9]+)</from>

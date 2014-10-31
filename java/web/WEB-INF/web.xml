@@ -841,6 +841,11 @@
         <servlet-class>com.easyinsight.api.v3.CompositeSourceServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>ScheduledDeliveryRun</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.RunDeliveryServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -1277,6 +1282,10 @@
     <servlet-mapping>
         <servlet-name>ScheduledDeliveryHistory</servlet-name>
         <url-pattern>/scheduling/history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ScheduledDeliveryRun</servlet-name>
+        <url-pattern>/scheduling/run</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

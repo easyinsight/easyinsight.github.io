@@ -1,0 +1,34 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="alert alert-danger" ng-if="error">There was an error running your report.</span>
+        <div class="alert alert-success" ng-if="finished">Your scheduled activity has ran. It may take a few minutes for emails to be sent.</span>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <button type="button" class="btn btn-primary" ng-click="runNow()">Run Now</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+    <table class="table table-striped table-bordered table-condensed reportDashboardTable">
+        <thead>
+        <tr>
+            <th>Sent At</th>
+            <th>Status</th>
+            <th>Message</th>
+            <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="record in history">
+            <td>{{record.date}}</td>
+            <td>{{record.code}}</td>
+            <td>{{record.message}}</td>
+            <td>{{record.email}}</td>
+        </tr>
+
+        </tbody>
+    </table>
+    </div>
+</div>

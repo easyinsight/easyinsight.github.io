@@ -94,11 +94,7 @@
 
                 }
             }
-            //var l = $http.get("/app/deliveries/" + $scope.schedule.id + "/history.json");
-            //l.then(function(c) {
-            //})
             $scope.save_schedule = function() {
-                console.log($scope.schedule)
                 var v = $http.post("/app/scheduled_tasks/" + $scope.schedule.id + ".json?offset=" + $scope.getOffset(), JSON.stringify($scope.schedule));
                 v.then(function(a) {
                     $scope.reload();
@@ -165,11 +161,31 @@
 
     }])
 
+    eiScheduling.controller("viewDeliverySchedulingHistoryController", ["$scope", "$http", function($scope, $http) {
+        $scope.loading.then(function() {
+            var l = $http.get("/app/deliveries/" + $scope.schedule.id + "/history.json");
+
+             l.then(function(c) { 
+                $scope.history = c.data.history;
+            })
+        })
+        $scope.runNow = function() {
+            $scope.finished = false;
+            $scope.error = false;
+            var l = $http.post("/app/deliveries/" + $scope.schedule.id + "/run", JSON.stringify({}));
+            l.then(function() {
+                $scope.finished = true;
+            }, function() {
+                $scope.finished = false;
+                $scope.error = true;
+            })
+        }
+    }])
+
     eiScheduling.controller("viewDeliverySchedulingReportController", ["$scope", "$http", function($scope, $http) {
         $scope.ds_load = $http.get("/app/dataSources.json");
         $scope.ds_load.then(function (d) {
             $scope.data_sources = d.data.data_sources;
-            console.log($scope.data_sources)
             if($scope.data_sources.length == 1) {
                 $scope.ds_name = $scope.data_sources[0];
                 $scope.select_data_source($scope.ds_name);
@@ -232,6 +248,7 @@
             when("/scheduling/delivery/:id/schedule", "scheduling.view_delivery.scheduling").
             when("/scheduling/delivery/:id/report", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/email", "scheduling.view_delivery.email").
+            when("/scheduling/delivery/:id/history", "scheduling.view_delivery.history").
             segment("scheduling", {
                 templateUrl: "/angular_templates/scheduling/scheduling_base.template.html",
                 controller: "schedulingBaseController"
@@ -265,6 +282,9 @@
             segment("email", {
                 templateUrl: "/angular_templates/scheduling/view_delivery_email.template.html",
                 controller: "viewDeliverySchedulingEmailController"
+            }).segment("history", {
+                templateUrl: "/angular_templates/scheduling/report_delivery_history.template.html",
+                controller: "viewDeliverySchedulingHistoryController"
             })
     }])
 })()
