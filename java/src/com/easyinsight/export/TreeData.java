@@ -226,7 +226,7 @@ public class TreeData {
 
             TreeRow treeRow = new TreeRow();
             treeRow.setDepth(index);
-            treeRow.setSortColumn(sortValue);
+            treeRow.setSortColumn(sortValue != null ? sortValue : value);
             treeRow.setBackgroundColor(backgroundColor);
             treeRow.setTextColor(textColor);
             treeRow.setGroupingField(level);
@@ -481,6 +481,8 @@ public class TreeData {
             }
             if (analysisItem.getSortItem() != null) {
                 treeRow.setSortColumn(row.getValue(analysisItem.getSortItem()));
+            } else {
+                treeRow.setSortColumn(row.getValue(analysisItem));
             }
             boolean matched = false;
             for (AnalysisItem reportItem : treeDefinition.getItems()) {
