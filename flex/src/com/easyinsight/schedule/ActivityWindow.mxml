@@ -81,7 +81,7 @@
 
         private function runNow():void {
             ProgressAlert.alert(this, "Running...", "The activity should now have been run.", exportService.runNow);
-            exportService.runNow.send(activity);
+            exportService.runNow.send(activity.scheduledActivityID);
         }
 
         private function ran():void {

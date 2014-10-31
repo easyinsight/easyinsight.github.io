@@ -249,7 +249,8 @@ public class ExportService {
 
     }
 
-    public void runNow(ScheduledDelivery scheduledDelivery) {
+    public void runNow(long id) {
+        ScheduledDelivery scheduledDelivery = (ScheduledDelivery) getActivityByID(id);
         EIConnection conn = Database.instance().getConnection();
         try {
             scheduledDelivery.taskNow(conn);
