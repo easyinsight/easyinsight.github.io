@@ -240,6 +240,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
             workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
+
+        System.out.println("final working end date = " + workingEndDate);
+        System.out.println("final working start date = " + workingStartDate);
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
     }
 
