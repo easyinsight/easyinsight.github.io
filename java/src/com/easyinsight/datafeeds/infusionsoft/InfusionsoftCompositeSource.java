@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IJoin;
@@ -27,6 +28,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     private String infusionApiKey;
     private String url;
     private String userID;
+    private boolean skipTags = true;
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Infusionsoft URL", "url");
@@ -40,6 +42,11 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     public void setUserID(String userID) {
         this.userID = userID;
+    }
+
+    @Override
+    public boolean checkDateTime(String name, Key key) {
+        return false;
     }
 
     private Map<String, String> userCache;
@@ -68,6 +75,14 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
             }
         }
         return end;
+    }
+
+    public boolean isSkipTags() {
+        return skipTags;
+    }
+
+    public void setSkipTags(boolean skipTags) {
+        this.skipTags = skipTags;
     }
 
     public Map<String, String> getUserCache() {
@@ -248,11 +263,12 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO INFUSIONSOFT (DATA_SOURCE_ID, URL, API_KEY, USER_ID) VALUES (?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO INFUSIONSOFT (DATA_SOURCE_ID, URL, API_KEY, USER_ID, skip_tags) VALUES (?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, url);
         insertStmt.setString(3, infusionApiKey);
         insertStmt.setString(4, userID);
+        insertStmt.setBoolean(5, skipTags);
         insertStmt.execute();
         insertStmt.close();
     }
@@ -260,13 +276,14 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, API_KEY, USER_ID FROM INFUSIONSOFT WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, API_KEY, USER_ID, skip_tags FROM INFUSIONSOFT WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             setUrl(rs.getString(1));
             setInfusionApiKey(rs.getString(2));
             setUserID(rs.getString(3));
+            setSkipTags(rs.getBoolean(4));
         }
         queryStmt.close();
     }
