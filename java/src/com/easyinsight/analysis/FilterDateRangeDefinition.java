@@ -313,7 +313,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         endCal.set(Calendar.MILLISECOND, 0);
         workingEndDate = endCal.getTime();
 
-        if (date.isTimeshift()) {
+        if (date.isTimeshift(insightRequestMetadata)) {
             workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
             workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
