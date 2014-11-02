@@ -287,8 +287,17 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         if (startDate == null) {
             startDate = new Date();
         }
-        workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+
+
+
+        /*workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);*/
+        workingEndDate = new Date(endDate.getTime());
+        workingStartDate = new Date(startDate.getTime());
+
+        System.out.println("db working end date = " + workingEndDate);
+        System.out.println("db working start date = " + workingStartDate);
+
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(workingStartDate);
         startCal.set(Calendar.HOUR_OF_DAY, 0);
