@@ -217,8 +217,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Date workingEndDate = new Date(endDate.getTime());
         Date workingStartDate = new Date(startDate.getTime());
 
-        System.out.println("working end date = " + workingEndDate);
-        System.out.println("working start date = " + workingStartDate);
+
 
         // but now it's in the app transformed into the user time!
         Calendar startCal = Calendar.getInstance();
@@ -241,8 +240,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
 
-        System.out.println("final working end date = " + workingEndDate);
-        System.out.println("final working start date = " + workingStartDate);
+
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
     }
 
@@ -318,8 +316,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
 
-        System.out.println("db working end date = " + workingEndDate);
-        System.out.println("db working start date = " + workingStartDate);
+
 
         /*System.out.println("end date = " + new Date(workingEndDate.getTime()));
         System.out.println("start date = " + new Date(workingStartDate.getTime()));*/
