@@ -25,7 +25,6 @@ public class InfusionsoftContactToTag extends InfusionsoftTableSource {
     public static final String CONTACT_ID = "ContactId";
     public static final String GROUP_ID = "GroupId";
 
-
     public InfusionsoftContactToTag() {
         setFeedName("Contact to Tag");
     }
@@ -52,7 +51,12 @@ public class InfusionsoftContactToTag extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            return query("ContactGroupAssign", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+            if (!infusionsoftCompositeSource.isSkipTags()) {
+                return query("ContactGroupAssign", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition);
+            } else {
+                return new DataSet();
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
