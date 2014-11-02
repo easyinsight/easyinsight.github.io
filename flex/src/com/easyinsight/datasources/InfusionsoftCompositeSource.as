@@ -9,6 +9,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
     public var url:String;
     public var infusionApiKey:String;
+    public var skipTags:Boolean;
 
     public function InfusionsoftCompositeSource() {
         super();
