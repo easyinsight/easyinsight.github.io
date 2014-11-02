@@ -292,11 +292,15 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
         /*workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);*/
-        workingEndDate = new Date(endDate.getTime());
-        workingStartDate = new Date(startDate.getTime());
+        if (date.isTimeshift()) {
+            workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+            workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        } else {
+            workingEndDate = new Date(endDate.getTime());
+            workingStartDate = new Date(startDate.getTime());
+        }
 
-        System.out.println("db working end date = " + workingEndDate);
-        System.out.println("db working start date = " + workingStartDate);
+
 
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(workingStartDate);
@@ -312,6 +316,10 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         endCal.set(Calendar.SECOND, 59);
         endCal.set(Calendar.MILLISECOND, 0);
         workingEndDate = endCal.getTime();
+
+        System.out.println("db working end date = " + workingEndDate);
+        System.out.println("db working start date = " + workingStartDate);
+
         /*System.out.println("end date = " + new Date(workingEndDate.getTime()));
         System.out.println("start date = " + new Date(workingStartDate.getTime()));*/
         /*if (date.isTimeshift()) {
