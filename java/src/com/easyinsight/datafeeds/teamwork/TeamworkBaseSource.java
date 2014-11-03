@@ -60,6 +60,24 @@ public class TeamworkBaseSource extends ServerDataSourceDefinition {
         return new EmptyValue();
     }
 
+    private transient DateTimeFormatter adf = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+
+    protected Value getDeadlineDate(Map n, String key) {
+        if (adf == null) {
+            adf = DateTimeFormat.forPattern("yyyyMMdd");
+        }
+        String value = getValue(n, key);
+        if (value != null) {
+            try {
+                Date date = adf.parseDateTime(value).toDate();
+                return new DateValue(date);
+            } catch (Exception e) {
+                return new EmptyValue();
+            }
+        }
+        return new EmptyValue();
+    }
+
     protected static Map runRestRequestForMap(String path, HttpClient client, TeamworkCompositeSource parentDefinition) throws ReportException {
         String url = parentDefinition.getUrl() + "/";
         HttpMethod restMethod = new GetMethod(url + path);

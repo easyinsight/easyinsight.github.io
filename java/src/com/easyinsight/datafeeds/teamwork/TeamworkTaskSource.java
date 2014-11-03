@@ -56,7 +56,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
         fieldBuilder.addField(TASK_STATUS, new AnalysisDimension());
         fieldBuilder.addField(TASK_PRIORITY, new AnalysisDimension());
         fieldBuilder.addField(TASK_CREATED_ON, new AnalysisDateDimension());
-        fieldBuilder.addField(TASK_DUE_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(TASK_DUE_DATE, new AnalysisDateDimension(true));
         fieldBuilder.addField(TASK_COUNT, new AnalysisMeasure());
         fieldBuilder.addField(TASK_POSITION, new AnalysisMeasure());
         fieldBuilder.addField(TASK_COMMENTS, new AnalysisMeasure());
@@ -92,6 +92,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
                     row.addValue(keys.get(TASK_TODO_LIST_ID), getValue(project, "todo-list-id"));
                     row.addValue(keys.get(TASK_PRIORITY), getValue(project, "priority"));
                     row.addValue(keys.get(TASK_STATUS), getValue(project, "status"));
+                    row.addValue(keys.get(TASK_DUE_DATE), getDeadlineDate(project, "due-date"));
                     resultCount++;
                 }
             } while (resultCount == 250);

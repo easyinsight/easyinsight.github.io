@@ -10,10 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -105,12 +102,15 @@ public class TeamworkCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected Collection<ChildConnection> getChildConnections() {
-        return new ArrayList<>();
+        return Arrays.asList(new ChildConnection(FeedType.TEAMWORK_PROJECT, FeedType.TEAMWORK_TASK_LIST, TeamworkProjectSource.PROJECT_ID, TeamworkTaskListSource.TODO_LIST_PROJECT_ID),
+                new ChildConnection(FeedType.TEAMWORK_TASK_LIST, FeedType.TEAMWORK_TASK, TeamworkTaskListSource.TODO_LIST_ID, TeamworkTaskSource.TASK_TODO_LIST_ID),
+                new ChildConnection(FeedType.TEAMWORK_TASK_LIST, FeedType.TEAMWORK_MILESTONE, TeamworkTaskListSource.TODO_LIST_MILESTONE_ID, TeamworkMilestoneSource.MILESTONE_ID),
+                new ChildConnection(FeedType.TEAMWORK_TASK, FeedType.TEAMWORK_TIME, TeamworkTaskSource.TASK_ID, TeamworkTimeSource.TIME_ENTRY_TODO_ID));
     }
 
     public void configureFactory(HTMLConnectionFactory factory) {
-        factory.addField("Zendesk URL", "url", "Your Teamwork URL is the browser URL you normally use to connect to Teamwork. For example, if you access Teamwork as yourcompanyname.teamwork.com, put yourcompanyname in as the Teamwork URL.");
-        factory.addField("Zendesk API Token:", "teamworkApiKey");
+        factory.addField("Teamwork URL", "url", "Your Teamwork URL is the browser URL you normally use to connect to Teamwork. For example, if you access Teamwork as yourcompanyname.teamwork.com, put yourcompanyname in as the Teamwork URL.");
+        factory.addField("Teamwork API Token:", "teamworkApiKey");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 }

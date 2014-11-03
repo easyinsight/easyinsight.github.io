@@ -25,6 +25,10 @@ public class TeamworkTaskListSource extends TeamworkBaseSource {
 
     public static final String TODO_LIST_NAME = "Task List Name";
     public static final String TODO_LIST_ID = "Task List ID";
+    public static final String TODO_LIST_PROJECT_ID = "Task List Project ID";
+    public static final String TODO_LIST_COMPLETED = "Task List Completed";
+    public static final String TODO_LIST_DESCRIPTION = "Task List Description";
+    public static final String TODO_LIST_MILESTONE_ID = "Task List Milestone ID";
 
     public TeamworkTaskListSource() {
         setFeedName("Task Lists");
@@ -34,6 +38,10 @@ public class TeamworkTaskListSource extends TeamworkBaseSource {
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(TODO_LIST_NAME, new AnalysisDimension());
         fieldBuilder.addField(TODO_LIST_ID, new AnalysisDimension());
+        fieldBuilder.addField(TODO_LIST_PROJECT_ID, new AnalysisDimension());
+        fieldBuilder.addField(TODO_LIST_COMPLETED, new AnalysisDimension());
+        fieldBuilder.addField(TODO_LIST_DESCRIPTION, new AnalysisDimension());
+        fieldBuilder.addField(TODO_LIST_MILESTONE_ID, new AnalysisDimension());
     }
 
     @Override
@@ -52,6 +60,10 @@ public class TeamworkTaskListSource extends TeamworkBaseSource {
                     IRow row = dataSet.createRow();
                     row.addValue(keys.get(TODO_LIST_ID), getValue(todoList, "id"));
                     row.addValue(keys.get(TODO_LIST_NAME), getValue(todoList, "name"));
+                    row.addValue(keys.get(TODO_LIST_PROJECT_ID), getValue(todoList, "project_id"));
+                    row.addValue(keys.get(TODO_LIST_COMPLETED), getValue(todoList, "complete"));
+                    row.addValue(keys.get(TODO_LIST_DESCRIPTION), getValue(todoList, "description"));
+                    row.addValue(keys.get(TODO_LIST_MILESTONE_ID), getValue(todoList, "milestone-id"));
                 }
             }
             return dataSet;
