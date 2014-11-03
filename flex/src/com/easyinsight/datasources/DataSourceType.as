@@ -73,6 +73,7 @@ public class DataSourceType {
     public static const INFUSIONSOFT_REPORT:int = 286;
     public static const MAILCHIMP:int = 288;
     public static const INTERNAL:int = 294;
+    public static const TEAMWORK:int = 295;
 
     public function DataSourceType() {
     }
