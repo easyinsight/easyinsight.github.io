@@ -465,8 +465,8 @@ public class SendGridEmail {
 
         //imagePart.attachFile(f);
         byte[] encoded = Base64.getMimeEncoder().encode(b);
-        //imagePart.setContent(encoded, "image/png");
-        imagePart.attachFile(f);
+        imagePart.setContent(encoded, "image/png");
+        //imagePart.attachFile(f);
         imagePart.setFileName("BatchbookDealBarChart.png");
 
         imagePart.setContentID("<myimagecid>");
