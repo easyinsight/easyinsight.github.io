@@ -56,22 +56,25 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
 
             Nodes dataSources = document.query("/defineCompositeDataSource/dataSources/dataSource");
             Map<String, CompositeFeedNode> compositeNodes = new HashMap<String, CompositeFeedNode>();
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, FEED_NAME, FEED_TYPE, REFRESH_BEHAVIOR FROM DATA_FEED WHERE " +
-                    "DATA_FEED.API_KEY = ? OR DATA_FEED.FEED_NAME = ?");
+                    "DATA_FEED.DATA_FEED_ID = ?");
             List<CompositeFeedConnection> compositeConnections = new ArrayList<CompositeFeedConnection>();
             for (int i = 0; i < dataSources.size(); i++) {
                 Node dataSourceNode = dataSources.get(i);
                 String dataSource = dataSourceNode.getValue();
-                queryStmt.setString(1, dataSource);
-                queryStmt.setString(2, dataSource);
-                ResultSet dataSetRS = queryStmt.executeQuery();
-                if (dataSetRS.next()) {
-                    long dataSourceID = dataSetRS.getLong(1);
-                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0, dataSetRS.getString(2), dataSetRS.getInt(3), dataSetRS.getInt(4)));
-                } else {
+                Map<Long, Boolean> map = findDataSourceIDsByName(dataSource, conn);
+                if (map.size() == 0) {
                     throw new ServiceRuntimeException("We couldn't find a data source with the key of " + dataSource + ".");
+                } else {
+                    Long dataSourceID = map.keySet().iterator().next();
+                    queryStmt.setLong(1, dataSourceID);
+                    ResultSet dataSetRS = queryStmt.executeQuery();
+                    dataSetRS.next();
+                    compositeNodes.put(dataSource, new CompositeFeedNode(dataSourceID, 0, 0, dataSetRS.getString(2), dataSetRS.getInt(3), dataSetRS.getInt(4)));
                 }
             }
+            queryStmt.close();
 
             Nodes connectionNodes = document.query("/defineCompositeDataSource/connections/connection");
 
@@ -105,12 +108,14 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 }
                 sourceDataSource = sourceDateSourceNodes.get(0).getValue();
                 try {
-                    Element sourceElement = (Element) sourceDateSourceNodes.get(0);
-                    Attribute attribute = sourceElement.getAttribute("cardinality");
-                    if (attribute != null) {
-                        String cardinality = attribute.getValue();
-                        if ("many".equals(cardinality.toLowerCase())) {
-                            sourceCardinality = IJoin.MANY;
+                    if (sourceDateSourceNodes.get(0) instanceof Element) {
+                        Element sourceElement = (Element) sourceDateSourceNodes.get(0);
+                        Attribute attribute = sourceElement.getAttribute("cardinality");
+                        if (attribute != null) {
+                            String cardinality = attribute.getValue();
+                            if ("many".equals(cardinality.toLowerCase())) {
+                                sourceCardinality = IJoin.MANY;
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -135,12 +140,14 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 }
                 targetDataSourceField = targetDataSourceFieldNodes.get(0).getValue();
                 try {
-                    Element targetElement = (Element) targetDataSourceFieldNodes.get(0);
-                    Attribute attribute = targetElement.getAttribute("cardinality");
-                    if (attribute != null) {
-                        String cardinality = attribute.getValue();
-                        if ("many".equals(cardinality.toLowerCase())) {
-                            targetCardinality = IJoin.MANY;
+                    if (sourceDateSourceNodes.get(0) instanceof Element) {
+                        Element targetElement = (Element) targetDataSourceFieldNodes.get(0);
+                        Attribute attribute = targetElement.getAttribute("cardinality");
+                        if (attribute != null) {
+                            String cardinality = attribute.getValue();
+                            if ("many".equals(cardinality.toLowerCase())) {
+                                targetCardinality = IJoin.MANY;
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -159,11 +166,11 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 FeedDefinition targetFeed = new FeedStorage().getFeedDefinitionData(target.getDataFeedID(), conn);
                 Key sourceKey = findKey(sourceDataSourceField, sourceFeed);
                 if (sourceKey == null) {
-                    throw new ServiceRuntimeException("We couldn't find a field by the name of " + sourceKey + " in " + sourceDataSource + ".");
+                    throw new ServiceRuntimeException("We couldn't find a field by the key of " + sourceDataSourceField + " in " + sourceDataSource + ".");
                 }
                 Key targetKey = findKey(targetDataSourceField, targetFeed);
                 if (targetKey == null) {
-                    throw new ServiceRuntimeException("We couldn't find a field by the name of " + targetKey + " in " + targetDataSource + ".");
+                    throw new ServiceRuntimeException("We couldn't find a field by the key of " + targetDataSourceField + " in " + targetDataSource + ".");
                 }
                 CompositeFeedConnection connection = new CompositeFeedConnection(source.getDataFeedID(), target.getDataFeedID(),
                         sourceKey, targetKey, sourceFeed.getFeedName(), targetFeed.getFeedName(), false, false, false, false);
