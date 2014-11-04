@@ -448,7 +448,7 @@ public class SendGridEmail {
         part2.setContent("<html><body><img src=\"cid:myimagecid\"/></body></html>", "text/html;charset=UTF-8");
         multipart.addBodyPart(part2);
 
-        File f = new File("/Users/jamesboe/Downloads/ei2/easyinsight/website/web/images/logo2.png");
+        File f = new File("/opt/tomcat/webapps/app/assets/BatchbookDealBarChart.png");
         FileInputStream fis = new FileInputStream(f);
         byte[] b = new byte[(int) f.length()];
         fis.read(b);
@@ -466,7 +466,7 @@ public class SendGridEmail {
         //imagePart.attachFile(f);
         byte[] encoded = Base64.getMimeEncoder().encode(b);
         imagePart.setContent(encoded, "image/png");
-        imagePart.setFileName("logo2.png");
+        imagePart.setFileName("BatchbookDealBarChart.png");
 
         imagePart.setContentID("cid:myimagecid");
 
