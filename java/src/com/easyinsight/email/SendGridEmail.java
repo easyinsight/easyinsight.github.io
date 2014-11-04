@@ -11,10 +11,13 @@ import javax.activation.DataSource;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.util.ByteArrayDataSource;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 
@@ -133,6 +136,8 @@ public class SendGridEmail {
         props.put("mail.smtp.host", SMTP_HOST_NAME);
         props.put("mail.smtp.auth", "true");
         props.put("vendor", "SendGrid");
+        props.put("mail.smtp.timeout", 30000);
+        props.put("mail.smtp.connectiontimeout", 30000);
 
         Authenticator auth = new SMTPAuthenticator();
         Session mailSession = Session.getInstance(props, auth);
@@ -408,11 +413,81 @@ public class SendGridEmail {
         transport.close();
     }
 
-    private class SMTPAuthenticator extends javax.mail.Authenticator {
+    private static class SMTPAuthenticator extends javax.mail.Authenticator {
         public PasswordAuthentication getPasswordAuthentication() {
            String username = SMTP_AUTH_USER;
            String password = SMTP_AUTH_PWD;
            return new PasswordAuthentication(username, password);
         }
+    }
+
+    public static void test() throws Exception {
+        // Then add to your message:
+        //messageContent.addBodyPart(bodyPart);
+        Properties props = new Properties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.host", SMTP_HOST_NAME);
+        props.put("mail.smtp.auth", "true");
+        props.put("vendor", "SendGrid");
+
+        Authenticator auth = new SMTPAuthenticator();
+        Session mailSession = Session.getInstance(props, auth);
+        // uncomment for debugging infos to stdout
+        // mailSession.setDebug(true);
+        Transport transport = mailSession.getTransport();
+
+        MimeMessage message = new MimeMessage(mailSession);
+
+
+
+        Multipart multipart = new MimeMultipart();
+
+        message.setSubject("image test", "UTF-8");
+
+        BodyPart part2 = new MimeBodyPart();
+        part2.setContent("<html><body><img src=\"cid:myimagecid\"/></body></html>", "text/html;charset=UTF-8");
+        multipart.addBodyPart(part2);
+
+        File f = new File("/Users/jamesboe/Downloads/ei2/easyinsight/website/web/images/logo2.png");
+        FileInputStream fis = new FileInputStream(f);
+        byte[] b = new byte[(int) f.length()];
+        fis.read(b);
+        fis.close();
+        BodyPart bodyPart = new MimeBodyPart();
+        DataSource source = new ByteArrayDataSource(b, "image/png");
+        bodyPart.setDataHandler(new DataHandler(source));
+        bodyPart.setFileName("logo2.png");
+        bodyPart.setDisposition(Part.ATTACHMENT);
+
+        multipart.addBodyPart(bodyPart);
+
+        MimeBodyPart imagePart = new MimeBodyPart();
+
+        //imagePart.attachFile(f);
+        byte[] encoded = Base64.getMimeEncoder().encode(b);
+        imagePart.setContent(encoded, "image/png");
+        imagePart.setFileName("logo2.png");
+
+        imagePart.setContentID("cid:myimagecid");
+
+        imagePart.setDisposition(MimeBodyPart.INLINE);
+
+        multipart.addBodyPart(imagePart);
+
+        message.setContent(multipart);
+
+
+            String fromAddress = "jboe@easy-insight.com";
+
+
+            String fromName = "Easy Insight Reports";
+
+        message.setFrom(new InternetAddress(fromAddress, fromName));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress("jboe@easy-insight.com"));
+
+        transport.connect();
+        transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
+        transport.close();
+
     }
 }
