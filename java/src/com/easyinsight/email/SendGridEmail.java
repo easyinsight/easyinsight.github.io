@@ -453,13 +453,13 @@ public class SendGridEmail {
         byte[] b = new byte[(int) f.length()];
         fis.read(b);
         fis.close();
-        /*BodyPart bodyPart = new MimeBodyPart();
+        BodyPart bodyPart = new MimeBodyPart();
         DataSource source = new ByteArrayDataSource(b, "image/png");
         bodyPart.setDataHandler(new DataHandler(source));
         bodyPart.setFileName("BatchbookDealBarChart.png");
-        bodyPart.setDisposition(Part.ATTACHMENT);*/
+        bodyPart.setDisposition(Part.ATTACHMENT);
 
-        //multipart.addBodyPart(bodyPart);
+        multipart.addBodyPart(bodyPart);
 
         MimeBodyPart imagePart = new MimeBodyPart();
 
