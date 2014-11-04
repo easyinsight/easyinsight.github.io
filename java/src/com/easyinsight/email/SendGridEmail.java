@@ -456,7 +456,7 @@ public class SendGridEmail {
         BodyPart bodyPart = new MimeBodyPart();
         DataSource source = new ByteArrayDataSource(b, "image/png");
         bodyPart.setDataHandler(new DataHandler(source));
-        bodyPart.setFileName("logo2.png");
+        bodyPart.setFileName("BatchbookDealBarChart.png");
         bodyPart.setDisposition(Part.ATTACHMENT);
 
         multipart.addBodyPart(bodyPart);
@@ -468,7 +468,7 @@ public class SendGridEmail {
         imagePart.setContent(encoded, "image/png");
         imagePart.setFileName("BatchbookDealBarChart.png");
 
-        imagePart.setContentID("cid:myimagecid");
+        imagePart.setContentID("<cid:myimagecid>");
 
         imagePart.setDisposition(MimeBodyPart.INLINE);
 
