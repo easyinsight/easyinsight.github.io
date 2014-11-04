@@ -191,7 +191,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                         request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
                                 setClientSecret(SECRET_KEY).
-                                setRedirectURI("https://j8staging.easy-insight.com/app/oauth").
+                                setRedirectURI("https://www.easy-insight.com/app/oauth").
                                 setCode(code).buildBodyMessage();
                     }
                     OAuthClient client = new OAuthClient(new URLConnectionClient());
