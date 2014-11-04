@@ -440,7 +440,7 @@ public class SendGridEmail {
 
 
 
-        Multipart multipart = new MimeMultipart();
+        Multipart multipart = new MimeMultipart("related");
 
         message.setSubject("image test", "UTF-8");
 
@@ -453,22 +453,23 @@ public class SendGridEmail {
         byte[] b = new byte[(int) f.length()];
         fis.read(b);
         fis.close();
-        BodyPart bodyPart = new MimeBodyPart();
+        /*BodyPart bodyPart = new MimeBodyPart();
         DataSource source = new ByteArrayDataSource(b, "image/png");
         bodyPart.setDataHandler(new DataHandler(source));
         bodyPart.setFileName("BatchbookDealBarChart.png");
-        bodyPart.setDisposition(Part.ATTACHMENT);
+        bodyPart.setDisposition(Part.ATTACHMENT);*/
 
-        multipart.addBodyPart(bodyPart);
+        //multipart.addBodyPart(bodyPart);
 
         MimeBodyPart imagePart = new MimeBodyPart();
 
         //imagePart.attachFile(f);
         byte[] encoded = Base64.getMimeEncoder().encode(b);
-        imagePart.setContent(encoded, "image/png");
+        //imagePart.setContent(encoded, "image/png");
+        imagePart.attachFile(f);
         imagePart.setFileName("BatchbookDealBarChart.png");
 
-        imagePart.setContentID("<cid:myimagecid>");
+        imagePart.setContentID("<myimagecid>");
 
         imagePart.setDisposition(MimeBodyPart.INLINE);
 
