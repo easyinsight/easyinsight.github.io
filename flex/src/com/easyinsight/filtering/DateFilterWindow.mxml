@@ -108,8 +108,10 @@
                 move.xTo = g.x + 20;
                 move.yTo = g.y;
             } else {
-                move.xTo = transformContainer.x + 60;
-                move.yTo = transformContainer.y + (transformContainer.height / 2);
+                var p2:Point = new Point(transformContainer.x, transformContainer.y);
+                var g2:Point = transformContainer.localToGlobal(p2);
+                move.xTo = g2.x + 100;
+                move.yTo = g2.y;
             }
             move.duration = 500;
             parallel.addChild(move);
