@@ -20,6 +20,7 @@ import com.easyinsight.util.PopUpUtil;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flash.events.ContextMenuEvent;
+import flash.geom.Point;
 import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
 
@@ -53,7 +54,7 @@ public class TransformContainer extends HBox
 {
     private var filterMap:Dictionary = new Dictionary();
     private var filterDefinitions:ArrayCollection = new ArrayCollection();
-    private var filterTile:FlowBox;
+    public var filterTile:FlowBox;
     private var _feedID:int;
     private var _reportID:int;
     private var _report:AnalysisDefinition;
@@ -268,7 +269,14 @@ public class TransformContainer extends HBox
         callout = null;
     }
 
+    private function onC(event:FlexEvent):void {
+        /*var p:Point = new Point(DisplayObjectContainer(event.currentTarget).x, DisplayObjectContainer(event.currentTarget).y);
+        var g:Point = localToGlobal(p);
+        Alert.show(g.x + " - " + g.y);*/
+    }
+
     private function xyz(filter:IFilter):void {
+        filter.addEventListener(FlexEvent.CREATION_COMPLETE, onC);
 
         /*var sequence:Sequence = new Sequence(filter);
         var glow1:Glow = new Glow(filter);
@@ -490,6 +498,7 @@ public class TransformContainer extends HBox
         filterMetadata.report = _report;
         if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
             var window:DateFilterWindow = new DateFilterWindow();
+            window.transformContainer = this;
             window.filterMetadata = filterMetadata;
             window.report = _report;
             window.feedID = _feedID;
