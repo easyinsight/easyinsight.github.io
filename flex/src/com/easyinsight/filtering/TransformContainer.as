@@ -519,6 +519,7 @@ public class TransformContainer extends HBox
             initializeFilter(sliderMeasureFilter, true, true);
         } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
             var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
+            dimWindow.transformContainer = this;
             dimWindow.item = analysisItem;
             dimWindow.filterMetadata = filterMetadata;
             dimWindow.report = _report;

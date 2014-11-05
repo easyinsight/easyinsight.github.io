@@ -5,6 +5,10 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
 
+        import mx.core.Application;
+        import mx.effects.Move;
+        import mx.effects.Parallel;
+
         import mx.managers.PopUpManager;
 
         private function onMouseDown(event:MouseEvent):void {
@@ -35,17 +39,46 @@
         }
 
         private function addNewMultiValue():void {
-            var multiValFilter:NewMultiValueFilter = new NewMultiValueFilter(_feedID, _item, 0, 0, _report, null, null, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(multiValFilter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new NewMultiValueFilter(_feedID, _item, 0, 0, _report, null, null, null, filterMetadata));
         }
 
         private function addComboBox():void {
-            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item, 0, 0, _report, null, null, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(comboBoxFilter));
+            useEffect(new ComboBoxFilter(_feedID, _item, 0, 0, _report, null, null, null, filterMetadata));
+        }
+
+        public var transformContainer:TransformContainer;
+
+        private function useEffect(filter:IFilter) {
             stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            var a:FilterAnimation = new FilterAnimation();
+            a.x = this.x;
+            a.y = this.y;
             PopUpManager.removePopUp(this);
+            PopUpManager.addPopUp(a, DisplayObject(Application.application));
+            var parallel:Parallel = new Parallel();
+            var move:Move = new Move(a);
+            move.xFrom = this.x;
+            move.yFrom = this.y;
+            if (transformContainer.filterTile.getChildren().length > 0) {
+                var obj:DisplayObject = transformContainer.filterTile.getChildAt(transformContainer.filterTile.getChildren().length - 1) as DisplayObject;
+                var p:Point = new Point(obj.x + obj.width, obj.y);
+                var g:Point = transformContainer.filterTile.localToGlobal(p);
+                move.xTo = g.x + 20;
+                move.yTo = g.y;
+            } else {
+                var p2:Point = new Point(transformContainer.x, transformContainer.y);
+                var g2:Point = transformContainer.localToGlobal(p2);
+                move.xTo = g2.x + 100;
+                move.yTo = g2.y;
+            }
+            move.duration = 500;
+            parallel.addChild(move);
+            parallel.addEventListener("effectEnd", function(event:Event):void {
+                dispatchEvent(new FilterCreationEvent(filter));
+                PopUpManager.removePopUp(a);
+
+            });
+            parallel.play();
         }
 
         private function addAutoComplete():void {
