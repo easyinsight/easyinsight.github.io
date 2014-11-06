@@ -34,6 +34,7 @@ public class InfusionsoftContactActionSource extends InfusionsoftTableSource {
     public static final String PRIORITY = "Priority";
     public static final String APPOINTMENT = "IsAppointment";
     public static final String ACTION_COUNT = "Action Count";
+    public static final String CREATION_NOTES = "CreationNotes";
 
     public InfusionsoftContactActionSource() {
         setFeedName("Contact Actions");
@@ -42,12 +43,6 @@ public class InfusionsoftContactActionSource extends InfusionsoftTableSource {
     @Override
     public FeedType getFeedType() {
         return FeedType.INFUSIONSOFT_CONTACT_ACTION;
-    }
-
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(CONTACT_ACTION_ID, CONTACT_ID, OPPORTUNITY_ID, ACTION_TYPE, ACTION_DESCRIPTION, CREATION_DATE, COMPLETION_DATE, ACTION_DATE, END_DATE);
     }
 
     @Override
@@ -66,6 +61,7 @@ public class InfusionsoftContactActionSource extends InfusionsoftTableSource {
         fieldBuilder.addField(ACTION_DATE, new AnalysisDateDimension("Action Date"));
         fieldBuilder.addField(END_DATE, new AnalysisDateDimension("Action End Date"));
         fieldBuilder.addField(ACTION_COUNT, new AnalysisMeasure("Number of Actions"));
+        fieldBuilder.addField(CREATION_NOTES, new AnalysisDimension("Creation Notes"));
     }
 
     @Override
