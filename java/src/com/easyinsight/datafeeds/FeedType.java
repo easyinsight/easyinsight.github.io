@@ -321,6 +321,12 @@ public class FeedType implements Serializable {
     public static final FeedType MAILCHIMP_CAMPAIGN_DETAILS = new FeedType(292);
     public static final FeedType INTERNAL_DATA_SOURCE = new FeedType(293);
     public static final FeedType INTERNAL_COMPOSITE = new FeedType(294);
+    public static final FeedType TEAMWORK_COMPOSITE = new FeedType(295);
+    public static final FeedType TEAMWORK_PROJECT = new FeedType(296);
+    public static final FeedType TEAMWORK_TASK = new FeedType(297);
+    public static final FeedType TEAMWORK_TASK_LIST = new FeedType(298);
+    public static final FeedType TEAMWORK_TIME = new FeedType(299);
+    public static final FeedType TEAMWORK_MILESTONE = new FeedType(300);
 
     public FeedType() {
     }

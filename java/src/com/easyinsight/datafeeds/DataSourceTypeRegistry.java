@@ -65,6 +65,7 @@ import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
 import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoFormSource;
 import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoMetadataSource;
 import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoQuestionSource;
+import com.easyinsight.datafeeds.teamwork.*;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
@@ -461,6 +462,12 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.MAILCHIMP_CAMPAIGN_DETAILS, MailchimpCampaignDetailSource.class);
         registerType(FeedType.INTERNAL_DATA_SOURCE, InternalDataSource.class);
         registerType(FeedType.INTERNAL_COMPOSITE, InternalCompositeSource.class);
+        registerType(FeedType.TEAMWORK_COMPOSITE, TeamworkCompositeSource.class);
+        registerType(FeedType.TEAMWORK_PROJECT, TeamworkProjectSource.class);
+        registerType(FeedType.TEAMWORK_TASK, TeamworkTaskSource.class);
+        registerType(FeedType.TEAMWORK_TASK_LIST, TeamworkTaskListSource.class);
+        registerType(FeedType.TEAMWORK_MILESTONE, TeamworkMilestoneSource.class);
+        registerType(FeedType.TEAMWORK_TIME, TeamworkTimeSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

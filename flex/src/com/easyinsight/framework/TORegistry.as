@@ -103,6 +103,7 @@ import com.easyinsight.datasources.PostgresDatabaseConnection;
 import com.easyinsight.datasources.RedboothCompositeSource;
 import com.easyinsight.datasources.SmartsheetTableSource;
 import com.easyinsight.datasources.Solve360CompositeDataSource;
+import com.easyinsight.datasources.TeamworkCompositeSource;
 import com.easyinsight.datasources.TrelloCompositeSource;
 import com.easyinsight.filtering.MultiFieldFilterDefinition;
 import com.easyinsight.solutions.DataSourceGroupDescriptor;
@@ -328,6 +329,7 @@ public class TORegistry {
         var oracleSales:OracleSalesCloudCompositeSource;
         var happyFox:HappyFoxDataSource;
         var mc:MailChimpCompositeSource;
+        var teamwork:TeamworkCompositeSource;
     }
 }
 }

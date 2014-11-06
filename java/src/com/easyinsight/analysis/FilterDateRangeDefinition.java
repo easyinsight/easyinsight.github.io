@@ -211,8 +211,14 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        Date workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        Date workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        /*Date workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        Date workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);*/
+
+        Date workingEndDate = new Date(endDate.getTime());
+        Date workingStartDate = new Date(startDate.getTime());
+
+
+
         // but now it's in the app transformed into the user time!
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(workingStartDate);
@@ -233,6 +239,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
             workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
         }
+
+
         return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
     }
 
@@ -277,8 +285,17 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         if (startDate == null) {
             startDate = new Date();
         }
-        workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+
+
+
+        /*workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);*/
+
+        workingEndDate = new Date(endDate.getTime());
+        workingStartDate = new Date(startDate.getTime());
+
+
+
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(workingStartDate);
         startCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -293,6 +310,14 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         endCal.set(Calendar.SECOND, 59);
         endCal.set(Calendar.MILLISECOND, 0);
         workingEndDate = endCal.getTime();
+
+        if (date.isTimeshift(insightRequestMetadata)) {
+            workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
+            workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        }
+
+
+
         /*System.out.println("end date = " + new Date(workingEndDate.getTime()));
         System.out.println("start date = " + new Date(workingStartDate.getTime()));*/
         /*if (date.isTimeshift()) {
