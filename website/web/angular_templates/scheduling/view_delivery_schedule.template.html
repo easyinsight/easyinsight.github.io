@@ -75,6 +75,9 @@
                 </tr>
                 </thead>
                 <tbody>
+                <tr ng-if="schedule.users.length == 0 && schedule.groups.length == 0 && all_emails.length == 0">
+                    <td colspan="2">There are no recipients yet. Add one now!</td>
+                </tr>
                 <tr ng-repeat="user in schedule.users">
                     <td><input type="checkbox" ng-model="user.selected" /></td>
                     <td><i style="color:#3276b1" class="glyphicon glyphicon-user" /> {{full_name(user)}}</td>

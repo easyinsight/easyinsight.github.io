@@ -396,7 +396,7 @@ public class GeneralDelivery extends ScheduledDelivery {
     }
 
     public String describe() {
-        return getDeliveryLabel() != null ? getDeliveryLabel() : "Email multiple dashboards and reports";
+        return getDeliveryLabel() != null && !getDeliveryLabel().isEmpty() ? getDeliveryLabel() : "Email multiple dashboards and reports";
     }
 
     @Override
@@ -406,7 +406,8 @@ public class GeneralDelivery extends ScheduledDelivery {
         jo.put("body", getBody());
         jo.put("html_email", isHtmlEmail());
         jo.put("offset", getTimezoneOffset());
-        jo.put("sender_id", getSenderID());
+        jo.put("sender", getSenderID());
+        jo.put("label", getDeliveryLabel());
         jo.put("delivery_info", new JSONArray(getDeliveryInfos().stream().map((a) -> {
             try {
                 return a.toJSON(md);
@@ -415,5 +416,23 @@ public class GeneralDelivery extends ScheduledDelivery {
             }
         }).collect(Collectors.toList())));
         return jo;
+    }
+
+    public GeneralDelivery() {}
+
+    public GeneralDelivery(long id, net.minidev.json.JSONObject jsonObject) {
+        super(id, jsonObject);
+        setSubject(String.valueOf(jsonObject.get("subject")));
+        setBody(String.valueOf(jsonObject.get("body")));
+        setHtmlEmail(Boolean.valueOf(String.valueOf(jsonObject.get("html_email"))));
+        setTimezoneOffset(Integer.parseInt(String.valueOf(jsonObject.get("offset"))));
+        setSenderID(Long.parseLong(String.valueOf(jsonObject.get("sender"))));
+        net.minidev.json.JSONArray deliveries = (net.minidev.json.JSONArray) jsonObject.get("delivery_info");
+        setDeliveryLabel(String.valueOf(jsonObject.get("label")));
+        List<DeliveryInfo> deliveryInfoList = new ArrayList<>();
+        for(int i = 0;i < deliveries.size();i++) {
+            deliveryInfoList.add(new DeliveryInfo((net.minidev.json.JSONObject) deliveries.get(i), i));
+        }
+        setDeliveryInfos(deliveryInfoList);
     }
 }

@@ -52,8 +52,13 @@ public class ScheduledActivitiesServlet extends JSONServlet {
     @Override
     protected ResponseInfo processPost(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject jo = new JSONObject();
-        long id = Long.parseLong(request.getParameter("schedule_id"));
+        long id;
+        if("new".equals(request.getParameter("schedule_id")))
+            id = 0;
+        else
+            id = Long.parseLong(request.getParameter("schedule_id"));
         int offset = Integer.parseInt(request.getParameter("offset"));
+
         ScheduledActivity sa = ScheduledActivity.fromJSON(id, jsonObject);
         ExportMetadata md = ExportService.createExportMetadata(conn);
         new ExportService().addOrUpdateSchedule(sa, offset, conn);

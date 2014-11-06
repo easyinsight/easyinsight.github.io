@@ -241,6 +241,8 @@ public abstract class ScheduledActivity {
                 return new DataSourceRefreshActivity(id, jsonObject);
             case "report":
                 return new ReportDelivery(id, jsonObject);
+            case "general":
+                return new GeneralDelivery(id, jsonObject);
         }
         return sa;
     }

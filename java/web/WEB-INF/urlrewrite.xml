@@ -149,6 +149,10 @@
         <from>^/html/report/([A-Za-z0-9]+)/data.json$</from>
         <to>/html/reportData?reportID=$1&amp;format=json</to>
     </rule>
+    <rule>
+        <from>^/html/dashboard/([A-Za-z0-9]+)/data.json</from>
+        <to>/html/dashboardData?dashboardID=$1&amp;format=json</to>
+    </rule>
 
     <rule>
         <from>^/html/report/([A-Za-z0-9]+)/describe.json$</from>

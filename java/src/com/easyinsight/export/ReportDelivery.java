@@ -468,7 +468,7 @@ public class ReportDelivery extends ScheduledDelivery {
         return jo;
     }
 
-    private String reportFormatValue(int value) {
+    public static String reportFormatValue(int value) {
         switch(value) {
             case 1:
                 return "excel";
@@ -503,6 +503,14 @@ public class ReportDelivery extends ScheduledDelivery {
         setConfigurationID(Long.parseLong(String.valueOf(jsonObject.get("configuration_id"))));
         setCustomFilters(new ArrayList<>());
         String reportFormat = String.valueOf(jsonObject.get("report_format"));
+        int reportFormatValue = formatStringToValue(reportFormat);
+        setReportFormat(reportFormatValue);
+        if(getReportFormat() == 3) {
+            setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) jsonObject.get("delivery_info")));
+        }
+    }
+
+    public static int formatStringToValue(String reportFormat) {
         int reportFormatValue = 0;
         switch(reportFormat) {
             case "excel":
@@ -523,9 +531,6 @@ public class ReportDelivery extends ScheduledDelivery {
             default:
                 reportFormatValue = 0;
         }
-        setReportFormat(reportFormatValue);
-        if(getReportFormat() == 3) {
-            setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) jsonObject.get("delivery_info")));
-        }
+        return reportFormatValue;
     }
 }
