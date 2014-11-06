@@ -38,6 +38,13 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String POSTAL_CODE = "PostalCode";
     public static final String STATE = "State";
     public static final String CITY = "City";
+    public static final String PHONE1 = "Phone1";
+    public static final String PHONE2 = "Phone2";
+    public static final String CONTACT_NOTES = "ContactNotes";
+    public static final String COUNTRY = "Country";
+    public static final String BIRTHDAY = "Birthday";
+    public static final String REFERRAL_CODE = "ReferralCode";
+    public static final String STREET_ADDRESS1 = "StreetAddress1";
 
     public InfusionsoftContactSource() {
         setFeedName("Contacts");
@@ -66,6 +73,13 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         fieldBuilder.addField(CONTACT_URL, new AnalysisDimension("Contact URL"));
         fieldBuilder.addField(OWNER_ID, new AnalysisDimension("Contact Owner ID"));
         fieldBuilder.addField(OWNER_NAME, new AnalysisDimension());
+        fieldBuilder.addField(PHONE1, new AnalysisDimension());
+        fieldBuilder.addField(PHONE2, new AnalysisDimension());
+        fieldBuilder.addField(CONTACT_NOTES, new AnalysisDimension());
+        fieldBuilder.addField(COUNTRY, new AnalysisDimension());
+        fieldBuilder.addField(BIRTHDAY, new AnalysisDimension());
+        fieldBuilder.addField(REFERRAL_CODE, new AnalysisDimension());
+        fieldBuilder.addField(STREET_ADDRESS1, new AnalysisDimension());
         InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
         List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-1);
         if (customFields != null) {
