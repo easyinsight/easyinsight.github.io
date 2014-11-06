@@ -108,8 +108,9 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 }
                 sourceDataSource = sourceDateSourceNodes.get(0).getValue();
                 try {
-                    if (sourceDateSourceNodes.get(0) instanceof Element) {
-                        Element sourceElement = (Element) sourceDateSourceNodes.get(0);
+                    Nodes els = connectionNode.query("sourceDataSource");
+                    if (els.get(0) instanceof Element) {
+                        Element sourceElement = (Element) els.get(0);
                         Attribute attribute = sourceElement.getAttribute("cardinality");
                         if (attribute != null) {
                             String cardinality = attribute.getValue();
@@ -128,20 +129,10 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 }
                 targetDataSource = targetDataSourceNodes.get(0).getValue();
 
-                Nodes sourceDateSourceFieldNodes = connectionNode.query("sourceDataSourceField/text()");
-                if (sourceDateSourceFieldNodes.size() == 0) {
-                    throw new ServiceRuntimeException("You need to specify a source data source field for each connection.");
-                }
-                sourceDataSourceField = sourceDateSourceFieldNodes.get(0).getValue();
-
-                Nodes targetDataSourceFieldNodes = connectionNode.query("targetDataSourceField/text()");
-                if (targetDataSourceFieldNodes.size() == 0) {
-                    throw new ServiceRuntimeException("You need to specify a target data source field for each connection.</message></response>");
-                }
-                targetDataSourceField = targetDataSourceFieldNodes.get(0).getValue();
                 try {
-                    if (sourceDateSourceNodes.get(0) instanceof Element) {
-                        Element targetElement = (Element) targetDataSourceFieldNodes.get(0);
+                    Nodes els = connectionNode.query("targetDataSource");
+                    if (els.get(0) instanceof Element) {
+                        Element targetElement = (Element) els.get(0);
                         Attribute attribute = targetElement.getAttribute("cardinality");
                         if (attribute != null) {
                             String cardinality = attribute.getValue();
@@ -153,6 +144,18 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
+
+                Nodes sourceDateSourceFieldNodes = connectionNode.query("sourceDataSourceField/text()");
+                if (sourceDateSourceFieldNodes.size() == 0) {
+                    throw new ServiceRuntimeException("You need to specify a source data source field for each connection.");
+                }
+                sourceDataSourceField = sourceDateSourceFieldNodes.get(0).getValue();
+
+                Nodes targetDataSourceFieldNodes = connectionNode.query("targetDataSourceField/text()");
+                if (targetDataSourceFieldNodes.size() == 0) {
+                    throw new ServiceRuntimeException("You need to specify a target data source field for each connection.</message></response>");
+                }
+                targetDataSourceField = targetDataSourceFieldNodes.get(0).getValue();
 
                 CompositeFeedNode source = compositeNodes.get(sourceDataSource);
                 CompositeFeedNode target = compositeNodes.get(targetDataSource);
