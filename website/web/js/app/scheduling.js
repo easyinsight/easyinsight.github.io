@@ -91,22 +91,26 @@
     eiScheduling.controller("viewDeliverySchedulingController", ["$scope", "$routeParams", "$http", "$location", function($scope, $routeParams, $http, $location) {
         $scope.loading.then(function() {
             $scope.is_new = $routeParams.id == "new";
+            console.log($location.path())
             if($scope.is_new) {
                 $scope.schedule = {
                     emails: [],
                     groups: [],
                     users: [],
                     id: "new",
-                    type: "report",
+                    type: $location.path().match(/scheduling\/delivery/i) ? "report" : "general",
                     schedule_type: {
                         offset: $scope.getOffset(),
                         type: "daily",
                         hour: 0,
                         minute: 0
                     },
+                    label: "",
+                    delivery_info: [],
                     report_id: 0,
                     sender: 0,
                     timezone_offset: $scope.getOffset(),
+                    offset: $scope.getOffset(),
                     configuration_id: 0,
                     report_format: "excel2007",
                     delivery_label: "",
@@ -386,12 +390,12 @@
             when("/scheduling/reports", "scheduling.reports").
             when("/scheduling/data_sources", "scheduling.data_sources").
             when("/scheduling/data_sources/:id", "scheduling.view_data_source").
-            when("/scheduling/delivery/:id", "scheduling.view_delivery.scheduling").
+            when("/scheduling/delivery/:id", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/schedule", "scheduling.view_delivery.scheduling").
             when("/scheduling/delivery/:id/report", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/email", "scheduling.view_delivery.email").
             when("/scheduling/delivery/:id/history", "scheduling.view_delivery.history").
-            when("/scheduling/multi_delivery/:id", "scheduling.view_multi_delivery.scheduling").
+            when("/scheduling/multi_delivery/:id", "scheduling.view_multi_delivery.reports").
             when("/scheduling/multi_delivery/:id/schedule", "scheduling.view_multi_delivery.scheduling").
             when("/scheduling/multi_delivery/:id/email", "scheduling.view_multi_delivery.email").
             when("/scheduling/multi_delivery/:id/history", "scheduling.view_multi_delivery.history").
