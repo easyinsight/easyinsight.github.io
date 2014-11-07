@@ -6,12 +6,12 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jetbrains.annotations.NotNull;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,7 +36,7 @@ public class TrelloCardSource extends TrelloBaseSource {
     public static final String CARD_LIST_ID = "Card List ID";
     public static final String CARD_LAST_ACTIVITY_DATE = "Card Last Activity Date";
     public static final String CARD_COUNT = "Card Count";
-    public static final String CARD_CREATED_AT = "Card Count";
+    public static final String CARD_URL = "Card URL";
 
     public TrelloCardSource() {
         setFeedName("Cards");
@@ -53,6 +53,7 @@ public class TrelloCardSource extends TrelloBaseSource {
         fieldBuilder.addField(CARD_CLOSED, new AnalysisDimension());
         fieldBuilder.addField(CARD_LAST_ACTIVITY_DATE, new AnalysisDateDimension());
         fieldBuilder.addField(CARD_COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(CARD_URL, new AnalysisDimension());
     }
 
     @Override
@@ -69,6 +70,7 @@ public class TrelloCardSource extends TrelloBaseSource {
         List<Member> memberData = new ArrayList<Member>();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat dueDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
             for (int i = 0 ; i < boards.length(); i++) {
@@ -110,9 +112,16 @@ public class TrelloCardSource extends TrelloBaseSource {
                     row.addValue(CARD_LIST_ID, card.get("idList").toString());
                     row.addValue(CARD_CLOSED, card.get("closed").toString());
                     row.addValue(CARD_DESCRIPTION, card.get("description").toString());
+                    row.addValue(CARD_URL, card.get("shortUrl").toString());
                     try {
-                        Date dueDate = sdf.parse(card.get("due").toString());
+                        Date dueDate = dueDF.parse(card.get("due").toString());
                         row.addValue(CARD_DUE_AT, new DateValue(dueDate));
+                    } catch (ParseException e) {
+                        // ignore
+                    }
+                    try {
+                        Date dueDate = dueDF.parse(card.get("dateLastActivity").toString());
+                        row.addValue(CARD_LAST_ACTIVITY_DATE, new DateValue(dueDate));
                     } catch (ParseException e) {
                         // ignore
                     }
