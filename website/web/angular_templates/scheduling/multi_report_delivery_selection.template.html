@@ -40,9 +40,57 @@
 
     </div>
 </div>
+    <div ng-if="selected_delivery">
+        <div class="row scheduleRow">
+            <div class="col-md-12"><h2>Name: {{selected_delivery.name}}</h2></div>
+        </div>
+        <div class="row scheduleRow">
+            <div class="col-md-4">
+                Send If No Data:
+            </div>
+            <div class="col-md-8"><input type="checkbox" ng-model="selected_delivery.send_if_no_data" />
+            </div>
+        </div>
+        <div class="row scheduleRow">
+                <div class="col-md-4">Configuration: </div>
+                <div class="col-md-8" ng-if="schedule_configurations == null || schedule_configurations.length == 0">There are no configurations available.</div>
+                <div class="col-md-8" ng-if="schedule_configurations != null && schedule_configurations.length > 0">
+                    <select class="form-control" ng-model="selected_delivery.configuration_id" ng-options="configuration.id as configuration.name for configuration in default_added(schedule_configurations)">
+                    </select>
+                </div>
+            </div>
+        <div ng-if="selected_delivery.type == 'report'" class="row scheduleRow">
+            <div class="col-md-4">
+                Output Format:
+            </div>
+            <div class="col-md-8">
+                <select ng-model="selected_delivery.format" class="form-control" ng-change="checkPDF()">
+                    <option value="excel2007">Excel 2007</option>
+                    <option value="excel">Excel</option>
+                    <option value="png">PNG</option>
+                    <option value="pdf">PDF</option>
+                    <option value="html">HTML Table</option>
+                </select>
+            </div>
+        </div>
+        <div ng-if="selected_delivery.format == 'pdf'" class="row scheduleRow">
+            <div class="col-md-4">Show Header:</div>
+            <div class="col-md-8"><input type="checkbox" ng-model="selected_delivery.delivery_info.show_header" /></div>
+        </div>
+        <div class="row scheduleRow" ng-if="selected_delivery.format == 'pdf'">
+            <div class="col-md-4">Orientation:</div>
+            <div class="col-md-8">
+                <select class="form-control" ng-model="selected_delivery.delivery_info.orientation">
+                    <option value="Landscape">Landscape</option>
+                    <option value="Portrait">Portrait</option>
+                </select>
+            </div>
+        </div>
+    </div>
     <div class="row scheduleRow">
         <div class="col-md-12">
             <input type="submit" value="Save" class="btn btn-primary" />
         </div>
     </div>
+
 </form>

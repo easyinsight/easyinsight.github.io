@@ -110,7 +110,8 @@
                     configuration_id: 0,
                     report_format: "excel2007",
                     delivery_label: "",
-                    subject: ""
+                    subject: "",
+                    body: ""
                 }
             } else {
                 var i;
@@ -282,6 +283,20 @@
                     }
                 }
             });
+            $scope.checkPDF = function() {
+                if($scope.schedule.report_format == "pdf") {
+                    if(typeof($scope.schedule.delivery_info) == "undefined") {
+                        $scope.schedule.delivery_info = {
+                            show_header: false,
+                            orientation: "landscape"
+                        }
+                    }
+                } else {
+                    if(typeof($scope.schedule.delivery_info) != "undefined") {
+                        delete $scope.schedule.delivery_info;
+                    }
+                }
+            }
         });
         $scope.isSelected = function(val) {
             return val && typeof(val) === "object"
@@ -314,14 +329,20 @@
         };
         $scope.add_report = function() {
             if($scope.isSelected($scope.selected_report)) {
-                console.log($scope.selected_report);
-                $scope.schedule.delivery_info.push({
-                    format: "excel2007",
+                var v = {
+                    format: $scope.selected_report == 'report' ? "excel2007" : "pdf",
                     id: $scope.selected_report.id,
                     type: $scope.selected_report.type,
                     send_if_no_data: true,
                     name: $scope.selected_report.name
-                });
+                }
+                if(v.format == "pdf") {
+                    v.delivery_info = {
+                        show_header: false,
+                        orientation: "Landscape"
+                    }
+                }
+                $scope.schedule.delivery_info.push(v);
             }
         }
         $scope.isSelected = function(val) {
@@ -334,6 +355,28 @@
 
         $scope.select_delivery = function(item) {
             $scope.selected_delivery = item;
+            $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
+                $scope.schedule_configurations = d.data.configurations;
+            });
+        }
+
+        $scope.default_added = function(a) {
+            return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
+        };
+
+        $scope.checkPDF = function() {
+            if($scope.selected_delivery.format == "pdf") {
+                if(typeof($scope.selected_delivery.delivery_info) == "undefined") {
+                    $scope.selected_delivery.delivery_info = {
+                        show_header: false,
+                        orientation: "Landscape"
+                    }
+                }
+            } else {
+                if(typeof($scope.selected_delivery.delivery_info) != "undefined") {
+                    delete $scope.selected_delivery.delivery_info;
+                }
+            }
         }
 
     }])
