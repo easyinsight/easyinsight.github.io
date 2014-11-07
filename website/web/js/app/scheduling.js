@@ -36,7 +36,10 @@
 
     eiScheduling.controller("deleteScheduledDataSourceController", ["$scope", "$http", function($scope, $http) {
         $scope.confirmDelete = function() {
-            var l = $http.delete("/app/scheduled_tasks/" + $scope.schedule.id + ".json");
+            var l = $http.delete("/app/scheduled_tasks.json", {data: JSON.stringify({
+                "schedules": $scope.to_delete.map(function(e, i, l) { return e.id; })
+                }
+            )  });
             l.then(function() {
                 $scope.$close();
             })
