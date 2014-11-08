@@ -63,11 +63,6 @@
     </filter>
 
     <filter>
-        <filter-name>FixedDashboard</filter-name>
-        <filter-class>com.easyinsight.html.FixedDashboardFilter</filter-class>
-    </filter>
-
-    <filter>
         <filter-name>ValidAccountFilter</filter-name>
         <filter-class>com.easyinsight.html.ValidAccountFilter</filter-class>
     </filter>
@@ -178,11 +173,6 @@
         <url-pattern>/html/*</url-pattern>
         <url-pattern>/embed/*</url-pattern>
         <url-pattern>/billing/*</url-pattern>
-    </filter-mapping>
-
-    <filter-mapping>
-        <filter-name>FixedDashboard</filter-name>
-        <url-pattern>/html/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
@@ -419,6 +409,12 @@
         <servlet-name>BenchmarkHistory</servlet-name>
         <display-name>BenchmarkHistory</display-name>
         <servlet-class>com.easyinsight.api.v3.BenchmarkServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Done</servlet-name>
+        <display-name>Done</display-name>
+        <servlet-class>com.easyinsight.html.DoneServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -756,9 +752,21 @@
     </servlet>
 
     <servlet>
+        <servlet-name>LineChartMeasureD3</servlet-name>
+        <display-name>LineChartMeasureD3</display-name>
+        <servlet-class>com.easyinsight.html.LineD3MeasureChartServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>StackedChart</servlet-name>
         <display-name>StackedChart</display-name>
         <servlet-class>com.easyinsight.html.StackedColumnChartServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TreeServlet</servlet-name>
+        <display-name>TreeServlet</display-name>
+        <servlet-class>com.easyinsight.html.TreeServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -1214,6 +1222,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>Done</servlet-name>
+        <url-pattern>/done</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>ReportMarkdown</servlet-name>
         <url-pattern>/reportMarkdown</url-pattern>
     </servlet-mapping>
@@ -1274,6 +1287,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>TreeServlet</servlet-name>
+        <url-pattern>/tree</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>DiagramChart</servlet-name>
         <url-pattern>/diagramChart</url-pattern>
     </servlet-mapping>
@@ -1310,6 +1328,11 @@
     <servlet-mapping>
         <servlet-name>LineChartD3</servlet-name>
         <url-pattern>/lineChartD3</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LineChartMeasureD3</servlet-name>
+        <url-pattern>/lineChartMeasureD3</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
