@@ -61,7 +61,7 @@ public class GaugeServlet extends HtmlServlet {
                 nf.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 nf.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 ExportMetadata exportMetadata = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
-                String string = ExportService.createValue(0, analysisMeasure, value, Calendar.getInstance(), exportMetadata.currencySymbol, exportMetadata.locale, false);
+                String string = ExportService.createValue(0, analysisMeasure, value, Calendar.getInstance(), exportMetadata.currencySymbol, exportMetadata.locale, true, null, true);
                 jsonObject.put("formattedValue", string);
                 if (gaugeDefinition.getBenchmarkMeasure() != null) {
                     Value benchmarkValue = dataSet.getRow(0).getValue(gaugeDefinition.getBenchmarkMeasure());
