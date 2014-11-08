@@ -32,7 +32,7 @@
     <div class="row scheduleRow">
         <div class="col-md-4">Output Format:</div>
         <div class="col-md-8">
-            <select ng-model="schedule.report_format" class="form-control">
+            <select ng-model="schedule.report_format" ng-change="checkPDF()" class="form-control">
                 <option value="excel2007">Excel 2007</option>
                 <option value="excel">Excel</option>
                 <option value="png">PNG</option>
@@ -44,6 +44,15 @@
     <div class="row scheduleRow" ng-if="schedule.report_format == 'pdf'">
         <div class="col-md-4">Show Header</div>
         <div class="col-md-8"><input ng-model="schedule.delivery_info.show_header" type="checkbox"></div>
+    </div>
+    <div class="row scheduleRow" ng-if="schedule.report_format == 'pdf'">
+        <div class="col-md-4">Orientation:</div>
+        <div class="col-md-8">
+            <select class="form-control" ng-model="schedule.delivery_info.orientation">
+                <option value="Landscape">Landscape</option>
+                <option value="Portrait">Portrait</option>
+            </select>
+        </div>
     </div>
     <div class="row scheduleRow">
         <div class="col-md-12">

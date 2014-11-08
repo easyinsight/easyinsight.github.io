@@ -38,7 +38,15 @@ public class DeliveryInfo {
     private DeliveryExtension deliveryExtension;
     private long configurationID;
 
+    private String urlKey;
 
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
 
     public long getConfigurationID() {
         return configurationID;
@@ -200,8 +208,9 @@ public class DeliveryInfo {
         jo.put("format", ReportDelivery.reportFormatValue(getFormat()));
         jo.put("configuration_id", getConfigurationID());
         jo.put("send_if_no_data", isSendIfNoData());
+        jo.put("url_key", getUrlKey());
         if(getDeliveryExtension() != null)
-            jo.put("delivery_info", getDeliveryExtension());
+            jo.put("delivery_info", getDeliveryExtension().toJSON(md));
         return jo;
     }
 

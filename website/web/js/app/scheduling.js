@@ -36,7 +36,10 @@
 
     eiScheduling.controller("deleteScheduledDataSourceController", ["$scope", "$http", function($scope, $http) {
         $scope.confirmDelete = function() {
-            var l = $http.delete("/app/scheduled_tasks/" + $scope.schedule.id + ".json");
+            var l = $http.delete("/app/scheduled_tasks.json", {data: JSON.stringify({
+                "schedules": $scope.to_delete.map(function(e, i, l) { return e.id; })
+                }
+            )  });
             l.then(function() {
                 $scope.$close();
             })
@@ -91,26 +94,31 @@
     eiScheduling.controller("viewDeliverySchedulingController", ["$scope", "$routeParams", "$http", "$location", function($scope, $routeParams, $http, $location) {
         $scope.loading.then(function() {
             $scope.is_new = $routeParams.id == "new";
+            console.log($location.path())
             if($scope.is_new) {
                 $scope.schedule = {
                     emails: [],
                     groups: [],
                     users: [],
                     id: "new",
-                    type: "report",
+                    type: $location.path().match(/scheduling\/delivery/i) ? "report" : "general",
                     schedule_type: {
                         offset: $scope.getOffset(),
                         type: "daily",
                         hour: 0,
                         minute: 0
                     },
+                    label: "",
+                    delivery_info: [],
                     report_id: 0,
                     sender: 0,
                     timezone_offset: $scope.getOffset(),
+                    offset: $scope.getOffset(),
                     configuration_id: 0,
                     report_format: "excel2007",
                     delivery_label: "",
-                    subject: ""
+                    subject: "",
+                    body: ""
                 }
             } else {
                 var i;
@@ -282,6 +290,20 @@
                     }
                 }
             });
+            $scope.checkPDF = function() {
+                if($scope.schedule.report_format == "pdf") {
+                    if(typeof($scope.schedule.delivery_info) == "undefined") {
+                        $scope.schedule.delivery_info = {
+                            show_header: false,
+                            orientation: "landscape"
+                        }
+                    }
+                } else {
+                    if(typeof($scope.schedule.delivery_info) != "undefined") {
+                        delete $scope.schedule.delivery_info;
+                    }
+                }
+            }
         });
         $scope.isSelected = function(val) {
             return val && typeof(val) === "object"
@@ -314,14 +336,20 @@
         };
         $scope.add_report = function() {
             if($scope.isSelected($scope.selected_report)) {
-                console.log($scope.selected_report);
-                $scope.schedule.delivery_info.push({
-                    format: "excel2007",
+                var v = {
+                    format: $scope.selected_report == 'report' ? "excel2007" : "pdf",
                     id: $scope.selected_report.id,
                     type: $scope.selected_report.type,
                     send_if_no_data: true,
                     name: $scope.selected_report.name
-                });
+                }
+                if(v.format == "pdf") {
+                    v.delivery_info = {
+                        show_header: false,
+                        orientation: "Landscape"
+                    }
+                }
+                $scope.schedule.delivery_info.push(v);
             }
         }
         $scope.isSelected = function(val) {
@@ -334,6 +362,28 @@
 
         $scope.select_delivery = function(item) {
             $scope.selected_delivery = item;
+            $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
+                $scope.schedule_configurations = d.data.configurations;
+            });
+        }
+
+        $scope.default_added = function(a) {
+            return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
+        };
+
+        $scope.checkPDF = function() {
+            if($scope.selected_delivery.format == "pdf") {
+                if(typeof($scope.selected_delivery.delivery_info) == "undefined") {
+                    $scope.selected_delivery.delivery_info = {
+                        show_header: false,
+                        orientation: "Landscape"
+                    }
+                }
+            } else {
+                if(typeof($scope.selected_delivery.delivery_info) != "undefined") {
+                    delete $scope.selected_delivery.delivery_info;
+                }
+            }
         }
 
     }])
@@ -343,12 +393,12 @@
             when("/scheduling/reports", "scheduling.reports").
             when("/scheduling/data_sources", "scheduling.data_sources").
             when("/scheduling/data_sources/:id", "scheduling.view_data_source").
-            when("/scheduling/delivery/:id", "scheduling.view_delivery.scheduling").
+            when("/scheduling/delivery/:id", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/schedule", "scheduling.view_delivery.scheduling").
             when("/scheduling/delivery/:id/report", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/email", "scheduling.view_delivery.email").
             when("/scheduling/delivery/:id/history", "scheduling.view_delivery.history").
-            when("/scheduling/multi_delivery/:id", "scheduling.view_multi_delivery.scheduling").
+            when("/scheduling/multi_delivery/:id", "scheduling.view_multi_delivery.reports").
             when("/scheduling/multi_delivery/:id/schedule", "scheduling.view_multi_delivery.scheduling").
             when("/scheduling/multi_delivery/:id/email", "scheduling.view_multi_delivery.email").
             when("/scheduling/multi_delivery/:id/history", "scheduling.view_multi_delivery.history").

@@ -66,6 +66,13 @@ public class ScheduledActivitiesServlet extends JSONServlet {
     }
 
     @Override
+    protected ResponseInfo processDelete(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
+        JSONObject jo = new JSONObject();
+        new ExportService().deleteSchedules(((net.minidev.json.JSONArray) jsonObject.get("schedules")).stream().map((a) -> (Integer) a).collect(Collectors.toList()));
+        return new ResponseInfo(ResponseInfo.ALL_GOOD, jo.toString());
+    }
+
+    @Override
     protected ResponseInfo processJSON(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         throw new UnsupportedOperationException();
     }
