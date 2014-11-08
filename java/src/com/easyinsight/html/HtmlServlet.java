@@ -114,12 +114,14 @@ public class HtmlServlet extends HttpServlet {
                 List<FilterDefinition> drillthroughFilters = new ArrayList<FilterDefinition>();
 
                 String drillThroughKey = req.getParameter("drillThroughKey");
+                boolean replaceFilters = false;
                 if (drillThroughKey != null && !"undefined".equals(drillThroughKey)) {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id FROM drillthrough_save WHERE url_key = ?");
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id, phantomjs FROM drillthrough_save WHERE url_key = ?");
                     queryStmt.setString(1, drillThroughKey);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
                     long drillthroughSaveID = rs.getLong(1);
+                    replaceFilters = rs.getBoolean(2);
                     queryStmt.close();
                     PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id FROM drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
                     filterStmt.setLong(1, drillthroughSaveID);
@@ -129,6 +131,9 @@ public class HtmlServlet extends HttpServlet {
                         FilterDefinition filter = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterRS.getLong(1)).list().get(0);
                         filter.afterLoad();
                         drillthroughFilters.add(filter);
+                        if (!filter.isShowOnReportView()) {
+                            report.getFilterDefinitions().add(filter);
+                        }
                         hibernateSession.close();
                     }
                     filterStmt.close();
@@ -159,9 +164,11 @@ public class HtmlServlet extends HttpServlet {
                     filterStmt.close();
                 }
 
-
-
-                filters.addAll(drillthroughFilters);
+                if (replaceFilters) {
+                    report.setFilterDefinitions(drillthroughFilters);
+                } else {
+                    filters.addAll(drillthroughFilters);
+                }
 
                 String dashboardIDString = req.getParameter("dashboardID");
                 if(dashboardIDString == null && filterObject != null) {
@@ -182,30 +189,6 @@ public class HtmlServlet extends HttpServlet {
                     FilterUtils.adjustFilters(filters, actualFilterObject, report.getName(), logReport);
                 } else {
                     FilterUtils.adjustFilters(filters, filterObject, report.getName(), logReport);
-                }
-
-                Object seleniumID = filterObject.get("seleniumID");
-                if (seleniumID != null) {
-                    List<FilterDefinition> seleniumFilters = new ArrayList<FilterDefinition>();
-
-                    org.hibernate.Session hibernateSession = Database.instance().createSession(conn);
-                    try {
-                        PreparedStatement query = conn.prepareStatement("SELECT filter_id FROM image_selenium_trigger_to_filter WHERE image_selenium_trigger_id = ?");
-                        query.setLong(1, Long.parseLong(seleniumID.toString()));
-                        ResultSet rs = query.executeQuery();
-                        while (rs.next()) {
-                            long filterID = rs.getLong(1);
-                            FilterDefinition filterDefinition = (FilterDefinition) hibernateSession.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list().get(0);
-                            filterDefinition.afterLoad();
-                            //filterDefinition.setShowOnReportView(false);
-                            seleniumFilters.add(filterDefinition);
-                        }
-                        query.close();
-                    } finally {
-                        hibernateSession.close();
-
-                    }
-                    report.setFilterDefinitions(seleniumFilters);
                 }
 
                 /*
