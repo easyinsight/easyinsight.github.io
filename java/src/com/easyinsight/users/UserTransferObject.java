@@ -18,6 +18,7 @@ public class UserTransferObject {
     private String name;
     private Date lastLoginDate;
     private boolean defaultReportSharing;
+    private boolean onlyShowTopReports;
 
     private long personaID;
 
@@ -49,6 +50,14 @@ public class UserTransferObject {
         this.email = email;
         this.name = name;
         this.firstName = firstName;
+    }
+
+    public boolean isOnlyShowTopReports() {
+        return onlyShowTopReports;
+    }
+
+    public void setOnlyShowTopReports(boolean onlyShowTopReports) {
+        this.onlyShowTopReports = onlyShowTopReports;
     }
 
     public boolean isConsultant() {
@@ -250,6 +259,7 @@ public class UserTransferObject {
         jo.put("invoice_recipient", isInvoiceRecipient());
         jo.put("newsletter", isOptInEmail());
         jo.put("consultant", isConsultant());
+        jo.put("only_show_top_reports", isOnlyShowTopReports());
         return jo;
     }
 

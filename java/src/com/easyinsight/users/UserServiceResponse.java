@@ -82,6 +82,15 @@ public class UserServiceResponse {
     private String defaultFontFamily;
     private String newsSubject;
     private List<EIDescriptor> topReports;
+    private boolean onlyShowTopReports;
+
+    public boolean isOnlyShowTopReports() {
+        return onlyShowTopReports;
+    }
+
+    public void setOnlyShowTopReports(boolean onlyShowTopReports) {
+        this.onlyShowTopReports = onlyShowTopReports;
+    }
 
     public String getNewsSubject() {
         return newsSubject;
@@ -252,7 +261,7 @@ public class UserServiceResponse {
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
-                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily(), topReports, newsTitle);
+                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily(), topReports, newsTitle, user.isAssignedDashboardIsFixedView());
         response.setReportImage(bytes);
         String accountLocale;
         if (!"0".equals(user.getUserLocale())) {
@@ -299,7 +308,8 @@ public class UserServiceResponse {
                                String apiKey, String apiSecretKey, boolean newsletterEnabled, Long fixedDashboardID, ReportTypeOptions reportTypeOptions,
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
                                Date newsDate, Date newsDismissDate, boolean accountOverSize, boolean accountReports, boolean tagsAndCopyEnabled,
-                               boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily, List<EIDescriptor> topReports, String newsTitle) {
+                               boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily, List<EIDescriptor> topReports, String newsTitle,
+                               boolean onlyShowTopReports) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -348,6 +358,7 @@ public class UserServiceResponse {
         this.defaultFontFamily = defaultFontFamily;
         this.topReports = topReports;
         this.newsSubject = newsTitle;
+        this.onlyShowTopReports = onlyShowTopReports;
     }
 
     public boolean isAccountOverSize() {
