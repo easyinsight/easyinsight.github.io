@@ -1,12 +1,15 @@
 package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSLineChartDefinition;
 import com.easyinsight.analysis.definitions.WSTwoAxisDefinition;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
@@ -29,7 +32,7 @@ import java.util.*;
 public class LineD3ChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
-        WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
+        WSLineChartDefinition twoAxisDefinition = (WSLineChartDefinition) report;
         AnalysisItem eventPoint = twoAxisDefinition.getEventPoint();
         AnalysisItem eventPointLabel = twoAxisDefinition.getEventPointLabel();
         twoAxisDefinition.setEventPoint(null);
@@ -43,7 +46,8 @@ public class LineD3ChartServlet extends HtmlServlet {
             WSListDefinition temp = new WSListDefinition();
             temp.setDataFeedID(twoAxisDefinition.getDataFeedID());
             temp.setColumns(Arrays.asList(eventPoint, eventPointLabel));
-            temp.setFilterDefinitions(new ArrayList<>());
+            Feed feed = FeedRegistry.instance().getFeed(twoAxisDefinition.getDataFeedID(), conn);
+            temp.setFilterDefinitions(feed.getIntrinsicFilters(conn));
             temp.setAddedItems(twoAxisDefinition.getAddedItems());
             temp.setAddonReports(twoAxisDefinition.getAddonReports());
             DataSet tempSet = DataService.listDataSet(temp, insightRequestMetadata, conn);
@@ -56,6 +60,38 @@ public class LineD3ChartServlet extends HtmlServlet {
                 events.put(eventObject);
             }
         }
+
+        JSONObject generalGoalValue = null;
+        AnalysisItem goal = twoAxisDefinition.getGoal();
+        if (goal != null) {
+            WSListDefinition temp = new WSListDefinition();
+            temp.setDataFeedID(twoAxisDefinition.getDataFeedID());
+            List<AnalysisItem> columns = new ArrayList<>();
+            columns.add(goal);
+            AnalysisMeasure m = (AnalysisMeasure) goal;
+            m.setAggregation(AggregationTypes.AVERAGE);
+            temp.setColumns(columns);
+            Feed feed = FeedRegistry.instance().getFeed(twoAxisDefinition.getDataFeedID(), conn);
+            temp.setFilterDefinitions(feed.getIntrinsicFilters(conn));
+            temp.setAddedItems(twoAxisDefinition.getAddedItems());
+            temp.setAddonReports(twoAxisDefinition.getAddonReports());
+            DataSet tempSet = DataService.listDataSet(temp, insightRequestMetadata, conn);
+            IRow row = tempSet.getRow(0);
+            /*for (IRow row : tempSet.getRows()) {*/
+            Value goalValue = row.getValue(goal);
+            generalGoalValue = new JSONObject();
+            AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
+
+            if (twoAxisDefinition.getGoalDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
+                if (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+                    goalValue = new NumericValue(goalValue.toDouble() * 3);
+                }
+            }
+
+            generalGoalValue.put("goal", goalValue.toDouble());
+        }
+
+
 
         JSONObject object = new JSONObject();
 
@@ -107,6 +143,7 @@ public class LineD3ChartServlet extends HtmlServlet {
                         //point.put("x", dateValue.getDate().getTime());
                         point.put("x", dFormat.format(dateValue.getDate()));
                         point.put("dx", dateValue.getDate().getTime());
+                        point.put("t", dateValue.getDate().getTime());
                         if (twoAxisDefinition.isRelativeScale()) {
                             point.put("y", row.getValue(measure).toDouble() / maxMultiplier);
                             point.put("sy", row.getValue(measure).toDouble());
@@ -202,6 +239,7 @@ public class LineD3ChartServlet extends HtmlServlet {
                     //point.put("x", x.getTime());
                     // if there's a start date
                     point.put("x", dFormat.format(x));
+                    point.put("t", x.getTime());
                     point.put("y", entry.getValue().get(x));
                     points.put(point);
                 }
@@ -213,6 +251,39 @@ public class LineD3ChartServlet extends HtmlServlet {
                 i++;
                 blahArray.put(axisObject);
             }
+
+            List<Map<String, Value>> trendLineValues = (List<Map<String, Value>>) dataSet.getAdditionalProperties().get("trendLineData");
+
+            if (trendLineValues != null) {
+                JSONArray trendPoints = new JSONArray();
+
+                List<Date> dates = new ArrayList<>();
+                Map<Date, Map<String, Value>> m = new HashMap<>();
+                for (Map<String, Value> map : trendLineValues) {
+                    DateValue dValue = (DateValue) map.get("date");
+                    dates.add(dValue.getDate());
+                    m.put(dValue.getDate(), map);
+                }
+                Collections.sort(dates);
+
+                for (Date d : dates) {
+                    Map<String, Value> map = m.get(d);
+                    DateValue dValue = (DateValue) map.get("date");
+                    NumericValue trendValue = (NumericValue) map.get("trend");
+                    JSONObject point = new JSONObject();
+                    point.put("x", dFormat.format(dValue.getDate()));
+                    point.put("label", dateFormat.format(dValue.getDate()));
+                    point.put("t", dValue.getDate().getTime());
+                    point.put("y", trendValue.toDouble());
+                    trendPoints.put(point);
+                }
+                JSONObject axisObject = new JSONObject();
+                axisObject.put("values", trendPoints);
+                axisObject.put("key", "Trend Line");
+                axisObject.put("color", ExportService.createHexString(twoAxisDefinition.getTrendLineColor()));
+                blahArray.put(axisObject);
+            }
+
         }
 
         object.put("values", blahArray);
@@ -224,6 +295,10 @@ public class LineD3ChartServlet extends HtmlServlet {
         }
 
         object.put("relative_line", twoAxisDefinition.isRelativeScale());
+
+        if (generalGoalValue != null) {
+            object.put("single_goal_value", generalGoalValue);
+        }
 
         if (events.length() > 0) {
             object.put("events", events);
