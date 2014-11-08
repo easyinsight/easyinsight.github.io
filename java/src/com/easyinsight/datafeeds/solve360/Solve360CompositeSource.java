@@ -198,7 +198,7 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
                     count = 0;
                     Document doc;
                     if (page == 0) {
-                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&categories=1&limit=1000&start=1", client, new Builder(), this);
+                        doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&categories=1&limit=1000&start=0", client, new Builder(), this);
                     } else {
                         doc = Solve360BaseSource.runRestRequest("https://secure.solve360.com/companies?layout=1&categories=1&limit=1000&start=" + (page * 1000), client, new Builder(), this);
                     }
