@@ -437,9 +437,15 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject pie = super.toJSON(htmlReportMetadata, parentDefinitions);
         pie.put("key", getUrlKey());
-        pie.put("type", "line");
+
         pie.put("styles", htmlReportMetadata.createStyleProperties());
-        pie.put("url", "/app/lineChartD3");
+        if (getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            pie.put("url", "/app/lineChartD3");
+            pie.put("type", "line");
+        } else {
+            pie.put("url", "/app/lineChartMeasureD3");
+            pie.put("type", "lineMeasure");
+        }
         return pie;
     }
 
