@@ -715,7 +715,11 @@ public class SecurityUtil {
             }
 
             if (role == Roles.NONE) {
-                throw new SecurityException();
+                if (!publicVisible) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.SUBSCRIBER;
+                }
             }
             return role;
         } catch (SQLException e) {
