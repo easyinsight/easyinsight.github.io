@@ -34,6 +34,7 @@ public class ReportDelivery extends ScheduledDelivery {
     public static final int PDF = 3;
     public static final int HTML_TABLE = 4;
     public static final int EXCEL_2007 = 5;
+    public static final int INLINE_IMAGE = 6;
 
     private int reportFormat;
     private long reportID;
@@ -442,6 +443,9 @@ public class ReportDelivery extends ScheduledDelivery {
             case 4:
                 type = " as Inline HTML Table";
                 break;
+            case 6:
+                type = " as Inline PNG";
+                break;
             default:
                 type = "";
         }
@@ -480,6 +484,8 @@ public class ReportDelivery extends ScheduledDelivery {
                 return "html";
             case 5:
                 return "excel2007";
+            case 6:
+                return "inlinePNG";
             default:
                 return "";
         }
@@ -527,6 +533,9 @@ public class ReportDelivery extends ScheduledDelivery {
                 break;
             case "excel2007":
                 reportFormatValue = 5;
+                break;
+            case "inlinePNG":
+                reportFormatValue = 6;
                 break;
             default:
                 reportFormatValue = 0;
