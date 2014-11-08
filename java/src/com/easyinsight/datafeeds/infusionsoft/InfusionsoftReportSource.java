@@ -3,6 +3,8 @@ package com.easyinsight.datafeeds.infusionsoft;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.StringValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
@@ -11,6 +13,7 @@ import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.userupload.DataTypeGuesser;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
@@ -19,6 +22,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -64,10 +69,36 @@ public class InfusionsoftReportSource extends ServerDataSourceDefinition {
             parameters.add(reportID);
             parameters.add(1);
             Map<String, String> result = (Map<String, String>) client.execute("SearchService.getAllReportColumns", parameters);
-            for (Map.Entry<String, String> entry : result.entrySet()) {
-                fieldBuilder.addField(entry.getKey(), new AnalysisDimension(getFeedName() + " - " + entry.getKey()));
+            if (getFields().size() == 0) {
+                Set<String> keys = new HashSet<>();
+                for (Map.Entry<String, String> entry : result.entrySet()) {
+                    keys.add(entry.getKey());
+                }
+                List params = new ArrayList();
+                params.add(infusionsoftCompositeSource.getInfusionApiKey());
+                params.add(reportID);
+                params.add(1);
+                params.add(0);
+                params.add(new ArrayList<>(keys));
+                DataTypeGuesser guesser = new DataTypeGuesser(new String[] { "MM-dd-yy" }, new String[] { "EEE MMM dd HH:mm:ss zzz yyyy" });
+                Object[] results = (Object[]) client.execute("SearchService.getSavedSearchResults", params);
+                for (Object o : results) {
+                    Map resultMap = (Map) o;
+                    for (String key : keys) {
+                        StringValue stringValue = new StringValue(resultMap.get(key).toString());
+                        guesser.addValue(new NamedKey(key), stringValue);
+                    }
+                }
+                List<AnalysisItem> items = guesser.createFeedItems();
+                for (AnalysisItem item : items) {
+                    item.setDisplayName(getFeedName() + " - " + item.getKey().toKeyString());
+                    fieldBuilder.addField(item.getKey().toKeyString(), item);
+                }
+            } else {
+                for (Map.Entry<String, String> entry : result.entrySet()) {
+                    fieldBuilder.addField(entry.getKey(), new AnalysisDimension(getFeedName() + " - " + entry.getKey()));
+                }
             }
-            //System.out.println(result);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -104,7 +135,8 @@ public class InfusionsoftReportSource extends ServerDataSourceDefinition {
                 parameters.add(reportID);
                 parameters.add(1);
                 parameters.add(page);
-                Object[] results = (Object[]) client.execute("SearchService.getSavedSearchResultsAllFields", parameters);
+                parameters.add(new ArrayList<>(keys.keySet()));
+                Object[] results = (Object[]) client.execute("SearchService.getSavedSearchResults", parameters);
                 for (Object result : results) {
                     IRow row = dataSet.createRow();
                     Map resultMap = (Map) result;
@@ -117,8 +149,6 @@ public class InfusionsoftReportSource extends ServerDataSourceDefinition {
                     }
                     count++;
                 }
-
-                // todo: figure out what page size it returns
 
                 hasMoreResults = count == 1000;
                 page++;
