@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
     <util:states>
         <mx:State name="initialCreate">
             <mx:AddChild relativeTo="{baseInfoForm}">
@@ -82,6 +82,7 @@
             this.lastLoginDate = userTransferObject.lastLoginDate;
             this.reportVisibility = userTransferObject.testAccountVisible;
             this.selectedDateFormat = String(userTransferObject.dateFormat);
+            this.assignedDashboardIsFixedView = userTransferObject.onlyShowTopReports;
             if (userTransferObject.dateFormat == 0) {
                 this.selectedDateFormat = "8";
             }
@@ -126,7 +127,7 @@
                     currentState = "initialCreateNoEmail";
                 }
                 resendButton.parent.removeChild(resendButton);
-            } else if (lastLoginDate != null) {
+            } else if (lastLoginDate != null && sendEmail) {
                 resendButton.parent.removeChild(resendButton);
             }
             validators = [ emailValidator, userNameValidator, fullNameValidator ];
@@ -172,6 +173,7 @@
                 user.dateFormat = int(dateFormatBox.selectedItem.data);
                 user.userLocale = localeBox.selectedItem.data;
                 user.currency = int(defaultCurrencyBox.selectedItem.data);
+                user.onlyShowTopReports = assignedDashboardIsFixedViewCheckbox.selected;
                 if (showPersonaOption) {
                     var persona:Object = personaComboBox.selectedItem;
                     if (persona != Persona.EMPTY_PERSONA) {
@@ -209,7 +211,7 @@
 
         private function gotDashboards():void {
             var views:ArrayCollection = dashboardService.getDashboards.lastResult as ArrayCollection;
-            views.addItemAt({ id:0, name:"[ No Fixed View ]"}, 0);
+            views.addItemAt({ id:0, name:"[ No Default View ]"}, 0);
             availableViews = views;
         }
 
@@ -304,6 +306,9 @@
 
         [Bindable]
         private var selectedDateFormat:String = "6";
+
+        [Bindable]
+        private var assignedDashboardIsFixedView:Boolean;
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -350,10 +355,17 @@
                 </mx:FormItem>
             </mx:Form>
             <mx:HRule width="100%"/>
-            <mx:Text text="By setting a fixed dashboard view, the user will only see the specified dashboard when he or she logs into Easy Insight."
-                    width="540" selectable="false"/>
+            <mx:Text text="By setting the Top Reports and Dashboards flag below, the viewer will only see the top reports and dashboards meeting his or her permissions."
+                     width="540" selectable="false"/>
             <mx:Form>
-                <mx:FormItem label="Fixed Dashboard View:" labelWidth="180">
+                <mx:FormItem label="Only Show Top Reports and Dashboards:">
+                    <mx:CheckBox id="assignedDashboardIsFixedViewCheckbox" selected="{assignedDashboardIsFixedView}"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Text text="By setting a default dashboard view, the user will be sent to the specified dashboard when he or she logs into Easy Insight."
+                     width="540" selectable="false"/>
+            <mx:Form>
+                <mx:FormItem label="Default Dashboard View:" labelWidth="180">
                     <util:SmartComboBox dataProvider="{availableViews}" labelField="name" id="singleViewComboBox" selectedProperty="id" selectedValue="{viewID}" enabled="{!accountAdmin}"
                             maxWidth="300"/>
                 </mx:FormItem>
@@ -417,4 +429,4 @@
         <mx:method name="resendInvite" result="resent()"/>
         <mx:method name="regenerateInviteLink" result="regenerated()"/>
 	</mx:RemoteObject>
-</util:EISlimWindow>
+</util:EITitleWindow>
