@@ -18,6 +18,7 @@ package com.easyinsight.framework
         public var initialSetupDone:Boolean;
         public var invoiceRecipient:Boolean;
         public var autoRefreshReports:Boolean;
+        public var onlyShowTopReports:Boolean;
         public var analyst:Boolean = true;
         public var consultant:Boolean;
         public var testAccountVisible:Boolean = true;

@@ -124,7 +124,7 @@
                 descriptor.id = event.feedID;
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID:descriptor.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DATA_SOURCE_ADMIN, {feedID: descriptor.id})));
                 } else {
                     dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID)));
                 }
@@ -202,12 +202,22 @@
         private function toDataGrid():void {
             currentState = "";
             blah.removeAllChildren();
-            if (dataGrid == null) {
-                dataGrid = new DataSourceGrid();
-                BindingUtils.bindProperty(dataGrid, "dataProvider", this, "dataSources");
-                BindingUtils.bindProperty(dataGrid, "tags", this, "tags");
-            }
-            blah.addChild(dataGrid);
+
+                if (User.getInstance().onlyShowTopReports) {
+                    if (topReports == null) {
+                        topReports = new TopReports();
+                    }
+                    blah.addChild(topReports);
+                } else {
+                    if (dataGrid == null) {
+                        dataGrid = new DataSourceGrid();
+                        BindingUtils.bindProperty(dataGrid, "dataProvider", this, "dataSources");
+                        BindingUtils.bindProperty(dataGrid, "tags", this, "tags");
+                    }
+                    blah.addChild(dataGrid);
+                }
+
+
         }
 
         private var _tags:ArrayCollection;
@@ -224,6 +234,7 @@
         }
 
         private var dataGrid:DataSourceGrid;
+        private var topReports:TopReports;
 
         private var dsList:Container;
 
