@@ -17,7 +17,9 @@ public class ReportEndUserExportButton extends ReportExportButton {
     }
 
     override protected function getReport():AnalysisDefinition {
-        return getReportView(this).viewFactory.report;
+        var reportView:ReportView = getReportView(this);
+        reportView.viewFactory.updateExportMetadata();
+        return reportView.viewFactory.report;
     }
 
     private function getReportView(comp:DisplayObject):ReportView {
