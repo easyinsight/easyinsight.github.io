@@ -44,8 +44,8 @@
     <div class="navbar-collapse" ng-class="{collapse: isCollapsed}">
         <ul class="nav navbar-nav">
             <li><a href="/a/home">Home</a></li>
-            <li><a href="/app/html/connections.jsp" ng-click="$event.stopPropagation()">Connections</a></li>
-            <li><a href="/a/scheduling">Scheduling</a></li>
+            <li ng-if="user.designer"><a href="/app/html/connections.jsp" ng-click="$event.stopPropagation()">Connections</a></li>
+            <li ng-if="user.designer"><a href="/a/scheduling">Scheduling</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown" ng-if="bookmarks && bookmarks.length > 0">

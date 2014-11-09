@@ -45,7 +45,8 @@ busyIndicator = busyIndicator || (function () {
 function captureAndReturn(o) {
     var obj = o.report.report;
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
-        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend" || obj.metadata.type == "summary") {
+        obj.metadata.type == "ytd_definition" || obj.metadata.type == "compare_years" || obj.metadata.type == "trend" || obj.metadata.type == "summary" ||
+        obj.metadata.type == "vertical_list") {
         return null;
     } else if (obj.metadata.type == "gauge") {
         var id = o.report.id;
@@ -299,7 +300,11 @@ var toPNG = function (o, dashboardID, drillthroughID) {
 
     if (obj.metadata.type == "gauge") {
         var canvas = $("#gauge" + id);
-        url = url + "&pdfWidth=" + canvas.width() + "&pdfHeight=" + canvas.height();
+        url = url + "&pdfWidth=" + (canvas.width() + 60) + "&pdfHeight=" + (canvas.height() + 60);
+    } else if (obj.metadata.type == "diagram") {
+        var diagram = $("#"+id);
+        //alert("width = " + diagram.width());
+        url = url + "&pdfWidth=" + diagram.width() + "&pdfHeight=" + diagram.height();
     } else {
         var svg = $("#d3Div" + id);
         var h = svg.height();
@@ -349,12 +354,12 @@ var toPDF = function (o, dashboardID, drillthroughID) {
     var url =  "/app/htmlPDF" + "?reportID=" + obj.id + "&timezoneOffset=" + new Date().getTimezoneOffset() +"&drillThroughKey=" + drillthroughID;
 
     if (obj.metadata.type == "list" || obj.metadata.type == "crosstab" || obj.metadata.type == "trend_grid" || obj.metadata.type == "tree" || obj.metadata.type == "form" ||
-        obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition" || obj.metadata.type == "summary") {
+        obj.metadata.type == "compare_years" || obj.metadata.type == "ytd_definition" || obj.metadata.type == "summary" || obj.metadata.type == "vertical_list") {
     } else {
         if (obj.metadata.type == "gauge") {
             var gCanvas = $("#gauge" + id);
-            url = url + "&pdfWidth=" + gCanvas.width() + "&pdfHeight=" + gCanvas.height();
-        } else if (obj.metadata.type == "gauge") {
+            url = url + "&pdfWidth=" + (gCanvas.width() + 60) + "&pdfHeight=" + (gCanvas.height() + 60);
+        } else if (obj.metadata.type == "diagram") {
             var dCanvas = $("#diagram" + id);
             url = url + "&pdfWidth=" + dCanvas.width() + "&pdfHeight=" + dCanvas.height();
         } else {
@@ -499,6 +504,9 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "line") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3LineCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
+    } else if (obj.metadata.type == "lineMeasure") {
+        $("#" + id + " .reportArea").html(d3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3LineMeasureCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
     } else if (obj.metadata.type == "area") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3AreaCallback(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));

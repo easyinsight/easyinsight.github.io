@@ -71,6 +71,11 @@ public class PlotChartServlet extends HtmlServlet {
             p1.put("x", row.getValue(plotDefinition.getXaxisMeasure()).toDouble());
             p1.put("y", row.getValue(plotDefinition.getYaxisMeasure()).toDouble());
             p1.put("a", row.getValue(dimension).toString());
+            if (plotDefinition.getZaxisMeasure() != null) {
+                p1.put("size", row.getValue(plotDefinition.getYaxisMeasure()).toDouble());
+            } else {
+                p1.put("size", 100);
+            }
             points.put(p1);
         }
 
@@ -88,7 +93,9 @@ public class PlotChartServlet extends HtmlServlet {
             i++;
         }
 
-        object.put("point", true);
+        object.put("point", plotDefinition.getZaxisMeasure() == null);
+
+        object.put("showLabels", plotDefinition.isShowLabels());
 
         object.put("values", arrays);
         configureAxes(object, plotDefinition, plotDefinition.getXaxisMeasure(), plotDefinition.getYaxisMeasure(), md);

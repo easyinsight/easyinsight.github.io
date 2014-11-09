@@ -249,7 +249,8 @@ public class ExportService {
 
     }
 
-    public void runNow(ScheduledDelivery scheduledDelivery) {
+    public void runNow(long id) {
+        ScheduledDelivery scheduledDelivery = (ScheduledDelivery) getActivityByID(id);
         EIConnection conn = Database.instance().getConnection();
         try {
             scheduledDelivery.taskNow(conn);
@@ -1936,6 +1937,7 @@ public class ExportService {
                 if (ytdReportFieldExtension.isLineAbove()) {
                     lineAbove = true;
                 }
+            }
                 com.itextpdf.text.Font boldFont;
                 if (alwaysShow) {
                     boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
@@ -1969,7 +1971,7 @@ public class ExportService {
                         Value measureValue = (Value) map.get(columnName);
                         String text;
                         if (measureValue != null && measureValue.type() == Value.NUMBER) {
-                            text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
+                            text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true);
                         } else {
                             text = "";
                         }
@@ -1978,7 +1980,6 @@ public class ExportService {
                         table.addCell(dataCell);
                     }
                 }
-            }
         }
 
         return table;

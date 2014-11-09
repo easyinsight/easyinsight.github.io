@@ -77,7 +77,10 @@ public class UserService {
             if (userServiceResponse.isFirstLogin()) {
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/user/initialUserSetup.jsp"));
             } else {
+
                 session.removeAttribute("loginRedirect");
+
+
                 String redirectUrl = RedirectUtil.getURL(request, "/app/");
                 String originalURL = redirectUrl;
                 //System.out.println("Redirect url = " + oldRedirectUrl);
@@ -91,7 +94,26 @@ public class UserService {
                     redirectUrl = redirectUrl + urlHash;
                 } else if (redirectUrl.equals(originalURL)) {
                     if (userServiceResponse.isDefaultHTML()) {
-                        response.sendRedirect(RedirectUtil.getURL(request, "/a/home"));
+                        if (userServiceResponse.getFixedDashboardID() > 0) {
+                            EIConnection conn = Database.instance().getConnection();
+                            try {
+                                PreparedStatement uStmt = conn.prepareStatement("SELECT url_key FROM dashboard WHERE dashboard_id = ?");
+                                uStmt.setLong(1, userServiceResponse.getFixedDashboardID());
+                                ResultSet dRS = uStmt.executeQuery();
+                                if (dRS.next()) {
+                                    String urlKey = dRS.getString(1);
+                                    redirectUrl = RedirectUtil.getURL(request, "/app/html/dashboard/" + urlKey);
+                                } else {
+                                    redirectUrl = RedirectUtil.getURL(request, "/app/");
+                                }
+                                uStmt.close();
+                            } finally {
+                                Database.closeConnection(conn);
+                            }
+                        } else {
+                            redirectUrl = RedirectUtil.getURL(request, "/a/home");
+                        }
+                        response.sendRedirect(redirectUrl);
                         return;
                     }
                 }

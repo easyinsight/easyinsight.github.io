@@ -191,7 +191,8 @@ public abstract class ScheduleType {
     }
 
     public ScheduleType(net.minidev.json.JSONObject jsonObject) {
-        setScheduleID(Long.parseLong(String.valueOf(jsonObject.get("schedule_id"))));
+        if(jsonObject.containsKey("schedule_id"))
+            setScheduleID(Long.parseLong(String.valueOf(jsonObject.get("schedule_id"))));
         setHour(Integer.parseInt(String.valueOf(jsonObject.get("hour"))));
         setMinute(Integer.parseInt(String.valueOf(jsonObject.get("minute"))));
         setTimeOffset(Integer.parseInt(String.valueOf(jsonObject.get("offset"))));

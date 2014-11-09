@@ -86,7 +86,7 @@ public class OAuthServlet extends HttpServlet {
                 if(ConfigLoader.instance().isProduction()) {
                     redirectURL = "https://www.easy-insight.com";
                 } else {
-                    redirectURL = "https://staging.easy-insight.com";
+                    redirectURL = "https://j8staging.easy-insight.com";
                 }
 
                 redirectURL = redirectURL + "/app/googleAppsUserList.jsp";
@@ -118,7 +118,7 @@ public class OAuthServlet extends HttpServlet {
                         if (ConfigLoader.instance().isProduction()) {
                             redirectURL = "https://www.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
                         } else {
-                            redirectURL = "https://staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
+                            redirectURL = "https://j8staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
                         }
                     } else if (redirectType == TokenService.HTML_SETUP) {
                         redirectURL = RedirectUtil.getURL(req, "/app/html/dataSources/"+ feedDefinition.getApiKey() + "/createConnection");

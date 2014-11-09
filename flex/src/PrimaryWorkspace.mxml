@@ -93,7 +93,7 @@
         private var helveticaNeue:Class;
 
         /*[Embed(source="/com/easyinsight/skin/osx/helvetica.swf", fontName="Helvetica Neue", fontStyle="normal")]
-        private var helvetica:Class;*/
+         private var helvetica:Class;*/
 
         [Embed(source="/com/easyinsight/skin/osx/opensans.swf", fontName="Open Sans", fontStyle="normal")]
         private var openSans:Class;
@@ -102,7 +102,7 @@
         private var openSansBold:Class;
 
         /*[Embed(source="/com/easyinsight/skin/osx/helvetica.swf", fontName="Helvetica Neue", fontStyle="bold")]
-        private var helveticaBold:Class;*/
+         private var helveticaBold:Class;*/
 
         private function startWorkspace():void {
             Font.registerFont(myNormalLucida);
@@ -190,8 +190,7 @@
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
             if (currentFragment != browserManager.fragment) {
                 currentFragment = browserManager.fragment;
-                if (User.getInstance() != null && User.getInstance().accountState != Account.REACTIVATION_POSSIBLE &&
-                        !User.getInstance().firstLogin) {
+                if (User.getInstance() != null && User.getInstance().accountState != Account.REACTIVATION_POSSIBLE && !User.getInstance().firstLogin) {
                     parseFragmentObject(o, currentFragment);
                 } else {
                     if (o.resetPassword != null && o.resetPassword != "") {
@@ -268,8 +267,8 @@
                     coreVBox.removeChild(headerBar);
                 }
                 /*if (highBar != null && highBar.parent == coreVBox) {
-                    coreVBox.removeChild(highBar);
-                }*/
+                 coreVBox.removeChild(highBar);
+                 }*/
                 if (coreSpace != null && coreSpace.parent == coreVBox) {
                     coreVBox.removeChild(coreSpace);
                 }
@@ -375,8 +374,12 @@
             } else {
                 quietLogin(authResult, false);
                 if (authResult.fixedDashboardID > 0) {
-                    limitedMain();
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:authResult.fixedDashboardID, fixedID:true})))
+                    if (User.getInstance().onlyShowTopReports) {
+                        toMain();
+                    } else {
+                        limitedMain();
+                    }
+                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
                 } else {
                     toMain();
                     browserInit();
@@ -408,9 +411,13 @@
                 } else {
                     quietLogin(authResult, false);
                     if (authResult.fixedDashboardID > 0) {
-                        limitedMain();
+                        if (User.getInstance().onlyShowTopReports) {
+                            toMain();
+                        } else {
+                            limitedMain();
+                        }
                         browserSetup = false;
-                        internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:authResult.fixedDashboardID, fixedID:true})))
+                        internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
                     } else {
                         toMain();
                     }
@@ -462,7 +469,12 @@
                                     } else {
                                         quietLogin(authResult, false);
                                         if (authResult.fixedDashboardID > 0) {
-                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:authResult.fixedDashboardID, fixedID:true})))
+                                            if (User.getInstance().onlyShowTopReports) {
+                                                toMain();
+                                            } else {
+                                                limitedMain();
+                                            }
+                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
                                         } else {
                                             toMain();
                                             browserInit();
@@ -494,8 +506,13 @@
         private function login(event:LoginEvent):void {
             if (event.authResponse.fixedDashboardID > 0) {
                 quietLogin(event.authResponse, false);
+                if (User.getInstance().onlyShowTopReports) {
+                    toMain();
+                } else {
+                    limitedMain();
+                }
                 coreVBox = masterCanvas;
-                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:event.authResponse.fixedDashboardID, fixedID:true})))
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.authResponse.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
             } else {
                 quietLogin(event.authResponse, true);
                 toMain();
@@ -560,8 +577,13 @@
                     parseFragmentObject(o, currentFragment);
                 }
             } else {
-                coreVBox = masterCanvas;
-                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:User.getInstance().fixedDashboardID, fixedID:true})))
+                if (User.getInstance().onlyShowTopReports) {
+                    toMain();
+                } else {
+                    limitedMain();
+                }
+                //coreVBox = masterCanvas;
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: User.getInstance().fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
             }
         }
 
@@ -584,16 +606,16 @@
             }
             //headerBar.percentWidth = 100;
             /*headerBar.setStyle("paddingTop", 5);
-            headerBar.setStyle("paddingBottom", 5);
-            headerBar.setStyle("paddingLeft", 10);
-            headerBar.setStyle("paddingRight", 10);*/
+             headerBar.setStyle("paddingBottom", 5);
+             headerBar.setStyle("paddingLeft", 10);
+             headerBar.setStyle("paddingRight", 10);*/
             headerBar.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
             masterCanvas.addChild(headerBar);
             /*var box:Box = new Box();
-            box.percentWidth = 100;
-            box.height = 5;
-            box.y = 38;
-            masterCanvas.addChild(box);*/
+             box.percentWidth = 100;
+             box.height = 5;
+             box.y = 38;
+             masterCanvas.addChild(box);*/
             var hbox:HBox = new HBox();
             hbox.y = 42;
             hbox.percentWidth = 100;

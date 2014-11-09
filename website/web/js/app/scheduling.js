@@ -34,9 +34,15 @@
     }
     }])
 
-    eiScheduling.controller("deleteScheduledDataSourceController", ["$scope", function($scope) {
+    eiScheduling.controller("deleteScheduledDataSourceController", ["$scope", "$http", function($scope, $http) {
         $scope.confirmDelete = function() {
-            $scope.$close();
+            var l = $http.delete("/app/scheduled_tasks.json", {data: JSON.stringify({
+                "schedules": $scope.to_delete.map(function(e, i, l) { return e.id; })
+                }
+            )  });
+            l.then(function() {
+                $scope.$close();
+            })
         }
     }])
 
@@ -67,8 +73,8 @@
     eiScheduling.controller("viewDataSourceSchedulingController", ["$scope", "$http", "$routeParams", "$location", function($scope, $http, $routeParams, $location) {
         $scope.loading.then(function() {
             var i;
-            for(i = 0;i < $scope.schedules.data_sources.length;i++) {
-                if($scope.schedules.data_sources[i].id == $routeParams.id) {
+            for (i = 0; i < $scope.schedules.data_sources.length; i++) {
+                if ($scope.schedules.data_sources[i].id == $routeParams.id) {
                     $scope.schedule = angular.copy($scope.schedules.data_sources[i]);
                 }
             }
@@ -87,23 +93,84 @@
 
     eiScheduling.controller("viewDeliverySchedulingController", ["$scope", "$routeParams", "$http", "$location", function($scope, $routeParams, $http, $location) {
         $scope.loading.then(function() {
-            var i;
-            for(i = 0;i < $scope.schedules.reports.length;i++) {
-                if($scope.schedules.reports[i].id == $routeParams.id) {
-                    $scope.schedule = angular.copy($scope.schedules.reports[i]);
-
+            $scope.is_new = $routeParams.id == "new";
+            console.log($location.path())
+            if($scope.is_new) {
+                $scope.schedule = {
+                    emails: [],
+                    groups: [],
+                    users: [],
+                    id: "new",
+                    type: $location.path().match(/scheduling\/delivery/i) ? "report" : "general",
+                    schedule_type: {
+                        offset: $scope.getOffset(),
+                        type: "daily",
+                        hour: 0,
+                        minute: 0
+                    },
+                    label: "",
+                    delivery_info: [],
+                    report_id: 0,
+                    sender: 0,
+                    timezone_offset: $scope.getOffset(),
+                    offset: $scope.getOffset(),
+                    configuration_id: 0,
+                    report_format: "excel2007",
+                    delivery_label: "",
+                    subject: "",
+                    body: ""
+                }
+            } else {
+                var i;
+                for (i = 0; i < $scope.schedules.reports.length; i++) {
+                    if ($scope.schedules.reports[i].id == $routeParams.id) {
+                        $scope.schedule = angular.copy($scope.schedules.reports[i]);
+                    }
                 }
             }
-            //var l = $http.get("/app/deliveries/" + $scope.schedule.id + "/history.json");
-            //l.then(function(c) {
-            //})
+
+            $scope.errors = [];
+
             $scope.save_schedule = function() {
-                console.log($scope.schedule)
-                var v = $http.post("/app/scheduled_tasks/" + $scope.schedule.id + ".json?offset=" + $scope.getOffset(), JSON.stringify($scope.schedule));
-                v.then(function(a) {
-                    $scope.reload();
-                     $location.path("/scheduling/reports")
-                })
+                $scope.errors = [];
+                var change = true;
+                var endLocation = null;
+                if($scope.schedule.type == "report" && $scope.schedule.report_id == 0) {
+                    $scope.errors.push("There must be a report selected.");
+                    if($location.path().match(/\/report$/i))
+                        change = false;
+                    if(endLocation != null)
+                        endLocation = "/scheduling/" + ($scope.schedule.type == 'general' ? 'multi_delivery' : 'delivery') + "/" + $routeParams.id + "/report";
+                }
+                if($scope.schedule.type == "general" && $scope.schedule.delivery_info.length == 0) {
+                    $scope.errors.push("There must be a report selected.");
+                    if($location.path().match(/\/report$/i))
+                        change = false;
+                    if(endLocation != null)
+                        endLocation = "/scheduling/delivery/" + $routeParams.id + "/report";
+                }
+                if($scope.schedule.emails.length == 0  && $scope.schedule.users.length == 0 && $scope.schedule.groups.length == 0 ) {
+                    $scope.errors.push("There must be at least one recipient to the delivery.");
+                    if($location.path().match(/\/schedule$/i))
+                        change = false;
+                    endLocation = "/scheduling/" + ($scope.schedule.type == 'general' ? 'multi_delivery' : 'delivery') + "/" + $routeParams.id + "/schedule";
+                }
+                if($scope.schedule.subject.trim().length == 0) {
+                    $scope.errors.push("You must add a subject to the email.");
+                    if($location.path().match(/\/email$/i))
+                        change = false;
+                    if(endLocation != null)
+                        endLocation = "/scheduling/" + ($scope.schedule.type == 'general' ? 'multi_delivery' : 'delivery') + "/" + $routeParams.id + "/email";
+                }
+                if($scope.errors.length == 0) {
+                    var v = $http.post("/app/scheduled_tasks/" + $scope.schedule.id + ".json?offset=" + $scope.getOffset(), JSON.stringify($scope.schedule));
+                    v.then(function (a) {
+                        $scope.reload();
+                        $location.path("/scheduling/reports");
+                    })
+                } else if(change) {
+                    $location.path(endLocation);
+                }
             }
         })
     }])
@@ -165,11 +232,31 @@
 
     }])
 
+    eiScheduling.controller("viewDeliverySchedulingHistoryController", ["$scope", "$http", function($scope, $http) {
+        $scope.loading.then(function() {
+            var l = $http.get("/app/deliveries/" + $scope.schedule.id + "/history.json");
+
+             l.then(function(c) { 
+                $scope.history = c.data.history;
+            })
+        })
+        $scope.runNow = function() {
+            $scope.finished = false;
+            $scope.error = false;
+            var l = $http.post("/app/deliveries/" + $scope.schedule.id + "/run", JSON.stringify({}));
+            l.then(function() {
+                $scope.finished = true;
+            }, function() {
+                $scope.finished = false;
+                $scope.error = true;
+            })
+        }
+    }])
+
     eiScheduling.controller("viewDeliverySchedulingReportController", ["$scope", "$http", function($scope, $http) {
         $scope.ds_load = $http.get("/app/dataSources.json");
         $scope.ds_load.then(function (d) {
             $scope.data_sources = d.data.data_sources;
-            console.log($scope.data_sources)
             if($scope.data_sources.length == 1) {
                 $scope.ds_name = $scope.data_sources[0];
                 $scope.select_data_source($scope.ds_name);
@@ -203,18 +290,32 @@
                     }
                 }
             });
+            $scope.checkPDF = function() {
+                if($scope.schedule.report_format == "pdf") {
+                    if(typeof($scope.schedule.delivery_info) == "undefined") {
+                        $scope.schedule.delivery_info = {
+                            show_header: false,
+                            orientation: "landscape"
+                        }
+                    }
+                } else {
+                    if(typeof($scope.schedule.delivery_info) != "undefined") {
+                        delete $scope.schedule.delivery_info;
+                    }
+                }
+            }
         });
         $scope.isSelected = function(val) {
             return val && typeof(val) === "object"
         };
         $scope.select_data_source = function(item) {
             $scope.report_loading = $http.get("/app/dataSources/" + item.url_key + "/reports.json").then(function(d) {
-                $scope.reports = d.data.reports;
+                $scope.reports = d.data.reports.filter(function(e, i, l) { return e.type == "report" });
             });
         };
         $scope.select_report = function(item) {
             $scope.schedule.report_id = item.id;
-            $http.get("/app/html/report/" + item.url_key + "/data.json").then(function(d) {
+            $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
                 $scope.configurations = d.data.configurations;
             });
         };
@@ -223,15 +324,85 @@
         };
     }]);
 
+    eiScheduling.controller("multiReportDeliverySelectionController", ["$scope", "$http", function($scope, $http) {
+        $scope.ds_load = $http.get("/app/dataSources.json");
+        $scope.ds_load.then(function (d) {
+            $scope.data_sources = d.data.data_sources;
+        });
+        $scope.select_data_source = function(item) {
+            $scope.report_loading = $http.get("/app/dataSources/" + item.url_key + "/reports.json").then(function(d) {
+                $scope.reports = d.data.reports;
+            });
+        };
+        $scope.add_report = function() {
+            if($scope.isSelected($scope.selected_report)) {
+                var v = {
+                    format: $scope.selected_report == 'report' ? "excel2007" : "pdf",
+                    id: $scope.selected_report.id,
+                    type: $scope.selected_report.type,
+                    send_if_no_data: true,
+                    name: $scope.selected_report.name
+                }
+                if(v.format == "pdf") {
+                    v.delivery_info = {
+                        show_header: false,
+                        orientation: "Landscape"
+                    }
+                }
+                $scope.schedule.delivery_info.push(v);
+            }
+        }
+        $scope.isSelected = function(val) {
+            return val && typeof(val) === "object"
+        };
+
+        $scope.delete_selected = function() {
+            $scope.schedule.delivery_info = $scope.schedule.delivery_info.filter(function(e, i, l) { return !e.selected; })
+        }
+
+        $scope.select_delivery = function(item) {
+            $scope.selected_delivery = item;
+            $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
+                $scope.schedule_configurations = d.data.configurations;
+            });
+        }
+
+        $scope.default_added = function(a) {
+            return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
+        };
+
+        $scope.checkPDF = function() {
+            if($scope.selected_delivery.format == "pdf") {
+                if(typeof($scope.selected_delivery.delivery_info) == "undefined") {
+                    $scope.selected_delivery.delivery_info = {
+                        show_header: false,
+                        orientation: "Landscape"
+                    }
+                }
+            } else {
+                if(typeof($scope.selected_delivery.delivery_info) != "undefined") {
+                    delete $scope.selected_delivery.delivery_info;
+                }
+            }
+        }
+
+    }])
+
     eiScheduling.config(["$routeSegmentProvider", function($routeSegmentProvider) {
         $routeSegmentProvider.when("/scheduling", "scheduling.reports").
             when("/scheduling/reports", "scheduling.reports").
             when("/scheduling/data_sources", "scheduling.data_sources").
             when("/scheduling/data_sources/:id", "scheduling.view_data_source").
-            when("/scheduling/delivery/:id", "scheduling.view_delivery.scheduling").
+            when("/scheduling/delivery/:id", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/schedule", "scheduling.view_delivery.scheduling").
             when("/scheduling/delivery/:id/report", "scheduling.view_delivery.report_info").
             when("/scheduling/delivery/:id/email", "scheduling.view_delivery.email").
+            when("/scheduling/delivery/:id/history", "scheduling.view_delivery.history").
+            when("/scheduling/multi_delivery/:id", "scheduling.view_multi_delivery.reports").
+            when("/scheduling/multi_delivery/:id/schedule", "scheduling.view_multi_delivery.scheduling").
+            when("/scheduling/multi_delivery/:id/email", "scheduling.view_multi_delivery.email").
+            when("/scheduling/multi_delivery/:id/history", "scheduling.view_multi_delivery.history").
+            when("/scheduling/multi_delivery/:id/report", "scheduling.view_multi_delivery.reports").
             segment("scheduling", {
                 templateUrl: "/angular_templates/scheduling/scheduling_base.template.html",
                 controller: "schedulingBaseController"
@@ -265,6 +436,27 @@
             segment("email", {
                 templateUrl: "/angular_templates/scheduling/view_delivery_email.template.html",
                 controller: "viewDeliverySchedulingEmailController"
-            })
+            }).segment("history", {
+                templateUrl: "/angular_templates/scheduling/report_delivery_history.template.html",
+                controller: "viewDeliverySchedulingHistoryController"
+            }).up().
+            segment("view_multi_delivery", {
+                templateUrl: "/angular_templates/scheduling/report_multi_delivery.template.html",
+                controller: "viewDeliverySchedulingController"
+            }).within().
+            segment("scheduling", {
+                templateUrl: "/angular_templates/scheduling/view_delivery_schedule.template.html",
+                controller: "viewDeliverySchedulingRecipientsController"
+            }).segment("email",  {
+                templateUrl: "/angular_templates/scheduling/view_delivery_email.template.html",
+                controller: "viewDeliverySchedulingEmailController"
+            }).segment("history", {
+                templateUrl: "/angular_templates/scheduling/report_delivery_history.template.html",
+                controller: "viewDeliverySchedulingHistoryController"
+            }).segment("reports", {
+                templateUrl: "/angular_templates/scheduling/multi_report_delivery_selection.template.html",
+                controller: "multiReportDeliverySelectionController"
+            });
+
     }])
 })()

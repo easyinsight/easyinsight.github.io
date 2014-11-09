@@ -274,7 +274,7 @@ public class GeneralDelivery extends ScheduledDelivery {
             long id = rs.getLong(6);
             setUserID(rs.getLong(7));
             deliveryLabel = rs.getString(8);
-            PreparedStatement getReportStmt = conn.prepareStatement("SELECT REPORT_ID, TITLE, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_REPORT_ID, DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA FROM DELIVERY_TO_REPORT, ANALYSIS WHERE GENERAL_DELIVERY_ID = ? AND " +
+            PreparedStatement getReportStmt = conn.prepareStatement("SELECT REPORT_ID, TITLE, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_REPORT_ID, DATA_FEED_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, ANALYSIS.URL_KEY, CONFIGURATION_ID FROM DELIVERY_TO_REPORT, ANALYSIS WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_report.report_id = analysis.analysis_id");
             PreparedStatement getFilterStmt = conn.prepareStatement("SELECT FILTER_ID FROM delivery_to_report_to_filter WHERE delivery_to_report_id = ?");
             getReportStmt.setLong(1, id);
@@ -290,6 +290,8 @@ public class GeneralDelivery extends ScheduledDelivery {
                 deliveryInfo.setDataSourceID(reports.getLong(6));
                 deliveryInfo.setLabel(reports.getString(7));
                 deliveryInfo.setSendIfNoData(reports.getBoolean(8));
+                deliveryInfo.setUrlKey(reports.getString(9));
+                deliveryInfo.setConfigurationID(reports.getLong(10));
                 deliveryInfo.setType(DeliveryInfo.REPORT);
                 List<FilterDefinition> customFilters = new ArrayList<FilterDefinition>();
                 getFilterStmt.setLong(1, deliveryInfoID);
@@ -328,7 +330,7 @@ public class GeneralDelivery extends ScheduledDelivery {
                 infos.add(deliveryInfo);
             }
             getScorecardStmt.close();
-            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_DASHBOARD_ID, DATA_SOURCE_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, SAVED_CONFIGURATION_ID FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_ID, DASHBOARD_NAME, DELIVERY_INDEX, DELIVERY_FORMAT, DELIVERY_TO_DASHBOARD_ID, DATA_SOURCE_ID, DELIVERY_LABEL, SEND_IF_NO_DATA, SAVED_CONFIGURATION_ID, DASHBOARD.URL_KEY FROM DELIVERY_TO_DASHBOARD, DASHBOARD WHERE GENERAL_DELIVERY_ID = ? AND " +
                     "delivery_to_dashboard.dashboard_id = dashboard.dashboard_id");
 
             getDashboardStmt.setLong(1, id);
@@ -344,6 +346,8 @@ public class GeneralDelivery extends ScheduledDelivery {
                 deliveryInfo.setLabel(dashboardRS.getString(7));
                 deliveryInfo.setSendIfNoData(dashboardRS.getBoolean(8));
                 deliveryInfo.setConfigurationID(dashboardRS.getLong(9));
+                deliveryInfo.setUrlKey(dashboardRS.getString(10));
+
                 deliveryInfo.setType(DeliveryInfo.DASHBOARD);
                 infos.add(deliveryInfo);
                 deliveryInfo.setDeliveryExtension(DeliveryExtension.load(conn, 0, 0, deliveryInfo.getFormat(), deliveryInfoID));
@@ -396,7 +400,7 @@ public class GeneralDelivery extends ScheduledDelivery {
     }
 
     public String describe() {
-        return getDeliveryLabel() != null ? getDeliveryLabel() : "Email multiple dashboards and reports";
+        return getDeliveryLabel() != null && !getDeliveryLabel().isEmpty() ? getDeliveryLabel() : "Email multiple dashboards and reports";
     }
 
     @Override
@@ -406,7 +410,8 @@ public class GeneralDelivery extends ScheduledDelivery {
         jo.put("body", getBody());
         jo.put("html_email", isHtmlEmail());
         jo.put("offset", getTimezoneOffset());
-        jo.put("sender_id", getSenderID());
+        jo.put("sender", getSenderID());
+        jo.put("label", getDeliveryLabel());
         jo.put("delivery_info", new JSONArray(getDeliveryInfos().stream().map((a) -> {
             try {
                 return a.toJSON(md);
@@ -415,5 +420,23 @@ public class GeneralDelivery extends ScheduledDelivery {
             }
         }).collect(Collectors.toList())));
         return jo;
+    }
+
+    public GeneralDelivery() {}
+
+    public GeneralDelivery(long id, net.minidev.json.JSONObject jsonObject) {
+        super(id, jsonObject);
+        setSubject(String.valueOf(jsonObject.get("subject")));
+        setBody(String.valueOf(jsonObject.get("body")));
+        setHtmlEmail(Boolean.valueOf(String.valueOf(jsonObject.get("html_email"))));
+        setTimezoneOffset(Integer.parseInt(String.valueOf(jsonObject.get("offset"))));
+        setSenderID(Long.parseLong(String.valueOf(jsonObject.get("sender"))));
+        net.minidev.json.JSONArray deliveries = (net.minidev.json.JSONArray) jsonObject.get("delivery_info");
+        setDeliveryLabel(String.valueOf(jsonObject.get("label")));
+        List<DeliveryInfo> deliveryInfoList = new ArrayList<>();
+        for(int i = 0;i < deliveries.size();i++) {
+            deliveryInfoList.add(new DeliveryInfo((net.minidev.json.JSONObject) deliveries.get(i), i));
+        }
+        setDeliveryInfos(deliveryInfoList);
     }
 }

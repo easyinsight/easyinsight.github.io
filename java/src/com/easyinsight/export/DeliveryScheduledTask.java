@@ -2,9 +2,7 @@ package com.easyinsight.export;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSMultiSummaryDefinition;
-import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.benchmark.ScheduledTaskBenchmarkInfo;
-import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.dashboard.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -19,15 +17,7 @@ import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.itextpdf.text.DocumentException;
-import com.xerox.amazonws.common.Result;
-import com.xerox.amazonws.sns.NotificationService;
-import com.xerox.amazonws.sns.SNSException;
-import com.xerox.amazonws.sqs2.Message;
-import com.xerox.amazonws.sqs2.MessageQueue;
-import com.xerox.amazonws.sqs2.SQSException;
-import com.xerox.amazonws.sqs2.SQSUtils;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
+import com.itextpdf.text.Element;
 import org.jetbrains.annotations.Nullable;
 
 import javax.mail.MessagingException;
@@ -35,10 +25,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -126,6 +117,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
 
         private DeliveryResult(AttachmentInfo attachmentInfo) {
+            this.attachmentInfo = attachmentInfo;
+        }
+
+        private DeliveryResult(String body, AttachmentInfo attachmentInfo) {
+            this.body = body;
             this.attachmentInfo = attachmentInfo;
         }
     }
@@ -304,6 +300,24 @@ public class DeliveryScheduledTask extends ScheduledTask {
         }
     }
 
+    private static class BodyElement {
+        private String body;
+        private int order;
+
+        private BodyElement(String body, int order) {
+            this.body = body;
+            this.order = order;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public Integer getOrder() {
+            return order;
+        }
+    }
+
     private void sendEmails(final EIConnection conn, String subject, String body, boolean htmlEmail, final int timezoneOffset,
                             List<DeliveryInfo> infos, final int accountType, final int firstDayOfWeek, final long accountID,
                             List<UserInfo> users, List<String> emails, final UserInfo firstUser, @Nullable final String personaName, String senderEmail, String senderName,
@@ -313,7 +327,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
         ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 5, TimeUnit.MINUTES, queue);
         final CountDownLatch latch = new CountDownLatch(infos.size());
-        final List<String> bodyElements = new ArrayList<>();
+        final List<BodyElement> bodyElements = new ArrayList<>();
         final List<AttachmentInfo> attachmentInfos = new ArrayList<>();
         for (DeliveryInfo dInfo : infos) {
             final DeliveryInfo deliveryInfo = dInfo;
@@ -324,8 +338,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, ourConn, timezoneOffset, sendIfNoData);
                     if (deliveryResult != null) {
                         if (deliveryResult.body != null) {
-                            bodyElements.add(deliveryResult.body);
-                        } else if (deliveryResult.attachmentInfo != null) {
+                            bodyElements.add(new BodyElement(deliveryResult.body, deliveryInfo.getIndex()));
+                        }
+                        if (deliveryResult.attachmentInfo != null) {
                             attachmentInfos.add(deliveryResult.attachmentInfo);
                         }
                     }
@@ -349,8 +364,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
         if (bodyElements.size() == 0 && attachmentInfos.size() == 0) {
             return;
         }
-        for (String bodyElement : bodyElements) {
-            emailBody += bodyElement;
+
+        Collections.sort(bodyElements, (o1, o2) -> o1.getOrder().compareTo(o2.getOrder()));
+
+        for (BodyElement bodyElement : bodyElements) {
+            emailBody += bodyElement.body;
         }
 
         PreparedStatement deliveryAuditStmt = conn.prepareStatement("INSERT INTO REPORT_DELIVERY_AUDIT (" +
@@ -427,184 +445,75 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     System.out.println("Running scorecard " + deliveryInfo.getId() + " for HTML delivery");
                     return new DeliveryResult(ExportService.exportScorecard(deliveryInfo.getId(), insightRequestMetadata, conn));
                 }
-            } else if (deliveryInfo.getFormat() == ReportDelivery.PDF || deliveryInfo.getFormat() == ReportDelivery.PNG) {
+            } else if (deliveryInfo.getFormat() == ReportDelivery.PDF || deliveryInfo.getFormat() == ReportDelivery.PNG ||
+                    deliveryInfo.getFormat() == ReportDelivery.INLINE_IMAGE) {
                 if (deliveryInfo.getFormat() == ReportDelivery.PDF && ExportService.toDirectPDF(analysisDefinition.getReportType())) {
                     System.out.println("Running report " + deliveryInfo.getId() + " for inline PDF delivery");
                     byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
                     String reportName = analysisDefinition.getName();
                     return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
                 } else {
-                    System.out.println("Running report " + deliveryInfo.getId() + " for selenium PDF or PNG delivery");
-                    long id = new SeleniumLauncher().requestSeleniumDrawForReport(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
-                            deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
-                    System.out.println("launched " + id);
-                    String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-                    String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + Thread.currentThread().getId();
-                    System.out.println("Queue: " + queueName);
-                    MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                    NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                    notificationService.createTopic(topicName);
-                    Result<String> result = notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
-
-                    msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
-
-                    msgQueue.setEncoding(false);
-                    try {
-                        int timeout = 0;
-                        while (timeout < 300) {
-                            Message message = msgQueue.receiveMessage();
-                            if (message == null) {
-                                timeout++;
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException ex) {
-                                    // ignore
-                                }
-                            } else {
-                                timeout++;
-                                JSONObject jo = (JSONObject) JSONValue.parse(message.getMessageBody());
-                                String body = (String) jo.get("Message");
-                                msgQueue.deleteMessage(message);
-                                String[] parts = body.split("\\|");
-                                long responseID = Long.parseLong(parts[0]);
-                                System.out.println("got response of " + responseID + ", looking for " + id);
-                                if (responseID == id) {
-                                    long pdfID = Long.parseLong(parts[1]);
-                                    System.out.println("retrieving and returning " + pdfID);
-                                    PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
-                                    getStmt.setLong(1, pdfID);
-                                    ResultSet rs = getStmt.executeQuery();
-                                    rs.next();
-                                    byte[] bytes = rs.getBytes(1);
-                                    String deliveryName;
-                                    if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
-                                        deliveryName = "export";
-                                    } else {
-                                        deliveryName = deliveryInfo.getName();
-                                    }
-                                    if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
-                                        return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
-                                    } else {
-                                        return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
-                                    }
-                                } else {
-                                    System.out.println("does not match, ignoring");
-                                }
-                            }
-                        }
-                    } finally {
-                        try {
-                            notificationService.unsubscribe(result.getResult());
-                            msgQueue.deleteQueue();
-                        } catch (Exception e) {
-                            LogClass.error(e);
+                    System.out.println("Running report " + deliveryInfo.getId() + " for PhantomJS PDF or PNG delivery");
+                    if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
+                        Element element = DashboardPDF.generatePDF(analysisDefinition, 1000, 800, conn);
+                        byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element);
+                        String reportName = analysisDefinition.getName();
+                        return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
+                    } else {
+                        byte[] png = DashboardPDF.generatePNG(analysisDefinition, 1000, 800, conn);
+                        String reportName = analysisDefinition.getName();
+                        FileOutputStream fos = new FileOutputStream(new File("/Users/jamesboe/exp.png"));
+                        fos.write(png);
+                        fos.flush();
+                        fos.close();
+                        System.out.println("saved");
+                        if (deliveryInfo.getFormat() == ReportDelivery.INLINE_IMAGE) {
+                            String cid = "c" + System.currentTimeMillis();
+                            return new DeliveryResult("<img src=\"cid:"+cid+"\"/>", new AttachmentInfo(png, reportName + ".png", "image/png", cid));
+                        } else {
+                            return new DeliveryResult(new AttachmentInfo(png, reportName + ".png", "image/png"));
                         }
                     }
-                    LogClass.error("Failed to generate Selenium report for report ID " + deliveryInfo.getId() + ", ended up timing out.");
+
                 }
             }
         } else if (deliveryInfo.getType() == DeliveryInfo.DASHBOARD) {
-            System.out.println("Running dashboard " + deliveryInfo.getId() + " for Selenium delivery");
+            System.out.println("Running dashboard " + deliveryInfo.getId() + " for PhantomJS delivery");
+            boolean showHeader = true;
+            String orientation = "Landscape";
             if (deliveryInfo.getDeliveryExtension() != null) {
                 PDFDeliveryExtension deliveryExtension = (PDFDeliveryExtension) deliveryInfo.getDeliveryExtension();
-                if (deliveryExtension.getGenerateByHTML() == 1) {
-                    Dashboard dashboard = new DashboardService().getDashboardView(deliveryInfo.getId());
-                    DashboardStackPositions positions;
-                    if (deliveryInfo.getConfigurationID() > 0) {
-                        PreparedStatement urlKeyStmt = conn.prepareStatement("SELECT saved_configuration.url_key FROM saved_configuration WHERE " +
-                                "saved_configuration.saved_configuration_id = ?");
-                        urlKeyStmt.setLong(1, deliveryInfo.getConfigurationID());
-                        ResultSet urlRS = urlKeyStmt.executeQuery();
-                        if (urlRS.next()) {
-                            String key = urlRS.getString(1);
+                showHeader = deliveryExtension.isShowHeader();
+                orientation = deliveryExtension.getOrientation();
+            }
 
-                            positions = new DashboardService().getConfigurationForDashboard(key).getSavedConfiguration().getDashboardStackPositions();
-                        } else {
-                            positions = new DashboardStackPositions();
-                        }
-                    } else {
-                        positions = new DashboardStackPositions();
-                    }
-                    byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, new HashMap<>(),
-                            insightRequestMetadata.getUtcOffset(), deliveryExtension.isShowHeader(), !"Portrait".equals(deliveryExtension.getOrientation()));
-                    return new DeliveryResult(new AttachmentInfo(bytes, dashboard.getName() + ".pdf", "application/pdf"));
+            Dashboard dashboard = new DashboardService().getDashboardView(deliveryInfo.getId());
+            DashboardStackPositions positions;
+            if (deliveryInfo.getConfigurationID() > 0) {
+                PreparedStatement urlKeyStmt = conn.prepareStatement("SELECT saved_configuration.url_key FROM saved_configuration WHERE " +
+                        "saved_configuration.saved_configuration_id = ?");
+                urlKeyStmt.setLong(1, deliveryInfo.getConfigurationID());
+                ResultSet urlRS = urlKeyStmt.executeQuery();
+                if (urlRS.next()) {
+                    String key = urlRS.getString(1);
+
+                    positions = new DashboardService().getConfigurationForDashboard(key).getSavedConfiguration().getDashboardStackPositions();
                 } else {
-                    return dashboardToPDFViaFlash(deliveryInfo, conn);
+                    positions = new DashboardStackPositions();
                 }
             } else {
-                return dashboardToPDFViaFlash(deliveryInfo, conn);
+                positions = new DashboardStackPositions();
             }
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, new HashMap<>(),
+                    insightRequestMetadata.getUtcOffset(), true, !"Portrait".equals(orientation));
+            System.out.println("pdf size = " + bytes.length);
+            FileOutputStream fos = new FileOutputStream(new File("/Users/jamesboe/blah.pdf"));
+            fos.write(bytes);
+            fos.flush();
+            fos.close();
+            System.out.println("saved");
+            return new DeliveryResult(new AttachmentInfo(bytes, dashboard.getName() + ".pdf", "application/pdf"));
         }
-        return null;
-    }
-
-    private DeliveryResult dashboardToPDFViaFlash(DeliveryInfo deliveryInfo, EIConnection conn) throws SNSException, SQSException, UnknownHostException, SQLException {
-        long id = new SeleniumLauncher().requestSeleniumDrawForDashboard(deliveryInfo.getId(), activityID, SecurityUtil.getUserID(), SecurityUtil.getAccountID(), conn,
-                deliveryInfo.getFormat(), deliveryInfo.getDeliveryExtension());
-        System.out.println("launched " + id);
-        String topicName = ConfigLoader.instance().getReportDeliveryQueue();
-        String queueName = topicName + InetAddress.getLocalHost().getHostName().replace(".", "") + Thread.currentThread().getId();
-        System.out.println("Queue: " + queueName);
-        MessageQueue msgQueue = SQSUtils.connectToQueue(queueName, "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-        NotificationService notificationService = new NotificationService("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-        notificationService.createTopic(topicName);
-        Result<String> result = notificationService.subscribe("arn:aws:sns:us-east-1:808335860417:" + topicName, "sqs", "arn:aws:sqs:us-east-1:808335860417:" + queueName);
-        msgQueue.setQueueAttribute("Policy", QUEUE_POLICY_FORMAT.replace("{0}", queueName).replace("{1}", topicName));
-
-        msgQueue.setEncoding(false);
-
-        try {
-            int timeout = 0;
-            while (timeout < 300) {
-                Message message = msgQueue.receiveMessage();
-                if (message == null) {
-                    timeout++;
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        // ignore
-                    }
-                } else {
-                    timeout++;
-                    JSONObject jo = (JSONObject) JSONValue.parse(message.getMessageBody());
-                    String body = (String) jo.get("Message");
-                    msgQueue.deleteMessage(message);
-                    String[] parts = body.split("\\|");
-                    long responseID = Long.parseLong(parts[0]);
-                    System.out.println("got response of " + responseID + ", looking for " + id);
-                    if (responseID == id) {
-                        long pdfID = Long.parseLong(parts[1]);
-                        System.out.println("retrieving and returning " + pdfID);
-                        PreparedStatement getStmt = conn.prepareStatement("SELECT PNG_IMAGE FROM PNG_EXPORT WHERE PNG_EXPORT_ID = ?");
-                        getStmt.setLong(1, pdfID);
-                        ResultSet rs = getStmt.executeQuery();
-                        rs.next();
-                        byte[] bytes = rs.getBytes(1);
-                        String deliveryName;
-                        if (deliveryInfo.getName() == null || "".equals(deliveryInfo.getName())) {
-                            deliveryName = "export";
-                        } else {
-                            deliveryName = deliveryInfo.getName();
-                        }
-                        //if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
-                        return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".pdf", "application/pdf"));
-                        /*} else {
-                            return new DeliveryResult(new AttachmentInfo(bytes, deliveryName + ".png", "image/png"));
-                        }*/
-                    } else {
-                        System.out.println("does not match, ignoring");
-                    }
-                }
-            }
-        } finally {
-            try {
-                notificationService.unsubscribe(result.getResult());
-                msgQueue.deleteQueue();
-            } catch (Exception e) {
-                LogClass.error(e);
-            }
-        }
-        LogClass.error("Failed to generate Selenium dashboard for " + deliveryInfo.getId() + ", ended up timing out.");
         return null;
     }
 

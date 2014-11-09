@@ -130,9 +130,11 @@ public class FilterUtils {
             String endDate = curFilter != null ? (String) curFilter.get("end") : null;
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
             if (startDate != null) {
+                System.out.println("Start date = " + startDate);
                 filterDateRangeDefinition.setStartDate(dateFormat.parse(startDate));
             }
             if (endDate != null) {
+                System.out.println("End date = " + endDate);
                 filterDateRangeDefinition.setEndDate(dateFormat.parse(endDate));
             }
         } else if (filter instanceof FilterPatternDefinition) {

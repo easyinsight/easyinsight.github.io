@@ -11,7 +11,7 @@ import com.easyinsight.analysis.trend.TrendGridDefinition;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.TrendOutcome")]
-public class TrendOutcome {
+public dynamic class TrendOutcome {
 
     public var now:Value;
     public var historical:Value;

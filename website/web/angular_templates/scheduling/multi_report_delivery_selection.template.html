@@ -1,0 +1,96 @@
+<form ng-submit="save_schedule()">
+    <div class="row scheduleRow">
+        <div class="col-md-4">Label:</div>
+        <div class="col-md-8"><input class="form-control" type="text" ng-model="schedule.label" /></div>
+    </div>
+<div class="row scheduleRow">
+    <div class="col-md-4">Data Source Name:</div>
+    <div class="col-md-8"><input class="form-control" type="text" ng-model="ds_name" placeholder="Search for a data source..."
+                       typeahead="data_source as data_source.name for data_source in data_sources | filter: {name: $viewValue}" typeahead-min-length="0"
+                       typeahead-editable="false" typeahead-on-select="select_data_source($item, $model, $label)" autocomplete="false" /></div>
+</div>
+<div class="row scheduleRow">
+    <div class="col-md-4">Report/Dashboard Name:</div>
+    <div class="col-md-8">
+        <input id="report_select" class="form-control" type="text" ng-model="selected_report" placeholder="Search for a report..."
+           ng-disabled="!isSelected(ds_name)" typeahead="report as report.name for report in reports | filter: {name: $viewValue}"
+           typeahead-min-length="0" typeahead-on-select="select_report($item, $modal, $label)" typeahead-editable="false" autocomplete="false" />
+    </div>
+</div>
+
+<div class="row scheduleRow">
+     <div class="col-md-4"><button type="button" class="btn btn-primary" ng-click="add_report()">Add Report/Dashboard</button></div><div class="col-md-8"><button type="button" class="btn btn-danger pull-right" ng-click="delete_selected()">Delete Selected</button></div>
+ </div>
+<div class="row scheduleRow">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-condensed reportDashboardTable">
+            <thead>
+            <tr>
+                <th style="width:10px;"></th>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="delivery in schedule.delivery_info">
+                <td><input type="checkbox" ng-model="delivery.selected" /></td>
+                <td><a ng-click="select_delivery(delivery)">{{ delivery.name }}</a></td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+    <div ng-if="selected_delivery">
+        <div class="row scheduleRow">
+            <div class="col-md-12"><h2>Name: {{selected_delivery.name}}</h2></div>
+        </div>
+        <div class="row scheduleRow">
+            <div class="col-md-4">
+                Send If No Data:
+            </div>
+            <div class="col-md-8"><input type="checkbox" ng-model="selected_delivery.send_if_no_data" />
+            </div>
+        </div>
+        <div class="row scheduleRow">
+                <div class="col-md-4">Configuration: </div>
+                <div class="col-md-8" ng-if="schedule_configurations == null || schedule_configurations.length == 0">There are no configurations available.</div>
+                <div class="col-md-8" ng-if="schedule_configurations != null && schedule_configurations.length > 0">
+                    <select class="form-control" ng-model="selected_delivery.configuration_id" ng-options="configuration.id as configuration.name for configuration in default_added(schedule_configurations)">
+                    </select>
+                </div>
+            </div>
+        <div ng-if="selected_delivery.type == 'report'" class="row scheduleRow">
+            <div class="col-md-4">
+                Output Format:
+            </div>
+            <div class="col-md-8">
+                <select ng-model="selected_delivery.format" class="form-control" ng-change="checkPDF()">
+                    <option value="excel2007">Excel 2007</option>
+                    <option value="excel">Excel</option>
+                    <option value="png">PNG</option>
+                    <option value="pdf">PDF</option>
+                    <option value="html">HTML Table</option>
+                </select>
+            </div>
+        </div>
+        <div ng-if="selected_delivery.format == 'pdf'" class="row scheduleRow">
+            <div class="col-md-4">Show Header:</div>
+            <div class="col-md-8"><input type="checkbox" ng-model="selected_delivery.delivery_info.show_header" /></div>
+        </div>
+        <div class="row scheduleRow" ng-if="selected_delivery.format == 'pdf'">
+            <div class="col-md-4">Orientation:</div>
+            <div class="col-md-8">
+                <select class="form-control" ng-model="selected_delivery.delivery_info.orientation">
+                    <option value="Landscape">Landscape</option>
+                    <option value="Portrait">Portrait</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row scheduleRow">
+        <div class="col-md-12">
+            <input type="submit" value="Save" class="btn btn-primary" />
+        </div>
+    </div>
+
+</form>

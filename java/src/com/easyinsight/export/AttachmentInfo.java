@@ -9,11 +9,23 @@ public class AttachmentInfo {
     private byte[] body;
     private String name;
     private String encoding;
+    private String inlineCID;
 
     AttachmentInfo(byte[] body, String name, String encoding) {
         this.body = body;
         this.name = name;
         this.encoding = encoding;
+    }
+
+    AttachmentInfo(byte[] body, String name, String encoding, String inlineCID) {
+        this.body = body;
+        this.name = name;
+        this.encoding = encoding;
+        this.inlineCID = inlineCID;
+    }
+
+    public String getInlineCID() {
+        return inlineCID;
     }
 
     public byte[] getBody() {

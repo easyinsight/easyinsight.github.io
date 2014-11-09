@@ -1,10 +1,6 @@
 package com.easyinsight.users;
 
-import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.preferences.UISettings;
-import com.easyinsight.util.RandomTextGenerator;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -29,6 +25,9 @@ public class User {
     private String email;
     @Column(name="name")
     private String name;
+
+    @Column(name="assigned_dashboard_is_fixed")
+    private boolean assignedDashboardIsFixedView;
 
     @Column(name="consultant")
     private boolean consultant;
@@ -112,6 +111,14 @@ public class User {
     @Column(name="user_date_format")
     private int dateFormat = 6;
 
+    public boolean isAssignedDashboardIsFixedView() {
+        return assignedDashboardIsFixedView;
+    }
+
+    public void setAssignedDashboardIsFixedView(boolean assignedDashboardIsFixedView) {
+        this.assignedDashboardIsFixedView = assignedDashboardIsFixedView;
+    }
+
     public User() {
     }
 
@@ -149,6 +156,7 @@ public class User {
         userTransferObject.setUserLocale(userLocale);
         userTransferObject.setDateFormat(dateFormat);
         userTransferObject.setCurrency(currency);
+        userTransferObject.setOnlyShowTopReports(assignedDashboardIsFixedView);
         return userTransferObject;
     }
 
@@ -412,6 +420,7 @@ public class User {
         setUserName(transferObject.getUserName());
         setAccountAdmin(transferObject.isAccountAdmin());
         setEmail(transferObject.getEmail());
+        setAssignedDashboardIsFixedView(transferObject.isOnlyShowTopReports());
         setFirstName(transferObject.getFirstName());
         setPersonaID(transferObject.getPersonaID() > 0 ? transferObject.getPersonaID() : null);
         setName(transferObject.getName());

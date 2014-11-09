@@ -65,7 +65,20 @@ public class ReportDeliveryAudit {
         JSONObject jo = new JSONObject();
         jo.put("email", getEmail());
         jo.put("message", getMessage());
-        jo.put("code", getCode());
+        String code = "";
+        switch(getCode()) {
+            case 0:
+                code = "Pending";
+                break;
+            case 1:
+                code = "Successful";
+                break;
+            case 2:
+                code = "Failed";
+                break;
+            default:
+        }
+        jo.put("code", code);
         jo.put("date", dateFormat.format(getDate()));
         return jo;
     }

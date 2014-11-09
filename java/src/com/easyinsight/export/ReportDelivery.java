@@ -34,6 +34,7 @@ public class ReportDelivery extends ScheduledDelivery {
     public static final int PDF = 3;
     public static final int HTML_TABLE = 4;
     public static final int EXCEL_2007 = 5;
+    public static final int INLINE_IMAGE = 6;
 
     private int reportFormat;
     private long reportID;
@@ -442,6 +443,9 @@ public class ReportDelivery extends ScheduledDelivery {
             case 4:
                 type = " as Inline HTML Table";
                 break;
+            case 6:
+                type = " as Inline PNG";
+                break;
             default:
                 type = "";
         }
@@ -468,7 +472,7 @@ public class ReportDelivery extends ScheduledDelivery {
         return jo;
     }
 
-    private String reportFormatValue(int value) {
+    public static String reportFormatValue(int value) {
         switch(value) {
             case 1:
                 return "excel";
@@ -480,6 +484,8 @@ public class ReportDelivery extends ScheduledDelivery {
                 return "html";
             case 5:
                 return "excel2007";
+            case 6:
+                return "inlinePNG";
             default:
                 return "";
         }
@@ -503,6 +509,14 @@ public class ReportDelivery extends ScheduledDelivery {
         setConfigurationID(Long.parseLong(String.valueOf(jsonObject.get("configuration_id"))));
         setCustomFilters(new ArrayList<>());
         String reportFormat = String.valueOf(jsonObject.get("report_format"));
+        int reportFormatValue = formatStringToValue(reportFormat);
+        setReportFormat(reportFormatValue);
+        if(getReportFormat() == 3) {
+            setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) jsonObject.get("delivery_info")));
+        }
+    }
+
+    public static int formatStringToValue(String reportFormat) {
         int reportFormatValue = 0;
         switch(reportFormat) {
             case "excel":
@@ -520,12 +534,12 @@ public class ReportDelivery extends ScheduledDelivery {
             case "excel2007":
                 reportFormatValue = 5;
                 break;
+            case "inlinePNG":
+                reportFormatValue = 6;
+                break;
             default:
                 reportFormatValue = 0;
         }
-        setReportFormat(reportFormatValue);
-        if(getReportFormat() == 3) {
-            setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) jsonObject.get("delivery_info")));
-        }
+        return reportFormatValue;
     }
 }

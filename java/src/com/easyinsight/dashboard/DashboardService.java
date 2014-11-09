@@ -306,25 +306,29 @@ public class DashboardService {
         }
     }
 
+    public List<SavedConfiguration> getConfigurationsForDashboard(long dashboardID, EIConnection conn) throws SQLException {
+        List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id, saved_configuration.url_key FROM " +
+                "DASHBOARD_STATE, SAVED_CONFIGURATION WHERE DASHBOARD_STATE.dashboard_id = ? AND DASHBOARD_STATE.DASHBOARD_STATE_ID = SAVED_CONFIGURATION.dashboard_state_id");
+        queryStmt.setLong(1, dashboardID);
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long configurationID = rs.getLong(1);
+            String configurationName = rs.getString(2);
+            SavedConfiguration savedConfiguration = new SavedConfiguration();
+            savedConfiguration.setName(configurationName);
+            savedConfiguration.setId(configurationID);
+            savedConfiguration.setUrlKey(rs.getString(4));
+            savedConfigurations.add(savedConfiguration);
+        }
+        return savedConfigurations;
+    }
+
     public List<SavedConfiguration> getConfigurationsForDashboard(long dashboardID) {
         SecurityUtil.authorizeDashboard(dashboardID);
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<SavedConfiguration> savedConfigurations = new ArrayList<SavedConfiguration>();
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT saved_configuration_id, configuration_name, SAVED_CONFIGURATION.dashboard_state_id, saved_configuration.url_key FROM " +
-                    "DASHBOARD_STATE, SAVED_CONFIGURATION WHERE DASHBOARD_STATE.dashboard_id = ? AND DASHBOARD_STATE.DASHBOARD_STATE_ID = SAVED_CONFIGURATION.dashboard_state_id");
-            queryStmt.setLong(1, dashboardID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long configurationID = rs.getLong(1);
-                String configurationName = rs.getString(2);
-                SavedConfiguration savedConfiguration = new SavedConfiguration();
-                savedConfiguration.setName(configurationName);
-                savedConfiguration.setId(configurationID);
-                savedConfiguration.setUrlKey(rs.getString(4));
-                savedConfigurations.add(savedConfiguration);
-            }
-            return savedConfigurations;
+            return getConfigurationsForDashboard(dashboardID, conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

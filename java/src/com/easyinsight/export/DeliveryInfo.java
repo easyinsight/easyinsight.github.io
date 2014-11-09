@@ -38,6 +38,16 @@ public class DeliveryInfo {
     private DeliveryExtension deliveryExtension;
     private long configurationID;
 
+    private String urlKey;
+
+    public String getUrlKey() {
+        return urlKey;
+    }
+
+    public void setUrlKey(String urlKey) {
+        this.urlKey = urlKey;
+    }
+
     public long getConfigurationID() {
         return configurationID;
     }
@@ -73,7 +83,7 @@ public class DeliveryInfo {
     public Element toXML(XMLMetadata xmlMetadata) {
         Element element = new Element("deliveryInfo");
         element.addAttribute(new Attribute("id", String.valueOf(id)));
-        element.addAttribute(new Attribute("type", String.valueOf(type)));
+        element.addAttribute(new Attribute("type", valueOf(type)));
         element.addAttribute(new Attribute("index", String.valueOf(index)));
         element.addAttribute(new Attribute("format", String.valueOf(format)));
         if (dataSourceID == 0) {
@@ -94,6 +104,17 @@ public class DeliveryInfo {
             }
         }
         return element;
+    }
+
+    private static String valueOf(int type) {
+        switch(type) {
+            case DASHBOARD:
+                return "dashboard";
+            case REPORT:
+                return "report";
+            default:
+                return "";
+        }
     }
 
     public boolean isSendIfNoData() {
@@ -182,13 +203,53 @@ public class DeliveryInfo {
         jo.put("id", getId());
         jo.put("data_source_id", getDataSourceID());
         jo.put("label", getLabel());
-        jo.put("type", getType());
+        jo.put("type", toType(getType()));
         jo.put("index", getIndex());
-        jo.put("format", getFormat());
+        jo.put("format", ReportDelivery.reportFormatValue(getFormat()));
         jo.put("configuration_id", getConfigurationID());
         jo.put("send_if_no_data", isSendIfNoData());
+        jo.put("url_key", getUrlKey());
         if(getDeliveryExtension() != null)
-            jo.put("delivery_extension", getDeliveryExtension());
+            jo.put("delivery_info", getDeliveryExtension().toJSON(md));
         return jo;
+    }
+
+    public DeliveryInfo() {
+    }
+
+    public DeliveryInfo(net.minidev.json.JSONObject jsonObject, int index) {
+        setIndex(index);
+        setName(String.valueOf(jsonObject.get("name")));
+        setId(Long.parseLong(String.valueOf(jsonObject.get("id"))));
+        setType(parseType(String.valueOf(jsonObject.get("type"))));
+        setFormat(ReportDelivery.formatStringToValue(String.valueOf(jsonObject.get("format"))));
+        if(jsonObject.containsKey("configuration_id"))
+            setConfigurationID(Long.parseLong(String.valueOf(jsonObject.get("configuration_id"))));
+        setSendIfNoData(Boolean.valueOf(String.valueOf(jsonObject.get("send_if_no_data"))));
+        if(jsonObject.containsKey("delivery_info"))
+            setDeliveryExtension(DeliveryExtension.fromJSON(((net.minidev.json.JSONObject) jsonObject.get("delivery_info"))));
+
+    }
+
+    public static String toType(int type) {
+        switch(type) {
+            case DASHBOARD:
+                return "dashboard";
+            case REPORT:
+                return "report";
+            default:
+                return "";
+        }
+    }
+
+    private static int parseType(String type) {
+        switch(type) {
+            case "dashboard":
+                return DASHBOARD;
+            case "report":
+                return REPORT;
+            default:
+                return 0;
+        }
     }
 }

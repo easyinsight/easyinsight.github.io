@@ -355,20 +355,20 @@ a {
 }
 
 .reportDashboardTable {
-    border-color: #1C5C76;
+    border-color: #0074A4;
 }
 
 .reportDashboardTable > tbody > tr > td {
-    border-color: #1C5C76;
+    border-color: #0074A4;
 }
 
 .reportDashboardTable > thead > tr {
-    background-color: #1C5C76;
+    background-color: #0074A4;
     color:#FFFFFF;
 }
 
 .reportDashboardTable > thead > tr > th {
-    border-color: #1C5C76;
+    border-color: #0074A4;
 }
 
 .droppable_area {
@@ -503,4 +503,16 @@ fieldset[disabled] .btn-alt-primary.active {
 
 .scheduleRow {
     margin-top:10px;
+}
+
+.clickBar {
+    background-color:#0084b4;
+    text-align: center;
+}
+
+.clickBarH2 {
+    color:#FFFFFF;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
 }

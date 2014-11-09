@@ -25,10 +25,7 @@ public class PDFDeliveryExtension extends DeliveryExtension {
     public PDFDeliveryExtension() {}
     public PDFDeliveryExtension(net.minidev.json.JSONObject jsonObject) {
         setShowHeader(Boolean.valueOf(String.valueOf(jsonObject.get("show_header"))));
-        setDisplayType(Boolean.valueOf(String.valueOf(jsonObject.get("display_type"))));
-        setWidth(Integer.parseInt(String.valueOf(jsonObject.get("width"))));
-        setHeight(Integer.parseInt(String.valueOf(jsonObject.get("height"))));
-        setGenerateByHTML(Integer.parseInt(String.valueOf(jsonObject.get("generate_by_html"))));
+        setOrientation(String.valueOf(jsonObject.get("orientation")));
     }
 
     public int getGenerateByHTML() {
@@ -132,10 +129,7 @@ public class PDFDeliveryExtension extends DeliveryExtension {
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = super.toJSON(md);
         jo.put("show_header", isShowHeader());
-        jo.put("display_type", isDisplayType());
-        jo.put("width", getWidth());
-        jo.put("height", getHeight());
-        jo.put("generate_by_html", getGenerateByHTML());
+        jo.put("orientation", getOrientation());
         return jo;
     }
 }

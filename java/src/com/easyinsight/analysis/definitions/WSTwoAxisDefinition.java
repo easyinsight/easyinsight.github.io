@@ -22,6 +22,42 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
     private AnalysisItem eventPointLabel;
     private int eventPointLineColor;
     private boolean relativeScale;
+    private AnalysisItem goal;
+    private AnalysisItem goalDate;
+    private int goalLineColor;
+    private int goalDateLevel;
+
+    public int getGoalDateLevel() {
+        return goalDateLevel;
+    }
+
+    public void setGoalDateLevel(int goalDateLevel) {
+        this.goalDateLevel = goalDateLevel;
+    }
+
+    public AnalysisItem getGoalDate() {
+        return goalDate;
+    }
+
+    public void setGoalDate(AnalysisItem goalDate) {
+        this.goalDate = goalDate;
+    }
+
+    public int getGoalLineColor() {
+        return goalLineColor;
+    }
+
+    public void setGoalLineColor(int goalLineColor) {
+        this.goalLineColor = goalLineColor;
+    }
+
+    public AnalysisItem getGoal() {
+        return goal;
+    }
+
+    public void setGoal(AnalysisItem goal) {
+        this.goal = goal;
+    }
 
     public boolean isRelativeScale() {
         return relativeScale;
@@ -202,6 +238,12 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         if (eventPointLabel != null) {
             addItems("eventPointLabel", Arrays.asList(eventPointLabel), structure);
         }
+        if (goal != null) {
+            addItems("goal", Arrays.asList(goal), structure);
+        }
+        if (goalDate != null) {
+            addItems("goalDate", Arrays.asList(goalDate), structure);
+        }
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
@@ -211,6 +253,8 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         measures = items("measures", structure);
         eventPoint = firstItem("eventPoint", structure);
         eventPointLabel = firstItem("eventPointLabel", structure);
+        goal = firstItem("goal", structure);
+        goalDate = firstItem("goalDate", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
@@ -262,6 +306,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         interpolateValues = findStringProperty(properties, "interpolateValues", "false");
         multiMeasure = findBooleanProperty(properties, "multiMeasure", false);
         relativeScale = findBooleanProperty(properties, "relativeScale", false);
+        goalDateLevel = (int) findNumberProperty(properties, "goalDateLevel", 0);
     }
 
     @Override
@@ -272,6 +317,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         properties.add(new ReportStringProperty("interpolateValues", interpolateValues));
         properties.add(new ReportBooleanProperty("multiMeasure", multiMeasure));
         properties.add(new ReportBooleanProperty("relativeScale", relativeScale));
+        properties.add(new ReportNumericProperty("goalDateLevel", goalDateLevel));
         return properties;
     }
 }
