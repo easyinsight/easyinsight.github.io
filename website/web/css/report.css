@@ -390,7 +390,7 @@ table.dataTable tfoot td {
     fill: #000;
     stroke: #000;
     stroke-width: 0;
-    font: normal 12px Arial;
+    font: bold 12px Arial;
 }
 
 .filterBoxLabel {
