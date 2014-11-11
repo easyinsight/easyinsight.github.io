@@ -267,7 +267,7 @@ public class ExportService {
         scheduledActivity.setup(conn);
     }
 
-    public List<DataSourceDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
+    public List<DataSourceDescriptor> getRefreshableDataSources() {
         List<DataSourceDescriptor> validSources = new ArrayList<DataSourceDescriptor>();
         List<DataSourceDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
         for (DataSourceDescriptor fd : dataSources) {
@@ -287,7 +287,6 @@ public class ExportService {
             while (rs.next()) {
                 long dataSourceID = rs.getLong(1);
                 long id = rs.getLong(2);
-                if (scheduledActivity != null && id == scheduledActivity.getScheduledActivityID()) continue;
                 Iterator<DataSourceDescriptor> descIter = validSources.iterator();
                 while (descIter.hasNext()) {
                     DataSourceDescriptor fd = descIter.next();
