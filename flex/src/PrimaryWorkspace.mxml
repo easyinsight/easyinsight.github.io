@@ -373,15 +373,10 @@
                 toLogin(LoginPage.NEEDS_ACTIVATION);
             } else {
                 quietLogin(authResult, false);
+                toMain();
                 if (authResult.fixedDashboardID > 0) {
-                    if (User.getInstance().onlyShowTopReports) {
-                        toMain();
-                    } else {
-                        limitedMain();
-                    }
-                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
+                    internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID })))
                 } else {
-                    toMain();
                     browserInit();
                 }
             }
@@ -410,16 +405,11 @@
                     toLogin(LoginPage.NEEDS_ACTIVATION);
                 } else {
                     quietLogin(authResult, false);
+                    toMain();
                     if (authResult.fixedDashboardID > 0) {
-                        if (User.getInstance().onlyShowTopReports) {
-                            toMain();
-                        } else {
-                            limitedMain();
-                        }
                         browserSetup = false;
-                        internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
+                        internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID })))
                     } else {
-                        toMain();
                     }
                 }
 
@@ -469,12 +459,8 @@
                                     } else {
                                         quietLogin(authResult, false);
                                         if (authResult.fixedDashboardID > 0) {
-                                            if (User.getInstance().onlyShowTopReports) {
-                                                toMain();
-                                            } else {
-                                                limitedMain();
-                                            }
-                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
+                                            toMain();
+                                            internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: authResult.fixedDashboardID})))
                                         } else {
                                             toMain();
                                             browserInit();
@@ -506,13 +492,9 @@
         private function login(event:LoginEvent):void {
             if (event.authResponse.fixedDashboardID > 0) {
                 quietLogin(event.authResponse, false);
-                if (User.getInstance().onlyShowTopReports) {
-                    toMain();
-                } else {
-                    limitedMain();
-                }
+                toMain();
                 coreVBox = masterCanvas;
-                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.authResponse.fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: event.authResponse.fixedDashboardID})))
             } else {
                 quietLogin(event.authResponse, true);
                 toMain();
@@ -577,13 +559,9 @@
                     parseFragmentObject(o, currentFragment);
                 }
             } else {
-                if (User.getInstance().onlyShowTopReports) {
-                    toMain();
-                } else {
-                    limitedMain();
-                }
+                toMain();
                 //coreVBox = masterCanvas;
-                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: User.getInstance().fixedDashboardID, fixedID: !User.getInstance().onlyShowTopReports})))
+                internalAnalyze(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID: User.getInstance().fixedDashboardID})))
             }
         }
 

@@ -89,7 +89,7 @@
             Database.closeConnection(c);
         }
 
-
+        boolean onlyTopReports = userObject.getBoolean("onlyTopReports");
 
 %>
 <head>
@@ -116,13 +116,18 @@
 <div class="nav nav-pills reportNav">
     <div class="container-fluid">
         <div class="row controlsRow">
+
             <div class="col-md-4 reportBlah">
+                <% if (!onlyTopReports) { %>
                 <a class="reportControl visible-sm visible-md visible-lg" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <% } %>
             </div>
             <div class="col-md-8 col-xs-12 reportControlToolbar">
+
                 <div class="reportBlah visible-xs pull-left" style="margin-top: 0">
                     <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Reports</a>
                 </div>
+
                 <div class="btn-toolbar pull-right">
                     <div id="configuration-dropdown" class="btn-group reportControlBtnGroup visible-sm visible-md visible-lg">
 

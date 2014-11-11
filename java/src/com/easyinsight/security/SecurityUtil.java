@@ -305,6 +305,7 @@ public class SecurityUtil {
                 User u = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
                 jo.put("name", u.getUserName());
                 jo.put("designer", embedKey != null || u.isAnalyst());
+                jo.put("onlyTopReports", u.isAssignedDashboardIsFixedView());
             } finally {
                 session.close();
             }

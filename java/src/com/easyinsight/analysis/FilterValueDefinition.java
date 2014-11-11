@@ -416,103 +416,6 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        StringBuilder sb = new StringBuilder();
-        AnalysisItemResultMetadata metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, 0, 0, filterHTMLMetadata.getReport());
-        if (metadata.getReportFault() != null) {
-            return "";
-        }
-        AnalysisDimensionResultMetadata dimensionMetadata = (AnalysisDimensionResultMetadata) metadata;
-        String filterName = "filter" + getFilterID();
-        if (singleValue) {
-
-            String onChange;
-            String key = filterHTMLMetadata.getFilterKey();
-            String function = filterHTMLMetadata.createOnChange();
-            onChange = "updateFilter('" + filterName + "','" + key + "', " + function + ")";
-
-            if (!isToggleEnabled()) {
-                sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
-            }
-            sb.append(label(true));
-            sb.append("<select class=\"filterSelect\" id=\"" + filterName + "\" onchange=\"" + onChange + "\">");
-
-
-            List<String> stringList = dimensionMetadata.getStrings();
-            for (Value value : dimensionMetadata.getValues()) {
-                stringList.add(value.toHTMLString());
-            }
-            Collections.sort(stringList);
-            if (isAllOption()) {
-                stringList.add(0, "All");
-            }
-            if (isExcludeEmpty()) {
-                stringList.remove("");
-            }
-            String existingChoice = null;
-            if (!getFilteredValues().isEmpty()) {
-                Object obj = getFilteredValues().get(0);
-                if (obj != null) {
-                    existingChoice = obj.toString();
-                }
-            }
-            for (String value : stringList) {
-                if (value.equals(existingChoice)) {
-                    sb.append("<option selected=\"selected\">").append(value).append("</option>");
-                } else {
-                    sb.append("<option>").append(value).append("</option>");
-                }
-            }
-            sb.append("</select>");
-
-            if (!filterHTMLMetadata.isFromStack()) {
-                sb.append("<script type=\"text/javascript\">\n");
-                sb.append("updateFilter('" + filterName + "','" + key + "', " + function + ");\n");
-                sb.append("</script>");
-            }
-        } else {
-            String divID = "filter" + getFilterID() + "div";
-            sb.append("<div id=\"").append(divID).append("\" class=\"modal\">");
-            sb.append("<div class=\"modal-dialog\"><div class=\"modal-content\"><div class=\"modal-body\">");
-            sb.append("<div class=\"control-group\">");
-            sb.append("<label class=\"control-label\" for=\"" + filterName + "\">Available Values</label>");
-            sb.append("<div class=\"controls\">");
-            int size = Math.min(15, dimensionMetadata.getValues().size());
-            sb.append("<ul class=\"unstyled\" id=\"");
-            sb.append(filterName);
-            sb.append("\">");
-
-            for (Value value : dimensionMetadata.getValues()) {
-                sb.append("<li><input type='checkbox'");
-                if (filteredValues.contains(value)) {
-                    sb.append(" checked='checked'");
-                }
-                sb.append(" /> <span class='cb_filter_value'>");
-                sb.append(value);
-                sb.append("</span></li>");
-            }
-            sb.append("</ul>");
-            sb.append("</div>");
-            sb.append("</div>");
-            sb.append("</div>");
-
-            sb.append("<div class=\"modal-footer\">\n" +
-                    "        <button class=\"btn\" data-dismiss=\"modal\" onclick=\"updateMultiFilter('" + filterName + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")\">Save</button>\n" +
-                    "        <button class=\"btn\" data-dismiss=\"modal\" type=\"button\">Cancel</button>\n" +
-                    "    </div>");
-            sb.append("</div>");
-            sb.append("</div>");
-            sb.append("</div>");
-            sb.append("<div class=\"filterLabel\">");
-            if (!isToggleEnabled()) {
-                sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
-            }
-            sb.append("<a href=\"#" + divID + "\" data-toggle=\"modal\">").append(label(false)).append("</a></div>");
-        }
-        return sb.toString();
-    }
-
-    @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         JSONObject jo = super.toJSON(filterHTMLMetadata);
         Dashboard db = filterHTMLMetadata.getDashboard();
@@ -564,7 +467,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 stringList.remove("");
             }
             JSONObject existingChoices = new JSONObject();
-            if(stringList.size() > 100) {
+            if(stringList.size() > 500) {
                 jo.put("values", new JSONArray());
                 jo.put("error", "Too many values, please refine your search.");
             } else if(getParentFilters() != null && !getParentFilters().isEmpty()) {
