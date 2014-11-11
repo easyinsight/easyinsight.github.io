@@ -938,17 +938,8 @@ $(function () {
                 var a = $(e.target).parent().parent().parent().parent().parent().parent().parent();
                 var k = a.attr("id").replace(/_modal$/g, "");
                 var selMap = selectionMap[k];
-
                 var checked = $(e.target).is(":checked");
                 selMap[$(".cb_filter_value", $(e.target).parent()).html()] = checked;
-                /*if (checked) {
-                    var allSelected = _.all(selectionMap, function(e, i, l) {
-                        return (i == "All") || e;
-                    });
-                    if (allSelected) {
-
-                    }
-                }*/
                 if (checked && _.all(selMap, function(e, i, l) {
                     return (i == "All") || e; })) {
                     $(".cb_all_choice", $(e.target).parent().parent()).prop('checked', true);
@@ -989,13 +980,13 @@ $(function () {
                         }
                         for (var mo in m) {
                             var selected = f.selected[mo];
-                            if (selected) {
+                            if (selected || f.selected["All"]) {
                                 selMap[mo] = true;
                             } else {
                                 selMap[mo] = false;
                             }
                         }
-                        if(d.values.length > 300) {
+                        if(d.values.length > 500) {
                             d.error = "Too many values, please refine your search."
                         } else {
                             $(".multi-value-list", $(e.target)).html(multi_value_results({ data: { selected: selMap }, results: d }));
@@ -1014,7 +1005,7 @@ $(function () {
                     selectionMap[target] = selMap;
                     for (var mo in m) {
                         var selected = f.selected[mo];
-                        if (selected) {
+                        if (selected || f.selected["All"]) {
                             selMap[mo] = true;
                         } else {
                             selMap[mo] = false;
