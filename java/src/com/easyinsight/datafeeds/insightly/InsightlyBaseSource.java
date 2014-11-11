@@ -61,6 +61,33 @@ public abstract class InsightlyBaseSource extends ServerDataSourceDefinition {
         }
     }
 
+    public List runJSONRequest21(String path, InsightlyCompositeSource insightlyCompositeSource, HttpClient client) {
+        String url = "https://api.insight.ly/v2.1/" + path;
+        HttpMethod restMethod = new GetMethod(url);
+        restMethod.setRequestHeader("Accept", "application/json");
+        restMethod.setRequestHeader("Content-Type", "application/json");
+
+        try {
+            client.executeMethod(restMethod);
+            if (restMethod.getStatusCode() == 404) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate an Insightly instance at " + url, insightlyCompositeSource));
+            } else if (restMethod.getStatusCode() == 401) {
+                throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", insightlyCompositeSource));
+            }
+            Object obj = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            try {
+                return (List) obj;
+            } catch (ClassCastException e) {
+                System.out.println(obj);
+                throw e;
+            }
+        } catch (ReportException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Map runJSONRequestForMap(String path, InsightlyCompositeSource insightlyCompositeSource, HttpClient client) {
         String url = "https://api.insight.ly/v2/" + path;
         HttpMethod restMethod = new GetMethod(url);
