@@ -1583,10 +1583,11 @@ public class UserUploadService {
                 int reportType = reportRS.getInt(4);
                 String urlKey = reportRS.getString(5);
                 try {
+                    SecurityUtil.authorizeReport(reportID, Roles.VIEWER);
                     InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
                     id.setDescription(reportRS.getString(6));
                     reports.add(id);
-                } catch (com.easyinsight.security.SecurityException e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -1606,7 +1607,7 @@ public class UserUploadService {
                     DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
                     dd.setDescription(dashboardRS.getString(5));
                     reports.add(dd);
-                } catch (com.easyinsight.security.SecurityException e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
