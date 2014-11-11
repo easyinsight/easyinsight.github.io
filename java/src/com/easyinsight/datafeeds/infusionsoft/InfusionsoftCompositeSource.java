@@ -298,6 +298,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_CONTACTS, InfusionsoftLeadSource.CONTACT_ID, InfusionsoftContactSource.ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_COMPANIES, InfusionsoftContactSource.COMPANY_ID, InfusionsoftCompanySource.ID));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_CONTACT_ACTION, InfusionsoftContactSource.ID, InfusionsoftContactActionSource.CONTACT_ID));
 
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_LEAD, FeedType.INFUSIONSOFT_PRODUCT_INTEREST, InfusionsoftLeadSource.LEAD_ID, InfusionsoftProductInterestSource.OBJECT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCT_INTEREST, FeedType.INFUSIONSOFT_PRODUCTS, InfusionsoftProductInterestSource.PRODUCT_ID, InfusionsoftProductSource.PRODUCT_ID));
