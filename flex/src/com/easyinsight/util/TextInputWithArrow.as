@@ -18,6 +18,7 @@ import mx.containers.Canvas;
 
 import mx.controls.TextInput;
 import mx.core.UIComponent;
+import mx.events.DropdownEvent;
 
 public class TextInputWithArrow extends Canvas {
     public function TextInputWithArrow() {
@@ -70,11 +71,16 @@ public class TextInputWithArrow extends Canvas {
         }
     }
 
+    private function onClose(event:DropdownEvent):void {
+        dispatchEvent(event);
+    }
+
     override protected function createChildren():void {
         super.createChildren();
         autoCompleteManager = new AutoCompleteManager();
         BindingUtils.bindProperty(autoCompleteManager, "dataProvider", this, "filteredProvider");
         autoCompleteManager.minCharsForCompletion = 0;
+        autoCompleteManager.addEventListener(DropdownEvent.CLOSE, onClose);
         autoCompleteManager.labelField = labelField;
         autoCompleteManager.maxRowCount = 12;
         autoCompleteManager.target = textInput;
