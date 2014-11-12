@@ -305,14 +305,6 @@ public class ExportService {
         return validSources;
     }
 
-    /*private boolean isRefreshable(int feedType) {
-        return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType() ||
-            feedType == FeedType.PIVOTAL_TRACKER.getType() || feedType == FeedType.WHOLE_FOODS.getType() ||
-            feedType == FeedType.CONSTANT_CONTACT.getType() || feedType == FeedType.ZENDESK_COMPOSITE.getType() ||
-            feedType == FeedType.HARVEST_COMPOSITE.getType() || feedType == FeedType.QUICKBASE_COMPOSITE.getType() ||
-            feedType == FeedType.LINKEDIN.getType() || feedType == FeedType.BATCHBOOK_COMPOSITE.getType());
-    }*/
-
     public ReportDelivery getReportDelivery(long reportID, int utcOffset) {
         ReportDelivery reportDelivery = null;
         EIConnection conn = Database.instance().getConnection();
@@ -737,7 +729,17 @@ public class ExportService {
                         if (crosstabValue.isSummaryValue()) {
                             sb.append("<td style=\"" + summaryCell + "\">");
                         } else {
-                            sb.append("<td style=\"" + dataCell + "\">");
+                            String style = dataCell;
+                            if (crosstabValue.getValue().getValueExtension() != null) {
+                                TextValueExtension tve = (TextValueExtension) crosstabValue.getValue().getValueExtension();
+                                if (tve.getBackgroundColor() != 0) {
+                                    style += ";background-color:" + ExportService.createHexString(tve.getBackgroundColor());
+                                }
+                                if (tve.getColor() != 0) {
+                                    style += ";color:" + ExportService.createHexString(tve.getColor());
+                                }
+                            }
+                            sb.append("<td style=\"" + style + "\">");
                         }
                         if (crosstabValue.getDtMap() != null) {
                             DrillThrough drillThrough = (DrillThrough) measure.getLinks().get(0);
