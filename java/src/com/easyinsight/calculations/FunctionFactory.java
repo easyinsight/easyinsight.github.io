@@ -340,8 +340,6 @@ public class FunctionFactory {
             return new StandardDeviation();
         } else if (s.equals("split")) {
             return new Split();
-        } else if (s.equals("overridevalue")) {
-            return new OverrideValue();
         } else if (s.equals("sequencenumber")) {
             return new SequenceRecord();
         } else if (s.equals("autocolor")) {
