@@ -15,6 +15,10 @@ public class TwoAxisDefinition extends ChartDefinition{
     public var eventPoint:AnalysisItem;
     public var eventPointLabel:AnalysisItem;
     public var eventPointLineColor:uint;
+    public var goalLineColor:uint;
+    public var goal:AnalysisItem;
+    public var goalDate:AnalysisItem;
+    public var goalDateLevel:int;
 
     public var multiMeasure:Boolean = false;
 
