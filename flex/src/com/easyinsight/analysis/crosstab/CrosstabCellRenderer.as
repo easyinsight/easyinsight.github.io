@@ -133,9 +133,17 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                 _changed = false;
                 text.text = _valText;
                 text.setTextFormat(_format);
+                if (backgroundColor != 0xFFFFFF) {
+                    text.backgroundColor = backgroundColor;
+                    text.background = true;
+                } else {
+                    text.background = false;
+                }
             }
         }
     }
+
+    private var backgroundColor:uint = 0xFFFFFF;
 
     private var _changed:Boolean;
     private var _valText:String;
@@ -177,6 +185,7 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
             } else if (_report.getFont() == "Open Sans") {
                 text.styleName = "myFontStyle";
             }
+            backgroundColor = 0xFFFFFF;
             if (crosstabValue.header == null) {
                 if (crosstabValue.summaryValue) {
                     var summaryColor:uint = _report.summaryTextColor;
@@ -187,6 +196,7 @@ public class CrosstabCellRenderer extends UIComponent implements IListItemRender
                     if (crosstabValue.value.valueExtension != null) {
                         var ext:TextValueExtension = crosstabValue.value.valueExtension as TextValueExtension;
                         color = ext.color;
+                        backgroundColor = ext.backgroundColor;
                     } else {
                         color = 0x0;
                     }
