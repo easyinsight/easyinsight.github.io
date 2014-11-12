@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="920" height="500">
+    <mx:Script>
+		<![CDATA[
+
+        import mx.collections.ArrayCollection;
+        import mx.containers.Form;
+        import mx.managers.PopUpManager;
+
+        private var _definition:AnalysisDefinition;
+
+        [Bindable]
+        private var limitsEnabled:Boolean;
+
+        [Bindable]
+        private var customLimitEnabled:Boolean;
+
+        public function set definition(definition:AnalysisDefinition):void {
+            this._definition = definition;
+        }
+        private var _startIndex:int;
+
+
+        [Bindable(event="startIndexChanged")]
+        public function get startIndex():int {
+            return _startIndex;
+        }
+
+        public function set startIndex(value:int):void {
+            if (_startIndex == value) return;
+            _startIndex = value;
+            dispatchEvent(new Event("startIndexChanged"));
+        }
+
+        public var section:int;
+
+        public static const LIMITS:int = 1;
+
+        public var items:ArrayCollection;
+
+        override protected function createChildren():void {
+            super.createChildren();
+
+                var formBox:Box = new Box();
+                formBox.verticalScrollPolicy = "auto";
+                formBox.percentWidth = 100;
+                formBox.percentHeight = 100;
+                formBox.setStyle("borderThickness", 1);
+                formBox.setStyle("borderStyle", "solid");
+                formBox.setStyle("borderColor", 0xCCCCCC);
+                formBox.setStyle("paddingLeft", 5);
+                formBox.setStyle("paddingTop", 5);
+                formBox.setStyle("paddingBottom", 5);
+                formBox.setStyle("horizontalAlign", "center");
+                formBox.label = "Limits";
+                var limitForm:Form = new Form();
+                formBox.addChild(limitForm);
+                for each (var limitItem:ReportFormItem in items) {
+                    limitForm.addChild(limitItem);
+                }
+                box.addChild(formBox);
+
+        }
+
+        private var _allFields:ArrayCollection;
+
+        public function set allFields(value:ArrayCollection):void {
+            _allFields = value;
+        }
+
+        public function save():void {
+            for each (var limitItem:ReportFormItem in items) {
+                limitItem.save();
+            }
+            dispatchEvent(new ReportPreferencesEvent(true));
+            PopUpManager.removePopUp(this);
+        }
+
+        public function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+
+        ]]>
+    </mx:Script>
+    <mx:Box width="100%" height="100%" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" paddingLeft="5" paddingTop="5" paddingBottom="5"
+            horizontalAlign="center" verticalScrollPolicy="auto" id="box">
+
+    </mx:Box>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+    </mx:HBox>
+</util:EISlimWindow>
