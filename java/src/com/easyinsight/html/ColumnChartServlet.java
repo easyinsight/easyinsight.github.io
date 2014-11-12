@@ -133,12 +133,12 @@ public class ColumnChartServlet extends HtmlServlet {
                     String color = null;
                     if (measureValue.getValueExtension() != null && measureValue.getValueExtension() instanceof TextValueExtension) {
                         TextValueExtension textValueExtension = (TextValueExtension) measureValue.getValueExtension();
-                        if (textValueExtension.getColor() > 0) {
+                        if (textValueExtension.getColor() != 0) {
                             color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
                         }
                     } else if (value.getValueExtension() != null && value.getValueExtension() instanceof TextValueExtension) {
                         TextValueExtension textValueExtension = (TextValueExtension) value.getValueExtension();
-                        if (textValueExtension.getColor() > 0) {
+                        if (textValueExtension.getColor() != 0) {
                             color = String.format("#%06X", (0xFFFFFF & textValueExtension.getColor()));
                         }
                     }
@@ -146,12 +146,14 @@ public class ColumnChartServlet extends HtmlServlet {
                         color = colors.get(0);
                     }
                     point.put("color", color);
+                } else {
+                    point.put("color", colors.get(i % colors.size()));
                 }
                 points.put(point);
             }
             axisObject.put("key", measureItem.toUnqualifiedDisplay());
             String color = colors.get(i % colors.size());
-            axisObject.put("color", color);
+            //axisObject.put("color", color);
             axisObject.put("values", points);
             blahArray.put(axisObject);
         }

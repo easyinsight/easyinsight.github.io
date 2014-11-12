@@ -21,12 +21,22 @@ public class AutoColor extends Function {
     public Value evaluate() {
         String statName = minusBrackets(getParameterName(0));
         AnalysisItem statMeasure = findDataSourceItem(0);
-        String color1String = minusQuotes(getParameter(1)).toString();
+        Value target;
+        Value source = getParameter(0);
+        int pCount;
+        if (paramCount() == 4) {
+            target = getParameter(1);
+            pCount = 2;
+        } else {
+            target = source;
+            pCount = 1;
+        }
+        String color1String = minusQuotes(getParameter(pCount)).toString();
         if (color1String.length() == 7) {
             color1String = color1String.substring(1, 7);
         }
         int color1 = Integer.parseInt(color1String, 16);
-        String color2String = minusQuotes(getParameter(2)).toString();
+        String color2String = minusQuotes(getParameter(pCount+1)).toString();
         if (color2String.length() == 7) {
             color2String = color2String.substring(1, 7);
         }
@@ -37,8 +47,8 @@ public class AutoColor extends Function {
         String processName = statMeasure.qualifiedName();
         StatCalculationCache statCache = (StatCalculationCache) calculationMetadata.getCache(new StatCacheBuilder(null, statMeasure,
                 d -> new Scale(Descriptive.min(d), Descriptive.max(d))), processName);
-        Value target = getParameter(0);
-        double instanceValue = getParameter(0).toDouble();
+
+        double instanceValue = source.toDouble();
         Scale scale = (Scale) statCache.getResult();
         double range = scale.max - scale.min;
         double place = instanceValue / range;
@@ -77,6 +87,6 @@ public class AutoColor extends Function {
 
     @Override
     public int getParameterCount() {
-        return 3;
+        return -1;
     }
 }
