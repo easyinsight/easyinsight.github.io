@@ -452,7 +452,6 @@ Chart = {
 
                             for (var i = 0; i < s1.length; i++) {
                                 var point = s1[i];
-                                var c = point.color;
                                 colors.push(point.color);
                             }
                             chart = nv.models.discreteBarChart()
@@ -612,6 +611,7 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             //.margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
                             .margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
+                        chart.multibar.barColor(function(d, i) { return d.color });
                         var floatingY = data["floatingY"];
                         if (floatingY) {
                             var vals = s1[0].values;
