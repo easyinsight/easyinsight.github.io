@@ -76,7 +76,6 @@
     }])
 
     eiScheduling.controller("viewDataSourceSchedulingController", ["$scope", "$http", "$routeParams", "$location", function($scope, $http, $routeParams, $location) {
-        console.log($routeParams);
         $scope.loading.then(function() {
 
             if($routeParams.id == "new") {
@@ -117,7 +116,6 @@
     eiScheduling.controller("viewDeliverySchedulingController", ["$scope", "$routeParams", "$http", "$location", function($scope, $routeParams, $http, $location) {
         $scope.loading.then(function() {
             $scope.is_new = $routeParams.id == "new";
-            console.log($location.path())
             if($scope.is_new) {
                 $scope.schedule = {
                     emails: [],
