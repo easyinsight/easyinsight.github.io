@@ -1039,7 +1039,9 @@
 
 
         private function saved(event:SavedAnalysisEvent):void {
+
             AnalysisUtil.updateReport(analysisDefinition, event.report);
+            UserAudit.instance().log(new ActionReportLog(ActionReportLog.EDIT, analysisDefinition.analysisID));
             if (!embedded) {
                 var feedFragmentObject:Object = new Object();
                 feedFragmentObject.analysisID = String(analysisDefinition.urlKey);
@@ -1648,9 +1650,12 @@
                                           feedID="{dataSourceID}"
                                           analysisItems="{wrappers}" minHeight="40" backgroundColor="#FFFFFF"
                                           report="{analysisDefinition}" context="{TransformContainer.REPORT_EDITOR}">
-                <mx:Button styleName="flatCreateButton"
-                           toolTip="Create a New Filter..." click="transformContainer.addNewFilter()"
-                           label="New Filter"/>
+                <mx:HBox verticalAlign="middle">
+                    <mx:Button styleName="flatCreateButton"
+                               toolTip="Create a New Filter..." click="transformContainer.addNewFilter()"
+                               label="New Filter"/>
+                    <mx:Label text="Filters:" styleName="fallThroughFonts" fontWeight="bold"/>
+                </mx:HBox>
             </filtering:TransformContainer>
             <mx:UIComponent height="1" id="uiComp2" width="100%"/>
         </mx:VBox>

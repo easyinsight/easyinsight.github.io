@@ -14,14 +14,15 @@
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.GenericDefinitionEditWindow;
         import com.easyinsight.analysis.JoinOverrideEvent;
+        import com.easyinsight.analysis.LimitsConfigWindow;
         import com.easyinsight.analysis.ReportJoinWindow;
         import com.easyinsight.analysis.ReportPreferencesEvent;
+        import com.easyinsight.analysis.StyleConfiguration;
         import com.easyinsight.code.MarmotScriptEvent;
         import com.easyinsight.code.ReportMarmotScriptWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
         import mx.events.MenuEvent;
 
         import mx.managers.PopUpManager;
@@ -37,11 +38,12 @@
             _reportEditor = value;
         }
 
-        [Bindable]
-        private var options:ArrayCollection = new ArrayCollection();
-
         private function onClick(event:MenuEvent):void {
             var target:String = event.item.data;
+            var items:ArrayCollection = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in _wrappers) {
+                items.addItem(wrapper.analysisItem);
+            }
             if (target == "editProperties") {
                 editReportProperties();
             } else if (target == "customizeCode") {
@@ -52,6 +54,33 @@
                 addonReports();
             } else if (target == "filterSets") {
                 filterSets();
+            } else if (target == "limits") {
+                var limitItems:ArrayCollection = StyleConfiguration.getLimitItems(_analysisDefinition, _wrappers);
+                editLimitProperties(limitItems);
+            } else if (target == "caching") {
+                var cacheItems:ArrayCollection = StyleConfiguration.getCachingItems(_analysisDefinition);
+                editLimitProperties(cacheItems);
+            } else if (target == "colorScheme") {
+                var colorItems:ArrayCollection = StyleConfiguration.getColorSchemeItems(_analysisDefinition);
+                editLimitProperties(colorItems);
+            } else if (target == "formatting") {
+                var formatItems:ArrayCollection = StyleConfiguration.getFormItems(_analysisDefinition);
+                editLimitProperties(formatItems);
+            } else if (target == "visuals") {
+                var visualItems:ArrayCollection = StyleConfiguration.getVisualItems(_analysisDefinition);
+                editLimitProperties(visualItems);
+            } else if (target == "advancedConfig") {
+                var advancedItems:ArrayCollection = StyleConfiguration.createExperimentalPage(_analysisDefinition);
+                editLimitProperties(advancedItems);
+            } else if (target == "custom") {
+                var reportItems:ArrayCollection = StyleConfiguration.createReportPage(_analysisDefinition, _wrappers);
+                if (reportItems.length > 0) {
+                    for each (var o:Object in reportItems) {
+                        if (o.label == event.item.label) {
+                            editLimitProperties(o.items);
+                        }
+                    }
+                }
             }
         }
 
@@ -59,14 +88,15 @@
         override protected function commitProperties():void {
             super.commitProperties();
             if (_analysisDefinition != null && _joinsCustomizable >0) {
+                var os:ArrayCollection = new ArrayCollection();
                 if (_joinsCustomizable == 1) {
-                    options = new ArrayCollection([
+                    os = new ArrayCollection([
                         {label: "Edit Properties      ", data: "editProperties"},
                         {label: "Customize Code", data: "customizeCode"},
                         {label: "Filter Sets", data: "filterSets"}
                     ]);
                 } else {
-                    options = new ArrayCollection([
+                    os = new ArrayCollection([
                         {label: "Edit Properties      ", data: "editProperties"},
                         {label: "Customize Code", data: "customizeCode"},
                         {label: "Customize Joins", data: "customizeJoins"},
@@ -74,7 +104,22 @@
                         {label: "Filter Sets", data: "filterSets"}
                     ]);
                 }
-                this.dataProvider = options;
+                var limitItems:ArrayCollection = StyleConfiguration.getLimitItems(_analysisDefinition, new ArrayCollection());
+                if (limitItems.length > 0) {
+                    os.addItem({label: "Limits", data: "limits"});
+                }
+                var cacheItems:ArrayCollection = StyleConfiguration.getCachingItems(_analysisDefinition);
+                if (cacheItems.length > 0) {
+                    os.addItem({label: "Caching", data: "caching"});
+                }
+                var reportItems:ArrayCollection = StyleConfiguration.createReportPage(_analysisDefinition, new ArrayCollection());
+                if (reportItems.length > 0) {
+                    for each (var o:Object in reportItems) {
+                        os.addItem({label: o.label, data: "custom"});
+                    }
+                }
+                this.dataProvider = os;
+                invalidateMenuDataProvider(os);
             }
 
         }
@@ -146,6 +191,17 @@
         private function onPreferences(event:ReportPreferencesEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             _dataView.refresh();
+        }
+
+        private function editLimitProperties(items:ArrayCollection):void {
+            var window:LimitsConfigWindow = new LimitsConfigWindow();
+            window.items = items;
+            window.addEventListener(ReportPreferencesEvent.REPORT_PREFERENCES, onPreferences, false, 0, true);
+            window.definition = _analysisDefinition;
+            window.allFields = _wrappers;
+            WindowManagement.manager.addWindow(window);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function editReportProperties(index:int = 0):void {

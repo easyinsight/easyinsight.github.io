@@ -6,7 +6,9 @@ import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.DimensionDropArea;
+import com.easyinsight.analysis.DropArea;
 import com.easyinsight.analysis.IReportControlBar;
+import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportControlBar;
@@ -38,7 +40,7 @@ public class TwoAxisControlBar extends ReportControlBar implements IReportContro
     public function TwoAxisControlBar() {
         xAxisGrouping = new ListDropAreaGrouping();
         xAxisGrouping.maxElements = 1;
-        xAxisGrouping.dropAreaType = DimensionDropArea;
+        xAxisGrouping.dropAreaType = ListDropArea;
         xAxisGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         yAxisGrouping = new ListDropAreaGrouping();
         yAxisGrouping.maxElements = 1;

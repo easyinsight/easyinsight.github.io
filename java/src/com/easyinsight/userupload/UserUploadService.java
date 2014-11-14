@@ -1005,6 +1005,7 @@ public class UserUploadService {
                 }
                 iter.remove();
             }
+            findOwnerStmt.close();
 
             long dsOwnerTime = System.currentTimeMillis();
 
