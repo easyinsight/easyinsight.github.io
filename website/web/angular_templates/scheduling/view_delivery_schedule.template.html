@@ -98,7 +98,7 @@
     <div class="row scheduleRow">
         <div class="col-md-12">
             <input type="submit" value="Save" class="btn btn-primary" ng-if="!is_new" />
-            <a href="/a/scheduling/delivery/{{schedule.id}}/schedule" ng-if="is_new"><button type="button" class="btn btn-primary">Next</button></a>
+            <button type="button" class="btn btn-primary" ng-if="is_new" ng-click="to_email()">Next</button>
         </div>
     </div>
 </form>

@@ -35,6 +35,11 @@
                 <td><input type="checkbox" ng-model="delivery.selected" /></td>
                 <td><a ng-click="select_delivery(delivery)">{{ delivery.name }}</a></td>
             </tr>
+            <tr ng-if="schedule.delivery_info.length == 0">
+                <td colspan="2">
+                    There are no reports to be delivered yet. Add one now!
+                </td>
+            </tr>
             </tbody>
         </table>
 
@@ -89,7 +94,8 @@
     </div>
     <div class="row scheduleRow">
         <div class="col-md-12">
-            <input type="submit" value="Save" class="btn btn-primary" />
+            <input type="submit" ng-if="!is_new" value="Save" class="btn btn-primary" />
+            <button type="button" class="btn btn-primary" ng-if="is_new" ng-click="to_schedule()">Next</button>
         </div>
     </div>
 

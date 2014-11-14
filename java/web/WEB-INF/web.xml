@@ -352,6 +352,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>MissingRefreshServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.MissingRefreshServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ExportExcel</servlet-name>
         <display-name>ExportExcel</display-name>
         <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
@@ -1304,6 +1309,11 @@
     <servlet-mapping>
         <servlet-name>AsyncList</servlet-name>
         <url-pattern>/asyncList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>MissingRefreshServlet</servlet-name>
+        <url-pattern>/scheduling/missing_refreshes.json</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
