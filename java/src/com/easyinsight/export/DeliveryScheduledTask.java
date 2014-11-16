@@ -502,10 +502,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, new HashMap<>(),
                     insightRequestMetadata.getUtcOffset(), showHeader, !"Portrait".equals(orientation));
             System.out.println("pdf size = " + bytes.length);
-            FileOutputStream fos = new FileOutputStream(new File("/Users/jamesboe/blah.pdf"));
-            fos.write(bytes);
-            fos.flush();
-            fos.close();
+
             System.out.println("saved");
             return new DeliveryResult(new AttachmentInfo(bytes, dashboard.getName() + ".pdf", "application/pdf"));
         }
