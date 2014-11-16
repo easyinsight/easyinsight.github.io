@@ -19,6 +19,28 @@ import java.util.*;
  */
 public class DataTypeGuesser implements IDataTypeGuesser {
 
+    public DataTypeGuesser() {
+
+    }
+
+    private String[] assignedDateFormatStrings;
+    private SimpleDateFormat[] assignedDateFormatters;
+    private String[] assignedDateTimeFormatStrings;
+    private SimpleDateFormat[] assignedDateTimeFormatters;
+
+    public DataTypeGuesser(String[] assignedDateFormatStrings, String[] assignedDateTimeFormatStrings) {
+        this.assignedDateFormatStrings = assignedDateFormatStrings;
+        assignedDateFormatters = new SimpleDateFormat[assignedDateFormatStrings.length];
+        for (int i = 0; i < assignedDateFormatStrings.length; i++) {
+            assignedDateFormatters[i] = new SimpleDateFormat(assignedDateFormatStrings[i]);
+        }
+        this.assignedDateTimeFormatStrings = assignedDateTimeFormatStrings;
+        assignedDateTimeFormatters = new SimpleDateFormat[assignedDateTimeFormatStrings.length];
+        for (int i = 0; i < assignedDateTimeFormatStrings.length; i++) {
+            assignedDateTimeFormatters[i] = new SimpleDateFormat(assignedDateTimeFormatStrings[i]);
+        }
+    }
+
     private static String[] dateFormatStrings = new String[]{
             "yyyy-MM-dd",
             "MM-dd-yy",
@@ -183,26 +205,50 @@ public class DataTypeGuesser implements IDataTypeGuesser {
     }
 
     private String guessDateTime(String value) {
-        for (int i = 0; i < dateTimeFormats.length; i++) {
-            SimpleDateFormat dateFormat = dateTimeFormats[i];
-            try {
-                dateFormat.parse(value);
-                return dateTimeFormatStrings[i];
-            } catch (ParseException e) {
-                // didn't work...
+        if (assignedDateTimeFormatStrings == null) {
+            for (int i = 0; i < dateTimeFormats.length; i++) {
+                SimpleDateFormat dateFormat = dateTimeFormats[i];
+                try {
+                    dateFormat.parse(value);
+                    return dateTimeFormatStrings[i];
+                } catch (ParseException e) {
+                    // didn't work...
+                }
+            }
+        } else {
+            for (int i = 0; i < assignedDateTimeFormatStrings.length; i++) {
+                SimpleDateFormat dateFormat = assignedDateTimeFormatters[i];
+                try {
+                    dateFormat.parse(value);
+                    return assignedDateTimeFormatStrings[i];
+                } catch (ParseException e) {
+                    // didn't work...
+                }
             }
         }
         return null;
     }
 
     private String guessDate(String value) {
-        for (int i = 0; i < dateFormats.length; i++) {
-            SimpleDateFormat dateFormat = dateFormats[i];
-            try {
-                dateFormat.parse(value);
-                return dateFormatStrings[i];
-            } catch (ParseException e) {
-                // didn't work...
+        if (assignedDateFormatStrings == null) {
+            for (int i = 0; i < dateFormats.length; i++) {
+                SimpleDateFormat dateFormat = dateFormats[i];
+                try {
+                    dateFormat.parse(value);
+                    return dateFormatStrings[i];
+                } catch (ParseException e) {
+                    // didn't work...
+                }
+            }
+        } else {
+            for (int i = 0; i < assignedDateFormatters.length; i++) {
+                SimpleDateFormat dateFormat = assignedDateFormatters[i];
+                try {
+                    dateFormat.parse(value);
+                    return assignedDateFormatStrings[i];
+                } catch (ParseException e) {
+                    // didn't work...
+                }
             }
         }
         return null;

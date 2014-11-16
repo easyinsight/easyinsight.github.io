@@ -68,6 +68,7 @@ public class User extends EventDispatcher
     public var decimalSeperator:String;
     public var thousandsSeperator:String;
     public var topReports:ArrayCollection;
+    public var onlyShowTopReports:Boolean;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -149,6 +150,7 @@ public class User extends EventDispatcher
         _user.dateFormat = response.dateFormat;
         _user.scenario = response.scenario;
         _user.defaultFontFamily = response.defaultFontFamily;
+        _user.onlyShowTopReports = response.onlyShowTopReports;
         if (response.currencySymbol == "EUR") {
             _user.currencySymbol = "\u20AC";
         } else if (response.currencySymbol == "GBP") {

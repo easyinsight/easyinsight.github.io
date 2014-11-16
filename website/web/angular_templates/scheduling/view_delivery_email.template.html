@@ -1,0 +1,23 @@
+<form ng-submit="save_schedule()">
+    <div class="row">
+    <div class="col-md-12">How do you want to set up this report email?</div>
+</div>
+<div class="row">
+    <div class="col-md-4">HTML Email</div>
+    <div class="col-md-2"><input type="checkbox" ng-model="schedule.html_email" /></div>
+    <div class="col-md-2">Link</div>
+</div>
+<div class="row">
+    <div class="col-md-4">Subject Line:</div>
+    <div class="col-md-8"><input type="text" ng-model="schedule.subject" class="form-control" /></div>
+</div>
+<div class="row">
+    <div class="col-md-4">Email Body:</div>
+    <div class="col-md-8"><textarea ng-model="schedule.body" class="form-control" rows="15" /></div>
+</div>
+<div class="row">
+    <div class="col-md-8 col-md-offset-4">
+        <input type="submit" class="btn btn-primary" value="Save" />
+    </div>
+</div>
+</form>

@@ -1,7 +1,6 @@
 package com.easyinsight.calculations;
 
 import cern.colt.list.DoubleArrayList;
-import cern.jet.stat.Descriptive;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Value;
@@ -24,7 +23,7 @@ public class StatCalculationCache implements ICalculationCache {
 
     private Map<Value, List<IRow>> rowMap = new HashMap<>();
     //private Map<Value, DoubleArrayList> coltMap = new HashMap<>();
-    private Map<Value, Double> resultMap = new HashMap<>();
+    private Map<Value, Object> resultMap = new HashMap<>();
 
     public StatCalculationCache(AnalysisItem instanceID, AnalysisItem statMeasure, StatFunction statFunction) {
         this.instanceID = instanceID;
@@ -34,40 +33,50 @@ public class StatCalculationCache implements ICalculationCache {
 
     @FunctionalInterface
     public interface StatFunction {
-        double calculate(DoubleArrayList data);
+        Object calculate(DoubleArrayList data);
     }
 
     public void fromDataSet(DataSet dataSet) {
-        for (IRow row : dataSet.getRows()) {
-            Value instanceIDValue = row.getValue(instanceID);
-            List<IRow> rows = rowMap.get(instanceIDValue);
-            if (rows == null) {
-                rows = new ArrayList<IRow>();
-                rowMap.put(instanceIDValue, rows);
-            }
-            rows.add(row);
-        }
-        for (Map.Entry<Value, List<IRow>> entry : rowMap.entrySet()) {
-            List<IRow> list = entry.getValue();
+        if (instanceID == null) {
             DoubleArrayList data = new DoubleArrayList();
-            for (IRow row : list) {
+            for (IRow row : dataSet.getRows()) {
                 Value value = row.getValue(statMeasure);
                 if (value.type() != Value.EMPTY) {
                     data.add(value.toDouble());
                 }
             }
-            double sumOfSquares = Descriptive.sumOfSquares(data);
-            int size = data.size();
-            double sum = Descriptive.sum(data);
-            System.out.println(entry.getKey() + " - " + sum + " - " + size + " - " + sumOfSquares);
-            double variance = Descriptive.variance(size, sum, sumOfSquares);
-            System.out.println("\t" + variance);
-            double result = statFunction.calculate(data);
-            resultMap.put(entry.getKey(), result);
+            Object result = statFunction.calculate(data);
+            resultMap.put(null, result);
+        } else {
+            for (IRow row : dataSet.getRows()) {
+                Value instanceIDValue = row.getValue(instanceID);
+                List<IRow> rows = rowMap.get(instanceIDValue);
+                if (rows == null) {
+                    rows = new ArrayList<IRow>();
+                    rowMap.put(instanceIDValue, rows);
+                }
+                rows.add(row);
+            }
+            for (Map.Entry<Value, List<IRow>> entry : rowMap.entrySet()) {
+                List<IRow> list = entry.getValue();
+                DoubleArrayList data = new DoubleArrayList();
+                for (IRow row : list) {
+                    Value value = row.getValue(statMeasure);
+                    if (value.type() != Value.EMPTY) {
+                        data.add(value.toDouble());
+                    }
+                }
+                Object result = statFunction.calculate(data);
+                resultMap.put(entry.getKey(), result);
+            }
         }
     }
 
-    public Double getResultForValue(Value value) {
+    public Object getResultForValue(Value value) {
         return resultMap.get(value);
+    }
+
+    public Object getResult() {
+        return resultMap.get(null);
     }
 }

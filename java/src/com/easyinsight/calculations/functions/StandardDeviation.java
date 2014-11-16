@@ -32,7 +32,7 @@ public class StandardDeviation extends Function {
         StatCalculationCache statCache = (StatCalculationCache) calculationMetadata.getCache(new StatCacheBuilder(instanceIDField, statMeasure,
                 d -> Descriptive.standardDeviation(Descriptive.variance(d.size(), Descriptive.sum(d), Descriptive.sumOfSquares(d)))), processName);
         Value instanceValue = getParameter(0);
-        Double result = statCache.getResultForValue(instanceValue);
+        Double result = (Double) statCache.getResultForValue(instanceValue);
         if (result == null) {
             return new EmptyValue();
         }

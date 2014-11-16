@@ -20,8 +20,18 @@
     } catch (NumberFormatException e) {
         headerActive = HtmlConstants.NONE;
     }
+    boolean designer = false;
     if (loggedIn) {
-
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement qStmt = conn.prepareStatement("SELECT ANALYST FROM USER WHERE USER_ID = ?");
+            qStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet rs = qStmt.executeQuery();
+            rs.next();
+            designer = rs.getBoolean(1);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 %>
 
@@ -39,10 +49,12 @@
         <ul class="nav navbar-nav">
             <li <%= headerActive == HtmlConstants.DATA_SOURCES_AND_REPORTS ? "class=\"active\"" : ""%>><a
                     href="/a/home">Home</a></li>
+            <% if (designer) { %>
             <li <%= headerActive == HtmlConstants.CONNECTIONS ? "class=\"active\"" : ""%>><a
                     href="/app/html/connections/">Connections</a></li>
             <li <%= headerActive == HtmlConstants.SCHEDULING ? "class=\"active\"" : ""%>><a
                     href="/app/embeddedScheduleManagement.jsp">Scheduling</a></li>
+            <% } %>
         </ul>
         <% } %>
         <ul class="nav navbar-nav navbar-right">

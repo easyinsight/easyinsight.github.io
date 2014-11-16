@@ -156,25 +156,49 @@ public class StyleConfiguration {
 
     public static function createReportPage(report:AnalysisDefinition, allFields:ArrayCollection = null):ArrayCollection {
 
-        var items:ArrayCollection = new ArrayCollection();
+        var sections:ArrayCollection = new ArrayCollection();
+
+
         if (report is GaugeDefinition) {
+            var items:ArrayCollection = new ArrayCollection();
             items.addItem(new FieldFormItem("Alert Measure 1", "alert1Measure", GaugeDefinition(report).alert1Measure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new FieldFormItem("Alert Measure 2", "alert2Measure", GaugeDefinition(report).alert2Measure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new FieldFormItem("Benchmark Measure", "benchmarkMeasure", GaugeDefinition(report).benchmarkMeasure, report, allFields, AnalysisItemTypes.MEASURE));
             items.addItem(new ComboBoxReportFormItem("Gauge Model", "gaugeModel", GaugeDefinition(report).gaugeModel, report, ["Gauge", "Bullet"]));
             items.addItem(new TextReportFormItem("Benchmark Label", "benchmarkLabel", GaugeDefinition(report).benchmarkLabel, report));
+            sections.addItem({label: "Gauge Options", items: items});
         }
         if (report is TwoAxisDefinition) {
+            var items:ArrayCollection = new ArrayCollection();
             items.addItem(new FieldFormItem("Event Date", "eventPoint", TwoAxisDefinition(report).eventPoint, report, allFields, AnalysisItemTypes.DATE));
             items.addItem(new FieldFormItem("Event Point Label", "eventPointLabel", TwoAxisDefinition(report).eventPointLabel, report, allFields, AnalysisItemTypes.DIMENSION));
+            items.addItem(new FieldFormItem("Goal", "goal", TwoAxisDefinition(report).goal, report, allFields, AnalysisItemTypes.MEASURE));
+            items.addItem(new FieldFormItem("Goal Date", "goalDate", TwoAxisDefinition(report).goalDate, report, allFields, AnalysisItemTypes.DATE));
+            items.addItem(new ComboBoxReportFormItem("Goal Date Level", "goalDateLevel", TwoAxisDefinition(report).goalDateLevel, report,
+                    [{label: "Year", date: AnalysisItemTypes.YEAR_LEVEL}, {label: "Month", date: AnalysisItemTypes.MONTH_LEVEL}], null, null, -1, "label", "date"));
+            sections.addItem({label: "Goal and Milestone Options", items: items});
+        }
+        if (report is LineChartDefinition) {
+            var items:ArrayCollection = new ArrayCollection();
+            items.addItem(new ComboBoxReportFormItem("Trend Line Interval", "trendLineTimeInterval", LineChartDefinition(report).trendLineTimeInterval, report,
+                    ["None", "Year", "Month", "Week"]));
+            items.addItem(new ColorReportFormItem("Trend Line Color", "trendLineColor", LineChartDefinition(report).trendLineColor, report));
+            items.addItem(new NumericReportFormItem("Trend Line Alpha", "trendLineAlpha", LineChartDefinition(report).trendLineAlpha, report, 0, 1));
+            items.addItem(new NumericReportFormItem("Trend Line Thickness", "trendLineThickness", LineChartDefinition(report).trendLineThickness, report, 1, 10));
+            sections.addItem({label: "Trend Line", items: items});
         }
         if (report is BarChartDefinition) {
+            var items:ArrayCollection = new ArrayCollection();
             items.addItem(new FieldFormItem("X Axis Minimum", "minimumXAxis", BarChartDefinition(report).minimumXAxis, report, allFields));
+            sections.addItem({label: "Bar Options", items: items});
         }
         if (report is StackedBarChartDefinition) {
+            var items:ArrayCollection = new ArrayCollection();
             items.addItem(new FieldFormItem("X Axis Minimum", "minimumXAxis", StackedBarChartDefinition(report).minimumXAxis, report, allFields));
+            sections.addItem({label: "Bar Options", items: items});
         }
         if (report is TopoMapDefinition) {
+            var items:ArrayCollection = new ArrayCollection();
             items.addItem(new FieldFormItem("Longitude", "longitude", TopoMapDefinition(report).longitude, report, allFields, AnalysisItemTypes.DIMENSION));
             items.addItem(new FieldFormItem("Latitude", "latitude", TopoMapDefinition(report).latitude, report, allFields, AnalysisItemTypes.DIMENSION));
             items.addItem(new FieldFormItem("Point Measure", "pointMeasure", TopoMapDefinition(report).pointMeasure, report, allFields, AnalysisItemTypes.MEASURE));
@@ -183,8 +207,9 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Region Fill End", "regionFillEnd",  TopoMapDefinition(report).regionFillEnd, report));
             items.addItem(new ColorReportFormItem("No Data Fill", "noDataFill",  TopoMapDefinition(report).noDataFill, report));
             items.addItem(new MultiColorReportFormItem("Point Colors", "pointColors", TopoMapDefinition(report).pointColors, report));
+            sections.addItem({label: "Map Options", items: items});
         }
-        return items;
+        return sections;
     }
 
     public static function getLimitItems(report:AnalysisDefinition, allFields:ArrayCollection = null):ArrayCollection {
@@ -371,12 +396,9 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Low Color", "lowColor", TreeMapDefinition(report).lowColor, report));
         }
         if (report is LineChartDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
-                    report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
-            items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,
-                    report, ["true", "false"]));
-            items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", TwoAxisDefinition(report).interpolateValues,
-                    report, ["true", "false"]));
+
+
+
             items.addItem(new NumericReportFormItem("Stroke Weight", "strokeWeight", LineChartDefinition(report).strokeWeight, report, 1, 10));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", LineChartDefinition(report).legendMaxWidth, report, 10, 400));
             items.addItem(new CheckBoxReportFormItem("Auto Scale", "autoScale", LineChartDefinition(report).autoScale, report));
@@ -386,20 +408,13 @@ public class StyleConfiguration {
             items.addItem(new CheckBoxReportFormItem("Align Labels To Units", "alignLabelsToUnits", LineChartDefinition(report).alignLabelsToUnits, report));
             items.addItem(new CheckBoxReportFormItem("Relative Scale", "relativeScale", LineChartDefinition(report).relativeScale, report));
 
-            items.addItem(new ComboBoxReportFormItem("Trend Line Interval", "trendLineTimeInterval", LineChartDefinition(report).trendLineTimeInterval, report,
-                    ["None", "Year", "Month", "Week"]));
-            items.addItem(new ColorReportFormItem("Trend Line Color", "trendLineColor", LineChartDefinition(report).trendLineColor, report));
-            items.addItem(new NumericReportFormItem("Trend Line Alpha", "trendLineAlpha", LineChartDefinition(report).trendLineAlpha, report, 0, 1));
-            items.addItem(new NumericReportFormItem("Trend Line Thickness", "trendLineThickness", LineChartDefinition(report).trendLineThickness, report, 1, 10));
+
         }
         if (report is AreaChartDefinition) {
             items.addItem(new CheckBoxReportFormItem("Auto Scale", "autoScale", AreaChartDefinition(report).autoScale, report));
-            items.addItem(new ComboBoxReportFormItem("Form", "form", TwoAxisDefinition(report).form,
-                    report, ["segment", "step", "reverseStep", "horizontal", "curve"]));
-            items.addItem(new ComboBoxReportFormItem("Base Y Axis at Zero", "baseAtZero", TwoAxisDefinition(report).baseAtZero,
-                    report, ["true", "false"]));
-            items.addItem(new ComboBoxReportFormItem("Interpolate Values", "interpolateValues", TwoAxisDefinition(report).interpolateValues,
-                    report, ["true", "false"]));
+
+
+
             items.addItem(new ComboBoxReportFormItem("Stacking Type", "stackingType", AreaChartDefinition(report).stackingType,
                     report, ["overlaid", "stacked", "100%"]));
             items.addItem(new NumericReportFormItem("Legend Max Width", "legendMaxWidth", AreaChartDefinition(report).legendMaxWidth, report, 10, 400));

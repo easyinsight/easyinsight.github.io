@@ -145,6 +145,7 @@
                     <exclude name="**/**/outro.js" />
                     <exclude name="**/**/data_sources.js" />
                     <exclude name="**/**/account.js" />
+                    <exclude name="**/**/scheduling.js" />
                 </fileset>
                 <mapper>
                       <globmapper from="*.css" to="*.min.css"/>

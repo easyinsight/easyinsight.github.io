@@ -29,7 +29,7 @@ public class TrendGroupingRenderer extends UIComponent implements IListItemRende
     public function TrendGroupingRenderer() {
         super();
         this.percentWidth = 100;
-        styleName = "boldStyle";
+        //styleName = "boldStyle";
         setStyle("color", 0x272727);
     }
 
@@ -37,7 +37,7 @@ public class TrendGroupingRenderer extends UIComponent implements IListItemRende
         super.createChildren();
         text = new Label();
         text.setStyle("fontWeight", "bold");
-        text.styleName = "boldStyle";
+        //text.styleName = "boldStyle";
         /*
          setStyle("fontGridFitType", "subpixel");
          setStyle("fontSharpess", -249);

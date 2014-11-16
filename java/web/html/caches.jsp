@@ -15,6 +15,9 @@
 <%@ page import="com.easyinsight.users.Account" %>
 <%@ page import="com.easyinsight.html.RedirectUtil" %>
 <%@ page import="com.easyinsight.jsphelpers.EIHelper" %>
+<%@ page import="com.easyinsight.admin.AdminService" %>
+<%@ page import="com.easyinsight.datafeeds.*" %>
+<%@ page import="com.easyinsight.email.SendGridEmail" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -29,6 +32,20 @@
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
+        //new AdminService().testUserPasswords();
+        new SendGridEmail().test();
+
+        /*CompositeFeedDefinition dataSource = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(20186);
+        CompositeFeedNode node = new CompositeFeedNode(20133, 0, 0, "Batchbook", 0, 0);
+        dataSource.getCompositeFeedNodes().add(node);
+        new FeedService().updateFeedDefinition(dataSource);
+
+        conn = Database.instance().getConnection();
+        try {
+            new AutoComposite(20186, conn).attach(node);
+        } finally {
+            Database.closeConnection(conn);
+        }*/
 
 
 %>

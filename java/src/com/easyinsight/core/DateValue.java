@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
@@ -177,16 +178,16 @@ public class DateValue extends Value implements Serializable {
         this.minute = minute;
     }
 
-    public int compareTo(Value value) {
+    public int compareTo(@NotNull Value value) {
         if (value.type() == Value.DATE) {
             DateValue date2 = (DateValue) value;
             return getDate().compareTo(date2.getDate());
         } else if (value.type() == Value.EMPTY) {
-            return 1;
+            return -1;
         } else if (value.type() == Value.STRING) {
-            if ("(Empty)".equals(value.toString()) || "".equals(value.toString())) {
-                return 1;
-            }
+            return -1;
+        } else if (value.type() == Value.NUMBER) {
+            return -1;
         }
         return 0;
     }

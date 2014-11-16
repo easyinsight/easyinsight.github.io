@@ -316,20 +316,40 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
         list.put("type", "tree");
         list.put("key", getUrlKey());
-        list.put("url", "/app/htmlExport");
+        list.put("properties", jsonProperties());
+        list.put("url", "/app/tree");
         return list;
+    }
+
+    public JSONObject jsonProperties() {
+
+        JSONObject p = new JSONObject();
+        try {
+            List<ReportProperty> properties = createProperties();
+            populateProperties(properties);
+            for (ReportProperty property : properties) {
+                if (property instanceof ReportNumericProperty)
+                    p.put(property.getPropertyName(), ((ReportNumericProperty) property).getValue());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return p;
     }
 
     public void renderConfig(ApplicationSkin applicationSkin) {
         if ("Primary".equals(getColorScheme())) {
             if (applicationSkin.isSummaryTextColorEnabled()) {
-                setSummaryBackgroundColor(applicationSkin.getSummaryTextColor());
+                setSummaryTextColor(applicationSkin.getSummaryTextColor());
             }
             if (applicationSkin.isSummaryBackgroundColorEnabled()) {
-                setSummaryTextColor(applicationSkin.getSummaryBackgroundColor());
+                setSummaryBackgroundColor(applicationSkin.getSummaryBackgroundColor());
             }
             if (applicationSkin.isHeaderStartEnabled()) {
                 setHeaderColor1(applicationSkin.getHeaderStart());
+            }
+            if (applicationSkin.isReportHeaderTextColorEnabled()) {
+                setHeaderTextColor(applicationSkin.getReportHeaderTextColor());
             }
             if (applicationSkin.isHeaderEndEnabled()) {
                 setHeaderColor2(applicationSkin.getHeaderEnd());

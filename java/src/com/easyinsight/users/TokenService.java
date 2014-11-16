@@ -153,7 +153,7 @@ public class TokenService {
                     request = OAuthClientRequest
                             .authorizationLocation(harvestCompositeSource.getUrl() + "/oauth2/authorize")
                             .setClientId("7wBqPVAr2om0aWwNbHjFHQ==")
-                            .setRedirectURI("https://staging.easy-insight.com/app/oauth").setResponseType("code")
+                            .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code")
                             .buildQueryMessage();
                 }
                 session.setAttribute("redirectTarget", redirectType);

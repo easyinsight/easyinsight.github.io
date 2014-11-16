@@ -35,6 +35,7 @@ public class MarmotHerderComponent implements IComponent {
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setReport(pipelineData.getReport());
             calculationMetadata.setDataSourceFields(allItems);
+            calculationMetadata.setDataSet(dataSet);
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
                 for (IRow row : dataSet.getRows()) {

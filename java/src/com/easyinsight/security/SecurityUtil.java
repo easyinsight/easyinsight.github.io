@@ -305,6 +305,7 @@ public class SecurityUtil {
                 User u = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
                 jo.put("name", u.getUserName());
                 jo.put("designer", embedKey != null || u.isAnalyst());
+                jo.put("onlyTopReports", u.isAssignedDashboardIsFixedView());
             } finally {
                 session.close();
             }
@@ -404,6 +405,57 @@ public class SecurityUtil {
     public static int getUserRoleToFeed(long feedID) {
         long userID = getUserID();
         return getRole(userID, feedID);
+    }
+
+    private static int getInsightRole(long userID, long insightID, EIConnection conn) {
+
+        try {
+            int role = Roles.NONE;
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE " +
+                    "USER_ID = ? AND ANALYSIS_ID = ?");
+            existingLinkQuery.setLong(1, userID);
+            existingLinkQuery.setLong(2, insightID);
+            ResultSet rs = existingLinkQuery.executeQuery();
+            if (rs.next()) {
+                role = Roles.OWNER;
+            } else {
+                PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM group_to_insight, group_to_user_join WHERE " +
+                        "group_to_user_join.group_id = group_to_insight.group_id AND group_to_user_join.user_id = ? AND group_to_insight.insight_id = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, insightID);
+                ResultSet groupRS = groupQueryStmt.executeQuery();
+                if (groupRS.next()) {
+                    role = groupRS.getInt(1);
+                } else {
+
+                    // this block of code is for reports which are included as part of "include reports" on groups per data source
+
+                    PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM ANALYSIS, group_to_user_join," +
+                            "community_group, upload_policy_groups WHERE " +
+                            "analysis.analysis_id = ? AND analysis.data_feed_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                            "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
+                    lastChanceStmt.setLong(1, insightID);
+                    lastChanceStmt.setBoolean(2, true);
+                    lastChanceStmt.setLong(3, userID);
+                    ResultSet lastChanceRS = lastChanceStmt.executeQuery();
+                    if (lastChanceRS.next()) {
+                        role = lastChanceRS.getInt(1);
+                    } else {
+                        role = Integer.MAX_VALUE;
+                    }
+                    lastChanceStmt.close();
+                    return role;
+                }
+                groupQueryStmt.close();
+            }
+            existingLinkQuery.close();
+            return role;
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+
+        }
     }
 
     private static int getInsightRole(long userID, long insightID) {
@@ -558,6 +610,91 @@ public class SecurityUtil {
         return role;
     }
 
+
+    public static int authorizeReport(long reportID, int neededRole, EIConnection conn) {
+        int role = authorizeInsight(reportID, conn);
+        if (role > neededRole) {
+            throw new SecurityException();
+        }
+        return role;
+    }
+
+    public static int authorizeInsight(long insightID, EIConnection conn) {
+        boolean accountVisibility = false;
+        boolean publicVisibility = false;
+
+        try {
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT ACCOUNT_VISIBLE, PUBLICLY_VISIBLE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+            authorizeStmt.setLong(1, insightID);
+            ResultSet rs = authorizeStmt.executeQuery();
+            if (rs.next()) {
+                accountVisibility = rs.getBoolean(1);
+                publicVisibility = rs.getBoolean(2);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            userPrincipal = threadLocal.get();
+            if (userPrincipal == null) {
+                if (!publicVisibility) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.PUBLIC;
+                }
+            }
+        }
+
+        if (accountVisibility && isAccountReports()) {
+
+            try {
+                PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +
+                        "user_to_analysis.user_id AND user_to_analysis.analysis_id = ?");
+                query.setLong(1, insightID);
+                ResultSet rs = query.executeQuery();
+                if (rs.next()) {
+                    long accountID = rs.getLong(1);
+                    if (accountID == userPrincipal.getAccountID()) {
+                        return Roles.OWNER;
+                        // all good
+                    } else {
+                        if (!publicVisibility) {
+                            throw new SecurityException();
+                        } else {
+                            return Roles.SUBSCRIBER;
+                        }
+                    }
+                } else {
+                    if (!publicVisibility) {
+                        throw new SecurityException();
+                    } else {
+                        return Roles.SUBSCRIBER;
+                    }
+                }
+            } catch (SQLException e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+
+            }
+        } else {
+            int role = getInsightRole(userPrincipal.getUserID(), insightID, conn);
+            if (role != Roles.OWNER && role != Roles.SUBSCRIBER && role != Roles.EDITOR) {
+                if (!publicVisibility) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.PUBLIC;
+                }
+            }
+            return role;
+        }
+    }
+
     public static int authorizeInsight(long insightID) {
         boolean accountVisibility = false;
         boolean publicVisibility = false;
@@ -643,6 +780,93 @@ public class SecurityUtil {
         }
     }
 
+    public static int authorizeDashboard(long dashboardID, EIConnection conn) {
+
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DASHBOARD.ACCOUNT_VISIBLE, DASHBOARD.PUBLIC_VISIBLE FROM DASHBOARD WHERE " +
+                    "dashboard.dashboard_id = ?");
+            queryStmt.setLong(1, dashboardID);
+
+            boolean accountVisible;
+            boolean publicVisible;
+
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                accountVisible = rs.getBoolean(1);
+                publicVisible = rs.getBoolean(2);
+            } else {
+                throw new SecurityException();
+            }
+
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                userPrincipal = threadLocal.get();
+                if (userPrincipal == null) {
+                    if (!publicVisible) {
+                        throw new SecurityException();
+                    } else {
+                        return Roles.PUBLIC;
+                    }
+                }
+            }
+
+            PreparedStatement userStmt = conn.prepareStatement("SELECT USER_TO_DASHBOARD.USER_ID, USER.ACCOUNT_ID FROM " +
+                    "user_to_dashboard, user WHERE user_to_dashboard.user_id = user.user_id AND user_to_dashboard.dashboard_id = ?");
+            userStmt.setLong(1, dashboardID);
+            ResultSet userRS = userStmt.executeQuery();
+            int role = Roles.NONE;
+            while (userRS.next()) {
+                long userID = userRS.getLong(1);
+                long accountID = userRS.getLong(2);
+                if (userID == SecurityUtil.getUserID()) {
+                    role = Math.min(Roles.OWNER, role);
+                } else if ((accountVisible && isAccountReports(conn)) && accountID == SecurityUtil.getAccountID()) {
+                    role = Math.min(Roles.OWNER, role);
+                }
+            }
+            if (role != Roles.NONE) {
+                return role;
+            }
+            PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM group_to_dashboard, group_to_user_join WHERE " +
+                    "group_to_user_join.group_id = group_to_dashboard.group_id AND group_to_user_join.user_id = ? AND group_to_dashboard.dashboard_id = ?");
+            groupQueryStmt.setLong(1, SecurityUtil.getUserID());
+            groupQueryStmt.setLong(2, dashboardID);
+            ResultSet groupRS = groupQueryStmt.executeQuery();
+            if (groupRS.next()) {
+                return groupRS.getInt(1);
+            } else {
+                PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM dashboard, group_to_user_join," +
+                        "community_group, upload_policy_groups WHERE " +
+                        "dashboard.dashboard_id = ? AND dashboard.data_source_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
+                        "community_group.data_source_include_report = ? AND community_group.community_group_id = group_to_user_join.group_id AND group_to_user_join.user_id = ?");
+                lastChanceStmt.setLong(1, dashboardID);
+                lastChanceStmt.setBoolean(2, true);
+                lastChanceStmt.setLong(3, SecurityUtil.getUserID());
+                ResultSet lastChanceRS = lastChanceStmt.executeQuery();
+                if (lastChanceRS.next()) {
+                    role = lastChanceRS.getInt(1);
+                } else {
+                    role = Roles.NONE;
+                }
+                lastChanceStmt.close();
+            }
+
+            if (role == Roles.NONE) {
+                if (!publicVisible) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.SUBSCRIBER;
+                }
+            }
+            return role;
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new SecurityException();
+        } finally {
+
+        }
+    }
+
     public static int authorizeDashboard(long dashboardID) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -715,7 +939,11 @@ public class SecurityUtil {
             }
 
             if (role == Roles.NONE) {
-                throw new SecurityException();
+                if (!publicVisible) {
+                    throw new SecurityException();
+                } else {
+                    return Roles.SUBSCRIBER;
+                }
             }
             return role;
         } catch (SQLException e) {

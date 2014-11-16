@@ -8,6 +8,10 @@
 package com.easyinsight.listing {
 import flash.events.MouseEvent;
 
+import mx.collections.ArrayCollection;
+
+import mx.controls.Menu;
+
 import mx.core.mx_internal;
 import mx.managers.DragManager;
 
@@ -26,6 +30,10 @@ public class ArghButton extends PopUpMenuButton {
         if (!DragManager.isDragging) {
             super.clickHandler(event);
         }
+    }
+
+    public function invalidateMenuDataProvider(data:ArrayCollection):void {
+        Menu(getPopUp()).dataProvider = data;
     }
 }
 }

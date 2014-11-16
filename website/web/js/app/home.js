@@ -1,4 +1,4 @@
-var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
+var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
 
 easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
 
@@ -69,6 +69,10 @@ easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q",
     $rootScope.mobile = function() {
         return navigator && navigator.userAgent && navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
     }
+
+        $rootScope.getOffset = function() {
+            return new Date().getTimezoneOffset();
+        }
 
 }]);
 

@@ -340,6 +340,12 @@ public class FunctionFactory {
             return new StandardDeviation();
         } else if (s.equals("split")) {
             return new Split();
+        } else if (s.equals("sequencenumber")) {
+            return new SequenceRecord();
+        } else if (s.equals("autocolor")) {
+            return new AutoColor();
+        }else if (s.equals("autobackgroundcolor")) {
+            return new AutoBackgroundColor();
         } else {
             return null;
         }

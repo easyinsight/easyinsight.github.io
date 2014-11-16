@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" creationComplete="onCreation()"
-        verticalGap="0">
+        verticalGap="0" horizontalAlign="center" paddingTop="20">
     <mx:Script><![CDATA[
         import com.easyinsight.dashboard.DashboardDescriptor;
         import com.easyinsight.framework.PerspectiveInfo;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -28,6 +29,7 @@
 
         private function onCreation():void {
             topList.addEventListener(RolloverLabelEvent.ROLLOVER_LABEL, onRolloverEvent);
+            topItems = User.getInstance().topReports;
         }
 
         private function onUpdate():void {
@@ -49,18 +51,20 @@
             dispatchEvent(event);
         }
         ]]></mx:Script>
+    <mx:Text text="Click on one of the dashboards or reports below to get started!" fontSize="20"/>
+    <mx:Spacer height="20"/>
     <mx:Canvas width="700">
-        <mx:Box backgroundColor="#440000" borderThickness="1" borderStyle="solid" horizontalAlign="center" width="100%">
-            <mx:Label text="Your Top Reports and Dashboards" fontSize="16" styleName="boldStyle" fontWeight="bold" color="#FFFFFF"/>
+        <mx:Box backgroundColor="#0074A4" borderThickness="1" borderStyle="solid" horizontalAlign="center" width="100%">
+            <mx:Label text="Your Top Reports and Dashboards" fontSize="20" styleName="fallThroughFonts" fontWeight="bold" color="#FFFFFF"/>
         </mx:Box>
         <!--<mx:Box width="100%" horizontalAlign="right">
             <mx:LinkButton label="Edit..." fontSize="12" click="editTop()"/>
         </mx:Box>-->
     </mx:Canvas>
-    <analysis:ListViewGrid id="topList" dataProvider="{topItems}" variableRowHeight="true" headerHeight="0" updateComplete="onUpdate()" selectable="false" width="700">
+    <analysis:ListViewGrid id="topList" dataProvider="{topItems}" variableRowHeight="true" headerHeight="0" updateComplete="onUpdate()" selectable="false" width="700" fontSize="16">
         <analysis:columns>
-            <mx:AdvancedDataGridColumn itemRenderer="com.easyinsight.listing.DescriptorRolloverLabel" width="200" dataField="name" wordWrap="true"/>
-            <mx:AdvancedDataGridColumn itemRenderer="com.easyinsight.listing.DescriptorRolloverLabel" width="480" dataField="description" wordWrap="true"/>
+            <mx:AdvancedDataGridColumn itemRenderer="com.easyinsight.listing.DescriptorRolloverLabel" width="300" dataField="name" wordWrap="true"/>
+            <mx:AdvancedDataGridColumn itemRenderer="com.easyinsight.listing.DescriptorRolloverLabel" width="380" dataField="description" wordWrap="true"/>
         </analysis:columns>
     </analysis:ListViewGrid>
 </mx:VBox>

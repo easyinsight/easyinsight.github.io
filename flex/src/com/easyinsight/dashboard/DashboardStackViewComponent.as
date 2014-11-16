@@ -455,15 +455,21 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
 
     public var stackFilterMap:Object = new Object();
 
+    protected function includeFilterContainer():Boolean {
+        return false;
+    }
+
     private function createTransformContainer():TransformContainer {
-        if (dashboardStack.filters.length > 0) {
+        if (dashboardStack.filters.length > 0 || includeFilterContainer()) {
             transformContainer = new TransformContainer();
+
+            customize(transformContainer);
             transformContainer.retrievalState = dashboardEditorMetadata.retrievalState;
             transformContainer.setStyle("borderStyle", dashboardStack.filterBorderStyle);
             transformContainer.setStyle("borderColor", dashboardStack.filterBorderColor);
             transformContainer.setStyle("backgroundColor", dashboardStack.filterBackgroundColor);
             transformContainer.setStyle("backgroundAlpha", dashboardStack.filterBackgroundAlpha);
-            transformContainer.filterEditable = false;
+
             var myFilterColl:ArrayCollection = new ArrayCollection();
             for each (var filterDefinition:FilterDefinition in dashboardStack.filters) {
                 var existingFilter:FilterDefinition = stackFilterMap[filterDefinition.qualifiedName()];
@@ -496,14 +502,20 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             if (dashboardEditorMetadata.dashboard != null) {
                 transformContainer.dashboardID = dashboardEditorMetadata.dashboard.id;
             }
-            transformContainer.reportView = true;
+
             transformContainer.feedID = dashboardEditorMetadata.dataSourceID;
             transformContainer.role = dashboardEditorMetadata.role;
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+
         } else {
             filterMap[elementID] = new ArrayCollection();
         }
         return transformContainer;
+    }
+
+    protected function customize(transformContainer:TransformContainer):void {
+        transformContainer.reportView = true;
+        transformContainer.filterEditable = false;
     }
 
     /*private function buildEffects():void {
@@ -541,7 +553,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
         }
     }*/
 
-    private var transformContainer:TransformContainer;
+    protected var transformContainer:TransformContainer;
 
     private var filterMap:Object = new Object();
 

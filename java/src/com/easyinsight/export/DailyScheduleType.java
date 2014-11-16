@@ -1,5 +1,6 @@
 package com.easyinsight.export;
 
+import net.minidev.json.JSONObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Calendar;
@@ -29,8 +30,13 @@ public class DailyScheduleType extends ScheduleType {
         return null;
     }
 
+    public DailyScheduleType() {}
+    public DailyScheduleType(JSONObject object) {
+        super(object);
+    }
+
     @Override
     public String when() {
-        return "Daily on " + getHour() + ":" + getMinute() + " GMT";
+        return "Daily on " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
     }
 }

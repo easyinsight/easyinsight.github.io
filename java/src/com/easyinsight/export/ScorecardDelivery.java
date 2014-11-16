@@ -194,6 +194,10 @@ public class ScorecardDelivery extends ScheduledDelivery {
         }
     }
 
+    public String describe() {
+        return "";
+    }
+
     public void taskNow(EIConnection connection) throws Exception {
         DeliveryScheduledTask deliveryScheduledTask = new DeliveryScheduledTask();
         deliveryScheduledTask.setActivityID(getScheduledActivityID());

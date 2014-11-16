@@ -125,7 +125,7 @@ public class WSVerticalListDefinition extends WSAnalysisDefinition {
     @Override
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
         JSONObject list = super.toJSON(htmlReportMetadata, parentDefinitions);
-        list.put("type", "trend_definition");
+        list.put("type", "vertical_list");
         list.put("key", getUrlKey());
         list.put("url", "/app/htmlExport");
         return list;

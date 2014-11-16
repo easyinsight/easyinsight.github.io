@@ -1,9 +1,23 @@
-<div class="container corePageWell">
+<div class="container" ng-show="user.only_show_top_reports">
     <div class="row">
+        <div class="col-md-12 clickBar">
+            <h2 class="clickBarH2">
+                Click on a report or dashboard to get started!
+            </h2>
+        </div>
+    </div>
+</div>
+<div class="container corePageWell">
+    <div class="row" ng-show="!user.only_show_top_reports">
         <div class="col-md-3">
             <div ng-include="'/angular_templates/data_sources/recent_actions.template.html'"></div>
         </div>
         <div class="col-md-9">
+            <div app-view-segment="1"></div>
+        </div>
+    </div>
+    <div class="row" ng-show="user.only_show_top_reports">
+        <div class="col-md-12">
             <div app-view-segment="1"></div>
         </div>
     </div>

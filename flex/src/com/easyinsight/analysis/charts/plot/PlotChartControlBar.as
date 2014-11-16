@@ -25,6 +25,7 @@ public class PlotChartControlBar extends ReportControlBar implements IReportCont
     private var seriesGrouping:ListDropAreaGrouping;
     private var xmeasureGrouping:ListDropAreaGrouping;
     private var ymeasureGrouping:ListDropAreaGrouping;
+    private var zmeasureGrouping:ListDropAreaGrouping;
 
     private var xAxisDefinition:PlotChartDefinition;
 
@@ -45,6 +46,10 @@ public class PlotChartControlBar extends ReportControlBar implements IReportCont
         ymeasureGrouping.maxElements = 1;
         ymeasureGrouping.dropAreaType = MeasureDropArea;
         ymeasureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        zmeasureGrouping = new ListDropAreaGrouping();
+        zmeasureGrouping.maxElements = 1;
+        zmeasureGrouping.dropAreaType = MeasureDropArea;
+        zmeasureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
     }
 
@@ -70,6 +75,11 @@ public class PlotChartControlBar extends ReportControlBar implements IReportCont
         xMeasureLabel.setStyle("fontSize", 14);
         addChild(xMeasureLabel);
         addDropAreaGrouping(xmeasureGrouping);
+        var zMeasureLabel:Label = new Label();
+        zMeasureLabel.text = "Plot Size Measure:";
+        zMeasureLabel.setStyle("fontSize", 14);
+        addChild(zMeasureLabel);
+        addDropAreaGrouping(zmeasureGrouping);
         if (xAxisDefinition.dimension != null) {
             dimensionGrouping.addAnalysisItem(xAxisDefinition.dimension);
         }
@@ -81,6 +91,9 @@ public class PlotChartControlBar extends ReportControlBar implements IReportCont
         }
         if (xAxisDefinition.yaxisMeasure != null) {
             ymeasureGrouping.addAnalysisItem(xAxisDefinition.yaxisMeasure);
+        }
+        if (xAxisDefinition.zaxisMeasure != null) {
+            zmeasureGrouping.addAnalysisItem(xAxisDefinition.zaxisMeasure);
         }
         var limitLabel:LinkButton = new LinkButton();
         limitLabel.setStyle("textDecoration", "underline");
@@ -132,6 +145,7 @@ public class PlotChartControlBar extends ReportControlBar implements IReportCont
         xAxisDefinition.dimension = dimensionGrouping.getListColumns()[0];
         xAxisDefinition.xaxisMeasure = xmeasureGrouping.getListColumns()[0];
         xAxisDefinition.yaxisMeasure = ymeasureGrouping.getListColumns()[0];
+        xAxisDefinition.zaxisMeasure = zmeasureGrouping.getListColumns()[0];
         xAxisDefinition.iconGrouping = seriesGrouping.getListColumns()[0];
         return xAxisDefinition;
     }

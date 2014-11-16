@@ -110,9 +110,9 @@ public class HappyFoxTicketSource extends HappyFoxBaseSource {
             do {
                 Map response;
                 if (page == 1) {
-                    response = runRestRequestForMap("tickets/?size=50&show_updates=0", client, happyFoxCompositeSource);
+                    response = runRestRequestForMap("tickets/?size=50", client, happyFoxCompositeSource);
                 } else {
-                    response = runRestRequestForMap("tickets/?size=50&page=" + page+"&show_updates=0", client, happyFoxCompositeSource);
+                    response = runRestRequestForMap("tickets/?size=50&page=" + page, client, happyFoxCompositeSource);
                 }
 
                 Map pageInfo = (Map) response.get("page_info");

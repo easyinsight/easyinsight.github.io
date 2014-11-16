@@ -62,6 +62,7 @@ public class UserServiceResponse
     public var defaultFontFamily:String;
     public var topReports:ArrayCollection;
     public var newsSubject:String;
+    public var onlyShowTopReports:Boolean;
 
     public function UserServiceResponse()
         {

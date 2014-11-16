@@ -249,7 +249,8 @@ public class ExportService {
 
     }
 
-    public void runNow(ScheduledDelivery scheduledDelivery) {
+    public void runNow(long id) {
+        ScheduledDelivery scheduledDelivery = (ScheduledDelivery) getActivityByID(id);
         EIConnection conn = Database.instance().getConnection();
         try {
             scheduledDelivery.taskNow(conn);
@@ -266,7 +267,21 @@ public class ExportService {
         scheduledActivity.setup(conn);
     }
 
-    public List<DataSourceDescriptor> getRefreshableDataSources(ScheduledActivity scheduledActivity) {
+    public List<DataSourceDescriptor> getRefreshableDataSources() {
+
+        EIConnection conn = Database.instance().getConnection();
+
+        try {
+            return getRefreshableDataSources(conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public List<DataSourceDescriptor> getRefreshableDataSources(EIConnection conn) throws SQLException {
         List<DataSourceDescriptor> validSources = new ArrayList<DataSourceDescriptor>();
         List<DataSourceDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
         for (DataSourceDescriptor fd : dataSources) {
@@ -274,44 +289,29 @@ public class ExportService {
                 validSources.add(fd);
             }
         }
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, scheduled_account_activity.scheduled_account_activity_id FROM " +
-                    "DATA_FEED, SCHEDULED_DATA_SOURCE_REFRESH, scheduled_account_activity WHERE " +
-                    "DATA_FEED.data_feed_id = SCHEDULED_DATA_SOURCE_REFRESH.data_source_id AND " +
-                    "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id AND " +
-                    "scheduled_account_activity.account_id = ?");
-            queryStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long dataSourceID = rs.getLong(1);
-                long id = rs.getLong(2);
-                if (scheduledActivity != null && id == scheduledActivity.getScheduledActivityID()) continue;
-                Iterator<DataSourceDescriptor> descIter = validSources.iterator();
-                while (descIter.hasNext()) {
-                    DataSourceDescriptor fd = descIter.next();
-                    if (fd.getId() == dataSourceID) {
-                        descIter.remove();
-                    }
+
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, scheduled_account_activity.scheduled_account_activity_id FROM " +
+                "DATA_FEED, SCHEDULED_DATA_SOURCE_REFRESH, scheduled_account_activity WHERE " +
+                "DATA_FEED.data_feed_id = SCHEDULED_DATA_SOURCE_REFRESH.data_source_id AND " +
+                "scheduled_data_source_refresh.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id AND " +
+                "scheduled_account_activity.account_id = ?");
+        queryStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long dataSourceID = rs.getLong(1);
+            long id = rs.getLong(2);
+            Iterator<DataSourceDescriptor> descIter = validSources.iterator();
+            while (descIter.hasNext()) {
+                DataSourceDescriptor fd = descIter.next();
+                if (fd.getId() == dataSourceID) {
+                    descIter.remove();
                 }
             }
-            queryStmt.close();
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
         }
+        queryStmt.close();
+
         return validSources;
     }
-
-    /*private boolean isRefreshable(int feedType) {
-        return (feedType == FeedType.BASECAMP_MASTER.getType() || feedType == FeedType.HIGHRISE_COMPOSITE.getType() ||
-            feedType == FeedType.PIVOTAL_TRACKER.getType() || feedType == FeedType.WHOLE_FOODS.getType() ||
-            feedType == FeedType.CONSTANT_CONTACT.getType() || feedType == FeedType.ZENDESK_COMPOSITE.getType() ||
-            feedType == FeedType.HARVEST_COMPOSITE.getType() || feedType == FeedType.QUICKBASE_COMPOSITE.getType() ||
-            feedType == FeedType.LINKEDIN.getType() || feedType == FeedType.BATCHBOOK_COMPOSITE.getType());
-    }*/
 
     public ReportDelivery getReportDelivery(long reportID, int utcOffset) {
         ReportDelivery reportDelivery = null;
@@ -737,7 +737,17 @@ public class ExportService {
                         if (crosstabValue.isSummaryValue()) {
                             sb.append("<td style=\"" + summaryCell + "\">");
                         } else {
-                            sb.append("<td style=\"" + dataCell + "\">");
+                            String style = dataCell;
+                            if (crosstabValue.getValue().getValueExtension() != null) {
+                                TextValueExtension tve = (TextValueExtension) crosstabValue.getValue().getValueExtension();
+                                if (tve.getBackgroundColor() != 0) {
+                                    style += ";background-color:" + ExportService.createHexString(tve.getBackgroundColor());
+                                }
+                                if (tve.getColor() != 0) {
+                                    style += ";color:" + ExportService.createHexString(tve.getColor());
+                                }
+                            }
+                            sb.append("<td style=\"" + style + "\">");
                         }
                         if (crosstabValue.getDtMap() != null) {
                             DrillThrough drillThrough = (DrillThrough) measure.getLinks().get(0);
@@ -750,9 +760,6 @@ public class ExportService {
                             sb.append("\" data-source=\"");
                             sb.append(measure.getAnalysisItemID());
                             sb.append("\"");
-
-
-
 
 
                             if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getColumns().get(0).qualifiedName())) {
@@ -972,7 +979,6 @@ public class ExportService {
 
     public Element listReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
                                         ExportMetadata exportMetadata, ListDataResults listDataResults) throws DocumentException {
-
 
 
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.LIST) {
@@ -1614,13 +1620,13 @@ public class ExportService {
                 if (intValue == doubleValue) {
                     valueString = String.valueOf(intValue);
                 } else {
-                    if(!skipSanitize && !pdf)
+                    if (!skipSanitize && !pdf)
                         valueString = value.toHTMLString();
                     else
                         valueString = value.toString();
                 }
             } else {
-                if(!skipSanitize && !pdf)
+                if (!skipSanitize && !pdf)
                     valueString = value.toHTMLString();
                 else
                     valueString = value.toString();
@@ -1898,7 +1904,6 @@ public class ExportService {
         percentMeasure.setPrecision(1);
 
 
-
         PdfPTable table = new PdfPTable(vListInfo.columns.size() + 1);
         table.setSpacingBefore(20);
         table.getDefaultCell().setPadding(3);
@@ -1936,47 +1941,47 @@ public class ExportService {
                 if (ytdReportFieldExtension.isLineAbove()) {
                     lineAbove = true;
                 }
-                com.itextpdf.text.Font boldFont;
+            }
+            com.itextpdf.text.Font boldFont;
+            if (alwaysShow) {
+                boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
+            } else {
+                boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
+            }
+
+            PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
+            rowHeaderCell.setBorderWidth(0f);
+            if (lineAbove) {
+                rowHeaderCell.setBorderWidthTop(1f);
+            }
+            if (alwaysShow) {
+                rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
+            } else {
+                rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
+            }
+            table.addCell(rowHeaderCell);
+
+            for (SortInfo sortInfo : vListInfo.columns) {
+                String columnName = sortInfo.label;
+
                 if (alwaysShow) {
-                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD);
-                } else {
-                    boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize);
-                }
-
-                PdfPCell rowHeaderCell = new PdfPCell(new Phrase(baseMeasure.toUnqualifiedDisplay(), boldFont));
-                rowHeaderCell.setBorderWidth(0f);
-                if (lineAbove) {
-                    rowHeaderCell.setBorderWidthTop(1f);
-                }
-                if (alwaysShow) {
-                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_LEFT);
-                } else {
-                    rowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_RIGHT);
-                }
-                table.addCell(rowHeaderCell);
-
-                for (SortInfo sortInfo : vListInfo.columns) {
-                    String columnName = sortInfo.label;
-
-                    if (alwaysShow) {
-                        PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
-                        emptyCell.setBorderWidth(0f);
-                        if (lineAbove) {
-                            emptyCell.setBorderWidthTop(1f);
-                        }
-                        table.addCell(emptyCell);
-                    } else {
-                        Value measureValue = (Value) map.get(columnName);
-                        String text;
-                        if (measureValue != null && measureValue.type() == Value.NUMBER) {
-                            text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, false);
-                        } else {
-                            text = "";
-                        }
-                        PdfPCell dataCell = new PdfPCell(new Phrase(text, regFont));
-                        dataCell.setBorder(0);
-                        table.addCell(dataCell);
+                    PdfPCell emptyCell = new PdfPCell(new Phrase("", regFont));
+                    emptyCell.setBorderWidth(0f);
+                    if (lineAbove) {
+                        emptyCell.setBorderWidthTop(1f);
                     }
+                    table.addCell(emptyCell);
+                } else {
+                    Value measureValue = (Value) map.get(columnName);
+                    String text;
+                    if (measureValue != null && measureValue.type() == Value.NUMBER) {
+                        text = ExportService.createValue(exportMetadata.dateFormat, baseMeasure, measureValue, exportMetadata.cal, exportMetadata.currencySymbol, exportMetadata.locale, true);
+                    } else {
+                        text = "";
+                    }
+                    PdfPCell dataCell = new PdfPCell(new Phrase(text, regFont));
+                    dataCell.setBorder(0);
+                    table.addCell(dataCell);
                 }
             }
         }
@@ -2311,7 +2316,7 @@ public class ExportService {
             sb.append("<div style=\"" + headerLabelStyle + "\">").append("<h0>").append(listDefinition.getName()).append("</h0></div>");
         }
         sb.append("</style>");
-        sb.append("<table class=\"table table-bordered table-condensed reportTable"+kpiReport.getUrlKey()+"\" style=\"font-size:").append(listDefinition.getFontSize()).append("px\">");
+        sb.append("<table class=\"table table-bordered table-condensed reportTable" + kpiReport.getUrlKey() + "\" style=\"font-size:").append(listDefinition.getFontSize()).append("px\">");
         sb.append("<thead>");
         sb.append("<tr>");
         int i;
@@ -2415,7 +2420,6 @@ public class ExportService {
         percentMeasure.setFormattingType(FormattingConfiguration.PERCENTAGE);
         percentMeasure.setMinPrecision(1);
         percentMeasure.setPrecision(1);
-
 
 
         PdfPTable table = new PdfPTable(ytdStuff.getHeaders().size() + 1);
@@ -3962,11 +3966,11 @@ public class ExportService {
         return style;
     }
 
-    public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException{
+    public static ExportMetadata createExportMetadata(EIConnection conn) throws SQLException {
         return createExportMetadata(SecurityUtil.getAccountID(false), conn, new InsightRequestMetadata());
     }
 
-    public static ExportMetadata createExportMetadata(EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException{
+    public static ExportMetadata createExportMetadata(EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         return createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
     }
 
@@ -4290,7 +4294,7 @@ public class ExportService {
         for (com.easyinsight.analysis.ListRow listRow : listDataResults.getRows()) {
             sb.append("<tr style=\"").append(trStyle).append("\">");
             if (lineNumbers) {
-                sb.append("<td style=\""+tdStyle+"center;width:60px\">").append(String.valueOf(rowCount++)).append("</td>");
+                sb.append("<td style=\"" + tdStyle + "center;width:60px\">").append(String.valueOf(rowCount++)).append("</td>");
             }
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < listDataResults.getHeaders().length; i++) {
@@ -4634,7 +4638,7 @@ public class ExportService {
                 }
 
                 if (maxRowHeight > 0) {
-                    sb.append("<div style=\"max-height:"+maxRowHeight+"px; overflow:hidden\">");
+                    sb.append("<div style=\"max-height:" + maxRowHeight + "px; overflow:hidden\">");
                 }
                 Link defaultLink = linkMap.get(analysisItem);
                 boolean showLink = false;
@@ -4793,7 +4797,7 @@ public class ExportService {
             if (drillthroughValue.type() == Value.NUMBER) {
                 drillthroughValueString = String.valueOf(drillthroughValue.toDouble().intValue());
             } else {
-                drillthroughValueString= ExportService.createValue(md, item, value, true);
+                drillthroughValueString = ExportService.createValue(md, item, value, true);
             }
             encodedValue = StringEscapeUtils.escapeHtml(URLEncoder.encode(drillthroughValueString, "UTF-8"));
             return encodedValue;

@@ -1,48 +1,40 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF"
            borderThickness="1" cornerRadius="8" dropShadowEnabled="true"
-           borderStyle="solid" creationComplete="onCreation()">
+           borderStyle="solid" creationComplete="onCreation()" verticalScrollPolicy="off" horizontalScrollPolicy="off">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+
+        import mx.core.Application;
+
+        import mx.effects.Move;
+
+        import mx.effects.Parallel;
+        import mx.effects.Resize;
 
         import mx.managers.PopUpManager;
 
         public var filterMetadata:FilterMetadata;
 
         private function addLastValue():void {
-            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new GenericFilter(_feedID, _item, GenericFilter.LAST_VALUE, null, filterMetadata));
         }
 
         private function addFirstValue():void {
-            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.FIRST_VALUE, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new GenericFilter(_feedID, _item, GenericFilter.FIRST_VALUE, null, filterMetadata));
         }
 
         private function addNullValue():void {
-            var filter:GenericFilter = new GenericFilter(_feedID, _item, GenericFilter.NULL_VALUE, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new GenericFilter(_feedID, _item, GenericFilter.NULL_VALUE, null, filterMetadata));
         }
 
         private function addFlatValue():void {
-            var filter:FlatDateFilter = new FlatDateFilter(_feedID, _item, 0, 0, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new FlatDateFilter(_feedID, _item, 0, 0, null, filterMetadata));
         }
 
         private function addFlatMonthValue():void {
-            var filter:FlatMonthDateFilter = new FlatMonthDateFilter(_feedID, _item, 0, 0, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new FlatMonthDateFilter(_feedID, _item, 0, 0, null, filterMetadata));
         }
 
         private function addMultiFlatValue():void {
@@ -56,9 +48,6 @@
             PopUpManager.addPopUp(w, this, true);
             stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             PopUpManager.removePopUp(this);
-            /*var filter:MultiFlatDateFilter = new MultiFlatDateFilter(_feedID, _item, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(filter));
-            PopUpManager.removePopUp(this);*/
         }
 
         private function passThrough(event:FilterCreationEvent):void {
@@ -90,17 +79,48 @@
         }
 
         private function addAbsolute():void {
-            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item, 0, 0, null, filterMetadata, _report);
-            dispatchEvent(new FilterCreationEvent(sliderDateFilter));
-            stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-            PopUpManager.removePopUp(this);
+            useEffect(new SliderDateFilter(_feedID, _item, 0, 0, null, filterMetadata, _report));
         }
 
+        private var a:FilterAnimation;
+
+        public var transformContainer:TransformContainer;
+
         private function addRolling():void {
-            var rollingFilter:RollingRangeFilter = new RollingRangeFilter(_feedID, _item, null, filterMetadata);
-            dispatchEvent(new FilterCreationEvent(rollingFilter));
+            useEffect(new RollingRangeFilter(_feedID, _item, null, filterMetadata));
+        }
+
+        private function useEffect(filter:IFilter) {
             stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            var a:FilterAnimation = new FilterAnimation();
+            a.x = this.x;
+            a.y = this.y;
             PopUpManager.removePopUp(this);
+            PopUpManager.addPopUp(a, DisplayObject(Application.application));
+            var parallel:Parallel = new Parallel();
+            var move:Move = new Move(a);
+            move.xFrom = this.x;
+            move.yFrom = this.y;
+            if (transformContainer.filterTile.getChildren().length > 0) {
+                var obj:DisplayObject = transformContainer.filterTile.getChildAt(transformContainer.filterTile.getChildren().length - 1) as DisplayObject;
+                var p:Point = new Point(obj.x + obj.width, obj.y);
+                var g:Point = transformContainer.filterTile.localToGlobal(p);
+                move.xTo = g.x + 20;
+                move.yTo = g.y;
+            } else {
+                var p2:Point = new Point(transformContainer.x, transformContainer.y);
+                var g2:Point = transformContainer.localToGlobal(p2);
+                move.xTo = g2.x + 100;
+                move.yTo = g2.y;
+            }
+            move.duration = 500;
+            parallel.addChild(move);
+            parallel.addEventListener("effectEnd", function(event:Event):void {
+                dispatchEvent(new FilterCreationEvent(filter));
+                PopUpManager.removePopUp(a);
+
+            });
+            parallel.play();
         }
 
         private function onMouseDown(event:MouseEvent):void {
@@ -120,7 +140,7 @@
         private var stackIndex:int;
         ]]></mx:Script>
     <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" horizontalAlign="center" verticalGap="10"
-            styleName="fallThroughFonts">
+            styleName="fallThroughFonts" verticalScrollPolicy="off" horizontalScrollPolicy="off">
         <mx:Label text="What type of filter do you want to create?" fontSize="16" color="#333333"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:VBox borderStyle="solid" click="addRolling()" mouseChildren="false"

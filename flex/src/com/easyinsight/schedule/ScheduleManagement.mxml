@@ -66,7 +66,7 @@
             index = 0;
             var utcOffset:int = new Date().getTimezoneOffset();
             exportService.getScheduledActivities.send(utcOffset);
-            exportService.getRefreshableDataSources.send(null);
+            exportService.getRefreshableDataSources.send();
             invalidateSize();
         }
 
@@ -89,7 +89,7 @@
 
         private function newDataSource():void {
             ProgressAlert.alert(this, "Retrieving information...", null, exportService.getRefreshableDataSources);
-            exportService.getRefreshableDataSources.send(null);
+            exportService.getRefreshableDataSources.send();
         }
 
         private function newReportDelivery():void {
@@ -122,7 +122,7 @@
             var utcOffset:int = new Date().getTimezoneOffset();
             ProgressAlert.alert(this, "Refreshing...", null, exportService.getScheduledActivities, exportService.getRefreshableDataSources);
             exportService.getScheduledActivities.send(utcOffset);
-            exportService.getRefreshableDataSources.send(null);
+            exportService.getRefreshableDataSources.send();
         }
 
         protected override function measure():void {
@@ -151,7 +151,7 @@
             index = 0;
             var utcOffset:int = new Date().getTimezoneOffset();
             exportService.getScheduledActivities.send(utcOffset);
-            exportService.getRefreshableDataSources.send(null);
+            exportService.getRefreshableDataSources.send();
         }
 
         private function deleteSelected():void {

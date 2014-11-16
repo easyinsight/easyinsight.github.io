@@ -1,5 +1,10 @@
 package com.easyinsight.export;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DateFormat;
 import java.util.Date;
 
 /**
@@ -53,5 +58,28 @@ public class ReportDeliveryAudit {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+        DateFormat dateFormat = ExportService.getDateFormatForAccount(AnalysisDateDimension.MINUTE_LEVEL, null, md.dateFormat);
+        JSONObject jo = new JSONObject();
+        jo.put("email", getEmail());
+        jo.put("message", getMessage());
+        String code = "";
+        switch(getCode()) {
+            case 0:
+                code = "Pending";
+                break;
+            case 1:
+                code = "Successful";
+                break;
+            case 2:
+                code = "Failed";
+                break;
+            default:
+        }
+        jo.put("code", code);
+        jo.put("date", dateFormat.format(getDate()));
+        return jo;
     }
 }

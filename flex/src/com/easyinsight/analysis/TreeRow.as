@@ -12,7 +12,7 @@ import mx.collections.ArrayCollection;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.TreeRow")]
-public class TreeRow {
+public dynamic class TreeRow {
 
     public var values:Object;
     public var children:ArrayCollection;

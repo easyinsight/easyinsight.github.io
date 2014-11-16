@@ -63,11 +63,6 @@
     </filter>
 
     <filter>
-        <filter-name>FixedDashboard</filter-name>
-        <filter-class>com.easyinsight.html.FixedDashboardFilter</filter-class>
-    </filter>
-
-    <filter>
         <filter-name>ValidAccountFilter</filter-name>
         <filter-class>com.easyinsight.html.ValidAccountFilter</filter-class>
     </filter>
@@ -181,11 +176,6 @@
     </filter-mapping>
 
     <filter-mapping>
-        <filter-name>FixedDashboard</filter-name>
-        <url-pattern>/html/*</url-pattern>
-    </filter-mapping>
-
-    <filter-mapping>
         <filter-name>UrlRewriteFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
@@ -267,6 +257,10 @@
     <servlet>
         <servlet-name>ReportInfo</servlet-name>
         <servlet-class>com.easyinsight.html.ReportInfoServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DashboardInfo</servlet-name>
+        <servlet-class>com.easyinsight.html.DashboardInfoServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -358,6 +352,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>MissingRefreshServlet</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.MissingRefreshServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>ExportExcel</servlet-name>
         <display-name>ExportExcel</display-name>
         <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
@@ -373,6 +372,10 @@
         <servlet-name>ListDataSourcesByTag</servlet-name>
         <display-name>ListDataSourcesByTag</display-name>
         <servlet-class>com.easyinsight.api.v3.ListDataSourcesServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ScheduledDeliveryHistory</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.ScheduledDeliveryHistoryServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -411,6 +414,12 @@
         <servlet-name>BenchmarkHistory</servlet-name>
         <display-name>BenchmarkHistory</display-name>
         <servlet-class>com.easyinsight.api.v3.BenchmarkServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Done</servlet-name>
+        <display-name>Done</display-name>
+        <servlet-class>com.easyinsight.html.DoneServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -748,9 +757,21 @@
     </servlet>
 
     <servlet>
+        <servlet-name>LineChartMeasureD3</servlet-name>
+        <display-name>LineChartMeasureD3</display-name>
+        <servlet-class>com.easyinsight.html.LineD3MeasureChartServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>StackedChart</servlet-name>
         <display-name>StackedChart</display-name>
         <servlet-class>com.easyinsight.html.StackedColumnChartServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>TreeServlet</servlet-name>
+        <display-name>TreeServlet</display-name>
+        <servlet-class>com.easyinsight.html.TreeServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -837,6 +858,11 @@
         <servlet-class>com.easyinsight.api.v3.CompositeSourceServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>ScheduledDeliveryRun</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.RunDeliveryServlet</servlet-class>
+    </servlet>
+
     <!--<servlet>
         <servlet-name>DefineTable</servlet-name>
         <display-name>DefineTable</display-name>
@@ -865,6 +891,11 @@
             <param-value>/WEB-INF/flex</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ScheduledActivities</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.ScheduledActivitiesServlet</servlet-class>
     </servlet>
 
     <servlet>
@@ -908,6 +939,11 @@
         <servlet-name>ReportsByTagServlet</servlet-name>
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
     </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ScheduledActivities</servlet-name>
+        <url-pattern>/scheduled_tasks.json</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>DeleteUserServlet</servlet-name>
@@ -981,6 +1017,11 @@
         <servlet-name>ReportInfo</servlet-name>
         <url-pattern>/html/reportData</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DashboardInfo</servlet-name>
+        <url-pattern>/html/dashboardData</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>CreateConfiguration</servlet-name>
         <url-pattern>/html/createConfiguration</url-pattern>
@@ -1186,6 +1227,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>Done</servlet-name>
+        <url-pattern>/done</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>ReportMarkdown</servlet-name>
         <url-pattern>/reportMarkdown</url-pattern>
     </servlet-mapping>
@@ -1246,6 +1292,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>TreeServlet</servlet-name>
+        <url-pattern>/tree</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>DiagramChart</servlet-name>
         <url-pattern>/diagramChart</url-pattern>
     </servlet-mapping>
@@ -1261,6 +1312,20 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>MissingRefreshServlet</servlet-name>
+        <url-pattern>/scheduling/missing_refreshes.json</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ScheduledDeliveryHistory</servlet-name>
+        <url-pattern>/scheduling/history</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ScheduledDeliveryRun</servlet-name>
+        <url-pattern>/scheduling/run</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>AsyncMultiSummary</servlet-name>
         <url-pattern>/asyncMultiSummary</url-pattern>
     </servlet-mapping>
@@ -1273,6 +1338,11 @@
     <servlet-mapping>
         <servlet-name>LineChartD3</servlet-name>
         <url-pattern>/lineChartD3</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>LineChartMeasureD3</servlet-name>
+        <url-pattern>/lineChartMeasureD3</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

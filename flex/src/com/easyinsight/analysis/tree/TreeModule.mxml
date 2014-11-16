@@ -95,11 +95,33 @@
             return empty;
         }
 
+        private function recursePopulate(tRow:TreeRow, treeDefinition:TreeDefinition):void {
+            for each (var ai:AnalysisItem in treeDefinition.items) {
+                if (tRow.values == null) {
+                    tRow[ai.qualifiedName()] = "";
+                } else {
+                    var o:Object = tRow.values[ai.qualifiedName()];
+                    if (o != null) {
+                        tRow[ai.qualifiedName()] = o.toSortValue().getValue();
+                    } else {
+                        tRow[ai.qualifiedName()] = "";
+                    }
+                }
+                tRow["groupingSort"] = tRow.sortColumn.getValue();
+            }
+            for each (var child:TreeRow in tRow.children) {
+                recursePopulate(child, treeDefinition);
+            }
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
             if (dataSet.length > 0) {
                 stackIndex = 0;
 
+                for each (var tRow:TreeRow in dataSet) {
+                    recursePopulate(tRow, treeDefinition);
+                }
 
                 activeLookupTables = new ArrayCollection();
                 pairMaps = new ArrayCollection();
@@ -143,21 +165,21 @@
                 }
                 var hierarchyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
                 var hierarchyFactory:ClassFactory = new ClassFactory(CustomTreeRenderer);
-                hierarchyFactory.properties = { analysisItem:hierarchy, report:treeDef };
+                hierarchyFactory.properties = { analysisItem: hierarchy, report: treeDef };
                 coreGrid.groupItemRenderer = hierarchyFactory;
                 hierarchyColumn.headerText = hierarchy.unqualifiedDisplay;
-                hierarchyColumn.sortCompareFunction = sortCompare;
+                hierarchyColumn.dataField = "groupingSort";
+
                 var rendererProviders:Array = [];
                 hierarchyColumn.labelFunction = function (item:Object, column:AdvancedDataGridColumn):String {
                     var treeRow:TreeRow = item as TreeRow;
                     if (treeRow.groupingField != null) {
                         var formatter:Formatter = treeRow.groupingField.getFormatter();
-                        return formatter.format(treeRow.groupingColumn);
+                        return formatter.format(treeRow.groupingColumn.getValue());
                     } else {
                         return "";
                     }
                 };
-                hierarchyColumn.dataField = "groupingColumn";
                 var existingHierarchyIndex:int = findHierarchy(hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName());
                 if (hierarchy.reportFieldExtension != null && hierarchy.reportFieldExtension is TextReportFieldExtension &&
                         TextReportFieldExtension(hierarchy.reportFieldExtension).fixedWidth > 0) {
@@ -173,7 +195,7 @@
                     hierarchyColumn.sortable = TextReportFieldExtension(hierarchy.reportFieldExtension).sortable;
                 }
                 var hierarchyHeaderFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
-                hierarchyHeaderFactory.properties = { eiColor:treeDefinition.headerTextColor };
+                hierarchyHeaderFactory.properties = { eiColor: treeDefinition.headerTextColor };
                 hierarchyColumn.headerRenderer = hierarchyHeaderFactory;
                 columns[0] = hierarchyColumn;
                 for (var k:int = 0; k < analysisItems.length; k++) {
@@ -229,11 +251,11 @@
                     } else if (explicitWidth) {
                         columnHeaderObject.width = myHeader.width;
                     }
-                    columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
+                    //columnHeaderObject.sortCompareFunction = SortFunctionFactory.createSortFunction(myHeader, columnHeaderObject.sortDescending);
                     columnHeaderObject.headerText = myHeader.display;
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     var headerFactory:ClassFactory = new ClassFactory(ListViewHeaderRenderer);
-                    headerFactory.properties = { eiColor:treeDefinition.headerTextColor };
+                    headerFactory.properties = { eiColor: treeDefinition.headerTextColor };
                     columnHeaderObject.headerRenderer = headerFactory;
 
                     var factory:ClassFactory = new ClassFactory(getCellRendererClass(myHeader, myLookupTable));
@@ -248,9 +270,9 @@
                         }
                     }
                     if (myLookupTable == null) {
-                        factory.properties = { analysisItem:myHeader, report:treeDef };
+                        factory.properties = { analysisItem: myHeader, report: treeDef };
                     } else {
-                        factory.properties = { analysisItem:myHeader, lookupTable:myLookupTable, pairMap:pairMap };
+                        factory.properties = { analysisItem: myHeader, lookupTable: myLookupTable, pairMap: pairMap };
                         var provider:AdvancedDataGridRendererProvider = new AdvancedDataGridRendererProvider();
                         provider.depth = hierarchy.hierarchyLevels.length;
                         provider.column = columnHeaderObject;

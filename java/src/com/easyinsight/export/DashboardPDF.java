@@ -24,8 +24,7 @@ import com.xerox.amazonws.sqs2.SQSUtils;
 import org.hibernate.Session;
 
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,6 +81,7 @@ public class DashboardPDF {
         try {
             for (FilterDefinition filter : report.getFilterDefinitions()) {
                 filter = filter.clone();
+                filter.setShowOnReportView(false);
                 filter.beforeSave(session);
                 session.save(filter);
                 session.flush();
@@ -94,17 +94,19 @@ public class DashboardPDF {
         }
         saveFilterStmt.close();
 
-        String url = "/app/embed/seleniumReport.jsp?seleniumUserName={0}&seleniumPassword={1}&seleniumID={2}";
-        String formatted = MessageFormat.format(url, u, p, String.valueOf(id));
-        System.out.println("https://www.easy-insight.com" + formatted);
+        String url = "/app/embed/seleniumReport.jsp?seleniumUserName={0}&seleniumPassword={1}&seleniumID={2}&width={3}&height={4}";
+        String formatted = MessageFormat.format(url, u, p, String.valueOf(id), String.valueOf(width), String.valueOf(height));
+        System.out.println("https://localhost:4443" + formatted);
 
-        PDFImageData imageData = launchAndWaitForRequest(formatted, conn, id);
+        PDFImageData imageData = launchAndWaitForRequest(formatted, conn, id, width, height, "https://localhost:4443" + formatted, u, p);
 
         if (outputFormat == PDF) {
 
             Image image = Image.getInstance(imageData.getBytes());
             //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
+            System.out.println("width = " + imageData.getWidth());
             float percent = 770f / imageData.getWidth() * 100;
+            System.out.println("percent = " + percent + ", bytes size = " + imageData.getBytes().length);
             //float percent = 50f;
             image.setBorder(Image.NO_BORDER);
             image.scalePercent(percent);
@@ -117,13 +119,72 @@ public class DashboardPDF {
         }
     }
 
-    //public static final String OUTBOUND_QUEUE = "EISelenium";
+    private static void fire(int width, int height, String url, String seleniumID, String seleniumUserName, String seleniumPassword) {
+        try {
+            Runtime rt = Runtime.getRuntime();
+            String jsPath = "/Users/jamesboe";
+            String host = "localhost:4443";
+            String string = "var page = require('webpage').create();\n" +
+                    "var page1 = require('webpage').create();\n" +
+                    "page.onError = function (msg, trace) {\n" +
+                    "    console.log(msg);\n" +
+                    "    trace.forEach(function(item) {\n" +
+                    "        console.log('  ', item.file, ':', item.line);\n" +
+                    "    })\n" +
+                    "}\n" +
+                    "page.viewportSize = {width: "+width+", height: "+height+"};\n" +
+                    "page.onResourceRequested = function (request) {\n" +
+                    "    if (request.url == \"https://"+host+"/app/done\") {\n" +
+                    "        console.log(\"Report ran, rendering image...\");\n" +
+                    "        window.setTimeout(function() {\n" +
+                    "            console.log(\"good\");\n" +
+                    "            var base64 = page.renderBase64('PNG');\n" +
+                    "            page1.open('https://"+host+"/app/uploadExportImage?id="+seleniumID+"&userName="+seleniumUserName+"&password="+seleniumPassword+"&height=" + height + "&width=" + width+"', 'post', base64, function(status) {\n" +
+                    "                console.log('Status on uploading image: ' + status);\n" +
+                    "                phantom.exit();\n" +
+                    "            });\n" +
+                    "\n" +
+                    "        }, 5000);\n" +
+                    "\n" +
+                    "    }\n" +
+                    "};\n" +
+                    "page.open('"+url+"', function() {\n" +
+                    "window.setTimeout(function() {\n" +
+                    "    console.log(\"Timed out waiting for report to render.\");\n" +
+                    "  phantom.exit();\n" +
+                    "},60000);\n" +
+                    "});\n";
+            String fileName = System.currentTimeMillis() + ".js";
+            File file = new File(fileName);
+            FileWriter fw = new FileWriter(file);
+            fw.write(string.toCharArray());
+            fw.flush();
+            fw.close();
+            Process pr = rt.exec("phantomjs --ignore-ssl-errors=true --ssl-protocol=tlsv1 " + file.getAbsolutePath(), null, new File(jsPath));
+            BufferedReader input = new BufferedReader(new InputStreamReader(pr.getInputStream()));
 
-    private static PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id) {
+            String line;
+
+            while ((line = input.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            int exitVal = pr.waitFor();
+            file.delete();
+            System.out.println("PhantomJS exited with error code "+exitVal);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
+    private static PDFImageData launchAndWaitForRequest(String url, EIConnection conn, long id, final int width, final int height,
+                                                        final String reportURL, final String seleniumUserName, final String seleniumPassword) {
         // send an SQS request
         try {
             MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getBaseSeleniumQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             msgQueue.sendMessage(url);
+
+            //new Thread(() -> fire(width, height, reportURL, String.valueOf(id), seleniumUserName, seleniumPassword)).start();
 
             PreparedStatement stmt = conn.prepareStatement("SELECT image_state FROM image_selenium_trigger WHERE image_selenium_trigger_id = ?");
 
@@ -136,14 +197,12 @@ public class DashboardPDF {
                 if (state == FAILURE) {
                     throw new RuntimeException();
                 } else if (state == SUCCESS) {
-                    PreparedStatement findDetailStmt = conn.prepareStatement("SELECT image_response, image_preferred_width, image_preferred_height FROM image_selenium_trigger WHERE " +
+                    PreparedStatement findDetailStmt = conn.prepareStatement("SELECT image_response FROM image_selenium_trigger WHERE " +
                             "image_selenium_trigger_id = ?");
                     findDetailStmt.setLong(1, id);
                     ResultSet detailRS = findDetailStmt.executeQuery();
                     detailRS.next();
                     byte[] bytes = detailRS.getBytes(1);
-                    int width = detailRS.getInt(2);
-                    int height = detailRS.getInt(3);
                     PDFImageData imageData = new PDFImageData();
                     imageData.setBytes(bytes);
                     imageData.setWidth(width);
@@ -172,7 +231,6 @@ public class DashboardPDF {
             List<FilterDefinition> replaceFilters = new ArrayList<>();
             for (FilterDefinition filter : dashboard.getFilters()) {
                 long filterID = filter.getFilterID();
-                System.out.println("dashboard filter ID = " + filterID);
                 FilterDefinition overrideFilter = selected.getFilterMap().get(1 + "|" + filterID);
                 if (overrideFilter != null) {
                     replaceFilters.add(overrideFilter);
@@ -235,7 +293,7 @@ public class DashboardPDF {
                 LogClass.error(e);
             }*/
 
-            Element object = populate(element, reportMap, conn, images, dashboard, timezoneOffset);
+            Element object = populate(element, reportMap, conn, images, dashboard, timezoneOffset, 1);
 
             document.add(object);
             document.close();
@@ -254,17 +312,17 @@ public class DashboardPDF {
     }
 
     private Element populate(DashboardElement element, Map<String, WSAnalysisDefinition> reportMap, EIConnection conn, Map<String, PDFImageData> images,
-                             Dashboard dashboard, int timezoneOffset) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
+                             Dashboard dashboard, int timezoneOffset, int gridWidth) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
         if (element instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) element;
             PdfPTable table = new PdfPTable(dashboardGrid.getColumns());
-            table.setSplitLate(false);
+            table.setSplitLate(true);
             table.setSplitRows(true);
             table.setHeaderRows(0);
             for (int j = 0; j < dashboardGrid.getRows(); j++) {
                 for (int i = 0; i < dashboardGrid.getColumns(); i++) {
                     DashboardElement child = dashboardGrid.findItem(j, i).getDashboardElement();
-                    Element e1 = populate(child, reportMap, conn, images, dashboard, timezoneOffset);
+                    Element e1 = populate(child, reportMap, conn, images, dashboard, timezoneOffset, Math.max(gridWidth, dashboardGrid.getColumns()));
                     if (e1 instanceof PdfPTable) {
                         PdfPTable t1 = (PdfPTable) e1;
                         PdfPCell cell = new PdfPCell(t1);
@@ -273,6 +331,12 @@ public class DashboardPDF {
                         table.addCell(cell);
                     } else if (e1 instanceof Image) {
                         PdfPCell cell = new PdfPCell((Image) e1, true);
+                        cell.setBorder(PdfPCell.NO_BORDER);
+                        cell.setPaddingBottom(20);
+                        table.addCell(cell);
+                    } else if (e1 instanceof Phrase) {
+                        Phrase phrase = (Phrase) e1;
+                        PdfPCell cell = new PdfPCell(phrase);
                         cell.setBorder(PdfPCell.NO_BORDER);
                         cell.setPaddingBottom(20);
                         table.addCell(cell);
@@ -288,23 +352,46 @@ public class DashboardPDF {
             PdfPTable stupidIText = null;
             if (dashboardReport.isShowLabel()) {
                 table = new PdfPTable(1);
-                table.setSplitLate(false);
                 table.setSplitRows(true);
+                table.setSplitLate(false);
                 table.setHeaderRows(0);
 
-                com.itextpdf.text.Font font = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, Font.BOLD, fromColor(dashboard.getReportHeaderTextColor()));
+                PdfPTable headerTable = new PdfPTable(3);
+
+
+
+                PdfPCell leftSpacingCell = new PdfPCell(new Phrase(" "));
+                leftSpacingCell.setBackgroundColor(fromColor(0xFFFFFF));
+                leftSpacingCell.setBorder(PdfPCell.NO_BORDER);
+                headerTable.addCell(leftSpacingCell);
+
+                com.itextpdf.text.Font font = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, Font.NORMAL, fromColor(dashboard.getReportHeaderTextColor()));
                 PdfPCell cell = new PdfPCell(new Phrase(dashboardReport.getReport().getName(), font));
                 cell.setPaddingBottom(5);
                 cell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
                 cell.setBackgroundColor(fromColor(dashboard.getReportHeaderBackgroundColor()));
                 cell.setBorder(PdfPCell.NO_BORDER);
                 cell.setFixedHeight(20f);
-                table.addCell(cell);
+                cell.setPaddingLeft(10);
+                cell.setPaddingRight(10);
+                headerTable.addCell(cell);
+
+                PdfPCell rightSpacingCell = new PdfPCell(new Phrase(" "));
+                rightSpacingCell.setBackgroundColor(fromColor(0xFFFFFF));
+                rightSpacingCell.setBorder(PdfPCell.NO_BORDER);
+                headerTable.addCell(rightSpacingCell);
+
+                PdfPCell phHeaderCell = new PdfPCell(headerTable);
+                phHeaderCell.setBackgroundColor(fromColor(dashboard.getReportHeaderBackgroundColor()));
+                phHeaderCell.setBorder(PdfPCell.NO_BORDER);
+                table.addCell(phHeaderCell);
+
+                headerTable.setWidths(new float[] {10f, 80f, 10f});
 
                 stupidIText = new PdfPTable(1);
                 stupidIText.setHeaderRows(0);
-                stupidIText.setSplitLate(false);
                 stupidIText.setSplitRows(true);
+                stupidIText.setSplitLate(true);
                 PdfPCell phCell = new PdfPCell(stupidIText);
                 phCell.setPaddingTop(5);
                 phCell.setBorder(PdfPCell.NO_BORDER);
@@ -334,21 +421,38 @@ public class DashboardPDF {
                 result = trend.kpiReportToPDFTable(conn, insightRequestMetadata, exportMetadata);
             } else if (report instanceof WSVerticalListDefinition) {
                 result = ExportService.verticalListToPDF(report, conn, insightRequestMetadata);
-            } else if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition || report instanceof WSMap) {
+            } else if (report instanceof WSChartDefinition || report instanceof WSGaugeDefinition || report instanceof WSMap || report instanceof WSDiagramDefinition) {
                 // do we have the chart data as is?
                 // if not, we'll need to retrieve via selenium or phantomjs
                 PDFImageData imageData = images.get(dashboardReport.getUrlKey());
 
                 if (imageData == null) {
-                    PdfPTable tempResult = new PdfPTable(1);
-                    PdfPCell cell = new PdfPCell();
-                    cell.setBorder(PdfPCell.NO_BORDER);
-                    Phrase phrase = new Phrase("");
-                    cell.addElement(phrase);
-                    tempResult.addCell(cell);
-                    result = tempResult;
+                    if (dashboardReport.getPreferredWidth() > 0 && dashboardReport.getPreferredHeight() > 0) {
+                        result = generatePDF(report, dashboardReport.getPreferredWidth(), dashboardReport.getPreferredHeight(), conn);
+                    } else if (dashboardReport.getPreferredWidth() > 0) {
+                        double ratio = 1263. / dashboardReport.getPreferredWidth();
+                        result = generatePDF(report, dashboardReport.getPreferredWidth(), 487, conn);
+                    }  else if (dashboardReport.getPreferredHeight() > 0) {
+                        int width;
+                        if (gridWidth > 1) {
+                            width = 1263 / gridWidth;
+                        } else {
+                            width = 1263;
+                        }
+                        double ratio = 487. / dashboardReport.getPreferredHeight();
+                        result = generatePDF(report, width, dashboardReport.getPreferredHeight(), conn);
+                    } else if (gridWidth > 1) {
+                        int width = 1263 / gridWidth;
+                        result = generatePDF(report, width, 487, conn);
+                    } else {
+                        result = generatePDF(report, 1263, 487, conn);
+                    }
+                    System.out.println("got back " + result);
                 } else if (imageData.getBytes() == null) {
+                    System.out.println("width = " + imageData.getWidth() + ", height = " + imageData.getHeight());
                     result = generatePDF(report, imageData.getWidth(), imageData.getHeight(), conn);
+                    //result = generatePDF(report, 400, 250, conn);
+                    System.out.println("got back " + result);
                 } else {
                     Image image = Image.getInstance(imageData.getBytes());
                     //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
@@ -361,7 +465,7 @@ public class DashboardPDF {
             } else {
                 result = new ExportService().listReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
             }
-            if (table == null) {
+            if (table == null || stupidIText == null) {
                 return result;
             } else {
                 if (result instanceof PdfPTable) {
@@ -378,9 +482,23 @@ public class DashboardPDF {
                 } else {
                     throw new RuntimeException("not yet implemented");
                 }
+                System.out.println("returned table");
                 return table;
             }
+        } else if (element instanceof DashboardText) {
+            DashboardText dashboardText = (DashboardText) element;
+            Phrase phrase = new Phrase(dashboardText.getText());
+            return phrase;
+        } else if (element instanceof DashboardImage) {
+            DashboardImage dashboardImage = (DashboardImage) element;
+            byte[] imageBytes = new PreferencesService().getImage(dashboardImage.getImageDescriptor().getId(), conn);
+            Image image = Image.getInstance(imageBytes);
+            //float percent = (landscapeOrientation ? 770f : 523f) / page.getWidth() * 100;
 
+            image.setBorder(Image.NO_BORDER);
+
+            image.setAlignment(Element.ALIGN_CENTER);
+            return image;
         } else {
             throw new RuntimeException();
         }
@@ -477,8 +595,6 @@ public class DashboardPDF {
             }
             report.setFilterDefinitions(replaceFilters);
             reportMap.put(dashboardReport.getUrlKey(), report);
-        } else {
-            throw new RuntimeException();
         }
     }
 }

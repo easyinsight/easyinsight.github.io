@@ -28,10 +28,10 @@ public class ReportInfoServlet extends HttpServlet {
             String reportIDString = req.getParameter("reportID");
             InsightResponse insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
             Long reportID = insightResponse.getInsightDescriptor().getId();
-            WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(reportID);
+            ReportInfo report = new AnalysisService().getReportInfo(reportID);
             HTMLReportMetadata reportMetadata = new HTMLReportMetadata();
             try {
-                JSONObject jo = report.toJSON(reportMetadata, new ArrayList<FilterDefinition>());
+                JSONObject jo = report.toJSON(reportMetadata);
                 resp.setContentType("application/json");
                 resp.getOutputStream().write(jo.toString().getBytes());
                 resp.getOutputStream().flush();

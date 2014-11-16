@@ -1,11 +1,13 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.WindowManagement;
+import com.easyinsight.filtering.TransformContainer;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.core.Container;
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
@@ -22,6 +24,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         var box:DashboardBox = event.dashboardBox;
         var index:int = viewChildren.getItemIndex(box);
         var pos:int = index;
+        (getButtonsBox().getChildAt(pos))["dashboardBox"] = box;
         if (box.element == null) {
             (getButtonsBox().getChildAt(pos))["label"] = "Stack Item " + index;
         } else if (box.element is DashboardReport) {
@@ -31,6 +34,34 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         } else {
             (getButtonsBox().getChildAt(pos))["label"] = "Stack Item " + index;
         }  
+    }
+
+    override protected function includeFilterContainer():Boolean {
+        return true;
+    }
+
+    override protected function customize(transformContainer:TransformContainer):void {
+        /*
+         <mx:Button toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter" styleName="flatCreateButton"/>
+         */
+        var button:Button = new Button();
+        button.addEventListener(MouseEvent.CLICK, onNewFilter);
+        button.label = "New Filter";
+        button.styleName = "flatCreateButton";
+        transformContainer.addChildAt(button, 0);
+        transformContainer.analysisItems = dashboardEditorMetadata.allFields;
+        transformContainer.reportView = false;
+        transformContainer.filterEditable = true;
+    }
+
+    private function onNewFilter(event:MouseEvent):void {
+        transformContainer.addNewFilter();
+    }
+
+    override protected function onChange(targetIndex:int):void {
+        DashboardEditButton(getButtonsBox().getChildAt(viewStack.selectedIndex)).selected = false;
+        DashboardEditButton(getButtonsBox().getChildAt(targetIndex)).selected = true;
+        super.onChange(targetIndex);
     }
 
     override protected function createComp(element:DashboardElement, i:int):UIComponent {
@@ -82,6 +113,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     }
 
     public function save():void {
+        dashboardStack.filters = transformContainer.getFilterDefinitions();
         var comps:ArrayCollection = stackComponents();
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.count; i++) {
@@ -108,6 +140,13 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
             dashboardStack.gridItems.addItem(eTemp);
         }
         super.createChildren();
+        for (var i:int = 0; i < getButtonsBox().getChildren().length; i++) {
+            var btn:DashboardEditButton = getButtonsBox().getChildAt(i) as DashboardEditButton;
+            if (i == 0) {
+                btn.selected = true;
+            }
+            btn.dashboardBox = stackComponents().getItemAt(i) as DashboardBox;
+        }
     }
     
     private function deletePage(event:DashboardStackEvent):void {
