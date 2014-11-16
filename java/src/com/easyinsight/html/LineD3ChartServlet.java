@@ -32,7 +32,7 @@ import java.util.*;
 public class LineD3ChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
-        WSLineChartDefinition twoAxisDefinition = (WSLineChartDefinition) report;
+        WSTwoAxisDefinition twoAxisDefinition = (WSTwoAxisDefinition) report;
         AnalysisItem eventPoint = twoAxisDefinition.getEventPoint();
         AnalysisItem eventPointLabel = twoAxisDefinition.getEventPointLabel();
         twoAxisDefinition.setEventPoint(null);
@@ -277,11 +277,14 @@ public class LineD3ChartServlet extends HtmlServlet {
                     point.put("y", trendValue.toDouble());
                     trendPoints.put(point);
                 }
-                JSONObject axisObject = new JSONObject();
-                axisObject.put("values", trendPoints);
-                axisObject.put("key", "Trend Line");
-                axisObject.put("color", ExportService.createHexString(twoAxisDefinition.getTrendLineColor()));
-                blahArray.put(axisObject);
+                if (twoAxisDefinition instanceof WSLineChartDefinition){
+                    WSLineChartDefinition line = (WSLineChartDefinition) twoAxisDefinition;
+                    JSONObject axisObject = new JSONObject();
+                    axisObject.put("values", trendPoints);
+                    axisObject.put("key", "Trend Line");
+                    axisObject.put("color", ExportService.createHexString(line.getTrendLineColor()));
+                    blahArray.put(axisObject);
+                }
             }
 
         }
