@@ -34,10 +34,6 @@ public class UploadExportImageServlet extends HttpServlet {
         imageString = imageString.substring("data:image/png;base64,".length());*/
         byte[] contentData =  IOUtils.toByteArray(req.getInputStream());
         byte[] decodedData = Base64.decodeBase64(contentData);
-        FileOutputStream fos = new FileOutputStream(new File("/Users/jamesboe/argh.png"));
-        fos.write(decodedData);
-        fos.flush();
-        fos.close();
 
         Long id = Long.parseLong(wrappedRequest.getParameter("id"));
         int height = (int) Double.parseDouble(wrappedRequest.getParameter("height"));
