@@ -715,7 +715,7 @@ public class UserServiceResponse {
             int reportType = reportRS.getInt(4);
             String urlKey = reportRS.getString(5);
             try {
-                SecurityUtil.authorizeReport(reportID, Roles.VIEWER, conn);
+                //SecurityUtil.authorizeReport(reportID, Roles.VIEWER, conn);
                 InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
                 id.setDescription(reportRS.getString(6));
                 reports.add(id);
@@ -736,7 +736,7 @@ public class UserServiceResponse {
             long dataSourceID = dashboardRS.getLong(3);
             String urlKey = dashboardRS.getString(4);
             try {
-                SecurityUtil.authorizeDashboard(reportID, conn);
+                //SecurityUtil.authorizeDashboard(reportID, conn);
                 DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
                 dd.setDescription(dashboardRS.getString(5));
                 reports.add(dd);

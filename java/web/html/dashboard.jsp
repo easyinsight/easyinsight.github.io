@@ -14,6 +14,7 @@
 <%@ page import="com.easyinsight.database.EIConnection" %>
 <%@ page import="com.easyinsight.admin.AdminService" %>
 <%@ page import="com.easyinsight.audit.ActionDashboardLog" %>
+<%@ page import="org.json.JSONException" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <%
@@ -89,7 +90,11 @@
             Database.closeConnection(c);
         }
 
-        boolean onlyTopReports = userObject.getBoolean("onlyTopReports");
+        boolean onlyTopReports = false;
+        try {
+            onlyTopReports = userObject.getBoolean("onlyTopReports");
+        } catch (Exception e) {
+        }
 
 %>
 <head>
