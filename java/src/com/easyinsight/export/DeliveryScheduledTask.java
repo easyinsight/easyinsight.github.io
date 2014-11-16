@@ -462,11 +462,6 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     } else {
                         byte[] png = DashboardPDF.generatePNG(analysisDefinition, 1000, 800, conn);
                         String reportName = analysisDefinition.getName();
-                        FileOutputStream fos = new FileOutputStream(new File("/Users/jamesboe/exp.png"));
-                        fos.write(png);
-                        fos.flush();
-                        fos.close();
-                        System.out.println("saved");
                         if (deliveryInfo.getFormat() == ReportDelivery.INLINE_IMAGE) {
                             String cid = "c" + System.currentTimeMillis();
                             return new DeliveryResult("<img src=\"cid:"+cid+"\"/>", new AttachmentInfo(png, reportName + ".png", "image/png", cid));
@@ -505,7 +500,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 positions = new DashboardStackPositions();
             }
             byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, new HashMap<>(),
-                    insightRequestMetadata.getUtcOffset(), true, !"Portrait".equals(orientation));
+                    insightRequestMetadata.getUtcOffset(), showHeader, !"Portrait".equals(orientation));
             System.out.println("pdf size = " + bytes.length);
             FileOutputStream fos = new FileOutputStream(new File("/Users/jamesboe/blah.pdf"));
             fos.write(bytes);
