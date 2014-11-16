@@ -290,9 +290,20 @@ public class SendGridEmail {
 
         MimeMessage message = new MimeMessage(mailSession);
 
+        boolean cidNeeded = false;
+        for (AttachmentInfo attachmentInfo : attachments) {
+            if (attachmentInfo.getInlineCID() != null) {
+                cidNeeded = true;
+                break;
+            }
+        }
 
-
-        Multipart multipart = new MimeMultipart();
+        Multipart multipart;
+        if (cidNeeded) {
+            multipart = new MimeMultipart("related");
+        } else {
+            multipart = new MimeMultipart();
+        }
 
         message.setSubject(subject, "UTF-8");
 
@@ -307,6 +318,16 @@ public class SendGridEmail {
         }
 
         for (AttachmentInfo attachmentInfo : attachments) {
+            if (attachmentInfo.getInlineCID() != null) {
+                MimeBodyPart imagePart = new MimeBodyPart();
+
+                DataSource iSource = new ByteArrayDataSource(attachmentInfo.getBody(), "image/png");
+                imagePart.setDataHandler(new DataHandler(iSource));
+                imagePart.setFileName(attachmentInfo.getName() + ".png");
+                imagePart.setContentID("<"+attachmentInfo.getInlineCID()+">");
+                imagePart.setDisposition(MimeBodyPart.INLINE);
+                multipart.addBodyPart(imagePart);
+            }
             BodyPart bodyPart = new MimeBodyPart();
             DataSource source = new ByteArrayDataSource(attachmentInfo.getBody(), attachmentInfo.getEncoding());
             bodyPart.setDataHandler(new DataHandler(source));
@@ -419,76 +440,5 @@ public class SendGridEmail {
            String password = SMTP_AUTH_PWD;
            return new PasswordAuthentication(username, password);
         }
-    }
-
-    public static void test() throws Exception {
-        // Then add to your message:
-        //messageContent.addBodyPart(bodyPart);
-        Properties props = new Properties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.host", SMTP_HOST_NAME);
-        props.put("mail.smtp.auth", "true");
-        props.put("vendor", "SendGrid");
-
-        Authenticator auth = new SMTPAuthenticator();
-        Session mailSession = Session.getInstance(props, auth);
-        // uncomment for debugging infos to stdout
-        // mailSession.setDebug(true);
-        Transport transport = mailSession.getTransport();
-
-        MimeMessage message = new MimeMessage(mailSession);
-
-
-
-        Multipart multipart = new MimeMultipart("related");
-
-        message.setSubject("image test", "UTF-8");
-
-        BodyPart part2 = new MimeBodyPart();
-        part2.setContent("<html><body><img src=\"cid:myimagecid\"/></body></html>", "text/html;charset=UTF-8");
-        multipart.addBodyPart(part2);
-
-        File f = new File("/opt/tomcat/webapps/app/assets/BatchbookDealBarChart.png");
-        FileInputStream fis = new FileInputStream(f);
-        byte[] b = new byte[(int) f.length()];
-        fis.read(b);
-        fis.close();
-        BodyPart bodyPart = new MimeBodyPart();
-        DataSource source = new ByteArrayDataSource(b, "image/png");
-        bodyPart.setDataHandler(new DataHandler(source));
-        bodyPart.setFileName("BatchbookDealBarChart.png");
-        bodyPart.setDisposition(Part.ATTACHMENT);
-
-        multipart.addBodyPart(bodyPart);
-
-        MimeBodyPart imagePart = new MimeBodyPart();
-
-        //imagePart.attachFile(f);
-        byte[] encoded = Base64.getMimeEncoder().encode(b);
-        imagePart.setContent(encoded, "image/png");
-        //imagePart.attachFile(f);
-        imagePart.setFileName("BatchbookDealBarChart.png");
-
-        imagePart.setContentID("<myimagecid>");
-
-        imagePart.setDisposition(MimeBodyPart.INLINE);
-
-        multipart.addBodyPart(imagePart);
-
-        message.setContent(multipart);
-
-
-            String fromAddress = "jboe@easy-insight.com";
-
-
-            String fromName = "Easy Insight Reports";
-
-        message.setFrom(new InternetAddress(fromAddress, fromName));
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress("jboe@easy-insight.com"));
-
-        transport.connect();
-        transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
-        transport.close();
-
     }
 }
