@@ -29,12 +29,16 @@
         [Bindable]
         private var editable:Boolean;
 
+        [Bindable]
+        private var showControl:Boolean = true;
+
         public function set dashboard(value:Dashboard):void {
             _dashboard = value;
             if (_dashboard != null) {
                 description = _dashboard.description;
                 dashboardName = _dashboard.name;
                 editable = _dashboard.role == 1 && User.getInstance().analyst;
+                showControl = !User.getInstance().onlyShowTopReports;
             }
         }
 
@@ -105,9 +109,6 @@
             dispatchEvent(new Event("viewFactoryChanged"));
         }
 
-        [Bindable]
-        private var viewInHTMLable:Boolean = true;
-
         private function viewInHTML():void {
             if (_dashboard != null) {
                 navigateToURL(new URLRequest("/app/html/dashboard/" + _dashboard.urlKey), "_blank");
@@ -149,17 +150,17 @@
                toolTip="Close the report view" label="Close Dashboard"/>
     <report:RefreshButton styleName="solidMenuButton" labelPlacement="right"
                id="refreshButton" toolTip="Refresh this dashboard" label="Refresh" viewFactory="{viewFactory}"
-            dataSource="{dataSource}"/>
+            dataSource="{dataSource}" visible="{showControl}"/>
     <mx:LinkButton styleName="solidMenuButton" click="_dashboardView.exportDashboard(exportButton)"
-           labelPlacement="right"
+           labelPlacement="right"  visible="{showControl}"
            id="exportButton" toolTip="Export the dashboard..." label="Export"/>
     <mx:LinkButton click="toggleFilters()" styleName="solidMenuButton" labelPlacement="right"
-               id="filterButton" label="Toggle Filters"/>
+               id="filterButton" label="Toggle Filters" visible="{showControl}"/>
     <!--<mx:Button click="resetFilters()" styleName="grayButton" labelPlacement="right"
                id="resetButton" label="Reset Filters" icon="{filterIcon}"/>-->
-    <mx:LinkButton click="viewInHTML()" styleName="solidMenuButton" labelPlacement="right" id="viewInHTMLButton" label="View in HTML" visible="{viewInHTMLable}"/>
+    <mx:LinkButton click="viewInHTML()" styleName="solidMenuButton" labelPlacement="right" id="viewInHTMLButton" label="View in HTML" visible="{showControl}"/>
     <listing:ArghButton label="{configLabel}" styleName="flatTransparentMenuButton" itemClick="_dashboardView.onConfigurationClick(event)" width="160" id="newButton"
-                        dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName"/>
+                        dataProvider="{options}" labelField="label" openAlways="true" popUpStyleName="myCustomPopUpStyleName" visible="{showControl}"/>
     <mx:LinkButton click="dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_EDITOR, { dashboardID: _dashboard.id})))" styleName="solidMenuButton" labelPlacement="right"
                id="editButton" label="Edit the Dashboard" visible="{editable}"/>
     <mx:Spacer width="100%"/>
