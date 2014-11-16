@@ -194,7 +194,7 @@ public class DefineCompositeDataSourceServlet extends APIServlet {
             } else {
                 new FeedStorage().updateDataFeedConfiguration(compositeFeedDefinition, conn);
             }
-            
+
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "<dataSourceKey>" + compositeFeedDefinition.getApiKey() + "</dataSourceKey>");
         } finally {
             if (dataStorage != null) {
