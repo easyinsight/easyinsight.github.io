@@ -78,7 +78,7 @@ Chart = {
                     generate: function() {
                         Chart.phantomJSFix();
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
                         var s1 = data["values"];
@@ -170,7 +170,7 @@ Chart = {
 
                         var height = Chart.chartHeightWithIFrame(target, styleProps, iframedInUI);
 
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
 
@@ -332,7 +332,7 @@ Chart = {
                     generate: function() {
                         Chart.phantomJSFix();
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
                         var s1 = data["values"];
@@ -428,7 +428,7 @@ Chart = {
                     generate: function() {
                         Chart.phantomJSFix();
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
                         var chart;
@@ -587,7 +587,7 @@ Chart = {
 
                         var height = Chart.chartHeight(target, styleProps);
 
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
 
@@ -784,7 +784,7 @@ Chart = {
                         }
 
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
 
@@ -950,6 +950,25 @@ Chart = {
         }
     },
 
+    ieTest:function() {
+        var rv = -1;
+        if (navigator.appName == 'Microsoft Internet Explorer')
+        {
+            var ua = navigator.userAgent;
+            var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
+            if (re.exec(ua) != null)
+                rv = parseFloat( RegExp.$1 );
+        }
+        else if (navigator.appName == 'Netscape')
+        {
+            var ua = navigator.userAgent;
+            var re  = new RegExp("Trident/.*rv:([0-9]{1,}[\\.0-9]{0,})");
+            if (re.exec(ua) != null)
+                rv = parseFloat( RegExp.$1 );
+        }
+        return rv > -1;
+    },
+
     phantomJSFix:function() {
         if (!Function.prototype.bind) {
             Function.prototype.bind = function (oThis) {
@@ -1037,7 +1056,7 @@ Chart = {
 
 
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
 
@@ -1178,7 +1197,7 @@ Chart = {
                         var axisMaxY = maxY + (maxY *.05);
 
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
 
@@ -1275,7 +1294,7 @@ Chart = {
                     generate: function() {
                         Chart.phantomJSFix();
                         var height = Chart.chartHeight(target, styleProps);
-                        if (/MSIE (\d+\.\d+);/.test(navigator.userAgent) || navigator.userAgent == "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko") {
+                        if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
 

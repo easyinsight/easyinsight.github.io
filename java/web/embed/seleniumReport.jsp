@@ -91,12 +91,13 @@
                 filters.add(filterDefinition);
             }
 
-            PreparedStatement saveDrillStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_SAVE (REPORT_ID, URL_KEY, SAVE_TIME) VALUES (?, ?, ?)",
+            PreparedStatement saveDrillStmt = conn.prepareStatement("INSERT INTO DRILLTHROUGH_SAVE (REPORT_ID, URL_KEY, SAVE_TIME, PHANTOMJS) VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             saveDrillStmt.setLong(1, report.getAnalysisID());
             dtUrlKey = RandomTextGenerator.generateText(40);
             saveDrillStmt.setString(2, dtUrlKey);
             saveDrillStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            saveDrillStmt.setBoolean(4, true);
             saveDrillStmt.execute();
             long drillID = Database.instance().getAutoGenKey(saveDrillStmt);
             saveDrillStmt.close();
@@ -115,6 +116,9 @@
             Database.closeConnection(conn);
         }
         report.setFilterDefinitions(filters);
+        for (FilterDefinition filter : filters) {
+            filter.setShowOnReportView(false);
+        }
 
         JSONObject reportJSON = new JSONObject();
         reportJSON.put("name", report.getName());
@@ -195,6 +199,11 @@
     <style type="text/css">
         body {
             background-image:none;
+        }
+
+        .well {
+            border-color: #FFFFFF;
+            box-shadow: 0 0 0 0;
         }
     </style>
     <script type="text/javascript" language="JavaScript">
