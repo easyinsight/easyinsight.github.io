@@ -208,6 +208,13 @@ public class WSTrendDefinition extends WSKPIDefinition {
                                        ExportMetadata exportMetadata) throws SQLException, DocumentException {
 
         TrendDataResults trendDataResults = DataService.getTrendDataResults(this, insightRequestMetadata, conn);
+        if (trendDataResults.getTrendOutcomes().size() == 0) {
+            PdfPTable table = new PdfPTable(1);
+            PdfPCell baseCell = new PdfPCell(new Phrase("There is no data available for the combination of filters you have selected."));
+            baseCell.setBorder(0);
+            table.addCell(baseCell);
+            return table;
+        }
         PdfPTable table = new PdfPTable(trendDataResults.getTrendOutcomes().size());
         for (TrendOutcome outcome : trendDataResults.getTrendOutcomes()) {
             AnalysisMeasure analysisMeasure = outcome.getMeasure();
