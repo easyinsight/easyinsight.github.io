@@ -16,6 +16,10 @@
                 <h2>Data Source Refresh Scheduling</h2>
             </div>
         </div>
+        <div class="row" ng-repeat="refreshable in refreshables">
+            <div class="col-md-12"><div class="alert alert-warning">{{ refreshable.name }} is not not set up to refresh. <a href="/a/scheduling/data_sources/new/{{refreshable.id}}">Set up a refresh now.</a></div></div>
+        </div>
+
         <div class="row">
             <div class="col-md-12">
                 <button class="btn btn-danger pull-right" ng-click="deleteSelected()">Delete Selected</button>

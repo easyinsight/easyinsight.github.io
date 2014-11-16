@@ -286,7 +286,7 @@ public class FeedService {
         try {
             List<Tag> tags = new ArrayList<Tag>();
             PreparedStatement ps = conn.prepareStatement("SELECT account_tag.account_tag_id, account_tag.tag_name FROM account_tag WHERE " +
-                    "account_tag.account_id = ? and account_tag.field_tag = ?");
+                    "account_tag.account_id = ? AND account_tag.field_tag = ?");
             ps.setLong(1, SecurityUtil.getAccountID());
             ps.setBoolean(2, true);
             ResultSet rs = ps.executeQuery();
@@ -425,14 +425,14 @@ public class FeedService {
     public void updateAnalysisItemConfigurations(List<AnalysisItemConfiguration> configurations, long dataSourceID, EIConnection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM field_to_tag WHERE data_source_id = ?");
         PreparedStatement clearExtStmt = conn.prepareStatement("DELETE FROM analysis_item_to_report_field_extension WHERE data_source_id = ?");
-        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, display_name, data_source_id) values (?, ?, ?)");
+        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO field_to_tag (account_tag_id, display_name, data_source_id) VALUES (?, ?, ?)");
         PreparedStatement saveExtStmt = conn.prepareStatement("INSERT INTO analysis_item_to_report_field_extension (report_field_extension_id, " +
-                "display_name, extension_type, data_source_id) values (?, ?, ?, ?)");
+                "display_name, extension_type, data_source_id) VALUES (?, ?, ?, ?)");
         clearStmt.setLong(1, dataSourceID);
         clearStmt.executeUpdate();
         clearExtStmt.setLong(1, dataSourceID);
         clearExtStmt.executeUpdate();
-        Map<String, Set<Long>> map = new HashMap<String,Set<Long>>();
+        Map<String, Set<Long>> map = new HashMap<String, Set<Long>>();
         for (AnalysisItemConfiguration configuration : configurations) {
             for (Tag tag : configuration.getTags()) {
                 Set<Long> ids = map.get(configuration.getAnalysisItem().toDisplay());
@@ -689,7 +689,7 @@ public class FeedService {
                     }
                     if (sourceKey != null && targetKey != null) {
                         CompositeFeedConnection compositeFeedConnection = new CompositeFeedConnection(source.getId(), childObj.getDataFeedID(), sourceKey, targetKey, sourceObj.getFeedName(),
-                            childObj.getFeedName(), false, false, false, false);
+                                childObj.getFeedName(), false, false, false, false);
                         compositeFeedDefinition.getConnections().add(compositeFeedConnection);
                     }
                 }
@@ -868,7 +868,7 @@ public class FeedService {
         }
 
     }
-    
+
     public ReportFault getCredentials(List<Integer> dataSourceIDs) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -918,7 +918,7 @@ public class FeedService {
                     }
                     countMap.put(descriptor.getName(), count);
                     descriptor.setName(descriptor.getName() + " (" + count + ")");
-                }    
+                }
             }
             conn.commit();
         } catch (Exception e) {
@@ -1141,59 +1141,63 @@ public class FeedService {
     }
 
     public List<DataSourceDescriptor> searchForSubscribedFeeds() {
-        long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
-            List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID(), conn, testAccountVisible(conn));
-            Collections.sort(dataSources, new Comparator<DataSourceDescriptor>() {
-
-                public int compare(DataSourceDescriptor dataSourceDescriptor, DataSourceDescriptor dataSourceDescriptor1) {
-                    return dataSourceDescriptor.getName().compareTo(dataSourceDescriptor1.getName());
-                }
-            });
-
-            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
-            PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
-                    "account_tag.account_tag_id = data_source_to_tag.account_tag_id and account_tag.account_id = ?");
-            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet tagRS = getTagsStmt.executeQuery();
-            Map<Long, Tag> tags = new HashMap<Long, Tag>();
-            while (tagRS.next()) {
-                tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
-            }
-
-            getTagsToDataSourcesStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet dsTagRS = getTagsToDataSourcesStmt.executeQuery();
-            Map<Long, List<Tag>> dsToTagMap = new HashMap<Long, List<Tag>>();
-            while (dsTagRS.next()) {
-                long dataSourceID = dsTagRS.getLong(2);
-                long tagID = dsTagRS.getLong(1);
-                Tag tag = tags.get(tagID);
-                List<Tag> t = dsToTagMap.get(dataSourceID);
-                if (t == null) {
-                    t = new ArrayList<Tag>();
-                    dsToTagMap.put(dataSourceID, t);
-                }
-                t.add(tag);
-            }
-            getTagsStmt.close();
-            getTagsToDataSourcesStmt.close();
-
-            for (DataSourceDescriptor dataSourceDescriptor : dataSources) {
-                List<Tag> tagList = dsToTagMap.get(dataSourceDescriptor.getId());
-                if (tagList == null) {
-                    tagList = new ArrayList<Tag>();
-                }
-                dataSourceDescriptor.setTags(tagList);
-            }
-
-            return dataSources;
+            return searchForSubscribedFeeds(conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public List<DataSourceDescriptor> searchForSubscribedFeeds(EIConnection conn) throws SQLException {
+        long userID = SecurityUtil.getUserID();
+        List<DataSourceDescriptor> dataSources = feedStorage.getDataSources(userID, SecurityUtil.getAccountID(), conn, testAccountVisible(conn));
+        Collections.sort(dataSources, new Comparator<DataSourceDescriptor>() {
+
+            public int compare(DataSourceDescriptor dataSourceDescriptor, DataSourceDescriptor dataSourceDescriptor1) {
+                return dataSourceDescriptor.getName().compareTo(dataSourceDescriptor1.getName());
+            }
+        });
+
+        PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ACCOUNT_TAG_ID, TAG_NAME, DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ?");
+        PreparedStatement getTagsToDataSourcesStmt = conn.prepareStatement("SELECT DATA_SOURCE_TO_TAG.ACCOUNT_TAG_ID, DATA_SOURCE_ID FROM data_source_to_tag, account_tag WHERE " +
+                "account_tag.account_tag_id = data_source_to_tag.account_tag_id AND account_tag.account_id = ?");
+        getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet tagRS = getTagsStmt.executeQuery();
+        Map<Long, Tag> tags = new HashMap<Long, Tag>();
+        while (tagRS.next()) {
+            tags.put(tagRS.getLong(1), new Tag(tagRS.getLong(1), tagRS.getString(2), tagRS.getBoolean(3), tagRS.getBoolean(4), tagRS.getBoolean(5)));
+        }
+
+        getTagsToDataSourcesStmt.setLong(1, SecurityUtil.getAccountID());
+        ResultSet dsTagRS = getTagsToDataSourcesStmt.executeQuery();
+        Map<Long, List<Tag>> dsToTagMap = new HashMap<Long, List<Tag>>();
+        while (dsTagRS.next()) {
+            long dataSourceID = dsTagRS.getLong(2);
+            long tagID = dsTagRS.getLong(1);
+            Tag tag = tags.get(tagID);
+            List<Tag> t = dsToTagMap.get(dataSourceID);
+            if (t == null) {
+                t = new ArrayList<Tag>();
+                dsToTagMap.put(dataSourceID, t);
+            }
+            t.add(tag);
+        }
+        getTagsStmt.close();
+        getTagsToDataSourcesStmt.close();
+
+        for (DataSourceDescriptor dataSourceDescriptor : dataSources) {
+            List<Tag> tagList = dsToTagMap.get(dataSourceDescriptor.getId());
+            if (tagList == null) {
+                tagList = new ArrayList<Tag>();
+            }
+            dataSourceDescriptor.setTags(tagList);
+        }
+
+        return dataSources;
     }
 
     public List<DataSourceDescriptor> searchForHiddenChildren(long dataSourceID) {
@@ -1230,16 +1234,16 @@ public class FeedService {
 
     public FederatedDataSource createdFederatedDataSourceWithConn(List<FederationSource> sources, String name, EIConnection conn) throws Exception {
 
-            FederatedDataSource federatedDataSource = new FederatedDataSource();
-            federatedDataSource.setFeedName(name);
+        FederatedDataSource federatedDataSource = new FederatedDataSource();
+        federatedDataSource.setFeedName(name);
         federatedDataSource.setAccountVisible(true);
-            federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
-            federatedDataSource.setSources(sources);
-            federatedDataSource.populateFields(conn);
-            federatedDataSource.setApiKey(RandomTextGenerator.generateText(12));
-            long feedID = feedStorage.addFeedDefinitionData(federatedDataSource, conn);
-            DataStorage.liveDataSource(feedID, conn, federatedDataSource.getFeedType().getType());
-            return federatedDataSource;
+        federatedDataSource.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID()));
+        federatedDataSource.setSources(sources);
+        federatedDataSource.populateFields(conn);
+        federatedDataSource.setApiKey(RandomTextGenerator.generateText(12));
+        long feedID = feedStorage.addFeedDefinitionData(federatedDataSource, conn);
+        DataStorage.liveDataSource(feedID, conn, federatedDataSource.getFeedType().getType());
+        return federatedDataSource;
 
     }
 
@@ -1355,7 +1359,7 @@ public class FeedService {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
-        } finally {            
+        } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
@@ -1421,7 +1425,6 @@ public class FeedService {
             Database.closeConnection(conn);
         }
     }
-
 
 
     public LookupTable getLookupTable(long lookupTableID) {
