@@ -10,6 +10,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,6 +32,7 @@ public class InfusionsoftSavedFilterSource extends InfusionsoftTableSource {
             String userIDValue = "1";
             reports.add(new InfusionsoftReport(name, reportID, userIDValue));
         }
+        Collections.sort(reports, (o1, o2) -> o1.getReportName().compareTo(o2.getReportName()));
         return reports;
     }
 }

@@ -46,7 +46,12 @@
         }
     }])
 
-    eiScheduling.controller("schedulingDataSourceController", ["$scope", "$modal", function($scope, $modal) {
+    eiScheduling.controller("schedulingDataSourceController", ["$scope", "$modal", "$http", function($scope, $modal, $http) {
+
+        $http.get("/app/scheduling/missing_refreshes.json").then(function(c) {
+            $scope.refreshables = c.data.refreshables;
+        })
+
         $scope.deleteSelected = function() {
             var to_delete = $scope.schedules.data_sources.filter(function(e, i, l) {
                 return e.selected;
@@ -72,13 +77,30 @@
 
     eiScheduling.controller("viewDataSourceSchedulingController", ["$scope", "$http", "$routeParams", "$location", function($scope, $http, $routeParams, $location) {
         $scope.loading.then(function() {
-            var i;
-            for (i = 0; i < $scope.schedules.data_sources.length; i++) {
-                if ($scope.schedules.data_sources[i].id == $routeParams.id) {
-                    $scope.schedule = angular.copy($scope.schedules.data_sources[i]);
+
+            if($routeParams.id == "new") {
+                $scope.schedule = {
+                    data_source: $routeParams.data_source_id,
+                    schedule_type: {
+                        offset: $scope.getOffset(),
+                        type: "daily",
+                        hour: 0,
+                        minute: 0
+                    },
+                    interval_number: 0,
+                    interval_units: 0,
+                    id: "new",
+                    type: "data_source",
+                    description: "New Refresh"
+                }
+            } else {
+                var i;
+                for (i = 0; i < $scope.schedules.data_sources.length; i++) {
+                    if ($scope.schedules.data_sources[i].id == $routeParams.id) {
+                        $scope.schedule = angular.copy($scope.schedules.data_sources[i]);
+                    }
                 }
             }
-
         })
 
         $scope.save_schedule = function() {
@@ -94,7 +116,6 @@
     eiScheduling.controller("viewDeliverySchedulingController", ["$scope", "$routeParams", "$http", "$location", function($scope, $routeParams, $http, $location) {
         $scope.loading.then(function() {
             $scope.is_new = $routeParams.id == "new";
-            console.log($location.path())
             if($scope.is_new) {
                 $scope.schedule = {
                     emails: [],
@@ -130,6 +151,25 @@
             }
 
             $scope.errors = [];
+
+            $scope.to_schedule = function() {
+                $scope.errors = [];
+                if($scope.schedule.type == "report" && $scope.schedule.report_id == 0) {
+                    $scope.errors.push("There must be a report selected.");
+                } else if ($scope.schedule.type == "general" && $scope.schedule.delivery_info.length == 0) {
+                    $scope.errors.push("There must be a report selected.");
+                } else {
+                    $location.path("/scheduling/" + ($scope.schedule.type == 'general' ? 'multi_delivery' : 'delivery') + "/" + $routeParams.id + "/schedule")
+                }
+            };
+            $scope.to_email = function() {
+                $scope.errors = [];
+                if($scope.schedule.emails.length == 0  && $scope.schedule.users.length == 0 && $scope.schedule.groups.length == 0 ) {
+                    $scope.errors.push("There must be at least one recipient to the delivery.");
+                } else {
+                    $location.path("/scheduling/" + ($scope.schedule.type == 'general' ? 'multi_delivery' : 'delivery') + "/" + $routeParams.id + "/email");
+                }
+            };
 
             $scope.save_schedule = function() {
                 $scope.errors = [];
@@ -234,7 +274,8 @@
 
     eiScheduling.controller("viewDeliverySchedulingHistoryController", ["$scope", "$http", function($scope, $http) {
         $scope.loading.then(function() {
-            var l = $http.get("/app/deliveries/" + $scope.schedule.id + "/history.json");
+            var l;
+            l = $http.get("/app/deliveries/" + $scope.schedule.id + "/history.json");
 
              l.then(function(c) { 
                 $scope.history = c.data.history;
@@ -360,6 +401,7 @@
             $scope.schedule.delivery_info = $scope.schedule.delivery_info.filter(function(e, i, l) { return !e.selected; })
         }
 
+
         $scope.select_delivery = function(item) {
             $scope.selected_delivery = item;
             $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
@@ -392,14 +434,15 @@
         $routeSegmentProvider.when("/scheduling", "scheduling.reports").
             when("/scheduling/reports", "scheduling.reports").
             when("/scheduling/data_sources", "scheduling.data_sources").
+            when("/scheduling/data_sources/:id/:data_source_id", "scheduling.view_data_source").
             when("/scheduling/data_sources/:id", "scheduling.view_data_source").
-            when("/scheduling/delivery/:id", "scheduling.view_delivery.report_info").
-            when("/scheduling/delivery/:id/schedule", "scheduling.view_delivery.scheduling").
-            when("/scheduling/delivery/:id/report", "scheduling.view_delivery.report_info").
+            when("/scheduling/delivery/:id", "scheduling.view_delivery.reports").
+            when("/scheduling/delivery/:id/schedule", "scheduling.view_delivery.times").
+            when("/scheduling/delivery/:id/report", "scheduling.view_delivery.reports").
             when("/scheduling/delivery/:id/email", "scheduling.view_delivery.email").
             when("/scheduling/delivery/:id/history", "scheduling.view_delivery.history").
             when("/scheduling/multi_delivery/:id", "scheduling.view_multi_delivery.reports").
-            when("/scheduling/multi_delivery/:id/schedule", "scheduling.view_multi_delivery.scheduling").
+            when("/scheduling/multi_delivery/:id/schedule", "scheduling.view_multi_delivery.times").
             when("/scheduling/multi_delivery/:id/email", "scheduling.view_multi_delivery.email").
             when("/scheduling/multi_delivery/:id/history", "scheduling.view_multi_delivery.history").
             when("/scheduling/multi_delivery/:id/report", "scheduling.view_multi_delivery.reports").
@@ -425,11 +468,11 @@
                 controller: "viewDeliverySchedulingController",
                 depends: ["id"]
             }).within().
-            segment("scheduling", {
+            segment("times", {
                 templateUrl: "/angular_templates/scheduling/view_delivery_schedule.template.html",
                 controller: "viewDeliverySchedulingRecipientsController"
             }).
-            segment("report_info", {
+            segment("reports", {
                 templateUrl: "/angular_templates/scheduling/view_delivery_report.template.html",
                 controller: "viewDeliverySchedulingReportController"
             }).
@@ -444,7 +487,7 @@
                 templateUrl: "/angular_templates/scheduling/report_multi_delivery.template.html",
                 controller: "viewDeliverySchedulingController"
             }).within().
-            segment("scheduling", {
+            segment("times", {
                 templateUrl: "/angular_templates/scheduling/view_delivery_schedule.template.html",
                 controller: "viewDeliverySchedulingRecipientsController"
             }).segment("email",  {

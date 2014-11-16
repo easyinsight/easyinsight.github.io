@@ -14,20 +14,23 @@ public class FieldFormItem extends ReportFormItem {
     public function FieldFormItem(label:String, property:String, value:Object, report:Object,
                                            fields:ArrayCollection, qualifier:int = 0, enabledProperty:String = null) {
         super(label, property, value, report, enabledProperty);
-        var copy:ArrayCollection = new ArrayCollection();
+        var copy:Array = [];
         for each (var item:AnalysisItemWrapper in fields) {
             if (qualifier == 0) {
-                copy.addItem(item);
+                copy.push(item);
             } else {
                 if (item.analysisItem.hasType(qualifier)) {
-                    copy.addItem(item);
+                    copy.push(item);
                 }
             }
         }
 
+        copy.sortOn("displayName", Array.CASEINSENSITIVE | Array.DESCENDING);
+
         var noOption:Object = { displayName: "[ No Selection ]"};
-        copy.addItemAt(noOption, 0);
-        this.choices = new ArrayCollection(copy.toArray());
+        copy.push(noOption);
+        copy.reverse();
+        this.choices = new ArrayCollection(copy);
     }
 
     protected override function createChildren():void {

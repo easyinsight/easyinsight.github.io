@@ -4,7 +4,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.report.SavedConfiguration;
 
-        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         private var _deliveryInfo:DeliveryInfo;
@@ -40,12 +39,6 @@
         [Bindable]
         private var orientation:String = "Landscape";
 
-        [Bindable]
-        private var pdfWidth:int = 1000;
-
-        [Bindable]
-        private var pdfHeight:int = 600;
-
         override protected function commitProperties():void {
             super.commitProperties();
             if (dashboardID != _deliveryInfo.id) {
@@ -54,26 +47,9 @@
                 configurationID = _deliveryInfo.configurationID;
                 if (deliveryExtension != null) {
                     showHeader = PDFDeliveryExtension(deliveryExtension).showHeader;
-                    pdfWidth = PDFDeliveryExtension(deliveryExtension).width;
-                    pdfHeight = PDFDeliveryExtension(deliveryExtension).height;
                     orientation = PDFDeliveryExtension(deliveryExtension).orientation;
-                    generateByHTML = PDFDeliveryExtension(deliveryExtension).generateByHTML;
-
-                    if (generateByHTML == 1) {
-                        stackIndex = 0;
-                    } else {
-                        stackIndex = 1;
-                    }
                 }
 
-            }
-        }
-
-        private function onRenderChange():void {
-            if (renderGroup.selectedValue == "renderViaHTML") {
-                stackIndex = 0;
-            } else {
-                stackIndex = 1;
             }
         }
 
@@ -87,7 +63,6 @@
                 _deliveryInfo.configurationID = 0;
             }
             var ext:PDFDeliveryExtension = new PDFDeliveryExtension();
-            ext.generateByHTML = renderGroup.selectedValue == "renderViaHTML" ? 1 : 0;
             ext.showHeader = showHeaderCheckBox.selected;
             /*ext.width = widthStepper.value;
             ext.height = heightStepper.value;*/
@@ -110,9 +85,6 @@
 
         [Bindable]
         private var stackIndex:int = 0;
-
-        [Bindable]
-        private var generateByHTML:int = 1;
         ]]></mx:Script>
     <mx:RemoteObject id="dashboardService" destination="dashboardService">
         <mx:method name="getConfigurationsForDashboard" result="gotConfigurations()"/>
@@ -120,11 +92,6 @@
     <mx:Form>
         <mx:FormItem label="Show Header:" labelWidth="200">
             <mx:CheckBox id="showHeaderCheckBox" selected="{showHeader}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Rendering Mode:" labelWidth="200">
-            <mx:RadioButtonGroup id="renderGroup" change="onRenderChange()"/>
-            <mx:RadioButton name="renderViaHTML" value="renderViaHTML" id="renderViaHTML" groupName="renderGroup" selected="{generateByHTML == 1}" label="HTML5 - Render PDF from the new HTML5 interface (recommended)"/>
-            <mx:RadioButton name="renderViaFlash" value="renderViaFlash" id="renderViaFlash" groupName="renderGroup" selected="{generateByHTML == 0}" label="Flash - Render PDF from the legacy Flash interface"/>
         </mx:FormItem>
     </mx:Form>
     <mx:Text maxWidth="500" text="To send out a specific page on a dashboard stack or customize the filters used in the PDF, you can save Configurations on the end user view, and then reference back to those customers with the dropdown below."/>
@@ -134,17 +101,6 @@
                                 id="configurationComboBox" labelField="name" enabled="{configEnabled}"/>
         </mx:FormItem>
     </mx:Form>
-        <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
-            <mx:Form/>
-            <mx:Form>
-                <mx:FormItem label="Width:" labelWidth="200">
-                    <mx:NumericStepper id="widthStepper" value="{pdfWidth}" maximum="3000" minimum="100"/>
-                </mx:FormItem>
-                <mx:FormItem label="Height:" labelWidth="200">
-                    <mx:NumericStepper id="heightStepper" value="{pdfHeight}" maximum="3000" minimum="100"/>
-                </mx:FormItem>
-            </mx:Form>
-        </mx:ViewStack>
     <mx:Form>
         <mx:FormItem label="Orientation:" labelWidth="200">
             <mx:ComboBox id="orientationBox" selectedItem="{orientation}">

@@ -129,6 +129,7 @@
         } finally {
             Database.closeConnection(c);
         }
+        boolean onlyTopReports = userObject.getBoolean("onlyTopReports");
 %>
 
 <head>
@@ -165,7 +166,9 @@
     <div class="container-fluid">
         <div class="row controlsRow">
             <div class="col-md-4 reportBlah visible-sm visible-md visible-lg">
-                <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <% if (!onlyTopReports) { %>
+                    <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
+                <% } %>
             </div>
             <div class="col-md-8 col-xs-12 reportControlToolbar">
                 <div class="reportBlah visible-xs pull-left" style="margin-top: 0">
@@ -198,6 +201,8 @@
                                     report.getReportType() == WSAnalysisDefinition.STACKED_COLUMN ||
                                     report.getReportType() == WSAnalysisDefinition.BAR ||
                                     report.getReportType() == WSAnalysisDefinition.STACKED_BAR ||
+                                    report.getReportType() == WSAnalysisDefinition.PLOT ||
+                                    report.getReportType() == WSAnalysisDefinition.TOPO ||
                                     report.getReportType() == WSAnalysisDefinition.GAUGE ||
                                     report.getReportType() == WSAnalysisDefinition.DIAGRAM) { %>
                             <li>

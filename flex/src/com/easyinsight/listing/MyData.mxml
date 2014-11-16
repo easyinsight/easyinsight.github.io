@@ -178,7 +178,7 @@
 
             if (dataSourceDescriptor != null) {
                 toDataSourceView();
-            } else if (myDataTree.objects.length > 0) {
+            } else if (myDataTree.objects.length > 0 || User.getInstance().onlyShowTopReports) {
                 if (dsList == null || !blah.contains(dsList)) {
                     toDataGrid();
                 }

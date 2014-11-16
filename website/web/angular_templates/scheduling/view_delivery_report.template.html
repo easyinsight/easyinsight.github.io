@@ -56,7 +56,8 @@
     </div>
     <div class="row scheduleRow">
         <div class="col-md-12">
-            <input type="submit" value="Save" class="btn btn-primary" />
+            <input type="submit" value="Save" class="btn btn-primary" ng-if="!is_new" />
+            <button type="button" class="btn btn-primary" ng-if="is_new" ng-click="to_schedule()">Next</button>
         </div>
     </div>
 </form>

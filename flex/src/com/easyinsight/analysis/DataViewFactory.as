@@ -32,6 +32,7 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.controls.Button;
+import mx.controls.Label;
 import mx.core.IUIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
@@ -251,7 +252,11 @@ public class DataViewFactory extends VBox implements IRetrievable {
             _controlBar["feedMetadata"] = _feedMetadata;
         }
         var box2:HBox = new HBox();
-
+        var l:Label = new Label();
+        l.text = "Report Fields:";
+        l.styleName = "fallThroughFonts";
+        l.setStyle("fontWeight", "bold");
+        box2.addChildAt(l, 0);
         box2.setStyle("verticalAlign", "middle");
         box2.setStyle("backgroundColor", 0xFFFFFF);
         box2.setStyle("borderStyle", "solid");

@@ -88,6 +88,7 @@ public class InfusionsoftUserSource extends InfusionsoftTableSource {
             String emailValue = row.getValue(email).toString();
             reports.add(new InfusionsoftUser(userIDValue, emailValue));
         }
+        Collections.sort(reports, (o1, o2) -> o1.getEmail().compareTo(o2.getEmail()));
         return reports;
     }
 }

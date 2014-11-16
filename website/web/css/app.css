@@ -516,3 +516,7 @@ fieldset[disabled] .btn-alt-primary.active {
     margin-bottom: 10px;
     font-size: 16px;
 }
+
+.selected_menu {
+    font-weight: bold;
+}

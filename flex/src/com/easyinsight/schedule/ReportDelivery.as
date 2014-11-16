@@ -10,6 +10,7 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
     public static const PDF:int = 3;
     public static const HTML:int = 4;
     public static const EXCEL_2007:int = 5;
+    public static const INLINE_PNG:int = 6;
 
     public var reportFormat:int;
     public var reportID:int;
@@ -42,13 +43,16 @@ public class ReportDelivery extends ScheduledDelivery implements IDeliverable {
                 type = " as Excel";
                 break;
             case 2:
-                type = " as PNG";
+                type = " as PNG Attachment";
                 break;
             case 3:
                 type = " as PDF";
                 break;
             case 4:
                 type = " as Inline HTML Table";
+                break;
+            case 6:
+                type = " as Inline PNG";
                 break;
         }
         return "Email " + reportName + type;

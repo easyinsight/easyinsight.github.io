@@ -714,13 +714,14 @@ public class UserServiceResponse {
             long dataSourceID = reportRS.getLong(3);
             int reportType = reportRS.getInt(4);
             String urlKey = reportRS.getString(5);
-            /*try {*/
+            try {
+                SecurityUtil.authorizeReport(reportID, Roles.VIEWER, conn);
                 InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
                 id.setDescription(reportRS.getString(6));
                 reports.add(id);
-            /*} catch (com.easyinsight.security.SecurityException e) {
+            } catch (Exception e) {
                 // ignore
-            }*/
+            }
         }
         getReportStmt.close();
         PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
@@ -733,14 +734,14 @@ public class UserServiceResponse {
             long reportID = dashboardRS.getLong(2);
             long dataSourceID = dashboardRS.getLong(3);
             String urlKey = dashboardRS.getString(4);
-            /*try {
-                SecurityUtil.authorizeDashboard(reportID);*/
+            try {
+                SecurityUtil.authorizeDashboard(reportID, conn);
                 DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
                 dd.setDescription(dashboardRS.getString(5));
                 reports.add(dd);
-            /*} catch (com.easyinsight.security.SecurityException e) {
+            } catch (Exception e) {
                 // ignore
-            }*/
+            }
         }
         getDashboardStmt.close();
         return reports;

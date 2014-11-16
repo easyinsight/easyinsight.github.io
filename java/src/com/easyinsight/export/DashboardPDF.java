@@ -119,8 +119,6 @@ public class DashboardPDF {
         }
     }
 
-    //public static final String OUTBOUND_QUEUE = "EISelenium";
-
     private static void fire(int width, int height, String url, String seleniumID, String seleniumUserName, String seleniumPassword) {
         try {
             Runtime rt = Runtime.getRuntime();
@@ -183,10 +181,10 @@ public class DashboardPDF {
                                                         final String reportURL, final String seleniumUserName, final String seleniumPassword) {
         // send an SQS request
         try {
-            /*MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getBaseSeleniumQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            msgQueue.sendMessage(url);*/
+            MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getBaseSeleniumQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            msgQueue.sendMessage(url);
 
-            new Thread(() -> fire(width, height, reportURL, String.valueOf(id), seleniumUserName, seleniumPassword)).start();
+            //new Thread(() -> fire(width, height, reportURL, String.valueOf(id), seleniumUserName, seleniumPassword)).start();
 
             PreparedStatement stmt = conn.prepareStatement("SELECT image_state FROM image_selenium_trigger WHERE image_selenium_trigger_id = ?");
 

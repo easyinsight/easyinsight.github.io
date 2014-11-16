@@ -144,13 +144,14 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
                 Map category = (Map) categoryObject;
                 categoryMap.put(category.get("CATEGORY_ID").toString(), category.get("CATEGORY_NAME").toString());
             }
-            List contactList = runJSONRequest("projects", insightlyCompositeSource, httpClient);
+            List contactList = runJSONRequest21("projects", insightlyCompositeSource, httpClient);
             for (Object contactObj : contactList) {
                 IRow row = dataSet.createRow();
                 Map contactMap = (Map) contactObj;
+                //System.out.println(contactMap);
                 row.addValue(keys.get(PROJECT_ID), contactMap.get("PROJECT_ID").toString());
                 row.addValue(keys.get(PROJECT_NAME), contactMap.get("PROJECT_NAME").toString());
-                row.addValue(keys.get(PROJECT_STATUS), getValue(contactMap, "PROJECT_STATUS"));
+                row.addValue(keys.get(PROJECT_STATUS), getValue(contactMap, "STATUS"));
                 row.addValue(keys.get(PROJECT_DETAILS), getValue(contactMap, "PROJECT_DETAILS"));
                 row.addValue(keys.get(OPPORTUNITY_ID), getValue(contactMap, "OPPORTUNITY_ID"));
 
@@ -174,15 +175,23 @@ public class InsightlyProjectSource extends InsightlyBaseSource {
                 if (category != null) {
                     row.addValue(keys.get(CATEGORY), category);
                 }
+
+                List<Map> customFieldValues = (List<Map>) contactMap.get("CUSTOMFIELDS");
                 for (AnalysisItem field : getFields()) {
                     if (field.getKey().toKeyString().startsWith("PROJECT_FIELD")) {
-                        if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                            Object obj = contactMap.get(field.getKey().toKeyString());
-                            if (obj != null) {
-                                row.addValue(field.getKey(), sdf.parse(obj.toString()));
+                        for (Map customField : customFieldValues) {
+                            String customFieldID = customField.get("CUSTOM_FIELD_ID").toString();
+                            if (field.getKey().toKeyString().equals(customFieldID)) {
+                                Object value = customField.get("FIELD_VALUE");
+                                if (value != null) {
+                                    if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                        row.addValue(field.getKey(), sdf.parse(value.toString()));
+                                    } else {
+                                        row.addValue(field.getKey(), value.toString());
+                                    }
+                                }
+
                             }
-                        } else {
-                            row.addValue(field.getKey(), getValue(contactMap, field.getKey().toKeyString()));
                         }
                     }
                 }
