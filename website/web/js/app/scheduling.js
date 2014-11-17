@@ -385,31 +385,30 @@
                     send_if_no_data: true,
                     name: $scope.selected_report.name,
                     configuration_id: 0
-                }
+                };
                 if(v.format == "pdf") {
                     v.delivery_info = {
                         show_header: false,
                         orientation: "Landscape"
-                    }
+                    };
                 }
                 $scope.schedule.delivery_info.push(v);
-                $scope.selected_delivery = v;
             }
-        }
+        };
         $scope.isSelected = function(val) {
             return val && typeof(val) === "object"
         };
 
         $scope.delete_selected = function() {
             $scope.schedule.delivery_info = $scope.schedule.delivery_info.filter(function(e, i, l) { return !e.selected; })
-        }
+        };
 
 
         $scope.get_schedule_configurations = function(item) {
             $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
                 item.possible_configurations = d.data.configurations;
             });
-        }
+        };
         $scope.default_added = function(a) {
             return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
         };
