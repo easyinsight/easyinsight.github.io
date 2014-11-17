@@ -344,8 +344,10 @@ public class FunctionFactory {
             return new SequenceRecord();
         } else if (s.equals("autocolor")) {
             return new AutoColor();
-        }else if (s.equals("autobackgroundcolor")) {
+        } else if (s.equals("autobackgroundcolor")) {
             return new AutoBackgroundColor();
+        } else if (s.equals("findexact")) {
+            return new FindExactRecord();
         } else {
             return null;
         }
