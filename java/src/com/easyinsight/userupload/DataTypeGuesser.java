@@ -211,7 +211,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 try {
                     dateFormat.parse(value);
                     return dateTimeFormatStrings[i];
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     // didn't work...
                 }
             }
@@ -221,7 +221,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 try {
                     dateFormat.parse(value);
                     return assignedDateTimeFormatStrings[i];
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     // didn't work...
                 }
             }
@@ -236,7 +236,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 try {
                     dateFormat.parse(value);
                     return dateFormatStrings[i];
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     // didn't work...
                 }
             }
@@ -246,7 +246,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 try {
                     dateFormat.parse(value);
                     return assignedDateFormatStrings[i];
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     // didn't work...
                 }
             }
