@@ -391,6 +391,7 @@
                     }
                 }
                 $scope.schedule.delivery_info.push(v);
+                $scope.selected_delivery = v;
             }
         }
         $scope.isSelected = function(val) {
