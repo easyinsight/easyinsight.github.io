@@ -43,7 +43,7 @@
             <tbody>
             <tr ng-repeat="delivery in schedule.delivery_info" ng-init="show=false">
                 <td><input type="checkbox" ng-model="delivery.selected" /></td>
-                <td><a ng-click="show=!show">{{ delivery.name }}</a>
+                <td><a style="cursor:pointer" ng-click="show=!show">{{ delivery.name }}</a>
                     <div class="well" ng-show="show">
                 <div class="row scheduleRow">
                     <div class="col-md-4">
@@ -65,7 +65,7 @@
                            Output Format:
                        </div>
                        <div class="col-md-8">
-                           <select ng-model="delivery.format" class="form-control" ng-change="checkPDF()">
+                           <select ng-model="delivery.format" class="form-control" ng-change="checkPDF(delivery)">
                                <option value="excel2007">Excel 2007</option>
                                <option value="excel">Excel</option>
                                <option value="png">PNG</option>

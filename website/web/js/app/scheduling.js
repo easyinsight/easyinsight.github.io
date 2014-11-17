@@ -238,6 +238,7 @@
             })
 
             $scope.addables = function() {
+
                 return [].concat($scope.groups.map(function(e, i, l) { return {label: e.name, type: "group", data: e};})).concat($scope.users.map(function(e, i, l) { return {label: $scope.full_name(e), type: "user", data: e};}));
             };
             $scope.add_selected = function() {
@@ -413,17 +414,17 @@
             return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
         };
 
-        $scope.checkPDF = function() {
-            if($scope.selected_delivery.format == "pdf") {
-                if(typeof($scope.selected_delivery.delivery_info) == "undefined") {
-                    $scope.selected_delivery.delivery_info = {
+        $scope.checkPDF = function(item) {
+            if(item.format == "pdf") {
+                if(typeof(item.delivery_info) == "undefined") {
+                    item.delivery_info = {
                         show_header: false,
                         orientation: "Landscape"
                     }
                 }
             } else {
-                if(typeof($scope.selected_delivery.delivery_info) != "undefined") {
-                    delete $scope.selected_delivery.delivery_info;
+                if(typeof(item.delivery_info) != "undefined") {
+                    delete item.delivery_info;
                 }
             }
         }
