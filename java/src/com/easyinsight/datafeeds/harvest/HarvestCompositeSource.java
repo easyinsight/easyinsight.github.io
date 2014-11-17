@@ -183,10 +183,10 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                     OAuthClientRequest request;
                     if (ConfigLoader.instance().isProduction()) {
                         request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
-                                    setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
-                                    setClientSecret(SECRET_KEY).
-                                    setRedirectURI("https://www.easy-insight.com/app/oauth").
-                                    setCode(code).buildBodyMessage();
+                                setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
+                                setClientSecret(SECRET_KEY).
+                                setRedirectURI("https://www.easy-insight.com/app/oauth").
+                                setCode(code).buildBodyMessage();
                     } else {
                         request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
                                 setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(CONSUMER_KEY).
@@ -215,7 +215,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
     @Override
     protected void beforeRefresh(Date lastRefreshTime) {
-        super.beforeRefresh(lastRefreshTime); 
+        super.beforeRefresh(lastRefreshTime);
         if (lastRefreshTime != null) {
             try {
                 refreshTokenInfo();
@@ -227,8 +227,8 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
 
     public void refreshTokenInfo() throws OAuthSystemException, OAuthProblemException {
         OAuthClientRequest request = OAuthClientRequest.tokenLocation(url + "/oauth2/token").
-                        setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
-                        setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
+                setGrantType(GrantType.REFRESH_TOKEN).setClientId(CONSUMER_KEY).
+                setClientSecret(SECRET_KEY).setRefreshToken(refreshToken).buildBodyMessage();
         OAuthClient client = new OAuthClient(new URLConnectionClient());
         OAuthJSONAccessTokenResponse response = client.accessToken(request);
 
@@ -251,7 +251,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
                 new ChildConnection(FeedType.HARVEST_USERS,  FeedType.HARVEST_EXPENSES, HarvestUserSource.USER_ID, HarvestExpenseSource.USER_ID),
                 new ChildConnection(FeedType.HARVEST_EXPENSE_CATEGORIES, FeedType.HARVEST_EXPENSES, HarvestExpenseCategoriesSource.ID, HarvestExpenseSource.EXPENSE_CATEGORY_ID),
                 new ChildConnection(FeedType.HARVEST_CLIENT, FeedType.HARVEST_INVOICES, HarvestClientSource.CLIENT_ID, HarvestInvoiceSource.CLIENT_ID)
-                );
+        );
     }
 
     @Override

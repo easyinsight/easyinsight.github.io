@@ -239,6 +239,7 @@ public class UserTransferObject {
         user.setCurrency(getCurrency());
         user.setDateFormat(getDateFormat());
         user.setUserLocale(getUserLocale());
+        user.setAssignedDashboardIsFixedView(isOnlyShowTopReports());
         if (getFixedDashboardID() > 0) {
             user.setFixedDashboardID(getFixedDashboardID());
         }

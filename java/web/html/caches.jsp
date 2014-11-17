@@ -32,21 +32,6 @@
     String userName = (String) session.getAttribute("userName");
     com.easyinsight.security.SecurityUtil.populateThreadLocalFromSession(request);
     try {
-        //new AdminService().testUserPasswords();
-        new SendGridEmail().test();
-
-        /*CompositeFeedDefinition dataSource = (CompositeFeedDefinition) new FeedStorage().getFeedDefinitionData(20186);
-        CompositeFeedNode node = new CompositeFeedNode(20133, 0, 0, "Batchbook", 0, 0);
-        dataSource.getCompositeFeedNodes().add(node);
-        new FeedService().updateFeedDefinition(dataSource);
-
-        conn = Database.instance().getConnection();
-        try {
-            new AutoComposite(20186, conn).attach(node);
-        } finally {
-            Database.closeConnection(conn);
-        }*/
-
 
 %>
 
