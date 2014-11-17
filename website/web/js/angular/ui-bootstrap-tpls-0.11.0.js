@@ -3712,7 +3712,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       });
 
       element.bind('focus', function(evt) {
-        console.log("should open now")
+        //console.log("should open now")
       })
 
       // Keep reference to click handler to unbind it.

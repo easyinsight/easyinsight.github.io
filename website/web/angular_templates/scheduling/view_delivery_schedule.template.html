@@ -56,7 +56,7 @@
             <div class="input-group">
             <input class="form-control" type="text" ng-model="added"
                    typeahead-template-url="/angular_templates/scheduling/addable_typeahead.template.html"
-                   typeahead="addable as addable.label for addable in addables()" />
+                   typeahead="addable as addable.label for addable in addables() | filter: {label: $viewValue}" />
             <span class="input-group-addon btn btn-primary" ng-click="add_selected()">Add</span>
             </div>
         </div>
