@@ -81,7 +81,7 @@ public class TeamworkCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getDataSourceType() {
-        return DataSourceInfo.STORED_PULL;
+        return DataSourceInfo.COMPOSITE_PULL;
     }
 
     @Override
