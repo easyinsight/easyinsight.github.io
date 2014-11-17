@@ -820,7 +820,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         }
                     } else if (filter instanceof FlatDateFilter) {
                         FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
-                        if (flatDateFilter.getValue() == 0) {
+                        if (flatDateFilter.getDateLevel() == AnalysisDateDimension.YEAR_LEVEL && flatDateFilter.getValue() == 0) {
                             continue;
                         }
                     }
