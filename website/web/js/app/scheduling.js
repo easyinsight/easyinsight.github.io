@@ -380,9 +380,11 @@
                 var v = {
                     format: $scope.selected_report == 'report' ? "excel2007" : "pdf",
                     id: $scope.selected_report.id,
+                    url_key: $scope.selected_report.url_key,
                     type: $scope.selected_report.type,
                     send_if_no_data: true,
-                    name: $scope.selected_report.name
+                    name: $scope.selected_report.name,
+                    configuration_id: 0
                 }
                 if(v.format == "pdf") {
                     v.delivery_info = {
@@ -403,13 +405,11 @@
         }
 
 
-        $scope.select_delivery = function(item) {
-            $scope.selected_delivery = item;
+        $scope.get_schedule_configurations = function(item) {
             $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
-                $scope.schedule_configurations = d.data.configurations;
+                item.possible_configurations = d.data.configurations;
             });
         }
-
         $scope.default_added = function(a) {
             return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
         };
