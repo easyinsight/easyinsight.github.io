@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.preferences.ApplicationSkin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -86,6 +87,16 @@ public class WSPieChartDefinition extends WSXAxisDefinition {
         properties.add(new ReportNumericProperty("donutRatio", donutRatio));
         properties.add(ReportMultiColorProperty.fromColors(multiColors, "multiColors"));
         return properties;
+    }
+
+    public void renderConfig(ApplicationSkin applicationSkin) {
+        if ("Primary".equals(getColorScheme()) && applicationSkin.getMultiColors() != null && applicationSkin.getMultiColors().size() > 0 &&
+                applicationSkin.getMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getMultiColors());
+        } else if ("Secondary".equals(getColorScheme()) && applicationSkin.getSecondaryMultiColors() != null && applicationSkin.getSecondaryMultiColors().size() > 0 &&
+                applicationSkin.getSecondaryMultiColors().get(0).isColor1StartEnabled()) {
+            setMultiColors(applicationSkin.getSecondaryMultiColors());
+        }
     }
 
     @Override
