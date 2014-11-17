@@ -468,6 +468,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.TEAMWORK_TASK_LIST, TeamworkTaskListSource.class);
         registerType(FeedType.TEAMWORK_MILESTONE, TeamworkMilestoneSource.class);
         registerType(FeedType.TEAMWORK_TIME, TeamworkTimeSource.class);
+        registerType(FeedType.INFUSIONSOFT_PRODUCT_CATEGORY, InfusionsoftProductCategorySource.class);
+        registerType(FeedType.INFUSIONSOFT_PRODUCT_TO_CATEGORY, InfusionsoftProductToCategorySource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

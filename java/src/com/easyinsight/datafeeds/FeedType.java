@@ -327,6 +327,8 @@ public class FeedType implements Serializable {
     public static final FeedType TEAMWORK_TASK_LIST = new FeedType(298);
     public static final FeedType TEAMWORK_TIME = new FeedType(299);
     public static final FeedType TEAMWORK_MILESTONE = new FeedType(300);
+    public static final FeedType INFUSIONSOFT_PRODUCT_CATEGORY = new FeedType(301);
+    public static final FeedType INFUSIONSOFT_PRODUCT_TO_CATEGORY = new FeedType(302);
 
     public FeedType() {
     }
