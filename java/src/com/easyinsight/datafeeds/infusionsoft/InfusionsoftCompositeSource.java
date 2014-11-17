@@ -229,6 +229,8 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.INFUSIONSOFT_TAG);
         types.add(FeedType.INFUSIONSOFT_CONTACT_TO_TAG);
         types.add(FeedType.INFUSIONSOFT_USERS);
+        types.add(FeedType.INFUSIONSOFT_PRODUCT_CATEGORY);
+        types.add(FeedType.INFUSIONSOFT_PRODUCT_TO_CATEGORY);
         return types;
     }
 
@@ -333,6 +335,8 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACTS, FeedType.INFUSIONSOFT_CONTACT_TO_TAG, InfusionsoftContactSource.ID, InfusionsoftContactToTag.CONTACT_ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_CONTACT_TO_TAG, FeedType.INFUSIONSOFT_TAG, InfusionsoftContactToTag.GROUP_ID, InfusionsoftTagSource.ID, IJoin.ONE, IJoin.ONE));
         connections.add(new ChildConnection(FeedType.INFUSIONSOFT_TAG, FeedType.INFUSIONSOFT_TAG_GROUP, InfusionsoftTagSource.TAG_CATEGORY_ID, InfusionsoftContactGroupCategorySource.ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCTS, FeedType.INFUSIONSOFT_PRODUCT_TO_CATEGORY, InfusionsoftProductSource.PRODUCT_ID, InfusionsoftProductToCategorySource.PRODUCT_ID, IJoin.ONE, IJoin.ONE));
+        connections.add(new ChildConnection(FeedType.INFUSIONSOFT_PRODUCT_TO_CATEGORY, FeedType.INFUSIONSOFT_PRODUCT_CATEGORY, InfusionsoftProductToCategorySource.PRODUCT_CATEGORY_ID, InfusionsoftProductCategorySource.CATEGORY_ID, IJoin.ONE, IJoin.ONE));
 
 
         return connections;

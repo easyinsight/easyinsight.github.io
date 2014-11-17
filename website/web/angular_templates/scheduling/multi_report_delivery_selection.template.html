@@ -1,8 +1,12 @@
 <form ng-submit="save_schedule()">
     <div class="row scheduleRow">
-        <div class="col-md-4">Label:</div>
-        <div class="col-md-8"><input class="form-control" type="text" ng-model="schedule.label" /></div>
+        <div class="col-md-6">What should this email be labeled as in Scheduling?</div>
+        <div class="col-md-6"><input class="form-control" type="text" ng-model="schedule.label" /></div>
     </div>
+    <div class="well" style="margin-top:10px">
+        <div class="row" style="text-align: center;margin-top: 0">
+            <h2 style="margin-top: 0;color: #333333;font-size: 16px">Add a Report or Dashboard to the Email</h2>
+        </div>
 <div class="row scheduleRow">
     <div class="col-md-4">Data Source Name:</div>
     <div class="col-md-8"><input class="form-control" type="text" ng-model="ds_name" placeholder="Search for a data source..."
@@ -19,8 +23,14 @@
 </div>
 
 <div class="row scheduleRow">
-     <div class="col-md-4"><button type="button" class="btn btn-primary" ng-click="add_report()">Add Report/Dashboard</button></div><div class="col-md-8"><button type="button" class="btn btn-danger pull-right" ng-click="delete_selected()">Delete Selected</button></div>
+     <div class="col-md-4"><button type="button" class="btn btn-primary" ng-click="add_report()">Add Report/Dashboard</button></div><div class="col-md-8"></div>
  </div>
+    </div>
+    <div class="row scheduleRow">
+        <div class="col-md-8 col-md-offset-4">
+            <button type="button" class="btn btn-danger pull-right" ng-click="delete_selected()">Delete Selected</button>
+        </div>
+    </div>
 <div class="row scheduleRow">
     <div class="col-md-12">
         <table class="table table-bordered table-condensed reportDashboardTable">
