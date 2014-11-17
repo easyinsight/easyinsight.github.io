@@ -129,7 +129,11 @@
         } finally {
             Database.closeConnection(c);
         }
-        boolean onlyTopReports = userObject.getBoolean("onlyTopReports");
+        boolean onlyTopReports = false;
+        try {
+            onlyTopReports = userObject.getBoolean("onlyTopReports");
+        } catch (Exception e) {
+        }
 %>
 
 <head>
