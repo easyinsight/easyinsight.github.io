@@ -6,6 +6,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -29,6 +30,7 @@ public class InfusionsoftOrderItemSource extends InfusionsoftTableSource {
     public static final String CPU = "CPU";
     public static final String PPU = "PPU";
     public static final String ITEM_TYPE = "ItemType";
+    public static final String ITEM_NAME = "ItemName";
 
     public InfusionsoftOrderItemSource() {
         setFeedName("Order Item");
@@ -39,24 +41,17 @@ public class InfusionsoftOrderItemSource extends InfusionsoftTableSource {
         return FeedType.INFUSIONSOFT_ORDER_ITEM;
     }
 
-    @NotNull
     @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(ORDER_ITEM_ID, ORDER_ID, PRODUCT_ID, SUBSCRIPTION_PLAN_ID, QUANTITY, CPU, PPU, ITEM_TYPE);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(ORDER_ITEM_ID), "Order Item ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(ORDER_ID), "Order Item Order ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Order Item Product ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(SUBSCRIPTION_PLAN_ID), "Order Item Subscription Plan ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(ITEM_TYPE), "Order Item Type"));
-        analysisitems.add(new AnalysisMeasure(keys.get(QUANTITY), "Order Item Quantity", AggregationTypes.SUM));
-        analysisitems.add(new AnalysisMeasure(keys.get(CPU), "CPU", AggregationTypes.SUM));
-        analysisitems.add(new AnalysisMeasure(keys.get(PPU), "PPU", AggregationTypes.SUM));
-        return analysisitems;
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(ORDER_ITEM_ID, new AnalysisDimension("Order Item ID"));
+        fieldBuilder.addField(ORDER_ID, new AnalysisDimension("Order Item Order ID"));
+        fieldBuilder.addField(PRODUCT_ID, new AnalysisDimension("Order Item Product ID"));
+        fieldBuilder.addField(ITEM_NAME, new AnalysisDimension("Order Item Name"));
+        fieldBuilder.addField(SUBSCRIPTION_PLAN_ID, new AnalysisDimension("Order Item Subscription Plan ID"));
+        fieldBuilder.addField(ITEM_TYPE, new AnalysisDimension("Order Item Type"));
+        fieldBuilder.addField(QUANTITY, new AnalysisMeasure("Order Item Quantity"));
+        fieldBuilder.addField(CPU, new AnalysisMeasure("CPU"));
+        fieldBuilder.addField(PPU, new AnalysisMeasure("PPU"));
     }
 
     @Override

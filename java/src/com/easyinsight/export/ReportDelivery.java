@@ -428,6 +428,9 @@ public class ReportDelivery extends ScheduledDelivery {
     }
 
     public String describe() {
+        String s = getDeliveryLabel();
+        if(s != null && !s.trim().isEmpty())
+            return s;
         String type;
         switch (reportFormat) {
             case 1:

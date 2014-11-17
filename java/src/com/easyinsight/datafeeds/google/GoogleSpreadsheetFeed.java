@@ -13,6 +13,7 @@ import com.google.gdata.client.authn.oauth.OAuthSigner;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.util.ResourceNotFoundException;
 
 import java.util.Set;
 import java.util.Collection;
@@ -99,6 +100,8 @@ public class GoogleSpreadsheetFeed extends Feed {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (OAuthException oe) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
+        } catch (ResourceNotFoundException re) {
+            throw new ReportException(new DataSourceConnectivityReportFault("We couldn't find the specified spreadsheet anymore--was it deleted?", getDataSource()));
         } catch (Exception e) {
             if (e.getCause() != null && e.getCause() instanceof OAuthException) {
                 throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));

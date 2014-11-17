@@ -23,7 +23,7 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
 
     @Override
     public boolean allows(Value value) {
-        if (this.value == 0) {
+        if (type != AnalysisDateDimension.MONTH_LEVEL && this.value == 0) {
             return true;
         }
         if (value.type() == Value.DATE) {

@@ -238,6 +238,7 @@
             })
 
             $scope.addables = function() {
+
                 return [].concat($scope.groups.map(function(e, i, l) { return {label: e.name, type: "group", data: e};})).concat($scope.users.map(function(e, i, l) { return {label: $scope.full_name(e), type: "user", data: e};}));
             };
             $scope.add_selected = function() {
@@ -380,50 +381,50 @@
                 var v = {
                     format: $scope.selected_report == 'report' ? "excel2007" : "pdf",
                     id: $scope.selected_report.id,
+                    url_key: $scope.selected_report.url_key,
                     type: $scope.selected_report.type,
                     send_if_no_data: true,
-                    name: $scope.selected_report.name
-                }
+                    name: $scope.selected_report.name,
+                    configuration_id: 0
+                };
                 if(v.format == "pdf") {
                     v.delivery_info = {
                         show_header: false,
                         orientation: "Landscape"
-                    }
+                    };
                 }
                 $scope.schedule.delivery_info.push(v);
             }
-        }
+        };
         $scope.isSelected = function(val) {
             return val && typeof(val) === "object"
         };
 
         $scope.delete_selected = function() {
             $scope.schedule.delivery_info = $scope.schedule.delivery_info.filter(function(e, i, l) { return !e.selected; })
-        }
+        };
 
 
-        $scope.select_delivery = function(item) {
-            $scope.selected_delivery = item;
+        $scope.get_schedule_configurations = function(item) {
             $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
-                $scope.schedule_configurations = d.data.configurations;
+                item.possible_configurations = d.data.configurations;
             });
-        }
-
+        };
         $scope.default_added = function(a) {
             return [{"name": "Default Configuration", "url_key": "", "id": 0}].concat(a);
         };
 
-        $scope.checkPDF = function() {
-            if($scope.selected_delivery.format == "pdf") {
-                if(typeof($scope.selected_delivery.delivery_info) == "undefined") {
-                    $scope.selected_delivery.delivery_info = {
+        $scope.checkPDF = function(item) {
+            if(item.format == "pdf") {
+                if(typeof(item.delivery_info) == "undefined") {
+                    item.delivery_info = {
                         show_header: false,
                         orientation: "Landscape"
                     }
                 }
             } else {
-                if(typeof($scope.selected_delivery.delivery_info) != "undefined") {
-                    delete $scope.selected_delivery.delivery_info;
+                if(typeof(item.delivery_info) != "undefined") {
+                    delete item.delivery_info;
                 }
             }
         }

@@ -139,7 +139,7 @@
                     var fault:ReportFault = callData.result as ReportFault;
                     Alert.show(fault.getMessage());
                 } else {
-                    Alert.show("Something went wrong in trying to retrive data. Please double check your configuration information.");
+                    Alert.show("Something went wrong in trying to retrieve data. Please double check your configuration information.");
                 }
             } else if (callData.status == CallData.RUNNING) {
                 if (callData.result != null) {

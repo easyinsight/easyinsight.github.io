@@ -3711,6 +3711,10 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
         hasFocus = false;
       });
 
+      element.bind('focus', function(evt) {
+        //console.log("should open now")
+      })
+
       // Keep reference to click handler to unbind it.
       var dismissClickHandler = function (evt) {
         if (element[0] !== evt.target) {

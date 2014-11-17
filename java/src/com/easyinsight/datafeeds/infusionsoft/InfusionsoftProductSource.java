@@ -5,6 +5,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -24,6 +25,38 @@ public class InfusionsoftProductSource extends InfusionsoftTableSource {
     public static final String PRODUCT_NAME = "ProductName";
     public static final String PRODUCT_PRICE = "ProductPrice";
     public static final String PRODUCT_SKU = "Sku";
+    public static final String CITY_TAXABLE = "CityTaxable";
+    public static final String COUNTRY_TAXABLE = "CountryTaxable";
+    public static final String DESCRIPTION = "Description";
+    public static final String INVENTORY_LIMIT = "InventoryLimit";
+    public static final String IS_PACKAGE = "IsPackage";
+    public static final String NEEDS_DIGITAL_DELIVERY = "NeedsDigitalDelivery";
+    public static final String SHIPPABLE = "Shippable";
+    public static final String SHORT_DESCRIPTION = "ShortDescription";
+    public static final String STATE_TAXABLE = "StateTaxable";
+    public static final String TAXABLE = "Taxable";
+    public static final String WEIGHT = "Weight";
+    public static final String STATUS = "Status";
+
+    @Override
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(PRODUCT_ID, new AnalysisDimension("Product ID"));
+        fieldBuilder.addField(PRODUCT_NAME, new AnalysisDimension("Product Name"));
+        fieldBuilder.addField(PRODUCT_SKU, new AnalysisDimension("Product SKU"));
+        fieldBuilder.addField(PRODUCT_PRICE, new AnalysisMeasure("Product Price", AggregationTypes.SUM, FormattingConfiguration.CURRENCY));
+        fieldBuilder.addField(CITY_TAXABLE, new AnalysisDimension("City Taxable"));
+        fieldBuilder.addField(COUNTRY_TAXABLE, new AnalysisDimension("Country Taxable"));
+        fieldBuilder.addField(STATE_TAXABLE, new AnalysisDimension("State Taxable"));
+        fieldBuilder.addField(TAXABLE, new AnalysisDimension("Taxable"));
+        fieldBuilder.addField(DESCRIPTION, new AnalysisDimension("Product Description"));
+        fieldBuilder.addField(SHORT_DESCRIPTION, new AnalysisDimension("Product Short Description"));
+        fieldBuilder.addField(NEEDS_DIGITAL_DELIVERY, new AnalysisDimension("Product Needs Digital Delivery"));
+        fieldBuilder.addField(SHIPPABLE, new AnalysisDimension("Product Shippable"));
+        fieldBuilder.addField(IS_PACKAGE, new AnalysisDimension("Product is Package"));
+        fieldBuilder.addField(WEIGHT, new AnalysisDimension("Product Weight"));
+        fieldBuilder.addField(INVENTORY_LIMIT, new AnalysisMeasure("Inventory Limit"));
+        fieldBuilder.addField(STATUS, new AnalysisDimension("Product Status"));
+    }
 
 
     public InfusionsoftProductSource() {
@@ -33,22 +66,6 @@ public class InfusionsoftProductSource extends InfusionsoftTableSource {
     @Override
     public FeedType getFeedType() {
         return FeedType.INFUSIONSOFT_PRODUCTS;
-    }
-
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return Arrays.asList(PRODUCT_ID, PRODUCT_NAME, PRODUCT_PRICE, PRODUCT_SKU);
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisitems = new ArrayList<AnalysisItem>();
-        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_ID), "Product ID"));
-        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_NAME), "Product Name"));
-        analysisitems.add(new AnalysisDimension(keys.get(PRODUCT_SKU), "Product SKU"));
-        analysisitems.add(new AnalysisMeasure(keys.get(PRODUCT_PRICE), "Product Price", AggregationTypes.SUM, true, FormattingConfiguration.CURRENCY));
-        return analysisitems;
     }
 
     @Override
