@@ -52,8 +52,8 @@ function captureAndReturn(o) {
         var id = o.report.id;
         var canvas = $("#gauge" + id);
         var canvasImageData = {};
-        canvasImageData.height = canvas.height();
-        canvasImageData.width = canvas.width();
+        canvasImageData.height = canvas.height() + 60;
+        canvasImageData.width = canvas.width() + 60;
         return canvasImageData;
     } else {
         var id = o.report.id;
@@ -1003,6 +1003,9 @@ $(function () {
                                 }, {});
                     var selMap = {};
                     selectionMap[target] = selMap;
+                    if (f.selected["All"]) {
+                        selMap["All"] = true;
+                    }
                     for (var mo in m) {
                         var selected = f.selected[mo];
                         if (selected || f.selected["All"]) {
@@ -1050,6 +1053,7 @@ $(function () {
                 f.filter.selected = selMap;
                 var selectVals = toSelectedArray(selMap);
                 var label;
+                console.log(selMap["All"]);
                 if(selMap["All"]) {
                     label = "All";
                 } else {
