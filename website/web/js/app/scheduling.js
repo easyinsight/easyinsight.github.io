@@ -307,6 +307,7 @@
     eiScheduling.controller("viewDeliverySchedulingEmailController", ["$scope", function($scope) {
         $scope.add_link = function() {
             insertAtCaret('body_text', "<a href='https://www.easy-insight.com/app/html/report/" + $scope.schedule.report_url_key + "'>View this report in Easy Insight</a>");
+            $scope.schedule.body = document.getElementById("body_text").value;
         }
 
     }])
