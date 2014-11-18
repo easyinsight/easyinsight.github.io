@@ -53,7 +53,7 @@
             <li <%= headerActive == HtmlConstants.CONNECTIONS ? "class=\"active\"" : ""%>><a
                     href="/app/html/connections/">Connections</a></li>
             <li <%= headerActive == HtmlConstants.SCHEDULING ? "class=\"active\"" : ""%>><a
-                    href="/a/scheduling">Scheduling</a></li>
+                    href="/app/embeddedScheduleManagement.jsp">Scheduling</a></li>
             <% } %>
         </ul>
         <% } %>
