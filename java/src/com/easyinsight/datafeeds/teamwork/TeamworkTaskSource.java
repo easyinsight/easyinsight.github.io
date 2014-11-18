@@ -89,6 +89,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
                     row.addValue(keys.get(TASK_CREATED_ON), getDate(project, "created-on"));
                     row.addValue(keys.get(TASK_PROGRESS), getValue(project, "progress"));
                     row.addValue(keys.get(TASK_RESPONSIBLE_PARTY), getValue(project, "responsible-party-summary"));
+                    row.addValue(keys.get(TASK_CREATOR), getValue(project, "creator-firstname") + " " + getValue(project, "creator-lastname"));
                     row.addValue(keys.get(TASK_TODO_LIST_ID), getValue(project, "todo-list-id"));
                     row.addValue(keys.get(TASK_PRIORITY), getValue(project, "priority"));
                     row.addValue(keys.get(TASK_STATUS), getValue(project, "status"));
