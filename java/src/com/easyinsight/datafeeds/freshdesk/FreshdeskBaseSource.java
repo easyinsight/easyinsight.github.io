@@ -98,7 +98,9 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
                 } else if (restMethod.getStatusCode() == 401) {
                     throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
                 } else if (restMethod.getStatusCode() == 403) {
-                    int retryAfter = Integer.parseInt(restMethod.getResponseHeader("retry-after").toString());
+                    String retry = restMethod.getResponseHeader("retry-after").toString();
+                    String f = retry.substring("Retry-After: ".length());
+                    int retryAfter = Integer.parseInt(f);
                     System.out.println("Told to retry after " + retryAfter);
                     Thread.sleep(retryAfter * 1000);
                     retryCount++;
