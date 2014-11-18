@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.teamwork;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 
@@ -81,7 +82,7 @@ public class TeamworkCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getDataSourceType() {
-        return DataSourceInfo.STORED_PULL;
+        return DataSourceInfo.COMPOSITE_PULL;
     }
 
     @Override
@@ -93,6 +94,23 @@ public class TeamworkCompositeSource extends CompositeServerDataSource {
         types.add(FeedType.TEAMWORK_MILESTONE);
         types.add(FeedType.TEAMWORK_TIME);
         return types;
+    }
+
+    protected List<IServerDataSourceDefinition> sortSources(List<IServerDataSourceDefinition> children) {
+        List<IServerDataSourceDefinition> end = new ArrayList<IServerDataSourceDefinition>();
+        Set<Integer> set = new HashSet<Integer>();
+        for (IServerDataSourceDefinition s : children) {
+            if (s.getFeedType().getType() == FeedType.TEAMWORK_PROJECT.getType()) {
+                set.add(s.getFeedType().getType());
+                end.add(s);
+            }
+        }
+        for (IServerDataSourceDefinition s : children) {
+            if (!set.contains(s.getFeedType().getType())) {
+                end.add(s);
+            }
+        }
+        return end;
     }
 
     @Override

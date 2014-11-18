@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -133,30 +134,67 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
         }
 
         List<String> ticketIDs = new ArrayList<>();
+        Map<String, Date> ticketIDToUpdateTime = new HashMap<>();
+        Map<String, IRow> ticketIDToDisplayID = new HashMap<>();
         Map<String, List<Map>> statusUpdates = new HashMap<>();
         Map<String, List<Map>> assignmentUpdates = new HashMap<>();
         Map<String, List<Map>> addedNotes = new HashMap<>();
         Map<String, List<Map>> surveyMap = new HashMap<>();
+        boolean surveysLocked = false;
+        int reqCtr = 0;
         do {
             ctr = 0;
+            loadingProgress(1, 1, "Retrieving general ticket information from Freshdesk...", callDataID);
             List responseList;
             if (page == 1) {
                 responseList = runRestRequestForList("tickets.json?filter_name=all_tickets", client, freshdeskCompositeSource);
             } else {
                 responseList = runRestRequestForList("tickets.json?filter_name=all_tickets&page=" + page, client, freshdeskCompositeSource);
             }
-            boolean surveysLocked = false;
+            reqCtr++;
+
             for (Object obj : responseList) {
                 ctr++;
                 Map map = (Map) obj;
                 String id = map.get("id").toString();
-                String displayID = getJSONValue(map, "display_id");
-
+                //String displayID = getJSONValue(map, "display_id");
+                ticketIDs.add(id);
 
 
                 IRow row = dataSet.createRow();
                 Date updatedAt = createTicket(keys, map, id, row, freshdeskCompositeSource);
-                if (lastRefreshDate.before(updatedAt)) {
+                ticketIDToUpdateTime.put(id, updatedAt);
+                ticketIDToDisplayID.put(id, row);
+            }
+            page++;
+            if (reqCtr == 800) {
+                LogClass.error("Had to break early retrieving tickets, too many...");
+                break;
+            }
+        } while (ctr == 30);
+
+        List<String> detailIDs = new ArrayList<>(ticketIDs);
+        Collections.sort(detailIDs, (o1, o2) -> ticketIDToUpdateTime.get(o2).compareTo(ticketIDToUpdateTime.get(o1)));
+
+        int threshold = 200;
+        if (reqCtr == 800) {
+            threshold = 1;
+        }
+
+        if (detailIDs.size() > threshold) {
+            detailIDs = detailIDs.subList(0, threshold);
+        }
+
+        int detailCtr = 0;
+        for (String detailID : detailIDs) {
+
+            loadingProgress(detailCtr, detailIDs.size(), "Retrieving history for ticket " + detailCtr + " of " + detailIDs.size() + "...", callDataID);
+            detailCtr++;
+            IRow row = ticketIDToDisplayID.get(detailID);
+            String displayID = row.getValue(keys.get(DISPLAY_ID)).toString();
+            Date updatedAt = ticketIDToUpdateTime.get(detailID);
+            //if (lastRefreshDate.before(updatedAt)) {
+                try {
                     List<Map> activities = runRestRequestForList("tickets/activities/" + displayID + ".json", client, freshdeskCompositeSource);
                     ticketIDs.add(displayID);
                     List<Map> statusUpdateList = new LinkedList<>();
@@ -201,7 +239,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
 
                     boolean closed = false;
                     Value resolvedAt = null;
-                    DateValue createdAt = (DateValue) getDate(map, "created_at");
+                    DateValue createdAt = (DateValue) row.getValue(keys.get(CREATED_AT));
                     ZonedDateTime zdt = createdAt.getDate().toInstant().atZone(ZoneId.systemDefault());
                     TicketAnalysis ticketAnalysis = new TicketAnalysis(zdt);
                     for (Object activityObject : statusUpdateList) {
@@ -236,10 +274,12 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                     row.addValue(keys.get(AGENT_TOUCHES), ticketAnalysis.getAgentHandles());
                     row.addValue(keys.get(CUSTOMER_TOUCHES), ticketAnalysis.getCustomerHandles());
                     row.addValue(keys.get(RESOLVED_AT), resolvedAt);
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
-            }
-            page++;
-        } while (ctr == 30);
+            //}
+        }
+
         freshdeskCompositeSource.setAssignmentUpdates(assignmentUpdates);
         freshdeskCompositeSource.setStatusUpdates(statusUpdates);
         freshdeskCompositeSource.setNotes(addedNotes);

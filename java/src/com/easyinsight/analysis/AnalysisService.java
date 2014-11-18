@@ -207,6 +207,9 @@ public class AnalysisService {
     public String saveReportLink(long reportID, DashboardStackPositions dashboardStackPositions) {
         EIConnection conn = Database.instance().getConnection();
         try {
+            if (dashboardStackPositions == null) {
+                dashboardStackPositions = new DashboardStackPositions();
+            }
             long id = dashboardStackPositions.save(conn, 0, reportID);
             PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO DASHBOARD_LINK (dashboard_state_id, url_key) VALUES (?, ?)");
             saveStmt.setLong(1, id);
