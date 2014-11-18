@@ -25,6 +25,11 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
         return query(table, fieldList, infusionsoftCompositeSource, new HashSet<String>());
     }
 
+    @Override
+    public boolean isMigrateRequired() {
+        return false;
+    }
+
     protected DataSet query(String table, List<AnalysisItem> fieldList, InfusionsoftCompositeSource infusionsoftCompositeSource, Collection<String> skip) throws MalformedURLException, XmlRpcException {
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
         List<String> fields = new ArrayList<String>();
