@@ -63,18 +63,20 @@ public class TeamworkTimeSource extends TeamworkBaseSource {
                 resultCount = 0;
                 Map results = runRestRequestForMap("time_entries.json?page=" + page + "&pageSize=250", httpClient, teamworkCompositeSource);
                 List<Map> projects = (List<Map>) results.get("time-entries");
-                for (Map project : projects) {
-                    IRow row = dataSet.createRow();
-                    row.addValue(keys.get(TIME_ENTRY_TODO_ID), getValue(project, "todo-item-id"));
-                    row.addValue(keys.get(TIME_ENTRY_ID), getValue(project, "id"));
-                    row.addValue(keys.get(TIME_ENTRY_TODO_LIST_ID), getValue(project, "todo-list-id"));
-                    row.addValue(keys.get(TIME_ENTRY_BILLABLE), "0".equals(getValue(project, "isbillable")) ? "Not Billable" : "Billable");
-                    row.addValue(keys.get(TIME_ENTRY_COUNT), 1);
-                    row.addValue(keys.get(TIME_ENTRY_DATE), getDate(project, "date"));
-                    row.addValue(keys.get(TIME_ENTRY_PERSON), getValue(project, "person-first-name") + " " + getValue(project, "person-last-name"));
-                    row.addValue(keys.get(TIME_ENTRY_PROJECT_ID), getValue(project, "project-id"));
-                    row.addValue(keys.get(TIME_ENTRY_TIME), Double.parseDouble(getValue(project, "hours")) + Double.parseDouble(getValue(project, "minutes")) / 60);
-                    resultCount++;
+                if (projects != null) {
+                    for (Map project : projects) {
+                        IRow row = dataSet.createRow();
+                        row.addValue(keys.get(TIME_ENTRY_TODO_ID), getValue(project, "todo-item-id"));
+                        row.addValue(keys.get(TIME_ENTRY_ID), getValue(project, "id"));
+                        row.addValue(keys.get(TIME_ENTRY_TODO_LIST_ID), getValue(project, "todo-list-id"));
+                        row.addValue(keys.get(TIME_ENTRY_BILLABLE), "0".equals(getValue(project, "isbillable")) ? "Not Billable" : "Billable");
+                        row.addValue(keys.get(TIME_ENTRY_COUNT), 1);
+                        row.addValue(keys.get(TIME_ENTRY_DATE), getDate(project, "date"));
+                        row.addValue(keys.get(TIME_ENTRY_PERSON), getValue(project, "person-first-name") + " " + getValue(project, "person-last-name"));
+                        row.addValue(keys.get(TIME_ENTRY_PROJECT_ID), getValue(project, "project-id"));
+                        row.addValue(keys.get(TIME_ENTRY_TIME), Double.parseDouble(getValue(project, "hours")) + Double.parseDouble(getValue(project, "minutes")) / 60);
+                        resultCount++;
+                    }
                 }
             } while (resultCount == 250);
             return dataSet;
