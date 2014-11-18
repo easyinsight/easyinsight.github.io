@@ -71,7 +71,9 @@ public class TeamworkMilestoneSource extends TeamworkBaseSource {
                 row.addValue(keys.get(MILESTONE_CREATED_ON), getDate(milestone, "created-on"));
                 row.addValue(keys.get(MILESTONE_COMPLETED_ON), getDate(milestone, "completed-on"));
                 row.addValue(keys.get(MILESTONE_DEADLINE), getDeadlineDate(milestone, "deadline"));
-                row.addValue(keys.get(MILESTONE_COMPLETER), getValue(milestone, "completer-firstname") + " " + getValue(milestone, "completer-lastname"));
+                if (getValue(milestone, "completer-lastname") != null) {
+                    row.addValue(keys.get(MILESTONE_COMPLETER), getValue(milestone, "completer-firstname") + " " + getValue(milestone, "completer-lastname"));
+                }
             }
             return dataSet;
         } catch (Exception e) {
