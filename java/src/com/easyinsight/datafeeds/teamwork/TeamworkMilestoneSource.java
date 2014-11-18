@@ -64,7 +64,9 @@ public class TeamworkMilestoneSource extends TeamworkBaseSource {
                 row.addValue(keys.get(MILESTONE_ID), getValue(milestone, "id"));
                 row.addValue(keys.get(MILESTONE_NAME), getValue(milestone, "title"));
                 row.addValue(keys.get(MILESTONE_PROJECT_ID), getValue(milestone, "project-id"));
-                row.addValue(keys.get(MILESTONE_RESPONSIBLE_PARTY), getValue(milestone, "responsible-party-firstname") + " " + getValue(milestone, "responsible-party-lastname"));
+                if (getValue(milestone, "responsible-party-lastname") != null) {
+                    row.addValue(keys.get(MILESTONE_RESPONSIBLE_PARTY), getValue(milestone, "responsible-party-firstname") + " " + getValue(milestone, "responsible-party-lastname"));
+                }
                 row.addValue(keys.get(MILESTONE_STATUS), getValue(milestone, "status"));
                 row.addValue(keys.get(MILESTONE_CREATED_ON), getDate(milestone, "created-on"));
                 row.addValue(keys.get(MILESTONE_COMPLETED_ON), getDate(milestone, "completed-on"));
