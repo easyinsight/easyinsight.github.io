@@ -3462,7 +3462,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       //SUPPORTED ATTRIBUTES (OPTIONS)
 
       //minimal no of characters that needs to be entered before typeahead kicks-in
-      var minSearch = originalScope.$eval(attrs.typeaheadMinLength) || 1;
+      var minSearch = originalScope.$eval(attrs.typeaheadMinLength) || 0;
 
       //minimal wait time after last character typed before typehead kicks-in
       var waitTime = originalScope.$eval(attrs.typeaheadWaitMs) || 0;
@@ -3541,14 +3541,13 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       });
 
       var getMatchesAsync = function(inputValue) {
-
         var locals = {$viewValue: inputValue};
         isLoadingSetter(originalScope, true);
         $q.when(parserResult.source(originalScope, locals)).then(function(matches) {
-
           //it might happen that several async queries were in progress if a user were typing fast
           //but we are interested only in responses that correspond to the current view value
-          var onCurrentRequest = (inputValue === modelCtrl.$viewValue);
+
+          var onCurrentRequest = typeof(modelCtrl.$viewValue) == "undefined" || (inputValue === modelCtrl.$viewValue);
           if (onCurrentRequest && hasFocus) {
             if (matches.length > 0) {
 
@@ -3596,11 +3595,10 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
       //plug into $parsers pipeline to open a typeahead on view changes initiated from DOM
       //$parsers kick-in on all the changes coming from the view as well as manually triggered by $setViewValue
-      modelCtrl.$parsers.unshift(function (inputValue) {
+      var f = function (inputValue) {
 
         hasFocus = true;
-
-        if (inputValue && inputValue.length >= minSearch) {
+        if (typeof(inputValue) != "undefined" && inputValue.length >= minSearch) {
           if (waitTime > 0) {
             if (timeoutPromise) {
               $timeout.cancel(timeoutPromise);//cancel previous timeout
@@ -3628,7 +3626,8 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
             return undefined;
           }
         }
-      });
+      };
+      modelCtrl.$parsers.unshift(f);
 
       modelCtrl.$formatters.push(function (modelValue) {
 
@@ -3712,7 +3711,8 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       });
 
       element.bind('focus', function(evt) {
-        //console.log("should open now")
+        console.log('here')
+        f("");
       })
 
       // Keep reference to click handler to unbind it.
