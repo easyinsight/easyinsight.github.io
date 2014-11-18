@@ -470,6 +470,8 @@ public class ReportDelivery extends ScheduledDelivery {
         jo.put("data_source_id", getDataSourceID());
         jo.put("delivery_label", getDeliveryLabel());
         jo.put("configuration_id", getConfigurationID());
+        jo.put("report_url_key", getReportUrlKey());
+        jo.put("configuration_url_key", getConfigurationUrlKey());
         if(getDeliveryExtension() != null)
             jo.put("delivery_info", getDeliveryExtension().toJSON(md));
         return jo;
