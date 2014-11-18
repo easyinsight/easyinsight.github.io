@@ -94,6 +94,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
                     row.addValue(keys.get(TASK_PRIORITY), getValue(project, "priority"));
                     row.addValue(keys.get(TASK_STATUS), getValue(project, "status"));
                     row.addValue(keys.get(TASK_DUE_DATE), getDeadlineDate(project, "due-date"));
+                    row.addValue(keys.get(TASK_COMPLETED), getValue(project, "completed"));
                     resultCount++;
                 }
             } while (resultCount == 250);
