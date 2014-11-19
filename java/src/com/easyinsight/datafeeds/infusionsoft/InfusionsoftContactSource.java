@@ -120,7 +120,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
                 }
                 row.addValue(keys.get(NAME), name);
                 row.addValue(keys.get(CONTACT_COUNT), 1);
-                row.addValue(keys.get(CONTACT_URL), infusionsoftCompositeSource.getUrl() + "/Contact/managerContact.jsp?view=edit&id=" + row.getValue(keys.get(ID)));
+                row.addValue(keys.get(CONTACT_URL), infusionsoftCompositeSource.getUrl() + "/Contact/manageContact.jsp?view=edit&id=" + row.getValue(keys.get(ID)));
                 row.addValue(LEAD_SOURCE, infusionsoftCompositeSource.getLeadSourceCache().get(row.getValue(new NamedKey(LEAD_SOURCE_ID)).toString()));
                 String ownerID = row.getValue(keys.get(OWNER_ID)).toString();
                 String ownerName = infusionsoftCompositeSource.getUserCache().get(ownerID);
