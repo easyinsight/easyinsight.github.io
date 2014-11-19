@@ -3711,7 +3711,6 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       });
 
       element.bind('focus', function(evt) {
-        console.log('here')
         f("");
       })
 
