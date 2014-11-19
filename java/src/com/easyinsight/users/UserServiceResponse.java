@@ -727,7 +727,6 @@ public class UserServiceResponse {
                     id.setDescription(reportRS.getString(6));
                     reports.add(id);
                 } catch (Exception e) {
-                    LogClass.error(e);
                     // ignore
                 }
             }
@@ -748,7 +747,6 @@ public class UserServiceResponse {
                     dd.setDescription(dashboardRS.getString(5));
                     reports.add(dd);
                 } catch (Exception e) {
-                    LogClass.error(e);
                     // ignore
                 }
             }

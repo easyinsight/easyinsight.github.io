@@ -1,4 +1,39 @@
 (function() {
+
+    function insertAtCaret(areaId,text) {
+        var txtarea = document.getElementById(areaId);
+        var scrollPos = txtarea.scrollTop;
+        var strPos = 0;
+        var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ?
+            "ff" : (document.selection ? "ie" : false ) );
+        if (br == "ie") {
+            txtarea.focus();
+            var range = document.selection.createRange();
+            range.moveStart ('character', -txtarea.value.length);
+            strPos = range.text.length;
+        }
+        else if (br == "ff") strPos = txtarea.selectionStart;
+
+        var front = (txtarea.value).substring(0,strPos);
+        var back = (txtarea.value).substring(strPos,txtarea.value.length);
+        txtarea.value=front+text+back;
+        strPos = strPos + text.length;
+        if (br == "ie") {
+            txtarea.focus();
+            var range = document.selection.createRange();
+            range.moveStart ('character', -txtarea.value.length);
+            range.moveStart ('character', strPos);
+            range.moveEnd ('character', 0);
+            range.select();
+        }
+        else if (br == "ff") {
+            txtarea.selectionStart = strPos;
+            txtarea.selectionEnd = strPos;
+            txtarea.focus();
+        }
+        txtarea.scrollTop = scrollPos;
+    }
+
     var eiScheduling = angular.module("eiScheduling", []);
 
     eiScheduling.controller("schedulingBaseController", ["$scope", "$http", function($scope, $http) {
@@ -269,7 +304,11 @@
         })
     }]);
 
-    eiScheduling.controller("viewDeliverySchedulingEmailController", [function() {
+    eiScheduling.controller("viewDeliverySchedulingEmailController", ["$scope", function($scope) {
+        $scope.add_link = function() {
+            insertAtCaret('body_text', "<a href='https://www.easy-insight.com/app/html/report/" + $scope.schedule.report_url_key + "'>View this report in Easy Insight</a>");
+            $scope.schedule.body = document.getElementById("body_text").value;
+        }
 
     }])
 
@@ -351,12 +390,14 @@
             return val && typeof(val) === "object"
         };
         $scope.select_data_source = function(item) {
+            $scope.schedule.data_source_id = item.id;
             $scope.report_loading = $http.get("/app/dataSources/" + item.url_key + "/reports.json").then(function(d) {
                 $scope.reports = d.data.reports.filter(function(e, i, l) { return e.type == "report" });
             });
         };
         $scope.select_report = function(item) {
             $scope.schedule.report_id = item.id;
+            $scope.schedule.report_url_key = item.url_key;
             $http.get("/app/html/" + item.type + "/" + item.url_key + "/data.json").then(function(d) {
                 $scope.configurations = d.data.configurations;
             });

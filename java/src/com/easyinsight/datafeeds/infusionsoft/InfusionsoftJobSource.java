@@ -44,6 +44,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
     public static final String SHIP_STREET1 = "ShipStreet1";
     public static final String SHIP_STREET2 = "ShipStreet2";
     public static final String SHIP_ZIP = "ShipZip";
+    public static final String ORDER_URL = "Order URL";
 
     public InfusionsoftJobSource() {
         setFeedName("Order");
@@ -75,6 +76,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
         fieldBuilder.addField(SHIP_STREET1, new AnalysisDimension("Order Ship Street 1"));
         fieldBuilder.addField(SHIP_STREET2, new AnalysisDimension("Order Ship Street 2"));
         fieldBuilder.addField(SHIP_ZIP, new AnalysisDimension("Order Ship Zip"));
+        fieldBuilder.addField(ORDER_URL, new AnalysisDimension("Order URL"));
         InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
         List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-9);
         if (customFields != null) {
@@ -87,7 +89,8 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            DataSet jobs = query("Job", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(JOB_COUNT));
+            InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
+            DataSet jobs = query("Job", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(JOB_COUNT, ORDER_URL));
             for (IRow row : jobs.getRows()) {
                 Key orderStatusKey = new NamedKey(ORDER_STATUS);
                 Value orderStatus = row.getValue(orderStatusKey);
@@ -96,6 +99,7 @@ public class InfusionsoftJobSource extends InfusionsoftTableSource {
                 } else {
                     row.addValue(orderStatusKey, "Unpaid");
                 }
+                row.addValue(keys.get(ORDER_URL), infusionsoftCompositeSource.getUrl() + "/Job/manageJob.jsp?view=edit&id=" + row.getValue(keys.get(JOB_ID)));
                 row.addValue(keys.get(JOB_COUNT), 1);
             }
             return jobs;

@@ -36,7 +36,11 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String OWNER_ID = "OwnerID";
     public static final String OWNER_NAME = "Contact Owner Name";
     public static final String POSTAL_CODE = "PostalCode";
+    public static final String POSTAL_CODE2 = "PostalCode2";
+    public static final String POSTAL_CODE3 = "PostalCode3";
     public static final String STATE = "State";
+    public static final String STATE2 = "State2";
+    public static final String STATE3 = "State3";
     public static final String CITY = "City";
     public static final String PHONE1 = "Phone1";
     public static final String PHONE2 = "Phone2";
@@ -45,6 +49,8 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
     public static final String BIRTHDAY = "Birthday";
     public static final String REFERRAL_CODE = "ReferralCode";
     public static final String STREET_ADDRESS1 = "StreetAddress1";
+    public static final String STREET_ADDRESS2 = "Address2Street1";
+    public static final String STREET_ADDRESS3 = "Address3Street1";
 
     public InfusionsoftContactSource() {
         setFeedName("Contacts");
@@ -80,6 +86,12 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         fieldBuilder.addField(BIRTHDAY, new AnalysisDimension());
         fieldBuilder.addField(REFERRAL_CODE, new AnalysisDimension());
         fieldBuilder.addField(STREET_ADDRESS1, new AnalysisDimension());
+        fieldBuilder.addField(STREET_ADDRESS2, new AnalysisDimension());
+        fieldBuilder.addField(STREET_ADDRESS3, new AnalysisDimension());
+        fieldBuilder.addField(STATE2, new AnalysisDimension("Contact State 2"));
+        fieldBuilder.addField(STATE3, new AnalysisDimension("Contact State 3"));
+        fieldBuilder.addField(POSTAL_CODE2, new AnalysisDimension("Contact Postal Code 2"));
+        fieldBuilder.addField(POSTAL_CODE3, new AnalysisDimension("Contact Postal Code 3"));
         InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
         List<CustomField> customFields = infusionsoftCompositeSource.getCache().getCustomFieldMap().get(-1);
         if (customFields != null) {
@@ -94,7 +106,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
         try {
             InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
             DataSet dataSet = query("Contact", createAnalysisItems(keys, conn, parentDefinition), infusionsoftCompositeSource, Arrays.asList(NAME, CONTACT_COUNT,
-                    LEAD_SOURCE, CONTACT_URL, OWNER_NAME, POSTAL_CODE, STATE, CITY));
+                    LEAD_SOURCE, CONTACT_URL, OWNER_NAME));
             for (IRow row : dataSet.getRows()) {
                 String firstName = row.getValue(keys.get(FIRST_NAME)).toString();
                 String lastName = row.getValue(keys.get(LAST_NAME)).toString();
@@ -108,7 +120,7 @@ public class InfusionsoftContactSource extends InfusionsoftTableSource {
                 }
                 row.addValue(keys.get(NAME), name);
                 row.addValue(keys.get(CONTACT_COUNT), 1);
-                row.addValue(keys.get(CONTACT_URL), infusionsoftCompositeSource.getUrl() + "/Contact/managerContact.jsp?view=edit&id=" + row.getValue(keys.get(ID)));
+                row.addValue(keys.get(CONTACT_URL), infusionsoftCompositeSource.getUrl() + "/Contact/manageContact.jsp?view=edit&id=" + row.getValue(keys.get(ID)));
                 row.addValue(LEAD_SOURCE, infusionsoftCompositeSource.getLeadSourceCache().get(row.getValue(new NamedKey(LEAD_SOURCE_ID)).toString()));
                 String ownerID = row.getValue(keys.get(OWNER_ID)).toString();
                 String ownerName = infusionsoftCompositeSource.getUserCache().get(ownerID);
