@@ -498,7 +498,7 @@
 
     <rule>
         <from>^/connectionDataSourceImage/([A-Za-z0-9]+)</from>
-        <to>/connectionImageByDataSource?connectionID=$1</to>
+        <to>/connectionImageByDataSource?dataSourceType=$1</to>
     </rule>
 
     <rule>
