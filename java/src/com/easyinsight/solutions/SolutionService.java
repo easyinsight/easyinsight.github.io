@@ -996,7 +996,7 @@ public class SolutionService {
             accountType = SecurityUtil.getAccountTier();
         }
         PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, INDUSTRY, COPY_DATA, SOLUTION_ARCHIVE_NAME," +
-                "solution_image, solution_tier, logo_link, data_source_type FROM SOLUTION WHERE SOLUTION_ID = ?");
+                "solution_image, solution_tier, logo_link, data_source_type FROM SOLUTION WHERE DATA_SOURCE_TYPE = ?");
         getSolutionsStmt.setInt(1, dataSourceType);
         ResultSet rs = getSolutionsStmt.executeQuery();
         if (rs.next()) {
