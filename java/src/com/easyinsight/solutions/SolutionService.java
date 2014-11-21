@@ -988,6 +988,38 @@ public class SolutionService {
         }
     }
 
+    public Solution solutionForDataSourceType(int dataSourceType, EIConnection conn) throws SQLException {
+        int accountType = 0;
+        if (SecurityUtil.getUserID(false) > 0) {
+            accountType = SecurityUtil.getAccountTier();
+        }
+        PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, INDUSTRY, COPY_DATA, SOLUTION_ARCHIVE_NAME," +
+                "solution_image, solution_tier, logo_link, data_source_type FROM SOLUTION WHERE SOLUTION_ID = ?");
+        getSolutionsStmt.setInt(1, dataSourceType);
+        ResultSet rs = getSolutionsStmt.executeQuery();
+        if (rs.next()) {
+            String name = rs.getString(2);
+            String industry = rs.getString(3);
+            boolean copyData = rs.getBoolean(4);
+            String solutionArchiveName = rs.getString(5);
+            Solution solution = new Solution();
+            solution.setName(name);
+            solution.setSolutionID(rs.getLong(1));
+            solution.setIndustry(industry);
+            solution.setCopyData(copyData);
+            solution.setSolutionArchiveName(solutionArchiveName);
+            solution.setImage(rs.getBytes(6));
+            solution.setSolutionTier(rs.getInt(7));
+            solution.setLogoLink(rs.getString(8));
+            solution.setDataSourceType(rs.getInt(9));
+            solution.setAccessible(solution.getSolutionTier() <= accountType);
+            solution.setInstallable(solution.getDataSourceType() > 0);
+            return solution;
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
     public Solution getSolution(long solutionID, Connection conn) throws SQLException {
         int accountType = 0;
         if (SecurityUtil.getUserID(false) > 0) {
