@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import com.easyinsight.users.AccountStats;
 import com.easyinsight.users.UserAccountAdminService;
 import org.hibernate.Session;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -988,6 +989,7 @@ public class SolutionService {
         }
     }
 
+    @Nullable
     public Solution solutionForDataSourceType(int dataSourceType, EIConnection conn) throws SQLException {
         int accountType = 0;
         if (SecurityUtil.getUserID(false) > 0) {
@@ -1016,7 +1018,7 @@ public class SolutionService {
             solution.setInstallable(solution.getDataSourceType() > 0);
             return solution;
         } else {
-            throw new RuntimeException();
+            return null;
         }
     }
 

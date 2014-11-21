@@ -33,20 +33,22 @@ public class ConnectionImageByDataSourceServlet extends HttpServlet {
             EIConnection conn = Database.instance().getConnection();
             try {
                 Solution solution = new SolutionService().solutionForDataSourceType(dataSourceType, conn);
-                byte[] image = solution.getImage();
-                if (image != null) {
-                    resp.setContentLength(image.length);
-                    resp.setContentType("image/png");
-                    SimpleDateFormat sdf = new SimpleDateFormat();
-                    sdf.setTimeZone(new SimpleTimeZone(0, "GMT"));
-                    sdf.applyPattern("dd MMM yyyy HH:mm:ss z");
-                    resp.setHeader("Cache-control", "private, max-age: 2592000");
-                    Calendar c = Calendar.getInstance();
-                    c.add(Calendar.SECOND, 2592000);
-                    resp.setHeader("Expires", sdf.format(c.getTime()));
-                    resp.setHeader("Content-disposition","inline; filename=reportHeader.png" );
-                    resp.getOutputStream().write(image);
-                    resp.getOutputStream().flush();
+                if (solution != null) {
+                    byte[] image = solution.getImage();
+                    if (image != null) {
+                        resp.setContentLength(image.length);
+                        resp.setContentType("image/png");
+                        SimpleDateFormat sdf = new SimpleDateFormat();
+                        sdf.setTimeZone(new SimpleTimeZone(0, "GMT"));
+                        sdf.applyPattern("dd MMM yyyy HH:mm:ss z");
+                        resp.setHeader("Cache-control", "private, max-age: 2592000");
+                        Calendar c = Calendar.getInstance();
+                        c.add(Calendar.SECOND, 2592000);
+                        resp.setHeader("Expires", sdf.format(c.getTime()));
+                        resp.setHeader("Content-disposition", "inline; filename=reportHeader.png");
+                        resp.getOutputStream().write(image);
+                        resp.getOutputStream().flush();
+                    }
                 }
             } catch (Exception e) {
                 LogClass.error(e);
