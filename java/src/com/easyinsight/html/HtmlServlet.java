@@ -367,11 +367,12 @@ public class HtmlServlet extends HttpServlet {
                     int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
                     insightRequestMetadata.setUtcOffset(timezoneOffset);
                 }
-                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, insightRequestMetadata);
+                ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
                 doStuff(req, resp, insightRequestMetadata, conn, report, md);
                 resp.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
                 resp.setHeader("Pragma", "no-cache"); //HTTP 1.0
                 resp.setDateHeader("Expires", 0); //prevents caching at the proxy server
+                // 512-508-1605
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
