@@ -3,11 +3,11 @@ import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
 import mx.controls.Alert;
 
-public class CalculationMeasureWindow extends CalculationWindow {
+public class TryAgainCalculationMeasureWindow extends TryAgainCalcWindow {
 
     private var analysisCalculation:AnalysisCalculation;
 
-    public function CalculationMeasureWindow() {
+    public function TryAgainCalculationMeasureWindow() {
         super();
     }
 
@@ -39,7 +39,9 @@ public class CalculationMeasureWindow extends CalculationWindow {
         example1 = "[Revenue] / [Units]";
         example1Explanation = "Produces Revenue Divided by Units";
         example2 = "namedbracketvalue([Deal Description], \"Prob\")";
-        example2Explanation = "";
+        example2Explanation = "Extracts a Probability custom field from the Deal Description";
+        example3 = "nowdate() - [Task - Created At]";
+        example3Explanation = "Calculates the age of a task based on the current time minus the task creation date";
     }
 
     override protected function get calculationItem():AnalysisItem {
@@ -62,20 +64,8 @@ public class CalculationMeasureWindow extends CalculationWindow {
             analysisCalculation.displayName = nameInput.text;
             analysisCalculation.unqualifiedDisplayName = nameInput.text;
         }
-        analysisCalculation.applyBeforeAggregation = rowLevelCheckbox.selected;
-        analysisCalculation.customFormatChoice = intervalBox.selectedItem.value;
-        analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
+
         analysisCalculation.calculationString = calculationInput.text;
-        analysisCalculation.formattingType = formattingSetup.formattingConfiguration;
-        analysisCalculation.recalculateSummary = summaryCheckbox.selected;
-        analysisCalculation.precision = precisionInput.value;
-        analysisCalculation.underline = false;
-        if (dateComparisonBox.selectedItem is AnalysisItem) {
-            analysisCalculation.defaultDate = dateComparisonBox.selectedItem.display;
-        } else {
-            analysisCalculation.defaultDate = null;
-        }
-        analysisCalculation.minPrecision = minPrecisionInput.value;
         return analysisCalculation;
     }
 }

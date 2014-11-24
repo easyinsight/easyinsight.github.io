@@ -106,6 +106,10 @@
         public function set editable(editable:Boolean):void {
             _editable = editable;
         }
+
+        public function editorLabel():String {
+            return "Define the hierarchy";
+        }
         ]]></mx:Script>
 
     <mx:VBox horizontalAlign="center" width="220" height="300">
