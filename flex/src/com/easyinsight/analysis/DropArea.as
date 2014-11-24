@@ -189,11 +189,11 @@ public class DropArea extends Box
 
     public function customEditor2():Class {
         if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            return TryAgainCalculationMeasureWindow;
+            return CalculationMeasureConfigWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
-            return TryAgainDerivedGroupingWindow;
+            return DerivedGroupingConfigWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-            return TryAgainDerivedDateWindow;
+            return DerivedDateConfigWindow;
         } else {
             return null;
         }
