@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+  Created by jamesboe on 11/13/14.
+-->
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" borderStyle="solid" borderThickness="1" borderColor="#CCCCCC" width="300" verticalAlign="middle"
+        backgroundColor="{wizardBackgroundColor}" mouseChildren="false" useHandCursor="true" buttonMode="true" mouseEnabled="true">
+    <mx:Script><![CDATA[
+        [Bindable]
+        public var mainLabel:String;
+
+        private var _num:int;
+
+        public function set num(value:int):void {
+            _num = value;
+            invalidateProperties();
+        }
+
+        public function get num():int {
+            return _num;
+        }
+
+        [Bindable]
+        private var numLabel:String;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            numLabel = _num + ".";
+        }
+
+        [Bindable]
+        private var wizardTextColor:uint = 0x000000;
+
+        [Bindable]
+        private var wizardBackgroundColor:uint = 0xFFFFFF;
+
+        public function deselect():void {
+            wizardTextColor = 0x000000;
+            wizardBackgroundColor = 0xFFFFFF;
+        }
+
+        public function select():void {
+            wizardTextColor = 0xFFFFFF;
+            wizardBackgroundColor = 0x006494;
+        }
+        ]]></mx:Script>
+    <mx:Text fontSize="24" fontWeight="bold" styleName="fallThroughFonts" selectable="false" text="{numLabel}" color="{wizardTextColor}"/>
+    <mx:Text fontSize="16" text="{mainLabel}" styleName="fallThroughFonts" selectable="false" color="{wizardTextColor}"/>
+</mx:HBox>
