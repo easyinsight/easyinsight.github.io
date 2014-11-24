@@ -249,7 +249,7 @@
                     <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}" change="onFormatChange(event)"/>
                 </mx:FormItem>
             </mx:Form>
-            <mx:ViewStack creationPolicy="all" resizeToContent="true" selectedIndex="{formatIndex}">
+            <!--<mx:ViewStack creationPolicy="all" resizeToContent="true" selectedIndex="{formatIndex}">
                 <mx:Box/>
                 <mx:FormItem label="Interval:">
                     <util:SmartComboBox id="intervalBox" selectedValue="{customFormatChoice}" selectedProperty="value">
@@ -264,7 +264,7 @@
                         </util:dataProvider>
                     </util:SmartComboBox>
                 </mx:FormItem>
-            </mx:ViewStack>
+            </mx:ViewStack>-->
             <mx:Form>
                 <mx:FormItem label="Recalculate on Summary:">
                     <mx:CheckBox id="summaryCheckbox" selected="{summaryRecalc}"/>

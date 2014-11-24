@@ -29,7 +29,6 @@ public class TryAgainCalculationMeasureWindow extends TryAgainCalcWindow {
             precision = analysisCalculation.precision;
             minPrecision = analysisCalculation.minPrecision;
             defaultDate = analysisCalculation.defaultDate;
-            customFormatChoice = analysisCalculation.customFormatChoice;
             if (formattingConfiguration == FormattingConfiguration.MILLISECONDS) {
                 formatIndex = 1;
             }

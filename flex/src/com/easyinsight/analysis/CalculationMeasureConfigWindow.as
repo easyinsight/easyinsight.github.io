@@ -29,7 +29,7 @@ public class CalculationMeasureConfigWindow extends CalculationConfigWindow {
             precision = analysisCalculation.precision;
             minPrecision = analysisCalculation.minPrecision;
             defaultDate = analysisCalculation.defaultDate;
-            customFormatChoice = analysisCalculation.customFormatChoice;
+            //customFormatChoice = analysisCalculation.customFormatChoice;
             if (formattingConfiguration == FormattingConfiguration.MILLISECONDS) {
                 formatIndex = 1;
             }
@@ -48,7 +48,7 @@ public class CalculationMeasureConfigWindow extends CalculationConfigWindow {
 
     override public function save(dataSourceID:int):void {
         analysisCalculation.applyBeforeAggregation = rowLevelCheckbox.selected;
-        analysisCalculation.customFormatChoice = intervalBox.selectedItem.value;
+        //analysisCalculation.customFormatChoice = intervalBox.selectedItem.value;
         analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
         analysisCalculation.formattingType = formattingSetup.formattingConfiguration;
         analysisCalculation.recalculateSummary = summaryCheckbox.selected;
