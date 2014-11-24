@@ -275,7 +275,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                     row.addValue(keys.get(CUSTOMER_TOUCHES), ticketAnalysis.getCustomerHandles());
                     row.addValue(keys.get(RESOLVED_AT), resolvedAt);
                 } catch (Exception e) {
-                    LogClass.error(e);
+                    LogClass.userError(e.getMessage(), e);
                 }
             //}
         }
