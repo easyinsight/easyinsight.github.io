@@ -23,13 +23,10 @@
 
         import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.CalculationMeasureConfigWindow;
-        import com.easyinsight.analysis.CalculationMeasureWindow;
         import com.easyinsight.analysis.DerivedAnalysisDateDimension;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
         import com.easyinsight.analysis.DerivedDateConfigWindow;
-        import com.easyinsight.analysis.DerivedDateWindow;
         import com.easyinsight.analysis.DerivedGroupingConfigWindow;
-        import com.easyinsight.analysis.DerivedGroupingWindow;
         import com.easyinsight.analysis.FeedFolder;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.FolderNode;
