@@ -32,6 +32,7 @@ public class PostgresDatabaseConnection extends ServerDatabaseConnection {
         factory.addPassword("Database Password", "dbPassword", true);
         factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
         factory.addFieldWithDefault("Connection Timeout (minutes)", "timeout", HTMLConnectionProperty.INTEGER, "20");
+        //factory.setName("PostgreSQL");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
@@ -106,7 +107,7 @@ public class PostgresDatabaseConnection extends ServerDatabaseConnection {
     public void customStorage(Connection conn) throws SQLException {
         super.customStorage(conn);
         if (getCopyingFromSource() > 0) {
-            MySQLDatabaseConnection dataSource = (MySQLDatabaseConnection) new FeedStorage().getFeedDefinitionData(getCopyingFromSource(), conn);
+            PostgresDatabaseConnection dataSource = (PostgresDatabaseConnection) new FeedStorage().getFeedDefinitionData(getCopyingFromSource(), conn);
             setDbPassword(dataSource.getDbPassword());
         }
         PreparedStatement findPasswordStmt = conn.prepareStatement("SELECT DATABASE_PASSWORD FROM postgres_database_connection WHERE DATA_SOURCE_ID = ?");
