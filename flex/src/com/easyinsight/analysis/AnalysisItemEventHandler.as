@@ -1,11 +1,11 @@
 package com.easyinsight.analysis {
 import com.easyinsight.AnalysisItemDeleteEvent;
 import com.easyinsight.WindowManagement;
-import com.easyinsight.util.PopUpUtil;
+
 import com.easyinsight.util.ProgressAlert;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
+
 import mx.core.UIComponent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -67,20 +67,29 @@ public class AnalysisItemEventHandler extends UIComponent {
     }
 
     private function edit(analysisItem:AnalysisItem, handler:Function, analysisItemWrapper:AnalysisItemWrapper = null, x:int = 0, y:int = 0):void {
-        var editor:Class;
-        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-            editor = HierarchyWindow;
-        } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            editor = CalculationMeasureWindow;
+        var editor:Class = null;
+        var editor2:Class = null;
+        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            editor = TryAgainCalculationMeasureWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
-            editor = DerivedGroupingWindow;
+            editor = TryAgainDerivedGroupingWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            editor = HierarchyWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-            editor = DerivedDateWindow;
+            editor = TryAgainDerivedDateWindow;
+        }
+        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            editor2 = CalculationMeasureConfigWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+            editor2 = DerivedGroupingConfigWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+            editor2 = DerivedDateConfigWindow;
         }
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
         analysisItemEditor.x = tmpX;
         analysisItemEditor.y = tmpY;
         analysisItemEditor.editorClass = editor;
+        analysisItemEditor.editorClass2 = editor2;
         analysisItemEditor.report = report;
         analysisItemEditor.originalWrapper = analysisItemWrapper;
         analysisItemEditor.analysisItem = analysisItem;

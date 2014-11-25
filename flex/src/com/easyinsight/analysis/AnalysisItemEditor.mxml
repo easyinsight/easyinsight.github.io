@@ -328,6 +328,10 @@
         public function set editable(editable:Boolean):void {
             _editable = editable;
         }
+
+        public function editorLabel():String {
+            return "General Field Properties";
+        }
         ]]>
     </mx:Script>
     <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick(event)" buttonWidth="100">

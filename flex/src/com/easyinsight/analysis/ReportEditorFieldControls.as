@@ -10,7 +10,6 @@ import flash.geom.Point;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UIComponent;
@@ -165,19 +164,29 @@ public class ReportEditorFieldControls extends UIComponent implements IListItemR
         }
 
         private function editItem(event:MouseEvent):void {
-            var editor:Class;
+
             var analysisItem:AnalysisItem = analysisItemWrapper.analysisItem;
-            if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                editor = HierarchyWindow;
-            } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                editor = CalculationMeasureWindow;
+            var editor:Class = null;
+            var editor2:Class = null;
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                editor = TryAgainCalculationMeasureWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
-                editor = DerivedGroupingWindow;
-            }  else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                editor = DerivedDateWindow;
+                editor = TryAgainDerivedGroupingWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                editor = HierarchyWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                editor = TryAgainDerivedDateWindow;
+            }
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                editor2 = CalculationMeasureConfigWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                editor2 = DerivedGroupingConfigWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                editor2 = DerivedDateConfigWindow;
             }
 			var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
 			analysisItemEditor.editorClass = editor; 			
+			analysisItemEditor.editorClass2 = editor2;
 			analysisItemEditor.analysisItem = analysisItemWrapper.analysisItem;
             analysisItemEditor.dataSourceID = _dataSourceID;
 			analysisItemEditor.analysisItems = this._analysisItems;

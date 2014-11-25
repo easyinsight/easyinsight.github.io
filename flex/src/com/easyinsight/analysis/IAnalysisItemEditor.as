@@ -13,5 +13,6 @@ public interface IAnalysisItemEditor {
     function normal():void;
     function set report(analysisDefinition:AnalysisDefinition):void;
     function set editable(editable:Boolean):void;
+    function editorLabel():String;
 }
 }

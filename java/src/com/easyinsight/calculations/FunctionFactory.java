@@ -346,6 +346,8 @@ public class FunctionFactory {
             return new AutoColor();
         } else if (s.equals("autobackgroundcolor")) {
             return new AutoBackgroundColor();
+        } else if (s.equals("autotextfrombackground")) {
+            return new AutoTextFromBackground();
         } else if (s.equals("findexact")) {
             return new FindExactRecord();
         } else {
