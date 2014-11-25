@@ -74,6 +74,10 @@ easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q",
             return new Date().getTimezoneOffset();
         }
 
+        $rootScope.isSearchEnabled = function() {
+            return true;
+        }
+
 }]);
 
 easyInsight.directive("passwordVerify", function() {

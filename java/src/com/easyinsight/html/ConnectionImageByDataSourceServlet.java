@@ -28,14 +28,16 @@ public class ConnectionImageByDataSourceServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SecurityUtil.populateThreadLocalFromSession(req);
         try {
-            int dataSourceType = Integer.parseInt(req.getParameter("dataSourceType"));
+            String s = req.getParameter("dataSourceType");
+            int dataSourceType = Integer.parseInt(s);
             Date d = new Date();
             EIConnection conn = Database.instance().getConnection();
             try {
+                boolean found = false;
                 Solution solution = new SolutionService().solutionForDataSourceType(dataSourceType, conn);
                 if (solution != null) {
                     byte[] image = solution.getImage();
-                    if (image != null) {
+                    if (image != null && image.length > 0) {
                         resp.setContentLength(image.length);
                         resp.setContentType("image/png");
                         SimpleDateFormat sdf = new SimpleDateFormat();
@@ -48,7 +50,11 @@ public class ConnectionImageByDataSourceServlet extends HttpServlet {
                         resp.setHeader("Content-disposition", "inline; filename=reportHeader.png");
                         resp.getOutputStream().write(image);
                         resp.getOutputStream().flush();
+                        found = true;
                     }
+                }
+                if(!found) {
+                    resp.sendRedirect("/images/defaultType.png");
                 }
             } catch (Exception e) {
                 LogClass.error(e);

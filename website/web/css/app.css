@@ -520,3 +520,29 @@ fieldset[disabled] .btn-alt-primary.active {
 .selected_menu {
     font-weight: bold;
 }
+
+.data_source_grid {
+    background-color: #ffffff;
+}
+
+.data_source_grid > div:first-child {
+    margin-top:100%;
+}
+
+.data_source_grid .title {
+    text-align:center;
+    position:absolute;
+    width:100%;
+    top:5px;
+    left:0px;
+}
+
+.data_source_grid > img {
+    margin: auto;
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    max-width:80%;
+}
