@@ -107,9 +107,6 @@ public abstract class FreshdeskBaseSource extends ServerDataSourceDefinition {
                     continue;
                 }
                 Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
-                if (!(o instanceof List)) {
-                    LogClass.error(o.toString());
-                }
                 return (List) o;
             } catch (ReportException re) {
                 throw re;

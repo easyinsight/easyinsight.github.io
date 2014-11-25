@@ -2,10 +2,12 @@ package com.easyinsight.html;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
+import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,21 +24,41 @@ import java.util.*;
 public class StackedColumnChartServlet extends HtmlServlet {
 
     private static interface Populator {
-        JSONObject createArray(Double measure, String string, int index) throws JSONException;
+        Point createArray(Value measure, Value string, int index) throws JSONException;
 
         public Integer getIndex(JSONObject jsonObject) throws JSONException;
 
         public Double getMeasure(JSONObject jsonObject) throws JSONException;
     }
 
+    private static class Point {
+        private Value x;
+        private Value y;
+        private int index;
+
+        private Point(Value x, Value y, int index) {
+            this.x = x;
+            this.y = y;
+            this.index = index;
+        }
+
+        public Value getX() {
+            return x;
+        }
+
+        public Value getY() {
+            return y;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+    }
+
     private static class ColumnPopulator implements Populator {
 
-        public JSONObject createArray(Double measure, String string, int index) throws JSONException {
-            JSONObject point = new JSONObject();
-            point.put("x", string);
-            point.put("y", measure);
-            point.put("index", index);
-            return point;
+        public Point createArray(Value measure, Value string, int index) throws JSONException {
+            return new Point(string, measure, index);
         }
 
         public Integer getIndex(JSONObject jsonObject) throws JSONException {
@@ -50,12 +72,13 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
     private static class BarPopulator implements Populator {
 
-        public JSONObject createArray(Double measure, String string, int index) throws JSONException {
-            JSONObject point = new JSONObject();
+        public Point createArray(Value measure, Value string, int index) throws JSONException {
+            return new Point(string, measure, index);
+            /*JSONObject point = new JSONObject();
             point.put("x", string);
             point.put("y", measure);
             point.put("index", index);
-            return point;
+            return point;*/
         }
 
         public Integer getIndex(JSONObject jsonObject) throws JSONException {
@@ -75,8 +98,8 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
 
         boolean dateAxis = false;
-        boolean sortStackAscending = false;
-        boolean sortStackDescending = false;
+        boolean sortStackAscending;
+        boolean sortStackDescending;
         boolean sortX = false;
         boolean sortY = false;
         boolean ascending = false;
@@ -148,18 +171,14 @@ public class StackedColumnChartServlet extends HtmlServlet {
         }
 
         int i = 1;
-        Map<String, List<JSONObject>> seriesMap = new LinkedHashMap<String, List<JSONObject>>();
-        Map<String, Integer> indexMap = new HashMap<String, Integer>();
-        Map<Integer, String> reverseIndexMap = new HashMap<Integer, String>();
+        Map<Value, List<Point>> seriesMap = new LinkedHashMap<>();
+        Map<Value, Integer> indexMap = new HashMap<>();
+        Map<Integer, Value> reverseIndexMap = new HashMap<>();
 
-        List<String> axisNames = new ArrayList<>();
+        List<Value> axisNames = new ArrayList<>();
 
 
         JSONObject rendererOptions = new JSONObject();
-
-
-
-
 
 
         Link l = stackItem.defaultLink();
@@ -178,18 +197,20 @@ public class StackedColumnChartServlet extends HtmlServlet {
 
         List<String> colors = ((WSChartDefinition) report).createMultiColors();
 
-        Map<String, Double> indexToMin = new HashMap<>();
+        Map<Value, Double> indexToMin = new HashMap<>();
 
-        List<Map<String, Object>> seriesList = new ArrayList<>();
+        List<Map<String, Value>> seriesList = new ArrayList<>();
 
         for (IRow row : dataSet.getRows()) {
 
-            String xAxisValue = row.getValue(xAxisItem).toString();
+            Value xAxisValue = row.getValue(xAxisItem);
+            Value sortValue = row.getValue(xAxisItem);
+            //String xAxisValue = row.getValue(xAxisItem).toString();
             Value sValue = row.getValue(stackItem);
-            String stackValue = sValue.toString();
+            //Value stackValue = sValue;
             Integer index = indexMap.get(xAxisValue);
             if (index == null) {
-                axisNames.add(xAxisValue);
+                axisNames.add(sortValue);
                 index = i++;
                 indexMap.put(xAxisValue, index);
                 reverseIndexMap.put(index, xAxisValue);
@@ -201,88 +222,91 @@ public class StackedColumnChartServlet extends HtmlServlet {
             }
 
 
-            List<JSONObject> array = seriesMap.get(stackValue);
+            List<Point> array = seriesMap.get(sValue);
             if (array == null) {
-                Map<String, Object> map = new HashMap<>();
-                //JSONObject seriesObj = new JSONObject();
-                map.put("label", stackValue);
-                map.put("sort", sValue.toSortValue());
+                Map<String, Value> map = new HashMap<>();
+                map.put("label", sValue);
+                map.put("sort", sValue);
                 seriesList.add(map);
                 array = new ArrayList<>();
-                seriesMap.put(stackValue, array);
+                seriesMap.put(sValue, array);
             }
 
             Value curValue = row.getValue(measureItem);
-            Double measure = curValue.toDouble();
+
             // need to end up with...
-            array.add(populator.createArray(measure, xAxisValue, index));
+            array.add(populator.createArray(curValue, xAxisValue, index));
 
 
         }
 
         if (sortStackAscending) {
-            seriesList.sort((o1, o2) -> o1.get("sort").toString().compareTo(o2.get("sort").toString()));
+            seriesList.sort((o1, o2) -> o1.get("sort").compareTo(o2.get("sort")));
         } else if (sortStackDescending) {
-            seriesList.sort((o1, o2) -> o2.get("sort").toString().compareTo(o1.get("sort").toString()));
+            seriesList.sort((o1, o2) -> o2.get("sort").compareTo(o1.get("sort")));
         }
 
         JSONArray series = new JSONArray();
-        for (Map<String, Object> map : seriesList) {
+        for (Map<String, Value> map : seriesList) {
             JSONObject seriesObject = new JSONObject();
             seriesObject.put("label", map.get("label"));
             series.put(seriesObject);
         }
 
-        Map<String, List<JSONObject>> sortedSeriesMap = new LinkedHashMap<>();
-        for (Map<String, Object> map : seriesList) {
-            String label = (String) map.get("label");
+        Map<Value, List<Point>> sortedSeriesMap = new LinkedHashMap<>();
+        for (Map<String, Value> map : seriesList) {
+            Value label = map.get("label");
             sortedSeriesMap.put(label, seriesMap.get(label));
         }
         seriesMap = sortedSeriesMap;
 
 
-
-        for (List<JSONObject> array : seriesMap.values()) {
+        for (List<Point> array : seriesMap.values()) {
             Set<Integer> contained = new HashSet<Integer>();
-            for (JSONObject anArray : array) {
-                Integer point = populator.getIndex(anArray);
+            for (Point anArray : array) {
+                Integer point = anArray.getIndex();
                 contained.add(point);
             }
             for (int j = 1; j < i; j++) {
                 if (!contained.contains(j)) {
-                    array.add(populator.createArray(0., reverseIndexMap.get(j), j));
+                    array.add(populator.createArray(new NumericValue(0.), reverseIndexMap.get(j), j));
                 }
             }
-            Collections.sort(array, new Comparator<JSONObject>() {
+            Collections.sort(array, (jsonArray, jsonArray1) -> {
 
-                public int compare(JSONObject jsonArray, JSONObject jsonArray1) {
-                    try {
-                        Integer i1 = populator.getIndex(jsonArray);
-                        Integer i2 = populator.getIndex(jsonArray1);
-                        return i1.compareTo(i2);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                Integer i1 = jsonArray.getIndex();
+                Integer i2 = jsonArray1.getIndex();
+                return i1.compareTo(i2);
+
             });
         }
 
-        List<Integer> zeroIndicies = new ArrayList<Integer>();
+        /*for (List<Point> array : seriesMap.values()) {
+            Iterator<Point> iter = array.iterator();
+            while (iter.hasNext()) {
+                Point pointer = iter.next();
+                if (pointer.getY().toDouble() == 0) {
+                    iter.remove();
+                }
+            }
+        }*/
+
+        /*Map<Value, List<Integer>> zeroIndicies = new HashMap<>();
         if (seriesMap.entrySet().size() > 0) {
-            Map.Entry<String, List<JSONObject>> first = null;
-            for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
+            Map.Entry<Value, List<Point>> first = null;
+            for (Map.Entry<Value, List<Point>> entry : seriesMap.entrySet()) {
                 first = entry;
                 break;
             }
             for (int k = 0; k < first.getValue().size(); k++) {
-                JSONObject jsonArray = first.getValue().get(k);
-                Integer curIndex = populator.getIndex(jsonArray);
+                Point jsonArray = first.getValue().get(k);
+                Integer curIndex = jsonArray.getIndex();
                 Double total = 0.0;
-                for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
+                for (Map.Entry<Value, List<Point>> entry : seriesMap.entrySet()) {
                     Double curVal = 0.0;
-                    for (JSONObject arr : entry.getValue()) {
-                        if (populator.getIndex(arr).equals(curIndex)) {
-                            curVal = populator.getMeasure(arr);
+                    for (Point arr : entry.getValue()) {
+                        if (arr.getIndex() == curIndex) {
+                            curVal = arr.getY().toDouble();
                             break;
                         }
                     }
@@ -292,15 +316,15 @@ public class StackedColumnChartServlet extends HtmlServlet {
                     zeroIndicies.add(k);
                 }
             }
-        }
+        }*/
         // start from top removing them in reverse order should make it easier
 //
-        for (int k = zeroIndicies.size() - 1; k >= 0; k--) {
-            for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
+        /*for (int k = zeroIndicies.size() - 1; k >= 0; k--) {
+            for (Map.Entry<Value, List<Point>> entry : seriesMap.entrySet()) {
                 entry.getValue().remove(entry.getValue().get(zeroIndicies.get(k)));
             }
             axisNames.remove(k);
-        }
+        }*/
 
 
         // series map is keyed on stack value
@@ -315,29 +339,29 @@ public class StackedColumnChartServlet extends HtmlServlet {
             if (!ascending) {
                 Collections.reverse(axisNames);
             }
-                for (List<JSONObject> list : seriesMap.values()) {
-                    Collections.sort(list, (o1, o2) -> {
-                        try {
-                            String val1 = o1.get("x").toString();
-                            String val2 = o2.get("x").toString();
-                            return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+            for (List<Point> list : seriesMap.values()) {
+                Collections.sort(list, (o1, o2) -> {
+
+                    Value val1 = o1.getX();
+                    Value val2 = o2.getX();
+                    Integer i1 = axisNames.indexOf(val1);
+                    Integer i2 = axisNames.indexOf(val2);
+                    return (i1.compareTo(i2));
+
+                });
             }
         } else if (sortY) {
 
-            Map<String, Double> map = new HashMap<>();
-            for (List<JSONObject> list : seriesMap.values()) {
+            Map<Value, Double> map = new HashMap<>();
+            for (List<Point> list : seriesMap.values()) {
 
-                for (JSONObject jo : list) {
-                    String x = jo.get("x").toString();
+                for (Point jo : list) {
+                    Value x = jo.getX();
                     Double d = map.get(x);
                     if (d == null) {
-                        map.put(x, (Double) jo.get("y"));
+                        map.put(x, jo.getY().toDouble());
                     } else {
-                        map.put(x, (Double) jo.get("y") + d);
+                        map.put(x, jo.getY().toDouble() + d);
                     }
 
                 }
@@ -356,59 +380,68 @@ public class StackedColumnChartServlet extends HtmlServlet {
             if (!ascending) {
                 Collections.reverse(axisNames);
             }
-            for (List<JSONObject> list : seriesMap.values()) {
-                Collections.sort(list, new Comparator<JSONObject>() {
+            for (List<Point> list : seriesMap.values()) {
+                Collections.sort(list, new Comparator<Point>() {
 
                     @Override
-                    public int compare(JSONObject o1, JSONObject o2) {
-                        try {
-                            String val1 = o1.get("x").toString();
-                            String val2 = o2.get("x").toString();
-                            return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
+                    public int compare(Point o1, Point o2) {
+                        Value val1 = o1.getX();
+                        Value val2 = o2.getY();
+                        return ((Integer) axisNames.indexOf(val1)).compareTo(axisNames.indexOf(val2));
+
                     }
                 });
             }
         }
-        Map<String, Double> stackMap = new HashMap<>();
+        Map<Value, Double> stackMap = new HashMap<>();
 
-        for (Map.Entry<String, List<JSONObject>> entry : seriesMap.entrySet()) {
+        for (Map.Entry<Value, List<Point>> entry : seriesMap.entrySet()) {
 
             double total = 0;
-            for (JSONObject arr : entry.getValue()) {
-                total = total + populator.getMeasure(arr);
+            for (Point arr : entry.getValue()) {
+                total = total + arr.getY().toDouble();
             }
             if (total != 0) {
                 JSONObject axisObject = new JSONObject();
-                axisObject.put("key", entry.getKey());
+                String keyString = ExportService.createValue(md, xAxisItem, entry.getKey(), true);
+                axisObject.put("key", keyString);
 
                 String color = colors.get(k % colors.size());
                 axisObject.put("color", color);
-                List<JSONObject> list = entry.getValue();
+                List<Point> list = entry.getValue();
+                List<JSONObject> joList = new ArrayList<>(list.size());
 
                 if (dateAxis) {
-                    for (JSONObject jo : list) {
-                        String key = jo.get("x").toString();
+                    for (Point point : list) {
+                        Value key = point.getX();
                         Double min = stackMap.get(key);
                         if (min == null) {
                             min = indexToMin.get(key);
                             stackMap.put(key, min);
                         }
-                        Double y = (Double) jo.get("y");
+                        Double y = point.getY().toDouble();
                         Double delta = y - min;
                         maxY = Math.max(maxY, y);
+                        JSONObject jo = new JSONObject();
                         jo.put("y", delta);
                         jo.put("xMin", min);
+                        String x = ExportService.createValue(md, xAxisItem, point.getX(), true);
+                        jo.put("x", x);
+                        joList.add(jo);
                         stackMap.put(key, (min + delta));
+                    }
+                } else {
+                    for (Point point : list) {
+                        JSONObject jo = new JSONObject();
+                        String x = ExportService.createValue(md, xAxisItem, point.getX(), true);
+                        jo.put("x", x);
+                        jo.put("y", point.getY().toDouble());
+                        joList.add(jo);
                     }
                 }
 
-                axisObject.put("values", list);
+                axisObject.put("values", joList);
                 blahs.put(axisObject);
-            } else {
-                zeroIndicies.add(k);
             }
             k++;
         }
