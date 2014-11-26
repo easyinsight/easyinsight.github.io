@@ -57,7 +57,7 @@
     </div>
 </div>
 <div class="row" ng-if="!grid">
-<div ng-repeat="data_source in filtered" class="col-md-3">
+<div ng-repeat="data_source in filtered" class="col-md-3 col-xs-6">
     <a href="/a/data_sources/{{data_source.url_key}}"><div class="well data_source_grid" style="position:relative;"><div /><div class="title">{{data_source.name}}</div><img src="/app/connectionDataSourceImage/{{ data_source.data_source_type }}" /></div></a>
 
 </div>
