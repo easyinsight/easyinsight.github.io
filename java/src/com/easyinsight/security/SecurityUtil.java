@@ -798,6 +798,8 @@ public class SecurityUtil {
                 throw new SecurityException();
             }
 
+            queryStmt.close();
+
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
                 userPrincipal = threadLocal.get();
@@ -824,6 +826,7 @@ public class SecurityUtil {
                     role = Math.min(Roles.OWNER, role);
                 }
             }
+            userStmt.close();
             if (role != Roles.NONE) {
                 return role;
             }
@@ -833,8 +836,11 @@ public class SecurityUtil {
             groupQueryStmt.setLong(2, dashboardID);
             ResultSet groupRS = groupQueryStmt.executeQuery();
             if (groupRS.next()) {
-                return groupRS.getInt(1);
+                int groupBinding = groupRS.getInt(1);
+                groupQueryStmt.close();
+                return groupBinding;
             } else {
+                groupQueryStmt.close();
                 PreparedStatement lastChanceStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM dashboard, group_to_user_join," +
                         "community_group, upload_policy_groups WHERE " +
                         "dashboard.dashboard_id = ? AND dashboard.data_source_id = upload_policy_groups.feed_id AND upload_policy_groups.group_id = community_group.community_group_id AND " +
