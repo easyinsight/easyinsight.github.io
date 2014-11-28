@@ -1,14 +1,12 @@
 <div cg-busy="load" />
 <div class="row" ng-show="!user.only_show_top_reports">
-    <div class="col-md-12"><h2>Data Sources</h2></div>
+    <div class="col-md-6"><h2>Data Sources</h2></div>
+    <div class="col-md-6" style="text-align: right;padding-top: 15px;padding-right:20px">
+        <i class="glyphicon glyphicon-th" style="font-size:18px;cursor:pointer;" ng-click="grid=false"></i> <i class="glyphicon glyphicon-th-list" style="font-size:18px;cursor:pointer;" ng-click="grid=true"></i>
+    </div>
 </div>
 <div class="row" ng-show="!user.only_show_top_reports">
     <div class="col-md-12"><p>These data sources are the different systems you've connected to Easy Insight. Click on a data source name to navigate to the reports and dashboards built on this data source or to create new reports and dashboards.</p></div>
-</div>
-<div class="row" ng-show="!user.only_show_top_reports">
-    <div class="browse-by-tag col-md-12">
-      <i class="glyphicon glyphicon-th" style="cursor:pointer;" ng-click="grid=false"></i> <i class="glyphicon glyphicon-th-list" style="cursor:pointer;" ng-click="grid=true"></i>
-    </div>
 </div>
 <div class="row" ng-show="!user.only_show_top_reports">
     <div class="browse-by-tag col-md-2"><span ng-if="tags && tags.length > 0">Browse by Tag:</span>
@@ -57,7 +55,7 @@
     </div>
 </div>
 <div class="row" ng-if="!grid">
-<div ng-repeat="data_source in filtered" class="col-md-3 col-xs-6">
+<div ng-repeat="data_source in filtered" class="col-md-3 col-xs-6" style="margin-top: 10px">
     <a href="/a/data_sources/{{data_source.url_key}}"><div class="well data_source_grid" style="position:relative;"><div /><div class="title">{{data_source.name}}</div><img src="/app/connectionDataSourceImage/{{ data_source.data_source_type }}" /></div></a>
 
 </div>
