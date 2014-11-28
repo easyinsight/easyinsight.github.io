@@ -356,6 +356,7 @@ public class StyleConfiguration {
             items.addItem(new ComboBoxReportFormItem("Font Name", "fontName", report.fontName, report, ["Lucida Grande", "Open Sans"]));
             items.addItem(new ComboBoxReportFormItem("Align", "align", CrosstabDefinition(report).align, report, ["left", "center", "right"]));
             items.addItem(new CheckBoxReportFormItem("Sort by Row Summaries", "sortByRowSummaries", CrosstabDefinition(report).sortByRowSummaries, report, null, true));
+            items.addItem(new CheckBoxReportFormItem("No Row Summaries", "noRowSummaries", CrosstabDefinition(report).noRowSummaries, report, null, true));
         }
         if (report is GaugeDefinition) {
             items.addItem(new NumericReportFormItem("Alert Point 1", "alertPoint1", GaugeDefinition(report).alertPoint1, report, 0, 1000000000));

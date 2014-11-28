@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
            xmlns:formatter="com.easyinsight.analysis.formatter.*" xmlns:schedule="com.easyinsight.schedule.*"
            xmlns:util="com.easyinsight.util.*"
            implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%"
-           creationComplete="onCreation()">
+           creationComplete="onCreation()" verticalGap="20">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
@@ -14,6 +14,7 @@
         import mx.controls.AdvancedDataGrid;
         import mx.controls.DataGrid;
         import mx.controls.TextArea;
+        import mx.controls.Tree;
         import mx.events.ListEvent;
         import mx.managers.DragManager;
         import mx.controls.List;
@@ -109,7 +110,7 @@
         private var _applyBefore:Boolean;
 
         private function onCreation():void {
-            BindingUtils.bindProperty(this, "applyBefore", rowLevelCheckbox, "selected");
+
         }
 
 
@@ -339,7 +340,13 @@
         protected var example2:String;
 
         [Bindable]
+        protected var example3:String;
+
+        [Bindable]
         protected var example2Explanation:String;
+
+        [Bindable]
+        protected var example3Explanation:String;
 
         [Bindable]
         protected var underline:Boolean;
@@ -400,182 +407,100 @@
         [Bindable]
         protected var defaultDate:String;
 
-        private function onFormatChange(event:Event):void {
-            if (FormattingSetup(event.currentTarget).formattingConfiguration == FormattingConfiguration.MILLISECONDS) {
-                formatIndex = 1;
-            } else {
-                formatIndex = 0;
-            }
-        }
-
         public function editorLabel():String {
-            return "";
+            return "Define the calculation";
         }
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="validateCalculation" result="validatedCalculation()"/>
     </mx:RemoteObject>
-
-    <mx:HBox>
-        <mx:VBox horizontalAlign="center">
-            <mx:Button fontSize="14" label="Calculation Documentation" click="navigateToURL(new URLRequest('https:/www.easy-insight.com/app/docs/Scripting'), '_blank')"
-                       styleName="flatCreateButton"/>
-            <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
-            <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
-                     dataProvider="{functions}" showRoot="false">
-            </mx:Tree>
-            <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
-                <mx:Label text="{functionSignature}"/>
-                <mx:Text text="{functionExplanation}"
-                             selectable="true"
-                             width="300" height="80"/>
-            </mx:VBox>
-        </mx:VBox>
-    <mx:VBox>
-    <mx:HBox width="100%" height="100%">
-
-        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Name: " direction="horizontal" width="100%" labelWidth="100">
-                <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
-            </mx:FormItem>
-            <mx:FormItem label="" direction="vertical" fontFamily="Lucida Grande" fontWeight="normal">
-                <mx:TextArea text="You can build calculations using fields from the report editor list and the functions listed to the left. You can drag fields from the report editor list into the input below."
-                        width="300" height="65" editable="false" selectable="false" focusEnabled="false"/>
-                <mx:Label text="Here are examples of calculation syntax:"/>
-                <mx:Grid horizontalGap="0">
-                    <mx:GridRow>
-                        <mx:GridItem borderStyle="solid" borderThickness="1">
-                            <mx:Text text="{example1}" selectable="true"/>
-                        </mx:GridItem>
-                    </mx:GridRow>
-                    <mx:GridRow>
-                        <mx:GridItem borderStyle="solid" borderThickness="1">
-                            <mx:Text text="{example2}" selectable="true"/>
-                        </mx:GridItem>
-                    </mx:GridRow>
-                </mx:Grid>
-            </mx:FormItem>
-            <mx:FormItem label="" direction="horizontal">
-                <mx:Button label="+" click="appendSymbol('+')" toolTip="Add"/>
-                <mx:Button label="-" click="appendSymbol('-')" toolTip="Subtract"/>
-                <mx:Button label="*" click="appendSymbol('*')" toolTip="Multiply"/>
-                <mx:Button label="/" click="appendSymbol('/')" toolTip="Divide"/>
-                <mx:Button label="^" click="appendSymbol('^')" toolTip="Exponent"/>
-            </mx:FormItem>
-        </mx:Form>
-        <mx:ViewStack resizeToContent="true" selectedIndex="{detailIndex}">
-            <mx:Box/>
-            <mx:VBox>
-            <mx:Form>
-                <mx:FormItem label="Formatting:">
-                    <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}" change="onFormatChange(event)"/>
-                </mx:FormItem>
-            </mx:Form>
-            <mx:ViewStack creationPolicy="all" resizeToContent="true" selectedIndex="{formatIndex}">
-                <mx:Box/>
-                <mx:FormItem label="Interval:">
-                    <util:SmartComboBox id="intervalBox" selectedValue="{customFormatChoice}" selectedProperty="value">
-                        <util:dataProvider>
-                            <mx:Array>
-                                <mx:Object label="Default" value="{FormattingConfiguration.DEFAULT}"/>
-                                <mx:Object label="Month" value="{FormattingConfiguration.MONTH}"/>
-                                <mx:Object label="Month - Day" value="{FormattingConfiguration.MONTH_DAY}"/>
-                                <mx:Object label="Day" value="{FormattingConfiguration.DAY}"/>
-                                <mx:Object label="Day - Hour" value="{FormattingConfiguration.DAY_HOUR}"/>
-                            </mx:Array>
-                        </util:dataProvider>
-                    </util:SmartComboBox>
-                </mx:FormItem>
-            </mx:ViewStack>
-            <mx:Form>
-                <mx:FormItem label="Recalculate on Summary:">
-                    <mx:CheckBox id="summaryCheckbox" selected="{summaryRecalc}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Row Level:" direction="horizontal">
-                    <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
-                    <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
-                </mx:FormItem>
-                <mx:FormItem label="Aggregation:">
-                    <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
-                        <util:dataProvider>
-                            <mx:Array>
-                                <mx:Object label="Sum" value="{AggregationTypes.SUM}"/>
-                                <mx:Object label="Average" value="{AggregationTypes.AVERAGE}"/>
-                                <mx:Object label="Min" value="{AggregationTypes.MIN}"/>
-                                <mx:Object label="Max" value="{AggregationTypes.MAX}"/>
-                                <mx:Object label="Count" value="{AggregationTypes.COUNT}"/>
-                                <mx:Object label="Median" value="{AggregationTypes.MEDIAN}"/>
-                                <mx:Object label="Variance" value="{AggregationTypes.VARIANCE}"/>
-                                <mx:Object label="Ranking" value="{AggregationTypes.RANK}"/>
-                            </mx:Array>
-                        </util:dataProvider>
-                    </util:SmartComboBox>
-                </mx:FormItem>
-                <mx:FormItem label="Floating Point Precision:">
-                    <mx:NumericStepper id="precisionInput" value="{precision}" minimum="0" maximum="50"/>
-                </mx:FormItem>
-                <mx:FormItem label="Minimum Precision:">
-                    <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
-                </mx:FormItem>
-                <mx:FormItem label="Date Comparison:">
-                    <util:SmartComboBox id="dateComparisonBox" labelField="display" dataProvider="{dateFields}"
-                                        selectedProperty="display" selectedValue="{defaultDate}"/>
-                </mx:FormItem>
-            </mx:Form>
-            </mx:VBox>
-            <mx:Form>
-                <mx:FormItem label="{detailItemLabel}" direction="horizontal">
-                    <util:SmartComboBox id="dateBox" rowCount="12" selectedValue="{dateLevel}" selectedProperty="data">
-                        <mx:ArrayCollection>
-                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
-                            <mx:Object label="Quarter - Year" data="{AnalysisItemTypes.QUARTER_OF_YEAR}"/>
-                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year - Hour - Minute"
-                                       data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
-
-                            <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
-                            <mx:Object label="Quarter" data="{AnalysisItemTypes.QUARTER_OF_YEAR_FLAT}"/>
-                            <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
-                            <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
-                            <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
-                            <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
-                        </mx:ArrayCollection>
-                    </util:SmartComboBox>
-                </mx:FormItem>
-                <mx:FormItem label="Apply Before Aggregation:">
-                    <mx:CheckBox id="dateApplyBeforeAggregationCheckbox" selected="{dateApplyBeforeAggregation}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Date Time:">
-                    <mx:CheckBox id="dateTimeCheckbox" selected="{dateTime}"/>
-                </mx:FormItem>
-            </mx:Form>
-            <mx:Form>
-                <mx:FormItem label="Word Wrap">
-                    <mx:CheckBox id="wordWrapCheckbox" selected="{wordWrap}"/>
-                </mx:FormItem>
-                <mx:FormItem label="HTML">
-                    <mx:CheckBox id="htmlCheckbox" selected="{html}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Apply Before Aggregation:">
-                    <mx:CheckBox id="groupingApplyBeforeAggregationCheckbox" selected="{groupingApplyBeforeAggregation}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Use Sort Field:">
-                    <util:SmartComboBox id="sortComboBox" labelField="display" dataProvider="{sortItems}"
-                                        selectedValue="{sortDimension}" selectedProperty="display"/>
-                </mx:FormItem>
-            </mx:Form>
-         </mx:ViewStack>
-    </mx:HBox>
-        <mx:FormItem label="Calculation: " direction="horizontal" width="100%" labelWidth="100">
+    <mx:HBox horizontalGap="20">
+        <mx:VBox>
+            <mx:HBox width="100%" height="100%">
+                <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                    <mx:FormItem label="What should the field be named?" direction="vertical" width="100%">
+                        <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:HBox>
+            <mx:HBox>
+                <mx:Text text="What should the calculation be?" fontWeight="bold" fontFamily="Tahoma"/>
+            </mx:HBox>
             <schedule:CursorTextArea id="calculationInput" dragEnter="dragEnterHandler(event)"
                                      dragDrop="dragDropHandler(event)"
-                                     width="550" height="100"
+                                     width="400" height="250"
                                      text="{calcText}" borderStyle="solid" borderThickness="1"/>
-        </mx:FormItem>
-    </mx:VBox>
+
+        </mx:VBox>
+        <mx:VBox horizontalAlign="center">
+            <mx:TabBar id="tabBar">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Help</mx:String>
+                            <mx:String>Examples</mx:String>
+                            <mx:String>Functions</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:TabBar>
+            <!--<mx:Button fontSize="14" label="Calculation Documentation" click="navigateToURL(new URLRequest('https:/www.easy-insight.com/app/docs/Scripting'), '_blank')"
+                       styleName="flatCreateButton"/>-->
+            <mx:ViewStack resizeToContent="true" selectedIndex="{tabBar.selectedIndex}">
+                <mx:VBox width="300">
+                    <mx:Text text="You can build calculations using fields from the field list to the left and the functions under the Functions tab. You can directly drag fields from the field list into the Calculation area."
+                             styleName="fallThroughFonts" fontSize="14" width="280"/>
+                </mx:VBox>
+                <mx:VBox width="300">
+                    <mx:Grid horizontalGap="0" styleName="fallThroughFonts">
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:Text text="{example1}" selectable="true" maxWidth="280"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:Text text="{example1Explanation}" selectable="true" maxWidth="280"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:Text text="{example2}" selectable="true" maxWidth="280"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:Text text="{example2Explanation}" selectable="true" maxWidth="280"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:Text text="{example3}" selectable="true" maxWidth="280"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:Text text="{example3Explanation}" selectable="true" maxWidth="280"/>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                    </mx:Grid>
+                </mx:VBox>
+                <mx:VBox styleName="fallThroughFonts">
+                    <mx:Label text="Available Functions" fontFamily="Tahoma" fontWeight="bold"/>
+                    <mx:Tree labelField="@label" width="300" itemClick="onFunctionClick(event)" dragEnabled="true" dragMoveEnabled="false"
+                             dataProvider="{functions}" showRoot="false" folderOpenIcon="{null}" folderClosedIcon="{null}">
+                    </mx:Tree>
+                    <mx:VBox borderStyle="inset" borderThickness="1" backgroundColor="#FFFFFF" visible="{functionSignature != null}">
+                        <mx:Label text="{functionSignature}"/>
+                        <mx:Text text="{functionExplanation}"
+                                 selectable="true"
+                                 width="300" height="80"/>
+                    </mx:VBox>
+                </mx:VBox>
+            </mx:ViewStack>
+
+        </mx:VBox>
     </mx:HBox>
     <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
-</mx:Canvas>
+</mx:VBox>

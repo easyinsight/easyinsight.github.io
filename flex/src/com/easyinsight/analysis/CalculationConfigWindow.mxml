@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+           xmlns:formatter="com.easyinsight.analysis.formatter.*" xmlns:schedule="com.easyinsight.schedule.*"
+           xmlns:util="com.easyinsight.util.*"
+           implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%"
+           creationComplete="onCreation()">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.collections.ArrayCollection;
+        import mx.collections.XMLListCollection;
+        import mx.controls.AdvancedDataGrid;
+        import mx.controls.DataGrid;
+        import mx.controls.TextArea;
+        import mx.events.ListEvent;
+        import mx.managers.DragManager;
+        import mx.controls.List;
+        import mx.events.DragEvent;
+        import mx.validators.Validator;
+
+        [Bindable]
+        private var failureMessage:String;
+
+        private var _report:AnalysisDefinition;
+
+        public function set report(value:AnalysisDefinition):void {
+            _report = value;
+        }
+
+        [Bindable]
+        protected var calcText:String;
+
+        [Bindable]
+        protected var calcName:String;
+
+
+        [Bindable]
+        protected var formattingConfiguration:int;
+
+
+        private var _applyBefore:Boolean;
+
+        private function onCreation():void {
+            BindingUtils.bindProperty(this, "applyBefore", rowLevelCheckbox, "selected");
+        }
+
+
+        [Bindable(event="applyBeforeChanged")]
+        public function get applyBefore():Boolean {
+            return _applyBefore;
+        }
+
+        public function set applyBefore(value:Boolean):void {
+            if (_applyBefore == value) return;
+            _applyBefore = value;
+            dispatchEvent(new Event("applyBeforeChanged"));
+        }
+
+        public function save(dataSourceID:int):void {
+        }
+
+
+        public function validate():Boolean {
+
+            return true;
+        }
+
+
+        protected function get calculationItem():AnalysisItem {
+            return null;
+        }
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+        }
+
+        protected var items:ArrayCollection;
+
+        [Bindable]
+        protected var sortItems:ArrayCollection;
+
+        [Bindable]
+        protected var dateFields:ArrayCollection;
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+            var items:ArrayCollection = new ArrayCollection();
+            var dates:ArrayCollection = new ArrayCollection();
+            var sortItems:ArrayCollection;
+            for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
+                items.addItem(analysisItemWrapper.analysisItem);
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dates.addItem(analysisItemWrapper.analysisItem);
+                }
+            }
+            sortItems = new ArrayCollection(items.toArray());
+            var noDate:Object = { display: "[ No Date ]"};
+            dates.addItemAt(noDate, 0);
+            var noSort:Object = { display: "[ No Sort ]"};
+            sortItems.addItemAt(noSort, 0);
+            this.sortItems = sortItems;
+            this.items = items;
+            this.dateFields = dates;
+        }
+
+        public function set dataSourceID(dataSourceID:int):void {
+        }
+
+        [Bindable]
+        protected var showMeasures:Boolean;
+
+        [Bindable]
+        protected var aggregation:int = AggregationTypes.SUM;
+
+
+        private var _detailItemLabel:String;
+
+        private var _detailIndex:int;
+
+        private var _dateLevel:int;
+
+        [Bindable(event="detailItemLabelChanged")]
+        public function get detailItemLabel():String {
+            return _detailItemLabel;
+        }
+
+        public function set detailItemLabel(value:String):void {
+            if (_detailItemLabel == value) return;
+            _detailItemLabel = value;
+            dispatchEvent(new Event("detailItemLabelChanged"));
+        }
+
+        [Bindable(event="detailIndexChanged")]
+        public function get detailIndex():int {
+            return _detailIndex;
+        }
+
+        public function set detailIndex(value:int):void {
+            if (_detailIndex == value) return;
+            _detailIndex = value;
+            dispatchEvent(new Event("detailIndexChanged"));
+        }
+
+        [Bindable(event="dateLevelChanged")]
+        public function get dateLevel():int {
+            return _dateLevel;
+        }
+
+        public function set dateLevel(value:int):void {
+            if (_dateLevel == value) return;
+            _dateLevel = value;
+            dispatchEvent(new Event("dateLevelChanged"));
+        }
+
+        [Bindable]
+        protected var summaryRecalc:Boolean;
+
+        [Bindable]
+        protected var example1:String;
+
+        [Bindable]
+        protected var example1Explanation:String;
+
+        [Bindable]
+        protected var example2:String;
+
+        [Bindable]
+        protected var example2Explanation:String;
+
+        [Bindable]
+        protected var underline:Boolean;
+
+        [Bindable]
+        protected var precision:int = 2;
+
+        [Bindable]
+        protected var minPrecision:int;
+
+        [Bindable]
+        protected var html:Boolean;
+
+        [Bindable]
+        protected var dateApplyBeforeAggregation:Boolean = true;
+
+        [Bindable]
+        protected var groupingApplyBeforeAggregation:Boolean = true;
+
+        [Bindable]
+        protected var wordWrap:Boolean;
+
+        [Bindable]
+        protected var dateTime:Boolean;
+
+        public function higlight():void {
+
+        }
+
+        public function normal():void {
+        }
+
+        private var _editable:Boolean;
+
+        public function set editable(editable:Boolean):void {
+            _editable = editable;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (!_editable) {
+                this.enabled = false;
+            }
+        }
+
+        [Bindable]
+        protected var sortDimension:String;
+
+        [Bindable]
+        protected var customFormatChoice:int;
+
+        [Bindable]
+        protected var formatIndex:int;
+
+        [Bindable]
+        protected var defaultDate:String;
+
+        private function onFormatChange(event:Event):void {
+            if (FormattingSetup(event.currentTarget).formattingConfiguration == FormattingConfiguration.MILLISECONDS) {
+                formatIndex = 1;
+            } else {
+                formatIndex = 0;
+            }
+        }
+
+        public function editorLabel():String {
+            return "Additional calculation properties";
+        }
+        ]]>
+	</mx:Script>
+
+
+    <mx:HBox width="100%" height="100%">
+
+
+        <mx:ViewStack resizeToContent="true" selectedIndex="{detailIndex}">
+            <mx:Box/>
+            <mx:VBox>
+            <mx:Form>
+                <mx:FormItem label="Formatting:">
+                    <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}" change="onFormatChange(event)"/>
+                </mx:FormItem>
+            </mx:Form>
+            <!--<mx:ViewStack creationPolicy="all" resizeToContent="true" selectedIndex="{formatIndex}">
+                <mx:Box/>
+                <mx:FormItem label="Interval:">
+                    <util:SmartComboBox id="intervalBox" selectedValue="{customFormatChoice}" selectedProperty="value">
+                        <util:dataProvider>
+                            <mx:Array>
+                                <mx:Object label="Default" value="{FormattingConfiguration.DEFAULT}"/>
+                                <mx:Object label="Month" value="{FormattingConfiguration.MONTH}"/>
+                                <mx:Object label="Month - Day" value="{FormattingConfiguration.MONTH_DAY}"/>
+                                <mx:Object label="Day" value="{FormattingConfiguration.DAY}"/>
+                                <mx:Object label="Day - Hour" value="{FormattingConfiguration.DAY_HOUR}"/>
+                            </mx:Array>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+            </mx:ViewStack>-->
+            <mx:Form>
+                <mx:FormItem label="Recalculate on Summary:">
+                    <mx:CheckBox id="summaryCheckbox" selected="{summaryRecalc}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Row Level:" direction="horizontal">
+                    <mx:CheckBox id="rowLevelCheckbox" selected="{applyBefore}"/>
+                    <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
+                </mx:FormItem>
+                <mx:FormItem label="Aggregation:">
+                    <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
+                        <util:dataProvider>
+                            <mx:Array>
+                                <mx:Object label="Sum" value="{AggregationTypes.SUM}"/>
+                                <mx:Object label="Average" value="{AggregationTypes.AVERAGE}"/>
+                                <mx:Object label="Min" value="{AggregationTypes.MIN}"/>
+                                <mx:Object label="Max" value="{AggregationTypes.MAX}"/>
+                                <mx:Object label="Count" value="{AggregationTypes.COUNT}"/>
+                                <mx:Object label="Median" value="{AggregationTypes.MEDIAN}"/>
+                                <mx:Object label="Variance" value="{AggregationTypes.VARIANCE}"/>
+                                <mx:Object label="Ranking" value="{AggregationTypes.RANK}"/>
+                            </mx:Array>
+                        </util:dataProvider>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Floating Point Precision:">
+                    <mx:NumericStepper id="precisionInput" value="{precision}" minimum="0" maximum="50"/>
+                </mx:FormItem>
+                <mx:FormItem label="Minimum Precision:">
+                    <mx:NumericStepper id="minPrecisionInput" value="{minPrecision}" minimum="0" maximum="50"/>
+                </mx:FormItem>
+                <mx:FormItem label="Date Comparison:">
+                    <util:SmartComboBox id="dateComparisonBox" labelField="display" dataProvider="{dateFields}"
+                                        selectedProperty="display" selectedValue="{defaultDate}"/>
+                </mx:FormItem>
+            </mx:Form>
+            </mx:VBox>
+            <mx:Form>
+                <mx:FormItem label="{detailItemLabel}" direction="horizontal">
+                    <util:SmartComboBox id="dateBox" rowCount="12" selectedValue="{dateLevel}" selectedProperty="data">
+                        <mx:ArrayCollection>
+                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                            <mx:Object label="Quarter - Year" data="{AnalysisItemTypes.QUARTER_OF_YEAR}"/>
+                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year - Hour - Minute"
+                                       data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+
+                            <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
+                            <mx:Object label="Quarter" data="{AnalysisItemTypes.QUARTER_OF_YEAR_FLAT}"/>
+                            <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+                            <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+                            <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+                            <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
+                        </mx:ArrayCollection>
+                    </util:SmartComboBox>
+                </mx:FormItem>
+                <mx:FormItem label="Apply Before Aggregation:">
+                    <mx:CheckBox id="dateApplyBeforeAggregationCheckbox" selected="{dateApplyBeforeAggregation}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Date Time:">
+                    <mx:CheckBox id="dateTimeCheckbox" selected="{dateTime}"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Form>
+                <mx:FormItem label="Word Wrap">
+                    <mx:CheckBox id="wordWrapCheckbox" selected="{wordWrap}"/>
+                </mx:FormItem>
+                <mx:FormItem label="HTML">
+                    <mx:CheckBox id="htmlCheckbox" selected="{html}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Apply Before Aggregation:">
+                    <mx:CheckBox id="groupingApplyBeforeAggregationCheckbox" selected="{groupingApplyBeforeAggregation}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Use Sort Field:">
+                    <util:SmartComboBox id="sortComboBox" labelField="display" dataProvider="{sortItems}"
+                                        selectedValue="{sortDimension}" selectedProperty="display"/>
+                </mx:FormItem>
+            </mx:Form>
+         </mx:ViewStack>
+    </mx:HBox>
+
+</mx:Canvas>

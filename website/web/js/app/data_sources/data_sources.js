@@ -71,13 +71,13 @@
                     delete $scope.to_delete;
                 })
             }
-        }
+        };
 
-
+        $scope.grid = true;
 
         $scope.remove_ds_tag = function (data_source, tag) {
             remove_tag(data_source, tag, "/app/dataSources/" + data_source.url_key + "/tags/" + tag.id, $http);
-        }
+        };
 
         $scope.add_ds_tag = function (data_source, tag, model) {
             add_tag(data_source, tag, model, "/app/dataSources/" + data_source.url_key + "/tags", $http);

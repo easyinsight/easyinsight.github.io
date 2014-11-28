@@ -242,7 +242,6 @@ public class GeneralDelivery extends ScheduledDelivery {
                 }
                 insertDashboardStmt.execute();
                 long insertDashboardID = Database.instance().getAutoGenKey(insertDashboardStmt);
-                insertDashboardStmt.close();
                 if (deliveryInfo.getDeliveryExtension() != null) {
                     deliveryInfo.getDeliveryExtension().save(conn, 0, 0, insertDashboardID);
                 }
@@ -254,6 +253,11 @@ public class GeneralDelivery extends ScheduledDelivery {
                 insertScorecardStmt.execute();
             }
         }
+
+        insertDashboardStmt.close();
+        insertReportStmt.close();
+        insertScorecardStmt.close();
+        insertFilterStmt.close();
     }
 
     @Override

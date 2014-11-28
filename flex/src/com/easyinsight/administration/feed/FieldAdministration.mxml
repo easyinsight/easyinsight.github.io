@@ -22,11 +22,11 @@
         import com.easyinsight.analysis.AnalysisItemWrapper;
 
         import com.easyinsight.analysis.AnalysisStep;
-        import com.easyinsight.analysis.CalculationMeasureWindow;
+        import com.easyinsight.analysis.CalculationMeasureConfigWindow;
         import com.easyinsight.analysis.DerivedAnalysisDateDimension;
         import com.easyinsight.analysis.DerivedAnalysisDimension;
-        import com.easyinsight.analysis.DerivedDateWindow;
-        import com.easyinsight.analysis.DerivedGroupingWindow;
+        import com.easyinsight.analysis.DerivedDateConfigWindow;
+        import com.easyinsight.analysis.DerivedGroupingConfigWindow;
         import com.easyinsight.analysis.FeedFolder;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.FolderNode;
@@ -36,6 +36,9 @@
 
         import com.easyinsight.analysis.Key;
         import com.easyinsight.analysis.NamedKey;
+        import com.easyinsight.analysis.TryAgainCalculationMeasureWindow;
+        import com.easyinsight.analysis.TryAgainDerivedDateWindow;
+        import com.easyinsight.analysis.TryAgainDerivedGroupingWindow;
 
         import com.easyinsight.util.PopUpUtil;
 
@@ -133,13 +136,25 @@
 
         public function customEditor(analysisItem:AnalysisItem):Class {
             if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-                return CalculationMeasureWindow;
+                return TryAgainCalculationMeasureWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
-                return DerivedGroupingWindow;
+                return TryAgainDerivedGroupingWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 return HierarchyWindow;
             } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-                return DerivedDateWindow;
+                return TryAgainDerivedDateWindow;
+            } else {
+                return null;
+            }
+        }
+
+        public function customEditor2(analysisItem:AnalysisItem):Class {
+            if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                return CalculationMeasureConfigWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+                return DerivedGroupingConfigWindow;
+            } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+                return DerivedDateConfigWindow;
             } else {
                 return null;
             }
@@ -168,6 +183,7 @@
         private function toFocus(analysisItem:AnalysisItem, handler:Function, wrapper:AnalysisItemWrapper = null):void {
             var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             analysisItemEditor.editorClass = customEditor(analysisItem);
+            analysisItemEditor.editorClass2 = customEditor2(analysisItem);
             analysisItemEditor.dataSourceID = dataSourceID;
             analysisItemEditor.originalWrapper = wrapper;
             analysisItemEditor.analysisItems = this.allFields;

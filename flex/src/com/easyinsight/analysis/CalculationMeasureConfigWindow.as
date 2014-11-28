@@ -3,11 +3,11 @@ import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
 import mx.controls.Alert;
 
-public class CalculationMeasureWindow extends CalculationWindow {
+public class CalculationMeasureConfigWindow extends CalculationConfigWindow {
 
     private var analysisCalculation:AnalysisCalculation;
 
-    public function CalculationMeasureWindow() {
+    public function CalculationMeasureConfigWindow() {
         super();
     }
 
@@ -29,7 +29,7 @@ public class CalculationMeasureWindow extends CalculationWindow {
             precision = analysisCalculation.precision;
             minPrecision = analysisCalculation.minPrecision;
             defaultDate = analysisCalculation.defaultDate;
-            customFormatChoice = analysisCalculation.customFormatChoice;
+            //customFormatChoice = analysisCalculation.customFormatChoice;
             if (formattingConfiguration == FormattingConfiguration.MILLISECONDS) {
                 formatIndex = 1;
             }
@@ -46,26 +46,10 @@ public class CalculationMeasureWindow extends CalculationWindow {
         return analysisCalculation;
     }
 
-    override protected function actualSave():AnalysisItem {
-        if (analysisCalculation == null) {
-            analysisCalculation = new AnalysisCalculation();
-            analysisCalculation.concrete = false;
-            var namedKey:NamedKey = new NamedKey();
-            namedKey.name = nameInput.text;
-            analysisCalculation.key = namedKey;
-            analysisCalculation.displayName = nameInput.text;
-            analysisCalculation.unqualifiedDisplayName = nameInput.text;
-        } else {
-            if (analysisCalculation.key is NamedKey) {
-                NamedKey(analysisCalculation.key).name = nameInput.text;
-            }
-            analysisCalculation.displayName = nameInput.text;
-            analysisCalculation.unqualifiedDisplayName = nameInput.text;
-        }
+    override public function save(dataSourceID:int):void {
         analysisCalculation.applyBeforeAggregation = rowLevelCheckbox.selected;
-        analysisCalculation.customFormatChoice = intervalBox.selectedItem.value;
+        //analysisCalculation.customFormatChoice = intervalBox.selectedItem.value;
         analysisCalculation.aggregation = measureAggregationBox.selectedItem.value;
-        analysisCalculation.calculationString = calculationInput.text;
         analysisCalculation.formattingType = formattingSetup.formattingConfiguration;
         analysisCalculation.recalculateSummary = summaryCheckbox.selected;
         analysisCalculation.precision = precisionInput.value;
@@ -76,7 +60,6 @@ public class CalculationMeasureWindow extends CalculationWindow {
             analysisCalculation.defaultDate = null;
         }
         analysisCalculation.minPrecision = minPrecisionInput.value;
-        return analysisCalculation;
     }
 }
 }

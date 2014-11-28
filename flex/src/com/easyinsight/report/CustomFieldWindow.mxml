@@ -7,14 +7,15 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
-        import com.easyinsight.analysis.AnalysisItemNode;
-        import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.analysis.CalculationMeasureWindow;
-        import com.easyinsight.analysis.DerivedDateWindow;
-        import com.easyinsight.analysis.DerivedGroupingWindow;
+        import com.easyinsight.analysis.CalculationMeasureConfigWindow;
+        import com.easyinsight.analysis.DerivedDateConfigWindow;
+        import com.easyinsight.analysis.DerivedGroupingConfigWindow;
         import com.easyinsight.analysis.FieldEditorEvent;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.ReportEditorFieldEvent;
+        import com.easyinsight.analysis.TryAgainCalculationMeasureWindow;
+        import com.easyinsight.analysis.TryAgainDerivedDateWindow;
+        import com.easyinsight.analysis.TryAgainDerivedGroupingWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -56,7 +57,8 @@
 
         private function createCalculation():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            window.editorClass = CalculationMeasureWindow;
+            window.editorClass = TryAgainCalculationMeasureWindow;
+            window.editorClass2 = CalculationMeasureConfigWindow;
             window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;
@@ -74,7 +76,8 @@
 
         private function createCalculatedGrouping():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            window.editorClass = DerivedGroupingWindow;
+            window.editorClass = TryAgainDerivedGroupingWindow;
+            window.editorClass2 = DerivedGroupingConfigWindow;
             window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;
@@ -88,7 +91,8 @@
 
         private function createCalculatedDate():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            window.editorClass = DerivedDateWindow;
+            window.editorClass = TryAgainDerivedDateWindow;
+            window.editorClass = DerivedDateConfigWindow;
             window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;

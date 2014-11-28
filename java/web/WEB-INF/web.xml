@@ -827,6 +827,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ConnectionImageByDataSource</servlet-name>
+        <display-name>ConnectionImageByDataSource</display-name>
+        <servlet-class>com.easyinsight.html.ConnectionImageByDataSourceServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>RefreshStatus</servlet-name>
         <display-name>RefreshStatus</display-name>
         <servlet-class>com.easyinsight.html.RefreshStatusServlet</servlet-class>
@@ -1388,6 +1394,11 @@
     <servlet-mapping>
         <servlet-name>ConnectionImage</servlet-name>
         <url-pattern>/connectionImage</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ConnectionImageByDataSource</servlet-name>
+        <url-pattern>/connectionImageByDataSource</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

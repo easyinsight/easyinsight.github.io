@@ -12,6 +12,8 @@
 
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
+
         import mx.core.Application;
 
         import mx.core.Container;
@@ -30,9 +32,13 @@
 
         private var _editorClass:Class;
 
+        private var _editorClass2:Class;
+
         public var fullEditable:Boolean = false;
 
         private var editor:IAnalysisItemEditor;
+
+        private var editor2:IAnalysisItemEditor;
 
         [Bindable]
         public var report:AnalysisDefinition;
@@ -55,10 +61,10 @@
 
             linkFactory = new ClassFactory(LinkControls);
             if (_analysisItem != null) {
-                linkFactory.properties = { sourceItem:_analysisItem, dataSourceID:dataSourceID };
+                linkFactory.properties = { sourceItem: _analysisItem, dataSourceID: dataSourceID };
                 transformContainer.existingFilters = _analysisItem.filters;
             } else {
-                linkFactory.properties = { dataSourceID:dataSourceID };
+                linkFactory.properties = { dataSourceID: dataSourceID };
             }
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
@@ -74,7 +80,7 @@
             // The appWidth may smaller than parentWidth if the application is
             // clipped by the parent application.
             var x:int = Math.max(0, appWidth - this.width) / 2;
-            var y:int = Math.max(0, appHeight - this.height) / 2;
+            var y:int = 20;
 
             var pt:Point = new Point(0, 0);
             //pt = popUpParent.localToGlobal(pt);
@@ -90,6 +96,10 @@
             parallel.children = [ resize, move ];
 
             parallel.play();
+        }
+
+        public function set editorClass2(value:Class):void {
+            _editorClass2 = value;
         }
 
         private var commandProcessor:CommandProcessor;
@@ -159,8 +169,13 @@
         override protected function createChildren():void {
             super.createChildren();
             if (_editorClass == null) {
-                editor = new AnalysisItemEditorPerspective(new PerspectiveInfo(PerspectiveInfo.ANALYSIS_ITEM_EDITOR, {dataSourceID:_dataSourceID,
-                    analysisItem:_analysisItem, analysisItems:_analysisItems, fullEditable: fullEditable, editable: this.editable}));
+                editor = new AnalysisItemEditor();
+                editor.dataSourceID = _dataSourceID;
+                editor.analysisItem = _analysisItem;
+                editor.analysisItems = _analysisItems;
+                editor.editable = this.editable;
+                editor.report = report;
+                primaryLabel = IAnalysisItemEditor(editor).editorLabel();
             } else {
                 editor = new _editorClass();
                 editor.dataSourceID = _dataSourceID;
@@ -168,11 +183,33 @@
                 editor.analysisItems = _analysisItems;
                 editor.editable = this.editable;
                 editor.report = report;
+                primaryLabel = IAnalysisItemEditor(editor).editorLabel();
             }
+
+            if (_editorClass2 != null) {
+                editor2 = new _editorClass2();
+                editor2.dataSourceID = _dataSourceID;
+                editor2.analysisItem = _analysisItem;
+                editor2.analysisItems = _analysisItems;
+                editor2.editable = this.editable;
+                editor2.report = report;
+            }
+
+            primary.select();
 
             UIComponent(editor).addEventListener(FlexEvent.UPDATE_COMPLETE, onEvent);
             Container(editor).label = "Item";
             tabNavigator.addChildAt(editor as DisplayObject, 0);
+            if (editor2 != null) {
+                var ed2:WizardTabBarSection = new WizardTabBarSection();
+                ed2.num = 2;
+                ed2.mainLabel = IAnalysisItemEditor(editor2).editorLabel();
+                ed2.addEventListener(MouseEvent.CLICK, onClick);
+                wizardTabBars.addChildAt(ed2, 1);
+                tabNavigator.addChildAt(editor2 as DisplayObject, 1);
+                linkNum++;
+                filterNum++;
+            }
             if (fullEditable) {
                 tabNavigator.removeChild(filtersBox);
                 tabNavigator.removeChild(linksBox);
@@ -183,6 +220,7 @@
                     }
                     if (_analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     } else {
+                        wizardTabBars.removeChild(filterTabBar);
                         tabNavigator.removeChild(filtersBox);
                     }
                 }
@@ -222,9 +260,14 @@
                     chartEditor.analysisItems = _analysisItems;
                     tabNavigator.addChild(chartEditor);
                 }
-                if (initialWindow == EXTENSION) {
-                    lastTab = tabNavigator.getChildIndex(DisplayObject(_reportEditor));
-                    tabNavigator.selectedChild = _reportEditor as Container;
+                if (_reportEditor != null) {
+
+                    var ed3:WizardTabBarSection = new WizardTabBarSection();
+                    ed3.num = wizardTabBars.getChildren().length + 1;
+                    ed3.mainLabel = Container(_reportEditor).label;
+                    ed3.addEventListener(MouseEvent.CLICK, onClick);
+                    wizardTabBars.addChild(ed3);
+
                 }
                 if (report != null && report.dataSourceFieldReport) {
                     fieldAdminWindow = new FieldAdminWindow();
@@ -239,19 +282,6 @@
                         tabNavigator.addChild(reportsEventsWindow);
                     }
                 }
-                /*if (dataSourceFields != null) {
-                    var advWindow:AdvancedFieldWindow = new AdvancedFieldWindow();
-                    advWindow.analysisItem = _analysisItem;
-
-
-                    var f:ArrayCollection = new ArrayCollection();
-                    f.addAll(dataSourceFields);
-                    if (report.addedItems != null) {
-                        f.addAll(report.addedItems);
-                    }
-                    advWindow.fields = f;
-                    tabNavigator.addChild(advWindow);
-                }*/
             }
         }
 
@@ -270,10 +300,6 @@
         private var lastTab:int = 0;
 
         private function onEvent(event:Event):void {
-            if (lastTab != tabNavigator.selectedIndex) {
-                lastTab = tabNavigator.selectedIndex;
-                PopUpUtil.centerPopUp(this);
-            }
         }
 
         private function cancel():void {
@@ -370,16 +396,46 @@
         public function normal():void {
             editor.normal();
         }
+
+        [Bindable]
+        private var idx:int;
+
+        private function onClick(event:Event):void {
+            var section:WizardTabBarSection = event.currentTarget as WizardTabBarSection;
+            for each (var s:WizardTabBarSection in wizardTabBars.getChildren()) {
+                if (s != section) {
+                    s.deselect();
+                }
+            }
+            section.select();
+
+            idx = section.num - 1;
+        }
+
+        [Bindable]
+        private var linkNum:int = 2;
+
+        [Bindable]
+        private var filterNum:int = 3;
+
+        [Bindable]
+        private var primaryLabel:String;
         ]]>
     </mx:Script>
-    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" id="primaryBox">
-        <mx:TabNavigator creationPolicy="all" width="100%" height="100%" resizeToContent="true" tabWidth="120" id="tabNavigator">
+    <mx:HBox horizontalGap="20">
+        <mx:VBox verticalGap="0" height="100%" backgroundColor="#FFFFFF" id="wizardTabBars">
+            <util:WizardTabBarSection mainLabel="{primaryLabel}" num="1" click="onClick(event)" id="primary"/>
+            <util:WizardTabBarSection mainLabel="Add links to URLs or other reports" num="{linkNum}" click="onClick(event)"/>
+            <util:WizardTabBarSection mainLabel="Add filters to this field" num="{filterNum}" click="onClick(event)" id="filterTabBar"/>
+        </mx:VBox>
+        <mx:HBox width="750" horizontalAlign="center">
+        <mx:ViewStack id="tabNavigator" resizeToContent="true" creationPolicy="all" selectedIndex="{idx}">
             <mx:VBox label="Links" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                 paddingTop="5" horizontalAlign="center" width="700" height="380" updateComplete="onEvent(event)" id="linksBox">
+                     paddingTop="5" horizontalAlign="center" width="700" height="380" updateComplete="onEvent(event)" id="linksBox">
                 <mx:Text width="515"  selectable="false" fontSize="14"
-                                       text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs) and links to external URLs."/>
+                         text="Links allow you to connect your reports to other locations. You can create links to other reports (drillthroughs) and links to external URLs."/>
                 <mx:Button fontSize="14" label="Click to view documentation for links" click="navigateToURL(new URLRequest('https://www.easy-insight.com/app/docs/Linking_Reports'), '_blank')"
-                        styleName="flatCreateButton"/>
+                           styleName="flatCreateButton"/>
                 <mx:HRule/>
                 <mx:ViewStack selectedIndex="{linkIndex}" width="100%" height="100%">
                     <mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
@@ -404,8 +460,8 @@
             <mx:VBox label="Filters" width="650" height="300" paddingBottom="5" paddingLeft="5" paddingRight="5"
                      paddingTop="5" horizontalAlign="center" updateComplete="onEvent(event)" id="filtersBox">
                 <mx:Text width="515" selectable="false"
-                                       fontSize="14"
-                                       text="You can define filters at the column level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this column."/>
+                         fontSize="14"
+                         text="You can define filters at the column level by dragging fields from the left hand list into the drop area below. Any filters you define here will only be applied to this column."/>
                 <mx:Button icon="@Embed(source='../../../../assets/funnel.png')"
                            toolTip="Add New Filter..." click="transformContainer.addNewFilter()" label="New Filter" enabled="{editable}"/>
                 <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
@@ -414,11 +470,11 @@
                                             feedID="{dataSourceID}" filterSource="{NewFilterWindow.FIELD_LEVEL}"
                                             analysisItems="{analysisItems}" report="{report}" borderStyle="solid" borderThickness="1" enabled="{editable}"/>
             </mx:VBox>
-        </mx:TabNavigator>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <util:SaveButton label="Save" click="save()" id="saveButton"/>
-            <util:CancelButton label="Cancel" click="cancel()"/>
+        </mx:ViewStack>
         </mx:HBox>
-    </mx:VBox>
-
+    </mx:HBox>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <util:SaveButton label="Save" click="save()" id="saveButton"/>
+        <util:CancelButton label="Cancel" click="cancel()"/>
+    </mx:HBox>
 </util:EITitleWindow>

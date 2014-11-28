@@ -497,6 +497,11 @@
     </rule>
 
     <rule>
+        <from>^/connectionDataSourceImage/([A-Za-z0-9]+)</from>
+        <to>/connectionImageByDataSource?dataSourceType=$1</to>
+    </rule>
+
+    <rule>
         <from>^/users.json</from>
         <to>/json/getUsers</to>
     </rule>

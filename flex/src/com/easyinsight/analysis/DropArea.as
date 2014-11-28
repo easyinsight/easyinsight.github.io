@@ -175,13 +175,25 @@ public class DropArea extends Box
 
     public function customEditor():Class {
         if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            return CalculationMeasureWindow;
+            return TryAgainCalculationMeasureWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
-            return DerivedGroupingWindow;
-        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
-            return DerivedDateWindow;
+            return TryAgainDerivedGroupingWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
             return HierarchyWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+            return TryAgainDerivedDateWindow;
+        } else {
+            return null;
+        }
+    }
+
+    public function customEditor2():Class {
+        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            return CalculationMeasureConfigWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_GROUPING)) {
+            return DerivedGroupingConfigWindow;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DATE)) {
+            return DerivedDateConfigWindow;
         } else {
             return null;
         }
@@ -190,6 +202,7 @@ public class DropArea extends Box
     protected function editEvent(event:MouseEvent, initialWindow:int = 0):void {
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
         analysisItemEditor.editorClass = customEditor();
+        analysisItemEditor.editorClass2 = customEditor2();
         analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.analysisItem = this.analysisItem;
