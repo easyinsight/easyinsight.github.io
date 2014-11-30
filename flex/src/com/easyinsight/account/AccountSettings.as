@@ -17,7 +17,8 @@ public class AccountSettings {
     public var defaultFontFamily:String;
     public var locale:String;
     public var fiscalYearStartMonth:int;
-    
+    public var zone:String;
+
     public function AccountSettings() {
     }
 }
