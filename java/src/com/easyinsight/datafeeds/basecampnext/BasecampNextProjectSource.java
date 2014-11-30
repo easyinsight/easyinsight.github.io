@@ -8,6 +8,8 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
@@ -75,32 +77,77 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
     }
 
     @Override
+    protected String getUpdateKeyName() {
+        return PROJECT_ID;
+    }
+
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        BasecampNextCompositeSource compositeSource = (BasecampNextCompositeSource) parentSource;
+        return !compositeSource.isUseProjectUpdatedAt();
+    }
+
+    @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         try {
-            DataSet dataSet = new DataSet();
+
             HttpClient httpClient = new HttpClient();
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
             DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
             DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.sssZZ");
-            for (Project project : projects) {
-                JSONObject projectObject = runJSONRequestForObject("/projects/" + project.getId() + ".json", basecampNextCompositeSource, httpClient);
-                IRow row = dataSet.createRow();
-                Date createdAt;
-                try {
-                    createdAt = format.parseDateTime(projectObject.getString("created_at")).toDate();
-                } catch (Exception e) {
-                    createdAt = altFormat.parseDateTime(projectObject.getString("created_at")).toDate();
+            if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+
+                for (Project project : projects) {
+                    if (lastRefreshDate != null && project.getUpdatedAt().before(lastRefreshDate)) {
+                        continue;
+                    }
+                    DataSet dataSet = new DataSet();
+                    JSONObject projectObject = runJSONRequestForObject("/projects/" + project.getId() + ".json", basecampNextCompositeSource, httpClient);
+                    IRow row = dataSet.createRow();
+                    Date createdAt;
+                    try {
+                        createdAt = format.parseDateTime(projectObject.getString("created_at")).toDate();
+                    } catch (Exception e) {
+                        createdAt = altFormat.parseDateTime(projectObject.getString("created_at")).toDate();
+                    }
+                    row.addValue(keys.get(PROJECT_ID), project.getId());
+                    row.addValue(keys.get(PROJECT_NAME), project.getName());
+                    row.addValue(keys.get(PROJECT_ARCHIVED), String.valueOf(project.isArchived()));
+                    row.addValue(keys.get(DESCRIPTION), project.getDescription());
+                    row.addValue(keys.get(URL), project.getUrl());
+                    row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
+                    row.addValue(keys.get(CREATED_AT), createdAt);
+                    if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                        IDataStorage.insertData(dataSet);
+                    } else {
+                        StringWhere stringWhere = new StringWhere(keys.get(PROJECT_ID), project.getId());
+                        IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                    }
                 }
-                row.addValue(keys.get(PROJECT_ID), project.getId());
-                row.addValue(keys.get(PROJECT_NAME), project.getName());
-                row.addValue(keys.get(PROJECT_ARCHIVED), String.valueOf(project.isArchived()));
-                row.addValue(keys.get(DESCRIPTION), project.getDescription());
-                row.addValue(keys.get(URL), project.getUrl());
-                row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
-                row.addValue(keys.get(CREATED_AT), createdAt);
+                return null;
+            } else {
+                DataSet dataSet = new DataSet();
+                for (Project project : projects) {
+                    JSONObject projectObject = runJSONRequestForObject("/projects/" + project.getId() + ".json", basecampNextCompositeSource, httpClient);
+                    IRow row = dataSet.createRow();
+                    Date createdAt;
+                    try {
+                        createdAt = format.parseDateTime(projectObject.getString("created_at")).toDate();
+                    } catch (Exception e) {
+                        createdAt = altFormat.parseDateTime(projectObject.getString("created_at")).toDate();
+                    }
+                    row.addValue(keys.get(PROJECT_ID), project.getId());
+                    row.addValue(keys.get(PROJECT_NAME), project.getName());
+                    row.addValue(keys.get(PROJECT_ARCHIVED), String.valueOf(project.isArchived()));
+                    row.addValue(keys.get(DESCRIPTION), project.getDescription());
+                    row.addValue(keys.get(URL), project.getUrl());
+                    row.addValue(keys.get(UPDATED_AT), project.getUpdatedAt());
+                    row.addValue(keys.get(CREATED_AT), createdAt);
+                }
+                return dataSet;
             }
-            return dataSet;
+
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
