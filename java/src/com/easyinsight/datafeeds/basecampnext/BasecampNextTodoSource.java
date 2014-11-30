@@ -146,6 +146,14 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
             for (Project project : projects) {
+                if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+                    if (lastRefreshDate != null && project.getUpdatedAt().before(lastRefreshDate)) {
+                        System.out.println("skipping project " + project.getName() + " updated at " + project.getUpdatedAt());
+                        continue;
+                    } else {
+                        System.out.println("not skipping " + project.getName());
+                    }
+                }
                 DataSet dataSet = new DataSet();
                 String projectID = project.getId();
                 JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
@@ -235,7 +243,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             IRow row = dataSet.createRow();
             String todoID = String.valueOf(todoObject.getInt("id"));
             String todoContent = todoObject.getString("content");
-            //if (todoContent.contains("Todo with Comment")) {
+
             try {
                 Object commentsCountObj = todoObject.get("comments_count");
                 if (commentsCountObj != null) {
@@ -258,7 +266,6 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             } catch (Exception e) {
                 LogClass.error(e);
             }
-            // }
             String dueAtString = todoObject.getString("due_at");
             Date dueAt = parseDueDate(dueAtString);
             String completedAtString = todoObject.getString("completed_at");
