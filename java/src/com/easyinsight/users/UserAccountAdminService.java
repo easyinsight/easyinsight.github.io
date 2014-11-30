@@ -19,9 +19,9 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
-import sun.util.calendar.ZoneInfo;
 
 import java.sql.*;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.Date;
 
@@ -33,8 +33,9 @@ import java.util.Date;
 public class UserAccountAdminService {
 
     public List<String> getTimezones() {
-        String[] availableIDs = ZoneInfo.getAvailableIDs();
-        return Arrays.asList(availableIDs);
+        List<String> zones = new ArrayList<>(ZoneId.getAvailableZoneIds());
+        Collections.sort(zones);
+        return zones;
     }
 
     public void resendInvite(long userID) {
@@ -1329,6 +1330,7 @@ public class UserAccountAdminService {
             account.setUseHTMLVersion(accountSettings.isHtmlView());
             account.setAccountLocale(accountSettings.getLocale());
             account.setFiscalYearStartMonth(accountSettings.getFiscalYearStartMonth());
+            account.setTimezone(accountSettings.getZone());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -1363,6 +1365,7 @@ public class UserAccountAdminService {
             accountSettings.setSendEmail(account.isSendEmailsToNewUsers());
             accountSettings.setHtmlView(account.isUseHTMLVersion());
             accountSettings.setDefaultFontFamily(account.getDefaultFontFamily());
+            accountSettings.setZone(account.getTimezone());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);

@@ -83,6 +83,15 @@ public class UserServiceResponse {
     private String newsSubject;
     private List<EIDescriptor> topReports;
     private boolean onlyShowTopReports;
+    private String accountTimezone;
+
+    public String getAccountTimezone() {
+        return accountTimezone;
+    }
+
+    public void setAccountTimezone(String accountTimezone) {
+        this.accountTimezone = accountTimezone;
+    }
 
     public boolean isOnlyShowTopReports() {
         return onlyShowTopReports;
@@ -261,7 +270,8 @@ public class UserServiceResponse {
                                 user.getUserKey(), user.getUserSecretKey(), user.isOptInEmail(), user.getFixedDashboardID(),
                     new ReportTypeOptions(), user.getAccount().isSubdomainEnabled(), personaName, user.isRefreshReports(), user.isAnalyst(), account.getPricingModel(),
                 account.isHeatMapEnabled(), newsDate, user.getNewsDismissDate(), accountOverSize, user.isTestAccountVisible(), account.isTagsAndCopyEnabled(),
-                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily(), topReports, newsTitle, user.isAssignedDashboardIsFixedView());
+                account.isHourlyRefreshEnabled(), account.isUseHTMLVersion(), account.getDefaultFontFamily(), topReports, newsTitle, user.isAssignedDashboardIsFixedView(),
+                account.getTimezone());
         response.setReportImage(bytes);
         String accountLocale;
         if (!"0".equals(user.getUserLocale())) {
@@ -309,7 +319,7 @@ public class UserServiceResponse {
                                boolean subdomainEnabled, String personaName, boolean refreshReports, boolean analyst, int pricingModel, boolean reportMode,
                                Date newsDate, Date newsDismissDate, boolean accountOverSize, boolean accountReports, boolean tagsAndCopyEnabled,
                                boolean hourlyRefreshEnabled, boolean defaultHTML, String defaultFontFamily, List<EIDescriptor> topReports, String newsTitle,
-                               boolean onlyShowTopReports) {
+                               boolean onlyShowTopReports, String accountTimezone) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -359,6 +369,7 @@ public class UserServiceResponse {
         this.topReports = topReports;
         this.newsSubject = newsTitle;
         this.onlyShowTopReports = onlyShowTopReports;
+        this.accountTimezone = accountTimezone;
     }
 
     public boolean isAccountOverSize() {

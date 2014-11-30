@@ -24,8 +24,17 @@ public class AccountSettings {
     private boolean sendEmail;
     private boolean htmlView;
     private int fiscalYearStartMonth;
+    private String zone;
 
     public AccountSettings() {
+    }
+
+    public String getZone() {
+        return zone;
+    }
+
+    public void setZone(String zone) {
+        this.zone = zone;
     }
 
     public int getFiscalYearStartMonth() {
@@ -150,6 +159,11 @@ public class AccountSettings {
         jo.put("send_email", sendEmail);
         jo.put("html_view", htmlView);
         jo.put("fiscal_quarter_start", fiscalYearStartMonth);
+        if (zone == null || "".equals(zone)) {
+            jo.put("timezone", "[ Auto Detect ]");
+        } else {
+            jo.put("timezone", zone);
+        }
         return jo;
     }
 
@@ -163,6 +177,12 @@ public class AccountSettings {
         as.setMaxResults(Integer.valueOf(String.valueOf(jo.get("max_rows"))));
         as.setSendEmail(Boolean.valueOf(String.valueOf(jo.get("send_email"))));
         as.setHtmlView(Boolean.valueOf(String.valueOf(jo.get("html_view"))));
+        String zone = String.valueOf(jo.get("timezone"));
+        if ("[ Auto Detect ]".equals(zone)) {
+            as.setZone(null);
+        } else {
+            as.setZone(zone);
+        }
         return as;
     }
 }
