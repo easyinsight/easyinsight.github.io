@@ -69,6 +69,7 @@ public class User extends EventDispatcher
     public var thousandsSeperator:String;
     public var topReports:ArrayCollection;
     public var onlyShowTopReports:Boolean;
+    public var accountTimezone:String;
 
     public function getDateFormat():String {
         var formatString:String;
@@ -151,6 +152,7 @@ public class User extends EventDispatcher
         _user.scenario = response.scenario;
         _user.defaultFontFamily = response.defaultFontFamily;
         _user.onlyShowTopReports = response.onlyShowTopReports;
+        _user.accountTimezone = response.accountTimezone;
         if (response.currencySymbol == "EUR") {
             _user.currencySymbol = "\u20AC";
         } else if (response.currencySymbol == "GBP") {

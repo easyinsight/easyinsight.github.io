@@ -43,6 +43,15 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     private String accessToken;
     private String refreshToken;
     private String endpoint;
+    private boolean useProjectUpdatedAt;
+
+    public boolean isUseProjectUpdatedAt() {
+        return useProjectUpdatedAt;
+    }
+
+    public void setUseProjectUpdatedAt(boolean useProjectUpdatedAt) {
+        this.useProjectUpdatedAt = useProjectUpdatedAt;
+    }
 
     private transient List<BasecampComment> comments;
 
@@ -95,11 +104,13 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
         PreparedStatement deleteStatement = conn.prepareStatement("delete from basecamp_next where data_source_id = ?");
         deleteStatement.setLong(1, this.getDataFeedID());
         deleteStatement.execute();
-        PreparedStatement statement = conn.prepareStatement("insert into basecamp_next (data_source_id, endpoint, access_token, refresh_token) VALUES (?, ?, ?, ?)");
+        PreparedStatement statement = conn.prepareStatement("insert into basecamp_next (data_source_id, endpoint, access_token, refresh_token," +
+                "use_project_updated_at) VALUES (?, ?, ?, ?, ?)");
         statement.setLong(1, this.getDataFeedID());
         statement.setString(2, getEndpoint());
         statement.setString(3, getAccessToken());
         statement.setString(4, getRefreshToken());
+        statement.setBoolean(5, isUseProjectUpdatedAt());
         statement.execute();
         statement.close();
         deleteStatement.close();
@@ -108,13 +119,14 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement statement = conn.prepareStatement("select endpoint, access_token, refresh_token from basecamp_next where data_source_id = ?");
+        PreparedStatement statement = conn.prepareStatement("select endpoint, access_token, refresh_token, use_project_updated_at from basecamp_next where data_source_id = ?");
         statement.setLong(1, getDataFeedID());
         ResultSet rs = statement.executeQuery();
         if(rs.next()) {
             this.setEndpoint(rs.getString(1));
             setAccessToken(rs.getString(2));
             setRefreshToken(rs.getString(3));
+            setUseProjectUpdatedAt(rs.getBoolean(4));
         }
         statement.close();
     }

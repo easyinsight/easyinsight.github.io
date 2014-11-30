@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EISlimWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-                    creationComplete="userService.getAccountSettings.send(); groupService.getAccountGroups.send()">
+                    creationComplete="userService.getTimezones.send(); userService.getAccountSettings.send(); groupService.getAccountGroups.send(); ">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
         import com.easyinsight.util.ProgressAlert;
@@ -40,6 +40,11 @@
             selectedLocale = accountSettings.locale;
             defaultFontFamily = accountSettings.defaultFontFamily;
             fiscalYearStartMonth = accountSettings.fiscalYearStartMonth;
+            if (accountSettings.zone == null || accountSettings.zone == "") {
+                defaultTimezone = "[ Auto Detect ]";
+            } else {
+                defaultTimezone = accountSettings.zone;
+            }
         }
 
         private function save():void {
@@ -53,6 +58,11 @@
             accountSettings.locale = localeBox.selectedItem.data;
             accountSettings.defaultFontFamily = defaultFontFamilyInput.text;
             accountSettings.fiscalYearStartMonth = fiscalYearBox.selectedItem.data;
+            if (timezoneBox.selectedItem == "[ Auto Detect ]") {
+                accountSettings.zone = null;
+            } else {
+                accountSettings.zone = timezoneBox.selectedItem as String;
+            }
             ProgressAlert.alert(this, "Saving settings...", null, userService.saveAccountSettings);
             User.getInstance().dateFormat = accountSettings.dateFormat;
             userService.saveAccountSettings.send(accountSettings);
@@ -93,16 +103,29 @@
 
         [Bindable]
         private var fiscalYearStartMonth:int;
+
+        [Bindable]
+        private var zones:ArrayCollection;
+
+        private function gotZones():void {
+            var zones:ArrayCollection = userService.getTimezones.lastResult as ArrayCollection;
+            zones.addItemAt("[ Auto Detect ]", 0);
+            this.zones = zones;
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountSettings" result="gotSettings()"/>
         <mx:method name="saveAccountSettings" result="saved()"/>
+        <mx:method name="getTimezones" result="gotZones()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getAccountGroups" result="gotGroups()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Default Account Timezone:">
+                <mx:ComboBox id="timezoneBox" selectedItem="{defaultTimezone}" dataProvider="{zones}" rowCount="15"/>
+            </mx:FormItem>
             <mx:FormItem label="Locale:">
                 <util:SmartComboBox id="localeBox" rowCount="6" selectedValue="{selectedLocale}" selectedProperty="data">
                     <util:dataProvider>
@@ -165,9 +188,6 @@
             <mx:FormItem label="Default to HTML View:">
                 <mx:CheckBox id="htmlViewCheckbox" selected="{htmlView}"/>
             </mx:FormItem>
-            <!--<mx:FormItem label="Default Account Timezone:">
-                <mx:ComboBox id="timezoneBox" selectedItem="{defaultTimezone}"/>
-            </mx:FormItem>-->
             <mx:FormItem label="Default Font Family:">
                 <mx:TextInput id="defaultFontFamilyInput" text="{defaultFontFamily}"/>
             </mx:FormItem>

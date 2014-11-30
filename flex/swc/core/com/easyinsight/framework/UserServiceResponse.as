@@ -63,6 +63,7 @@ public class UserServiceResponse
     public var topReports:ArrayCollection;
     public var newsSubject:String;
     public var onlyShowTopReports:Boolean;
+    public var accountTimezone:String;
 
     public function UserServiceResponse()
         {
