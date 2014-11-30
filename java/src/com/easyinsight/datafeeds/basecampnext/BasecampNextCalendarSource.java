@@ -8,6 +8,8 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import com.easyinsight.storage.IWhere;
+import com.easyinsight.storage.StringWhere;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
@@ -111,52 +113,128 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         HttpClient httpClient = new HttpClient();
         try {
-            DataSet dataSet = new DataSet();
-            JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-            for (int i = 0; i < jsonArray.length(); i++) {
-
-                JSONObject projectObject = jsonArray.getJSONObject(i);
-                String calendarID = String.valueOf(projectObject.getInt("id"));
-                String calendarName = projectObject.getString("name");
-                String calendarURL = projectObject.getString("url");
-                Date calendarUpdatedAt;
-                try {
-                    calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
-                } catch (Exception e) {
-                    calendarUpdatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
-                }
-                JSONArray eventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, eventArray, null);
-                JSONArray pastEventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, pastEventArray, null);
-            }
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
-            List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+            if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+                DataSet dataSet = new DataSet();
+                JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                for (int i = 0; i < jsonArray.length(); i++) {
 
-            for (Project project : projects) {
-                String projectID = project.getId();
-
-                try {
-                    Object eventObj = runJSONRequest("projects/" + projectID + "/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                    if (eventObj instanceof JSONArray) {
-                        JSONArray eventArray = (JSONArray) eventObj;
-                        parseCalendarEvents(keys, dataSet, null, null, null, null, eventArray, projectID);
+                    JSONObject projectObject = jsonArray.getJSONObject(i);
+                    String calendarID = String.valueOf(projectObject.getInt("id"));
+                    String calendarName = projectObject.getString("name");
+                    String calendarURL = projectObject.getString("url");
+                    Date calendarUpdatedAt;
+                    try {
+                        calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                    } catch (Exception e) {
+                        calendarUpdatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
                     }
-                    Object pastEventObject = runJSONRequest("projects/"+projectID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                    if (pastEventObject instanceof JSONArray) {
-                        JSONArray eventArray = (JSONArray) pastEventObject;
-                        parseCalendarEvents(keys, dataSet, null, null, null, null, eventArray, projectID);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    JSONArray eventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                    parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, eventArray, "");
+                    JSONArray pastEventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                    parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, pastEventArray, "");
                 }
+                if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                    IDataStorage.insertData(dataSet);
+                } else {
+                    StringWhere stringWhere = new StringWhere(keys.get(CALENDAR_EVENT_PROJECT_ID), "");
+                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                }
+
+                List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+
+                for (Project project : projects) {
+                    String projectID = project.getId();
+                    if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+                        if (lastRefreshDate != null && project.getUpdatedAt().before(lastRefreshDate)) {
+                            System.out.println("skipping project " + project.getName() + " updated at " + project.getUpdatedAt());
+                            continue;
+                        } else {
+                            System.out.println("not skipping " + project.getName());
+                        }
+                    }
+                    dataSet = new DataSet();
+                    try {
+                        Object eventObj = runJSONRequest("projects/" + projectID + "/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                        if (eventObj instanceof JSONArray) {
+                            JSONArray eventArray = (JSONArray) eventObj;
+                            parseCalendarEvents(keys, dataSet, null, null, null, null, eventArray, projectID);
+                        }
+                        Object pastEventObject = runJSONRequest("projects/"+projectID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                        if (pastEventObject instanceof JSONArray) {
+                            JSONArray eventArray = (JSONArray) pastEventObject;
+                            parseCalendarEvents(keys, dataSet, null, null, null, null, eventArray, projectID);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                        IDataStorage.insertData(dataSet);
+                    } else {
+                        StringWhere stringWhere = new StringWhere(keys.get(CALENDAR_EVENT_PROJECT_ID), projectID);
+                        IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                    }
+                }
+                return null;
+            } else {
+                DataSet dataSet = new DataSet();
+                JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                for (int i = 0; i < jsonArray.length(); i++) {
+
+                    JSONObject projectObject = jsonArray.getJSONObject(i);
+                    String calendarID = String.valueOf(projectObject.getInt("id"));
+                    String calendarName = projectObject.getString("name");
+                    String calendarURL = projectObject.getString("url");
+                    Date calendarUpdatedAt;
+                    try {
+                        calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                    } catch (Exception e) {
+                        calendarUpdatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
+                    }
+                    JSONArray eventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                    parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, eventArray, null);
+                    JSONArray pastEventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                    parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, pastEventArray, null);
+                }
+                List<Project> projects = basecampNextCompositeSource.getOrCreateProjectCache().getProjects();
+
+                for (Project project : projects) {
+                    String projectID = project.getId();
+
+                    try {
+                        Object eventObj = runJSONRequest("projects/" + projectID + "/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                        if (eventObj instanceof JSONArray) {
+                            JSONArray eventArray = (JSONArray) eventObj;
+                            parseCalendarEvents(keys, dataSet, null, null, null, null, eventArray, projectID);
+                        }
+                        Object pastEventObject = runJSONRequest("projects/"+projectID+"/calendar_events/past.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                        if (pastEventObject instanceof JSONArray) {
+                            JSONArray eventArray = (JSONArray) pastEventObject;
+                            parseCalendarEvents(keys, dataSet, null, null, null, null, eventArray, projectID);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                return dataSet;
             }
-            return dataSet;
+
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected String getUpdateKeyName() {
+        return CALENDAR_EVENT_PROJECT_ID;
+    }
+
+    @Override
+    protected boolean clearsData(FeedDefinition parentSource) {
+        BasecampNextCompositeSource compositeSource = (BasecampNextCompositeSource) parentSource;
+        return !compositeSource.isUseProjectUpdatedAt();
     }
 
     private void parseCalendarEvents(Map<String, Key> keys, DataSet dataSet, String calendarID, String calendarName, String calendarURL, Date calendarUpdatedAt, JSONArray eventArray, String projectID) throws JSONException {

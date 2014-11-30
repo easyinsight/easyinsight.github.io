@@ -10,7 +10,9 @@ import com.csvreader.CsvWriter;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.pipeline.BetterFilterComponent;
 import com.easyinsight.pipeline.Pipeline;
+import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
@@ -803,7 +805,7 @@ public class DataStorage implements IDataStorage {
             insightRequestMetadata.setAggregateQuery(false);
             try {
                 existing = retrieveData(previousKeys, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 LogClass.error(e);
                 existing = new DataSet();
             }
@@ -965,7 +967,8 @@ public class DataStorage implements IDataStorage {
         if (reportItems.isEmpty()) {
             return new DataSet();
         }
-        filters = eligibleFilters(filters, keyStrings, insightRequestMetadata);
+        List<FilterDefinition> skippedFilters = new ArrayList<>();
+        filters = eligibleFilters(filters, keyStrings, insightRequestMetadata, skippedFilters);
 
 
 
@@ -1025,12 +1028,18 @@ public class DataStorage implements IDataStorage {
                     new ReportAuditEvent(ReportAuditEvent.QUERY, "Query took " + (System.currentTimeMillis() - startTime) + " ms to retrieve " + dataSet.getRows().size() + " rows"));
         }
         //System.out.println("took " + (System.currentTimeMillis() - startTime));
+        if (skippedFilters.size() > 0) {
+            BetterFilterComponent betterFilterComponent = new BetterFilterComponent(skippedFilters);
+            PipelineData pipelineData = new PipelineData(null, null, insightRequestMetadata, null, null, null, null, null);
+            dataSet = betterFilterComponent.apply(dataSet, pipelineData);
+        }
         return dataSet;
     }
 
     @NotNull
-    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters, Set<String> keyStrings, InsightRequestMetadata insightRequestMetadata) {
-        Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
+    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters, Set<String> keyStrings, InsightRequestMetadata insightRequestMetadata,
+                                                         Collection<FilterDefinition> skippedFilters) {
+        Collection<FilterDefinition> eligibleFilters = new ArrayList<>();
         if (filters != null) {
             for (FilterDefinition filterDefinition : filters) {
                 if (insightRequestMetadata.getSuppressedFilters().contains(filterDefinition)) {
@@ -1040,6 +1049,7 @@ public class DataStorage implements IDataStorage {
                     if (filterDefinition instanceof FilterValueDefinition && database.getDialect() == Database.POSTGRES) {
                         FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
                         if (filterValueDefinition.getFilteredValues().size() > 970) {
+                            skippedFilters.add(filterValueDefinition);
                             continue;
                         }
                     }
@@ -1050,6 +1060,7 @@ public class DataStorage implements IDataStorage {
                         if (filterDefinition instanceof FilterValueDefinition) {
                             FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filterDefinition;
                             if (filterValueDefinition.getFilteredValues() != null && filterValueDefinition.getFilteredValues().size() > SystemSettings.instance().getMaxFilterValues()) {
+                                skippedFilters.add(filterValueDefinition);
                                 continue;
                             }
                         }
