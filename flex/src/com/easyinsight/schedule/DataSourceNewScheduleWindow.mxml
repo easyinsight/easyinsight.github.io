@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<util:EISlimWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+        import com.easyinsight.solutions.DataSourceDescriptor;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        private var _dataSource:DataSourceDescriptor;
+
+        public function set dataSource(value:DataSourceDescriptor):void {
+            _dataSource = value;
+        }
+
+        [Bindable]
+        private var refreshText:String;
+
+        private var _activity:DataSourceRefreshActivity;
+
+        [Bindable]
+        private var dataSourceID:int;
+
+        [Bindable(event="activityChanged")]
+        public function get activity():ScheduledActivity {
+            return _activity;
+        }
+
+        public function set activity(value:ScheduledActivity):void {
+            if (_activity == value) return;
+            _activity = value as DataSourceRefreshActivity;
+            dispatchEvent(new Event("activityChanged"));
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_activity != null) {
+                dataSourceID = _activity.dataSourceID;
+                refreshText = "Scheduled refresh of " + _activity.dataSourceName;
+                hoursLevel = _activity.intervalNumber == DataSourceRefreshActivity.HOURLY;
+                selectedHours = _activity.intervalUnits > 0 ? String(_activity.intervalUnits) : "";
+            }
+            if (User.getInstance().hourlyRefreshEnabled) {
+                stackIndex = 1;
+            }
+        }
+
+        private var newActivity:Boolean;
+
+        private function save():void {
+            newActivity = _activity == null;
+            if (activity == null) {
+                activity = new DataSourceRefreshActivity();
+            }
+
+            if (scheduleConfiguration.save()) {
+
+                    DataSourceRefreshActivity(activity).dataSourceID = dataProviderBox.selectedItem.id;
+                    DataSourceRefreshActivity(activity).dataSourceName = dataProviderBox.selectedItem.name;
+
+                if (stackIndex == 1) {
+                    DataSourceRefreshActivity(activity).intervalNumber = intervalTypeCheckbox.selected ? DataSourceRefreshActivity.HOURLY : DataSourceRefreshActivity.DAILY;
+                    DataSourceRefreshActivity(activity).intervalUnits = int(hoursInput.text);
+                }
+                var utcOffset:int = new Date().getTimezoneOffset();
+                exportService.addOrUpdateSchedule.send(_activity, utcOffset);
+            }
+
+        }
+
+        private function saved():void {
+            if (newActivity) {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, _activity));
+            } else {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, _activity));
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var stackIndex:int = 0;
+
+        [Bindable]
+        private var hoursLevel:Boolean = false;
+
+        [Bindable]
+        private var selectedHours:String = "";
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private function gotDataSources():void {
+            dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+        }
+
+        private function onCreation():void {
+            feedService.searchForSubscribedFeeds.send();
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="addOrUpdateSchedule" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" horizontalAlign="center">
+        <mx:ComboBox id="dataProviderBox" dataProvider="{dataSources}" labelField="name"/>
+        <schedule:ScheduleConfiguration id="scheduleConfiguration" activity="{activity}"/>
+        <mx:ViewStack selectedIndex="{stackIndex}">
+            <mx:Box/>
+            <mx:Form>
+                <mx:FormItem label="Customize to Hours:">
+                    <mx:CheckBox id="intervalTypeCheckbox" selected="{hoursLevel}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Hours:" enabled="{intervalTypeCheckbox.selected}">
+                    <mx:TextInput id="hoursInput" text="{selectedHours}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:ViewStack>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EISlimWindow>
