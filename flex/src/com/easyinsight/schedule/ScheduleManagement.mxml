@@ -30,6 +30,9 @@
             }
         }
 
+        [Bindable]
+        private var showDSButton:Boolean = false;
+
         private function onEdit(event:RolloverLabelEvent):void {
             var activity:ScheduledActivity = ScheduledActivity(event.data);
             if (activity is DataSourceRefreshActivity) {
@@ -137,6 +140,7 @@
         private var index:int;
 
         public function gotFocus():void {
+            showDSButton = User.getInstance().hourlyRefreshEnabled;
             if (User.getInstance().notifyProp) {
                 notifyText = "We've automatically set up <b>"+User.getInstance().notifyProp+"</b> to email you at <b>6:00</b> every <b>Monday</b> morning and sent you a test of that email now so that you can see what it looks like. You can customize that scheduling below.";
                 User.getInstance().notifyProp = null;
@@ -177,6 +181,12 @@
             }
         }
 
+        private function additionalDSRefresh():void {
+            var dsWindow:DataSourceNewScheduleWindow = new DataSourceNewScheduleWindow();
+            PopUpManager.addPopUp(dsWindow, this, true);
+            PopUpUtil.centerPopUp(dsWindow);
+        }
+
         public function cleanup():void {
         }
 
@@ -204,9 +214,11 @@
             <mx:VBox id="dataSourceWarnings"/>
         </mx:Canvas>
         <mx:HBox width="1000">
-            <mx:HBox>
+            <mx:HBox width="100%">
                 <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="flatSaveButton"/>
                 <mx:Button label="Add Multi Report/Dashboard Delivery..." click="newGeneral()" styleName="flatSaveButton"/>
+                <mx:Button label="Add Data Source Refresh..." click="additionalDSRefresh()" styleName="flatSaveButton" visible="{showDSButton}"/>
+                <mx:Spacer width="100%"/>
                 <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
             </mx:HBox>
         </mx:HBox>
@@ -215,14 +227,14 @@
                 <mx:ProgressBar label="Loading schedule configuration..." indeterminate="{index == 0}"/>
             </mx:Box>
             <mx:Box width="100%" height="100%" horizontalAlign="center">
-                <mx:DataGrid dataProvider="{activities}" width="1000" rowHeight="28" fontSize="16" id="activityGrid" selectable="false">
+                <mx:DataGrid dataProvider="{activities}" width="1000" rowHeight="26" fontSize="14" id="activityGrid" selectable="false">
                     <mx:columns>
                         <mx:DataGridColumn dataField="" headerText=""
                                            itemRenderer="com.easyinsight.schedule.ScheduleCheckbox" width="30" sortable="false"/>
                         <util:EIDataGridColumn itemRenderer="com.easyinsight.schedule.ActivityStatusRenderer" width="50" sortable="false"/>
                         <util:EIDataGridColumn dataField="activityDisplay" headerText="Activity"
                                 itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
-                        <util:EIDataGridColumn dataField="interval" headerText="When" width="250"
+                        <util:EIDataGridColumn dataField="interval" headerText="When" width="350"
                                                itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
                     </mx:columns>
                 </mx:DataGrid>
