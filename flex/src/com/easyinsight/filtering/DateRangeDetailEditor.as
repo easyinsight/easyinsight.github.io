@@ -30,6 +30,7 @@ import mx.managers.PopUpManager;
 public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
 {
     private var choiceBox:ComboBox;
+    public var dataSourceID:int;
     private var leftComboBox:ComboBox;
     private var rightComboBox:ComboBox;
     private var lowerDateFieldsBox:SmartComboBox;
@@ -240,6 +241,7 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
 
     private function defineCustomFilter(event:MouseEvent):void {
         var window:CustomRollingIntervalWindow = new CustomRollingIntervalWindow();
+        window.dataSourceID = _feedID;
         window.addEventListener(CustomRollingIntervalEvent.FILTER_ADDED, onIntervalAdded, false, 0, true);
         PopUpManager.addPopUp(window, this, true);
         PopUpUtil.centerPopUp(window);
@@ -285,7 +287,10 @@ public class DateRangeDetailEditor extends VBox implements IFilterDetailEditor
         }
     }
 
+    private var _feedID:int;
+
     public function set feedID(feedID:int):void {
+        _feedID = feedID;
     }
 }
 }
