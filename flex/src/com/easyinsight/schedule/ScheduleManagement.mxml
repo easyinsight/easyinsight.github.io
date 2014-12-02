@@ -183,6 +183,7 @@
 
         private function additionalDSRefresh():void {
             var dsWindow:DataSourceNewScheduleWindow = new DataSourceNewScheduleWindow();
+            dsWindow.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity, false, 0, true);
             PopUpManager.addPopUp(dsWindow, this, true);
             PopUpUtil.centerPopUp(dsWindow);
         }
