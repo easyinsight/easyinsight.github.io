@@ -8,11 +8,8 @@
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.filtering.NewFilterWindow;
-        import com.easyinsight.framework.PerspectiveInfo;
 
         import com.easyinsight.util.PopUpUtil;
-
-        import mx.controls.Alert;
 
         import mx.core.Application;
 
@@ -223,6 +220,11 @@
                         wizardTabBars.removeChild(filterTabBar);
                         tabNavigator.removeChild(filtersBox);
                     }
+                } else {
+                    if (editor is TryAgainDerivedGroupingWindow || editor is TryAgainDerivedDateWindow) {
+                        wizardTabBars.removeChild(filterTabBar);
+                        tabNavigator.removeChild(filtersBox);
+                    }
                 }
                 if (_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.TREND_GRID) {
                     var trendEditor:TrendExtensionWindow = new TrendExtensionWindow();
@@ -273,6 +275,12 @@
                     fieldAdminWindow = new FieldAdminWindow();
                     fieldAdminWindow.analysisItem = _analysisItem;
                     tabNavigator.addChild(fieldAdminWindow);
+
+                    var ed4:WizardTabBarSection = new WizardTabBarSection();
+                    ed4.num = wizardTabBars.getChildren().length + 1;
+                    ed4.mainLabel = "Data Source Field";
+                    ed4.addEventListener(MouseEvent.CLICK, onClick);
+                    wizardTabBars.addChild(ed4);
                 }
                 if (_analysisItem != null && report != null && report.fieldEvents) {
                     var events:ArrayCollection = report.fieldEvents[_analysisItem.display];
@@ -280,6 +288,11 @@
                         var reportsEventsWindow:ReportEventsWindow = new ReportEventsWindow();
                         reportsEventsWindow.events = events;
                         tabNavigator.addChild(reportsEventsWindow);
+                        var ed5:WizardTabBarSection = new WizardTabBarSection();
+                        ed5.num = wizardTabBars.getChildren().length + 1;
+                        ed5.mainLabel = "Field Events";
+                        ed5.addEventListener(MouseEvent.CLICK, onClick);
+                        wizardTabBars.addChild(ed5);
                     }
                 }
             }
