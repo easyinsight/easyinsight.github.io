@@ -350,6 +350,8 @@ public class FunctionFactory {
             return new AutoTextFromBackground();
         } else if (s.equals("findexact")) {
             return new FindExactRecord();
+        } else if (s.equals("lastdate")) {
+            return new LastDate();
         } else {
             return null;
         }
