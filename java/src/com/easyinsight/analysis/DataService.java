@@ -2907,7 +2907,7 @@ public class DataService {
                     String line = toker.nextToken();
                     if (!FunctionFactory.functionRunsOnReportLoad(line)) {
                         try {
-                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata,
+                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
                         } catch (FunctionException fe) {
                             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                         } catch (ReportException re) {
