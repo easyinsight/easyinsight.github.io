@@ -1465,10 +1465,11 @@ public class AnalysisService {
         }
     }
 
-    public FilterDateTest generate(String startDate, String endDate) {
+    public FilterDateTest generate(String startDate, String endDate, long dataSourceID) {
         try {
             FilterDateTest filterDateTest = new FilterDateTest();
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setDataSourceID(dataSourceID);
             if (startDate != null) {
                 Value value = new ReportCalculation(startDate).filterApply(null, null, new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
                         new HashMap<String, List<AnalysisItem>>(), null, null, new ArrayList<FilterDefinition>(), insightRequestMetadata, false);
