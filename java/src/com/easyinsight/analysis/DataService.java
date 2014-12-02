@@ -2735,6 +2735,7 @@ public class DataService {
                 insightRequestMetadata = new InsightRequestMetadata();
             }
             insightRequestMetadata.setJoinOverrides(analysisDefinition.getJoinOverrides());
+            insightRequestMetadata.setDataSourceID(analysisDefinition.getDataFeedID());
             insightRequestMetadata.setOptimized(analysisDefinition.isOptimized());
             insightRequestMetadata.setTraverseAllJoins(analysisDefinition.isFullJoins());
             insightRequestMetadata.setNoAggregation(analysisDefinition.isNoAggregation());
@@ -2868,6 +2869,7 @@ public class DataService {
                         if (child != null && child.equals(obj)) {
                             iter.remove();
                             filter.setField(existingFilter.getField());
+                            filter.setEnabled(existingFilter.isEnabled());
                         }
                     }
                 }
@@ -2905,7 +2907,7 @@ public class DataService {
                     String line = toker.nextToken();
                     if (!FunctionFactory.functionRunsOnReportLoad(line)) {
                         try {
-                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata,
                         } catch (FunctionException fe) {
                             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                         } catch (ReportException re) {
