@@ -27,7 +27,32 @@ easyInsight.factory('PageInfo', function() {
 
 easyInsight.controller('MissingFileController', ["PageInfo", function(PageInfo) {
     PageInfo.setTitle("Not Found");
-}])
+}]);
+
+easyInsight.controller("globalSearchController", ["$scope", "$http", function($scope, $http) {
+    $scope.search = {
+        "text": ""
+    };
+
+    $scope.iconFactory = function(result) {
+        if(result.type == "dashboard") {
+            return "glyphicon-list-alt";
+        } else if (result.type == "report") {
+            return "glyphicon-th-list"
+        }
+        else
+            return "glyphicon-book";
+    }
+    $scope.$watch("search.text", function(newVal, oldVal, scope) {
+        $scope.results = [];
+        if(newVal.length > 0) {
+            $scope.loading = $http.get("/app/search?query=" + encodeURIComponent(newVal));
+            $scope.loading.then(function(d) {
+                $scope.results = d.data.results;
+            })
+        }
+    });
+}]);
 
 easyInsight.config(["$httpProvider", function($httpProvider) {
     $httpProvider.interceptors.push(["$q", function($q) {
@@ -40,8 +65,8 @@ easyInsight.config(["$httpProvider", function($httpProvider) {
     }])
 }])
 
-easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q",
-    function ($rootScope, $http, $location, PageInfo, $q) {
+easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q", "$window",
+    function ($rootScope, $http, $location, PageInfo, $q, $window) {
     $rootScope.user = {
         "username": "..."
     };
@@ -75,7 +100,7 @@ easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q",
         }
 
         $rootScope.isSearchEnabled = function() {
-            return true;
+            return $window.location.host == "localhost" || $window.location.host == "j8staging.easy-insight.com";
         }
 
 }]);

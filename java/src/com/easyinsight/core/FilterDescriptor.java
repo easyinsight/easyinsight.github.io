@@ -13,7 +13,12 @@ public class FilterDescriptor extends EIDescriptor {
     public int getType() {
         return EIDescriptor.FILTER;
     }
-    
+
+    @Override
+    public String getUrl() {
+        return null;
+    }
+
     public FilterDescriptor(FilterDefinition filterDefinition) {
         super(filterDefinition.getFilterName(), filterDefinition.getFilterID(), false);
     }

@@ -14,6 +14,11 @@ public class ScorecardDescriptor extends EIDescriptor {
     public ScorecardDescriptor() {
     }
 
+    @Override
+    public String getUrl() {
+        return null;
+    }
+
     public ScorecardDescriptor(String name, long id, String urlKey, long dataSourceID, boolean accountVisible) {
         super(name, id, urlKey, accountVisible);
         this.dataSourceID = dataSourceID;

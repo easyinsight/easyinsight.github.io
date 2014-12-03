@@ -1636,6 +1636,8 @@ angular.module('ui.bootstrap.dropdown', [])
         return;
     }
 
+    if(!openScope.containsTargetElement(evt.target))
+
     openScope.$apply(function() {
       openScope.isOpen = false;
     });
@@ -1684,6 +1686,9 @@ angular.module('ui.bootstrap.dropdown', [])
       self.toggleElement[0].focus();
     }
   };
+      scope.containsTargetElement = function(e) {
+        return self.$element.has(e).length;
+      }
 
   scope.$watch('isOpen', function( isOpen, wasOpen ) {
     $animate[isOpen ? 'addClass' : 'removeClass'](self.$element, openClass);
