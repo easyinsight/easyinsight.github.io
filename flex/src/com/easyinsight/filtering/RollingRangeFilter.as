@@ -122,6 +122,7 @@ public class RollingRangeFilter extends HBox implements IFilter
         var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
         window.filterMetadata = filterMetadata;
         window.detailClass = DateRangeDetailEditor;
+        window.feedID = _feedID;
         window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit, false, 0, true);
         window.analysisItems = _analysisItems;
         window.filterDefinition = rollingFilter;

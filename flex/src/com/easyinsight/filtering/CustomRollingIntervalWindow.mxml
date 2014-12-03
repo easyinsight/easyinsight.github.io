@@ -26,6 +26,8 @@
         [Bindable]
         private var filterLabel:String;
 
+        public var dataSourceID:int;
+
         public var newFilter:Boolean;
 
         override protected function commitProperties():void {
@@ -168,7 +170,7 @@
 
         private function test():void {
             ProgressAlert.alert(this, "Testing...", null, analysisService.generate);
-            analysisService.generate.send(startDateCheckbox.selected ? startDateArea.text : null, endDateCheckbox.selected ? endDateArea.text : null);
+            analysisService.generate.send(startDateCheckbox.selected ? startDateArea.text : null, endDateCheckbox.selected ? endDateArea.text : null, dataSourceID);
         }
 
         [Bindable]

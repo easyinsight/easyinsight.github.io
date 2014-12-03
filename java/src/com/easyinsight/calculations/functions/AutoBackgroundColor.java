@@ -48,11 +48,11 @@ public class AutoBackgroundColor extends Function {
         Color c1 = new Color(color1);
         Color c2 = new Color(color2);
         int redDelta = c2.getRed() - c1.getRed();
-        int endRed = (int) (redDelta * place + c1.getRed());
+        int endRed = Math.min(Math.max((int) (redDelta * place + c1.getRed()), 0), 255);
         int greenDelta = c2.getGreen() - c1.getGreen();
-        int endGreen = (int) (greenDelta * place + c1.getGreen());
+        int endGreen = Math.min(Math.max((int) (greenDelta * place + c1.getGreen()), 0), 255);
         int blueDelta = c2.getBlue() - c1.getBlue();
-        int endBlue = (int) (blueDelta * place + c1.getBlue());
+        int endBlue = Math.min(Math.max((int) (blueDelta * place + c1.getBlue()), 0), 255);
         int endRGB = new Color(endRed, endGreen, endBlue).getRGB();
         TextValueExtension textValueExtension = (TextValueExtension) target.getValueExtension();
         if (textValueExtension == null) {

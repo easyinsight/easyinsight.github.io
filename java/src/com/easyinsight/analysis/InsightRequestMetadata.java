@@ -3,6 +3,8 @@ package com.easyinsight.analysis;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.pipeline.Pipeline;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.io.Serializable;
 
@@ -15,6 +17,7 @@ public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
     private int depth = 0;
     private boolean cacheForHTML;
+    private transient ZoneId zoneID;
     private AnalysisDateDimension baseDate;
     private boolean dateJoin;
     private int utcOffset;
@@ -57,6 +60,8 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<String, List<String>> fieldAudits = new LinkedHashMap<>();
     private transient Map<String, List<String>> filterAudits = new LinkedHashMap<>();
 
+    private long dataSourceID;
+
     private transient boolean aggregationRowChanged;
 
     private transient boolean noAggregation;
@@ -70,12 +75,35 @@ public class InsightRequestMetadata implements Serializable {
         return timeshiftState;
     }
 
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
+    }
+
     public boolean isCacheForHTML() {
         return cacheForHTML;
     }
 
     public void setCacheForHTML(boolean cacheForHTML) {
         this.cacheForHTML = cacheForHTML;
+    }
+
+    public ZoneId createZoneID() {
+        if (this.zoneID != null) {
+            return this.zoneID;
+        }
+        return ZoneId.ofOffset("", ZoneOffset.ofHours(-(getUtcOffset() / 60)));
+    }
+
+    public ZoneId getZoneID() {
+        return zoneID;
+    }
+
+    public void setZoneID(ZoneId zoneID) {
+        this.zoneID = zoneID;
     }
 
     public void setTimeshiftState(Map<String, Boolean> timeshiftState) {

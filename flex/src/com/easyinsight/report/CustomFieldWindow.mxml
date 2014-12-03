@@ -92,7 +92,7 @@
         private function createCalculatedDate():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = TryAgainDerivedDateWindow;
-            window.editorClass = DerivedDateConfigWindow;
+            window.editorClass2 = DerivedDateConfigWindow;
             window.report = _analysisDefinition;
             window.dataSourceID = _dataSourceID;
             window.analysisItems = _wrappers;
