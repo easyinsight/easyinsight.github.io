@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -34,8 +35,12 @@ public class URLPattern {
         return results;
     }
 
+    @Nullable
     public static String getURL(String pattern, @Nullable IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
         StringBuilder sb = updateString(pattern, row, dataSourceProperties, fields);
+        if (sb == null) {
+            return null;
+        }
         String urlString = sb.toString();
         if (!urlString.startsWith("http")) {
             urlString = "http://" + urlString;
@@ -43,9 +48,15 @@ public class URLPattern {
         return urlString;
     }
 
+    @Nullable
     public static StringBuilder updateString(String pattern, @Nullable IRow row, Map<String, String> dataSourceProperties, Collection<AnalysisItem> fields) {
         Map<String, Key> values = new HashMap<String, Key>();
         Map<String, Key> keyMap = new HashMap<String, Key>();
+        for (AnalysisItem field : fields) {
+            if (field.hasType(AnalysisItemTypes.DIMENSION)) {
+                values.put(field.toUnqualifiedDisplay(), field.createAggregateKey());
+            }
+        }
         for (AnalysisItem field : fields) {
             if (field.hasType(AnalysisItemTypes.DIMENSION)) {
                 values.put(field.toDisplay(), field.createAggregateKey());
@@ -81,7 +92,11 @@ public class URLPattern {
                         sb.append(dsProp);
                 }
             }
-            if (key != null) {
+            if (key != null && row != null) {
+                Value value = row.getValue(key);
+                if (value.type() == Value.EMPTY) {
+                    return null;
+                }
                 sb.append(row.getValue(key).toString());
             }
             if(i < fragments.length)
