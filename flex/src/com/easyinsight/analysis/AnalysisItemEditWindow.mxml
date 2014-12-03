@@ -220,11 +220,6 @@
                         wizardTabBars.removeChild(filterTabBar);
                         tabNavigator.removeChild(filtersBox);
                     }
-                } else {
-                    if (editor is TryAgainDerivedGroupingWindow || editor is TryAgainDerivedDateWindow) {
-                        wizardTabBars.removeChild(filterTabBar);
-                        tabNavigator.removeChild(filtersBox);
-                    }
                 }
                 if (_reportType == AnalysisDefinition.TREND || _reportType == AnalysisDefinition.TREND_GRID) {
                     var trendEditor:TrendExtensionWindow = new TrendExtensionWindow();
