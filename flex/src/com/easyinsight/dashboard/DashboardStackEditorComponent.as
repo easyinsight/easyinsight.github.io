@@ -37,7 +37,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     }
 
     override protected function includeFilterContainer():Boolean {
-        return true;
+        return false;
     }
 
     /*override protected function customize(transformContainer:TransformContainer):void {
