@@ -29,7 +29,7 @@ easyInsight.controller('MissingFileController', ["PageInfo", function(PageInfo) 
     PageInfo.setTitle("Not Found");
 }]);
 
-easyInsight.controller("globalSearchController", ["$scope", "$http", function($scope, $http) {
+easyInsight.controller("globalSearchController", ["$scope", "$http", "$timeout", function($scope, $http, $timeout) {
     $scope.search = {
         "text": ""
     };
@@ -42,15 +42,25 @@ easyInsight.controller("globalSearchController", ["$scope", "$http", function($s
         }
         else
             return "glyphicon-book";
-    }
+    };
+
     $scope.$watch("search.text", function(newVal, oldVal, scope) {
-        $scope.results = [];
-        if(newVal.length > 0) {
-            $scope.loading = $http.get("/app/search?query=" + encodeURIComponent(newVal));
-            $scope.loading.then(function(d) {
-                $scope.results = d.data.results;
-            })
+        if(scope.type_delay != null) {
+            $timeout.cancel(scope.type_delay);
         }
+
+        scope.type_delay = $timeout(function() {
+            scope.results = [];
+            if(newVal.length > 0) {
+                var searchText = "/app/search?query=" + encodeURIComponent(newVal);
+                scope.loading = $http.get(searchText);
+                scope.loading.then(function(d) {
+                    if(d.config.url == searchText)
+                        $scope.results = d.data.results;
+                })
+            }
+        }, 250
+        );
     });
 }]);
 
