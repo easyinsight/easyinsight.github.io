@@ -1,4 +1,6 @@
 package com.easyinsight.schedule {
+import com.easyinsight.framework.User;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.export.MonthlyScheduleType")]
 public class MonthlyScheduleType extends ScheduleType {
@@ -26,7 +28,11 @@ public class MonthlyScheduleType extends ScheduleType {
         } else {
             suffix = "th";
         }
-        return dayOfMonth + suffix + " day of the month at " + hour + ":" + minuteString;
+        if (useAccountTimezone) {
+            return dayOfMonth + suffix + " day of the month at " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
+        } else {
+            return dayOfMonth + suffix + " day of the month at " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";
+        }
     }
 }
 }

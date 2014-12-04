@@ -1,4 +1,6 @@
 package com.easyinsight.schedule {
+import com.easyinsight.framework.User;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.export.WeeklyScheduleType")]
 public class WeeklyScheduleType extends ScheduleType {
@@ -32,7 +34,11 @@ public class WeeklyScheduleType extends ScheduleType {
         } else if (dayOfWeek == 7) {
             day = "Saturday";
         }
-        return "Every " + day + " at " + hour + ":" + minuteString;
+        if (useAccountTimezone) {
+            return "Every " + day + " at " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
+        } else {
+            return "Every " + day + " at " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";
+        }
     }
 }
 }
