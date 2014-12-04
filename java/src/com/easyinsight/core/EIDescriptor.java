@@ -173,6 +173,14 @@ public abstract class EIDescriptor implements Serializable {
         jo.put("folder", getFolder());
         jo.put("delete_enabled", role == Roles.OWNER);
         jo.put("id", getId());
+        jo.put("href", getUrl());
         return jo;
+    }
+
+    public abstract String getUrl();
+
+    public boolean contains(String value) {
+        String v = value.toLowerCase().trim();
+        return (getName() != null && getName().toLowerCase().contains(v)) || (getDescription() != null && getDescription().contains(v));
     }
 }

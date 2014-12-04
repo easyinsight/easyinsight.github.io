@@ -157,4 +157,9 @@ public class InsightDescriptor extends EIDescriptor {
         jo.put("tags", tags);
         return jo;
     }
+
+    @Override
+    public String getUrl() {
+        return "/app/html/report/" + getUrlKey();
+    }
 }

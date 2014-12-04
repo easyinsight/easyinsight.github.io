@@ -191,4 +191,9 @@ public class DataSourceDescriptor extends EIDescriptor {
         jo.put("data_source_type", dataSourceType);
         return jo;
     }
+
+    @Override
+    public String getUrl() {
+        return "/a/data_sources/" + getUrlKey();
+    }
 }

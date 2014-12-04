@@ -441,6 +441,11 @@
     </servlet>
 
     <servlet>
+        <servlet-name>SearchData</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.SearchServlet</servlet-class>
+    </servlet>
+
+    <servlet>
         <servlet-name>EIAdmin</servlet-name>
         <display-name>EIAdmin</display-name>
         <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
@@ -997,6 +1002,11 @@
     <servlet-mapping>
         <servlet-name>DataSourceList</servlet-name>
         <url-pattern>/json/dataSourceList</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SearchData</servlet-name>
+        <url-pattern>/search</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

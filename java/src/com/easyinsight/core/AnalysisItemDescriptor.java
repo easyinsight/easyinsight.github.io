@@ -13,6 +13,11 @@ public class AnalysisItemDescriptor extends EIDescriptor {
         return EIDescriptor.ANALYSIS_ITEM;
     }
 
+    @Override
+    public String getUrl() {
+        return null;
+    }
+
     public AnalysisItemDescriptor(AnalysisItem analysisItem) {
         super(analysisItem.toDisplay(), analysisItem.getAnalysisItemID(), false);
     }
