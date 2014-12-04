@@ -37,13 +37,10 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     }
 
     override protected function includeFilterContainer():Boolean {
-        return true;
+        return false;
     }
 
-    override protected function customize(transformContainer:TransformContainer):void {
-        /*
-         <mx:Button toolTip="Create New Filter..." click="transformContainer.addNewFilter()" label="New Filter" styleName="flatCreateButton"/>
-         */
+    /*override protected function customize(transformContainer:TransformContainer):void {
         var button:Button = new Button();
         button.addEventListener(MouseEvent.CLICK, onNewFilter);
         button.label = "New Filter";
@@ -52,7 +49,7 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
         transformContainer.analysisItems = dashboardEditorMetadata.allFields;
         transformContainer.reportView = false;
         transformContainer.filterEditable = true;
-    }
+    }*/
 
     private function onNewFilter(event:MouseEvent):void {
         transformContainer.addNewFilter();
@@ -113,7 +110,6 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     }
 
     public function save():void {
-        dashboardStack.filters = transformContainer.getFilterDefinitions();
         var comps:ArrayCollection = stackComponents();
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.count; i++) {
