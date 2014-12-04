@@ -110,7 +110,6 @@ public class DashboardStackEditorComponent extends DashboardStackViewComponent i
     }
 
     public function save():void {
-        dashboardStack.filters = transformContainer.getFilterDefinitions();
         var comps:ArrayCollection = stackComponents();
         var items:ArrayCollection = new ArrayCollection();
         for (var i:int = 0; i < dashboardStack.count; i++) {
