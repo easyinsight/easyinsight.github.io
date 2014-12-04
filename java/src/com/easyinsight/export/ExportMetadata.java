@@ -14,11 +14,13 @@ public class ExportMetadata implements Serializable {
     public String currencySymbol;
     public Locale locale;
     public Calendar cal;
+    public String accountTimezone;
 
-    ExportMetadata(int dateFormat, String currencySymbol, Calendar cal, Locale locale) {
+    ExportMetadata(int dateFormat, String currencySymbol, Calendar cal, Locale locale, String accountTimezone) {
         this.dateFormat = dateFormat;
         this.currencySymbol = currencySymbol;
         this.locale = locale;
         this.cal = cal;
+        this.accountTimezone = accountTimezone;
     }
 }

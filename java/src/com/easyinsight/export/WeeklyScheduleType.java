@@ -1,15 +1,19 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 /**
@@ -47,8 +51,56 @@ public class WeeklyScheduleType extends ScheduleType {
         return ScheduleType.WEEKLY;
     }
 
+    protected java.time.DayOfWeek translateDayOfWeek(int dayToSet) {
+        java.time.DayOfWeek dow;
+        switch(dayToSet) {
+            case Calendar.SUNDAY:
+                dow = java.time.DayOfWeek.SUNDAY;
+                break;
+            case Calendar.MONDAY:
+                dow = java.time.DayOfWeek.MONDAY;
+                break;
+            case Calendar.TUESDAY:
+                dow = java.time.DayOfWeek.TUESDAY;
+                break;
+            case Calendar.WEDNESDAY:
+                dow = java.time.DayOfWeek.WEDNESDAY;
+                break;
+            case Calendar.THURSDAY:
+                dow = java.time.DayOfWeek.THURSDAY;
+                break;
+            case Calendar.FRIDAY:
+                dow = java.time.DayOfWeek.FRIDAY;
+                break;
+            case Calendar.SATURDAY:
+                dow = java.time.DayOfWeek.SATURDAY;
+                break;
+            default:
+                throw new RuntimeException();
+        }
+        return dow;
+    }
+
     @Nullable
-    public Date runTime(Date lastTime, Date now) {
+    public Date runTime(Date lastTime, Date now, String timezoneID) {
+        if (timezoneID != null && !"".equals(timezoneID)) {
+
+            ZonedDateTime lastTimeZDT = lastTime.toInstant().atZone(ZoneId.systemDefault());
+            ZonedDateTime nowZDT = now.toInstant().atZone(ZoneId.systemDefault());
+
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(timezoneID));
+            ZonedDateTime time = zonedDateTime.withHour(getHour()).withMinute(getMinute()).withSecond(0).with(ChronoField.MILLI_OF_SECOND, 0);
+
+            DayOfWeek target = translateDayOfWeek(dayOfWeek);
+
+            if (time.getDayOfWeek().equals(target)) {
+                if (time.isAfter(lastTimeZDT) && time.isBefore(nowZDT)) {
+                    Instant instant = time.toInstant();
+                    return Date.from(instant);
+                }
+            }
+            return null;
+        }
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
         cal.set(Calendar.HOUR_OF_DAY, getHour());
@@ -89,7 +141,7 @@ public class WeeklyScheduleType extends ScheduleType {
     }
 
     @Override
-    public String when() {
+    public String when(String accountTimezone) {
         String day;
         if (dayOfWeek == 1) {
             day = "Sunday";
@@ -108,11 +160,15 @@ public class WeeklyScheduleType extends ScheduleType {
         } else {
             day = "";
         }
-        return "Every " + day + "  on " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
+        if (isUseAccountTimezone()) {
+            return "Every " + day + " on " + getHour() + ":" + String.format("%02d", getMinute()) + " (" + accountTimezone + ")";
+        } else {
+            return "Every " + day + " on " + getHour() + ":" + String.format("%02d", getMinute()) + " (UTC" + (getTimeOffset() > 0 ? "-" : "+") + (getTimeOffset() / 60) + ":00)";
+        }
     }
 
     @Override
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = super.toJSON(md);
         String day;
         switch(dayOfWeek) {

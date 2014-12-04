@@ -2,11 +2,10 @@ package com.easyinsight.export;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -23,6 +22,7 @@ public abstract class ScheduleType {
     private int minute;
     private long scheduleID;
     private int timeOffset;
+    private boolean useAccountTimezone;
 
     public static final int DAILY = 1;
     public static final int WEEKDAYS = 2;
@@ -111,26 +111,17 @@ public abstract class ScheduleType {
         this.scheduleID = scheduleID;
     }
 
-    /*public void timeToGMT(int utcOffset) {
-        int hours = utcOffset / 60;
-        this.hour = (hour + hours) % 24;
-    }
-
-    public void timeFromGMT(int utcOffset) {
-        int hours = utcOffset / 60;
-        this.hour = Math.abs((hour - hours) % 24);
-    }*/
-
     public long save(EIConnection conn, long scheduledActivityID) throws SQLException {
         //timeToGMT(utcOffset);
         PreparedStatement insertScheduleStmt = conn.prepareStatement("INSERT INTO SCHEDULE (SCHEDULE_HOUR, SCHEDULE_MINUTE, SCHEDULE_TYPE, " +
-                "SCHEDULED_ACCOUNT_ACTIVITY_ID, TIME_OFFSET) VALUES (?, ?, ?, ?, ?)",
+                "SCHEDULED_ACCOUNT_ACTIVITY_ID, TIME_OFFSET, use_account_timezone) VALUES (?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
         insertScheduleStmt.setInt(1, getHour());
         insertScheduleStmt.setInt(2, getMinute());
         insertScheduleStmt.setInt(3, retrieveType());
         insertScheduleStmt.setLong(4, scheduledActivityID);
         insertScheduleStmt.setInt(5, timeOffset);
+        insertScheduleStmt.setBoolean(6, useAccountTimezone);
         insertScheduleStmt.execute();
         long scheduleID = Database.instance().getAutoGenKey(insertScheduleStmt);
         this.scheduleID = scheduleID;
@@ -139,7 +130,13 @@ public abstract class ScheduleType {
         return scheduleID;
     }
 
-    
+    public boolean isUseAccountTimezone() {
+        return useAccountTimezone;
+    }
+
+    public void setUseAccountTimezone(boolean useAccountTimezone) {
+        this.useAccountTimezone = useAccountTimezone;
+    }
 
     protected void childSave(EIConnection conn) throws SQLException {
 
@@ -150,17 +147,17 @@ public abstract class ScheduleType {
     }
 
     @Nullable
-    public abstract Date runTime(Date lastTime, Date now);
+    public abstract Date runTime(Date lastTime, Date now, String timezoneID);
 
-    public abstract String when();
+    public abstract String when(String accountTimezone);
 
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = new JSONObject();
         jo.put("schedule_id", getScheduleID());
         jo.put("hour", getHour());
         jo.put("minute", getMinute());
         jo.put("offset", getTimeOffset());
-        jo.put("description", when());
+        jo.put("description", when(md.accountTimezone));
         jo.put("type", toString(retrieveType()));
         return jo;
     }
