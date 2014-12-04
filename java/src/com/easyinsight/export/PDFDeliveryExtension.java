@@ -1,8 +1,7 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
-import org.json.JSONException;
-import org.json.JSONObject;
+import net.minidev.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -126,7 +125,7 @@ public class PDFDeliveryExtension extends DeliveryExtension {
     }
 
     @Override
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = super.toJSON(md);
         jo.put("show_header", isShowHeader());
         jo.put("orientation", getOrientation());
