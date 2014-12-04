@@ -23,4 +23,9 @@ public class LookupTableDescriptor extends EIDescriptor {
     public int getType() {
         return EIDescriptor.LOOKUP_TABLE;
     }
+
+    @Override
+    public String getUrl() {
+        return null;
+    }
 }

@@ -23,4 +23,9 @@ public class FilterSetDescriptor extends EIDescriptor {
     public int getType() {
         return FILTER_SET;
     }
+
+    @Override
+    public String getUrl() {
+        return null;
+    }
 }

@@ -63,7 +63,7 @@
             <li><a href="/app/docs" ng-click="$event.stopPropagation()">Help</a></li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-user"></i>{{ user.username }} <b class="caret"></b>
+                    <i class="glyphicon glyphicon-user"></i> {{ user.username }} <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
                     <li><a href="/a/account">Account Settings</a></li>
@@ -73,11 +73,16 @@
                     <li><a href="/app/logoutAction.jsp" ng-click="$event.stopPropagation()">Sign Out</a></li>
                 </ul>
             </li>
-            <!--<li ng-if="isSearchEnabled()"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-search"></i></a>-->
-                <!--<ul class="dropdown-menu">-->
-                    <!--<li><input type="text" class="form-control" /></li>-->
-                <!--</ul>-->
-            <!--</li>-->
+            <li ng-if="isSearchEnabled()" class="dropdown" ng-controller="globalSearchController">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <i class="glyphicon glyphicon-search"></i>
+                </a>
+                <ul class="dropdown-menu" style="width: 500px;">
+                    <li style="padding:5px;"><input class="form-control" ng-model="search.text" type="text" /></li>
+                    <li class="divider" ng-if="results.length > 0"></li>
+                    <li ng-repeat="result in results"><a ng-href="{{result.href}}" ng-click="search.text=''"><i class="glyphicon" ng-class="iconFactory(result)"></i> {{result.name}}</a></li>
+                </ul>
+            </li>
         </ul>
     </div>
 </nav>

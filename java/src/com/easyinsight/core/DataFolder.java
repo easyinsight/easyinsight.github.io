@@ -10,4 +10,9 @@ public class DataFolder extends EIDescriptor {
     public int getType() {
         return EIDescriptor.FOLDER;
     }
+
+    @Override
+    public String getUrl() {
+        return null;
+    }
 }

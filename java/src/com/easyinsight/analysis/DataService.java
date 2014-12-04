@@ -1897,6 +1897,7 @@ public class DataService {
     private static TrendResult createTrendOutcomes(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
         //SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+        insightRequestMetadata.setDataSourceID(analysisDefinition.getDataFeedID());
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
         Map<String, AnalysisDateDimension> dateMap = new HashMap<String, AnalysisDateDimension>();
         String nowDateFilterName = analysisDefinition.getNowDate();

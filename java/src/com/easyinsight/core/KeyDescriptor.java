@@ -10,7 +10,12 @@ public class KeyDescriptor extends EIDescriptor {
     public int getType() {
         return EIDescriptor.KEY;
     }
-    
+
+    @Override
+    public String getUrl() {
+        return null;
+    }
+
     public KeyDescriptor(Key key) {
         super(key.toKeyString(), key.getKeyID(), false);
     }

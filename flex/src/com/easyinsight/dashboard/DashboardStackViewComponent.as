@@ -25,13 +25,11 @@ import mx.containers.Canvas;
 import mx.containers.HBox;
 import mx.containers.VBox;
 import mx.containers.ViewStack;
-import mx.controls.Alert;
 import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.controls.Spacer;
 import mx.core.Container;
 import mx.core.UIComponent;
-import mx.effects.Effect;
 import mx.events.ItemClickEvent;
 import mx.managers.PopUpManager;
 import mx.messaging.config.ServerConfig;
@@ -39,12 +37,6 @@ import mx.rpc.AsyncResponder;
 import mx.rpc.AsyncToken;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
-
-import org.efflex.mx.viewStackEffects.CubePapervision3D;
-import org.efflex.mx.viewStackEffects.Fade;
-import org.efflex.mx.viewStackEffects.FlipPapervision3D;
-import org.efflex.mx.viewStackEffects.Pixelate;
-import org.efflex.mx.viewStackEffects.Slide;
 
 public class DashboardStackViewComponent extends VBox implements IDashboardViewComponent {
 
@@ -365,7 +357,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             var stackItem:DashboardStackItem = dashboardStack.gridItems.getItemAt(i) as DashboardStackItem;
             var report:DashboardElement = stackItem.dashboardElement;
 
-            if (dashboardStack.selectionType == 'Buttons') {
+            if (dashboardStack.selectionType == 'Buttons' || editMode()) {
                 var label:String;
                 if (report == null) {
                     label = "Stack Item " + i;
@@ -399,7 +391,7 @@ public class DashboardStackViewComponent extends VBox implements IDashboardViewC
             viewChildren.addItem(comp);
             viewStack.addChild(comp);
         }
-        if (dashboardStack.selectionType == 'Combo Box') {
+        if (dashboardStack.selectionType == 'Combo Box' && !editMode()) {
             var childComboBox:ComboBox = new ComboBox();
             childComboBox.labelFunction = comboBoxLabelFunction;
             childComboBox.dataProvider = dashboardStack.gridItems;

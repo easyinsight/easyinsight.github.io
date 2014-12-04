@@ -103,4 +103,9 @@ public class DashboardDescriptor extends EIDescriptor {
         jo.put("tags", tags);
         return jo;
     }
+
+    @Override
+    public String getUrl() {
+        return "/app/html/dashboard/" + getUrlKey();
+    }
 }
