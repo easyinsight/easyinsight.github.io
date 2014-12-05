@@ -143,7 +143,7 @@ public class DashboardPDFServlet extends HttpServlet {
             if (req.getParameter("timezoneOffset") != null) {
                 timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
             }
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, timezoneOffset, true, true);
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, timezoneOffset, true, true, true);
             String urlKey = new ExportService().htmlDashboardToPDFAlt(bytes, dashboard, req);
             JSONObject object = new JSONObject();
             object.put("urlKey", urlKey);

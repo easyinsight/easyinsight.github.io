@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 
@@ -223,7 +224,7 @@ public class DashboardPDF {
     }
 
     public byte[] createPDF(Dashboard dashboard, DashboardStackPositions selected, Map<String, PDFImageData> images, int timezoneOffset, boolean includeHeader,
-                            boolean landscapeOrientation) {
+                            boolean landscapeOrientation, boolean useAccountTimezone) {
         // have to find the underlying grid of reports
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -293,7 +294,7 @@ public class DashboardPDF {
                 LogClass.error(e);
             }*/
 
-            Element object = populate(element, reportMap, conn, images, dashboard, timezoneOffset, 1);
+            Element object = populate(element, reportMap, conn, images, dashboard, timezoneOffset, 1, useAccountTimezone);
 
             document.add(object);
             document.close();
@@ -312,7 +313,7 @@ public class DashboardPDF {
     }
 
     private Element populate(DashboardElement element, Map<String, WSAnalysisDefinition> reportMap, EIConnection conn, Map<String, PDFImageData> images,
-                             Dashboard dashboard, int timezoneOffset, int gridWidth) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
+                             Dashboard dashboard, int timezoneOffset, int gridWidth, boolean useAccountTimezone) throws SQLException, DocumentException, IOException, CloneNotSupportedException {
         if (element instanceof DashboardGrid) {
             DashboardGrid dashboardGrid = (DashboardGrid) element;
             PdfPTable table = new PdfPTable(dashboardGrid.getColumns());
@@ -322,7 +323,7 @@ public class DashboardPDF {
             for (int j = 0; j < dashboardGrid.getRows(); j++) {
                 for (int i = 0; i < dashboardGrid.getColumns(); i++) {
                     DashboardElement child = dashboardGrid.findItem(j, i).getDashboardElement();
-                    Element e1 = populate(child, reportMap, conn, images, dashboard, timezoneOffset, Math.max(gridWidth, dashboardGrid.getColumns()));
+                    Element e1 = populate(child, reportMap, conn, images, dashboard, timezoneOffset, Math.max(gridWidth, dashboardGrid.getColumns()), useAccountTimezone);
                     if (e1 instanceof PdfPTable) {
                         PdfPTable t1 = (PdfPTable) e1;
                         PdfPCell cell = new PdfPCell(t1);
@@ -401,6 +402,9 @@ public class DashboardPDF {
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(timezoneOffset);
             ExportMetadata exportMetadata = ExportService.createExportMetadata(conn, insightRequestMetadata);
+            if (useAccountTimezone && exportMetadata.accountTimezone != null && !"".equals(exportMetadata.accountTimezone)) {
+                insightRequestMetadata.setZoneID(ZoneId.of(exportMetadata.accountTimezone));
+            }
             Element result;
             if (report.getReportType() == WSAnalysisDefinition.CROSSTAB) {
                 result = new ExportService().crosstabToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
@@ -463,7 +467,7 @@ public class DashboardPDF {
                     result = image;
                 }
             } else {
-                result = new ExportService().listReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata);
+                result = new ExportService().listReportToPDFTable(report, conn, insightRequestMetadata, exportMetadata, true);
             }
             if (table == null || stupidIText == null) {
                 return result;

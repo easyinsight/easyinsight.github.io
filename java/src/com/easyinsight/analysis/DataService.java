@@ -36,10 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -950,6 +947,7 @@ public class DataService {
         Feed feed = feedRegistry.getFeed(feedID, conn);
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(utfOffset);
+        handleTimezoneData(conn, insightRequestMetadata);
         if (report != null) {
             insightRequestMetadata.setJoinOverrides(report.getJoinOverrides());
             insightRequestMetadata.setTraverseAllJoins(report.isFullJoins());
@@ -1272,7 +1270,7 @@ public class DataService {
                         continue;
                     }
                 }
-                for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1); i++) {
+                for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + (!crosstabReport.isNoRowSummaries() ? 1 : 0)); i++) {
                     CrosstabValue crosstabValue = values[j][i];
                     if (crosstabValue == null) {
 
@@ -1502,6 +1500,7 @@ public class DataService {
         try {
             long startTime = System.currentTimeMillis();
             SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
 
             conn.setAutoCommit(false);
@@ -1592,6 +1591,7 @@ public class DataService {
             dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
         }
         dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
+
         return dataSet;
     }
 
@@ -1651,6 +1651,7 @@ public class DataService {
         trendDataResults.setPreviousString(trendResult.previousString);
         trendDataResults.setSuggestions(new AnalysisService().generatePossibleIntentions(analysisDefinition, conn, insightRequestMetadata));
         trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
+        analysisDefinition.applyStyling(conn, trendResult.dataSourceInfo.getType());
         return trendDataResults;
     }
 
@@ -1676,6 +1677,7 @@ public class DataService {
             }
             InsightRequestMetadata childIRM = new InsightRequestMetadata();
             childIRM.setUtcOffset(insightRequestMetadata.getUtcOffset());
+            handleTimezoneData(conn, childIRM);
             ReportRetrieval childRetrieval = ReportRetrieval.reportEditor(childIRM, child, conn);
             DataSet childSet = childRetrieval.getPipeline().toDataSet(childRetrieval.getDataSet());
             childSets.put(childReport, childSet);
@@ -1693,6 +1695,7 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSTreeDefinition report = (WSTreeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, report, conn, customFilters, drillthroughFilters);
@@ -1736,6 +1739,7 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            handleTimezoneData(conn, insightRequestMetadata);
             WSCompareYearsDefinition wsytdDefinition = (WSCompareYearsDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, customFilters, drillthroughFilters);
@@ -1775,7 +1779,7 @@ public class DataService {
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
-            long start = System.currentTimeMillis();
+            handleTimezoneData(conn, insightRequestMetadata);
             WSCompareYearsDefinition wsytdDefinition = (WSCompareYearsDefinition) report;
 
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(insightRequestMetadata, report, conn);
@@ -1812,6 +1816,7 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            handleTimezoneData(conn, insightRequestMetadata);
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
@@ -1857,6 +1862,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
+            handleTimezoneData(conn, insightRequestMetadata);
             WSYTDDefinition wsytdDefinition = (WSYTDDefinition) report;
             if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
                 AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
@@ -1900,6 +1906,7 @@ public class DataService {
         insightRequestMetadata.setDataSourceID(analysisDefinition.getDataFeedID());
         Map<String, List<AnalysisMeasure>> trendMap = new HashMap<String, List<AnalysisMeasure>>();
         Map<String, AnalysisDateDimension> dateMap = new HashMap<String, AnalysisDateDimension>();
+        insightRequestMetadata.setDataSourceID(analysisDefinition.getDataFeedID());
         String nowDateFilterName = analysisDefinition.getNowDate();
         String previousDateFilterName = analysisDefinition.getPreviousDate();
         FilterDefinition nowFilter = null;
@@ -2053,6 +2060,7 @@ public class DataService {
             tempReport.setAddonReports(analysisDefinition.getAddonReports());
             tempReport.setJoinOverrides(analysisDefinition.getJoinOverrides());
             InsightRequestMetadata metadata = new InsightRequestMetadata();
+            handleTimezoneData(conn, metadata);
             metadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
             ReportRetrieval reportRetrievalNow = ReportRetrieval.reportEditor(metadata, tempReport, conn);
             dataSourceInfo = reportRetrievalNow.getDataSourceInfo();
@@ -2170,6 +2178,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            handleTimezoneData(conn, insightRequestMetadata);
             long start = System.currentTimeMillis();
             TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
             TrendDataResults trendDataResults = new TrendDataResults();
@@ -2205,6 +2214,7 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
 
@@ -2246,8 +2256,8 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
-
             WSTextDefinition analysisDefinition = (WSTextDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun(insightRequestMetadata);
@@ -2292,6 +2302,7 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             Map<String, DerivedAnalysisDimension> map = analysisDefinition.beforeRun(insightRequestMetadata);
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -2329,6 +2340,7 @@ public class DataService {
         try {
             long start = System.currentTimeMillis();
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+            handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             Crosstab crosstab = new Crosstab();
@@ -2347,7 +2359,7 @@ public class DataService {
                     }
                 }
                 Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
-                for (int i = 0; i < ((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + 1); i++) {
+                for (int i = 0; i < ((crosstab.getColumnSections().size() * analysisDefinition.getMeasures().size()) + analysisDefinition.getRows().size() + (!analysisDefinition.isNoRowSummaries() ? 1 : 0)); i++) {
                     CrosstabValue crosstabValue = values[j][i];
                     if (crosstabValue == null) {
 
@@ -2424,6 +2436,31 @@ public class DataService {
         return list(analysisDefinition, insightRequestMetadata, false);
     }
 
+    public static void handleTimezoneData(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
+        try {
+            long accountID = SecurityUtil.getAccountID(false);
+            if (accountID > 0) {
+                PreparedStatement ps = conn.prepareStatement("SELECT timezone FROM account WHERE account_id = ?");
+                ps.setLong(1, accountID);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                String timezone = rs.getString(1);
+                if (timezone == null || "".equals(timezone.trim())) {
+
+                } else {
+                    ZoneId zoneId = ZoneId.of(timezone);
+                    LocalDateTime dt = LocalDateTime.now();
+                    ZoneOffset zoneOffset = dt.atZone(zoneId).getOffset();
+                    insightRequestMetadata.setUtcOffset(-(zoneOffset.getTotalSeconds() / 60));
+                    insightRequestMetadata.setZoneID(zoneId);
+                }
+                ps.close();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
         boolean success;
         try {
@@ -2438,14 +2475,14 @@ public class DataService {
             long startTime = System.currentTimeMillis();
 
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+
+            handleTimezoneData(conn, insightRequestMetadata);
+
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
 
-            Map<String, DerivedAnalysisDimension> map = null;
             if (analysisDefinition instanceof WSTextDefinition) {
                 WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
-
-                map = textReport.beforeRun(insightRequestMetadata);
-
+                textReport.beforeRun(insightRequestMetadata);
             }
             ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
             /*List<ReportAuditEvent> events = new ArrayList<ReportAuditEvent>();

@@ -7,15 +7,13 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
-import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -456,7 +454,7 @@ public class ReportDelivery extends ScheduledDelivery {
     }
 
     @Override
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = super.toJSON(md);    //To change body of overridden methods use File | Settings | File Templates.
         jo.put("send_if_no_data", isSendIfNoData());
         jo.put("report_format", reportFormatValue(getReportFormat()));

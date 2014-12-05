@@ -20,7 +20,7 @@
 
     <context-param>
         <param-name>Owasp.CsrfGuard.Config</param-name>
-        <param-value>WEB-INF/classes/Owasp.CsrfGuard.properties</param-value>
+        <param-value>/WEB-INF/classes/Owasp.CsrfGuard.properties</param-value>
     </context-param>
 
     <context-param>
@@ -198,7 +198,7 @@
         <servlet-class>org.owasp.csrfguard.servlet.JavaScriptServlet</servlet-class>
         <init-param>
             <param-name>source-file</param-name>
-            <param-value>WEB-INF/classes/Owasp.CsrfGuard.js</param-value>
+            <param-value>/WEB-INF/classes/Owasp.CsrfGuard.js</param-value>
         </init-param>
         <init-param>
             <param-name>inject-into-forms</param-name>
@@ -551,6 +551,11 @@
         <servlet-name>TriggerCache</servlet-name>
         <display-name>TriggerCache</display-name>
         <servlet-class>com.easyinsight.datafeeds.CacheServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>AvailableTimeZones</servlet-name>
+        <servlet-class>com.easyinsight.api.v3.AvailableTimeZoneServlet</servlet-class>
     </servlet>
 
     <!--<servlet>
@@ -1188,7 +1193,6 @@
 
     <servlet-mapping>
         <servlet-name>WhiteLabelImage</servlet-name>
-
         <url-pattern>/whiteLabelImage</url-pattern>
     </servlet-mapping>
 
@@ -1200,6 +1204,11 @@
     <servlet-mapping>
         <servlet-name>ListDataSourcesByTag</servlet-name>
         <url-pattern>/json/listDataSourcesByTag</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>AvailableTimeZones</servlet-name>
+        <url-pattern>/json/availableTimeZones</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

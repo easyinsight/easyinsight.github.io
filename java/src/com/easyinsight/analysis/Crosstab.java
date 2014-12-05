@@ -193,7 +193,7 @@ public class Crosstab {
             }
         }
 
-        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset + 1][Math.max(columnSections.size() * crosstabDefinition.getMeasures().size(), crosstabDefinition.getColumns().size()) + crosstabDefinition.getRows().size() + 1];
+        CrosstabValue[][] array = new CrosstabValue[rowSections.size() + crosstabDefinition.getColumns().size() + rowOffset + 1][Math.max(columnSections.size() * crosstabDefinition.getMeasures().size(), crosstabDefinition.getColumns().size()) + crosstabDefinition.getRows().size() + (!crosstabDefinition.isNoRowSummaries() ? 1 : 0)];
 
         for (int i = 0; i < crosstabDefinition.getColumns().size(); i++) {
             AnalysisItem column = crosstabDefinition.getColumns().get(i);
@@ -300,7 +300,7 @@ public class Crosstab {
             }
         }
 
-        if (crosstabDefinition.getMeasures().size() == 1) {
+        if (crosstabDefinition.getMeasures().size() == 1 && !crosstabDefinition.isNoRowSummaries()) {
             AnalysisMeasure analysisItem = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
             AggregationFactory totalAggregationFactory = new AggregationFactory(analysisItem, false);
             Aggregation totalAggregation = totalAggregationFactory.getAggregation();

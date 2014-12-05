@@ -1,4 +1,6 @@
 package com.easyinsight.schedule {
+import com.easyinsight.framework.User;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.export.DailyScheduleType")]
 public class DailyScheduleType extends ScheduleType {
@@ -13,7 +15,11 @@ public class DailyScheduleType extends ScheduleType {
         } else {
             minuteString = String(minute);
         }
-        return "Daily on " + hour + ":" + minuteString;
+        if (useAccountTimezone) {
+            return "Daily on " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
+        } else {
+            return "Daily on " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";
+        }
     }
 }
 }

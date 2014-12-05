@@ -16,12 +16,12 @@ public class NeverScheduleType extends ScheduleType {
     }
 
     @Override
-    public Date runTime(Date lastTime, Date now) {
+    public Date runTime(Date lastTime, Date now, String timezoneID) {
         return null;
     }
 
     @Override
-    public String when() {
+    public String when(String accountTimezone) {
         return "Disabled";
     }
 
