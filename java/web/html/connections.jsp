@@ -49,22 +49,17 @@
 <div class="container corePageWell" style="margin-top: 20px;">
 
     <div class="row">
-        <div class="col-md-12">
-    <%--<div class="row">--%>
         <% for (Solution solution : validSolutions) { %>
-        <div style="float:left;height:150px;text-align:center;border-style: solid; border-radius: 8px;margin: 5px;border-color: #AAAAAA;border-width: 2px;width: 180px">
-            <div style="">
-                <div style="margin-bottom: 10px">
-            <a href="/app/html/connections/<%= solution.getDataSourceType() %>"><%=solution.getName()%></a>
+        <div class="col-md-2 col-sm-3 col-xs-6">
+            <a href="/app/html/connections/<%= solution.getDataSourceType() %>">
+                <div class="well data_source_grid" style="position:relative;">
+                    <div></div>
+                    <div class="title"><%=solution.getName()%></div>
+                    <img src="/app/connectionImage/<%= solution.getSolutionID()%>" />
                 </div>
-                <div style="line-height:80px;vertical-align: middle;">
-                    <a href="/app/html/connections/<%= solution.getDataSourceType() %>"><img src="/app/connectionImage/<%= solution.getSolutionID()%>" style="max-width: 150px;max-height: 150px"/></a>
-                </div>
-            </div>
+            </a>
         </div>
         <% } %>
-    <%--</div>--%>
-        </div>
     </div>
 </div>
 </body>
