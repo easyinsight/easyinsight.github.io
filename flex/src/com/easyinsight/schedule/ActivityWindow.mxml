@@ -122,7 +122,6 @@
     </mx:Form>
     <mx:HBox>
         <util:SaveButton label="Edit" click="onEdit()"/>
-        <util:SaveButton label="Test Valid" click="testValid()"/>
         <util:SaveButton label="Run Now" click="runNow()"/>
         <util:SaveButton label="History" click="history()"/>
         <!--<util:SaveButton label="Copy"/>-->
