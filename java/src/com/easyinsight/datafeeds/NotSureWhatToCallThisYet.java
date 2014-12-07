@@ -288,7 +288,8 @@ public class NotSureWhatToCallThisYet {
     private AnalysisDateDimension findDateDimension(AnalysisItem item, int dateLevel) throws CloneNotSupportedException {
         if (item.getDefaultDate() != null && !"".equals(item.getDefaultDate())) {
             for (AnalysisItem field : getFields()) {
-                if (field.hasType(AnalysisItemTypes.DATE_DIMENSION) && item.getDefaultDate().equals(field.toOriginalDisplayName())) {
+                if (field.hasType(AnalysisItemTypes.DATE_DIMENSION) && (item.getDefaultDate().equals(field.toOriginalDisplayName()) ||
+                    item.getDefaultDate().equals(field.toDisplay()))) {
                     AnalysisDateDimension d = (AnalysisDateDimension) field;
                     d.setDateLevel(dateLevel);
                     return d;
