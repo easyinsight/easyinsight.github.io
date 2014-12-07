@@ -292,6 +292,7 @@ public class NotSureWhatToCallThisYet {
                     item.getDefaultDate().equals(field.toDisplay()))) {
                     AnalysisDateDimension d = (AnalysisDateDimension) field;
                     d.setDateLevel(dateLevel);
+                    System.out.println("using " + d.toDisplay());
                     return d;
                 }
             }
