@@ -335,6 +335,10 @@
             if (_reportEditor != null) {
                 _reportEditor.save(event.analysisItem);
             }
+            if (editor2 != null) {
+                editor2.analysisItem = event.analysisItem;
+                editor2.save(_dataSourceID);
+            }
             dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, _originalWrapper, true));
             editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
             dispatchEvent(new Event(Event.CLOSE));
