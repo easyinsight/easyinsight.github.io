@@ -6,13 +6,11 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
 import org.hibernate.Session;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.*;
 import java.util.*;
@@ -408,7 +406,7 @@ public class GeneralDelivery extends ScheduledDelivery {
     }
 
     @Override
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = super.toJSON(md);
         jo.put("subject", getSubject());
         jo.put("body", getBody());
@@ -416,13 +414,7 @@ public class GeneralDelivery extends ScheduledDelivery {
         jo.put("offset", getTimezoneOffset());
         jo.put("sender", getSenderID());
         jo.put("label", getDeliveryLabel());
-        jo.put("delivery_info", new JSONArray(getDeliveryInfos().stream().map((a) -> {
-            try {
-                return a.toJSON(md);
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        }).collect(Collectors.toList())));
+        jo.put("delivery_info", getDeliveryInfos().stream().map((a) -> a.toJSON(md)).collect(Collectors.toList()));
         return jo;
     }
 

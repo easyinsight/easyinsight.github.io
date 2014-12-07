@@ -2,13 +2,11 @@ package com.easyinsight.export;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import net.minidev.json.JSONObject;
 import org.hibernate.Session;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -171,7 +169,7 @@ public class DataSourceRefreshActivity extends ScheduledActivity {
     }
 
     @Override
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = super.toJSON(md);
         jo.put("data_source", dataSourceID);
         jo.put("label", toString());

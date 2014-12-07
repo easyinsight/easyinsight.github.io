@@ -40,7 +40,16 @@ public class DeliveryTaskGenerator extends TaskGenerator {
     public List<ScheduledTask> generateTasks(Date now, EIConnection conn) throws SQLException {
         ScheduleType scheduleType = getScheduleType(conn);
         Date lastRunTime = findStartTaskDate();
-        Date time = scheduleType.runTime(lastRunTime, now);
+        String timezoneID = null;
+        PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
+                "scheduled_account_activity.account_id = account.account_id");
+        tzStmt.setLong(1, activityID);
+        ResultSet rs = tzStmt.executeQuery();
+        if (rs.next()) {
+            timezoneID = rs.getString(1);
+        }
+        tzStmt.close();
+        Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
         if (time != null) {
             DeliveryScheduledTask deliveryTask = new DeliveryScheduledTask();
             deliveryTask.setTaskType(ScheduledTask.EMAIL);
@@ -56,7 +65,8 @@ public class DeliveryTaskGenerator extends TaskGenerator {
     }
 
     private ScheduleType getScheduleType(EIConnection conn) throws SQLException {
-        PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID, SCHEDULE.time_offset FROM SCHEDULE WHERE " +
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID, " +
+                "SCHEDULE.time_offset, SCHEDULE.use_account_timezone FROM SCHEDULE WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         loadStmt.setLong(1, activityID);
         ResultSet rs = loadStmt.executeQuery();
@@ -66,6 +76,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
             int minute = rs.getInt(3);
             long id = rs.getLong(4);
             int offset = rs.getInt(5);
+            boolean useAccountTimezone = rs.getBoolean(6);
             ScheduleType schedule;
             switch (type) {
                 case ScheduleType.DAILY:
@@ -97,6 +108,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
             schedule.setMinute(minute);
             schedule.setTimeOffset(offset);
             schedule.customLoad(conn);
+            schedule.setUseAccountTimezone(useAccountTimezone);
             loadStmt.close();
             return schedule;
         } else {

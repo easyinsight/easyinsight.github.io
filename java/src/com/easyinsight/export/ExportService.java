@@ -25,6 +25,7 @@ import com.easyinsight.kpi.KPIOutcome;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.preferences.ImageDescriptor;
 import com.easyinsight.preferences.PreferencesService;
+import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
@@ -349,6 +350,7 @@ public class ExportService {
                 try {
                     ScheduledActivity scheduledActivity = ScheduledActivity.createActivity(activityType, activityID, conn);
                     if (scheduledActivity.authorize()) {
+
                         activities.add(scheduledActivity);
                     }
                 } catch (Exception e) {
@@ -476,7 +478,7 @@ public class ExportService {
         SecurityUtil.authorizeDashboard(dashboard.getId(), Roles.PUBLIC);
         try {
             // todo: fix
-            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true, true);
+            byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, images, 0, true, true, true);
             EIConnection conn = Database.instance().getConnection();
             try {
                 toDatabase(dashboard.getName(), bytes, conn);
@@ -548,12 +550,12 @@ public class ExportService {
 
     public String toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
                                       Element element) throws SQLException, DocumentException {
-        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element), conn);
+        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element, true), conn);
     }
 
     public String toListPDFInDatabase(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
                                       HttpServletRequest request, Element element) throws SQLException, DocumentException {
-        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element), conn, request);
+        return toDatabase(analysisDefinition.getName(), toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element, true), conn, request);
     }
 
     public ReportFault emailReport(WSAnalysisDefinition analysisDefinition, int format, InsightRequestMetadata insightRequestMetadata, String email, String subject, String body,
@@ -642,7 +644,7 @@ public class ExportService {
             } else {
                 sb.append("<tr>");
             }
-            for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1); i++) {
+            for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + (!crosstabDefinition.isNoRowSummaries() ? 1 : 0)); i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
                     if (i == 0 || j < 2) {
@@ -708,7 +710,7 @@ public class ExportService {
             } else {
                 sb.append("<tr>");
             }
-            int columnSize = ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + 1);
+            int columnSize = ((crosstab.getColumnSections().size() * crosstabDefinition.getMeasures().size()) + crosstabDefinition.getRows().size() + (!crosstabDefinition.isNoRowSummaries() ? 1 : 0));
             for (int i = 0; i < columnSize; i++) {
                 CrosstabValue crosstabValue = values[j][i];
                 if (crosstabValue == null) {
@@ -887,10 +889,10 @@ public class ExportService {
     }
 
     public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata) throws SQLException, DocumentException {
-        return toPDFBytes(analysisDefinition, conn, insightRequestMetadata, null);
+        return toPDFBytes(analysisDefinition, conn, insightRequestMetadata, null, true);
     }
 
-    public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Element childElement) throws SQLException, DocumentException {
+    public byte[] toPDFBytes(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata, Element childElement, boolean sendIfNoData) throws SQLException, DocumentException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ExportMetadata exportMetadata = createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
@@ -963,7 +965,10 @@ public class ExportService {
                 throw new RuntimeException(e);
             }
         } else {
-            element = listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata);
+            element = listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata, sendIfNoData);
+        }
+        if (element == null) {
+            return null;
         }
         document.add(element);
 
@@ -972,8 +977,11 @@ public class ExportService {
     }
 
     public Element listReportToPDFTable(WSAnalysisDefinition analysisDefinition, EIConnection conn, InsightRequestMetadata insightRequestMetadata,
-                                        ExportMetadata exportMetadata) throws DocumentException {
+                                        ExportMetadata exportMetadata, boolean sendIfNoData) throws DocumentException {
         ListDataResults listDataResults = (ListDataResults) DataService.list(analysisDefinition, insightRequestMetadata, conn);
+        if (!sendIfNoData && listDataResults.getRows().length == 0) {
+            return null;
+        }
         return listReportToPDFTable(analysisDefinition, conn, insightRequestMetadata, exportMetadata, listDataResults);
     }
 
@@ -3980,14 +3988,16 @@ public class ExportService {
         int dateFormat;
         String currencySymbol;
         String locale;
+        String timezone = null;
         try {
-            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL, ACCOUNT_LOCALE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
+            PreparedStatement dateFormatStmt = conn.prepareStatement("SELECT DATE_FORMAT, CURRENCY_SYMBOL, ACCOUNT_LOCALE, TIMEZONE FROM ACCOUNT WHERE ACCOUNT_ID = ?");
             dateFormatStmt.setLong(1, accountID);
             ResultSet rs = dateFormatStmt.executeQuery();
             if (rs.next()) {
                 dateFormat = rs.getInt(1);
                 currencySymbol = rs.getString(2);
                 locale = rs.getString(3);
+                timezone = rs.getString(4);
             } else {
                 dateFormat = 1;
                 currencySymbol = "$";
@@ -4047,7 +4057,7 @@ public class ExportService {
         cal.setTimeZone(timeZone);
         Locale localeObject;
         localeObject = createLocale(locale);
-        return new ExportMetadata(dateFormat, currencySymbol, cal, localeObject);
+        return new ExportMetadata(dateFormat, currencySymbol, cal, localeObject, timezone);
     }
 
     public static final int CURRENCY_USD = 1;

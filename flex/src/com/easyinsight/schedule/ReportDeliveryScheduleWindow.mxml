@@ -142,7 +142,6 @@
                 activity = new ReportDelivery();
             }
             if (scheduleConfiguration.save()) {
-
                 _activity.users = users;
                 _activity.emails = emails;
                 _activity.groups = groups;

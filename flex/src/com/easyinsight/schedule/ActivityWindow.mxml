@@ -94,9 +94,14 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        private function testValid():void {
+            exportService.testValid.send(_activity);
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="exportService" destination="exportService">
         <mx:method name="runNow" result="ran()"/>
+        <mx:method name="testValid"/>
     </mx:RemoteObject>
     <mx:Label text="{activityDisplay}"/>
     <mx:Form>
@@ -117,6 +122,7 @@
     </mx:Form>
     <mx:HBox>
         <util:SaveButton label="Edit" click="onEdit()"/>
+        <util:SaveButton label="Test Valid" click="testValid()"/>
         <util:SaveButton label="Run Now" click="runNow()"/>
         <util:SaveButton label="History" click="history()"/>
         <!--<util:SaveButton label="Copy"/>-->

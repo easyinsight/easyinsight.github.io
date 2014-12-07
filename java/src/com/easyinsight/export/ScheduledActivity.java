@@ -5,13 +5,10 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
+import net.minidev.json.JSONObject;
 import nu.xom.Element;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User: jamesboe
@@ -140,7 +137,7 @@ public abstract class ScheduledActivity {
 
     private static ScheduleType loadSchedule(long activityID, EIConnection conn) throws SQLException {
         PreparedStatement loadStmt = conn.prepareStatement("SELECT SCHEDULE.schedule_type, SCHEDULE.SCHEDULE_HOUR, SCHEDULE.SCHEDULE_MINUTE, SCHEDULE.SCHEDULE_ID," +
-                "SCHEDULE.time_offset FROM SCHEDULE WHERE " +
+                "SCHEDULE.time_offset, SCHEDULE.use_account_timezone FROM SCHEDULE WHERE " +
                 "SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
         loadStmt.setLong(1, activityID);
         ResultSet rs = loadStmt.executeQuery();
@@ -150,6 +147,7 @@ public abstract class ScheduledActivity {
             int minute = rs.getInt(3);
             long id = rs.getLong(4);
             int utcOffset = rs.getInt(5);
+            boolean useAccountTimezone = rs.getBoolean(6);
             ScheduleType schedule;
             switch (type) {
                 case ScheduleType.DAILY:
@@ -180,6 +178,7 @@ public abstract class ScheduledActivity {
             schedule.setHour(hour);
             schedule.setMinute(minute);
             schedule.setTimeOffset(utcOffset);
+            schedule.setUseAccountTimezone(useAccountTimezone);
             schedule.customLoad(conn);
             loadStmt.close();
             return schedule;
@@ -198,13 +197,13 @@ public abstract class ScheduledActivity {
 
     }
 
-    public String when() {
-        return scheduleType.when();
+    public String when(String accountTimezone) {
+        return scheduleType.when(accountTimezone);
     }
 
     public abstract String describe();
 
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = new JSONObject();
         jo.put("id", getScheduledActivityID());
         jo.put("schedule_type", getScheduleType().toJSON(md));
@@ -212,7 +211,7 @@ public abstract class ScheduledActivity {
         jo.put("problem_level", getProblemLevel());
         jo.put("type", valueOf(retrieveType()));
         jo.put("description", describe());
-        jo.put("when", when());
+        jo.put("when", when(md.accountTimezone));
         return jo;
     }
 

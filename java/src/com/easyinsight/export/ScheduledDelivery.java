@@ -3,9 +3,9 @@ package com.easyinsight.export;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
-import org.json.JSONArray;
+import com.easyinsight.util.JSONUtil;
+import net.minidev.json.JSONObject;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -127,25 +127,23 @@ public abstract class ScheduledDelivery extends ScheduledActivity {
     }
 
     @Override
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = super.toJSON(md);
-        jo.put("emails", new JSONArray(getEmails()));
-        jo.put("users", new JSONArray(getUsers().stream().map((a) -> {
-
+        jo.put("emails", getEmails());
+        jo.put("users", getUsers().stream().map((a) -> {
             try {
-                return a.toJSON(md);
+                return JSONUtil.fromOrg(a.toJSON(md));
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
-        }).collect(Collectors.toList())));
-
-        jo.put("groups", new JSONArray(getGroups().stream().map((a) -> {
+        }).collect(Collectors.toList()));
+        jo.put("groups", getGroups().stream().map((a) -> {
             try {
-                return a.toJSON(md);
-            } catch(JSONException e) {
-                return new RuntimeException(e);
+                return JSONUtil.fromOrg(a.toJSON(md));
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
-        }).collect(Collectors.toList())));
+        }).collect(Collectors.toList()));
         return jo;
     }
 

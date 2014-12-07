@@ -2,6 +2,8 @@
 <mx:Form xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
         paddingLeft="0" paddingBottom="0" paddingRight="0" paddingTop="0" verticalGap="8">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
         private function changeSchedule():void {
             var item:String = scheduleBox.selectedItem as String;
             if (item == "Weekly") {
@@ -67,6 +69,11 @@
         protected override function commitProperties():void {
             super.commitProperties();
             if (_activity != null) {
+                if (_activity.scheduleType.useAccountTimezone) {
+                    timezone = User.getInstance().accountTimezone;
+                } else {
+                    timezone = "(UTC" + (_activity.scheduleType.timeOffset > 0 ? "-" : "+") + (_activity.scheduleType.timeOffset / 60) + ":00)";
+                }
                 hour = _activity.scheduleType.hour;
                 minute = _activity.scheduleType.minute;
                 if (_activity.scheduleType is DailyScheduleType) {
@@ -91,6 +98,13 @@
                     scheduleIndex = 2;
                 } else if (_activity.scheduleType is NeverScheduleType) {
                     scheduleType = "Never (Disabled)";
+                }
+            } else {
+                if (User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
+                    timezone = User.getInstance().accountTimezone;
+                } else {
+                    var offset:int = new Date().getTimezoneOffset();
+                    timezone = "(UTC" + (offset > 0 ? "-" : "+") + (offset / 60) + ":00)";
                 }
             }
             var fontSize:int = getStyle("fontSize");
@@ -126,8 +140,16 @@
             }
             _activity.scheduleType.hour = hourStepper.value;
             _activity.scheduleType.minute = minuteStepper.value;
+            if (User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
+                _activity.scheduleType.useAccountTimezone = true;
+            } else {
+                _activity.scheduleType.useAccountTimezone = false;
+            }
             return true;
         }
+
+        [Bindable]
+        private var timezone:String;
         ]]></mx:Script>
     <mx:FormItem label="How often should this event happen?">
         <mx:ComboBox rowCount="6" id="scheduleBox" change="changeSchedule()" selectedItem="{scheduleType}" enabled="{editEnabled}">
@@ -176,6 +198,6 @@
         <mx:NumericStepper value="{hour}" minimum="0" maximum="23" id="hourStepper" enabled="{editEnabled}"/>
         <mx:Label text=":"/>
         <mx:NumericStepper value="{minute}" minimum="0" maximum="59" id="minuteStepper" enabled="{editEnabled}"/>
-        <mx:Label text="What time zone is this using?" fontSize="10" textDecoration="underline" toolTip="This time will be your browser local time zone."/>
+        <mx:Text text="{timezone}"/>
     </mx:FormItem>
 </mx:Form>

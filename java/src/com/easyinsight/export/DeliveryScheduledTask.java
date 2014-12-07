@@ -25,8 +25,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import java.io.File;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -34,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -46,27 +46,6 @@ import java.util.concurrent.*;
 @Table(name = "delivery_scheduled_task")
 @PrimaryKeyJoinColumn(name = "scheduled_task_id")
 public class DeliveryScheduledTask extends ScheduledTask {
-
-    private static final String QUEUE_POLICY_FORMAT = "{\n" +
-            "  \"Version\": \"2008-10-17\",\n" +
-            "  \"Id\": \"arn:aws:sqs:us-east-1:808335860417:{0}/SQSDefaultPolicy\",\n" +
-            "  \"Statement\": [\n" +
-            "    {\n" +
-            "      \"Sid\": \"Sid1363034700583\",\n" +
-            "      \"Effect\": \"Allow\",\n" +
-            "      \"Principal\": {\n" +
-            "        \"AWS\": \"*\"\n" +
-            "      },\n" +
-            "      \"Action\": \"SQS:SendMessage\",\n" +
-            "      \"Resource\": \"arn:aws:sqs:us-east-1:808335860417:{0}\",\n" +
-            "      \"Condition\": {\n" +
-            "        \"ArnEquals\": {\n" +
-            "          \"aws:SourceArn\": \"arn:aws:sns:us-east-1:808335860417:{1}\"\n" +
-            "        }\n" +
-            "      }\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
 
 
     @Column(name = "scheduled_account_activity_id")
@@ -146,8 +125,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             String userFirstName = senderRS.getString(2);
             String userLastName = senderRS.getString(3);
             String senderName = userFirstName + " " + userLastName;
-            String senderEmail = email;
-            return new SenderInfo(senderName, senderEmail);
+            return new SenderInfo(senderName, email);
         }
         getSernderStmt.close();
         return null;
@@ -212,7 +190,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
             getGroups(conn, generalDelivery.getGroups(), userInfoSet);
 
             generateForUsers(userInfoSet, conn, subject, body, generalDelivery.isHtmlEmail(), generalDelivery.getTimezoneOffset(), generalDelivery.getDeliveryInfos(), accountType, firstDayOfWeek, accountID, emails, defaultUser, senderEmail, senderName, true,
-                    accountReports);
+                    accountReports, generalDelivery.getScheduleType().isUseAccountTimezone());
         }
     }
 
@@ -256,7 +234,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
     private void generateForUsers(Set<UserInfo> userInfoSet, EIConnection conn, String subject, String body, boolean htmlEmail, int timezoneOffset, List<DeliveryInfo> infos,
                                   int accountType, int firstDayOfWeek, long accountID, List<String> emails, UserInfo defaultUser, String senderEmail, String senderName, boolean sendIfNoData,
-                                  boolean accountReports)
+                                  boolean accountReports, boolean useAccountTimezone)
             throws SQLException, CloneNotSupportedException, MessagingException, InterruptedException, UnsupportedEncodingException {
         Map<List<UserDLS>, List<UserInfo>> personaMap = new HashMap<>();
         for (UserInfo userInfo : userInfoSet) {
@@ -292,11 +270,11 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 sentEmails = true;
             }
             sendEmails(conn, subject, body, htmlEmail, timezoneOffset, infos, accountType, firstDayOfWeek, accountID,
-                    entry.getValue(), emailAddressesToSend, firstUser, personaName, senderEmail, senderName, sendIfNoData, accountReports);
+                    entry.getValue(), emailAddressesToSend, firstUser, personaName, senderEmail, senderName, sendIfNoData, accountReports, useAccountTimezone);
         }
         if (!sentEmails) {
             sendEmails(conn, subject, body, htmlEmail, timezoneOffset, infos, accountType, firstDayOfWeek, accountID,
-                    new ArrayList<>(), emails, defaultUser, null, senderEmail, senderName, sendIfNoData, accountReports);
+                    new ArrayList<>(), emails, defaultUser, null, senderEmail, senderName, sendIfNoData, accountReports, useAccountTimezone);
         }
     }
 
@@ -321,7 +299,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
     private void sendEmails(final EIConnection conn, String subject, String body, boolean htmlEmail, final int timezoneOffset,
                             List<DeliveryInfo> infos, final int accountType, final int firstDayOfWeek, final long accountID,
                             List<UserInfo> users, List<String> emails, final UserInfo firstUser, @Nullable final String personaName, String senderEmail, String senderName,
-                            final boolean sendIfNoData, final boolean accountReports)
+                            final boolean sendIfNoData, final boolean accountReports, boolean accountTimezone)
             throws InterruptedException, SQLException, MessagingException, UnsupportedEncodingException {
         String emailBody = body;
         BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
@@ -335,7 +313,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 SecurityUtil.populateThreadLocal(firstUser.userName, firstUser.userID, accountID, accountType, firstUser.accountAdmin, firstDayOfWeek, personaName);
                 EIConnection ourConn = Database.instance().getConnection();
                 try {
-                    DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, ourConn, timezoneOffset, sendIfNoData);
+                    DeliveryResult deliveryResult = handleDeliveryInfo(deliveryInfo, ourConn, timezoneOffset, sendIfNoData, accountTimezone);
                     if (deliveryResult != null) {
                         if (deliveryResult.body != null) {
                             bodyElements.add(new BodyElement(deliveryResult.body, deliveryInfo.getIndex()));
@@ -394,9 +372,13 @@ public class DeliveryScheduledTask extends ScheduledTask {
         deliveryAuditStmt.close();
     }
 
-    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset, boolean sendIfNoData) throws Exception {
+    private DeliveryResult handleDeliveryInfo(DeliveryInfo deliveryInfo, EIConnection conn, int timezoneOffset, boolean sendIfNoData, boolean useAccountTimezone) throws Exception {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setUtcOffset(timezoneOffset);
+        ExportMetadata exportMetadata = ExportService.createExportMetadata(conn);
+        if (useAccountTimezone) {
+            insightRequestMetadata.setZoneID(ZoneId.of(exportMetadata.accountTimezone));
+        }
 
         if (deliveryInfo.getType() == DeliveryInfo.REPORT) {
             WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(deliveryInfo.getId(), conn);
@@ -449,14 +431,18 @@ public class DeliveryScheduledTask extends ScheduledTask {
                     deliveryInfo.getFormat() == ReportDelivery.INLINE_IMAGE) {
                 if (deliveryInfo.getFormat() == ReportDelivery.PDF && ExportService.toDirectPDF(analysisDefinition.getReportType())) {
                     System.out.println("Running report " + deliveryInfo.getId() + " for inline PDF delivery");
-                    byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata);
-                    String reportName = analysisDefinition.getName();
-                    return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
+                    byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata, null, sendIfNoData);
+                    if (bytes != null) {
+                        String reportName = analysisDefinition.getName();
+                        return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
+                    } else {
+                        // no data found
+                    }
                 } else {
                     System.out.println("Running report " + deliveryInfo.getId() + " for PhantomJS PDF or PNG delivery");
                     if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
                         Element element = DashboardPDF.generatePDF(analysisDefinition, 1000, 800, conn);
-                        byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element);
+                        byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element, sendIfNoData);
                         String reportName = analysisDefinition.getName();
                         return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
                     } else {
@@ -500,7 +486,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 positions = new DashboardStackPositions();
             }
             byte[] bytes = new DashboardPDF().createPDF(dashboard, positions, new HashMap<>(),
-                    insightRequestMetadata.getUtcOffset(), showHeader, !"Portrait".equals(orientation));
+                    insightRequestMetadata.getUtcOffset(), showHeader, !"Portrait".equals(orientation), useAccountTimezone);
             System.out.println("pdf size = " + bytes.length);
 
             System.out.println("saved");
@@ -605,7 +591,7 @@ public class DeliveryScheduledTask extends ScheduledTask {
 
 
             generateForUsers(userInfoSet, conn, subject, body, htmlEmail, timezoneOffset, Arrays.asList(deliveryInfo), accountType, firstDayOfWeek, accountID,
-                    emails, defaultUser, senderEmail, senderName, sendIfNoData, accountReports);
+                    emails, defaultUser, senderEmail, senderName, sendIfNoData, accountReports, reportDelivery.getScheduleType().isUseAccountTimezone());
 
             queryStmt.close();
         }

@@ -6,6 +6,8 @@ public class ScheduleType {
     public var scheduleID:int;
     public var hour:int;
     public var minute:int;
+    public var timeOffset:int;
+    public var useAccountTimezone:Boolean;
 
     public function ScheduleType() {
     }

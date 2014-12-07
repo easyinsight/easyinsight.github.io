@@ -5,11 +5,10 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.datafeeds.FeedStorage;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Nodes;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -197,7 +196,7 @@ public class DeliveryInfo {
         this.deliveryExtension = deliveryExtension;
     }
 
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         JSONObject jo = new JSONObject();
         jo.put("name", getName());
         jo.put("id", getId());

@@ -60,6 +60,21 @@ public class HealthListener implements Runnable {
                     }
 
                 }
+                for (Map.Entry<String, Database> storageEntry : DatabaseManager.instance().getAdditionalDatabases().entrySet()) {
+                    Database database = storageEntry.getValue();
+
+                    EIConnection conn = database.getConnection();
+                    try {
+                        Statement stmt = conn.createStatement();
+                        stmt.executeQuery("SELECT 1");
+                    } catch (Exception e) {
+                        response = e.getMessage() + " on query of " + storageEntry.getKey() + " database pool";
+                        code = FAILURE;
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
+
+                }
                 Status status = new Status();
                 status.setTime(System.currentTimeMillis());
                 status.setCode(code);

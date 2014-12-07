@@ -1,4 +1,6 @@
 package com.easyinsight.schedule {
+import com.easyinsight.framework.User;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.export.WeekdayScheduleType")]
 public class WeekdayScheduleType extends ScheduleType {
@@ -13,7 +15,11 @@ public class WeekdayScheduleType extends ScheduleType {
         } else {
             minuteString = String(minute);
         }
-        return "Every Weekday on " + hour + ":" + minuteString;
+        if (useAccountTimezone) {
+            return "Every Weekday on " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
+        } else {
+            return "Every Weekday on " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";
+        }
     }
 }
 }

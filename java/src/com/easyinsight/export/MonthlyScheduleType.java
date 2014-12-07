@@ -10,6 +10,11 @@ import org.json.JSONException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -49,7 +54,23 @@ public class MonthlyScheduleType extends ScheduleType {
     }
 
     @Nullable
-    public Date runTime(Date lastTime, Date now) {
+    public Date runTime(Date lastTime, Date now, String timezoneID) {
+        if (timezoneID != null && !"".equals(timezoneID)) {
+
+            ZonedDateTime lastTimeZDT = lastTime.toInstant().atZone(ZoneId.systemDefault());
+            ZonedDateTime nowZDT = now.toInstant().atZone(ZoneId.systemDefault());
+
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(timezoneID));
+            ZonedDateTime time = zonedDateTime.withHour(getHour()).withMinute(getMinute()).withSecond(0).with(ChronoField.MILLI_OF_SECOND, 0);
+
+            if (time.getDayOfMonth() == this.dayOfMonth) {
+                if (time.isAfter(lastTimeZDT) && time.isBefore(nowZDT)) {
+                    Instant instant = time.toInstant();
+                    return Date.from(instant);
+                }
+            }
+            return null;
+        }
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(cal.getTimeInMillis() - (getTimeOffset() * 60 * 1000));
         cal.set(Calendar.HOUR_OF_DAY, getHour());
@@ -82,20 +103,36 @@ public class MonthlyScheduleType extends ScheduleType {
         PreparedStatement nukeStmt = conn.prepareStatement("DELETE FROM monthly_schedule WHERE SCHEDULE_ID = ?");
         nukeStmt.setLong(1, getScheduleID());
         nukeStmt.executeUpdate();
+        nukeStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO monthly_schedule (DAY_OF_MONTH, SCHEDULE_ID) VALUES (?, ?)");
         insertStmt.setInt(1, dayOfMonth);
         insertStmt.setLong(2, getScheduleID());
         insertStmt.execute();
+        insertStmt.close();
     }
 
     @Override
-    public String when() {
-        return "Monthly on " +dayOfMonth + " day of month at " + getHour() + ":" + String.format("%02d", getMinute()) + " GMT";
+    public String when(String accountTimezone) {
+        String suffix;
+        if (dayOfMonth == 1) {
+            suffix = "st";
+        } else if (dayOfMonth == 2) {
+            suffix = "nd";
+        } else if (dayOfMonth == 3) {
+            suffix = "rd";
+        } else {
+            suffix = "th";
+        }
+        if (isUseAccountTimezone()) {
+            return dayOfMonth + suffix + " day of the month at " + getHour() + ":" + String.format("%02d", getMinute()) + " (" + accountTimezone + ")";
+        } else {
+            return dayOfMonth + suffix + " day of the month at " + getHour() + ":" + String.format("%02d", getMinute()) + " (UTC" + (getTimeOffset() > 0 ? "-" : "+") + (getTimeOffset() / 60) + ":00)";
+        }
     }
 
     @Override
-    public org.json.JSONObject toJSON(ExportMetadata md) throws JSONException {
-        org.json.JSONObject jo = super.toJSON(md);
+    public JSONObject toJSON(ExportMetadata md) {
+        JSONObject jo = super.toJSON(md);
         jo.put("day_of_month", getDayOfMonth());
         return jo;
     }

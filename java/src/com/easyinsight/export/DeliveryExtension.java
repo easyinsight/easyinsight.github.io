@@ -1,8 +1,7 @@
 package com.easyinsight.export;
 
 import com.easyinsight.database.EIConnection;
-import org.json.JSONException;
-import org.json.JSONObject;
+import net.minidev.json.JSONObject;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,7 +48,7 @@ public class DeliveryExtension {
         return "";
     }
 
-    public JSONObject toJSON(ExportMetadata md) throws JSONException {
+    public JSONObject toJSON(ExportMetadata md) {
         return new JSONObject();
     }
 
