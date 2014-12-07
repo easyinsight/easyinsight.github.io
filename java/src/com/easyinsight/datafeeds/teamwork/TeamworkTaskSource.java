@@ -28,6 +28,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
     public static final String TASK_COUNT = "Task Count";
     public static final String TASK_CREATED_ON = "Task Created On";
     public static final String TASK_COMPLETED = "Task Completed";
+    public static final String TASK_COMPLETED_ON = "Task Completed On";
     public static final String TASK_POSITION = "Task Position";
     public static final String TASK_ESTIMATED_MINUTES = "Task Estimated Minutes";
     public static final String TASK_DESCRIPTION = "Task Description";
@@ -49,6 +50,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
         fieldBuilder.addField(TASK_ID, new AnalysisDimension());
         fieldBuilder.addField(TASK_PROJECT_ID, new AnalysisDimension());
         fieldBuilder.addField(TASK_COMPLETED, new AnalysisDimension());
+        fieldBuilder.addField(TASK_COMPLETED_ON, new AnalysisDateDimension());
         fieldBuilder.addField(TASK_DESCRIPTION, new AnalysisDimension());
         fieldBuilder.addField(TASK_RESPONSIBLE_PARTY, new AnalysisDimension());
         fieldBuilder.addField(TASK_CREATOR, new AnalysisDimension());
@@ -87,6 +89,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
                     row.addValue(keys.get(TASK_DESCRIPTION), getValue(project, "description"));
                     row.addValue(keys.get(TASK_COUNT), 1);
                     row.addValue(keys.get(TASK_CREATED_ON), getDate(project, "created-on"));
+                    row.addValue(keys.get(TASK_COMPLETED_ON), getDate(project, "completed_on"));
                     row.addValue(keys.get(TASK_PROGRESS), getValue(project, "progress"));
                     row.addValue(keys.get(TASK_RESPONSIBLE_PARTY), getValue(project, "responsible-party-summary"));
                     row.addValue(keys.get(TASK_CREATOR), getValue(project, "creator-firstname") + " " + getValue(project, "creator-lastname"));
