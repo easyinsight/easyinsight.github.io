@@ -32,6 +32,8 @@ public class DailyScheduleType extends ScheduleType {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(timezoneID));
             ZonedDateTime time = zonedDateTime.withHour(getHour()).withMinute(getMinute()).withSecond(0).with(ChronoField.MILLI_OF_SECOND, 0);
 
+            System.out.println("Comparing " + time + " to last run of " + lastTimeZDT + " and now of " + nowZDT);
+
             if (time.isAfter(lastTimeZDT) && time.isBefore(nowZDT)) {
                 Instant instant = time.toInstant();
                 return Date.from(instant);
