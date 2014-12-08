@@ -153,78 +153,99 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     } else {
                         System.out.println("not skipping " + project.getName());
                     }
-                }
-                DataSet dataSet = new DataSet();
-                String projectID = project.getId();
-                JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
-                if (todoListArray == null) {
+                    DataSet dataSet = new DataSet();
+                    String projectID = project.getId();
 
-                    continue;
-                }
-                for (int j = 0; j < todoListArray.length(); j++) {
+                    int count;
+                    int page = 1;
+                    do {
+                        JSONArray todos = runJSONRequest("projects/" + projectID + "/todos.json?page=" + page, (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
+                        count = todos.length();
+                        parseTodoList2(keys, dataSet, projectID, todos, basecampNextCompositeSource,
+                                project.isArchived(), httpClient);
+                        page++;
+                    } while (count == 50);
 
-                    JSONObject todoList = todoListArray.getJSONObject(j);
-                    String todoListID = String.valueOf(todoList.getInt("id"));
-                    String todoListName = todoList.getString("name");
-
-                    String todoListDescription = todoList.getString("description");
-                    String todoListURL = todoList.getString("url");
-                    Date todoListUpdatedAt = null;
-                    try {
-                        todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
-                    } catch (Exception e) {
-                        try {
-                            todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
-                        } catch (Exception e1) {
-                            LogClass.error("Parse failure on " + todoList.getString("updated_at"));
-                        }
+                    if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                        IDataStorage.insertData(dataSet);
+                    } else {
+                        StringWhere stringWhere = new StringWhere(keys.get(TODO_LIST_PROJECT_ID), projectID);
+                        IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
                     }
-                    JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                    JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
 
-                    JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
-                            project.isArchived(), httpClient);
-
-                    JSONArray completedArray = todoMasterObject.getJSONArray("completed");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
-                            project.isArchived(), httpClient);
-                }
-                JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                for (int j = 0; j < completedTodoListArray.length(); j++) {
-
-                    JSONObject todoList = completedTodoListArray.getJSONObject(j);
-                    String todoListID = String.valueOf(todoList.getInt("id"));
-                    String todoListName = todoList.getString("name");
-
-                    String todoListDescription = todoList.getString("description");
-                    String todoListURL = todoList.getString("url");
-                    Date todoListUpdatedAt = null;
-                    try {
-                        todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
-                    } catch (Exception e) {
-                        try {
-                            todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
-                        } catch (Exception e1) {
-                            LogClass.error("Parse failure on " + todoList.getString("updated_at"));
-                        }
-                    }
-                    JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                    JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
-
-                    JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
-                            project.isArchived(), httpClient);
-
-                    JSONArray completedArray = todoMasterObject.getJSONArray("completed");
-                    parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
-                            project.isArchived(), httpClient);
-                }
-                if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
-                    IDataStorage.insertData(dataSet);
                 } else {
-                    StringWhere stringWhere = new StringWhere(keys.get(TODO_LIST_PROJECT_ID), projectID);
-                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                    DataSet dataSet = new DataSet();
+                    String projectID = project.getId();
+                    JSONArray todoListArray = runJSONRequest("projects/"+projectID+"/todolists.json", (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
+                    if (todoListArray == null) {
+
+                        continue;
+                    }
+                    for (int j = 0; j < todoListArray.length(); j++) {
+
+                        JSONObject todoList = todoListArray.getJSONObject(j);
+                        String todoListID = String.valueOf(todoList.getInt("id"));
+                        String todoListName = todoList.getString("name");
+
+                        String todoListDescription = todoList.getString("description");
+                        String todoListURL = todoList.getString("url");
+                        Date todoListUpdatedAt = null;
+                        try {
+                            todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                        } catch (Exception e) {
+                            try {
+                                todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                            } catch (Exception e1) {
+                                LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                            }
+                        }
+                        JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                        JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
+
+                        JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
+                        parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
+                                project.isArchived(), httpClient);
+
+                        JSONArray completedArray = todoMasterObject.getJSONArray("completed");
+                        parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
+                                project.isArchived(), httpClient);
+                    }
+                    JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                    for (int j = 0; j < completedTodoListArray.length(); j++) {
+
+                        JSONObject todoList = completedTodoListArray.getJSONObject(j);
+                        String todoListID = String.valueOf(todoList.getInt("id"));
+                        String todoListName = todoList.getString("name");
+
+                        String todoListDescription = todoList.getString("description");
+                        String todoListURL = todoList.getString("url");
+                        Date todoListUpdatedAt = null;
+                        try {
+                            todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                        } catch (Exception e) {
+                            try {
+                                todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                            } catch (Exception e1) {
+                                LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                            }
+                        }
+                        JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
+                        JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
+
+                        JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
+                        parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
+                                project.isArchived(), httpClient);
+
+                        JSONArray completedArray = todoMasterObject.getJSONArray("completed");
+                        parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
+                                project.isArchived(), httpClient);
+                    }
+                    if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                        IDataStorage.insertData(dataSet);
+                    } else {
+                        StringWhere stringWhere = new StringWhere(keys.get(TODO_LIST_PROJECT_ID), projectID);
+                        IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                    }
                 }
             }
             return null;
@@ -232,6 +253,105 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void parseTodoList2(Map<String, Key> keys, DataSet dataSet, String projectID, JSONArray todoArray,
+                               BasecampNextCompositeSource parentSource, boolean projectArchived, HttpClient httpClient) throws JSONException {
+        for (int k = 0; k < todoArray.length(); k++) {
+            JSONObject todoObject = todoArray.getJSONObject(k);
+            IRow row = dataSet.createRow();
+            String todoID = String.valueOf(todoObject.getInt("id"));
+            String todoContent = todoObject.getString("content");
+
+            try {
+                Object commentsCountObj = todoObject.get("comments_count");
+                if (commentsCountObj != null) {
+                    int commentCount = Integer.parseInt(commentsCountObj.toString());
+                    if (commentCount > 0) {
+                        JSONObject detail = runJSONRequestForObject("projects/" + projectID + "/todos/" + todoID + ".json", parentSource, httpClient);
+                        JSONArray comments = (JSONArray) detail.get("comments");
+
+                        for (int m = 0; m < comments.length(); m++) {
+                            JSONObject comment = (JSONObject) comments.get(m);
+                            String createdAtString = comment.get("created_at").toString();
+                            String commentID = comment.get("id").toString();
+                            String commentCreator = comment.get("content").toString();
+                            String creator = ((JSONObject) comment.get("creator")).get("name").toString();
+                            Date date = parseDate(createdAtString);
+                            parentSource.addComment(new BasecampComment(commentID, date, todoID, creator, commentCreator, projectID));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+            String dueAtString = todoObject.getString("due_at");
+            Date dueAt = parseDueDate(dueAtString);
+            String completedAtString = todoObject.getString("completed_at");
+            Date completedAt = parseDate(completedAtString);
+            String createdAtString = todoObject.getString("created_at");
+            Date createdAt = parseDate(createdAtString);
+            String updatedAtString = todoObject.getString("updated_at");
+            Date updatedAt = parseDate(updatedAtString);
+            Object obj = todoObject.get("assignee");
+            String assigneeString = null;
+            String completer = null;
+            Object obj2 = todoObject.get("completer");
+            if (obj2 != null && obj2 instanceof JSONObject) {
+                JSONObject completerObject = (JSONObject) obj2;
+                completer = completerObject.getString("name");
+            }
+            if (projectArchived) {
+                if (completedAt != null) {
+                    assigneeString = completer;
+                }
+            } else {
+                if (obj != null && obj instanceof JSONObject) {
+                    JSONObject assignee = (JSONObject) obj;
+                    assigneeString = assignee.getString("name");
+                }
+            }
+
+
+            row.addValue(keys.get(TODO_LIST_PROJECT_ID), projectID);
+
+            JSONObject todoList = (JSONObject) todoObject.get("todolist");
+            String todoListID = String.valueOf(todoList.getInt("id"));
+            String todoListName = todoList.getString("name");
+
+            String todoListDescription = todoList.getString("description");
+            String todoListURL = todoList.getString("url");
+            Date todoListUpdatedAt = null;
+            try {
+                todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+            } catch (Exception e) {
+                try {
+                    todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                } catch (Exception e1) {
+                    LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                }
+            }
+
+
+                row.addValue(keys.get(TODO_LIST_NAME), todoListName);
+                row.addValue(keys.get(TODO_LIST_ID), todoListID);
+
+                row.addValue(keys.get(TODO_LIST_DESCRIPTION), todoListDescription);
+                row.addValue(keys.get(TODO_LIST_UPDATED_AT), todoListUpdatedAt);
+
+                row.addValue(keys.get(TODO_LIST_URL), todoListURL);
+            row.addValue(keys.get(TODO_ASSIGNEE), assigneeString);
+            row.addValue(keys.get(TODO_COMPLETER), completer);
+            row.addValue(keys.get(TODO_COUNT), 1);
+            row.addValue(keys.get(TODO_COMPLETED_AT), completedAt);
+            row.addValue(keys.get(TODO_CREATED_AT), createdAt);
+            row.addValue(keys.get(TODO_UPDATED_AT), updatedAt);
+            row.addValue(keys.get(TODO_DUE_AT), dueAt);
+            row.addValue(keys.get(TODO_ID), todoID);
+            row.addValue(keys.get(TODO_NAME), todoContent);
+            row.addValue(keys.get(TODO_COMPLETED), completedAt != null ? "Completed" : "Not Completed");
+            row.addValue(keys.get(TODO_URL), "https://basecamp.com/"+parentSource.getEndpoint()+"/projects/"+projectID+"/todos/"+todoID);
         }
     }
 
