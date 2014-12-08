@@ -35,8 +35,12 @@ public class DailyScheduleType extends ScheduleType {
             System.out.println("Comparing " + time + " to last run of " + lastTimeZDT + " and now of " + nowZDT);
 
             if (time.isAfter(lastTimeZDT) && time.isBefore(nowZDT)) {
+
                 Instant instant = time.toInstant();
+                System.out.println("Scheduling for " + instant);
                 return Date.from(instant);
+            } else {
+                System.out.println("Not scheduling");
             }
             return null;
         }
