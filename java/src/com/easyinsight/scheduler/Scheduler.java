@@ -61,6 +61,7 @@ public class Scheduler {
     }
 
     public void start() {
+        System.out.println("Starting...");
         running = true;        
         long nextMinute = System.currentTimeMillis() / ONE_MINUTE * ONE_MINUTE + ONE_MINUTE;
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -118,9 +119,11 @@ public class Scheduler {
 
     private void scheduleTasks() {
         boolean locked;
+        System.out.println("Scheduling tasks...");
         locked = obtainLock(SCHEDULE_LOCK);
         if (locked) {
             try {
+                System.out.println("Really scheduling tasks!");
                 Date now = new Date();
                 // retrieve the task generators
                 EIConnection conn = Database.instance().getConnection();
