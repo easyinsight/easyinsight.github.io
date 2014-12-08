@@ -1,5 +1,6 @@
 package com.easyinsight.billing;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.database.Database;
@@ -32,6 +33,10 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @PrimaryKeyJoinColumn(name="scheduled_task_id")
 public class BillingScheduledTask extends ScheduledTask {
     protected void execute(Date now, EIConnection conn) throws Exception {
+
+        if (!ConfigLoader.instance().isProduction()) {
+            return;
+        }
 
         //new AccountActivityStorage().updateAccountTimes(now, conn);
         expireTrials(conn);
