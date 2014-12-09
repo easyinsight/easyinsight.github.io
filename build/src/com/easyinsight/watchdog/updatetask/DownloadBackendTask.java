@@ -10,4 +10,9 @@ public class DownloadBackendTask extends DownloadAppInstanceTask {
     protected String getAMI() {
         return APP_AMIS;
     }
+
+    @Override
+    protected String getRole() {
+        return "Backend";
+    }
 }
