@@ -41,14 +41,16 @@ public class DeliveryTaskGenerator extends TaskGenerator {
         ScheduleType scheduleType = getScheduleType(conn);
         Date lastRunTime = findStartTaskDate();
         String timezoneID = null;
-        PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
-                "scheduled_account_activity.account_id = account.account_id");
-        tzStmt.setLong(1, activityID);
-        ResultSet rs = tzStmt.executeQuery();
-        if (rs.next()) {
-            timezoneID = rs.getString(1);
+        if (scheduleType.isUseAccountTimezone()) {
+            PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
+                    "scheduled_account_activity.account_id = account.account_id");
+            tzStmt.setLong(1, activityID);
+            ResultSet rs = tzStmt.executeQuery();
+            if (rs.next()) {
+                timezoneID = rs.getString(1);
+            }
+            tzStmt.close();
         }
-        tzStmt.close();
         Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
         if (time != null) {
             DeliveryScheduledTask deliveryTask = new DeliveryScheduledTask();
