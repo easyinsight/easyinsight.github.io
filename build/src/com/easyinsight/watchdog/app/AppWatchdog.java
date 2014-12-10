@@ -1,5 +1,6 @@
 package com.easyinsight.watchdog.app;
 
+import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 import org.jets3t.service.model.S3Bucket;
@@ -88,22 +89,12 @@ public class AppWatchdog {
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eiproduction");
             S3Object object = s3Service.getObject(bucket, "code.zip");
-            byte[] buffer = new byte[8192];
-            BufferedOutputStream bufOS = new BufferedOutputStream(fos, 8192);
-            InputStream bfis = object.getDataInputStream();
-            int nBytes;
-            while ((nBytes = bfis.read(buffer)) != -1) {
-                bufOS.write(buffer, 0, nBytes);
-            }
-
+            writeFile(object, fos);
+            System.out.println("setenv.sh-" + role + "-" + type);
             S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh-" + role + "-" + type);
-            InputStream configInput = setEnvObject.getDataInputStream();
+
             setEnv = replaceFile("/opt/tomcat/bin/setenv.sh", true);
-            BufferedOutputStream setEnvOFS = new BufferedOutputStream(setEnv, 8192);
-            while((nBytes = configInput.read(buffer)) != -1) {
-                System.out.print(buffer);
-                setEnvOFS.write(buffer, 0, nBytes);
-            }
+            writeFile(setEnvObject, setEnv);
             fos.flush();
             setEnv.flush();
         } catch (Exception e) {
@@ -123,6 +114,16 @@ public class AppWatchdog {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    public static void writeFile(S3Object inputObject, FileOutputStream file) throws S3ServiceException, IOException {
+        InputStream is = inputObject.getDataInputStream();
+        BufferedOutputStream bufOS = new BufferedOutputStream(file, 8192);
+        int nBytes;
+        byte[] buffer = new byte[8192];
+        while ((nBytes = is.read(buffer)) != -1) {
+            bufOS.write(buffer, 0, nBytes);
         }
     }
 
