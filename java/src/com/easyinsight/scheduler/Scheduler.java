@@ -78,7 +78,6 @@ public class Scheduler {
     }
 
     public void stop() {
-        System.out.println("Stopping scheduler...");
         timer.cancel();
         executor.shutdown();
         for (ThreadPoolExecutor tpe : limitedExectutorMap.values()) {

@@ -1,5 +1,6 @@
 package com.easyinsight.billing;
 
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -27,6 +28,9 @@ import java.util.List;
 public class AccountSyncScheduledTask extends ScheduledTask {
     @Override
     protected void execute(Date now, EIConnection conn) throws Exception {
+        if (!ConfigLoader.instance().isProduction()) {
+            return;
+        }
         System.out.println("starting...");
         Session s = Database.instance().createSession(conn);
         List<Account> l = (List<Account>) s.createQuery("from Account where pricingModel = ?").setInteger(0, Account.NEW).list();

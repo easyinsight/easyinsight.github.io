@@ -12,4 +12,8 @@ public class UpdateStagingTask extends UpdateAppInstanceTask {
     protected String getAMI() {
         return STAGING_AMI;
     }
+    @Override
+    protected String getRole() {
+        return "Staging";
+    }
 }

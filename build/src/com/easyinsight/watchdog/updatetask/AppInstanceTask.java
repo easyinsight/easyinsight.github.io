@@ -16,6 +16,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.Mac;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.*;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -31,7 +39,7 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    protected static final String APP_AMIS = "ami-30ab4058";
+    protected static final String APP_AMIS = "ami-6ecaae06";
     protected static final String STAGING_AMI = "ami-6c692e05";
     protected static final String LARGE_AMI = "ami-e637f58e";
     protected static final String JAVA_8_AMI = "ami-6aca2a02";
@@ -44,6 +52,8 @@ public class AppInstanceTask extends Task {
     protected String getAMI() {
         return APP_AMIS;
     }
+
+    protected String getRole() { return "Backend";}
 
     public String getUserName() {
         return userName;
@@ -67,13 +77,13 @@ public class AppInstanceTask extends Task {
             Date date = new Date();
             String timestamp = getDateAsISO8601String(date);
             String accessKey = "0AWCBQ78TJR8QCY8ABG2";
-        String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2006-10-01";
+        String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2014-10-01";
         String signature = MessageFormat.format(hmacString, action, accessKey, timestamp);
             System.out.println(signature);
                 String base64Sig = calculateRFC2104HMAC(signature, "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             timestamp = URLEncoder.encode(getDateAsISO8601String(date), "UTF-8");
         String queryString = "https://ec2.amazonaws.com?Action={0}&AWSAccessKeyId={1}&SignatureVersion=1&Timestamp={2}&" +
-                "Version=2006-10-01&Signature={3}";
+                "Version=2014-10-01&Signature={3}";
         String urlString = MessageFormat.format(queryString, action, accessKey, timestamp, URLEncoder.encode(base64Sig, "UTF-8"));
             System.out.println(urlString);
             HttpClient httpClient = new HttpClient();
@@ -90,13 +100,14 @@ public class AppInstanceTask extends Task {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(content);
-            List<String> instances = new ArrayList<String>();
+        List<String> instances = new ArrayList<String>();
             NodeList transactions = document.getElementsByTagName("reservationSet");
             if (transactions.getLength() == 0) {
                 System.out.println("No running transactions");
             } else {
                 Node root = transactions.item(0);
                 NodeList items = root.getChildNodes();
+
                 for (int i = 0; i < items.getLength(); i++) {
                     Node itemNode = items.item(i);
                     if ("item".equals(itemNode.getNodeName())) {
@@ -106,8 +117,28 @@ public class AppInstanceTask extends Task {
                                 for(int k = 0;k < propertyNode.getChildNodes().getLength();k++) {
                                     Node infoNode = propertyNode.getChildNodes().item(k);
                                     if(infoNode.hasChildNodes()) {
+                                        boolean correctRole = false;
+                                        for(int l = 0;l < infoNode.getChildNodes().getLength();l++) {
+                                            if("tagSet".equals(infoNode.getChildNodes().item(l).getNodeName())) {
+                                                Node tagsNode = infoNode.getChildNodes().item(l);
+                                                for(int m = 0;m < tagsNode.getChildNodes().getLength();m++) {
+                                                    Node item = tagsNode.getChildNodes().item(m);
+                                                    String key = null;
+                                                    String value = null;
+                                                    for(int n = 0;n < item.getChildNodes().getLength();n++) {
+                                                        if("key".equals(item.getChildNodes().item(n).getNodeName()))
+                                                            key = item.getChildNodes().item(n).getTextContent();
+                                                        else if("value".equals(item.getChildNodes().item(n).getNodeName()))
+                                                            value = item.getChildNodes().item(n).getTextContent();
+                                                    }
+                                                    if(getRole() == null || "Role".equals(key) && getRole().equals(value)) {
+                                                        correctRole = true;
+                                                    }
+                                                }
+                                            }
+                                        }
                                         String state = infoNode.getChildNodes().item(5).getChildNodes().item(3).getFirstChild().getNodeValue();
-                                        if ("running".equals(state)) {
+                                        if (correctRole && "running".equals(state)) {
                                             String amiID = infoNode.getChildNodes().item(3).getFirstChild().getNodeValue();
                                             System.out.println(amiID);
                                             if (getAMI().equals(amiID)) {
