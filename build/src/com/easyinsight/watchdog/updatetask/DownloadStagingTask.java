@@ -12,4 +12,8 @@ public class DownloadStagingTask extends DownloadAppInstanceTask {
     protected String getAMI() {
         return STAGING_AMI;
     }
+    @Override
+    protected String getRole() {
+        return "Staging";
+    }
 }

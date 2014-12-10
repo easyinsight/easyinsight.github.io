@@ -12,4 +12,8 @@ public class StartLargeTask extends StartAppInstanceTask {
     protected String getAMI() {
         return LARGE_AMI;
     }
+    @Override
+    protected String getRole() {
+        return "Frontend";
+    }
 }
