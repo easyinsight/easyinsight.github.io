@@ -83,8 +83,7 @@ public class AppWatchdog {
     public void download(String role, String type) {
         FileOutputStream fos = null, setEnv = null;
         try {
-            fos = replaceFile("/opt/tomcat/code.zip");
-            setEnv = replaceFile("/opt/tomcat/bin/setenv.sh");
+            fos = replaceFile("/opt/tomcat/code.zip", false);
             AWSCredentials credentials = new AWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eiproduction");
@@ -99,8 +98,10 @@ public class AppWatchdog {
 
             S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh-" + role + "-" + type);
             InputStream configInput = setEnvObject.getDataInputStream();
+            setEnv = replaceFile("/opt/tomcat/bin/setenv.sh", true);
             BufferedOutputStream setEnvOFS = new BufferedOutputStream(setEnv, 8192);
             while((nBytes = configInput.read(buffer)) != -1) {
+                System.out.print(buffer);
                 setEnvOFS.write(buffer, 0, nBytes);
             }
             fos.flush();
@@ -125,7 +126,7 @@ public class AppWatchdog {
         }
     }
 
-    public static FileOutputStream replaceFile(String fileName) throws IOException {
+    public static FileOutputStream replaceFile(String fileName, boolean executable) throws IOException {
         File file = new File(fileName);
         if (file.exists()) {
             boolean success = file.delete();
@@ -136,6 +137,10 @@ public class AppWatchdog {
         boolean success = file.createNewFile();
         if (!success) {
             throw new RuntimeException("Could not create new " + fileName);
+        }
+
+        if(!file.setExecutable(executable, true)) {
+            throw new RuntimeException("could not set executable of the file.");
         }
         FileOutputStream fos = new FileOutputStream(file);
         return fos;
