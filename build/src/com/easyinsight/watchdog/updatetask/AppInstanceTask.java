@@ -39,7 +39,7 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    protected static final String APP_AMIS = "ami-5a365232";
+    protected static final String APP_AMIS = "ami-6ecaae06";
     protected static final String STAGING_AMI = "ami-6c692e05";
     protected static final String LARGE_AMI = "ami-e637f58e";
     protected static final String JAVA_8_AMI = "ami-6aca2a02";
