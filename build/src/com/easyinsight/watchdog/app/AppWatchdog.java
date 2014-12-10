@@ -18,8 +18,8 @@ import java.net.URLConnection;
  */
 public class AppWatchdog {
 
-    public static final String[] SHUTDOWN_CMD = {"/opt/tomcat/bin/catalina-easyinsight.sh", "stop"};
-    public static final String[] STARTUP_CMD = {"/opt/tomcat/bin/catalina-easyinsight.sh", "start"};
+    public static final String[] SHUTDOWN_CMD = {"/opt/tomcat/bin/catalina.sh", "stop"};
+    public static final String[] STARTUP_CMD = {"/opt/tomcat/bin/catalina.sh", "start"};
 
 
     public void restart() {
@@ -80,20 +80,11 @@ public class AppWatchdog {
         }
     }
 
-    public void download() {
+    public void download(String type) {
+        FileOutputStream fos = null, setEnv = null;
         try {
-            File file = new File("/opt/tomcat/code.zip");
-            if (file.exists()) {
-                boolean success = file.delete();
-                if (!success) {
-                    throw new RuntimeException("Could not delete existing code.zip");
-                }
-            }
-            boolean success = file.createNewFile();
-            if (!success) {
-                throw new RuntimeException("Could not create new code.zip");
-            }
-            FileOutputStream fos = new FileOutputStream(file);
+            fos = replaceFile("/opt/tomcat/code.zip");
+            setEnv = replaceFile("/opt/tomcat/bin/setenv.sh");
             AWSCredentials credentials = new AWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eiproduction");
@@ -105,11 +96,43 @@ public class AppWatchdog {
             while ((nBytes = bfis.read(buffer)) != -1) {
                 bufOS.write(buffer, 0, nBytes);
             }
+//            S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh" + )
             fos.flush();
-            fos.close();
+            setEnv.flush();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if(fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(setEnv != null) {
+                try {
+                    setEnv.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+    }
+
+    public static FileOutputStream replaceFile(String fileName) throws IOException {
+        File file = new File(fileName);
+        if (file.exists()) {
+            boolean success = file.delete();
+            if (!success) {
+                throw new RuntimeException("Could not delete existing " + fileName);
+            }
+        }
+        boolean success = file.createNewFile();
+        if (!success) {
+            throw new RuntimeException("Could not create new " + fileName);
+        }
+        FileOutputStream fos = new FileOutputStream(file);
+        return fos;
     }
 
     public void update() {
@@ -136,9 +159,7 @@ public class AppWatchdog {
                     while ((nBytes = zin.read(buffer)) != -1) {
                         bufOS.write(buffer, 0, nBytes);
                     }
-                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                        bufOS.write(c);
-                    }*/
+
                     bufOS.close();
                     fout.close();
                 }
@@ -146,7 +167,7 @@ public class AppWatchdog {
             }
             zin.close();
             copyFile("eiconfig.properties", "/opt/tomcat/webapps/app/WEB-INF/classes/eiconfig.properties");
-            copyFile("cache.ccf", "/opt/tomcat/webapps/app/WEB-INF/classes/cache.ccf");
+            copyFile("setenv.sh", "/opt/tomcat/bin/setenv.sh");
         } catch (Exception e) {
             e.printStackTrace();
         }

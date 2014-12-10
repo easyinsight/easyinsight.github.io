@@ -4,10 +4,7 @@
     <taskdef resource="yuicompressor.tasks" classpath="${flex.sdk.dir}/ant/lib/yuicompressor-taskdef-1.0.jar"/>
 
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
-    <taskdef name="StopInstances" classname="com.easyinsight.watchdog.updatetask.ShutdownAppInstanceTask"/>
-    <taskdef name="DownloadInstances" classname="com.easyinsight.watchdog.updatetask.DownloadAppInstanceTask"/>
-    <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
-    <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
+    <taskdef name="OrderInstances" classname="com.easyinsight.watchdog.updatetask.AppInstanceTask"/>
 
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
 
@@ -45,49 +42,51 @@
     </target>
 
     <target name="shutdownInstances">
-        <StopInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="shutdown" />
     </target>
 
     <target name="shutdownStagingInstances">
-        <StopInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="shutdown" />
     </target>
+
     <target name="shutdownLargeInstances">
-       <StopInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend"/>
+       <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="shutdown" />
    </target>
 
-
     <target name="downloadStagingInstances">
-        <DownloadInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="download" />
     </target>
 
     <target name="downloadBackendInstances">
-        <DownloadInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
     </target>
 
     <target name="downloadLargeInstances">
-        <DownloadInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="download"/>
     </target>
 
     <target name="updateLargeInstances">
-        <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="update" />
     </target>
+
     <target name="updateStagingInstances">
-        <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="update" />
     </target>
 
     <target name="updateInstances">
-        <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="update" />
     </target>
 
     <target name="startStagingInstances">
-        <StartInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="startup" />
     </target>
+
     <target name="startLargeInstances">
-        <StartInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="startup" />
     </target>
 
     <target name="startInstances">
-        <StartInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="startup" />
     </target>
 
 
