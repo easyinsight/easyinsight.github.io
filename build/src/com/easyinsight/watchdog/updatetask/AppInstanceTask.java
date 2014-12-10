@@ -107,7 +107,7 @@ public class AppInstanceTask extends Task {
             } else {
                 Node root = transactions.item(0);
                 NodeList items = root.getChildNodes();
-
+                System.out.println("Looking for " + getAMI());
                 for (int i = 0; i < items.getLength(); i++) {
                     Node itemNode = items.item(i);
                     if ("item".equals(itemNode.getNodeName())) {
