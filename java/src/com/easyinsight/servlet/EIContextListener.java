@@ -64,11 +64,8 @@ public class EIContextListener implements ServletContextListener {
                 ReportCache.initialize();
 
                 if (ConfigLoader.instance().isTaskRunner()) {
-                    System.out.println("*** Setting up scheduler");
                     Scheduler.initialize();
                     scheduler = Scheduler.instance();
-                } else {
-                    System.out.println("*** No scheduler running on this server");
                 }
                 if (ConfigLoader.instance().isTaskRunner()) {
                     scheduler.start();

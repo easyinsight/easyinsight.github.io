@@ -352,6 +352,8 @@ public class FunctionFactory {
             return new FindExactRecord();
         } else if (s.equals("lastdate")) {
             return new LastDate();
+        } else if (s.equals("contains")) {
+            return new Contains();
         } else {
             return null;
         }
