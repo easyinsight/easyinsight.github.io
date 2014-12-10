@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.CoordinateValue;
+import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -34,6 +35,12 @@ public class ZipGeocodeCache {
     @Nullable
     public Double findLatitudeForZip(String zipCode, EIConnection conn) {
         try {
+            if (zipCode.equals(new EmptyValue().toString())) {
+                return null;
+            }
+            if (zipCode.length() < 5) {
+                return null;
+            }
             PreparedStatement queryStmt = conn.prepareStatement("SELECT LATITUDE FROM ZIP_CODE_GEOCODE WHERE ZIP_CODE = ?");
             zipCode = zipCode.trim();
             if (zipCode.length() > 5) {
@@ -57,6 +64,12 @@ public class ZipGeocodeCache {
     @Nullable
     public Double findLongitudeForZip(String zipCode, EIConnection conn) {
         try {
+            if (zipCode.equals(new EmptyValue().toString())) {
+                return null;
+            }
+            if (zipCode.length() < 5) {
+                return null;
+            }
             PreparedStatement queryStmt = conn.prepareStatement("SELECT LONGITUDE FROM ZIP_CODE_GEOCODE WHERE ZIP_CODE = ?");
             zipCode = zipCode.trim();
             if (zipCode.length() > 5) {
