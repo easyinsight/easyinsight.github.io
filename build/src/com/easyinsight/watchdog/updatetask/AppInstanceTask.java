@@ -86,7 +86,7 @@ public class AppInstanceTask extends Task {
             Credentials defaultcreds = new UsernamePasswordCredentials(getUserName(), getPassword());
             httpClient.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
             for (Instance instance : getInstances()) {
-                HttpMethod updateMethod = new GetMethod("http://" + instance.host + ":4000/?operation=" + getOperation() + "&type=" + URLEncoder.encode(instance.type, "UTF-8"));
+                HttpMethod updateMethod = new GetMethod("http://" + instance.host + ":4000/?operation=" + getOperation() + "&type=" + URLEncoder.encode(instance.type, "UTF-8") + "&role=" + URLEncoder.encode(getRole(), "UTF-8"));
                 httpClient.executeMethod(updateMethod);
             }
         } catch (Exception e) {

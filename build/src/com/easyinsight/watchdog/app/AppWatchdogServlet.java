@@ -18,6 +18,7 @@ public class AppWatchdogServlet extends HttpServlet {
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse response) throws ServletException, IOException {
         String operation = httpServletRequest.getParameter("operation");
         String type = httpServletRequest.getParameter("type");
+        String role = httpServletRequest.getParameter("role");
         if ("shutdown".equals(operation)) {
             new AppWatchdog().shutdown();
         } else if ("startup".equals(operation)) {
@@ -27,7 +28,7 @@ public class AppWatchdogServlet extends HttpServlet {
         } else if ("update".equals(operation)) {
             new AppWatchdog().update();
         } else if ("download".equals(operation)) {
-            new AppWatchdog().download(type);
+            new AppWatchdog().download(role, type);
         }
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);

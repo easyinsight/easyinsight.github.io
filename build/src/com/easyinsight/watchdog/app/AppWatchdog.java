@@ -80,7 +80,7 @@ public class AppWatchdog {
         }
     }
 
-    public void download(String type) {
+    public void download(String role, String type) {
         FileOutputStream fos = null, setEnv = null;
         try {
             fos = replaceFile("/opt/tomcat/code.zip");
@@ -96,7 +96,13 @@ public class AppWatchdog {
             while ((nBytes = bfis.read(buffer)) != -1) {
                 bufOS.write(buffer, 0, nBytes);
             }
-//            S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh" + )
+
+            S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh-" + role + "-" + type);
+            InputStream configInput = setEnvObject.getDataInputStream();
+            BufferedOutputStream setEnvOFS = new BufferedOutputStream(setEnv, 8192);
+            while((nBytes = configInput.read(buffer)) != -1) {
+                setEnvOFS.write(buffer, 0, nBytes);
+            }
             fos.flush();
             setEnv.flush();
         } catch (Exception e) {
