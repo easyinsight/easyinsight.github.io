@@ -39,21 +39,15 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    protected static final String APP_AMIS = "ami-6ecaae06";
-    protected static final String STAGING_AMI = "ami-6c692e05";
-    protected static final String LARGE_AMI = "ami-e637f58e";
-    protected static final String JAVA_8_AMI = "ami-6aca2a02";
 
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
 
     private String password;
     private String userName;
+    private String role;
 
-    protected String getAMI() {
-        return APP_AMIS;
-    }
-
-    protected String getRole() { return "Backend";}
+    public String getRole() { return role;}
+    public void setRole(String role) { this.role = role; }
 
     public String getUserName() {
         return userName;
@@ -73,7 +67,6 @@ public class AppInstanceTask extends Task {
 
     protected List<String> getInstances() throws ParserConfigurationException, SignatureException, IOException, SAXException {
         String action = "DescribeInstances";
-        System.out.println(Arrays.asList(getAMI()));
             Date date = new Date();
             String timestamp = getDateAsISO8601String(date);
             String accessKey = "0AWCBQ78TJR8QCY8ABG2";
@@ -107,7 +100,6 @@ public class AppInstanceTask extends Task {
             } else {
                 Node root = transactions.item(0);
                 NodeList items = root.getChildNodes();
-                System.out.println("Looking for " + getAMI());
                 for (int i = 0; i < items.getLength(); i++) {
                     Node itemNode = items.item(i);
                     if ("item".equals(itemNode.getNodeName())) {
@@ -118,20 +110,20 @@ public class AppInstanceTask extends Task {
                                     Node infoNode = propertyNode.getChildNodes().item(k);
                                     if(infoNode.hasChildNodes()) {
                                         boolean correctRole = false;
-                                        for(int l = 0;l < infoNode.getChildNodes().getLength();l++) {
-                                            if("tagSet".equals(infoNode.getChildNodes().item(l).getNodeName())) {
+                                        for (int l = 0; l < infoNode.getChildNodes().getLength(); l++) {
+                                            if ("tagSet".equals(infoNode.getChildNodes().item(l).getNodeName())) {
                                                 Node tagsNode = infoNode.getChildNodes().item(l);
-                                                for(int m = 0;m < tagsNode.getChildNodes().getLength();m++) {
+                                                for (int m = 0; m < tagsNode.getChildNodes().getLength(); m++) {
                                                     Node item = tagsNode.getChildNodes().item(m);
                                                     String key = null;
                                                     String value = null;
-                                                    for(int n = 0;n < item.getChildNodes().getLength();n++) {
-                                                        if("key".equals(item.getChildNodes().item(n).getNodeName()))
+                                                    for (int n = 0; n < item.getChildNodes().getLength(); n++) {
+                                                        if ("key".equals(item.getChildNodes().item(n).getNodeName()))
                                                             key = item.getChildNodes().item(n).getTextContent();
-                                                        else if("value".equals(item.getChildNodes().item(n).getNodeName()))
+                                                        else if ("value".equals(item.getChildNodes().item(n).getNodeName()))
                                                             value = item.getChildNodes().item(n).getTextContent();
                                                     }
-                                                    if(getRole() == null || "Role".equals(key) && getRole().equals(value)) {
+                                                    if (getRole() == null || "Role".equals(key) && getRole().equals(value)) {
                                                         correctRole = true;
                                                     }
                                                 }
@@ -139,13 +131,9 @@ public class AppInstanceTask extends Task {
                                         }
                                         String state = infoNode.getChildNodes().item(5).getChildNodes().item(3).getFirstChild().getNodeValue();
                                         if (correctRole && "running".equals(state)) {
-                                            String amiID = infoNode.getChildNodes().item(3).getFirstChild().getNodeValue();
-                                            System.out.println(amiID);
-                                            if (getAMI().equals(amiID)) {
-                                                String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
-                                                System.out.println(dns);
-                                                instances.add(dns);
-                                            }
+                                            String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
+                                            System.out.println(dns);
+                                            instances.add(dns);
                                         }
                                     }
                                 }
