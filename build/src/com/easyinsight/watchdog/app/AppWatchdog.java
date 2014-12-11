@@ -84,16 +84,16 @@ public class AppWatchdog {
     public void download(String role, String type) {
         FileOutputStream fos = null, setEnv = null;
         try {
-            fos = replaceFile("/opt/tomcat/code.zip", false);
+            File f = new File("/opt/tomcat/code.zip");
+            fos = replaceFile(f);
             AWSCredentials credentials = new AWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eiproduction");
             S3Object object = s3Service.getObject(bucket, "code.zip");
             writeFile(object, fos);
-            System.out.println("setenv.sh-" + role + "-" + type);
             S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh-" + role + "-" + type);
-
-            setEnv = replaceFile("/opt/tomcat/bin/setenv.sh", true);
+            File m = new File("/opt/tomcat/bin/setenv.sh");
+            setEnv = replaceFile(m);
             writeFile(setEnvObject, setEnv);
             fos.flush();
             setEnv.flush();
@@ -124,24 +124,20 @@ public class AppWatchdog {
         byte[] buffer = new byte[8192];
         while ((nBytes = is.read(buffer)) != -1) {
             bufOS.write(buffer, 0, nBytes);
+            bufOS.flush();
         }
     }
 
-    public static FileOutputStream replaceFile(String fileName, boolean executable) throws IOException {
-        File file = new File(fileName);
+    public static FileOutputStream replaceFile(File file) throws IOException {
         if (file.exists()) {
             boolean success = file.delete();
             if (!success) {
-                throw new RuntimeException("Could not delete existing " + fileName);
+                throw new RuntimeException("Could not delete existing " + file.getName());
             }
         }
         boolean success = file.createNewFile();
         if (!success) {
-            throw new RuntimeException("Could not create new " + fileName);
-        }
-
-        if(!file.setExecutable(executable, true)) {
-            throw new RuntimeException("could not set executable of the file.");
+            throw new RuntimeException("Could not create new " + file.getName());
         }
         FileOutputStream fos = new FileOutputStream(file);
         return fos;
@@ -179,7 +175,6 @@ public class AppWatchdog {
             }
             zin.close();
             copyFile("eiconfig.properties", "/opt/tomcat/webapps/app/WEB-INF/classes/eiconfig.properties");
-            copyFile("setenv.sh", "/opt/tomcat/bin/setenv.sh");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -200,16 +195,6 @@ public class AppWatchdog {
     }
 
     public static void main(String[] args) throws IOException {
-            File file = new File("eiconfig.properties");
-            File target = new File("/opt/tomcat/webapps/DMS/WEB-INF/classes/eiconfig.properties");
-            target.delete();
-            FileReader reader = new FileReader(file);
-            FileWriter writer = new FileWriter(target);
-            int byteSymbol;
-            while ((byteSymbol = reader.read()) != -1) {
-                writer.write(byteSymbol);
-            }
-            writer.close();
-            reader.close();
+            new AppWatchdog().download("Staging", "m1.small");
     }
 }

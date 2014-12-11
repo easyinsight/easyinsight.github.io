@@ -26,6 +26,8 @@ import javax.servlet.ServletContextListener;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -42,6 +44,10 @@ public class EIContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         try {
             LogClass.info("Starting the core Easy Insight server...");
+            Map<Integer, String> a = new HashMap<>();
+            for(int i = 0;i < Integer.MAX_VALUE;i++)
+                a.put(i, "");
+
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
