@@ -4,27 +4,9 @@
     <taskdef resource="yuicompressor.tasks" classpath="${flex.sdk.dir}/ant/lib/yuicompressor-taskdef-1.0.jar"/>
 
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
-    <taskdef name="StopInstances" classname="com.easyinsight.watchdog.updatetask.ShutdownAppInstanceTask"/>
-    <taskdef name="DownloadBackendInstances" classname="com.easyinsight.watchdog.updatetask.DownloadBackendTask"/>
-    <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
-    <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
-
-    <taskdef name="StopJava8Instances" classname="com.easyinsight.watchdog.updatetask.ShutdownJava8Task" />
-    <taskdef name="DownloadJava8Instances" classname="com.easyinsight.watchdog.updatetask.DownloadJava8Task" />
-    <taskdef name="StartJava8Instances" classname="com.easyinsight.watchdog.updatetask.StartJava8Task" />
-    <taskdef name="UpdateJava8Instances" classname="com.easyinsight.watchdog.updatetask.UpdateJava8Task" />
+    <taskdef name="OrderInstances" classname="com.easyinsight.watchdog.updatetask.AppInstanceTask"/>
 
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
-
-    <taskdef name="StartStaging" classname="com.easyinsight.watchdog.updatetask.StartStagingTask" />
-    <taskdef name="UpdateStaging" classname="com.easyinsight.watchdog.updatetask.UpdateStagingTask" />
-    <taskdef name="DownloadStaging" classname="com.easyinsight.watchdog.updatetask.DownloadStagingTask" />
-    <taskdef name="StopStaging" classname="com.easyinsight.watchdog.updatetask.ShutdownStagingTask" />
-
-    <taskdef name="StartLarge" classname="com.easyinsight.watchdog.updatetask.StartLargeTask" />
-    <taskdef name="UpdateLarge" classname="com.easyinsight.watchdog.updatetask.UpdateLargeTask" />
-    <taskdef name="DownloadLarge" classname="com.easyinsight.watchdog.updatetask.DownloadLargeTask" />
-    <taskdef name="StopLarge" classname="com.easyinsight.watchdog.updatetask.ShutdownLargeTask" />
 
     <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
     <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
@@ -60,65 +42,53 @@
     </target>
 
     <target name="shutdownInstances">
-        <StopInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="shutdown" />
     </target>
 
     <target name="shutdownStagingInstances">
-        <StopStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
-    </target>
-
-    <target name="downloadStagingInstances">
-        <DownloadStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
-    </target>
-
-    <target name="downloadBackendInstances">
-        <DownloadBackendInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="shutdown" />
     </target>
 
     <target name="shutdownLargeInstances">
-        <StopLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
+       <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="shutdown" />
+   </target>
+
+    <target name="downloadStagingInstances">
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="download" />
+    </target>
+
+    <target name="downloadBackendInstances">
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
     </target>
 
     <target name="downloadLargeInstances">
-        <DownloadLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="download"/>
     </target>
 
     <target name="updateLargeInstances">
-        <UpdateLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
-    </target>
-
-    <target name="startLargeInstances">
-        <StartLarge userName="einsight" password="eJAqp0Q~j!n>L"/>
-    </target>
-
-    <target name="updateInstances">
-        <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="update" />
     </target>
 
     <target name="updateStagingInstances">
-        <UpdateStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="update" />
     </target>
 
-    <target  name="startStagingInstances">
-        <StartStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+    <target name="updateInstances">
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="update" />
+    </target>
+
+    <target name="startStagingInstances">
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="startup" />
+    </target>
+
+    <target name="startLargeInstances">
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="startup" />
     </target>
 
     <target name="startInstances">
-        <StartInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="startup" />
     </target>
 
-    <target name="startJava8Instances">
-        <StartJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
-    </target>
-    <target name="stopJava8Instances">
-        <StopJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
-    </target>
-    <target name="updateJava8Instances">
-        <UpdateJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
-    </target>
-    <target name="downloadJava8Instances">
-        <DownloadJava8Instances userName="einsight" password="eJAqp0Q~j!n>L" />
-    </target>
 
     <target name="cleanGZ">
         <exec executable="bash" dir="../website">

@@ -555,7 +555,7 @@ public class StyleConfiguration {
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
         }
         if (report is TopoMapDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Map", "map", TopoMapDefinition(report).map, report, [ "US States", "World", "TN" ]));
+            items.addItem(new ComboBoxReportFormItem("Map", "map", TopoMapDefinition(report).map, report, [ "US States", "World", "TN", "CO", "HI" ]));
         }
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];
