@@ -8,7 +8,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
-import net.minidev.json.parser.JSONParser;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +34,11 @@ public class TopoMapServlet extends HtmlServlet {
         WSMap wsMap = (WSMap) report;
 
         JSONObject object = new JSONObject();
-        object.put("map", wsMap.getMap());
+        if ("CO".equals(wsMap.getMap()) || "HI".equals(wsMap.getMap())) {
+            object.put("map", "State");
+        } else {
+            object.put("map", wsMap.getMap());
+        }
         object.put("noDataFill", ExportService.createHexString(wsMap.getNoDataFill()));
         AnalysisItem region = wsMap.getRegion();
         AnalysisItem measure = wsMap.getMeasure();
@@ -87,6 +90,8 @@ public class TopoMapServlet extends HtmlServlet {
 
         JSONArray pointSets = new JSONArray();
 
+
+
         if (pointGrouping == null) {
             JSONObject pointData = new JSONObject();
             JSONArray points = new JSONArray();
@@ -135,6 +140,12 @@ public class TopoMapServlet extends HtmlServlet {
         }
 
         object.put("pointDatas", pointSets);
+
+        if ("CO".equals(wsMap.getMap())) {
+            object.put("json_source", "colorado");
+        } else if ("HI".equals(wsMap.getMap())) {
+            object.put("json_source", "hawaii");
+        }
     }
 
     private void populateRegionData(InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSMap wsMap, JSONObject object, AnalysisItem region, AnalysisItem measure) throws JSONException {
@@ -242,6 +253,11 @@ public class TopoMapServlet extends HtmlServlet {
 
         object.put("colors", colorArray);
 
+        if ("CO".equals(wsMap.getMap())) {
+            object.put("json_source", "colorado");
+        } else if ("HI".equals(wsMap.getMap())) {
+            object.put("json_source", "hawaii");
+        }
     }
 
     private static class Region {
@@ -262,6 +278,7 @@ public class TopoMapServlet extends HtmlServlet {
 
     private class WorldRegionLookup implements IRegionLookup {
         private Map<String, String> lookups = new HashMap<>();
+
 
 
 
