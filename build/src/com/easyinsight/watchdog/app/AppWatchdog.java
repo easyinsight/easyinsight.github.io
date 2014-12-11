@@ -92,7 +92,7 @@ public class AppWatchdog {
             S3Object object = s3Service.getObject(bucket, "code.zip");
             writeFile(object, fos);
             S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh-" + role + "-" + type);
-            File m = new File("/opt/tomcat/bin/setenv.sh");
+            File m = new File("/opt/watchdog/setenv.sh");
             setEnv = replaceFile(m);
             writeFile(setEnvObject, setEnv);
             fos.flush();
@@ -175,12 +175,13 @@ public class AppWatchdog {
             }
             zin.close();
             copyFile("eiconfig.properties", "/opt/tomcat/webapps/app/WEB-INF/classes/eiconfig.properties");
+            copyFile("/opt/watchdog/setenv.sh", "/opt/tomcat/bin/setenv.sh").setExecutable(true, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void copyFile(String fileName, String targetName) throws IOException {
+    private File copyFile(String fileName, String targetName) throws IOException {
         File file = new File(fileName);
         File target = new File(targetName);
         target.delete();
@@ -192,6 +193,7 @@ public class AppWatchdog {
         }
         writer.close();
         reader.close();
+        return target;
     }
 
     public static void main(String[] args) throws IOException {
