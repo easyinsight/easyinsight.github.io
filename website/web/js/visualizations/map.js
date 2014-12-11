@@ -57,19 +57,16 @@ Map = {
 
                 featureProp = "countries";
             } else if (mapType == "TN") {
-                var baseScale = 8000;
-                sHeight = height / 480;
-                sWidth = width / 735;
-                if (sHeight < sWidth) {
-                    scale = baseScale * sHeight;
-                } else {
-                    scale = baseScale * sWidth;
-                }
                 projection = d3.geo.albers().scale(1)
                     .translate([0, 0]).rotate([86.7489, 0])
                     .center([0, 35.7449]);
                 targetJSON = "/js/maps/tn.json";
                 featureProp = "tnzip";
+            } else if (mapType == "State") {
+                projection = d3.geo.albers().scale(1)
+                    .translate([0, 0]);
+                targetJSON = "/js/maps/"+data.json_source+".json";
+                featureProp = "zip";
             }
 
 
@@ -137,15 +134,29 @@ Map = {
                             projection
                                 .scale(s)
                                 .translate(t);
+
+                            svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.tncounties, function (a, b) {
+                                return a !== b;
+                            })).style("fill", "none").style("stroke", "#AAAAAA").attr("d", path);
+
+                            svg.append("path").datum(targetData).style("fill", "none").style("stroke-width", "3px").style("stroke", "#000000").attr("d", path);
                         } else {
-                            targetData = topology.objects.tncounties;
+                            //targetData = topology.objects.tncounties;
+
+                            targetData = topojson.merge(topology, topology.objects.tncounties.geometries.filter(function (d) {
+                                return true
+                            }));
+                            var h = height - 20;
+                            var b = path.bounds(targetData),
+                                s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / h),
+                                t = [(width - s * (b[1][0] + b[0][0])) / 2, ((h - s * (b[1][1] + b[0][1])) / 2) + 30];
+
+                            projection
+                                .scale(s)
+                                .translate(t);
                         }
 
-                        svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.tncounties, function (a, b) {
-                            return a !== b;
-                        })).style("fill", "none").style("stroke", "#AAAAAA").attr("d", path);
 
-                        svg.append("path").datum(targetData).style("fill", "none").style("stroke-width", "3px").style("stroke", "#000000").attr("d", path);
                     }
 
                     country.enter().append("path").attr("class", "counties").attr("d", path).style("fill",
@@ -169,6 +180,28 @@ Map = {
                             }
                         }
                     );
+                }
+
+                if (mapType == "State") {
+                    targetData = topojson.merge(topology, topology.objects.counties.geometries.filter(function (d) {
+                        return true
+                    }));
+                    var h = height - 20;
+                    var b = path.bounds(targetData),
+                        s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / h),
+                        t = [(width - s * (b[1][0] + b[0][0])) / 2, ((h - s * (b[1][1] + b[0][1])) / 2) + 30];
+
+                    projection
+                        .scale(s)
+                        .translate(t);
+
+                    alert("xyz");
+
+                    svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.counties, function (a, b) {
+                        return a !== b;
+                    })).style("fill", "none").style("stroke", "#AAAAAA").attr("d", path);
+
+                    svg.append("path").datum(targetData).style("fill", "none").style("stroke-width", "3px").style("stroke", "#000000").attr("d", path);
                 }
 
                 country
