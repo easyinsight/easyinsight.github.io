@@ -648,7 +648,7 @@ public class AutoComposite {
         bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
         clone.setUserBindings(bindings);
         Session session = Database.instance().createSession(conn);
-        new AnalysisStorage().saveAnalysis(clone, session);
+        new AnalysisStorage().saveAnalysis(clone, session, conn);
         session.flush();
         session.close();
         return clone.createBlazeDefinition();
