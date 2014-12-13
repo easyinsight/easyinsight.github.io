@@ -32,6 +32,8 @@
     <property name="analysis.api.key" value="JeSfljXxeIcw"/>
 
     <property name="flex.prefix" value="${build.flex.prefix}"/>
+    <property name="deploy.operation" value="${build.deploy.operation}" />
+    <property name="deploy.role" value="${build.deploy.role}" />
 
     <target name="testVCS">
         <echo>Blah ${build.vcs.number}</echo>
@@ -87,6 +89,10 @@
 
     <target name="startInstances">
         <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="startup" />
+    </target>
+
+    <target name="orderInstances">
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="${deploy.role}" operation="${deploy.operation}" />
     </target>
 
 

@@ -107,9 +107,8 @@ Map = {
 
             var tooltip = $("#" + target + " .mapTooltip");
 
-            console.log("loading " + targetJSON);
             d3.json(targetJSON, function(error, topology) {
-                if (error) return console.error(error);
+                //if (error) return console.error(error);
 
                 var feature = topojson.feature(topology, topology.objects[featureProp]);
                 var country = g.selectAll(".counties").data(feature.features);
@@ -194,8 +193,6 @@ Map = {
                     projection
                         .scale(s)
                         .translate(t);
-
-                    alert("xyz");
 
                     svg.insert("path", ".graticule").datum(topojson.mesh(topology, topology.objects.counties, function (a, b) {
                         return a !== b;
