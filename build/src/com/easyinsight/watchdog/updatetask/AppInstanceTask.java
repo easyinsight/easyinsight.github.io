@@ -130,11 +130,6 @@ public class AppInstanceTask extends Task {
 
         Document document = builder.parse(content);
 
-        try {
-            printDocument(document, System.out);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
         List<Instance> instances = new ArrayList<>();
         NodeList transactions = document.getElementsByTagName("reservationSet");
         if (transactions.getLength() == 0) {

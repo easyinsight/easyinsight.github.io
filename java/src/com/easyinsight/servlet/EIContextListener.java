@@ -25,7 +25,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.util.Enumeration;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -42,6 +42,7 @@ public class EIContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         try {
             LogClass.info("Starting the core Easy Insight server...");
+
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
