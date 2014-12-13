@@ -3183,7 +3183,7 @@ public class AnalysisService {
                         long id = cachedAddonDataSource.create(conn, null, null);
                         CachedAddonDataSource.runReport(conn, id, false);
 
-                        PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
+                        /*PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
                         reportSourceQuery.setLong(1, reportID);
                         ResultSet reportRS = reportSourceQuery.executeQuery();
                         while (reportRS.next()) {
@@ -3191,7 +3191,7 @@ public class AnalysisService {
                             //dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", new Date(), false, new ArrayList<>(), new HashMap<>());
                             dataSource.migrations(conn, null);
                             new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
-                        }
+                        }*/
                         conn.commit();
                         /*PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
                         saveLoadStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
