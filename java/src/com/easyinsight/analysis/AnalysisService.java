@@ -2650,7 +2650,7 @@ public class AnalysisService {
             clone.setUserBindings(bindings);
             session.close();
             session = Database.instance().createSession(conn);
-            analysisStorage.saveAnalysis(clone, session);
+            analysisStorage.saveAnalysis(clone, session, conn);
             session.flush();
             session.close();
             reportID = clone.getAnalysisID();
@@ -2709,7 +2709,7 @@ public class AnalysisService {
             clone.setUserBindings(bindings);
             session.close();
             session = Database.instance().createSession(conn);
-            analysisStorage.saveAnalysis(clone, session);
+            analysisStorage.saveAnalysis(clone, session, conn);
             session.flush();
             session.close();
             reportID = clone.getAnalysisID();
@@ -2897,7 +2897,7 @@ public class AnalysisService {
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
             analysisDefinition.setUserBindings(bindings);
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
-            analysisStorage.saveAnalysis(analysisDefinition, session);
+            analysisStorage.saveAnalysis(analysisDefinition, session, conn);
             XMLMetadata xmlMetadata = new XMLMetadata();
             xmlMetadata.setConn(conn);
             /*String xml = analysisDefinition.toXML(xmlMetadata);
@@ -2943,6 +2943,7 @@ public class AnalysisService {
         } else {
             conn = Database.instance().getConnection();
             try {
+                conn.setAutoCommit(false);
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM cached_addon_report_source WHERE REPORT_ID = ?");
                 queryStmt.setLong(1, reportID);
                 ResultSet rs = queryStmt.executeQuery();
@@ -2974,8 +2975,10 @@ public class AnalysisService {
                 }
                 reportSourceQuery.close();
                 parentStmt.close();
+                conn.commit();
             } catch (Exception e) {
                 LogClass.error(e);
+                conn.rollback();
             } finally {
                 conn.setAutoCommit(true);
                 Database.closeConnection(conn);
@@ -2983,6 +2986,7 @@ public class AnalysisService {
         }
         if (wsAnalysisDefinition.isDataSourceFieldReport()) {
             MemCachedManager.delete("ds" + wsAnalysisDefinition.getDataFeedID());
+            MemCachedManager.delete("feed" + wsAnalysisDefinition.getDataFeedID());
         }
         session = Database.instance().createSession();
         try {
@@ -3054,7 +3058,7 @@ public class AnalysisService {
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
             analysisDefinition.setUserBindings(bindings);
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
-            analysisStorage.saveAnalysis(analysisDefinition, session);
+            analysisStorage.saveAnalysis(analysisDefinition, session, conn);
             XMLMetadata xmlMetadata = new XMLMetadata();
             xmlMetadata.setConn(conn);
             /*String xml = analysisDefinition.toXML(xmlMetadata);
@@ -3177,7 +3181,17 @@ public class AnalysisService {
                         cachedAddonDataSource.setUploadPolicy(policy);
 
                         long id = cachedAddonDataSource.create(conn, null, null);
-                        CachedAddonDataSource.runReport(conn, id);
+                        CachedAddonDataSource.runReport(conn, id, false);
+
+                        PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
+                        reportSourceQuery.setLong(1, reportID);
+                        ResultSet reportRS = reportSourceQuery.executeQuery();
+                        while (reportRS.next()) {
+                            ServerDataSourceDefinition dataSource = (ServerDataSourceDefinition) new FeedStorage().getFeedDefinitionData(reportRS.getLong(1), conn);
+                            //dataSource.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, "", new Date(), false, new ArrayList<>(), new HashMap<>());
+                            dataSource.migrations(conn, null);
+                            new DataSourceInternalService().updateFeedDefinition(dataSource, conn);
+                        }
                         conn.commit();
                         /*PreparedStatement saveLoadStmt = conn.prepareStatement("INSERT INTO cache_to_rebuild (cache_time, data_source_id) values (?, ?)");
                         saveLoadStmt.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
@@ -3186,6 +3200,7 @@ public class AnalysisService {
                         saveLoadStmt.close();*/
                     } catch (Exception e) {
                         LogClass.error(e);
+                        conn.rollback();
                     } finally {
                         conn.setAutoCommit(true);
                         Database.closeConnection(conn);
@@ -3215,7 +3230,7 @@ public class AnalysisService {
                 manualDeleteStmt.setLong(1, reportID);
                 manualDeleteStmt.executeUpdate();
             }
-            new AnalysisStorage().clearCache(reportID, dbAnalysisDef.getDataFeedID());
+            new AnalysisStorage().clearCache(reportID, dbAnalysisDef.getDataFeedID(), conn);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -3253,7 +3268,7 @@ public class AnalysisService {
 
     public static WSAnalysisDefinition openAnalysisDefinitionWithConn(long analysisID, EIConnection conn) {
         try {
-            int role = SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
+            int role = SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC, conn);
             WSAnalysisDefinition report = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
             if (role >= Roles.VIEWER) {
                 report.setCanSave(false);
@@ -3344,14 +3359,14 @@ public class AnalysisService {
         InsightResponse insightResponse = null;
         try {
             try {
-                Connection conn = Database.instance().getConnection();
+                EIConnection conn = Database.instance().getConnection();
                 try {
                     PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE URL_KEY = ?");
                     queryStmt.setString(1, urlKey);
                     ResultSet rs = queryStmt.executeQuery();
                     if (rs.next()) {
                         long analysisID = rs.getLong(1);
-                        SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
+                        SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC, conn);
                         insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(2),
                                 rs.getLong(3), rs.getInt(4), urlKey, Roles.NONE, false));
                     } else {
@@ -3437,7 +3452,7 @@ public class AnalysisService {
                 suggestions.add(warning);
             }
         }
-        Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        Feed feed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
         suggestions.addAll(commonIntentions());
         DataSourceInfo dataSourceInfo = feed.createSourceInfo(conn);
         FeedDefinition dataSource = feed.getDataSource();
