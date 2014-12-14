@@ -217,7 +217,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                 do {
                     ctr = 0;
                     if (usePaging() && !query.toLowerCase().contains(" limit ")) {
-                        pagedQuery = query.replace(";", "") + " limit 10000 offset " + offset;
+                        pagedQuery = query.replace(";", "") + " limit 5000 offset " + offset;
                         System.out.println(pagedQuery);
                     }
 
@@ -243,13 +243,17 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                                 case Types.DOUBLE:
                                 case Types.DECIMAL:
                                 case Types.REAL:
-                                    double number = rs.getDouble(i);
-                                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                                        row.addValue(analysisItem.getKey(), String.valueOf((int) number));
-                                    } else {
-                                        row.addValue(analysisItem.getKey(), number);
+                                    try {
+                                        double number = rs.getDouble(i);
+                                        if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                                            row.addValue(analysisItem.getKey(), String.valueOf((int) number));
+                                        } else {
+                                            row.addValue(analysisItem.getKey(), number);
+                                        }
+                                        break;
+                                    } catch (Exception e) {
+                                        // something went wrong...
                                     }
-                                    break;
 
                                 case Types.BOOLEAN:
                                 case Types.BIT:
@@ -306,7 +310,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                     }
                     offset += ctr;
                     rs.close();
-                } while (ctr == 10000 && usePaging());
+                } while (ctr == 5000 && usePaging());
                 IDataStorage.insertData(dataSet);
             } finally {
                 connection.close();
