@@ -84,6 +84,11 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             ResultSet fedRS = fedStmt.executeQuery();
             while (fedRS.next()) {
                 long fedID = fedRS.getLong(1);
+                queryStmt.setLong(1, fedID);
+                ResultSet detailRS = queryStmt.executeQuery();
+                while (detailRS.next()) {
+                    ids.add(detailRS.getLong(1));
+                }
                 nextIDs.add(fedID);
             }
             for (Long id : nextIDs) {
@@ -105,7 +110,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 for (Long id : ids) {
                     try {
                         System.out.println("Running report " + id);
-                        runReport(conn, id);
+                        runReport(conn, id, true);
                     } catch (Exception e) {
                         LogClass.error(e);
                     }
@@ -133,7 +138,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         try {
             conn.setAutoCommit(false);
             long dataSourceID = feedResponse.getFeedDescriptor().getId();
-            runReport(conn, dataSourceID);
+            runReport(conn, dataSourceID, true);
             conn.commit();
         } catch (Exception e) {
             if (!conn.getAutoCommit()) {
@@ -175,8 +180,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             conn = Database.instance().getConnection();
             try {
                 System.out.println("Running report " + id);
-                runReport(conn, id);
-            } catch (Exception e) {
+                runReport(conn, id, true);
+            } catch (Throwable e) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
                 }
@@ -189,7 +194,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
 
     }
 
-    public static boolean runReport(EIConnection conn, Long id) throws Exception {
+    public static boolean runReport(EIConnection conn, Long id, boolean popThreadLocal) throws Exception {
         conn.setAutoCommit(false);
         FeedDefinition base = new FeedStorage().getFeedDefinitionData(id, conn);
         if (!(base instanceof IServerDataSourceDefinition)) {
@@ -229,7 +234,9 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     personaName = personaRS.getString(1);
                 }
                 stmt.close();
-                SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                if (popThreadLocal) {
+                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                }
                 try {
 
                     if (DataSourceMutex.mutex().lock(dataSource.getDataFeedID())) {
@@ -242,7 +249,9 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     }
 
                 } finally {
-                    SecurityUtil.clearThreadLocal();
+                    if (popThreadLocal) {
+                        SecurityUtil.clearThreadLocal();
+                    }
                 }
             }
 
@@ -377,7 +386,16 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     } while (keepGoing);
                 }
             } else if (partitionFilter instanceof FilterValueDefinition) {
-
+                FilterValueDefinition filterValueDefinition = (FilterValueDefinition) partitionFilter;
+                AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().
+                        getAnalysisItemMetadataForFilter(filterValueDefinition.getFilterID(), new ArrayList<>(), 0, conn);
+                for (String string : metadata.getStrings()) {
+                    System.out.println("Generating report for " + string);
+                    List<Object> blah = Arrays.asList(string);
+                    filterValueDefinition.setFilteredValues(blah);
+                    Key key = new NamedKey(filterValueDefinition.getFilterName() + "cache");
+                    cacheForPartition(IDataStorage, conn, report, key, string, lastRefreshDate != null && lastRefreshDate.after(new Date(1000)));
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -406,7 +424,6 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             for (AnalysisItem field : getFields()) {
                 if (field.getBasedOnReportField() != null && field.getBasedOnReportField() == reportItem.getAnalysisItemID()) {
                     map.put(reportItem, field);
-                    System.out.println("mapping " + reportItem.toDisplay() + " into " + field.toDisplay() + " with key " + field.getKey().toKeyString());
                     break;
                 }
             }

@@ -278,7 +278,7 @@ public class AnalysisStorage {
     public void saveAnalysis(AnalysisDefinition analysisDefinition, Connection conn) {
         Session session = Database.instance().createSession(conn);
         try {
-            saveAnalysis(analysisDefinition, session);
+            saveAnalysis(analysisDefinition, session, (EIConnection) conn);
         } finally {
             session.close();
         }
@@ -293,9 +293,18 @@ public class AnalysisStorage {
         }
     }
 
-    public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session) {
+    public void clearCache(long reportID, long dataSourceID, EIConnection conn) {
+        MemCachedManager.deleteReport(reportID);
+        try {
+            ReportCache.instance().flushResults(dataSourceID, conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
+    public void saveAnalysis(AnalysisDefinition analysisDefinition, Session session, EIConnection conn) {
         if (analysisDefinition.getAnalysisID() != null) {
-            clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID());
+            clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID(), conn);
         }
         if (analysisDefinition.getAnalysisID() != null && analysisDefinition.getAnalysisID() == 0) {
             analysisDefinition.setAnalysisID(null);
@@ -342,21 +351,6 @@ public class AnalysisStorage {
         else
             session.update(analysisDefinition);
         session.flush();
-    }
-
-    public void saveAnalysis(AnalysisDefinition analysisDefinition) {
-
-        Session session = Database.instance().createSession();
-        try {
-            session.beginTransaction();
-            saveAnalysis(analysisDefinition, session);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
     }
 
     public RolePrioritySet<InsightDescriptor> getReports(long userID, long accountID, EIConnection conn, boolean testAccountVisible) throws SQLException {
@@ -596,28 +590,12 @@ public class AnalysisStorage {
         return false;
     }
 
-    public void deleteAnalysisDefinition(AnalysisDefinition analysisDefinition) {
-        Session session = Database.instance().createSession();      
-        try {
-            session.beginTransaction();
-            session.delete(analysisDefinition);
-            session.getTransaction().commit();
-            clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID());
-        } catch (Exception e) {
-            
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
-
     public void deleteAnalysisDefinition(AnalysisDefinition analysisDefinition, Connection conn) {
         Session session = Database.instance().createSession(conn);
         try {
             session.delete(analysisDefinition);
             if (analysisDefinition.getAnalysisID() != null) {
-                clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID());
+                clearCache(analysisDefinition.getAnalysisID(), analysisDefinition.getDataFeedID(), (EIConnection) conn);
             }
         } finally {
             session.close();

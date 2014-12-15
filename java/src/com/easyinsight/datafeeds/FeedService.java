@@ -52,6 +52,59 @@ public class FeedService {
         // this goes into a different data provider        
     }
 
+    public void fieldsWithValues(long sourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            FeedDefinition source = feedStorage.getFeedDefinitionData(sourceID, conn);
+            WSListDefinition report = new WSListDefinition();
+            report.setColumns(source.getFields());
+            report.setDataFeedID(sourceID);
+            report.setFilterDefinitions(new ArrayList<>());
+            DataSet dataSet = DataService.listDataSet(report, new InsightRequestMetadata(), conn);
+            Map<AnalysisItem, Integer> counts = new HashMap<>();
+            for (IRow row : dataSet.getRows()) {
+                for (AnalysisItem field : source.getFields()) {
+                    Value value = row.getValue(field);
+                    if (value.type() == Value.STRING) {
+                        if (!"".equals(value.toString())) {
+                            Integer count = counts.get(field);
+                            if (count == null) {
+                                counts.put(field, 1);
+                            } else {
+                                counts.put(field, count + 1);
+                            }
+                        }
+                    } else if (value.type() == Value.DATE) {
+                        DateValue dateValue = (DateValue) value;
+                        if (dateValue.getDate() != null) {
+                            Integer count = counts.get(field);
+                            if (count == null) {
+                                counts.put(field, 1);
+                            } else {
+                                counts.put(field, count + 1);
+                            }
+                        }
+                    }
+                }
+            }
+            List<AnalysisItem> sortedItems = new ArrayList<>(source.getFields());
+            Collections.sort(sortedItems, new Comparator<AnalysisItem>() {
+
+                @Override
+                public int compare(AnalysisItem o1, AnalysisItem o2) {
+                    return o1.toDisplay().compareTo(o2.toDisplay());
+                }
+            });
+            for (AnalysisItem item : source.getFields()) {
+                System.out.println(item.toDisplay() + " - " + counts.get(item));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void saveCustomFieldTags(List<CustomFieldTag> tags, long dataSourceID) {
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         EIConnection conn = Database.instance().getConnection();
@@ -624,7 +677,7 @@ public class FeedService {
                             analysisDefinition.getReportStructure().put(entry.getKey(), replacement);
                         }
                     }
-                    analysisStorage.saveAnalysis(analysisDefinition, session);
+                    analysisStorage.saveAnalysis(analysisDefinition, session, conn);
                 }
                 session.close();
             }

@@ -118,6 +118,26 @@ public class ReportCache {
         }
     }
 
+    public void flushResults(long dataSourceID, EIConnection conn) {
+
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT CACHE_KEY FROM REPORT_CACHE WHERE DATA_SOURCE_ID = ?");
+            queryStmt.setLong(1, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                String cacheID = rs.getString(1);
+                MemCachedManager.delete(cacheID);
+            }
+            queryStmt.close();
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM REPORT_CACHE WHERE DATA_SOURCE_ID = ?");
+            deleteStmt.setLong(1, dataSourceID);
+            deleteStmt.executeUpdate();
+            deleteStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
     public void flushResults(long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -128,9 +148,11 @@ public class ReportCache {
                 String cacheID = rs.getString(1);
                 MemCachedManager.delete(cacheID);
             }
+            queryStmt.close();
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM REPORT_CACHE WHERE DATA_SOURCE_ID = ?");
             deleteStmt.setLong(1, dataSourceID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
@@ -148,9 +170,11 @@ public class ReportCache {
                 String cacheID = rs.getString(1);
                 MemCachedManager.delete(cacheID);
             }
+            queryStmt.close();
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM REPORT_CACHE WHERE REPORT_ID = ?");
             deleteStmt.setLong(1, reportID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
         } finally {

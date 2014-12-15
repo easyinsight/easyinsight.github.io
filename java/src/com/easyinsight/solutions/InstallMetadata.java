@@ -387,7 +387,7 @@ public class InstallMetadata {
             if (folderID != null) {
                 report.setFolder(folderID);
             }
-            analysisStorage.saveAnalysis(report, session);
+            analysisStorage.saveAnalysis(report, session, conn);
             installedReportMap.put(insightDescriptor.getId(), report);
             newOrUpdatedReports.add(report);
             newOrUpdatedMetadatas.add(metadata);
@@ -914,7 +914,7 @@ public class InstallMetadata {
             System.out.println("Updating metadata on " + original.getTitle());
             AnalysisDefinition.copyToAlternateType(targetSource, templateCopyMap, metadata.analysisDefinition, metadata.replacementMap);
             metadata.analysisDefinition.updateReportIDs(installedReportMap, installedDashboardMap, session);
-            analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
+            analysisStorage.saveAnalysis(metadata.analysisDefinition, session, conn);
         }
 
         Set<Long> valids = validChildSources();
@@ -934,7 +934,7 @@ public class InstallMetadata {
         for (int i = 0; i < newOrUpdatedReports.size(); i++) {
             AnalysisDefinition copiedReport = newOrUpdatedReports.get(i);
             AnalysisDefinition originReport = originReportList.get(i);
-            new AnalysisStorage().saveAnalysis(copiedReport, session);
+            new AnalysisStorage().saveAnalysis(copiedReport, session, conn);
             originStmt.setLong(1, originReport.getAnalysisID());
             originStmt.setLong(2, copiedReport.getAnalysisID());
             originStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
@@ -971,7 +971,7 @@ public class InstallMetadata {
             System.out.println("Updating metadata on " + original.getTitle());
             AnalysisDefinition.updateFromMetadata(targetSource, metadata.replacementMap, metadata.analysisDefinition, targetFields, metadata.added);
             metadata.analysisDefinition.updateReportIDs(installedReportMap, installedDashboardMap, session);
-            analysisStorage.saveAnalysis(metadata.analysisDefinition, session);
+            analysisStorage.saveAnalysis(metadata.analysisDefinition, session, conn);
         }
 
         Set<Long> valids = validChildSources();
@@ -991,7 +991,7 @@ public class InstallMetadata {
         for (int i = 0; i < newOrUpdatedReports.size(); i++) {
             AnalysisDefinition copiedReport = newOrUpdatedReports.get(i);
             AnalysisDefinition originReport = originReportList.get(i);
-            new AnalysisStorage().saveAnalysis(copiedReport, session);
+            new AnalysisStorage().saveAnalysis(copiedReport, session, conn);
             originStmt.setLong(1, originReport.getAnalysisID());
             originStmt.setLong(2, copiedReport.getAnalysisID());
             originStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
