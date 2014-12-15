@@ -82,7 +82,7 @@ public class AppWatchdog {
     }
 
     public void download(String role, String type) {
-        FileOutputStream fos = null, setEnv = null;
+        FileOutputStream fos = null, setEnv = null, eiconfig = null;
         try {
             File f = new File("/opt/tomcat/code.zip");
             fos = replaceFile(f);
@@ -95,6 +95,11 @@ public class AppWatchdog {
             File m = new File("/opt/watchdog/setenv.sh");
             setEnv = replaceFile(m);
             writeFile(setEnvObject, setEnv);
+            File props = new File("/opt/watchdog/eiconfig.properties");
+            S3Object propertiesDownload = s3Service.getObject(bucket, "eiconfig.properties-" + role + "-" + type);
+            eiconfig = replaceFile(props);
+            writeFile(propertiesDownload, eiconfig);
+            eiconfig.flush();
             fos.flush();
             setEnv.flush();
         } catch (Exception e) {
@@ -111,6 +116,13 @@ public class AppWatchdog {
                 try {
                     setEnv.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(eiconfig != null) {
+                try {
+                    eiconfig.close();
+                } catch(IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -174,7 +186,7 @@ public class AppWatchdog {
                 zin.closeEntry();
             }
             zin.close();
-            copyFile("eiconfig.properties", "/opt/tomcat/webapps/app/WEB-INF/classes/eiconfig.properties");
+            copyFile("/opt/watchdog/eiconfig.properties", "/opt/tomcat/webapps/app/WEB-INF/classes/eiconfig.properties");
             copyFile("/opt/watchdog/setenv.sh", "/opt/tomcat/bin/setenv.sh").setExecutable(true, true);
         } catch (Exception e) {
             e.printStackTrace();
