@@ -11,7 +11,9 @@ import com.easyinsight.datafeeds.CacheTimer;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.custom.ThreadDumpWatcher;
+import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.datafeeds.database.DatabaseListener;
+//import com.easyinsight.datafeeds.database.ReportListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.Scheduler;
@@ -70,6 +72,8 @@ public class EIContextListener implements ServletContextListener {
                 }
                 if (ConfigLoader.instance().isTaskRunner()) {
                     scheduler.start();
+                    DataSourceListener.initialize();
+                    //ReportListener.initialize();
                 }
                 try {
                     MemCachedManager.initialize();
@@ -77,6 +81,9 @@ public class EIContextListener implements ServletContextListener {
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
+
+
+
                 healthListener = new HealthListener();
                 healthThread = new Thread(healthListener);
                 healthThread.setName("Health Listener");
@@ -115,6 +122,10 @@ public class EIContextListener implements ServletContextListener {
         }
         if (DatabaseListener.instance() != null) {
             DatabaseListener.instance().stop();
+        }
+
+        if (DataSourceListener.instance() != null) {
+            DataSourceListener.instance().stop();
         }
 
         if (ThreadDumpWatcher.instance() != null) {
