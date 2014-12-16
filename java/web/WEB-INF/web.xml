@@ -1538,16 +1538,6 @@
         <url-pattern>/drillThrough</url-pattern>
     </servlet-mapping>
 
-    <!--<servlet-mapping>
-        <servlet-name>DefineTable</servlet-name>
-        <url-pattern>/defineTable</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>QueryTable</servlet-name>
-        <url-pattern>/queryTable</url-pattern>
-    </servlet-mapping>-->
-
     <servlet-mapping>
         <servlet-name>Excel</servlet-name>
         <url-pattern>/excel</url-pattern>
@@ -1567,11 +1557,6 @@
         <servlet-name>PDF</servlet-name>
         <url-pattern>/pdf</url-pattern>
     </servlet-mapping>
-
-    <!--<servlet-mapping>
-        <servlet-name>ReportImage</servlet-name>
-        <url-pattern>/ReportImage</url-pattern>
-    </servlet-mapping>-->
 
     <servlet-mapping>
         <servlet-name>OAuth</servlet-name>
