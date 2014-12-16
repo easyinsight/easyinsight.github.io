@@ -59,6 +59,7 @@ import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.util.ServiceUtil;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
+import com.xerox.amazonws.sqs2.SQSException;
 import com.xerox.amazonws.sqs2.SQSUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -158,6 +159,28 @@ public class UserUploadService {
         return tags;
     }
 
+    public List<Tag> getReportTags(EIConnection conn) {
+        List<Tag> tags = new ArrayList<Tag>();
+
+        try {
+            PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG_NAME, ACCOUNT_TAG_ID,DATA_SOURCE_TAG, REPORT_TAG, FIELD_TAG FROM ACCOUNT_TAG WHERE ACCOUNT_ID = ? AND REPORT_TAG = ? ORDER BY TAG_INDEX");
+            getTagsStmt.setLong(1, SecurityUtil.getAccountID());
+            getTagsStmt.setBoolean(2, true);
+            ResultSet rs = getTagsStmt.executeQuery();
+            while (rs.next()) {
+                String tagName = rs.getString(1);
+                long tagID = rs.getLong(2);
+                boolean dataSourceTag = rs.getBoolean(3);
+                boolean reportTag = rs.getBoolean(4);
+                boolean fieldTag = rs.getBoolean(5);
+                tags.add(new Tag(tagID, tagName, dataSourceTag, reportTag, fieldTag));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return tags;
+    }
+
     public List<Tag> getReportTags() {
         List<Tag> tags = new ArrayList<Tag>();
         EIConnection conn = Database.instance().getConnection();
@@ -181,7 +204,6 @@ public class UserUploadService {
         }
         return tags;
     }
-
 
     public List<Tag> saveTags(List<Tag> tags) {
         EIConnection conn = Database.instance().getConnection();
@@ -469,7 +491,7 @@ public class UserUploadService {
             if (descriptor.getType() == EIDescriptor.REPORT) {
                 SecurityUtil.authorizeReport(descriptor.getId(), Roles.EDITOR);
                 InsightDescriptor insightDescriptor = (InsightDescriptor) descriptor;
-                new AnalysisStorage().clearCache(descriptor.getId(), insightDescriptor.getDataFeedID());
+                new AnalysisStorage().clearCache(descriptor.getId(), insightDescriptor.getDataFeedID(), conn);
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET FOLDER = ? WHERE ANALYSIS_ID = ?");
                 updateStmt.setInt(1, targetFolder);
                 updateStmt.setLong(2, descriptor.getId());
@@ -1094,7 +1116,7 @@ public class UserUploadService {
             myDataTree.setDataSourceCount(dataSourceCount);
             myDataTree.setReportCount(reportCount);
             conn.commit();
-            BenchmarkManager.recordBenchmark("Home Tree", (System.currentTimeMillis() - startTime), SecurityUtil.getUserID());
+            BenchmarkManager.recordBenchmark("Home Tree", (System.currentTimeMillis() - startTime), SecurityUtil.getUserID(), conn);
             return myDataTree;
         } catch (Throwable e) {
             LogClass.error(e);
@@ -1175,7 +1197,7 @@ public class UserUploadService {
     }
 
     public long createNewDefaultFeed(String name) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage tableDef = null;
         try {
             conn.setAutoCommit(false);
@@ -1195,21 +1217,13 @@ public class UserUploadService {
             if (tableDef != null) {
                 tableDef.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             if (tableDef != null) {
                 tableDef.closeConnection();
             }
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -1435,6 +1449,7 @@ public class UserUploadService {
                     baos.write(retrieveBuf);
                 }
                 byte[] resultBytes = baos.toByteArray();
+                baos.close();
                 ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
                 ZipInputStream zin = new ZipInputStream(bais);
                 zin.getNextEntry();
@@ -1567,9 +1582,8 @@ public class UserUploadService {
         }
     }
 
+    public List<EIDescriptor> getAccountReports(EIConnection conn) {
 
-    public List<EIDescriptor> getAccountReports() {
-        EIConnection conn = Database.instance().getConnection();
         try {
             List<EIDescriptor> reports = new ArrayList<EIDescriptor>();
             PreparedStatement getReportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE, ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE," +
@@ -1584,7 +1598,7 @@ public class UserUploadService {
                 int reportType = reportRS.getInt(4);
                 String urlKey = reportRS.getString(5);
                 try {
-                    SecurityUtil.authorizeReport(reportID, Roles.VIEWER);
+                    SecurityUtil.authorizeReport(reportID, Roles.VIEWER, conn);
                     InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
                     id.setDescription(reportRS.getString(6));
                     reports.add(id);
@@ -1604,7 +1618,59 @@ public class UserUploadService {
                 long dataSourceID = dashboardRS.getLong(3);
                 String urlKey = dashboardRS.getString(4);
                 try {
-                    SecurityUtil.authorizeDashboard(reportID);
+                    SecurityUtil.authorizeDashboard(reportID, conn);
+                    DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
+                    dd.setDescription(dashboardRS.getString(5));
+                    reports.add(dd);
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+            getDashboardStmt.close();
+            return reports;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<EIDescriptor> getAccountReports() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            List<EIDescriptor> reports = new ArrayList<EIDescriptor>();
+            PreparedStatement getReportStmt = conn.prepareStatement("SELECT ANALYSIS.TITLE, ANALYSIS.ANALYSIS_ID, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE," +
+                    "ANALYSIS.URL_KEY, ANALYSIS.DESCRIPTION FROM " +
+                    "ANALYSIS, ACCOUNT_TO_REPORT WHERE ACCOUNT_TO_REPORT.ACCOUNT_ID = ? AND ACCOUNT_TO_REPORT.REPORT_ID = ANALYSIS.ANALYSIS_ID");
+            getReportStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet reportRS = getReportStmt.executeQuery();
+            while (reportRS.next()) {
+                String title = reportRS.getString(1);
+                long reportID = reportRS.getLong(2);
+                long dataSourceID = reportRS.getLong(3);
+                int reportType = reportRS.getInt(4);
+                String urlKey = reportRS.getString(5);
+                try {
+                    SecurityUtil.authorizeReport(reportID, Roles.VIEWER, conn);
+                    InsightDescriptor id = new InsightDescriptor(reportID, title, dataSourceID, reportType, urlKey, Roles.OWNER, true);
+                    id.setDescription(reportRS.getString(6));
+                    reports.add(id);
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+            getReportStmt.close();
+            PreparedStatement getDashboardStmt = conn.prepareStatement("SELECT DASHBOARD.DASHBOARD_NAME, DASHBOARD.DASHBOARD_ID, DASHBOARD.DATA_SOURCE_ID, " +
+                    "DASHBOARD.URL_KEY, DASHBOARD.DESCRIPTION FROM " +
+                    "DASHBOARD, ACCOUNT_TO_DASHBOARD WHERE ACCOUNT_TO_DASHBOARD.ACCOUNT_ID = ? AND ACCOUNT_TO_DASHBOARD.DASHBOARD_ID = DASHBOARD.DASHBOARD_ID");
+            getDashboardStmt.setLong(1, SecurityUtil.getAccountID());
+            ResultSet dashboardRS = getDashboardStmt.executeQuery();
+            while (dashboardRS.next()) {
+                String title = dashboardRS.getString(1);
+                long reportID = dashboardRS.getLong(2);
+                long dataSourceID = dashboardRS.getLong(3);
+                String urlKey = dashboardRS.getString(4);
+                try {
+                    SecurityUtil.authorizeDashboard(reportID, conn);
                     DashboardDescriptor dd = new DashboardDescriptor(title, reportID, urlKey, dataSourceID, Roles.OWNER, "", true);
                     dd.setDescription(dashboardRS.getString(5));
                     reports.add(dd);
@@ -1853,11 +1919,8 @@ public class UserUploadService {
         existingLinkQuery.executeUpdate();
     }
 
-    public CredentialsResponse refreshData(long feedID) {
-        return refreshData(feedID, null);
-    }
 
-    public CredentialsResponse refreshData(long feedID, final Map<String, Object> refreshProperties) {
+    public CredentialsResponse refreshData(long feedID) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         try {
             CredentialsResponse credentialsResponse;
@@ -1868,6 +1931,7 @@ public class UserUploadService {
             final FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);
             EIConnection timeConn = Database.instance().getConnection();
             int avgTime;
+            boolean async;
             try {
                 PreparedStatement avgElapsed = timeConn.prepareStatement("SELECT AVG(ELAPSED) FROM DATA_SOURCE_REFRESH_AUDIT WHERE DATA_SOURCE_ID = ? AND REFRESH_DATE >= ?");
                 avgElapsed.setLong(1, feedID);
@@ -1878,6 +1942,11 @@ public class UserUploadService {
                 rs.next();
                 avgTime = rs.getInt(1);
                 avgElapsed.close();
+                PreparedStatement asyncStmt = timeConn.prepareStatement("SELECT async_requests FROM account WHERE account_id = ?");
+                asyncStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet asyncRS = asyncStmt.executeQuery();
+                asyncRS.next();
+                async = asyncRS.getBoolean(1);
             } finally {
                 Database.closeConnection(timeConn);
             }
@@ -1894,73 +1963,15 @@ public class UserUploadService {
                     final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                     final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                     final String personaName = SecurityUtil.getPersonaName();
-                    DataSourceThreadPool.instance().addActivity(new Runnable() {
-
-                        public void run() {
-                            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                            EIConnection conn = Database.instance().getConnection();
-                            try {
-                                List<ReportFault> warnings = new ArrayList<ReportFault>();
-                                conn.setAutoCommit(false);
-                                Date now = new Date();
-                                List<FeedDefinition> sourcesToRefresh = new ArrayList<FeedDefinition>();
-                                if (feedDefinition.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
-                                    CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
-                                    for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
-                                        FeedDefinition child = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
-                                        sourcesToRefresh.add(child);
-                                    }
-                                } else {
-                                    sourcesToRefresh.add(feedDefinition);
-                                }
-
-                                boolean changed = false;
-                                for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
-                                    if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
-                                            sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
-                                        IServerDataSourceDefinition refreshable = (IServerDataSourceDefinition) sourceToRefresh;
-                                        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
-                                        info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
-                                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
-                                        changed = changed || new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID, refreshProperties).invoke();
-                                        PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
-                                        stmt.setTimestamp(1, new Timestamp(now.getTime()));
-                                        stmt.setLong(2, sourceToRefresh.getDataFeedID());
-                                        stmt.execute();
-                                        stmt.close();
-                                    }
-                                }
-
-                                ReportFault warning = null;
-                                if (!warnings.isEmpty()) {
-                                    warning = warnings.get(warnings.size() - 1);
-                                }
-                                DataSourceRefreshResult result = new DataSourceRefreshResult();
-                                result.setDate(now);
-                                result.setWarning(warning);
-                                result.setNewFields(sourcesToRefresh.size() == 1 && sourcesToRefresh.get(0).rebuildFieldWindow() && changed);
-                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
-
-                                conn.commit();
-                            } catch (ReportException re) {
-                                if (!conn.getAutoCommit()) {
-                                    conn.rollback();
-                                }
-                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
-                            } catch (Exception e) {
-                                LogClass.error(e);
-                                if (!conn.getAutoCommit()) {
-                                    conn.rollback();
-                                }
-                                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
-                            } finally {
-                                conn.setAutoCommit(true);
-                                Database.closeConnection(conn);
-                                DataSourceMutex.mutex().unlock(feedDefinition.getDataFeedID());
-                                SecurityUtil.clearThreadLocal();
-                            }
-                        }
-                    });
+                    Refresh refresh;
+                    if (async) {
+                        refresh = new AsynchronousRefresh(userName, userID, accountID,
+                                accountType, accountAdmin, firstDayOfWeek, personaName, feedDefinition, callID);
+                    } else {
+                        refresh = new SynchronousRefresh(userName, userID, accountID,
+                                accountType, accountAdmin, firstDayOfWeek, personaName, feedDefinition, callID);
+                    }
+                    DataSourceThreadPool.instance().addActivity(refresh);
                 } else {
                     credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                     credentialsResponse.setEstimatedDuration(avgTime);
@@ -2337,7 +2348,7 @@ public class UserUploadService {
             }
             conn.commit();
             if (credentialsResponse == null) {
-                final String callID = ServiceUtil.instance().longRunningCall(dataSource.getDataFeedID());
+                final String callID = ServiceUtil.instance().longRunningCall(dataSource.getDataFeedID(), conn);
                 credentialsResponse = new CredentialsResponse(true, dataSource.getDataFeedID());
                 credentialsResponse.setCallDataID(callID);
                 final String userName = SecurityUtil.getUserName();
@@ -2360,18 +2371,18 @@ public class UserUploadService {
                             DataSourceRefreshResult result = new DataSourceRefreshResult();
                             result.setDate(now);
                             result.setNewFields(changed && dataSource.rebuildFieldWindow());
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result, conn);
                         } catch (ReportException re) {
                             if (!conn.getAutoCommit()) {
                                 conn.rollback();
                             }
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault(), conn);
                         } catch (Exception e) {
                             LogClass.error(e);
                             if (!conn.getAutoCommit()) {
                                 conn.rollback();
                             }
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
+                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage(), conn);
                         } finally {
                             conn.setAutoCommit(true);
                             Database.closeConnection(conn);
@@ -2421,11 +2432,11 @@ public class UserUploadService {
     public static class DataSourceFactory {
         public IUploadDataSource createSource(EIConnection conn, List<ReportFault> warnings, Date now, FeedDefinition sourceToRefresh, IServerDataSourceDefinition refreshable, String callID,
                                               Map<String, Object> properties) {
-            if (ConfigLoader.instance().isProduction() && (sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
+            if ((sourceToRefresh.getFeedType().getType() == FeedType.SERVER_MYSQL.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_SQL_SERVER.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.ORACLE.getType() ||
                     sourceToRefresh.getFeedType().getType() == FeedType.SERVER_POSTGRES.getType())) {
-                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), (ServerDatabaseConnection) sourceToRefresh);
+                return new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh, callID);
             } else {
                 return new UploadDataSource(conn, warnings, now, sourceToRefresh, refreshable, callID, properties);
             }
@@ -2436,25 +2447,50 @@ public class UserUploadService {
         public boolean invoke() throws Exception;
     }
 
+    public static void main(String[] args) throws SQSException {
+        MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+        boolean blah = true;
+        do {
+            Message message = responseQueue.receiveMessage();
+            if (message != null) {
+                System.out.println("deleting message...");
+                responseQueue.deleteMessage(message);
+            } else {
+                blah = false;
+            }
+        } while (blah);
+    }
+
     public static class SQSUploadDataSource implements IUploadDataSource {
 
         private long dataSourceID;
-        private ServerDatabaseConnection dataSource;
+        private FeedDefinition dataSource;
+        private String callID;
 
-        private SQSUploadDataSource(long dataSourceID, ServerDatabaseConnection dataSource) {
+        private SQSUploadDataSource(long dataSourceID, FeedDefinition dataSource, String callID) {
             this.dataSourceID = dataSourceID;
             this.dataSource = dataSource;
+            this.callID = callID;
         }
 
         public boolean invoke() throws Exception {
-            MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
+            MessageQueue msgQueue = SQSUtils.connectToQueue(dataSource instanceof ServerDatabaseConnection ?
+                    ConfigLoader.instance().getDatabaseRequestQueue() : ConfigLoader.instance().getDataSourceRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue responseQueue = SQSUtils.connectToQueue(dataSource instanceof ServerDatabaseConnection ? ConfigLoader.instance().getDatabaseResponseQueue() :
+                    ConfigLoader.instance().getDataSourceResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            String requestID = dataSourceID + "^" + System.currentTimeMillis() + "^" + callID;
+            msgQueue.sendMessage(requestID);
             boolean responded = false;
             boolean changed = false;
             int i = 0;
             boolean success = false;
-            while (!responded && i < (dataSource.getTimeout() * 60)) {
+
+            int timeout = 1000;
+            if (dataSource instanceof ServerDatabaseConnection) {
+                timeout = ((ServerDatabaseConnection) dataSource).getTimeout();
+            }
+
+            while (!responded && i < (timeout * 60)) {
                 Message message = responseQueue.receiveMessage();
                 if (message == null) {
                     i++;
@@ -2468,20 +2504,24 @@ public class UserUploadService {
                     String[] parts = body.split("\\|");
                     long sourceID = Long.parseLong(parts[0]);
                     //long time = Long.parseLong(parts[3]);
-                    System.out.println("got response with id = " + sourceID);
+                    String responseID = parts[4];
                     if (sourceID == dataSourceID) {
-                        success = true;
-                        responseQueue.deleteMessage(message);
-                        boolean successful = Boolean.parseBoolean(parts[1]);
-                        if (successful) {
-                            changed = Boolean.parseBoolean(parts[2]);
-                            System.out.println("matched!");
-                            responded = true;
+                        if (requestID.equals(responseID)) {
+                            success = true;
+                            responseQueue.deleteMessage(message);
+                            boolean successful = Boolean.parseBoolean(parts[1]);
+                            if (successful) {
+                                changed = Boolean.parseBoolean(parts[2]);
+                                responded = true;
+                            } else {
+                                String error = parts[2];
+                                throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
+                            }
                         } else {
-                            String error = parts[2];
-                            throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
+                            responseQueue.deleteMessage(message);
                         }
-                    } /*else if (time < (System.currentTimeMillis() - 1000 * 60 * 60)) {
+                    }
+                    /*else if (time < (System.currentTimeMillis() - 1000 * 60 * 60)) {
                         System.out.println("Dropping old message");
                         responseQueue.deleteMessage(message);
                     }*/
@@ -2652,5 +2692,178 @@ public class UserUploadService {
             LogClass.error(e);
         }
         return suggestionResult;
+    }
+
+    abstract class Refresh implements Runnable {
+        protected String userName;
+        protected long userID;
+        protected long accountID;
+        protected int accountType;
+        protected boolean accountAdmin;
+        protected int firstDayOfWeek;
+        protected String personaName;
+        protected FeedDefinition feedDefinition;
+        protected String callID;
+
+        protected Refresh(String userName, long userID, long accountID, int accountType, boolean accountAdmin, int firstDayOfWeek,
+                          String personaName, FeedDefinition feedDefinition, String callID) {
+            this.userName = userName;
+            this.userID = userID;
+            this.accountID = accountID;
+            this.accountType = accountType;
+            this.accountAdmin = accountAdmin;
+            this.firstDayOfWeek = firstDayOfWeek;
+            this.personaName = personaName;
+            this.feedDefinition = feedDefinition;
+            this.callID = callID;
+        }
+    }
+
+    class AsynchronousRefresh extends Refresh {
+
+
+        protected AsynchronousRefresh(String userName, long userID, long accountID, int accountType, boolean accountAdmin, int firstDayOfWeek,
+                                     String personaName, FeedDefinition feedDefinition, String callID) {
+            super(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName, feedDefinition, callID);
+        }
+
+        @Override
+        public void run() {
+            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+            try {
+
+                List<FeedDefinition> sourcesToRefresh = new ArrayList<FeedDefinition>();
+                Date now = new Date();
+                List<ReportFault> warnings = new ArrayList<ReportFault>();
+                EIConnection conn = Database.instance().getConnection();
+                try {
+
+                    //conn.setAutoCommit(false);
+
+
+                    if (feedDefinition.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
+                        CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
+                        for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
+                            FeedDefinition child = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+                            sourcesToRefresh.add(child);
+                        }
+                    } else {
+                        sourcesToRefresh.add(feedDefinition);
+                    }
+                } finally {
+                    Database.closeConnection(conn);
+                }
+
+                boolean changed = false;
+                for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
+                    if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
+                            sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
+                        IServerDataSourceDefinition refreshable = (IServerDataSourceDefinition) sourceToRefresh;
+                        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+                        info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
+                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
+                        changed = new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh, callID).invoke() || changed;
+                                        /*PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
+                                        stmt.setTimestamp(1, new Timestamp(now.getTime()));
+                                        stmt.setLong(2, sourceToRefresh.getDataFeedID());
+                                        stmt.execute();
+                                        stmt.close();*/
+                    }
+                }
+
+                ReportFault warning = null;
+                if (!warnings.isEmpty()) {
+                    warning = warnings.get(warnings.size() - 1);
+                }
+                DataSourceRefreshResult result = new DataSourceRefreshResult();
+                result.setDate(now);
+                result.setWarning(warning);
+                result.setNewFields(sourcesToRefresh.size() == 1 && sourcesToRefresh.get(0).rebuildFieldWindow() && changed);
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result);
+            } catch (ReportException re) {
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
+            } catch (Exception e) {
+                LogClass.error(e);
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
+            } finally {
+                DataSourceMutex.mutex().unlock(feedDefinition.getDataFeedID());
+                SecurityUtil.clearThreadLocal();
+            }
+        }
+    }
+
+    class SynchronousRefresh extends Refresh {
+
+
+        protected SynchronousRefresh(String userName, long userID, long accountID, int accountType, boolean accountAdmin, int firstDayOfWeek,
+                                     String personaName, FeedDefinition feedDefinition, String callID) {
+            super(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName, feedDefinition, callID);
+        }
+
+        @Override
+        public void run() {
+            SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                List<ReportFault> warnings = new ArrayList<ReportFault>();
+                conn.setAutoCommit(false);
+                Date now = new Date();
+                List<FeedDefinition> sourcesToRefresh = new ArrayList<FeedDefinition>();
+                if (feedDefinition.getFeedType().getType() == FeedType.COMPOSITE.getType()) {
+                    CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
+                    for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
+                        FeedDefinition child = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+                        sourcesToRefresh.add(child);
+                    }
+                } else {
+                    sourcesToRefresh.add(feedDefinition);
+                }
+
+                boolean changed = false;
+                for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
+                    if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
+                            sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
+                        IServerDataSourceDefinition refreshable = (IServerDataSourceDefinition) sourceToRefresh;
+                        DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+                        info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
+                        ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info, conn);
+                        changed = changed || new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID, null).invoke();
+                        PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
+                        stmt.setTimestamp(1, new Timestamp(now.getTime()));
+                        stmt.setLong(2, sourceToRefresh.getDataFeedID());
+                        stmt.execute();
+                        stmt.close();
+                    }
+                }
+
+                ReportFault warning = null;
+                if (!warnings.isEmpty()) {
+                    warning = warnings.get(warnings.size() - 1);
+                }
+                DataSourceRefreshResult result = new DataSourceRefreshResult();
+                result.setDate(now);
+                result.setWarning(warning);
+                result.setNewFields(sourcesToRefresh.size() == 1 && sourcesToRefresh.get(0).rebuildFieldWindow() && changed);
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result, conn);
+
+                conn.commit();
+            } catch (ReportException re) {
+                if (!conn.getAutoCommit()) {
+                    conn.rollback();
+                }
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
+            } catch (Exception e) {
+                LogClass.error(e);
+                if (!conn.getAutoCommit()) {
+                    conn.rollback();
+                }
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
+            } finally {
+                conn.setAutoCommit(true);
+                Database.closeConnection(conn);
+                DataSourceMutex.mutex().unlock(feedDefinition.getDataFeedID());
+                SecurityUtil.clearThreadLocal();
+            }
+        }
     }
 }
