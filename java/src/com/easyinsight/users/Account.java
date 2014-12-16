@@ -72,6 +72,9 @@ public class Account {
     @Column(name="account_id")
     private long accountID;
 
+    @Column(name="async_requests")
+    private boolean asyncRequests;
+
     @Column(name="core_small_biz_connections")
     private int coreSmallBizConnections;
 
@@ -302,6 +305,14 @@ public class Account {
 
     @Column(name="next_bill_amount")
     private Double nextBillAmount;
+
+    public boolean isAsyncRequests() {
+        return asyncRequests;
+    }
+
+    public void setAsyncRequests(boolean asyncRequests) {
+        this.asyncRequests = asyncRequests;
+    }
 
     public int getRecacheTime() {
         return recacheTime;

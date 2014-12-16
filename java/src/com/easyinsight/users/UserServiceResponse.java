@@ -182,7 +182,7 @@ public class UserServiceResponse {
     }
 
     public static UserServiceResponse createResponseWithUISettings(User user, ApplicationSkin applicationSkin, String personaName) {
-        return createResponse(user, applicationSkin, personaName);
+        return createResponse(user, applicationSkin, personaName, null);
     }
 
     public static UserServiceResponse createResponse(User user, Session session, EIConnection conn) throws SQLException {
@@ -222,12 +222,12 @@ public class UserServiceResponse {
         } finally {
             session.close();
         }*/
-        UserServiceResponse response = createResponse(user, applicationSkin, personaName);
+        UserServiceResponse response = createResponse(user, applicationSkin, personaName, conn);
         response.setReportImage(bytes);
         return response;
     }
 
-    private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, String personaName)  {
+    private static UserServiceResponse createResponse(User user, ApplicationSkin applicationSkin, String personaName, EIConnection conn)  {
         Account account = user.getAccount();
         LogClass.info("Log in from " + user.getUserID() + " - " + user.getEmail());
         byte[] bytes = null;
@@ -235,7 +235,11 @@ public class UserServiceResponse {
         String newsTitle = null;
         boolean accountOverSize = false;
         List<EIDescriptor> topReports = new ArrayList<>();
-        EIConnection conn = Database.instance().getConnection();
+        boolean createdConn = false;
+        if (conn == null) {
+            conn = Database.instance().getConnection();
+            createdConn = true;
+        }
         try {
             if (applicationSkin.getReportHeaderImage() != null) {
                 bytes = new PreferencesService().getImage(applicationSkin.getReportHeaderImage().getId(), conn);
@@ -259,7 +263,9 @@ public class UserServiceResponse {
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
-            Database.closeConnection(conn);
+            if (createdConn) {
+                Database.closeConnection(conn);
+            }
         }
         UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                             user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), user.isAccountAdmin(),
