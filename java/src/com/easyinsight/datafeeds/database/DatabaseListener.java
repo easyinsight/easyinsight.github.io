@@ -78,7 +78,7 @@ public class DatabaseListener implements Runnable {
                 } else {
                     String body = message.getMessageBody();
                     messageQueue.deleteMessage(message);
-                    String[] tokens = body.split("\\|");
+                    String[] tokens = body.split("\\^");
                     final long sourceID = Long.parseLong(tokens[0]);
                     long time = Long.parseLong(tokens[1]);
 
@@ -158,7 +158,7 @@ public class DatabaseListener implements Runnable {
                             }
                             try {
                                 MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed + "| " + System.currentTimeMillis());
+                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed + "| " + System.currentTimeMillis() + "|" + body);
                             } catch (Exception e) {
                                 LogClass.error(e);
                             }

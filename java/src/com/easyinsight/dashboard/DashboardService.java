@@ -744,6 +744,18 @@ public class DashboardService {
         }
     }
 
+    public static Dashboard getDashboardWithConn(long dashboardID, EIConnection conn) {
+        try {
+            int role = SecurityUtil.authorizeDashboard(dashboardID, conn);
+            Dashboard dashboard = new DashboardStorage().getDashboard(dashboardID, conn);
+            dashboard.setRole(role);
+            return dashboard;
+        } catch (Exception e) {
+            LogClass.error("On retrieving dashboard " + dashboardID, e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public Dashboard getDashboard(long dashboardID) {
         try {
             int role = SecurityUtil.authorizeDashboard(dashboardID);
@@ -808,7 +820,7 @@ public class DashboardService {
     }
 
     public Dashboard getDashboardView(long dashboardID, @Nullable DashboardStackPositions dashboardStackPositions, EIConnection conn) throws Exception {
-        int role = SecurityUtil.authorizeDashboard(dashboardID);
+        int role = SecurityUtil.authorizeDashboard(dashboardID, conn);
         long startTime = System.currentTimeMillis();
 
         Dashboard dashboard = null;
@@ -889,7 +901,7 @@ public class DashboardService {
 
 
         dashboard.setRole(role);
-        dashboard.setConfigurations(getConfigurationsForDashboard(dashboardID));
+        dashboard.setConfigurations(getConfigurationsForDashboard(dashboardID, conn));
         Feed feed = FeedRegistry.instance().getFeed(dashboard.getDataSourceID(), conn);
         List<FilterDefinition> dlsFilters = DataService.addDLSFilters(dashboard.getDataSourceID(), conn);
         KeyDisplayMapper mapper = KeyDisplayMapper.create(feed.getFields());
@@ -922,7 +934,7 @@ public class DashboardService {
             dashboard.visit(new StateVisitor(dashboardStackPositions));
         }
         dashboard.setDataSourceInfo(feed.createSourceInfo(conn));
-        BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID);
+        BenchmarkManager.recordBenchmarkForDashboard("DashboardView", System.currentTimeMillis() - startTime, SecurityUtil.getUserID(false), dashboardID, conn);
         return dashboard;
     }
 

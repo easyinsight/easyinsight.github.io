@@ -83,6 +83,28 @@ public class BenchmarkManager {
         new InternalPublishService().addRow("Scheduled Task Benchmarks", row);
     }
 
+    public static void recordBenchmark(String category, long time, long userID, Connection conn) {
+
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id) VALUES (?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.execute();
+            benchmarkStmt.close();
+        } catch (SQLException e) {
+            LogClass.error(e);
+        }
+    }
+
     public static void recordBenchmark(String category, long time, long userID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -176,6 +198,29 @@ public class BenchmarkManager {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public static void recordBenchmarkForDashboard(String category, long time, long userID, long dashboardID, EIConnection conn) {
+
+        try {
+            PreparedStatement benchmarkStmt = conn.prepareStatement("INSERT INTO BENCHMARK (CATEGORY, ELAPSED_TIME, benchmark_date, user_id, dashboard_id) VALUES (?, ?, ?, ?, ?)");
+            if (category.length() > 38) {
+                category = category.substring(0, 38);
+            }
+            benchmarkStmt.setString(1, category);
+            benchmarkStmt.setLong(2, time);
+            benchmarkStmt.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            if (userID > 0) {
+                benchmarkStmt.setLong(4, userID);
+            } else {
+                benchmarkStmt.setNull(4, Types.BIGINT);
+            }
+            benchmarkStmt.setLong(5, dashboardID);
+            benchmarkStmt.execute();
+            benchmarkStmt.close();
+        } catch (SQLException e) {
+            LogClass.error(e);
         }
     }
 

@@ -121,16 +121,20 @@ public class SecurityUtil {
         }
     }
 
-    public static boolean isAccountReports(EIConnection conn) throws SQLException {
-        PreparedStatement ps = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
-        ps.setLong(1, getUserID());
-        ResultSet rs = ps.executeQuery();
-        boolean ret = false;
-        if (rs.next()) {
-            ret = rs.getBoolean(1);
+    public static boolean isAccountReports(EIConnection conn) {
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT TEST_ACCOUNT_VISIBLE FROM USER WHERE USER_ID = ?");
+            ps.setLong(1, getUserID());
+            ResultSet rs = ps.executeQuery();
+            boolean ret = false;
+            if (rs.next()) {
+                ret = rs.getBoolean(1);
+            }
+            ps.close();
+            return ret;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        ps.close();
-        return ret;
     }
 
     public static boolean isAccountAdmin() {
@@ -509,6 +513,59 @@ public class SecurityUtil {
         }
     }
 
+    public static int getRole(long userID, long feedID, Connection conn) {
+
+        try {
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT ROLE FROM UPLOAD_POLICY_USERS WHERE " +
+                    "USER_ID = ? AND FEED_ID = ?");
+            existingLinkQuery.setLong(1, userID);
+            existingLinkQuery.setLong(2, feedID);
+            ResultSet rs = existingLinkQuery.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                PreparedStatement groupQueryStmt = conn.prepareStatement("SELECT group_to_user_join.binding_type FROM upload_policy_groups, group_to_user_join WHERE " +
+                        "group_to_user_join.group_id = upload_policy_groups.group_id AND group_to_user_join.user_id = ? AND upload_policy_groups.feed_id = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, feedID);
+                ResultSet groupRS = groupQueryStmt.executeQuery();
+                if (groupRS.next()) {
+                    return groupRS.getInt(1);
+                } else {
+                    PreparedStatement accountQueryStmt = conn.prepareStatement("SELECT role FROM upload_policy_users, user, data_feed WHERE " +
+                            "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id AND " +
+                            "data_feed.account_visible = ? AND upload_policy_users.user_id = user.user_id AND " +
+                            "user.account_id = ?");
+                    accountQueryStmt.setLong(1, feedID);
+                    accountQueryStmt.setBoolean(2, true);
+                    accountQueryStmt.setLong(3, getAccountID());
+                    ResultSet accountRS = accountQueryStmt.executeQuery();
+                    if (accountRS.next()) {
+                        return Roles.OWNER;
+                    } else {
+                        PreparedStatement forTimeBeingStmt = conn.prepareStatement("SELECT account_id FROM user, data_feed, upload_policy_users WHERE " +
+                                "data_feed.data_feed_id = ? AND data_feed.data_feed_id = upload_policy_users.feed_id AND upload_policy_users.user_id = user.user_id");
+                        forTimeBeingStmt.setLong(1, feedID);
+                        ResultSet hackRS = forTimeBeingStmt.executeQuery();
+                        if (hackRS.next()) {
+                            long accountID = hackRS.getLong(1);
+                            if (accountID == getAccountID()) {
+                                return Roles.OWNER;
+                            } else {
+                                return Integer.MAX_VALUE;
+                            }
+                        } else {
+                            return Integer.MAX_VALUE;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public static int getRole(long userID, long feedID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -650,7 +707,7 @@ public class SecurityUtil {
             }
         }
 
-        if (accountVisibility && isAccountReports()) {
+        if (accountVisibility && isAccountReports(conn)) {
 
             try {
                 PreparedStatement query = conn.prepareStatement("SELECT ACCOUNT_ID FROM USER, USER_TO_ANALYSIS WHERE USER.USER_ID = " +

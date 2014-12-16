@@ -115,6 +115,41 @@ public class DataStorage implements IDataStorage {
         return dataStorage;
     }
 
+    public static DataStorage readConnection(List<AnalysisItem> fields, long feedID, FeedType feedType, Connection conn) {
+        DataStorage dataStorage = new DataStorage();
+        Map<Key, KeyMetadata> keyMetadatas = new LinkedHashMap<Key, KeyMetadata>();
+        for (AnalysisItem analysisItem : fields) {
+            if (analysisItem.isDerived()) {
+                continue;
+            }
+            Key key = analysisItem.createAggregateKey(false);
+            if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+            } else if (analysisItem.hasType(AnalysisItemTypes.TEXT)) {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
+            } else {
+                keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+            }
+        }
+        dataStorage.metadata = getMetadata(feedID, conn);
+        if (dataStorage.metadata == null) {
+            dataStorage.metadata = createDefaultMetadata(conn, feedType);
+        }
+        dataStorage.keys = keyMetadatas;
+        dataStorage.feedID = feedID;
+        dataStorage.version = dataStorage.metadata.getVersion();
+        dataStorage.database = DatabaseManager.instance().getDatabase(dataStorage.metadata.getDatabase());
+        dataStorage.storageConn = dataStorage.database.getConnection();
+        try {
+            dataStorage.storageConn.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return dataStorage;
+    }
+
     private IStorageDialect getStorageDialect(String tableName, Key distKey) {
         if (database.getDialect() == Database.MYSQL) {
             return new MySQLStorageDialect(tableName, keys);
@@ -368,22 +403,53 @@ public class DataStorage implements IDataStorage {
 
     public long calculateSize() throws SQLException {
         if (database.getDialect() == Database.POSTGRES) {
-            return 0;
-        }
-        PreparedStatement countStmt = storageConn.prepareStatement("SHOW TABLE STATUS LIKE ?");
-        countStmt.setString(1, getTableName());
-        ResultSet countRS = countStmt.executeQuery();
-        if (countRS.next()) {
-            long dataLength = countRS.getLong("Data_length");
-            long indexLength = countRS.getLong("Index_length");
-            if (dataSourceType == FeedType.HIGHRISE_ACTIVITIES.getType()) {
-                // 339,656,704
-                return 0;
-            } else {
-                return dataLength;
+            /*PreparedStatement countStmt = storageConn.prepareStatement("SELECT\n" +
+                    "    trim(pgdb.datname) AS DATABASE,\n" +
+                    "    trim(pgn.nspname) AS SCHEMA,\n" +
+                    "    trim(a.name) AS TABLE,\n" +
+                    "    b.mbytes,\n" +
+                    "    a.rows\n" +
+                    "FROM (\n" +
+                    "    SELECT db_id, id, NAME, sum(ROWS) AS ROWS\n" +
+                    "    FROM stv_tbl_perm a\n" +
+                    "    GROUP BY db_id, id, NAME\n" +
+                    ") AS a\n" +
+                    "JOIN pg_class AS pgc ON pgc.oid = a.id\n" +
+                    "JOIN pg_namespace AS pgn ON pgn.oid = pgc.relnamespace\n" +
+                    "JOIN pg_database AS pgdb ON pgdb.oid = a.db_id\n" +
+                    "JOIN (\n" +
+                    "    SELECT tbl, COUNT(*) AS mbytes\n" +
+                    "    FROM stv_blocklist\n" +
+                    "    GROUP BY tbl\n" +
+                    ") b ON a.id = b.tbl\n" +
+                    "WHERE a.name = ?");
+            countStmt.setString(1, getTableName());
+            ResultSet countRS = countStmt.executeQuery();
+            long size = 0;
+            if (countRS.next()) {
+                int rows = countRS.getInt(5);
+                size = countRS.getLong(4);
+                System.out.println(rows + " = " + size);
             }
-        } else {
+            countStmt.close();
+            return size;*/
             return 0;
+        } else {
+            PreparedStatement countStmt = storageConn.prepareStatement("SHOW TABLE STATUS LIKE ?");
+            countStmt.setString(1, getTableName());
+            ResultSet countRS = countStmt.executeQuery();
+            if (countRS.next()) {
+                long dataLength = countRS.getLong("Data_length");
+                long indexLength = countRS.getLong("Index_length");
+                if (dataSourceType == FeedType.HIGHRISE_ACTIVITIES.getType()) {
+                    // 339,656,704
+                    return 0;
+                } else {
+                    return dataLength;
+                }
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -424,7 +490,7 @@ public class DataStorage implements IDataStorage {
             validateSpace(coreDBConn);
         }
         storageConn.commit();
-        ReportCache.instance().flushResults(feedID);
+        ReportCache.instance().flushResults(feedID, (EIConnection) coreDBConn);
         committed = true;
     }
 

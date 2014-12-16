@@ -48,12 +48,31 @@ public class ConfigLoader {
     private String databaseRequestQueue;
     private String databaseResponseQueue;
 
+    private String dataSourceRequestQueue;
+    private String dataSourceResponseQueue;
+
     private String memcachedUrl;
 
     private String redshiftCSVPath;
 
     private String baseSeleniumQueue = "EISelenium";
     private String baseSeleniumResponseQueue = "EISeleniumResponse";
+
+    public String getDataSourceRequestQueue() {
+        return dataSourceRequestQueue;
+    }
+
+    public void setDataSourceRequestQueue(String dataSourceRequestQueue) {
+        this.dataSourceRequestQueue = dataSourceRequestQueue;
+    }
+
+    public String getDataSourceResponseQueue() {
+        return dataSourceResponseQueue;
+    }
+
+    public void setDataSourceResponseQueue(String dataSourceResponseQueue) {
+        this.dataSourceResponseQueue = dataSourceResponseQueue;
+    }
 
     public String getRedshiftCSVPath() {
         return redshiftCSVPath;
@@ -308,6 +327,9 @@ public class ConfigLoader {
             databaseResponseQueue = (String) properties.get("database.response.queue");
             reportDeliveryQueue = (String) properties.get("report.delivery.queue");
             memcachedUrl = (String) properties.get("memcached.url");
+
+            dataSourceRequestQueue = (String) properties.get("datasource.request.queue");
+            dataSourceResponseQueue = (String) properties.get("datasource.response.queue");
 
             baseSeleniumQueue = (String) properties.get("base.selenium.queue");
             if (baseSeleniumQueue == null || "".equals(baseSeleniumQueue)) {
