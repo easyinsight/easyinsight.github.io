@@ -65,6 +65,7 @@ public class AnalysisBasedFeed extends Feed {
         }
         localInsightRequestMetadata.setTargetCurrency(insightRequestMetadata.getTargetCurrency());
         localInsightRequestMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+        localInsightRequestMetadata.setZoneID(insightRequestMetadata.getZoneID());
         localInsightRequestMetadata.setIp(insightRequestMetadata.getIp());
         localInsightRequestMetadata.setNow(insightRequestMetadata.getNow());
         localInsightRequestMetadata.setLogReport(insightRequestMetadata.isLogReport());
