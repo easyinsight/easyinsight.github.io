@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.pipeline.IComponent;
 import org.jetbrains.annotations.Nullable;
@@ -75,11 +76,11 @@ public class NamedFilterReference extends FilterDefinition {
     }
 
     @Override
-    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
+    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters, EIConnection conn) {
         if (filter == null) {
             throw new ReportException(new GenericReportFault("Could not find a filter named " + referenceName + " as referenced in a named filter reference you defined."));
         }
-        filter.timeshift(dataSource, filters);
+        filter.timeshift(dataSource, filters, conn);
     }
 
     @Nullable
