@@ -163,11 +163,16 @@ public class AsyncReport {
                         conn = Database.instance().getConnection();
                         try {
                             ResultData rh = new ResultData();
-                            DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
-                            dataSet.setAsyncSavedReport(report);
-                            rh.dataSet = dataSet;
-                            rh.report = report;
-                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                            try {
+                                DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
+                                dataSet.setAsyncSavedReport(report);
+                                rh.dataSet = dataSet;
+                                rh.report = report;
+                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                            } catch (Exception e) {
+                                rh.exception = e;
+                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                            }
                         } finally {
                             Database.closeConnection(conn);
                         }
@@ -276,6 +281,9 @@ public class AsyncReport {
                 if (dataResults == null) {
                     Thread.sleep(100);
                 }
+            }
+            if (dataResults.exception != null) {
+                throw dataResults.exception;
             }
             return dataResults;
         } catch (Exception e) {
