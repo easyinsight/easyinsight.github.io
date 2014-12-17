@@ -1,7 +1,13 @@
 package com.easyinsight.datafeeds.database;
 
 import com.easyinsight.analysis.AsyncReport;
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
+
+import java.net.InetAddress;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  * User: jamesboe
@@ -35,9 +41,26 @@ public class ReportListener implements Runnable {
     public void blah() throws Exception {
         running = true;
 
+        int serverID = 0;
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            String host = InetAddress.getLocalHost().getHostName();
+            PreparedStatement stmt = conn.prepareStatement("SELECT server_id FROM server WHERE server_host = ?");
+            stmt.setString(1, host);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            serverID = rs.getInt(1);
+            stmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
         while (running) {
             try {
-                new AsyncReport().claimAndRun();
+                new AsyncReport(serverID).claimAndRun();
             } catch (Exception e) {
                 LogClass.error(e);
             }
