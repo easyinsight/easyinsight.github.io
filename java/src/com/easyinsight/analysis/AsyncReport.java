@@ -18,6 +18,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -25,6 +28,86 @@ import java.util.ArrayList;
  * Time: 11:16 AM
  */
 public class AsyncReport {
+
+    private int serverID;
+
+    public AsyncReport(int serverID) {
+        this.serverID = serverID;
+    }
+
+    public static final int WAITING_ASSIGN = 1;
+    public static final int ASSIGNED = 2;
+    public static final int IN_PROGRESS = 3;
+    public static final int FINISHED = 4;
+
+    public void assign() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            List<Integer> servers = new ArrayList<>();
+            PreparedStatement stmt = conn.prepareStatement("SELECT server_id FROM server WHERE enabled = ? AND report_listener = ?");
+            stmt.setBoolean(1, true);
+            stmt.setBoolean(2, true);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                servers.add(rs.getInt(1));
+            }
+            stmt.close();
+            PreparedStatement workStmt = conn.prepareStatement("SELECT async_report_request_id, assigned_server, request_state FROM async_report_request WHERE request_state = ? OR request_state = ? OR request_state = ?");
+            workStmt.setInt(1, WAITING_ASSIGN);
+            workStmt.setInt(2, ASSIGNED);
+            workStmt.setInt(3, IN_PROGRESS);
+            ResultSet workRS = workStmt.executeQuery();
+            Map<Integer, Integer> loadMap = new HashMap<>();
+            for (Integer serverID : servers) {
+                loadMap.put(serverID, 0);
+            }
+            List<Long> waitingForAssign = new ArrayList<>(1);
+            while (workRS.next()) {
+                long requestID = workRS.getLong(1);
+                int assignedServer = workRS.getInt(2);
+                boolean serverAssigned = !workRS.wasNull();
+                int requestState = workRS.getInt(3);
+                if (requestState == WAITING_ASSIGN) {
+                    waitingForAssign.add(requestID);
+                }
+                if (serverAssigned) {
+                    Integer count = loadMap.get(assignedServer);
+                    loadMap.put(assignedServer, count + 1);
+                }
+            }
+            workStmt.close();
+
+            if (waitingForAssign.size() > 0) {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE async_report_request SET request_state = ?, assigned_server = ? WHERE async_report_request_id = ?");
+                for (Long requestID : waitingForAssign) {
+                    int leastLoaded = Integer.MAX_VALUE;
+                    Integer server = null;
+                    for (Map.Entry<Integer, Integer> entry : loadMap.entrySet()) {
+                        if (entry.getValue() < leastLoaded) {
+                            leastLoaded = entry.getValue();
+                            server = entry.getKey();
+                        }
+                    }
+                    if (server == null) {
+                        throw new RuntimeException("Could not find a server to assign tasks.");
+                    }
+                    updateStmt.setInt(1, ASSIGNED);
+                    updateStmt.setInt(2, server);
+                    updateStmt.setLong(3, requestID);
+                    updateStmt.executeUpdate();
+                }
+                updateStmt.close();
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
 
     public void claimAndRun() throws InterruptedException {
         Long requestID = null;
@@ -36,8 +119,9 @@ public class AsyncReport {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
-                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, user_id FROM async_report_request WHERE claimed = ?");
-                q.setBoolean(1, false);
+                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, user_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
+                q.setInt(1, ASSIGNED);
+                q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
                 if (rs.next()) {
                     requestID = rs.getLong(1);
@@ -45,8 +129,8 @@ public class AsyncReport {
                     metadataBytes = rs.getBytes(3);
                     requestType = rs.getInt(4);
                     userID = rs.getLong(5);
-                    PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET claimed = ? WHERE async_report_request_id = ?");
-                    u.setBoolean(1, true);
+                    PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+                    u.setInt(1, IN_PROGRESS);
                     u.setLong(2, requestID);
                     u.executeUpdate();
                     u.close();
@@ -177,6 +261,16 @@ public class AsyncReport {
                             Database.closeConnection(conn);
                         }
                     }
+                    conn = Database.instance().getConnection();
+                    try {
+                        PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+                        u.setInt(1, FINISHED);
+                        u.setLong(2, frequestID);
+                        u.executeUpdate();
+                        u.close();
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
                 } finally {
                     SecurityUtil.clearThreadLocal();
                 }
@@ -232,9 +326,9 @@ public class AsyncReport {
         oos.writeObject(insightRequestMetadata);
         oos.flush();
         byte[] metadata = baos.toByteArray();
-        PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (claimed, report, metadata, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+        PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, metadata, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
-        reqStmt.setBoolean(1, false);
+        reqStmt.setInt(1, WAITING_ASSIGN);
         reqStmt.setBytes(2, reportBytes);
         reqStmt.setBytes(3, metadata);
         reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
