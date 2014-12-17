@@ -1,6 +1,7 @@
 package com.easyinsight.admin;
 
 import com.easyinsight.cache.MemCachedManager;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
@@ -10,6 +11,7 @@ import java.net.InetAddress;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Map;
 
 /**
@@ -100,11 +102,30 @@ public class HealthListener implements Runnable {
             stmt.setString(1, host);
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SERVER (SERVER_HOST, ENABLED) VALUES (?, ?)");
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SERVER (server_host, enabled, database_listener, report_listener," +
+                        "data_source_listener, healthy, last_healthy_time) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 insertStmt.setString(1, host);
-                insertStmt.setBoolean(2, false);
+                insertStmt.setBoolean(2, true);
+                insertStmt.setBoolean(3, ConfigLoader.instance().isDatabaseListener());
+                insertStmt.setBoolean(4, ConfigLoader.instance().isTaskRunner());
+                insertStmt.setBoolean(5, ConfigLoader.instance().isTaskRunner());
+                insertStmt.setBoolean(6, true);
+                insertStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
                 insertStmt.execute();
+                insertStmt.close();
+            } else {
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE SERVER SET database_listener = ?, report_listener = ?," +
+                        "data_source_listener = ?, healthy = ?, last_healthy_time = ? WHERE server_host = ?");
+                updateStmt.setBoolean(1, ConfigLoader.instance().isDatabaseListener());
+                updateStmt.setBoolean(2, ConfigLoader.instance().isTaskRunner());
+                updateStmt.setBoolean(3, ConfigLoader.instance().isTaskRunner());
+                updateStmt.setBoolean(4, true);
+                updateStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+                updateStmt.setString(6, host);
+                updateStmt.execute();
+                updateStmt.close();
             }
+            stmt.close();
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
