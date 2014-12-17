@@ -9,6 +9,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.pipeline.IComponent;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public class CalculationMetadata {
     private boolean filterTimeShift;
     private List<IComponent> generatedComponents = new ArrayList<IComponent>();
     private Calendar calendar = Calendar.getInstance();
-
+    private ExportMetadata exportMetadata;
     private List<String> warnings = new ArrayList<String>();
 
     public boolean isFilterTimeShift() {
@@ -50,6 +51,14 @@ public class CalculationMetadata {
 
     public List<IComponent> getGeneratedComponents() {
         return generatedComponents;
+    }
+
+    public ExportMetadata getExportMetadata() {
+        return exportMetadata;
+    }
+
+    public void setExportMetadata(ExportMetadata exportMetadata) {
+        this.exportMetadata = exportMetadata;
     }
 
     public ICalculationCache getCache(ICacheBuilder cacheBuilder, String key) {
