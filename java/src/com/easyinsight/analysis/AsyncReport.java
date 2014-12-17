@@ -196,12 +196,20 @@ public class AsyncReport {
         try {
             long reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_EDITOR);
 
+            int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null) {
+            while (dataResults == null && elapsedTime < TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
+                    elapsedTime += 100;
                     Thread.sleep(100);
                 }
+            }
+            if (dataResults == null) {
+                LogClass.error("Timeout");
+                ListDataResults embeddedDataResults = new ListDataResults();
+                embeddedDataResults.setReportFault(new ServerError("The report timed out."));
+                return embeddedDataResults;
             }
             dataResults.dataResults.setReport(dataResults.report);
             return dataResults.dataResults;
@@ -248,12 +256,20 @@ public class AsyncReport {
                 Database.closeConnection(conn);
             }
 
+            int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null) {
+            while (dataResults == null && elapsedTime < TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
+                    elapsedTime += 100;
                     Thread.sleep(100);
                 }
+            }
+            if (dataResults == null) {
+                LogClass.error("Timeout");
+                ListDataResults embeddedDataResults = new ListDataResults();
+                embeddedDataResults.setReportFault(new ServerError("The report timed out."));
+                return embeddedDataResults;
             }
             dataResults.dataResults.setReport(dataResults.report);
             return dataResults.dataResults;
@@ -265,6 +281,8 @@ public class AsyncReport {
         }
     }
 
+    public static final int TIMEOUT = 60000;
+
     public static ResultData asyncDataSet(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata)  {
         try {
             long reqID;
@@ -275,12 +293,17 @@ public class AsyncReport {
                 Database.closeConnection(conn);
             }
 
+            int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null) {
+            while (dataResults == null && elapsedTime < TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
+                    elapsedTime += 100;
                     Thread.sleep(100);
                 }
+            }
+            if (dataResults == null) {
+                throw new RuntimeException("Timeout");
             }
             if (dataResults.exception != null) {
                 throw dataResults.exception;
@@ -302,12 +325,22 @@ public class AsyncReport {
                 Database.closeConnection(conn);
             }
 
+            int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null) {
+            while (dataResults == null && elapsedTime < TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
+                    elapsedTime += 100;
                     Thread.sleep(100);
                 }
+            }
+            if (dataResults == null) {
+                LogClass.error("Timeout");
+                EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
+                embeddedDataResults.setReportFault(new ServerError("The report timed out."));
+                ResultData resultData = new ResultData();
+                resultData.results = embeddedDataResults;
+                return resultData;
             }
             return dataResults;
         } catch (Exception e) {
@@ -315,7 +348,9 @@ public class AsyncReport {
             EmbeddedResults embeddedDataResults = new EmbeddedResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
             //return embeddedDataResults;
-            throw new RuntimeException(e);
+            ResultData resultData = new ResultData();
+            resultData.results = embeddedDataResults;
+            return resultData;
         }
     }
 }
