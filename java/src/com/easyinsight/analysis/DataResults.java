@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.intention.IntentionSuggestion;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -9,7 +10,7 @@ import java.util.*;
  * Date: Nov 30, 2009
  * Time: 9:15:12 AM
  */
-public abstract class DataResults implements Cloneable {
+public abstract class DataResults implements Cloneable, Serializable {
     
     private Set<Long> invalidAnalysisItemIDs;
     private WSAnalysisDefinition report;
