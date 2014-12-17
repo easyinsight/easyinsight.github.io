@@ -14,6 +14,7 @@ import com.easyinsight.datafeeds.custom.ThreadDumpWatcher;
 import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.datafeeds.database.DatabaseListener;
 //import com.easyinsight.datafeeds.database.ReportListener;
+import com.easyinsight.datafeeds.database.ReportListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.Scheduler;
@@ -54,6 +55,8 @@ public class EIContextListener implements ServletContextListener {
                 CurrencyRetrieval.initialize();
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     DatabaseListener.initialize();
+                    DataSourceListener.initialize();
+                    ReportListener.initialize();
                 }
                 new Migrations().migrate();
                 // create schedulers...
@@ -72,8 +75,6 @@ public class EIContextListener implements ServletContextListener {
                 }
                 if (ConfigLoader.instance().isTaskRunner()) {
                     scheduler.start();
-                    DataSourceListener.initialize();
-                    //ReportListener.initialize();
                 }
                 try {
                     MemCachedManager.initialize();
@@ -126,6 +127,10 @@ public class EIContextListener implements ServletContextListener {
 
         if (DataSourceListener.instance() != null) {
             DataSourceListener.instance().stop();
+        }
+
+        if (ReportListener.instance() != null) {
+            ReportListener.instance().stop();
         }
 
         if (ThreadDumpWatcher.instance() != null) {
