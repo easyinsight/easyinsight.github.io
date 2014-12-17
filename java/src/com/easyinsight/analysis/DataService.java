@@ -2491,6 +2491,7 @@ public class DataService {
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
         accountAsyncHack(insightRequestMetadata);
         if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
             return AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
         } else {
             boolean success;
