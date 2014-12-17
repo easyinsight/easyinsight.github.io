@@ -5,6 +5,7 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.FilterComponent;
 import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.Pipeline;
@@ -511,14 +512,14 @@ public class FilterDefinition implements Serializable, Cloneable {
         return filterElement;
     }
 
-    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
+    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters, EIConnection conn) {
         if (getField() != null) {
             if (getField().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) getField();
-                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(getField().toOriginalDisplayName(), getField().getKey());
+                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(getField().toOriginalDisplayName(), getField().getKey(), conn);
                 dateDim.setTimeshift(dateTime);
             }
-        }               // https://www.pivotaltracker.com/story/show/37900405
+        }
     }
 
     public void calculationItems(Map<String, List<AnalysisItem>> map) {
