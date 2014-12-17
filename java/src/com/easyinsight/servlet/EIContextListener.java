@@ -55,8 +55,6 @@ public class EIContextListener implements ServletContextListener {
                 CurrencyRetrieval.initialize();
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     DatabaseListener.initialize();
-                    DataSourceListener.initialize();
-                    ReportListener.initialize();
                 }
                 new Migrations().migrate();
                 // create schedulers...
@@ -90,9 +88,16 @@ public class EIContextListener implements ServletContextListener {
                 healthThread.setName("Health Listener");
                 healthThread.setDaemon(true);
                 healthThread.start();
+
+                WorkerManager.initialize();
+
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     CacheTimer.initialize();
                     CacheTimer.instance().start();
+                }
+                if (ConfigLoader.instance().isTaskRunner()) {
+                    DataSourceListener.initialize();
+                    ReportListener.initialize();
                 }
                 ThreadDumpWatcher.initialize();
             }
@@ -106,6 +111,9 @@ public class EIContextListener implements ServletContextListener {
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         LogClass.info("Shutting down...");
+        if (WorkerManager.instance() != null) {
+            WorkerManager.instance().stop();
+        }
         try {
             healthListener.stop();
             healthThread.interrupt();
