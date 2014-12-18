@@ -1,6 +1,6 @@
 <Context reloadable="true">
 
-    <Valve className="flex.messaging.security.TomcatValve"/>
+    <Valve className="flex.messaging.security.TomcatValve" asyncSupported="true" />
 
     <JarScanner>
         <JarScanFilter

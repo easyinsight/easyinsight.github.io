@@ -7,6 +7,7 @@ import com.easyinsight.export.ScheduledActivity;
 import net.minidev.json.JSONObject;
 
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.function.Function;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/scheduled_tasks.json", asyncSupported = true)
 public class ScheduledActivitiesServlet extends JSONServlet {
 
 

@@ -6,6 +6,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import java.io.InputStream;
  * Time: 11:10 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebFilter(value = "/html/filterValue", asyncSupported = true)
 public class FilterPublicFilter implements Filter {
     public void destroy() {
     }

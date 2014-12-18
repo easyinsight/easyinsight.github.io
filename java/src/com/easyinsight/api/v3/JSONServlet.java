@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -121,46 +122,48 @@ public abstract class JSONServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            authProcessor(req, resp, authorizeFilter(req, resp, () ->
-                    Database.useConnection((conn) -> {
-                        try {
-                            ResponseInfo responseInfo;
+        AsyncContext context = req.startAsync();
+        context.start(() -> {
+            try {
+                authProcessor((HttpServletRequest) context.getRequest(), (HttpServletResponse) context.getResponse(), authorizeFilter((HttpServletRequest) context.getRequest(), (HttpServletResponse) context.getResponse(), () ->
+                        Database.useConnection((conn) -> {
                             try {
-                                conn.setAutoCommit(false);
-                                responseInfo = processGet(null, conn, req);
-                                conn.commit();
-                            } catch (ServiceRuntimeException sre) {
-                                conn.rollback();
-                                LogClass.error(sre);
-                                responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
-                            } catch (ParsingException spe) {
-                                conn.rollback();
-                                responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
+                                ResponseInfo responseInfo;
+                                try {
+                                    conn.setAutoCommit(false);
+                                    responseInfo = processGet(null, conn, (HttpServletRequest) context.getRequest());
+                                    conn.commit();
+                                } catch (ServiceRuntimeException sre) {
+                                    conn.rollback();
+                                    LogClass.error(sre);
+                                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
+                                } catch (ParsingException spe) {
+                                    conn.rollback();
+                                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
+                                } catch (Exception e) {
+                                    conn.rollback();
+                                    LogClass.error(e);
+                                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                                } finally {
+                                    conn.setAutoCommit(true);
+                                    Database.closeConnection(conn);
+                                }
+                                context.getResponse().setContentType("application/json");
+                                ((HttpServletResponse) context.getResponse()).setStatus(responseInfo.getCode());
+                                context.getResponse().getOutputStream().write(responseInfo.getResponseBody().getBytes());
+                                context.getResponse().getOutputStream().flush();
                             } catch (Exception e) {
-                                conn.rollback();
-                                LogClass.error(e);
-                                responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
-                            } finally {
-                                conn.setAutoCommit(true);
-                                Database.closeConnection(conn);
+                                sendError(400, "Your request was malformed.", (HttpServletResponse) context.getResponse());
                             }
-                            resp.setContentType("application/json");
-                            resp.setStatus(responseInfo.getCode());
-                            resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
-                            resp.getOutputStream().flush();
-                        } catch (Exception e) {
-                            sendError(400, "Your request was malformed.", resp);
-                        }
-                    })));
+                        })));
 
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof IOException)
-                throw (IOException) e.getCause();
-            if (e.getCause() instanceof ServletException)
-                throw (ServletException) e.getCause();
-        }
-
+            } catch (Exception e) {
+                ((HttpServletResponse) context.getResponse()).setStatus(500);
+                LogClass.error(e);
+            }
+            context.complete();
+        });
+        System.out.println(this.getClass().getCanonicalName() + " is done!");
 
     }
 
@@ -278,7 +281,7 @@ public abstract class JSONServlet extends HttpServlet {
                 if (o instanceof JSONArray) {
                     postObject = new net.minidev.json.JSONObject();
                     postObject.put("rows", o);
-                } else if(o instanceof String) {
+                } else if (o instanceof String) {
                     postObject = null;
                 } else {
                     postObject = (net.minidev.json.JSONObject) o;

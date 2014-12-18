@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import java.io.IOException;
  * Time: 10:02 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/account/delete", asyncSupported = true)
 public class DeleteUserServlet extends JSONServlet {
     @Override
     protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {

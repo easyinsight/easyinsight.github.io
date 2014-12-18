@@ -5,6 +5,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.users.Account;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -19,6 +20,7 @@ import java.util.Map;
  * Date: 5/24/12
  * Time: 9:26 AM
  */
+@WebFilter(value = {"/html/*", "/billing/*"}, asyncSupported = true)
 public class AuthFilter implements Filter {
 
     public void init(FilterConfig filterConfig) throws ServletException {
