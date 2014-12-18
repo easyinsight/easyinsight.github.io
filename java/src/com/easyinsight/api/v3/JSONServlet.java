@@ -163,7 +163,6 @@ public abstract class JSONServlet extends HttpServlet {
             }
             context.complete();
         });
-        System.out.println(this.getClass().getCanonicalName() + " is done!");
 
     }
 
