@@ -768,7 +768,6 @@
 
     <servlet>
         <servlet-name>ReportListServlet</servlet-name>
-        <async-supported>true</async-supported>
         <servlet-class>com.easyinsight.api.v3.DataSourceInfoServlet</servlet-class>
     </servlet>
 
