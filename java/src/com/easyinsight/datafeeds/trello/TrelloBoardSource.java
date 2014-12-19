@@ -60,7 +60,6 @@ public class TrelloBoardSource extends TrelloBaseSource {
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
             for (int i = 0 ; i < boards.length(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
-                System.out.println(board);
                 IRow row = dataSet.createRow();
                 row.addValue(BOARD_ID, board.get("id").toString());
                 row.addValue(BOARD_NAME, board.get("name").toString());
