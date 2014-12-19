@@ -1244,14 +1244,11 @@ public class FeedStorage {
     }
 
     public long dataSourceIDForDataSource(String urlKey, EIConnection conn) throws SQLException {
-
-
-            PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
-            stmt.setString(1, urlKey);
-            ResultSet rs = stmt.executeQuery();
-            rs.next();
-            return rs.getLong(1);
-
+        PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
+        stmt.setString(1, urlKey);
+        ResultSet rs = stmt.executeQuery();
+        rs.next();
+        return rs.getLong(1);
     }
 
     public DataSourceDescriptor dataSourceURLKeyForDataSource(long dataSourceID) throws SQLException {

@@ -8,7 +8,6 @@ import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import com.easyinsight.security.SecurityUtil;
@@ -31,14 +30,14 @@ import java.util.stream.Collectors;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DataSourceInfoServlet extends JSONServlet {
+public class DataSourceInfoServlet extends SynchronousJSONServlet {
 
     @Override
     protected ResponseInfo processGet(net.minidev.json.JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         JSONObject responseObject = new JSONObject();
 
         String dataSourceKey = request.getParameter("dataSourceID");
-        long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
+        long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey, conn);
         DataSourceDescriptor dataSourceDescriptor = new FeedStorage().dataSourceURLKeyForDataSource(dataSourceID, conn);
         ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
         JSONArray array;
