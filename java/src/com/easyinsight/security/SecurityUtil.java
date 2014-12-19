@@ -690,6 +690,7 @@ public class SecurityUtil {
             } else {
                 throw new SecurityException();
             }
+            authorizeStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -766,6 +767,8 @@ public class SecurityUtil {
             } else {
                 throw new SecurityException();
             }
+            authorizeStmt.close();
+
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

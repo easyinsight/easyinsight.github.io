@@ -6,6 +6,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ import java.util.regex.Pattern;
  * Date: 11/4/13
  * Time: 11:49 AM
  */
+@WebFilter(value = "/html/report/*", asyncSupported = true)
 public class ReportFilter implements Filter {
     public void destroy() {
     }

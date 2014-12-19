@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +42,7 @@ import java.util.zip.ZipOutputStream;
  * Date: 7/8/13
  * Time: 1:26 PM
  */
+@WebServlet(value = "/images", asyncSupported = true)
 public class ImageUploadServlet extends JSONServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

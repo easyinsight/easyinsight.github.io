@@ -12,6 +12,7 @@ import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 11:32 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/json/fieldList", asyncSupported = true)
 public class FieldsServlet extends JSONServlet {
 
     @Override
