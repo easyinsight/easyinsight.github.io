@@ -85,7 +85,7 @@
                 if (_pair.targetValue is StringValue) {
                     targetText = StringValue(_pair.targetValue).value;
                 } else if (_pair.targetValue is DateValue) {
-                    //targetDate = DateValue(_pair.targetValue).date;
+                    targetDate = DateValue(_pair.targetValue).date;
                 } else if (_pair.targetValue is NumericValue) {
                     targetNumber = String(NumericValue(_pair.targetValue).value);
                 }
