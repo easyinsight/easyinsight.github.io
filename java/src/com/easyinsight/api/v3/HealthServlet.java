@@ -48,9 +48,9 @@ public class HealthServlet extends HttpServlet {
                     status.setExtendedCode("Failure");
                     status.setExtendedMessage(host + " has failed to update with any status information");
                     statusList.add(status);
-                } else if ((System.currentTimeMillis() - status.getTime()) > (1000 * 60 * 2)) {
+                } else if ((System.currentTimeMillis() - status.getTime()) > (1000 * 60 * 4)) {
                     status.setExtendedCode("Failure");
-                    status.setExtendedMessage(host + " hasn't updated updated status for at least two minutes");
+                    status.setExtendedMessage(host + " hasn't updated updated status for at least four minutes");
                     statusList.add(status);
                 } else if (HealthListener.FAILURE.equals(status.getCode())) {
                     status.setExtendedCode("Failure");
