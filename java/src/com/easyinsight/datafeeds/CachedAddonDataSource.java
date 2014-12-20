@@ -390,6 +390,9 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().
                         getAnalysisItemMetadataForFilter(filterValueDefinition.getFilterID(), new ArrayList<>(), 0, conn);
                 for (String string : metadata.getStrings()) {
+                    if ("[ No Value ]".equals(string)) {
+                        continue;
+                    }
                     System.out.println("Generating report for " + string);
                     List<Object> blah = Arrays.asList(string);
                     filterValueDefinition.setFilteredValues(blah);
