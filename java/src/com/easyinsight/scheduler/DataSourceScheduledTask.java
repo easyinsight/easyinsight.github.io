@@ -181,7 +181,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
         public boolean invoke() throws Exception {
             MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            String requestID = dataSourceID + "^" + System.currentTimeMillis();
+            String requestID = dataSourceID + "^" + System.currentTimeMillis() + "^" + System.currentTimeMillis();
             msgQueue.sendMessage(requestID);
             boolean responded = false;
             boolean changed = false;
