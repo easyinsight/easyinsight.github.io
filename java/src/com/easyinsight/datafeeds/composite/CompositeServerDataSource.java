@@ -6,6 +6,7 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.intention.Intention;
 import com.easyinsight.intention.IntentionSuggestion;
 import com.easyinsight.scorecard.DataSourceRefreshEvent;
@@ -199,6 +200,13 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);
         FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, null, uploadPolicy);
+
+        if (this instanceof SalesforceBaseDataSource) {
+            conn.commit();
+            beforeRefresh(null);
+            conn.setAutoCommit(false);
+        }
+
         obtainChildDataSources(conn);
         new FeedStorage().updateDataFeedConfiguration(this, conn);
         return feedCreationResult.getFeedID();
@@ -253,6 +261,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         Set<FeedType> feedTypes = getFeedTypes();
         Map<FeedType, FeedDefinition> feedTypeMap = new HashMap<FeedType, FeedDefinition>();
         boolean newSource = getCompositeFeedNodes().size() == 0;
+
         for (CompositeFeedNode node : getCompositeFeedNodes()) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
             if (feedDefinition instanceof IServerDataSourceDefinition) {
@@ -264,8 +273,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         newSource = newSource || getFeedType().getType() == FeedType.ZENDESK_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.CONSTANT_CONTACT.getType() ||
                 getFeedType().getType() == FeedType.HARVEST_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.MAILCHIMP_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.BATCHBOOK2_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.FRESHDESK_COMPOSITE.getType() ||
+                getFeedType().getType() == FeedType.TEAMWORK_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.BASECAMP_NEXT_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.INSIGHTLY_COMPOSITE.getType() ||
                 getFeedType().getType() == FeedType.SAMPLE_COMPOSITE.getType() ||
@@ -460,7 +471,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 if (callDataID != null) {
                     DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                     info.setDataSourceName("Looking for any changed fields on " + source.getFeedName());
-                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
+                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info, conn);
                 }
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 MigrationResult migrationResult = serverDataSourceDefinition.migrations(conn, this);
@@ -478,7 +489,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 if (callDataID != null) {
                     DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                     info.setDataSourceName("Retrieving data from " + source.getFeedName());
-                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
+                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info, conn);
                 }
                 tempTables.put(serverDataSourceDefinition.getDataFeedID(),
                         serverDataSourceDefinition.tempLoad(keyMap.get(serverDataSourceDefinition.getDataFeedID()), now,
@@ -493,7 +504,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 if (callDataID != null) {
                     DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                     info.setDataSourceName("Persisting data from " + source.getFeedName());
-                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info);
+                    ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info, conn);
                 }
                 String tempTable = tempTables.get(serverDataSourceDefinition.getDataFeedID());
                 serverDataSourceDefinition.applyTempLoad(conn, accountID, this, lastRefreshTime, tempTable, fullRefresh, warnings, null);
