@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -11,6 +12,7 @@ import java.io.IOException;
  * Date: 5/24/12
  * Time: 9:26 AM
  */
+@WebFilter(value = {"/html/*", "/embed/*", "/billing/*"}, asyncSupported = true)
 public class NoCacheFilter implements Filter {
 
     public void init(FilterConfig filterConfig) throws ServletException {

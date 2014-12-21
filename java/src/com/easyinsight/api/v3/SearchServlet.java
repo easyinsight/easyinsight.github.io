@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/search", asyncSupported = true)
 public class SearchServlet extends JSONServlet {
 
     @Override

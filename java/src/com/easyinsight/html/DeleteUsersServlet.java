@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
  * Time: 10:02 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/account/deleteUsers", asyncSupported = true)
 public class DeleteUsersServlet extends JSONServlet {
 
     @Override

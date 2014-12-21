@@ -78,9 +78,10 @@ public class DatabaseListener implements Runnable {
                 } else {
                     String body = message.getMessageBody();
                     messageQueue.deleteMessage(message);
-                    String[] tokens = body.split("\\|");
+                    String[] tokens = body.split("\\^");
                     final long sourceID = Long.parseLong(tokens[0]);
                     long time = Long.parseLong(tokens[1]);
+                    String callID = tokens[2];
 
                     if (time < (System.currentTimeMillis() - (1000 * 60 * 60))) {
                         System.out.println("Dropping old message from " + new Date(time));
@@ -144,9 +145,9 @@ public class DatabaseListener implements Runnable {
                                 try {
                                     MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
                                     if (e.getCause() == null) {
-                                        responseQueue.sendMessage(String.valueOf(sourceID) + "|false|" + e.getMessage());
+                                        responseQueue.sendMessage(String.valueOf(sourceID) + "|false|" + e.getMessage() + "|" + System.currentTimeMillis() + "|" + body);
                                     } else {
-                                        responseQueue.sendMessage(String.valueOf(sourceID) + "|false|" + e.getCause().getMessage());
+                                        responseQueue.sendMessage(String.valueOf(sourceID) + "|false|" + e.getCause().getMessage() + "|" + System.currentTimeMillis() + "|" + body);
                                     }
                                 } catch (Exception e1) {
                                     LogClass.error(e1);
@@ -158,7 +159,7 @@ public class DatabaseListener implements Runnable {
                             }
                             try {
                                 MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed + "| " + System.currentTimeMillis());
+                                responseQueue.sendMessage(String.valueOf(sourceID) + "|true|" + changed + "| " + System.currentTimeMillis() + "|" + body);
                             } catch (Exception e) {
                                 LogClass.error(e);
                             }

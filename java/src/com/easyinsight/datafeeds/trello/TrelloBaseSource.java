@@ -31,29 +31,38 @@ import java.io.IOException;
  */
 public abstract class TrelloBaseSource extends ServerDataSourceDefinition {
     public JSONArray runRequest(String url, org.apache.http.client.HttpClient httpClient, TrelloCompositeSource trelloCompositeSource) throws IOException, JSONException, OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException {
-        OAuthConsumer consumer = new CommonsHttpOAuthConsumer(TrelloCompositeSource.KEY, TrelloCompositeSource.SECRET_KEY);
-        consumer.setMessageSigner(new HmacSha1MessageSigner());
-        consumer.setTokenWithSecret(trelloCompositeSource.getTokenKey(), trelloCompositeSource.getTokenSecret());
-        HttpGet httpRequest = new HttpGet(url);
-        httpRequest.setHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
-        consumer.sign(httpRequest);
+        int retryCount = 0;
+        do {
+            try {
+                OAuthConsumer consumer = new CommonsHttpOAuthConsumer(TrelloCompositeSource.KEY, TrelloCompositeSource.SECRET_KEY);
+                consumer.setMessageSigner(new HmacSha1MessageSigner());
+                consumer.setTokenWithSecret(trelloCompositeSource.getTokenKey(), trelloCompositeSource.getTokenSecret());
+                HttpGet httpRequest = new HttpGet(url);
+                httpRequest.setHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+                consumer.sign(httpRequest);
 
-        ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-            public String handleResponse(final HttpResponse response)
-                    throws IOException {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() >= 300) {
-                    throw new HttpResponseException(statusLine.getStatusCode(),
-                            statusLine.getReasonPhrase());
+                ResponseHandler<String> responseHandler = response -> {
+                    StatusLine statusLine = response.getStatusLine();
+                    if (statusLine.getStatusCode() >= 300) {
+                        throw new HttpResponseException(statusLine.getStatusCode(),
+                                statusLine.getReasonPhrase());
+                    }
+
+                    HttpEntity entity = response.getEntity();
+                    return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
+                };
+
+                String string = httpClient.execute(httpRequest, responseHandler);
+                return new JSONArray(string);
+            } catch (HttpResponseException hre) {
+                if (hre.getMessage().contains("Time-out")) {
+                    retryCount++;
+                } else {
+                    throw new RuntimeException(hre);
                 }
-
-                HttpEntity entity = response.getEntity();
-                return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
             }
-        };
-
-        String string = httpClient.execute(httpRequest, responseHandler);
-        return new JSONArray(string);
+        } while (retryCount < 3);
+        throw new RuntimeException("Trello server error--please try again later.");
     }
 
     public JSONObject runRequestForObject(String url, org.apache.http.client.HttpClient httpClient, TrelloCompositeSource trelloCompositeSource) throws IOException, JSONException, OAuthExpectationFailedException, OAuthMessageSignerException, OAuthCommunicationException {
@@ -64,18 +73,15 @@ public abstract class TrelloBaseSource extends ServerDataSourceDefinition {
         httpRequest.setHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
         consumer.sign(httpRequest);
 
-        ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-            public String handleResponse(final HttpResponse response)
-                    throws IOException {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() >= 300) {
-                    throw new HttpResponseException(statusLine.getStatusCode(),
-                            statusLine.getReasonPhrase());
-                }
-
-                HttpEntity entity = response.getEntity();
-                return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
+        ResponseHandler<String> responseHandler = response -> {
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() >= 300) {
+                throw new HttpResponseException(statusLine.getStatusCode(),
+                        statusLine.getReasonPhrase());
             }
+
+            HttpEntity entity = response.getEntity();
+            return entity == null ? null : EntityUtils.toString(entity, "UTF-8");
         };
 
         String string = httpClient.execute(httpRequest, responseHandler);

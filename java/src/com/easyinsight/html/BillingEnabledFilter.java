@@ -3,6 +3,7 @@ package com.easyinsight.html;
 import com.easyinsight.config.ConfigLoader;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.io.IOException;
  * Time: 8:43 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebFilter(value = "/billing/*", asyncSupported = true)
 public class BillingEnabledFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
 

@@ -131,6 +131,12 @@ public class AppInstanceTask extends Task {
         Document document = builder.parse(content);
 
         List<Instance> instances = new ArrayList<>();
+
+        try {
+            printDocument(document, System.out);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
         NodeList transactions = document.getElementsByTagName("reservationSet");
         if (transactions.getLength() == 0) {
             System.out.println("No running transactions");
@@ -148,7 +154,9 @@ public class AppInstanceTask extends Task {
                                 if (infoNode.hasChildNodes()) {
                                     boolean correctRole = false;
                                     String type = "";
+                                    boolean vpc = false;
                                     for (int l = 0; l < infoNode.getChildNodes().getLength(); l++) {
+
                                         if ("tagSet".equals(infoNode.getChildNodes().item(l).getNodeName())) {
                                             Node tagsNode = infoNode.getChildNodes().item(l);
                                             for (int m = 0; m < tagsNode.getChildNodes().getLength(); m++) {
@@ -169,11 +177,14 @@ public class AppInstanceTask extends Task {
                                         if("instanceType".equals(infoNode.getChildNodes().item(l).getNodeName())) {
                                             type = infoNode.getChildNodes().item(l).getTextContent();
                                         }
+                                        if("vpcId".equals(infoNode.getChildNodes().item(l).getNodeName())) {
+                                            vpc = true;
+                                        }
                                     }
                                     String state = infoNode.getChildNodes().item(5).getChildNodes().item(3).getFirstChild().getNodeValue();
                                     if (correctRole && "running".equals(state)) {
                                         Instance curInstance = new Instance();
-                                        String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
+                                        String dns = infoNode.getChildNodes().item(7 + (vpc ? 2 : 0)).getFirstChild().getNodeValue();
                                         System.out.println(dns);
                                         curInstance.host = dns;
                                         curInstance.type = type;

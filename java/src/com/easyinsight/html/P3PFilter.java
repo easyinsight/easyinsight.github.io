@@ -1,6 +1,7 @@
 package com.easyinsight.html;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
  * Time: 3:24 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebFilter(value = "/*", asyncSupported = true)
 public class P3PFilter implements Filter {
     public void destroy() {
     }

@@ -8,6 +8,7 @@ import com.easyinsight.security.SecurityUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

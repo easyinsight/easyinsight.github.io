@@ -52,7 +52,8 @@
     </target>
 
     <target name="shutdownLargeInstances">
-       <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="shutdown" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="shutdown" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="shutdown" />
    </target>
 
     <target name="downloadStagingInstances">
@@ -65,10 +66,12 @@
 
     <target name="downloadLargeInstances">
         <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="download"/>
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="download"/>
     </target>
 
     <target name="updateLargeInstances">
         <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="update" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="update" />
     </target>
 
     <target name="updateStagingInstances">
@@ -85,6 +88,7 @@
 
     <target name="startLargeInstances">
         <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="startup" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="startup" />
     </target>
 
     <target name="startInstances">
@@ -338,6 +342,9 @@
                     <include name="*.jar"/>
                 </fileset>
                 <fileset dir="../java/lib/excel">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/servlet">
                     <include name="*.jar"/>
                 </fileset>
             </classpath>

@@ -40,6 +40,7 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
     private transient boolean optimizeDays;
     private transient Map<String, Boolean> timeshiftState = new HashMap<String, Boolean>();
+    private transient boolean noAsync;
 
     private transient List<ReportAuditEvent> auditEvents = new ArrayList<ReportAuditEvent>();
     private transient List<String> warnings = new ArrayList<String>();
@@ -89,6 +90,14 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setCacheForHTML(boolean cacheForHTML) {
         this.cacheForHTML = cacheForHTML;
+    }
+
+    public boolean isNoAsync() {
+        return noAsync;
+    }
+
+    public void setNoAsync(boolean noAsync) {
+        this.noAsync = noAsync;
     }
 
     public ZoneId createZoneID() {

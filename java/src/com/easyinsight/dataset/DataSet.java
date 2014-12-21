@@ -26,6 +26,8 @@ public class DataSet implements Serializable, Cloneable {
 
     private List<DataSet> additionalSets = new ArrayList<DataSet>();
 
+    private WSAnalysisDefinition asyncSavedReport;
+
     private long time;
 
     public DataSet() {
@@ -41,6 +43,14 @@ public class DataSet implements Serializable, Cloneable {
     public DataSet(List<IRow> rows) {
         this.rows = rows;
         time = System.currentTimeMillis();
+    }
+
+    public WSAnalysisDefinition getAsyncSavedReport() {
+        return asyncSavedReport;
+    }
+
+    public void setAsyncSavedReport(WSAnalysisDefinition asyncSavedReport) {
+        this.asyncSavedReport = asyncSavedReport;
     }
 
     public long getTime() {
