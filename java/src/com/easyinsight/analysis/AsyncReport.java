@@ -232,16 +232,18 @@ public class AsyncReport {
                         } else if (report instanceof WSCompareYearsDefinition) {
                             results = getCompareYearsResults(report, localMetadata);
                         } else {*/
+                        ResultData rh = new ResultData();
                         conn = Database.instance().getConnection();
                         try {
                             results = new DataService().getEmbeddedResultsForReport(report, new ArrayList<>(), localMetadata, new ArrayList<>(), conn);
+                            rh.results = results;
+                            rh.report = report;
+                        } catch (Exception e) {
+                            rh.exception = e;
                         } finally {
                             Database.closeConnection(conn);
                         }
                         //}
-                        ResultData rh = new ResultData();
-                        rh.results = results;
-                        rh.report = report;
                         MemCachedManager.instance().add("async" + frequestID, 100, rh);
                     } else if (frequestType == REPORT_DATA_SET) {
                         conn = Database.instance().getConnection();
@@ -276,6 +278,18 @@ public class AsyncReport {
                 }
 
             } catch (Exception e) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+                    u.setInt(1, FINISHED);
+                    u.setLong(2, frequestID);
+                    u.executeUpdate();
+                    u.close();
+                } catch (Exception e1) {
+                    LogClass.error(e1);
+                } finally {
+                    Database.closeConnection(conn);
+                }
                 LogClass.error(e);
             }
         });
@@ -419,6 +433,8 @@ public class AsyncReport {
                 Database.closeConnection(conn);
             }
 
+            // requestor, start date,
+
             int elapsedTime = 0;
             ResultData dataResults = null;
             while (dataResults == null && elapsedTime < TIMEOUT) {
@@ -436,10 +452,13 @@ public class AsyncReport {
                 resultData.results = embeddedDataResults;
                 return resultData;
             }
+            if (dataResults.exception != null) {
+                throw dataResults.exception;
+            }
             return dataResults;
         } catch (Exception e) {
             LogClass.error(e);
-            EmbeddedResults embeddedDataResults = new EmbeddedResults();
+            EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
             //return embeddedDataResults;
             ResultData resultData = new ResultData();
