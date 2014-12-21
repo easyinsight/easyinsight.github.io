@@ -354,6 +354,8 @@ public class FunctionFactory {
             return new LastDate();
         } else if (s.equals("contains")) {
             return new Contains();
+        } else if (s.equals("sum")) {
+            return new Sum();
         } else {
             return null;
         }
