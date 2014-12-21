@@ -122,47 +122,46 @@ public abstract class JSONServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AsyncContext context = req.startAsync();
-        context.start(() -> {
-            try {
-                authProcessor((HttpServletRequest) context.getRequest(), (HttpServletResponse) context.getResponse(), authorizeFilter((HttpServletRequest) context.getRequest(), (HttpServletResponse) context.getResponse(), () ->
-                        Database.useConnection((conn) -> {
+        try {
+            authProcessor(req, resp, authorizeFilter(req, resp, () ->
+                    Database.useConnection((conn) -> {
+                        try {
+                            ResponseInfo responseInfo;
                             try {
-                                ResponseInfo responseInfo;
-                                try {
-                                    conn.setAutoCommit(false);
-                                    responseInfo = processGet(null, conn, (HttpServletRequest) context.getRequest());
-                                    conn.commit();
-                                } catch (ServiceRuntimeException sre) {
-                                    conn.rollback();
-                                    LogClass.error(sre);
-                                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
-                                } catch (ParsingException spe) {
-                                    conn.rollback();
-                                    responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
-                                } catch (Exception e) {
-                                    conn.rollback();
-                                    LogClass.error(e);
-                                    responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
-                                } finally {
-                                    conn.setAutoCommit(true);
-                                    Database.closeConnection(conn);
-                                }
-                                context.getResponse().setContentType("application/json");
-                                ((HttpServletResponse) context.getResponse()).setStatus(responseInfo.getCode());
-                                context.getResponse().getOutputStream().write(responseInfo.getResponseBody().getBytes());
-                                context.getResponse().getOutputStream().flush();
+                                conn.setAutoCommit(false);
+                                responseInfo = processGet(null, conn, req);
+                                conn.commit();
+                            } catch (ServiceRuntimeException sre) {
+                                conn.rollback();
+                                LogClass.error(sre);
+                                responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, sre.getMessage());
+                            } catch (ParsingException spe) {
+                                conn.rollback();
+                                responseInfo = new ResponseInfo(ResponseInfo.BAD_REQUEST, spe.getMessage());
                             } catch (Exception e) {
-                                sendError(400, "Your request was malformed.", (HttpServletResponse) context.getResponse());
+                                conn.rollback();
+                                LogClass.error(e);
+                                responseInfo = new ResponseInfo(ResponseInfo.SERVER_ERROR, "An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
+                            } finally {
+                                conn.setAutoCommit(true);
+                                Database.closeConnection(conn);
                             }
-                        })));
+                            resp.setContentType("application/json");
+                            resp.setStatus(responseInfo.getCode());
+                            resp.getOutputStream().write(responseInfo.getResponseBody().getBytes());
+                            resp.getOutputStream().flush();
+                        } catch (Exception e) {
+                            sendError(400, "Your request was malformed.", resp);
+                        }
+                    })));
 
-            } catch (Exception e) {
-                ((HttpServletResponse) context.getResponse()).setStatus(500);
-                LogClass.error(e);
-            }
-            context.complete();
-        });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException)
+                throw (IOException) e.getCause();
+            if (e.getCause() instanceof ServletException)
+                throw (ServletException) e.getCause();
+        }
+
 
     }
 
@@ -280,7 +279,7 @@ public abstract class JSONServlet extends HttpServlet {
                 if (o instanceof JSONArray) {
                     postObject = new net.minidev.json.JSONObject();
                     postObject.put("rows", o);
-                } else if (o instanceof String) {
+                } else if(o instanceof String) {
                     postObject = null;
                 } else {
                     postObject = (net.minidev.json.JSONObject) o;
