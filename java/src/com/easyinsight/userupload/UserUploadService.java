@@ -2502,6 +2502,11 @@ public class UserUploadService {
                 } else {
                     String body = message.getMessageBody();
                     String[] parts = body.split("\\|");
+                    if (parts.length < 5) {
+                        System.out.println("Dropping old messsage...");
+                        responseQueue.deleteMessage(message);
+                        continue;
+                    }
                     long sourceID = Long.parseLong(parts[0]);
                     //long time = Long.parseLong(parts[3]);
                     String responseID = parts[4];

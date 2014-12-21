@@ -15,6 +15,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
+import com.xerox.amazonws.sqs2.SQSException;
 import com.xerox.amazonws.sqs2.SQSUtils;
 
 import javax.persistence.Entity;
@@ -180,7 +181,8 @@ public class DataSourceScheduledTask extends ScheduledTask {
         public boolean invoke() throws Exception {
             MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            msgQueue.sendMessage(dataSourceID + "|" + System.currentTimeMillis());
+            String requestID = dataSourceID + "^" + System.currentTimeMillis();
+            msgQueue.sendMessage(requestID);
             boolean responded = false;
             boolean changed = false;
             int i = 0;
@@ -196,18 +198,24 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 } else {
                     String body = message.getMessageBody();
                     String[] parts = body.split("\\|");
-                    long sourceID = Long.parseLong(parts[0]);
-                    System.out.println("got response with id = " + sourceID);
-                    if (sourceID == dataSourceID) {
+                    if (parts.length < 5) {
+                        System.out.println("Old message of " + body + ", dropping...");
                         responseQueue.deleteMessage(message);
-                        boolean successful = Boolean.parseBoolean(parts[1]);
-                        if (successful) {
-                            changed = Boolean.parseBoolean(parts[2]);
-                            System.out.println("matched!");
-                            responded = true;
-                        } else {
-                            String error = parts[2];
-                            throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
+                    } else {
+                        long sourceID = Long.parseLong(parts[0]);
+                        String responseID = parts[4];
+                        System.out.println("got response with id = " + sourceID);
+                        if (sourceID == dataSourceID && requestID.equals(responseID)) {
+                            responseQueue.deleteMessage(message);
+                            boolean successful = Boolean.parseBoolean(parts[1]);
+                            if (successful) {
+                                changed = Boolean.parseBoolean(parts[2]);
+                                System.out.println("matched!");
+                                responded = true;
+                            } else {
+                                String error = parts[2];
+                                throw new ReportException(new DataSourceConnectivityReportFault(error, dataSource));
+                            }
                         }
                     }
                 }
@@ -242,6 +250,14 @@ public class DataSourceScheduledTask extends ScheduledTask {
                 feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
             }
             return changed;
+        }
+    }
+
+    public static void main(String[] args) throws SQSException {
+        MessageQueue mq = SQSUtils.connectToQueue("EIDBResponseProduction", "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+        while (true) {
+            Message message = mq.receiveMessage();
+            mq.deleteMessage(message);
         }
     }
 }
