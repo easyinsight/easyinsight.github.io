@@ -30,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -102,7 +103,7 @@ public class HtmlServlet extends HttpServlet {
             EIConnection conn = Database.instance().getConnection();
             try {
 
-                report = new AnalysisService().openAnalysisDefinition(reportID);
+                report = AnalysisService.openAnalysisDefinitionWithConn(reportID, conn);
 
                 boolean logReport = report.isLogReport();
 
@@ -115,13 +116,15 @@ public class HtmlServlet extends HttpServlet {
 
                 String drillThroughKey = req.getParameter("drillThroughKey");
                 boolean replaceFilters = false;
+                String zoneID = null;
                 if (drillThroughKey != null && !"undefined".equals(drillThroughKey)) {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id, phantomjs FROM drillthrough_save WHERE url_key = ?");
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT drillthrough_save_id, phantomjs, phantomjs_zoneid FROM drillthrough_save WHERE url_key = ?");
                     queryStmt.setString(1, drillThroughKey);
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
                     long drillthroughSaveID = rs.getLong(1);
                     replaceFilters = rs.getBoolean(2);
+                    zoneID = rs.getString(3);
                     queryStmt.close();
                     PreparedStatement filterStmt = conn.prepareStatement("SELECT filter_id FROM drillthrough_report_save_filter WHERE drillthrough_save_id = ?");
                     filterStmt.setLong(1, drillthroughSaveID);
@@ -179,7 +182,7 @@ public class HtmlServlet extends HttpServlet {
                 }
                 if (dashboardIDString != null) {
                     long dashboardID = Long.parseLong(dashboardIDString);
-                    Dashboard dashboard = new DashboardService().getDashboard(dashboardID);
+                    Dashboard dashboard = DashboardService.getDashboardWithConn(dashboardID, conn);
                     filters.addAll(dashboard.filtersForReport(reportID));
                 }
 
@@ -200,6 +203,9 @@ public class HtmlServlet extends HttpServlet {
                 if (req.getParameter("timezoneOffset") != null) {
                     int timezoneOffset = Integer.parseInt(req.getParameter("timezoneOffset"));
                     insightRequestMetadata.setUtcOffset(timezoneOffset);
+                }
+                if (zoneID != null) {
+                    insightRequestMetadata.setZoneID(ZoneId.of(zoneID));
                 }
                 ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
                 long start = System.currentTimeMillis();

@@ -704,7 +704,7 @@ public class FeedStorage {
     static long time = 0;
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws Exception {
-        updateDataFeedConfiguration(feedDefinition, conn, -1);
+        updateDataFeedConfiguration(feedDefinition, (EIConnection)conn, -1);
     }
 
     public void flushCache(long dataSourceID) {
@@ -716,8 +716,8 @@ public class FeedStorage {
         }
     }
 
-    public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn, int overrideType) throws Exception {
-        ReportCache.instance().flushResults(feedDefinition.getDataFeedID());
+    public void updateDataFeedConfiguration(FeedDefinition feedDefinition, EIConnection conn, int overrideType) throws Exception {
+        ReportCache.instance().flushResults(feedDefinition.getDataFeedID(), conn);
         //feedCache.remove(feedDefinition.getDataFeedID());
         MemCachedManager.delete("ds" + feedDefinition.getDataFeedID());
         if (FeedRegistry.instance() != null) {
@@ -1241,6 +1241,14 @@ public class FeedStorage {
         } finally {
             Database.closeConnection(conn);
         }
+    }
+
+    public long dataSourceIDForDataSource(String urlKey, EIConnection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
+        stmt.setString(1, urlKey);
+        ResultSet rs = stmt.executeQuery();
+        rs.next();
+        return rs.getLong(1);
     }
 
     public DataSourceDescriptor dataSourceURLKeyForDataSource(long dataSourceID) throws SQLException {

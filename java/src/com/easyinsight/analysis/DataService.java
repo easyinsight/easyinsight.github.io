@@ -30,8 +30,7 @@ import net.spy.memcached.MemcachedClient;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -831,7 +830,7 @@ public class DataService {
             WSAnalysisDefinition report = null;
             long dataSourceID;
             if (reportID != null) {
-                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC, conn);
                 report = new AnalysisStorage().getAnalysisDefinition(reportID);
                 dataSourceID = report.getDataFeedID();
             } else if (dashboardID != null) {
@@ -912,7 +911,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
-                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC, conn);
             } else if (dashboardID > 0) {
                 SecurityUtil.authorizeDashboard(dashboardID, Roles.PUBLIC);
             } else {
@@ -976,7 +975,7 @@ public class DataService {
                 }
             }
         }
-        timeshift(Arrays.asList(analysisItem), new ArrayList<>(), feed, insightRequestMetadata);
+        timeshift(Arrays.asList(analysisItem), new ArrayList<>(), feed, insightRequestMetadata, conn);
         return feed.getMetadata(analysisItem, insightRequestMetadata, conn, report, additionalFilters, requester);
     }
 
@@ -1097,7 +1096,7 @@ public class DataService {
             feedMetadata.setExchangeSave(feed.isExchangeSave());
             feedMetadata.setUrlKey(feed.getUrlKey());
             feedMetadata.setDataSourceInfo(feed.createSourceInfo(conn));
-            feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
+            feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID, conn) == Roles.OWNER);
             feedMetadata.setCustomJoinsAllowed(feed.getDataSource().customJoinsAllowed(conn));
             feedMetadata.setDataSourceType(feed.getDataSource().getFeedType().getType());
             feedMetadata.setDefaultManualRun(feed.getDataSource().isManualReportRun());
@@ -1312,14 +1311,25 @@ public class DataService {
 
 
 
-    private EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
+    public EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
-        ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
-        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
-        analysisDefinition.untweakReport(null);
-        EmbeddedResults embeddedResults = results.toEmbeddedResults();
-        embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-        embeddedResults.setDefinition(analysisDefinition);
+
+        accountAsyncHack(insightRequestMetadata);
+        EmbeddedResults embeddedResults;
+        if (!insightRequestMetadata.isNoAsync()) {
+            ReportRetrieval.asyncReportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
+            ResultData resultData = AsyncReport.asyncEndUserResults(analysisDefinition, insightRequestMetadata);
+            resultData.results.setDefinition(resultData.report);
+            return resultData.results;
+        } else {
+            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
+            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
+            analysisDefinition.untweakReport(null);
+            embeddedResults = results.toEmbeddedResults();
+            embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+            embeddedResults.setDefinition(analysisDefinition);
+        }
+
         return embeddedResults;
     }
 
@@ -1499,7 +1509,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
-            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC, conn);
             handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
 
@@ -1580,19 +1590,28 @@ public class DataService {
 
 
     public static DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
-        ReportRetrieval reportRetrieval;
-        try {
-            reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
-        if (analysisDefinition.isLogReport()) {
-            dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
-        }
-        dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            ResultData rh = AsyncReport.asyncDataSet(analysisDefinition, insightRequestMetadata);
+            DataSet dataSet = rh.dataSet;
+            dataSet.setAsyncSavedReport(rh.report);
+            return dataSet;
+        } else {
+            ReportRetrieval reportRetrieval;
+            try {
+                reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+            if (analysisDefinition.isLogReport()) {
+                dataSet.setReportLog(reportRetrieval.getPipeline().toLogString());
+            }
+            dataSet.setPipelineData(reportRetrieval.getPipeline().getPipelineData());
 
-        return dataSet;
+            return dataSet;
+        }
+
     }
 
     public static ExtendedDataSet extendedListDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
@@ -1608,11 +1627,18 @@ public class DataService {
 
     public static DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata,
                                    EIConnection conn) {
+
         try {
-            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
-            results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-            return results;
+            // how do we make this async...
+            accountAsyncHack(insightRequestMetadata, conn);
+            if (!insightRequestMetadata.isNoAsync()) {
+                return AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata, conn);
+            } else {
+                ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+                DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
+                results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+                return results;
+            }
         } catch (ReportException dae) {
             throw dae;
         } catch (Throwable e) {
@@ -1623,11 +1649,12 @@ public class DataService {
         }
     }
 
-    private static void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
+    private static void timeshift(Collection<AnalysisItem> items, Collection<FilterDefinition> filters, Feed dataSource, InsightRequestMetadata insightRequestMetadata,
+                                  EIConnection conn) {
         for (AnalysisItem item : items) {
             if (item.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 AnalysisDateDimension dateDim = (AnalysisDateDimension) item;
-                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey());
+                boolean dateTime = !dateDim.isDateOnlyField() && dataSource.getDataSource().checkDateTime(item.toOriginalDisplayName(), item.getKey(), conn);
                 if (insightRequestMetadata.isLogReport()) {
                     System.out.println("Setting " + dateDim.toDisplay() + " to timeshift of " + dateTime);
                 }
@@ -1636,10 +1663,10 @@ public class DataService {
             }
         }
         for (AnalysisItem item : items) {
-            item.timeshift(dataSource, filters);
+            item.timeshift(dataSource, filters, conn);
         }
         for (FilterDefinition filter : filters) {
-            filter.timeshift(dataSource, filters);
+            filter.timeshift(dataSource, filters, conn);
         }
     }
 
@@ -1694,7 +1721,7 @@ public class DataService {
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
-            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC, conn);
             handleTimezoneData(conn, insightRequestMetadata);
             LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
             WSTreeDefinition report = (WSTreeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
@@ -2462,83 +2489,128 @@ public class DataService {
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
-        boolean success;
-        try {
-            success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (ReportException e) {
-            ListDataResults embeddedDataResults = new ListDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
-            return embeddedDataResults;
-        }
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            long startTime = System.currentTimeMillis();
-
-            SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
-
-            handleTimezoneData(conn, insightRequestMetadata);
-
-            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
-
-            if (analysisDefinition instanceof WSTextDefinition) {
-                WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
-                textReport.beforeRun(insightRequestMetadata);
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
+            return AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
+        } else {
+            boolean success;
+            try {
+                success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+            } catch (ReportException e) {
+                ListDataResults embeddedDataResults = new ListDataResults();
+                embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+                return embeddedDataResults;
             }
-            ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
-            /*List<ReportAuditEvent> events = new ArrayList<ReportAuditEvent>();
-            events.addAll(reportRetrieval.getDataSet().getAudits());*/
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
-            boolean tooManyResults = false;
-            if (results instanceof ListDataResults) {
-                ListDataResults listDataResults = (ListDataResults) results;
-                if (!ignoreCache && analysisDefinition.getGeneralSizeLimit() > 0 && (listDataResults.getRows().length > analysisDefinition.getGeneralSizeLimit())) {
-                    tooManyResults = true;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                long startTime = System.currentTimeMillis();
+
+                SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+
+                handleTimezoneData(conn, insightRequestMetadata);
+
+                LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + analysisDefinition.getAnalysisID());
+
+                if (analysisDefinition instanceof WSTextDefinition) {
+                    WSTextDefinition textReport = (WSTextDefinition) analysisDefinition;
+                    textReport.beforeRun(insightRequestMetadata);
                 }
-            }
+                ReportRetrieval reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
+                /*List<ReportAuditEvent> events = new ArrayList<ReportAuditEvent>();
+                events.addAll(reportRetrieval.getDataSet().getAudits());*/
+                DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
+                boolean tooManyResults = false;
+                if (results instanceof ListDataResults) {
+                    ListDataResults listDataResults = (ListDataResults) results;
+                    if (!ignoreCache && analysisDefinition.getGeneralSizeLimit() > 0 && (listDataResults.getRows().length > analysisDefinition.getGeneralSizeLimit())) {
+                        tooManyResults = true;
+                    }
+                }
 
 
+                results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
 
-            results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+                if (tooManyResults) {
+                    cacheReportResults(analysisDefinition.getAnalysisID(), results);
+                    results = truncateResults(results, analysisDefinition.getGeneralSizeLimit());
+                    results.getAdditionalProperties().put("cappedResults", results.getUid());
+                }
 
-            if (tooManyResults) {
-                cacheReportResults(analysisDefinition.getAnalysisID(), results);
-                results = truncateResults(results, analysisDefinition.getGeneralSizeLimit());
-                results.getAdditionalProperties().put("cappedResults", results.getUid());
+                long elapsed = System.currentTimeMillis() - startTime;
+                long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
+                results.setProcessingTime(processingTime);
+                results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
+                decorateResults(analysisDefinition, insightRequestMetadata, conn, reportRetrieval, reportRetrieval.getDataSet().getAudits(), results);
+                if (!insightRequestMetadata.isNoLogging()) {
+                    reportEditorBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime(), conn);
+                }
+                results.setReport(analysisDefinition);
+                if (insightRequestMetadata.isCacheForHTML()) {
+                    String req = String.valueOf("chtml" + System.currentTimeMillis());
+                    results.setCacheForHTMLKey(req);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(baos);
+                    oos.writeObject(analysisDefinition);
+                    oos.flush();
+                    MemCachedManager.add(req, 50000, baos.toByteArray());
+                }
+                return results;
+            } catch (ReportException dae) {
+                ListDataResults embeddedDataResults = new ListDataResults();
+                embeddedDataResults.setReportFault(dae.getReportFault());
+                return embeddedDataResults;
+            } catch (Throwable e) {
+                LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
+                ListDataResults embeddedDataResults = new ListDataResults();
+                embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+                return embeddedDataResults;
+            } finally {
+                if (success) {
+                    UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+                }
+                Database.closeConnection(conn);
             }
+        }
+    }
 
-            long elapsed = System.currentTimeMillis() - startTime;
-            long processingTime = elapsed - insightRequestMetadata.getDatabaseTime();
-            results.setProcessingTime(processingTime);
-            results.setDatabaseTime(insightRequestMetadata.getDatabaseTime());
-            decorateResults(analysisDefinition, insightRequestMetadata, conn, reportRetrieval, reportRetrieval.getDataSet().getAudits(), results);
-            if (!insightRequestMetadata.isNoLogging()) {
-                reportEditorBenchmark(analysisDefinition, processingTime, insightRequestMetadata.getDatabaseTime(), conn);
+    protected static void accountAsyncHack(InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        if (!insightRequestMetadata.isNoAsync()) {
+            long accountID = SecurityUtil.getAccountID(false);
+
+            try {
+                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+                ps.setLong(1, accountID);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean accountAsync = rs.getBoolean(1);
+                if (!accountAsync) {
+                    insightRequestMetadata.setNoAsync(true);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
             }
-            results.setReport(analysisDefinition);
-            if (insightRequestMetadata.isCacheForHTML()) {
-                String req = String.valueOf("chtml" + System.currentTimeMillis());
-                results.setCacheForHTMLKey(req);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(analysisDefinition);
-                oos.flush();
-                MemCachedManager.add(req, 50000, baos.toByteArray());
+        }
+    }
+
+    protected static void accountAsyncHack(InsightRequestMetadata insightRequestMetadata) {
+        if (!insightRequestMetadata.isNoAsync()) {
+            long accountID = SecurityUtil.getAccountID(false);
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+                ps.setLong(1, accountID);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                boolean accountAsync = rs.getBoolean(1);
+                if (!accountAsync) {
+                    insightRequestMetadata.setNoAsync(true);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+            } finally {
+                Database.closeConnection(conn);
             }
-            return results;
-        } catch (ReportException dae) {
-            ListDataResults embeddedDataResults = new ListDataResults();
-            embeddedDataResults.setReportFault(dae.getReportFault());
-            return embeddedDataResults;
-        } catch (Throwable e) {
-            LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
-            ListDataResults embeddedDataResults = new ListDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
-            return embeddedDataResults;
-        } finally {
-            if (success) {
-                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
-            }
-            Database.closeConnection(conn);
         }
     }
 
@@ -2620,6 +2692,12 @@ public class DataService {
 
     }
 
+
+
+
+
+
+
     public AsyncReportResponse asyncList(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata, final boolean ignoreCache) {
 
 
@@ -2631,6 +2709,12 @@ public class DataService {
         final boolean accountAdmin = SecurityUtil.isAccountAdmin();
         final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
         final String personaName = SecurityUtil.getPersonaName();
+
+        // serialize the report, serialize the metadata
+        // add to database table
+
+
+
         DataSourceThreadPool.instance().addActivity(new Runnable() {
 
             public void run() {
@@ -2703,6 +2787,36 @@ public class DataService {
 
         private static ReportRetrieval reportEditor(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn) throws SQLException {
             return new ReportRetrieval(insightRequestMetadata, analysisDefinition, conn).toPipeline();
+        }
+
+        private static void asyncReportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
+                                                  @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
+
+            if (analysisDefinition.isPassThroughFilters()) {
+                Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
+                for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                    map.put(filter.getFilterID(), filter);
+                }
+                List<FilterDefinition> toSet = new ArrayList<FilterDefinition>();
+                List<FilterDefinition> toPass = new ArrayList<FilterDefinition>();
+                if (customFilters != null) {
+                    for (FilterDefinition filter : customFilters) {
+                        FilterDefinition inMap = map.get(filter.getFilterID());
+                        if (inMap != null) {
+                            toSet.add(filter);
+                        } else {
+                            toPass.add(filter);
+                        }
+                    }
+                }
+                insightRequestMetadata.setFilters(toPass);
+                analysisDefinition.setFilterDefinitions(toSet);
+            } else if (customFilters != null) {
+                analysisDefinition.setFilterDefinitions(customFilters);
+            }
+            if (drillThroughFilters != null) {
+                analysisDefinition.applyFilters(drillThroughFilters);
+            }
         }
 
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
@@ -3226,7 +3340,7 @@ public class DataService {
             insightRequestMetadata.setReportItems(analysisDefinition.getAllAnalysisItems());
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
 
-            timeshift(validQueryItems, filters, feed, insightRequestMetadata);
+            timeshift(validQueryItems, filters, feed, insightRequestMetadata, conn);
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
                 filterDefinition.applyCalculationsBeforeRun(analysisDefinition, allFields, keyMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata);
             }

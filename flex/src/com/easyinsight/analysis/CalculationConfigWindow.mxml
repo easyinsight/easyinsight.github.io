@@ -274,7 +274,7 @@
                     <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If you specify row level calculation, Easy Insight will apply your calculation before aggregating the data together."/>
                 </mx:FormItem>
                 <mx:FormItem label="Aggregation:">
-                    <util:SmartComboBox id="measureAggregationBox" rowCount="8" selectedProperty="value" selectedValue="{aggregation}">
+                    <util:SmartComboBox id="measureAggregationBox" rowCount="9" selectedProperty="value" selectedValue="{aggregation}">
                         <util:dataProvider>
                             <mx:Array>
                                 <mx:Object label="Sum" value="{AggregationTypes.SUM}"/>
@@ -285,6 +285,7 @@
                                 <mx:Object label="Median" value="{AggregationTypes.MEDIAN}"/>
                                 <mx:Object label="Variance" value="{AggregationTypes.VARIANCE}"/>
                                 <mx:Object label="Ranking" value="{AggregationTypes.RANK}"/>
+                                <mx:Object label="Count Distinct" value="{AggregationTypes.COUNT_DISTINCT}"/>
                             </mx:Array>
                         </util:dataProvider>
                     </util:SmartComboBox>

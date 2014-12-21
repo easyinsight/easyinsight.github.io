@@ -21,6 +21,7 @@ import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -38,6 +39,7 @@ import java.util.Map;
  * Time: 10:32 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/json/addRows", asyncSupported = true)
 public class JSONAddRowServlet extends JSONServlet {
 
     @Override

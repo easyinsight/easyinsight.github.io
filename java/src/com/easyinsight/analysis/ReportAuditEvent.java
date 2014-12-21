@@ -1,11 +1,13 @@
 package com.easyinsight.analysis;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 10/8/13
  * Time: 12:28 PM
  */
-public class ReportAuditEvent {
+public class ReportAuditEvent implements Serializable {
 
     public static final String JOIN_FILTER = "Join Filter";
     public static final String JOIN = "Join";

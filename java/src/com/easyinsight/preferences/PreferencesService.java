@@ -157,6 +157,7 @@ public class PreferencesService {
                 return null;
             }
             bytes = rs.getBytes(1);
+            queryStmt.close();
             conn.commit();
             return bytes;
         } catch (Exception e) {
@@ -181,7 +182,7 @@ public class PreferencesService {
                 return null;
             }
             bytes = rs.getBytes(1);
-
+            queryStmt.close();
             return bytes;
         } catch (Exception e) {
             LogClass.error(e);

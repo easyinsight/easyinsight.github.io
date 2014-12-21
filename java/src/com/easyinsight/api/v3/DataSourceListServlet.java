@@ -13,6 +13,7 @@ import com.easyinsight.userupload.UserUploadService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Comparator;
 import java.util.stream.Collector;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/json/dataSourceList", asyncSupported = true)
 public class DataSourceListServlet extends JSONServlet {
 
     @Override

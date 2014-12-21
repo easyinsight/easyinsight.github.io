@@ -494,7 +494,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setAttribution(getAttribution());
         feed.setProperties(createProperties());
         feed.setFilterExampleMessage(getFilterExampleMessage());
-        populateFeedFields(feed, kpis);
+        populateFeedFields(feed, kpis, conn);
         try {
             Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
             for (AnalysisItem item : feed.getFields()) {
@@ -658,7 +658,7 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     }
 
-    private void populateFeedFields(Feed feed, Map<String, List<AnalysisItem>> kpis) {
+    private void populateFeedFields(Feed feed, Map<String, List<AnalysisItem>> kpis, EIConnection conn) {
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         List<AnalysisItem> allFields = new ArrayList<AnalysisItem>();
@@ -744,12 +744,7 @@ public class FeedDefinition implements Cloneable, Serializable {
             feedNodes.add(analysisItem.toFeedNode());
         }
         if (addonReports != null) {
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                addAddonReports(clones, feedNodes, conn);
-            } finally {
-                Database.closeConnection(conn);
-            }
+            addAddonReports(clones, feedNodes, conn);
         }
         Collections.sort(feedNodes, new Comparator<FeedNode>() {
 
@@ -940,7 +935,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return key;
     }
 
-    public void postClone(Connection conn) throws Exception {
+    public void postClone(EIConnection conn) throws Exception {
         
     }
 
@@ -1022,6 +1017,10 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void decorateLinks(List<AnalysisItem> analysisItems) {
         
+    }
+
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
+        return true;
     }
 
     public boolean checkDateTime(String name, Key key) {

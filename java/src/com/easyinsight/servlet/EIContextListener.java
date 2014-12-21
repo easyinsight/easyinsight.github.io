@@ -11,7 +11,10 @@ import com.easyinsight.datafeeds.CacheTimer;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.custom.ThreadDumpWatcher;
+import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.datafeeds.database.DatabaseListener;
+//import com.easyinsight.datafeeds.database.ReportListener;
+import com.easyinsight.datafeeds.database.ReportListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.Scheduler;
@@ -77,14 +80,24 @@ public class EIContextListener implements ServletContextListener {
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
+
+
+
                 healthListener = new HealthListener();
                 healthThread = new Thread(healthListener);
                 healthThread.setName("Health Listener");
                 healthThread.setDaemon(true);
                 healthThread.start();
+
+                WorkerManager.initialize();
+
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     CacheTimer.initialize();
                     CacheTimer.instance().start();
+                }
+                if (ConfigLoader.instance().isTaskRunner()) {
+                    DataSourceListener.initialize();
+                    ReportListener.initialize();
                 }
                 ThreadDumpWatcher.initialize();
             }
@@ -98,6 +111,9 @@ public class EIContextListener implements ServletContextListener {
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         LogClass.info("Shutting down...");
+        if (WorkerManager.instance() != null) {
+            WorkerManager.instance().stop();
+        }
         try {
             healthListener.stop();
             healthThread.interrupt();
@@ -115,6 +131,14 @@ public class EIContextListener implements ServletContextListener {
         }
         if (DatabaseListener.instance() != null) {
             DatabaseListener.instance().stop();
+        }
+
+        if (DataSourceListener.instance() != null) {
+            DataSourceListener.instance().stop();
+        }
+
+        if (ReportListener.instance() != null) {
+            ReportListener.instance().stop();
         }
 
         if (ThreadDumpWatcher.instance() != null) {

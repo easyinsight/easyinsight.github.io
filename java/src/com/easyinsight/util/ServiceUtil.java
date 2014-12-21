@@ -34,8 +34,9 @@ public class ServiceUtil {
     }
 
     public String longRunningCall(long itemID) {
-        String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
         EIConnection conn = Database.instance().getConnection();
+        String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
+
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO refresh_connection_cache (call_data_id, status) values (?, ?)");
             insertStmt.setString(1, callID);
@@ -51,8 +52,24 @@ public class ServiceUtil {
         return callID;
     }
 
-    public void updateStatusMessage(String callDataID, String statusMessage) {
-        EIConnection conn = Database.instance().getConnection();
+    public String longRunningCall(long itemID, EIConnection conn) {
+        String callID = itemID + "-" + SecurityUtil.getUserID() + "-" + System.currentTimeMillis();
+
+        try {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO refresh_connection_cache (call_data_id, status) values (?, ?)");
+            insertStmt.setString(1, callID);
+            insertStmt.setInt(2, RUNNING);
+            insertStmt.execute();
+            insertStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        //MemCachedManager.add(callID, 10000, new CallData());
+        return callID;
+    }
+
+    public void updateStatusMessage(String callDataID, String statusMessage, EIConnection conn) {
+
         try {
             PreparedStatement insertStmt = conn.prepareStatement("UPDATE refresh_connection_cache set message = ? where call_data_id = ?");
             insertStmt.setString(1, statusMessage);
@@ -61,8 +78,6 @@ public class ServiceUtil {
             insertStmt.close();
         } catch (Exception e) {
             LogClass.error(e);
-        } finally {
-            Database.closeConnection(conn);
         }
     }
 
@@ -78,6 +93,19 @@ public class ServiceUtil {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public void updateStatus(String callDataID, int status, EIConnection conn) {
+
+        try {
+            PreparedStatement insertStmt = conn.prepareStatement("UPDATE refresh_connection_cache set status = ? where call_data_id = ?");
+            insertStmt.setInt(1, status);
+            insertStmt.setString(2, callDataID);
+            insertStmt.executeUpdate();
+            insertStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
         }
     }
 
@@ -100,14 +128,36 @@ public class ServiceUtil {
         }
     }
 
+    public void updateResult(String callDataID, Object result, EIConnection conn) {
+
+        try {
+            PreparedStatement insertStmt = conn.prepareStatement("UPDATE refresh_connection_cache set result_object = ? where call_data_id = ?");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(result);
+            oos.flush();
+            insertStmt.setBytes(1, baos.toByteArray());
+            insertStmt.setString(2, callDataID);
+            insertStmt.executeUpdate();
+            insertStmt.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+    }
+
     public void updateStatus(String callDataID, int status, Object result) {
         updateStatus(callDataID, status);
         updateResult(callDataID, result);
     }
 
-    public void updateStatus(String callDataID, int status, String message) {
-        updateStatus(callDataID, status);
-        updateStatusMessage(callDataID, message);
+    public void updateStatus(String callDataID, int status, Object result, EIConnection conn) {
+        updateStatus(callDataID, status, conn);
+        updateResult(callDataID, result, conn);
+    }
+
+    public void updateStatus(String callDataID, int status, String message, EIConnection conn) {
+        updateStatus(callDataID, status, conn);
+        updateStatusMessage(callDataID, message, conn);
     }
 
     public CallData getCallData(String callDataID) {

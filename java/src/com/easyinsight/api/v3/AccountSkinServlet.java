@@ -13,6 +13,7 @@ import com.easyinsight.users.UserService;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/account_skin.json", asyncSupported = true)
 public class AccountSkinServlet extends JSONServlet {
 
     @Override

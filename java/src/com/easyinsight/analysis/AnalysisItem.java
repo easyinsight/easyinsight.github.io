@@ -982,9 +982,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return root;
     }
 
-    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters) {
+    public void timeshift(Feed dataSource, Collection<FilterDefinition> filters, EIConnection conn) {
         for (FilterDefinition filterDefinition : getFilters()) {
-            filterDefinition.timeshift(dataSource, filters);
+            filterDefinition.timeshift(dataSource, filters, conn);
         }
     }
 

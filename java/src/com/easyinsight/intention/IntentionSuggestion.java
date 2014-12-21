@@ -1,11 +1,13 @@
 package com.easyinsight.intention;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 9/17/11
  * Time: 8:21 PM
  */
-public class IntentionSuggestion {
+public class IntentionSuggestion implements Serializable {
 
     public static final int PROBLEM = 1;
     public static final int WARNING = 2;
@@ -41,6 +43,7 @@ public class IntentionSuggestion {
     public static final int TURN_OFF_AGGREGATE_QUERY = 22;
     public static final int CONFIGURE_DATE_COMPARISON = 23;
     public static final int FULL_JOINS = 24;
+    public static final int GENERATE_FILL = 25;
 
     private String headline;
     private String description;
