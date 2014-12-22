@@ -60,7 +60,7 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
         //public static final String ALTDATEFORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         HighRiseCompositeSource  highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
-        DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
+        DateFormat deadlineFormat = new SimpleDateFormat(XMLDATETIMEFORMAT);
         String dateString = dateFormat.format(lastTime);
 
         int page = 0;
