@@ -639,6 +639,9 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 HighRiseTaskSource.DONE_AT.equals(name)) {
             return true;
         }
+        if (HighRiseCaseNotesSource.NOTE_CREATED_AT.equals(name)) {
+            return true;
+        }
         return false;
     }
 
