@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.solve360;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.composite.ChildConnection;
@@ -180,7 +181,7 @@ public class Solve360CompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name, Key key) {
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
         return false;
     }
 

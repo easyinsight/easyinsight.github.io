@@ -404,7 +404,7 @@ public class HarvestCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name, Key key) {
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
         return false;
     }
 
