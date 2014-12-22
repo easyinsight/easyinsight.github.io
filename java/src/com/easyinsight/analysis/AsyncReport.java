@@ -6,6 +6,7 @@ import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -115,11 +116,13 @@ public class AsyncReport {
         byte[] metadataBytes = null;
         int requestType = 0;
         long userID = 0;
+        long dataSourceID = 0;
+        String callID = null;
         do {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
-                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, user_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
+                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, user_id, data_source_id, call_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
                 q.setInt(1, ASSIGNED);
                 q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
@@ -129,6 +132,8 @@ public class AsyncReport {
                     metadataBytes = rs.getBytes(3);
                     requestType = rs.getInt(4);
                     userID = rs.getLong(5);
+                    dataSourceID = rs.getLong(6);
+                    callID = rs.getString(7);
                     PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                     u.setInt(1, IN_PROGRESS);
                     u.setLong(2, requestID);
@@ -148,157 +153,207 @@ public class AsyncReport {
                 Thread.sleep(100);
             }
         } while (requestID == null);
-        final Long frequestID = requestID;
-        final byte[] freportBytes = reportBytes;
-        final byte[] fmetadataBytes = metadataBytes;
-        final int frequestType = requestType;
-        final long fuserID = userID;
+
+        if (requestType == REPORT_EDITOR || requestType == REPORT_END_USER || requestType == REPORT_DATA_SET) {
+
+            final Long frequestID = requestID;
+            final byte[] freportBytes = reportBytes;
+            final byte[] fmetadataBytes = metadataBytes;
+            final int frequestType = requestType;
+            final long fuserID = userID;
 
 
-        DataSourceThreadPool.instance().addActivity(() -> {
-            try {
+            DataSourceThreadPool.instance().addActivity(() -> {
                 try {
-                    EIConnection conn = Database.instance().getConnection();
                     try {
-                        PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
-                                "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
-                                "WHERE USER.USER_ID = ?");
-                        queryStmt.setLong(1, fuserID);
-                        ResultSet queryRS = queryStmt.executeQuery();
-                        queryRS.next();
-                        String userName = queryRS.getString(1);
-                        int accountType = queryRS.getInt(2);
-                        boolean accountAdmin = queryRS.getBoolean(3);
-                        int firstDayOfWeek = queryRS.getInt(4);
-                        long accountID = queryRS.getLong(8);
-                        long userPersonaID = queryRS.getLong("USER.persona_ID");
-                        String personaName = null;
-                        if (userPersonaID > 0) {
-                            PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
-                            personaNameStmt.setLong(1, userPersonaID);
-                            ResultSet personaRS = personaNameStmt.executeQuery();
-                            if (personaRS.next()) {
-                                personaName = personaRS.getString(1);
-                            }
-                            personaNameStmt.close();
-                        }
-                        SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        Database.closeConnection(conn);
-                    }
-
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
-                    WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
-                    ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
-                    InsightRequestMetadata insightRequestMetadata = (InsightRequestMetadata) ois.readObject();
-                    InsightRequestMetadata localMetadata = new InsightRequestMetadata();
-                    localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                    localMetadata.setNoAsync(true);
-
-                    System.out.println("Asynchronous execution of " + report.getName());
-
-                    if (frequestType == REPORT_EDITOR) {
-                        DataResults results;
-                        if (report instanceof WSCrosstabDefinition) {
-                            results = new DataService().getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
-                        } else if (report instanceof WSKPIDefinition) {
-                            results = new DataService().getTrendDataResults((WSKPIDefinition) report, localMetadata);
-                        } else if (report instanceof WSTreeDefinition) {
-                            results = new DataService().getTreeDataResults((WSTreeDefinition) report, localMetadata);
-                        } else if (report instanceof WSYTDDefinition) {
-                            results = new DataService().getYTDResults(report, localMetadata);
-                        } else if (report instanceof WSCompareYearsDefinition) {
-                            results = new DataService().getCompareYearsResults(report, localMetadata);
-                        } else {
-                            results = new DataService().list(report, localMetadata);
-                        }
-                        ResultData rh = new ResultData();
-                        rh.dataResults = results;
-                        rh.report = report;
-                        MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                    } else if (frequestType == REPORT_END_USER) {
-                        EmbeddedResults results;
-                        /*if (report instanceof WSCrosstabDefinition) {
-
-                            results = getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
-                        } else if (report instanceof WSKPIDefinition) {
-                            results = getTrendDataResults((WSKPIDefinition) report, localMetadata);
-                        } else if (report instanceof WSTreeDefinition) {
-                            results = getTreeDataResults((WSTreeDefinition) report, localMetadata);
-                        } else if (report instanceof WSYTDDefinition) {
-                            results = getYTDResults(report, localMetadata);
-                        } else if (report instanceof WSCompareYearsDefinition) {
-                            results = getCompareYearsResults(report, localMetadata);
-                        } else {*/
-                        ResultData rh = new ResultData();
-                        conn = Database.instance().getConnection();
+                        EIConnection conn = Database.instance().getConnection();
                         try {
-                            results = new DataService().getEmbeddedResultsForReport(report, new ArrayList<>(), localMetadata, new ArrayList<>(), conn);
-                            rh.results = results;
-                            rh.report = report;
+                            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
+                                    "WHERE USER.USER_ID = ?");
+                            queryStmt.setLong(1, fuserID);
+                            ResultSet queryRS = queryStmt.executeQuery();
+                            queryRS.next();
+                            String userName = queryRS.getString(1);
+                            int accountType = queryRS.getInt(2);
+                            boolean accountAdmin = queryRS.getBoolean(3);
+                            int firstDayOfWeek = queryRS.getInt(4);
+                            long accountID = queryRS.getLong(8);
+                            long userPersonaID = queryRS.getLong("USER.persona_ID");
+                            String personaName = null;
+                            if (userPersonaID > 0) {
+                                PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
+                                personaNameStmt.setLong(1, userPersonaID);
+                                ResultSet personaRS = personaNameStmt.executeQuery();
+                                if (personaRS.next()) {
+                                    personaName = personaRS.getString(1);
+                                }
+                                personaNameStmt.close();
+                            }
+                            SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                         } catch (Exception e) {
-                            rh.exception = e;
+                            throw new RuntimeException(e);
                         } finally {
                             Database.closeConnection(conn);
                         }
-                        //}
-                        MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                    } else if (frequestType == REPORT_DATA_SET) {
-                        conn = Database.instance().getConnection();
-                        try {
+
+                        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
+                        WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
+                        ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
+                        InsightRequestMetadata insightRequestMetadata = (InsightRequestMetadata) ois.readObject();
+                        InsightRequestMetadata localMetadata = new InsightRequestMetadata();
+                        localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                        localMetadata.setNoAsync(true);
+
+                        System.out.println("Asynchronous execution of " + report.getName());
+
+                        if (frequestType == REPORT_EDITOR) {
+                            DataResults results;
+                            if (report instanceof WSCrosstabDefinition) {
+                                results = new DataService().getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
+                            } else if (report instanceof WSKPIDefinition) {
+                                results = new DataService().getTrendDataResults((WSKPIDefinition) report, localMetadata);
+                            } else if (report instanceof WSTreeDefinition) {
+                                results = new DataService().getTreeDataResults((WSTreeDefinition) report, localMetadata);
+                            } else if (report instanceof WSYTDDefinition) {
+                                results = new DataService().getYTDResults(report, localMetadata);
+                            } else if (report instanceof WSCompareYearsDefinition) {
+                                results = new DataService().getCompareYearsResults(report, localMetadata);
+                            } else {
+                                results = new DataService().list(report, localMetadata);
+                            }
                             ResultData rh = new ResultData();
+                            rh.dataResults = results;
+                            rh.report = report;
+                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                        } else if (frequestType == REPORT_END_USER) {
+                            EmbeddedResults results;
+                            /*if (report instanceof WSCrosstabDefinition) {
+
+                                results = getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
+                            } else if (report instanceof WSKPIDefinition) {
+                                results = getTrendDataResults((WSKPIDefinition) report, localMetadata);
+                            } else if (report instanceof WSTreeDefinition) {
+                                results = getTreeDataResults((WSTreeDefinition) report, localMetadata);
+                            } else if (report instanceof WSYTDDefinition) {
+                                results = getYTDResults(report, localMetadata);
+                            } else if (report instanceof WSCompareYearsDefinition) {
+                                results = getCompareYearsResults(report, localMetadata);
+                            } else {*/
+                            ResultData rh = new ResultData();
+                            conn = Database.instance().getConnection();
                             try {
-                                DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
-                                dataSet.setAsyncSavedReport(report);
-                                rh.dataSet = dataSet;
+                                results = new DataService().getEmbeddedResultsForReport(report, new ArrayList<>(), localMetadata, new ArrayList<>(), conn);
+                                rh.results = results;
                                 rh.report = report;
-                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
                             } catch (Exception e) {
                                 rh.exception = e;
-                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                            } finally {
+                                Database.closeConnection(conn);
                             }
+                            //}
+                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                        } else if (frequestType == REPORT_DATA_SET) {
+                            conn = Database.instance().getConnection();
+                            try {
+                                ResultData rh = new ResultData();
+                                try {
+                                    DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
+                                    dataSet.setAsyncSavedReport(report);
+                                    rh.dataSet = dataSet;
+                                    rh.report = report;
+                                    MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                                } catch (Exception e) {
+                                    rh.exception = e;
+                                    MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                                }
+                            } finally {
+                                Database.closeConnection(conn);
+                            }
+                        }
+                        conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+                            u.setInt(1, FINISHED);
+                            u.setLong(2, frequestID);
+                            u.executeUpdate();
+                            u.close();
                         } finally {
                             Database.closeConnection(conn);
                         }
+                    } finally {
+                        SecurityUtil.clearThreadLocal();
                     }
-                    conn = Database.instance().getConnection();
+
+                } catch (Exception e) {
+                    EIConnection conn = Database.instance().getConnection();
                     try {
                         PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                         u.setInt(1, FINISHED);
                         u.setLong(2, frequestID);
                         u.executeUpdate();
                         u.close();
+                    } catch (Exception e1) {
+                        LogClass.error(e1);
                     } finally {
                         Database.closeConnection(conn);
                     }
-                } finally {
-                    SecurityUtil.clearThreadLocal();
+                    LogClass.error(e);
                 }
-
-            } catch (Exception e) {
-                EIConnection conn = Database.instance().getConnection();
-                try {
-                    PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
-                    u.setInt(1, FINISHED);
-                    u.setLong(2, frequestID);
-                    u.executeUpdate();
-                    u.close();
-                } catch (Exception e1) {
-                    LogClass.error(e1);
-                } finally {
-                    Database.closeConnection(conn);
-                }
-                LogClass.error(e);
-            }
-        });
+            });
+        } else if (requestType == DATA_SOURCE_REFRESH) {
+            final long fdataSourceID = dataSourceID;
+            final String fcallID = callID;
+            DataSourceListener.dataSource(fdataSourceID, fcallID, requestID);
+        }
 
     }
 
     public static final int REPORT_EDITOR = 1;
     public static final int REPORT_END_USER = 2;
     public static final int REPORT_DATA_SET = 3;
+    public static final int DATA_SOURCE_REFRESH = 4;
+
+    public static boolean dataSourceRefresh(long sourceID, String callID) throws Exception {
+
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, data_source_id, call_id, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setLong(2, sourceID);
+            reqStmt.setString(3, callID);
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, DATA_SOURCE_REFRESH);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        int elapsedTime = 0;
+        Object result = null;
+        while (result == null && elapsedTime < TIMEOUT) {
+            result = MemCachedManager.instance().get("async" + requestID);
+            if (result == null) {
+                elapsedTime += 100;
+                Thread.sleep(100);
+            }
+        }
+        if (result instanceof Boolean) {
+            return (Boolean) result;
+        } else if (result instanceof Exception) {
+            throw (Exception) result;
+        } else {
+            throw new RuntimeException();
+        }
+    }
 
     public static DataResults asyncDataResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata, EIConnection conn)  {
         try {
