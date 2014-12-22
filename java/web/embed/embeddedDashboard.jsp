@@ -60,7 +60,7 @@
             userObject = SecurityUtil.getUserJSON(c, request);
             userObject.put("embedded", true);
         } finally {
-            c.close();
+            Database.closeConnection(c);
         }
 %>
 <head>
