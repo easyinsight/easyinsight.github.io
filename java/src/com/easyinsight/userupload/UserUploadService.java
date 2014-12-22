@@ -2447,20 +2447,6 @@ public class UserUploadService {
         public boolean invoke() throws Exception;
     }
 
-    public static void main(String[] args) throws SQSException {
-        MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-        boolean blah = true;
-        do {
-            Message message = responseQueue.receiveMessage();
-            if (message != null) {
-                System.out.println("deleting message...");
-                responseQueue.deleteMessage(message);
-            } else {
-                blah = false;
-            }
-        } while (blah);
-    }
-
     public static class SQSUploadDataSource implements IUploadDataSource {
 
         private long dataSourceID;
@@ -2474,10 +2460,8 @@ public class UserUploadService {
         }
 
         public boolean invoke() throws Exception {
-            MessageQueue msgQueue = SQSUtils.connectToQueue(dataSource instanceof ServerDatabaseConnection ?
-                    ConfigLoader.instance().getDatabaseRequestQueue() : ConfigLoader.instance().getDataSourceRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
-            MessageQueue responseQueue = SQSUtils.connectToQueue(dataSource instanceof ServerDatabaseConnection ? ConfigLoader.instance().getDatabaseResponseQueue() :
-                    ConfigLoader.instance().getDataSourceResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
+            MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             String requestID = dataSourceID + "^" + System.currentTimeMillis() + "^" + callID;
             msgQueue.sendMessage(requestID);
             boolean responded = false;
@@ -2767,7 +2751,8 @@ public class UserUploadService {
                         DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                         info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
                         ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info);
-                        changed = new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh, callID).invoke() || changed;
+                        changed = AsyncReport.dataSourceRefresh(sourceToRefresh.getDataFeedID(), callID) || changed;
+                        //changed = new SQSUploadDataSource(sourceToRefresh.getDataFeedID(), sourceToRefresh, callID).invoke() || changed;
                                         /*PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
                                         stmt.setTimestamp(1, new Timestamp(now.getTime()));
                                         stmt.setLong(2, sourceToRefresh.getDataFeedID());
@@ -2789,7 +2774,7 @@ public class UserUploadService {
                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault());
             } catch (Exception e) {
                 LogClass.error(e);
-                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage());
+                ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED);
             } finally {
                 DataSourceMutex.mutex().unlock(feedDefinition.getDataFeedID());
                 SecurityUtil.clearThreadLocal();
