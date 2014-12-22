@@ -2609,6 +2609,7 @@ public class DataService {
                         insightRequestMetadata.setNoAsync(true);
                     }
                 }
+                ps.close();
             } catch (Exception e) {
                 LogClass.error(e);
             } finally {
