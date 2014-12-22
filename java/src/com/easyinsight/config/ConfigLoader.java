@@ -45,11 +45,12 @@ public class ConfigLoader {
 
     private boolean databaseListener;
 
+    private boolean reportListener;
+    private boolean dataSourceListener;
+    private boolean cacheBuilder;
+
     private String databaseRequestQueue;
     private String databaseResponseQueue;
-
-    private String dataSourceRequestQueue;
-    private String dataSourceResponseQueue;
 
     private String memcachedUrl;
 
@@ -57,22 +58,6 @@ public class ConfigLoader {
 
     private String baseSeleniumQueue = "EISelenium";
     private String baseSeleniumResponseQueue = "EISeleniumResponse";
-
-    public String getDataSourceRequestQueue() {
-        return dataSourceRequestQueue;
-    }
-
-    public void setDataSourceRequestQueue(String dataSourceRequestQueue) {
-        this.dataSourceRequestQueue = dataSourceRequestQueue;
-    }
-
-    public String getDataSourceResponseQueue() {
-        return dataSourceResponseQueue;
-    }
-
-    public void setDataSourceResponseQueue(String dataSourceResponseQueue) {
-        this.dataSourceResponseQueue = dataSourceResponseQueue;
-    }
 
     public String getRedshiftCSVPath() {
         return redshiftCSVPath;
@@ -104,6 +89,30 @@ public class ConfigLoader {
 
     public void setEmailRunner(boolean emailRunner) {
         this.emailRunner = emailRunner;
+    }
+
+    public boolean isCacheBuilder() {
+        return cacheBuilder;
+    }
+
+    public void setCacheBuilder(boolean cacheBuilder) {
+        this.cacheBuilder = cacheBuilder;
+    }
+
+    public boolean isReportListener() {
+        return reportListener;
+    }
+
+    public void setReportListener(boolean reportListener) {
+        this.reportListener = reportListener;
+    }
+
+    public boolean isDataSourceListener() {
+        return dataSourceListener;
+    }
+
+    public void setDataSourceListener(boolean dataSourceListener) {
+        this.dataSourceListener = dataSourceListener;
     }
 
     public String getReportDeliveryQueue() {
@@ -322,14 +331,14 @@ public class ConfigLoader {
             billingEnabled = Boolean.valueOf((String) properties.get("billing.enabled"));
 
             databaseListener = Boolean.valueOf((String) properties.get("database.listener"));
+            reportListener = Boolean.valueOf((String) properties.get("report.listener"));
+            cacheBuilder = Boolean.valueOf((String) properties.get("cache.listener"));
+            dataSourceListener = Boolean.valueOf((String) properties.get("datasource.listener"));
 
             databaseRequestQueue = (String) properties.get("database.request.queue");
             databaseResponseQueue = (String) properties.get("database.response.queue");
             reportDeliveryQueue = (String) properties.get("report.delivery.queue");
             memcachedUrl = (String) properties.get("memcached.url");
-
-            dataSourceRequestQueue = (String) properties.get("datasource.request.queue");
-            dataSourceResponseQueue = (String) properties.get("datasource.response.queue");
 
             baseSeleniumQueue = (String) properties.get("base.selenium.queue");
             if (baseSeleniumQueue == null || "".equals(baseSeleniumQueue)) {
