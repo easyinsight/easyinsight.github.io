@@ -2583,9 +2583,13 @@ public class DataService {
                 ps.setLong(1, accountID);
                 ResultSet rs = ps.executeQuery();
                 rs.next();
-                boolean accountAsync = rs.getBoolean(1);
-                if (!accountAsync) {
+                if (!rs.next()) {
                     insightRequestMetadata.setNoAsync(true);
+                } else {
+                    boolean accountAsync = rs.getBoolean(1);
+                    if (!accountAsync) {
+                        insightRequestMetadata.setNoAsync(true);
+                    }
                 }
             } catch (Exception e) {
                 LogClass.error(e);
