@@ -634,7 +634,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name, Key key) {
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
         if (HighRiseTaskSource.DUE_AT.equals(name) || HighRiseTaskSource.CREATED_AT.equals(name) ||
                 HighRiseTaskSource.DONE_AT.equals(name)) {
             return true;

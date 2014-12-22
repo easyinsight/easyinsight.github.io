@@ -433,7 +433,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name, Key key) {
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
         if (BaseCampTimeSource.DATE.equals(name) || BaseCampTodoSource.MILESTONE_COMPLETED_ON.equals(name) ||
                 BaseCampTodoSource.MILESTONE_CREATED_ON.equals(name) || BaseCampTodoSource.DEADLINE.equals(name)) {
             return false;

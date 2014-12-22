@@ -79,6 +79,20 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     @Override
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
+        if (key instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) key;
+            long childDataSourceID = derivedKey.getFeedID();
+            try {
+                return new FeedStorage().getFeedDefinitionData(childDataSourceID, conn).checkDateTime(name, derivedKey.getParentKey());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return checkDateTime(name, key);
+    }
+
+    @Override
     public boolean checkDateTime(String name, Key key) {
         if (key instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) key;
@@ -612,8 +626,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
             PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             nameStmt.setLong(1, feedID);
             ResultSet rs = nameStmt.executeQuery();
-            rs.next();
-            String name = rs.getString(1);
+            String name;
+            if (rs.next()) {
+                name = rs.getString(1);
+            } else {
+                name = "";
+            }
             nameStmt.close();
             return name;
         } catch (SQLException e) {
@@ -771,7 +789,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
 
     }
 
-    public void postClone(Connection conn) throws Exception {
+    public void postClone(EIConnection conn) throws Exception {
         FeedStorage feedStorage = new FeedStorage();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(child.getDataFeedID(), conn);

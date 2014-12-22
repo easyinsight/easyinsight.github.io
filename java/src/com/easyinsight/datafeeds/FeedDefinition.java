@@ -1020,7 +1020,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public boolean checkDateTime(String name, Key key, EIConnection conn) {
-        return true;
+        return checkDateTime(name, key);
     }
 
     public boolean checkDateTime(String name, Key key) {

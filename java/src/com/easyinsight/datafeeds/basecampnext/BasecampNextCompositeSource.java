@@ -229,7 +229,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name, Key key) {
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
         if (BasecampNextTodoSource.TODO_DUE_AT.equals(name)) {
             return false;
         }
