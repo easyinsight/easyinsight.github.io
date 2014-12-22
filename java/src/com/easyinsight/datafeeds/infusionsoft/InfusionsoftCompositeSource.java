@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
 import com.easyinsight.datafeeds.IJoin;
@@ -45,7 +46,7 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
-    public boolean checkDateTime(String name, Key key) {
+    public boolean checkDateTime(String name, Key key, EIConnection conn) {
         return false;
     }
 
