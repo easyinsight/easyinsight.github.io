@@ -100,6 +100,44 @@ public class HtmlServlet extends HttpServlet {
             } else {
                 throw new com.easyinsight.security.SecurityException();
             }
+            long userID = SecurityUtil.getUserID(false);
+            boolean hadToPopulateThreadLocal = false;
+            if (userID == 0) {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_ID, USER.ACCOUNT_ID, USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                            "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE " +
+                            "FROM USER, user_to_analysis, account WHERE user_to_analysis.analysis_id = ? AND " +
+                            "user_to_analysis.user_id = user.user_id AND user.account_id = account.account_id");
+                    uStmt.setLong(1, insightResponse.getInsightDescriptor().getId());
+                    ResultSet uRS = uStmt.executeQuery();
+                    uRS.next();
+                    userID = uRS.getLong("user.user_id");
+                    long accountID = uRS.getLong("user.account_id");
+                    String userName = uRS.getString("username");
+                    int accountType = uRS.getInt("account.account_type");
+                    boolean accountAdmin = uRS.getBoolean("user.account_admin");
+                    int firstDayOfWeek = uRS.getInt("account.first_day_of_week");
+                    String firstName = uRS.getString("user.first_name");
+                    String name = uRS.getString("user.name");
+                    long personaID = uRS.getLong("user.persona_id");
+                    String personaName = null;
+                    if (personaID > 0) {
+                        PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
+                        personaNameStmt.setLong(1, personaID);
+                        ResultSet personaRS = personaNameStmt.executeQuery();
+                        if (personaRS.next()) {
+                            personaName = personaRS.getString(1);
+                        }
+                        personaNameStmt.close();
+                    }
+                    SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                    hadToPopulateThreadLocal = true;
+                    uStmt.close();
+                } finally {
+                    Database.closeConnection(conn);
+                }
+            }
             EIConnection conn = Database.instance().getConnection();
             try {
 
@@ -218,6 +256,9 @@ public class HtmlServlet extends HttpServlet {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
+                if (hadToPopulateThreadLocal) {
+                    SecurityUtil.clearThreadLocal();
+                }
                 Database.closeConnection(conn);
             }
         } catch (Exception e) {
