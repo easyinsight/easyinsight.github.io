@@ -61,6 +61,8 @@ public class ReportListener implements Runnable {
         while (running) {
             try {
                 new AsyncReport(serverID).claimAndRun();
+            } catch (InterruptedException ie) {
+                running = false;
             } catch (Exception e) {
                 LogClass.error(e);
             }
