@@ -7,13 +7,12 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.util.*;
@@ -65,17 +64,17 @@ public class BasecampNextPeopleSource extends BasecampNextBaseSource {
             DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
             DataSet dataSet = new DataSet();
             JSONArray jsonArray = runJSONRequest("people.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-            for (int i = 0; i < jsonArray.length(); i++) {
+            for (int i = 0; i < jsonArray.size(); i++) {
                 IRow row = dataSet.createRow();
-                JSONObject projectObject = jsonArray.getJSONObject(i);
-                row.addValue(keys.get(PERSON_ID), String.valueOf(projectObject.getInt("id")));
-                row.addValue(keys.get(PERSON_NAME), projectObject.getString("name"));
-                row.addValue(keys.get(PERSON_EMAIL), projectObject.getString("email_address"));
-                row.addValue(keys.get(URL), projectObject.getString("url"));
+                JSONObject projectObject = (JSONObject) jsonArray.get(i);
+                row.addValue(keys.get(PERSON_ID), getValue(projectObject, "id"));
+                row.addValue(keys.get(PERSON_NAME), getValue(projectObject, "name"));
+                row.addValue(keys.get(PERSON_EMAIL), getValue(projectObject, "email_address"));
+                row.addValue(keys.get(URL), getValue(projectObject, "url"));
                 try {
-                    row.addValue(keys.get(PERSON_UPDATED_AT), format.parseDateTime(projectObject.getString("updated_at")).toDate());
+                    row.addValue(keys.get(PERSON_UPDATED_AT), getDate(projectObject, "updated_at", format));
                 } catch (Exception e) {
-                    row.addValue(keys.get(PERSON_UPDATED_AT), altFormat.parseDateTime(projectObject.getString("updated_at")).toDate());
+                    row.addValue(keys.get(PERSON_UPDATED_AT), getDate(projectObject, "updated_at", altFormat));
                 }
             }
             return dataSet;

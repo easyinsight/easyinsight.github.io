@@ -11,11 +11,10 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
-import org.apache.commons.httpclient.HttpClient;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.util.*;
@@ -59,12 +58,12 @@ public class TrelloListSource extends TrelloBaseSource {
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
-            for (int i = 0 ; i < boards.length(); i++) {
+            for (int i = 0 ; i < boards.size(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
 
                 String id = (String) board.get("id");
                 JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/lists", httpClient, (TrelloCompositeSource) parentDefinition);
-                for (int j = 0; j < cards.length(); j++) {
+                for (int j = 0; j < cards.size(); j++) {
                     JSONObject card = (JSONObject) cards.get(j);
                     IRow row = dataSet.createRow();
                     row.addValue(LIST_ID, card.get("id").toString());

@@ -3,13 +3,15 @@ package com.easyinsight.datafeeds.basecampnext;
 import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -17,6 +19,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -24,6 +27,22 @@ import java.util.Date;
  * Time: 11:06 AM
  */
 public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition {
+
+    protected static Date getDate(Map n, String key, DateTimeFormatter simpleDateFormat) throws java.text.ParseException {
+        Object obj = n.get(key);
+        if(obj != null)
+            return simpleDateFormat.parseDateTime(obj.toString()).toDate();
+        else
+            return null;
+    }
+
+    protected static String getValue(Map n, String key) {
+        Object obj = n.get(key);
+        if(obj != null)
+            return obj.toString();
+        else
+            return null;
+    }
 
     protected JSONArray runJSONRequest(String path, BasecampNextCompositeSource parentDefinition, HttpClient httpClient) {
         return runJSONRequest(path, parentDefinition, null, httpClient);
@@ -76,8 +95,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    responseString = restMethod.getResponseBodyAsString();
-                    jsonObject = new JSONArray(responseString);
+                    jsonObject = (JSONArray) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     restMethod.releaseConnection();
                     successful = true;
                 }
@@ -133,7 +151,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     }
                 } else {
                     responseString = restMethod.getResponseBodyAsString();
-                    jsonObject = new JSONObject(responseString);
+                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     successful = true;
                 }
             } catch (IOException e) {
@@ -184,7 +202,7 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     }
                 } else {
                     responseString = restMethod.getResponseBodyAsString();
-                    jsonObject = new JSONObject(responseString);
+                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     successful = true;
                 }
             } catch (IOException e) {

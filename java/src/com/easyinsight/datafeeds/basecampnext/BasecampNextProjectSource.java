@@ -10,19 +10,14 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
+import net.minidev.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -107,9 +102,9 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
                     IRow row = dataSet.createRow();
                     Date createdAt;
                     try {
-                        createdAt = format.parseDateTime(projectObject.getString("created_at")).toDate();
+                        createdAt = getDate(projectObject, "created_at", format);
                     } catch (Exception e) {
-                        createdAt = altFormat.parseDateTime(projectObject.getString("created_at")).toDate();
+                        createdAt = getDate(projectObject, "created_at", altFormat);
                     }
                     row.addValue(keys.get(PROJECT_ID), project.getId());
                     row.addValue(keys.get(PROJECT_NAME), project.getName());
@@ -133,9 +128,9 @@ public class BasecampNextProjectSource extends BasecampNextBaseSource {
                     IRow row = dataSet.createRow();
                     Date createdAt;
                     try {
-                        createdAt = format.parseDateTime(projectObject.getString("created_at")).toDate();
+                        createdAt = getDate(projectObject, "created_at", format);
                     } catch (Exception e) {
-                        createdAt = altFormat.parseDateTime(projectObject.getString("created_at")).toDate();
+                        createdAt = getDate(projectObject, "created_at", altFormat);
                     }
                     row.addValue(keys.get(PROJECT_ID), project.getId());
                     row.addValue(keys.get(PROJECT_NAME), project.getName());

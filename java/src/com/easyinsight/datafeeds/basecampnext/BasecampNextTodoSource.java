@@ -11,13 +11,12 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.util.*;
@@ -160,7 +159,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                     int page = 1;
                     do {
                         JSONArray todos = runJSONRequest("projects/" + projectID + "/todos.json?page=" + page, (BasecampNextCompositeSource) parentDefinition, lastRefreshDate, httpClient);
-                        count = todos.length();
+                        count = todos.size();
                         parseTodoList2(keys, dataSet, projectID, todos, basecampNextCompositeSource,
                                 project.isArchived(), httpClient, lastRefreshDate);
                         page++;
@@ -181,62 +180,62 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
                         continue;
                     }
-                    for (int j = 0; j < todoListArray.length(); j++) {
+                    for (int j = 0; j < todoListArray.size(); j++) {
 
-                        JSONObject todoList = todoListArray.getJSONObject(j);
-                        String todoListID = String.valueOf(todoList.getInt("id"));
-                        String todoListName = todoList.getString("name");
+                        JSONObject todoList = (JSONObject) todoListArray.get(j);
+                        String todoListID = String.valueOf(todoList.get("id"));
+                        String todoListName = getValue(todoList, "name");
 
-                        String todoListDescription = todoList.getString("description");
-                        String todoListURL = todoList.getString("url");
+                        String todoListDescription = getValue(todoList, "description");
+                        String todoListURL = getValue(todoList, "url");
                         Date todoListUpdatedAt = null;
                         try {
-                            todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                            todoListUpdatedAt = getDate(todoList, "updated_at", format);
                         } catch (Exception e) {
                             try {
-                                todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                                todoListUpdatedAt = getDate(todoList, "updated_at", altFormat);
                             } catch (Exception e1) {
-                                LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                                LogClass.error("Parse failure on " + todoList.get("updated_at"));
                             }
                         }
                         JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                        JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
+                        JSONObject todoMasterObject = (JSONObject) todoListDetail.get("todos");
 
-                        JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
+                        JSONArray remainingArray = (JSONArray) todoMasterObject.get("remaining");
                         parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
                                 project.isArchived(), httpClient);
 
-                        JSONArray completedArray = todoMasterObject.getJSONArray("completed");
+                        JSONArray completedArray = (JSONArray) todoMasterObject.get("completed");
                         parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
                                 project.isArchived(), httpClient);
                     }
                     JSONArray completedTodoListArray = runJSONRequest("projects/"+projectID+"/todolists/completed.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                    for (int j = 0; j < completedTodoListArray.length(); j++) {
+                    for (int j = 0; j < completedTodoListArray.size(); j++) {
 
-                        JSONObject todoList = completedTodoListArray.getJSONObject(j);
-                        String todoListID = String.valueOf(todoList.getInt("id"));
-                        String todoListName = todoList.getString("name");
+                        JSONObject todoList = (JSONObject) completedTodoListArray.get(j);
+                        String todoListID = String.valueOf(todoList.get("id"));
+                        String todoListName = getValue(todoList, "name");
 
-                        String todoListDescription = todoList.getString("description");
-                        String todoListURL = todoList.getString("url");
+                        String todoListDescription = getValue(todoList, "description");
+                        String todoListURL = getValue(todoList, "url");
                         Date todoListUpdatedAt = null;
                         try {
-                            todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                            todoListUpdatedAt = getDate(todoList, "updated_at", format);
                         } catch (Exception e) {
                             try {
-                                todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                                todoListUpdatedAt = getDate(todoList, "updated_at", altFormat);
                             } catch (Exception e1) {
-                                LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                                LogClass.error("Parse failure on " + todoList.get("updated_at"));
                             }
                         }
                         JSONObject todoListDetail = runJSONRequestForObject("projects/" + projectID + "/todolists/" + todoListID + ".json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                        JSONObject todoMasterObject = todoListDetail.getJSONObject("todos");
+                        JSONObject todoMasterObject = (JSONObject) todoListDetail.get("todos");
 
-                        JSONArray remainingArray = todoMasterObject.getJSONArray("remaining");
+                        JSONArray remainingArray = (JSONArray) todoMasterObject.get("remaining");
                         parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, remainingArray, basecampNextCompositeSource,
                                 project.isArchived(), httpClient);
 
-                        JSONArray completedArray = todoMasterObject.getJSONArray("completed");
+                        JSONArray completedArray = (JSONArray) todoMasterObject.get("completed");
                         parseTodoList(keys, dataSet, projectID, todoListID, todoListName, todoListDescription, todoListURL, todoListUpdatedAt, completedArray, basecampNextCompositeSource,
                                 project.isArchived(), httpClient);
                     }
@@ -257,14 +256,14 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
     }
 
     private void parseTodoList2(Map<String, Key> keys, DataSet dataSet, String projectID, JSONArray todoArray,
-                               BasecampNextCompositeSource parentSource, boolean projectArchived, HttpClient httpClient, Date lastRefreshDate) throws JSONException {
-        for (int k = 0; k < todoArray.length(); k++) {
-            JSONObject todoObject = todoArray.getJSONObject(k);
+                               BasecampNextCompositeSource parentSource, boolean projectArchived, HttpClient httpClient, Date lastRefreshDate) {
+        for (int k = 0; k < todoArray.size(); k++) {
+            JSONObject todoObject = (JSONObject) todoArray.get(k);
             IRow row = dataSet.createRow();
-            String todoID = String.valueOf(todoObject.getInt("id"));
-            String todoContent = todoObject.getString("content");
+            String todoID = getValue(todoObject, "id");
+            String todoContent = getValue(todoObject, "content");
 
-            String updatedAtString = todoObject.getString("updated_at");
+            String updatedAtString = getValue(todoObject, "updated_at");
             Date updatedAt = parseDate(updatedAtString);
 
             try {
@@ -279,7 +278,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                             JSONArray comments = (JSONArray) detail.get("comments");
 
                             int ct = 0;
-                            for (int m = 0; m < comments.length(); m++) {
+                            for (int m = 0; m < comments.size(); m++) {
                                 JSONObject comment = (JSONObject) comments.get(m);
                                 String createdAtString = comment.get("created_at").toString();
                                 String commentID = comment.get("id").toString();
@@ -296,11 +295,11 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             } catch (Exception e) {
                 LogClass.error(e);
             }
-            String dueAtString = todoObject.getString("due_at");
+            String dueAtString = getValue(todoObject, "due_at");
             Date dueAt = parseDueDate(dueAtString);
-            String completedAtString = todoObject.getString("completed_at");
+            String completedAtString = getValue(todoObject, "completed_at");
             Date completedAt = parseDate(completedAtString);
-            String createdAtString = todoObject.getString("created_at");
+            String createdAtString = getValue(todoObject, "created_at");
             Date createdAt = parseDate(createdAtString);
 
             Object obj = todoObject.get("assignee");
@@ -309,7 +308,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             Object obj2 = todoObject.get("completer");
             if (obj2 != null && obj2 instanceof JSONObject) {
                 JSONObject completerObject = (JSONObject) obj2;
-                completer = completerObject.getString("name");
+                completer = getValue(completerObject, "name");
             }
             if (projectArchived) {
                 if (completedAt != null) {
@@ -318,7 +317,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             } else {
                 if (obj != null && obj instanceof JSONObject) {
                     JSONObject assignee = (JSONObject) obj;
-                    assigneeString = assignee.getString("name");
+                    assigneeString = getValue(assignee, "name");
                 }
             }
 
@@ -326,19 +325,19 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             row.addValue(keys.get(TODO_LIST_PROJECT_ID), projectID);
 
             JSONObject todoList = (JSONObject) todoObject.get("todolist");
-            String todoListID = String.valueOf(todoList.getInt("id"));
-            String todoListName = todoList.getString("name");
+            String todoListID = getValue(todoList, "id");
+            String todoListName = getValue(todoList, "name");
 
-            String todoListDescription = todoList.getString("description");
-            String todoListURL = todoList.getString("url");
+            String todoListDescription = getValue(todoList, "description");
+            String todoListURL = getValue(todoList, "url");
             Date todoListUpdatedAt = null;
             try {
-                todoListUpdatedAt = format.parseDateTime(todoList.getString("updated_at")).toDate();
+                todoListUpdatedAt = getDate(todoList, "updated_at", format);
             } catch (Exception e) {
                 try {
-                    todoListUpdatedAt = altFormat.parseDateTime(todoList.getString("updated_at")).toDate();
+                    todoListUpdatedAt = getDate(todoList, "updated_at", altFormat);
                 } catch (Exception e1) {
-                    LogClass.error("Parse failure on " + todoList.getString("updated_at"));
+                    LogClass.error("Parse failure on " + todoList.get("updated_at"));
                 }
             }
 
@@ -366,12 +365,12 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
     private void parseTodoList(Map<String, Key> keys, DataSet dataSet, String projectID, String todoListID, String todoListName,
                                String todoListDescription, String todoListURL, Date todoListUpdatedAt, JSONArray todoArray,
-                               BasecampNextCompositeSource parentSource, boolean projectArchived, HttpClient httpClient) throws JSONException {
-        for (int k = 0; k < todoArray.length(); k++) {
-            JSONObject todoObject = todoArray.getJSONObject(k);
+                               BasecampNextCompositeSource parentSource, boolean projectArchived, HttpClient httpClient)  {
+        for (int k = 0; k < todoArray.size(); k++) {
+            JSONObject todoObject = (JSONObject) todoArray.get(k);
             IRow row = dataSet.createRow();
-            String todoID = String.valueOf(todoObject.getInt("id"));
-            String todoContent = todoObject.getString("content");
+            String todoID = getValue(todoObject, "id");
+            String todoContent = getValue(todoObject, "content");
 
             try {
                 Object commentsCountObj = todoObject.get("comments_count");
@@ -381,7 +380,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                         JSONObject detail = runJSONRequestForObject("projects/" + projectID + "/todos/" + todoID + ".json", parentSource, httpClient);
                         JSONArray comments = (JSONArray) detail.get("comments");
 
-                        for (int m = 0; m < comments.length(); m++) {
+                        for (int m = 0; m < comments.size(); m++) {
                             JSONObject comment = (JSONObject) comments.get(m);
                             String createdAtString = comment.get("created_at").toString();
                             String commentID = comment.get("id").toString();
@@ -395,13 +394,13 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             } catch (Exception e) {
                 LogClass.error(e);
             }
-            String dueAtString = todoObject.getString("due_at");
+            String dueAtString = getValue(todoObject, "due_at");
             Date dueAt = parseDueDate(dueAtString);
-            String completedAtString = todoObject.getString("completed_at");
+            String completedAtString = getValue(todoObject, "completed_at");
             Date completedAt = parseDate(completedAtString);
-            String createdAtString = todoObject.getString("created_at");
+            String createdAtString = getValue(todoObject, "created_at");
             Date createdAt = parseDate(createdAtString);
-            String updatedAtString = todoObject.getString("updated_at");
+            String updatedAtString = getValue(todoObject, "updated_at");
             Date updatedAt = parseDate(updatedAtString);
             Object obj = todoObject.get("assignee");
             String assigneeString = null;
@@ -409,7 +408,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             Object obj2 = todoObject.get("completer");
             if (obj2 != null && obj2 instanceof JSONObject) {
                 JSONObject completerObject = (JSONObject) obj2;
-                completer = completerObject.getString("name");
+                completer = getValue(completerObject, "name");
             }
             if (projectArchived) {
                 if (completedAt != null) {
@@ -418,7 +417,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             } else {
                 if (obj != null && obj instanceof JSONObject) {
                     JSONObject assignee = (JSONObject) obj;
-                    assigneeString = assignee.getString("name");
+                    assigneeString = getValue(assignee, "name");
                 }
             }
 

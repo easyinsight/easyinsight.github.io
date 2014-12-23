@@ -10,13 +10,12 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.text.DateFormat;
@@ -117,17 +116,17 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
             if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
                 DataSet dataSet = new DataSet();
                 JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                for (int i = 0; i < jsonArray.length(); i++) {
+                for (int i = 0; i < jsonArray.size(); i++) {
 
-                    JSONObject projectObject = jsonArray.getJSONObject(i);
-                    String calendarID = String.valueOf(projectObject.getInt("id"));
-                    String calendarName = projectObject.getString("name");
-                    String calendarURL = projectObject.getString("url");
+                    JSONObject projectObject = (JSONObject) jsonArray.get(i);
+                    String calendarID = getValue(projectObject, "id");
+                    String calendarName = getValue(projectObject,"name");
+                    String calendarURL = getValue(projectObject,"url");
                     Date calendarUpdatedAt;
                     try {
-                        calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                        calendarUpdatedAt = format.parseDateTime(getValue(projectObject,"updated_at")).toDate();
                     } catch (Exception e) {
-                        calendarUpdatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
+                        calendarUpdatedAt = altFormat.parseDateTime(getValue(projectObject,"updated_at")).toDate();
                     }
                     JSONArray eventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                     parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, eventArray, "");
@@ -179,17 +178,17 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
             } else {
                 DataSet dataSet = new DataSet();
                 JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-                for (int i = 0; i < jsonArray.length(); i++) {
+                for (int i = 0; i < jsonArray.size(); i++) {
 
-                    JSONObject projectObject = jsonArray.getJSONObject(i);
-                    String calendarID = String.valueOf(projectObject.getInt("id"));
-                    String calendarName = projectObject.getString("name");
-                    String calendarURL = projectObject.getString("url");
+                    JSONObject projectObject = (JSONObject) jsonArray.get(i);
+                    String calendarID = getValue(projectObject, "id");
+                    String calendarName = getValue(projectObject,"name");
+                    String calendarURL = getValue(projectObject,"url");
                     Date calendarUpdatedAt;
                     try {
-                        calendarUpdatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                        calendarUpdatedAt = format.parseDateTime(getValue(projectObject,"updated_at")).toDate();
                     } catch (Exception e) {
-                        calendarUpdatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
+                        calendarUpdatedAt = altFormat.parseDateTime(getValue(projectObject,"updated_at")).toDate();
                     }
                     JSONArray eventArray = runJSONRequest("calendars/"+calendarID+"/calendar_events.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                     parseCalendarEvents(keys, dataSet, calendarID, calendarName, calendarURL, calendarUpdatedAt, eventArray, null);
@@ -237,17 +236,17 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
         return !compositeSource.isUseProjectUpdatedAt();
     }
 
-    private void parseCalendarEvents(Map<String, Key> keys, DataSet dataSet, String calendarID, String calendarName, String calendarURL, Date calendarUpdatedAt, JSONArray eventArray, String projectID) throws JSONException {
-        for (int j = 0; j < eventArray.length(); j++) {
-            JSONObject calendarEvent = eventArray.getJSONObject(j);
-            String id = calendarEvent.getString("id");
-            String summary = calendarEvent.getString("summary");
-            String url = calendarEvent.getString("url");
-            String description = calendarEvent.getString("description");
-            Date createdAt = parseDate(calendarEvent.getString("created_at"));
-            Date updatedAt = parseDate(calendarEvent.getString("updated_at"));
-            Date startsAt = parseDate(calendarEvent.getString("starts_at"));
-            Date endsAt = parseDate(calendarEvent.getString("ends_at"));
+    private void parseCalendarEvents(Map<String, Key> keys, DataSet dataSet, String calendarID, String calendarName, String calendarURL, Date calendarUpdatedAt, JSONArray eventArray, String projectID) {
+        for (int j = 0; j < eventArray.size(); j++) {
+            JSONObject calendarEvent = (JSONObject) eventArray.get(j);
+            String id = getValue(calendarEvent,"id");
+            String summary = getValue(calendarEvent,"summary");
+            String url = getValue(calendarEvent,"url");
+            String description = getValue(calendarEvent,"description");
+            Date createdAt = parseDate(getValue(calendarEvent,"created_at"));
+            Date updatedAt = parseDate(getValue(calendarEvent,"updated_at"));
+            Date startsAt = parseDate(getValue(calendarEvent,"starts_at"));
+            Date endsAt = parseDate(getValue(calendarEvent,"ends_at"));
             IRow row = dataSet.createRow();
             row.addValue(keys.get(CALENDAR_ID), calendarID);
             row.addValue(keys.get(CALENDAR_NAME), calendarName);

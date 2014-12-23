@@ -1,22 +1,18 @@
 package com.easyinsight.datafeeds.trello;
 
 import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
-import org.apache.commons.httpclient.HttpClient;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.util.*;
@@ -58,7 +54,7 @@ public class TrelloBoardSource extends TrelloBaseSource {
         try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
-            for (int i = 0 ; i < boards.length(); i++) {
+            for (int i = 0 ; i < boards.size(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
                 IRow row = dataSet.createRow();
                 row.addValue(BOARD_ID, board.get("id").toString());
