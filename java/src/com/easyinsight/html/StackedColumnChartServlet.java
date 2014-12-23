@@ -93,6 +93,9 @@ public class StackedColumnChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        if (dataSet.getAsyncSavedReport() != null) {
+            report = dataSet.getAsyncSavedReport();
+        }
 
         JSONObject pointLabels = new JSONObject();
 
