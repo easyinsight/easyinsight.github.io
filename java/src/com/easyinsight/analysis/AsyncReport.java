@@ -351,7 +351,7 @@ public class AsyncReport {
         } else if (result instanceof Exception) {
             throw (Exception) result;
         } else {
-            throw new RuntimeException();
+            throw new RuntimeException("result was " + result);
         }
     }
 
