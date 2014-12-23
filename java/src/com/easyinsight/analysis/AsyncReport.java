@@ -110,6 +110,22 @@ public class AsyncReport {
         }
     }
 
+    public void resetState() {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE request_state = ? AND assigned_server = ?");
+            u.setInt(1, FINISHED);
+            u.setInt(2, IN_PROGRESS);
+            u.setInt(3, serverID);
+            u.executeUpdate();
+            u.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void claimAndRun() throws InterruptedException {
         Long requestID = null;
         byte[] reportBytes = null;

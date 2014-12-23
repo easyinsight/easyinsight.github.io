@@ -58,6 +58,8 @@ public class ReportListener implements Runnable {
             Database.closeConnection(conn);
         }
 
+        new AsyncReport(serverID).resetState();
+
         while (running) {
             try {
                 new AsyncReport(serverID).claimAndRun();
