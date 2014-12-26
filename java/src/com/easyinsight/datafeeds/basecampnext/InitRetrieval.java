@@ -32,7 +32,7 @@ public class InitRetrieval extends BasecampNextBaseSource {
                 JSONObject accountObject = (JSONObject) accountsArray.get(i);
                 String product = (String) accountObject.get("product");
                 if ("bcx".equals(product)) {
-                    String s = (String) accountObject.get("id");
+                    String s = accountObject.get("id").toString();
                     BasecampNextAccount account = new BasecampNextAccount();
                     account.setName((String) accountObject.get("name"));
                     account.setId(s);
