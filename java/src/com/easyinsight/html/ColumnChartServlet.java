@@ -24,6 +24,9 @@ public class ColumnChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        if (dataSet.getAsyncSavedReport() != null) {
+            report = dataSet.getAsyncSavedReport();
+        }
         WSChartDefinition chart = (WSChartDefinition) report;
         JSONObject object = new JSONObject();
         // need series, need ticks

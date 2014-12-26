@@ -103,6 +103,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                     }
                 }
             }
+        } else if (interval > ALL) {
+            rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+            if (rollingFilterDefinition.getStartDate() != null) {
+                return rollingFilterDefinition.getStartDate().getTime();
+            }
         }
         int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
@@ -358,6 +363,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                         return rollingFilterDefinition.getEndDate().getTime();
                     }
                 }
+            }
+        } else if (interval > ALL) {
+            rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+            if (rollingFilterDefinition.getEndDate() != null) {
+                return rollingFilterDefinition.getEndDate().getTime();
             }
         }
         int intervalAmount = rollingFilterDefinition.getCustomIntervalAmount();

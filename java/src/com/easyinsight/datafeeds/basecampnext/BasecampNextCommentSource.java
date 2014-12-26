@@ -45,7 +45,7 @@ public class BasecampNextCommentSource extends BasecampNextBaseSource {
 
     @Override
     protected String getUpdateKeyName() {
-        return COMMENT_PROJECT_ID;
+        return COMMENT_ID;
     }
 
     @Override
@@ -71,9 +71,13 @@ public class BasecampNextCommentSource extends BasecampNextBaseSource {
                 }
                 comments.add(basecampComment);
             }
+
+            //
+
             for (Map.Entry<String, List<BasecampComment>> entry : map.entrySet()) {
-                DataSet dataSet = new DataSet();
+
                 for (BasecampComment basecampComment : entry.getValue()) {
+                    DataSet dataSet = new DataSet();
                     IRow row = dataSet.createRow();
                     row.addValue(keys.get(COMMENT_ID), basecampComment.getId());
                     row.addValue(keys.get(COMMENT_TODO_ID), basecampComment.getTodoID());
@@ -82,13 +86,14 @@ public class BasecampNextCommentSource extends BasecampNextBaseSource {
                     row.addValue(keys.get(COMMENT_CONTENT), basecampComment.getContent());
                     row.addValue(keys.get(COMMENT_PROJECT_ID), basecampComment.getProjectID());
                     row.addValue(keys.get(COMMENT_COUNT), 1);
+                    if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
+                        IDataStorage.insertData(dataSet);
+                    } else {
+                        StringWhere stringWhere = new StringWhere(keys.get(COMMENT_ID), basecampComment.getId());
+                        IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
+                    }
                 }
-                if (lastRefreshDate == null || lastRefreshDate.getTime() < 100) {
-                    IDataStorage.insertData(dataSet);
-                } else {
-                    StringWhere stringWhere = new StringWhere(keys.get(COMMENT_PROJECT_ID), entry.getKey());
-                    IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
-                }
+
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

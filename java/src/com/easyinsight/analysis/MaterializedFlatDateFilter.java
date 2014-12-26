@@ -14,6 +14,7 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
 
     private int type;
     private int value;
+    private Calendar cal = Calendar.getInstance();
 
     public MaterializedFlatDateFilter(AnalysisItem key, int type, int value) {
         super(key);
@@ -28,7 +29,6 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
         }
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            Calendar cal = Calendar.getInstance();
             cal.setTime(dateValue.getDate());
             if (type == AnalysisDateDimension.YEAR_LEVEL) {
                 int year = cal.get(Calendar.YEAR);
@@ -41,7 +41,6 @@ public class MaterializedFlatDateFilter extends MaterializedFilterDefinition {
             Value originalValue = value.getOriginalValue();
             if (originalValue.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) originalValue;
-                Calendar cal = Calendar.getInstance();
                 cal.setTime(dateValue.getDate());
                 if (type == AnalysisDateDimension.YEAR_LEVEL) {
                     int year = cal.get(Calendar.YEAR);

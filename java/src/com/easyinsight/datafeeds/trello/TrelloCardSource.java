@@ -10,10 +10,10 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.text.ParseException;
@@ -73,20 +73,20 @@ public class TrelloCardSource extends TrelloBaseSource {
             SimpleDateFormat dueDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
-            for (int i = 0 ; i < boards.length(); i++) {
+            for (int i = 0 ; i < boards.size(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
                 String id = (String) board.get("id");
                 JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/cards?checklists=all", httpClient, (TrelloCompositeSource) parentDefinition);
-                for (int j = 0; j < cards.length(); j++) {
+                for (int j = 0; j < cards.size(); j++) {
                     JSONObject card = (JSONObject) cards.get(j);
                     IRow row = dataSet.createRow();
                     row.addValue(CARD_ID, card.get("id").toString());
                     JSONArray checklists = (JSONArray) card.get("checklists");
-                    for (int k = 0; k < checklists.length(); k++) {
+                    for (int k = 0; k < checklists.size(); k++) {
                         JSONObject checkListObject = (JSONObject) checklists.get(k);
                         String name = checkListObject.get("name").toString();
                         JSONArray checkListItems = (JSONArray) checkListObject.get("checkItems");
-                        for (int l = 0; l < checkListItems.length(); l++) {
+                        for (int l = 0; l < checkListItems.size(); l++) {
                             JSONObject checkListItem = (JSONObject) checkListItems.get(l);
                             String itemName = checkListItem.get("name").toString();
                             String state = checkListItem.get("state").toString();
@@ -94,7 +94,7 @@ public class TrelloCardSource extends TrelloBaseSource {
                         }
                     }
                     JSONArray labels = (JSONArray) card.get("labels");
-                    for (int k = 0; k < labels.length(); k++) {
+                    for (int k = 0; k < labels.size(); k++) {
                         JSONObject jsonObject = (JSONObject) labels.get(k);
                         String color = jsonObject.get("color").toString();
                         String name = jsonObject.get("name").toString();
@@ -102,25 +102,25 @@ public class TrelloCardSource extends TrelloBaseSource {
                     }
 
                     JSONArray members = (JSONArray) card.get("idMembers");
-                    for (int k = 0; k < members.length(); k++) {
+                    for (int k = 0; k < members.size(); k++) {
                         String memberID = members.get(k).toString();
                         memberData.add(new Member(card.get("id").toString(), memberID));
                     }
 
                     row.addValue(CARD_NAME, card.get("name").toString());
                     row.addValue(CARD_BOARD_ID, card.get("idBoard").toString());
-                    row.addValue(CARD_LIST_ID, card.get("idList").toString());
-                    row.addValue(CARD_CLOSED, card.get("closed").toString());
-                    row.addValue(CARD_DESCRIPTION, card.get("description").toString());
-                    row.addValue(CARD_URL, card.get("shortUrl").toString());
+                    row.addValue(CARD_LIST_ID, getValue(card, "idList"));
+                    row.addValue(CARD_CLOSED, getValue(card, "closed"));
+                    row.addValue(CARD_DESCRIPTION, getValue(card, "description"));
+                    row.addValue(CARD_URL, getValue(card, "shortUrl"));
                     try {
-                        Date dueDate = dueDF.parse(card.get("due").toString());
+                        Date dueDate = getDate(card, "due", dueDF);
                         row.addValue(CARD_DUE_AT, new DateValue(dueDate));
                     } catch (ParseException e) {
                         // ignore
                     }
                     try {
-                        Date dueDate = dueDF.parse(card.get("dateLastActivity").toString());
+                        Date dueDate = getDate(card, "dateLastActivity", dueDF);
                         row.addValue(CARD_LAST_ACTIVITY_DATE, new DateValue(dueDate));
                     } catch (ParseException e) {
                         // ignore

@@ -32,8 +32,6 @@ public class ConfigLoader {
     private String billingPublicKey;
     private String billingPrivateKey;
 
-    private String googleUserName;
-    private String googlePassword;
     private String outputLogPath;
 
     private int billingSystem;
@@ -45,11 +43,12 @@ public class ConfigLoader {
 
     private boolean databaseListener;
 
+    private boolean cacheBuilder;
+
+    private boolean reportListener;
+
     private String databaseRequestQueue;
     private String databaseResponseQueue;
-
-    private String dataSourceRequestQueue;
-    private String dataSourceResponseQueue;
 
     private String memcachedUrl;
 
@@ -57,22 +56,6 @@ public class ConfigLoader {
 
     private String baseSeleniumQueue = "EISelenium";
     private String baseSeleniumResponseQueue = "EISeleniumResponse";
-
-    public String getDataSourceRequestQueue() {
-        return dataSourceRequestQueue;
-    }
-
-    public void setDataSourceRequestQueue(String dataSourceRequestQueue) {
-        this.dataSourceRequestQueue = dataSourceRequestQueue;
-    }
-
-    public String getDataSourceResponseQueue() {
-        return dataSourceResponseQueue;
-    }
-
-    public void setDataSourceResponseQueue(String dataSourceResponseQueue) {
-        this.dataSourceResponseQueue = dataSourceResponseQueue;
-    }
 
     public String getRedshiftCSVPath() {
         return redshiftCSVPath;
@@ -104,6 +87,22 @@ public class ConfigLoader {
 
     public void setEmailRunner(boolean emailRunner) {
         this.emailRunner = emailRunner;
+    }
+
+    public boolean isCacheBuilder() {
+        return cacheBuilder;
+    }
+
+    public void setCacheBuilder(boolean cacheBuilder) {
+        this.cacheBuilder = cacheBuilder;
+    }
+
+    public boolean isReportListener() {
+        return reportListener;
+    }
+
+    public void setReportListener(boolean reportListener) {
+        this.reportListener = reportListener;
     }
 
     public String getReportDeliveryQueue() {
@@ -152,22 +151,6 @@ public class ConfigLoader {
 
     public void setTaskRunner(boolean taskRunner) {
         this.taskRunner = taskRunner;
-    }
-
-    public String getGoogleUserName() {
-        return googleUserName;
-    }
-
-    public void setGoogleUserName(String googleUserName) {
-        this.googleUserName = googleUserName;
-    }
-
-    public String getGooglePassword() {
-        return googlePassword;
-    }
-
-    public void setGooglePassword(String googlePassword) {
-        this.googlePassword = googlePassword;
     }
 
     public String getRedirectLocation() {
@@ -304,9 +287,6 @@ public class ConfigLoader {
             outputLogPath = (String) properties.get("report.log.path");
             redshiftCSVPath = (String) properties.get("redshift.csv.path");
 
-            googleUserName = (String) properties.get("google.username");
-            googlePassword = (String) properties.get("google.password");
-
             billingPublicKey = (String) properties.get("billing.blue.key");
             billingPrivateKey = (String) properties.get("billing.blue.secretKey");
             merchantID = (String) properties.get("billing.blue.merchantKey");
@@ -322,14 +302,13 @@ public class ConfigLoader {
             billingEnabled = Boolean.valueOf((String) properties.get("billing.enabled"));
 
             databaseListener = Boolean.valueOf((String) properties.get("database.listener"));
+            reportListener = Boolean.valueOf((String) properties.get("report.listener"));
+            cacheBuilder = Boolean.valueOf((String) properties.get("cache.listener"));
 
             databaseRequestQueue = (String) properties.get("database.request.queue");
             databaseResponseQueue = (String) properties.get("database.response.queue");
             reportDeliveryQueue = (String) properties.get("report.delivery.queue");
             memcachedUrl = (String) properties.get("memcached.url");
-
-            dataSourceRequestQueue = (String) properties.get("datasource.request.queue");
-            dataSourceResponseQueue = (String) properties.get("datasource.response.queue");
 
             baseSeleniumQueue = (String) properties.get("base.selenium.queue");
             if (baseSeleniumQueue == null || "".equals(baseSeleniumQueue)) {

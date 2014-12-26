@@ -293,11 +293,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     }
 
     public Collection<BasecampNextAccount> getBasecampAccounts() {
-        try {
-            return new InitRetrieval().getAccounts(this);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+        return new InitRetrieval().getAccounts(this);
     }
 
     public String postOAuthSetup(HttpServletRequest request) {

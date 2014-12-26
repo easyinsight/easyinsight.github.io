@@ -62,7 +62,7 @@
         }
 
         private function onLogout(event:LoginEvent):void {
-            gotFocus();
+            //gotFocus();
         }
 
         private function setupListeners():void {

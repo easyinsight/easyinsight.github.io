@@ -34,19 +34,7 @@ public class HealthListener implements Runnable {
 
                 String response = "All Good";
                 String code = SUCCESS;
-                {
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        Statement stmt = conn.createStatement();
-                        stmt.executeQuery("SELECT 1");
-                    } catch (Exception e) {
-                        response = e.getMessage() + " on query of core database pool";
-                        code = FAILURE;
-                    } finally {
-                        Database.closeConnection(conn);
-                    }
 
-                }
                 for (Map.Entry<String, Database> storageEntry : DatabaseManager.instance().getDbMap().entrySet()) {
                     Database database = storageEntry.getValue();
 
@@ -71,6 +59,23 @@ public class HealthListener implements Runnable {
                         stmt.executeQuery("SELECT 1");
                     } catch (Exception e) {
                         response = e.getMessage() + " on query of " + storageEntry.getKey() + " database pool";
+                        code = FAILURE;
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
+
+                }
+                {
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        PreparedStatement update = conn.prepareStatement("UPDATE server SET healthy = ?, last_healthy_time = ? WHERE server_host = ?");
+                        update.setBoolean(1, SUCCESS.equals(code));
+                        update.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                        update.setString(3, InetAddress.getLocalHost().getHostName());
+                        update.executeUpdate();
+                        update.close();
+                    } catch (Exception e) {
+                        response = e.getMessage() + " on query of core DB database pool";
                         code = FAILURE;
                     } finally {
                         Database.closeConnection(conn);
@@ -103,25 +108,23 @@ public class HealthListener implements Runnable {
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SERVER (server_host, enabled, database_listener, report_listener," +
-                        "data_source_listener, healthy, last_healthy_time) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                        "healthy, last_healthy_time) VALUES (?, ?, ?, ?, ?, ?)");
                 insertStmt.setString(1, host);
                 insertStmt.setBoolean(2, true);
                 insertStmt.setBoolean(3, ConfigLoader.instance().isDatabaseListener());
-                insertStmt.setBoolean(4, ConfigLoader.instance().isTaskRunner());
-                insertStmt.setBoolean(5, ConfigLoader.instance().isTaskRunner());
-                insertStmt.setBoolean(6, true);
-                insertStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+                insertStmt.setBoolean(4, ConfigLoader.instance().isReportListener());
+                insertStmt.setBoolean(5, true);
+                insertStmt.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 insertStmt.execute();
                 insertStmt.close();
             } else {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE SERVER SET database_listener = ?, report_listener = ?," +
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE SERVER SET database_listener = ?," +
                         "data_source_listener = ?, healthy = ?, last_healthy_time = ? WHERE server_host = ?");
                 updateStmt.setBoolean(1, ConfigLoader.instance().isDatabaseListener());
-                updateStmt.setBoolean(2, ConfigLoader.instance().isTaskRunner());
-                updateStmt.setBoolean(3, ConfigLoader.instance().isTaskRunner());
-                updateStmt.setBoolean(4, true);
-                updateStmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-                updateStmt.setString(6, host);
+                updateStmt.setBoolean(2, ConfigLoader.instance().isReportListener());
+                updateStmt.setBoolean(3, true);
+                updateStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                updateStmt.setString(5, host);
                 updateStmt.execute();
                 updateStmt.close();
             }

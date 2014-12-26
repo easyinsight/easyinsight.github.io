@@ -1,13 +1,12 @@
 package com.easyinsight.datafeeds.basecampnext;
 
 import com.easyinsight.datafeeds.FeedDefinition;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,7 +24,7 @@ public class ProjectCache extends BasecampNextBaseSource {
         return projects;
     }
 
-    public void populate(FeedDefinition parentDefinition) throws JSONException {
+    public void populate(FeedDefinition parentDefinition)  {
         HttpClient httpClient = new HttpClient();
         DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
         DateTimeFormatter altFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
@@ -33,37 +32,37 @@ public class ProjectCache extends BasecampNextBaseSource {
         //JSONObject me = runJSONRequestForObject("/people/me.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
         BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
         JSONArray jsonArray = runJSONRequest("projects.json", basecampNextCompositeSource, httpClient);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject projectObject = jsonArray.getJSONObject(i);
-            String projectURL = "https://basecamp.com/"+basecampNextCompositeSource.getEndpoint()+"/projects/" + projectObject.getString("id");
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject projectObject = (JSONObject) jsonArray.get(i);
+            String projectURL = "https://basecamp.com/"+basecampNextCompositeSource.getEndpoint()+"/projects/" + getValue(projectObject,"id");
             Date updatedAt;
             try {
-                updatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                updatedAt = format.parseDateTime(getValue(projectObject,"updated_at")).toDate();
             } catch (Exception e) {
-                updatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
+                updatedAt = altFormat.parseDateTime(getValue(projectObject,"updated_at")).toDate();
             }
-            projects.add(new Project(String.valueOf(projectObject.getInt("id")),
-                    projectObject.getString("name"),
-                    projectObject.getString("description"),
+            projects.add(new Project(String.valueOf(getValue(projectObject, "id")),
+                    getValue(projectObject,"name"),
+                    getValue(projectObject,"description"),
                     projectURL,
                     updatedAt,
-                    projectObject.getBoolean("archived")));
+                    (Boolean) projectObject.get("archived")));
         }
         jsonArray = runJSONRequest("projects/archived.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject projectObject = jsonArray.getJSONObject(i);
-            String projectURL = "https://basecamp.com/"+basecampNextCompositeSource.getEndpoint()+"/projects/" + projectObject.getString("id");
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject projectObject = (JSONObject) jsonArray.get(i);
+            String projectURL = "https://basecamp.com/"+basecampNextCompositeSource.getEndpoint()+"/projects/" + getValue(projectObject,"id");
             Date updatedAt;
             try {
-                updatedAt = format.parseDateTime(projectObject.getString("updated_at")).toDate();
+                updatedAt = format.parseDateTime(getValue(projectObject,"updated_at")).toDate();
             } catch (Exception e) {
-                updatedAt = altFormat.parseDateTime(projectObject.getString("updated_at")).toDate();
+                updatedAt = altFormat.parseDateTime(getValue(projectObject,"updated_at")).toDate();
             }
-            projects.add(new Project(String.valueOf(projectObject.getInt("id")),
-                    projectObject.getString("name"),
-                    projectObject.getString("description"),
+            projects.add(new Project(String.valueOf(getValue(projectObject, "id")),
+                    getValue(projectObject,"name"),
+                    getValue(projectObject,"description"),
                     projectURL,
-                    updatedAt, projectObject.getBoolean("archived")));
+                    updatedAt, (Boolean) projectObject.get("archived")));
         }
     }
 

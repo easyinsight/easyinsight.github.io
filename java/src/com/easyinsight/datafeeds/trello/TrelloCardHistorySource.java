@@ -6,14 +6,12 @@ import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
@@ -65,17 +63,17 @@ public class TrelloCardHistorySource extends TrelloBaseSource {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             JSONArray boards = runRequest("https://api.trello.com/1/members/me/boards", httpClient, (TrelloCompositeSource) parentDefinition);
             int ctr = 0;
-            for (int i = 0 ; i < boards.length(); i++) {
+            for (int i = 0 ; i < boards.size(); i++) {
                 JSONObject board = (JSONObject) boards.get(i);
 
 
                 String id = (String) board.get("id");
                 JSONArray cards = runRequest("https://api.trello.com/1/boards/" + id + "/cards", httpClient, (TrelloCompositeSource) parentDefinition);
-                for (int j = 0; j < cards.length(); j++) {
+                for (int j = 0; j < cards.size(); j++) {
                     JSONObject card = (JSONObject) cards.get(j);
                     JSONArray history = runRequest("https://api.trello.com/1/cards/"+card.get("id")+"/actions?filter=updateCard:idList", httpClient, (TrelloCompositeSource) parentDefinition);
                     // for each item in history
-                    for (int k = 0; k < history.length(); k++) {
+                    for (int k = 0; k < history.size(); k++) {
                         IRow row = dataSet.createRow();
                         JSONObject historyObject = (JSONObject) history.get(k);
 
