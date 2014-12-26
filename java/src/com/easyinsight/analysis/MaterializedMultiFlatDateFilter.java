@@ -22,6 +22,7 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
     private Set<String> valids;
     private int level;
     private SimpleDateFormat sdf;
+    private Calendar cal = Calendar.getInstance();
 
     public MaterializedMultiFlatDateFilter(AnalysisItem key, Collection<DateLevelWrapper> wrappers, int level) {
         super(key);
@@ -49,11 +50,9 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
 
     @Override
     public boolean allows(Value value) {
-
         if (level == AnalysisDateDimension.MONTH_FLAT) {
             if (value.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) value;
-                Calendar cal = Calendar.getInstance();
                 cal.setTime(dateValue.getDate());
                 return months.contains(cal.get(Calendar.MONTH));
             } else if (value.type() == Value.STRING) {
