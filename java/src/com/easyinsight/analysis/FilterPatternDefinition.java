@@ -49,7 +49,12 @@ public class FilterPatternDefinition extends FilterDefinition {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
         queryBuilder.append(columnName);
-        queryBuilder.append(" LIKE ?");
+        if (database.getDialect() == Database.POSTGRES && !caseSensitive) {
+            queryBuilder.append(" ILIKE ?");
+        } else {
+            queryBuilder.append(" LIKE ?");
+        }
+
         return queryBuilder.toString();
     }
 
