@@ -46,6 +46,7 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
             }
         }
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+        config.setEncoding("UTF-8");
         String url = infusionsoftCompositeSource.getUrl()+":443/api/xmlrpc";
         config.setServerURL(new URL(url));
         XmlRpcClient client = new XmlRpcClient();
@@ -78,9 +79,6 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {
                         row.addValue(analysisItem.getKey(), new DateValue((Date) value));
-                        if ("ContactAction".equals(table)) {
-                            System.out.println((Date) value);
-                        }
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;
