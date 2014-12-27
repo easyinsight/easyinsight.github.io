@@ -150,7 +150,6 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    responseString = restMethod.getResponseBodyAsString();
                     jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     successful = true;
                 }
@@ -201,7 +200,6 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    responseString = restMethod.getResponseBodyAsString();
                     jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     successful = true;
                 }
