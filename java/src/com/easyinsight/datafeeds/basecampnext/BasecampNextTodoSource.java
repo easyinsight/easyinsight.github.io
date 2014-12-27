@@ -280,9 +280,9 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                             int ct = 0;
                             for (int m = 0; m < comments.size(); m++) {
                                 JSONObject comment = (JSONObject) comments.get(m);
-                                String createdAtString = comment.get("created_at").toString();
+                                String createdAtString = getValue(comment, "created_at");
                                 String commentID = comment.get("id").toString();
-                                String commentCreator = comment.get("content").toString();
+                                String commentCreator = getValue(comment, "content");
                                 String creator = ((JSONObject) comment.get("creator")).get("name").toString();
                                 Date date = parseDate(createdAtString);
                                 parentSource.addComment(new BasecampComment(commentID, date, todoID, creator, commentCreator, projectID));
