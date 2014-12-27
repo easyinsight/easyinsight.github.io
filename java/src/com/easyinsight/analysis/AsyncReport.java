@@ -30,6 +30,32 @@ import java.util.Map;
  */
 public class AsyncReport {
 
+    private static ThreadLocal<AsyncReportLocal> asyncReportLocals = new ThreadLocal<>();
+
+    private static class AsyncReportLocal {
+        private boolean inAsync;
+
+        private AsyncReportLocal(boolean inAsync) {
+            this.inAsync = inAsync;
+        }
+
+        public boolean isInAsync() {
+            return inAsync;
+        }
+    }
+
+    public static void establishAsync() {
+        asyncReportLocals.set(new AsyncReportLocal(true));
+    }
+
+    public static void releaseAsync() {
+        asyncReportLocals.remove();
+    }
+
+    public static boolean isAsync() {
+        return asyncReportLocals.get() != null && asyncReportLocals.get().inAsync;
+    }
+
     private int serverID;
 
     public AsyncReport(int serverID) {
@@ -180,7 +206,9 @@ public class AsyncReport {
 
 
             DataSourceThreadPool.instance().addActivity(() -> {
+
                 try {
+                    AsyncReport.establishAsync();
                     try {
                         EIConnection conn = Database.instance().getConnection();
                         try {
@@ -299,6 +327,7 @@ public class AsyncReport {
                         }
                     } finally {
                         SecurityUtil.clearThreadLocal();
+                        AsyncReport.releaseAsync();
                     }
 
                 } catch (Exception e) {

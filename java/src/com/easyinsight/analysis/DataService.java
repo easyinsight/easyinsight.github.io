@@ -2576,48 +2576,56 @@ public class DataService {
 
     protected static void accountAsyncHack(InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
         if (!insightRequestMetadata.isNoAsync()) {
-            long accountID = SecurityUtil.getAccountID(false);
+            if (AsyncReport.isAsync()) {
+                insightRequestMetadata.setNoAsync(true);
+            } else {
+                long accountID = SecurityUtil.getAccountID(false);
 
-            try {
-                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
-                ps.setLong(1, accountID);
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                if (!rs.next()) {
-                    insightRequestMetadata.setNoAsync(true);
-                } else {
-                    boolean accountAsync = rs.getBoolean(1);
-                    if (!accountAsync) {
+                try {
+                    PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+                    ps.setLong(1, accountID);
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    if (!rs.next()) {
                         insightRequestMetadata.setNoAsync(true);
+                    } else {
+                        boolean accountAsync = rs.getBoolean(1);
+                        if (!accountAsync) {
+                            insightRequestMetadata.setNoAsync(true);
+                        }
                     }
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
-            } catch (Exception e) {
-                LogClass.error(e);
             }
         }
     }
 
     protected static void accountAsyncHack(InsightRequestMetadata insightRequestMetadata) {
         if (!insightRequestMetadata.isNoAsync()) {
-            long accountID = SecurityUtil.getAccountID(false);
-            EIConnection conn = Database.instance().getConnection();
-            try {
-                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
-                ps.setLong(1, accountID);
-                ResultSet rs = ps.executeQuery();
-                if (!rs.next()) {
-                    insightRequestMetadata.setNoAsync(true);
-                } else {
-                    boolean accountAsync = rs.getBoolean(1);
-                    if (!accountAsync) {
+            if (AsyncReport.isAsync()) {
+                insightRequestMetadata.setNoAsync(true);
+            } else {
+                long accountID = SecurityUtil.getAccountID(false);
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+                    ps.setLong(1, accountID);
+                    ResultSet rs = ps.executeQuery();
+                    if (!rs.next()) {
                         insightRequestMetadata.setNoAsync(true);
+                    } else {
+                        boolean accountAsync = rs.getBoolean(1);
+                        if (!accountAsync) {
+                            insightRequestMetadata.setNoAsync(true);
+                        }
                     }
+                    ps.close();
+                } catch (Exception e) {
+                    LogClass.error(e);
+                } finally {
+                    Database.closeConnection(conn);
                 }
-                ps.close();
-            } catch (Exception e) {
-                LogClass.error(e);
-            } finally {
-                Database.closeConnection(conn);
             }
         }
     }
