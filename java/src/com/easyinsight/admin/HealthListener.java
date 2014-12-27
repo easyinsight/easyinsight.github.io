@@ -119,7 +119,7 @@ public class HealthListener implements Runnable {
                 insertStmt.close();
             } else {
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE SERVER SET database_listener = ?," +
-                        "data_source_listener = ?, healthy = ?, last_healthy_time = ? WHERE server_host = ?");
+                        "report_listener = ?, healthy = ?, last_healthy_time = ? WHERE server_host = ?");
                 updateStmt.setBoolean(1, ConfigLoader.instance().isDatabaseListener());
                 updateStmt.setBoolean(2, ConfigLoader.instance().isReportListener());
                 updateStmt.setBoolean(3, true);
