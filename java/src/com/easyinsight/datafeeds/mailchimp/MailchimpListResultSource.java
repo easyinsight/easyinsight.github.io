@@ -140,6 +140,9 @@ public class MailchimpListResultSource extends ServerDataSourceDefinition {
                 sb.append(fixed).append("\r\n");
             }
 
+            if (sb.length() == 0) {
+                return new DataSet();
+            }
             sb.deleteCharAt(sb.length() - 1);
 
             in.close();

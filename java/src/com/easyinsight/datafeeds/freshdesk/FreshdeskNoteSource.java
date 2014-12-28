@@ -77,8 +77,6 @@ public class FreshdeskNoteSource extends FreshdeskBaseSource {
                     } else {
                         throw new RuntimeException();
                     }
-                    System.out.println(map);
-                    System.out.println(ticketActivity);
                     row.addValue(keys.get(NOTE_CREATED_AT), getDate(ticketActivity, "performed_time"));
                     row.addValue(keys.get(NOTE_CONTENT), getValue(ticketActivity, "note_content"));
                     row.addValue(keys.get(NOTE_TICKET_ID), ticketID);

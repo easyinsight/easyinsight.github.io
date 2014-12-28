@@ -283,7 +283,8 @@ public class ReportCalculation {
     }
 
     public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
-                      Map<String, List<AnalysisItem>> unqualifiedDisplayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) throws RecognitionException {
+                      Map<String, List<AnalysisItem>> unqualifiedDisplayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata,
+                      Map<String, UniqueKey> namespaces) throws RecognitionException {
             //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
             CalculationMetadata calculationMetadata = new CalculationMetadata();
             calculationMetadata.setFeed(feed);
@@ -309,7 +310,7 @@ public class ReportCalculation {
 
 
 
-            visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports(), conn));
+            visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), namespaces);
             calculationTreeNode.accept(visitor);
             ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
             calculationTreeNode.accept(rowVisitor);
