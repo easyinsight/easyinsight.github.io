@@ -315,10 +315,10 @@ public class DatabaseManager {
                 return specialCachingStorage;
             }
         } else {
-            Set<FeedType> redshiftTypes = forceToRedshift();
+            /*Set<FeedType> redshiftTypes = forceToRedshift();
             if (redshiftTypes.contains(feedType) && additionalDatabases.containsKey("storage5")) {
                 return "storage5";
-            }
+            }*/
             if (specialStorage != null && additionalDatabases.containsKey(specialStorage)) {
                 return specialStorage;
             }
