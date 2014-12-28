@@ -1,6 +1,7 @@
 package com.easyinsight.storage;
 
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
@@ -254,6 +255,51 @@ public class DatabaseManager {
         System.out.println(PasswordStorage.encryptString("Storage5"));
     }
 
+    private Set<FeedType> forceToRedshift() {
+        Set<FeedType> types = new HashSet<>();
+        if (ConfigLoader.instance().isProduction()) {
+
+            types.add(FeedType.REDBOOTH_ORGANIZATION);
+            types.add(FeedType.REDBOOTH_COMMENT);
+            types.add(FeedType.REDBOOTH_PROJECT);
+            types.add(FeedType.REDBOOTH_TASK);
+            types.add(FeedType.REDBOOTH_TASK_LIST);
+            types.add(FeedType.INFUSIONSOFT_LEAD);
+            types.add(FeedType.INFUSIONSOFT_STAGE);
+            types.add(FeedType.INFUSIONSOFT_STAGE_HISTORY);
+            types.add(FeedType.INFUSIONSOFT_AFFILIATES);
+
+            types.add(FeedType.INFUSIONSOFT_CAMPAIGNEE);
+            types.add(FeedType.INFUSIONSOFT_CAMPAIGN_STEP);
+            types.add(FeedType.INFUSIONSOFT_REFERRAL);
+            types.add(FeedType.INFUSIONSOFT_TAG_GROUP);
+
+            types.add(FeedType.INFUSIONSOFT_COMPANIES);
+            types.add(FeedType.INFUSIONSOFT_CONTACTS);
+            types.add(FeedType.INFUSIONSOFT_JOBS);
+            types.add(FeedType.INFUSIONSOFT_SUBSCRIPTIONS);
+            types.add(FeedType.INFUSIONSOFT_PRODUCTS);
+            types.add(FeedType.INFUSIONSOFT_PRODUCT_INTEREST);
+            types.add(FeedType.INFUSIONSOFT_CONTACT_ACTION);
+            types.add(FeedType.INFUSIONSOFT_RECURRING_ORDERS);
+            types.add(FeedType.INFUSIONSOFT_CAMPAIGNS);
+            types.add(FeedType.INFUSIONSOFT_ORDER_ITEM);
+            types.add(FeedType.INFUSIONSOFT_PAYMENT);
+            types.add(FeedType.INFUSIONSOFT_INVOICES);
+            types.add(FeedType.INFUSIONSOFT_INVOICE_ITEM);
+            types.add(FeedType.INFUSIONSOFT_INVOICE_PAYMENT);
+            types.add(FeedType.INFUSIONSOFT_LEAD_SOURCE);
+            types.add(FeedType.INFUSIONSOFT_JOB_RECURRING_INSTANCE);
+            types.add(FeedType.INFUSIONSOFT_PAY_PLAN);
+            types.add(FeedType.INFUSIONSOFT_EXPENSES);
+            types.add(FeedType.INFUSIONSOFT_TAG);
+            types.add(FeedType.INFUSIONSOFT_CONTACT_TO_TAG);
+            types.add(FeedType.INFUSIONSOFT_USERS);
+            types.add(FeedType.SMARTSHEET_TABLE);
+        }
+        return types;
+    }
+
     public String chooseDatabase(Connection conn, FeedType feedType) throws SQLException {
 
 
@@ -269,6 +315,10 @@ public class DatabaseManager {
                 return specialCachingStorage;
             }
         } else {
+            Set<FeedType> redshiftTypes = forceToRedshift();
+            if (redshiftTypes.contains(feedType) && additionalDatabases.containsKey("storage5")) {
+                return "storage5";
+            }
             if (specialStorage != null && additionalDatabases.containsKey(specialStorage)) {
                 return specialStorage;
             }
