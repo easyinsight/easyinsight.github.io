@@ -37,6 +37,10 @@ public class LineD3ChartServlet extends HtmlServlet {
         AnalysisItem eventPointLabel = twoAxisDefinition.getEventPointLabel();
         twoAxisDefinition.setEventPoint(null);
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        if (dataSet.getAsyncSavedReport() != null) {
+            report = dataSet.getAsyncSavedReport();
+        }
+        twoAxisDefinition = (WSTwoAxisDefinition) report;
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         DateFormat dFormat = new SimpleDateFormat("MM/dd/yyyy");

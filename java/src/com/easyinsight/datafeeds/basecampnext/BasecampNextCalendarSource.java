@@ -114,6 +114,9 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
         try {
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
             if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+                return new DataSet();
+            }
+            if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
                 DataSet dataSet = new DataSet();
                 JSONArray jsonArray = runJSONRequest("calendars.json", (BasecampNextCompositeSource) parentDefinition, httpClient);
                 for (int i = 0; i < jsonArray.size(); i++) {
