@@ -5,6 +5,7 @@ import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
+import com.easyinsight.calculations.NamespaceGenerator;
 import com.easyinsight.calculations.functions.DayOfQuarter;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
@@ -3096,12 +3097,14 @@ public class DataService {
                     }
                 }
             }
-            if (feed.getDataSource().getMarmotScript() != null) {
+            if (feed.getDataSource().getMarmotScript() != null && !"".equals(feed.getDataSource().getMarmotScript())) {
+                Map<String, UniqueKey> namespaces = new NamespaceGenerator().generate(analysisDefinition.getDataFeedID(), analysisDefinition.getAddonReports(), conn);
                 StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     try {
-                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                        new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata,
+                                namespaces);
                     } catch (FunctionException fe) {
                         throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                     } catch (ReportException re) {
