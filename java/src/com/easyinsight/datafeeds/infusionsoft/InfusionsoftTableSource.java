@@ -6,6 +6,7 @@ import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -66,7 +67,13 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
             Map emptyMap = new HashMap();
             parameters.add(emptyMap);
             parameters.add(fields);
-            Object[] results = (Object[]) client.execute("DataService.query", parameters);
+            Object[] results = new Object[0];
+            try {
+                results = (Object[]) client.execute("DataService.query", parameters);
+            } catch (XmlRpcException e) {
+                LogClass.error(e);
+                count = 1000;
+            }
             for (Object result : results) {
                 Map resultMap = (Map) result;
                 count++;
