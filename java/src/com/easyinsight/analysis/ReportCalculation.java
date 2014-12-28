@@ -283,6 +283,39 @@ public class ReportCalculation {
     }
 
     public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
+                      Map<String, List<AnalysisItem>> unqualifiedDisplayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata) throws RecognitionException {
+        //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
+        CalculationMetadata calculationMetadata = new CalculationMetadata();
+        calculationMetadata.setFeed(feed);
+        calculationMetadata.setReport(report);
+        calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
+        calculationMetadata.setConnection(conn);
+        if (feed != null) {
+            calculationMetadata.setDataSource(feed.getDataSource());
+        }
+        Collection<FilterDefinition> allFilters = new ArrayList<FilterDefinition>();
+        if (report.getFilterDefinitions() != null) {
+            allFilters.addAll(report.getFilterDefinitions());
+        }
+        if (dlsFilters != null) {
+            allFilters.addAll(dlsFilters);
+        }
+        calculationMetadata.setFilters(allFilters);
+        //calculationMetadata.setDataSet(dataSet);
+        calculationMetadata.setDataSourceFields(allFields);
+        CalculationTreeNode calculationTreeNode;
+        ICalculationTreeVisitor visitor;
+        calculationTreeNode = CalculationHelper.createTree(code, false);
+
+
+        Map<String, UniqueKey> namespaces = new NamespaceGenerator().generate(report.getDataFeedID(), report.getAddonReports(), conn);
+        visitor = new ResolverVisitor(keyMap, displayMap, unqualifiedDisplayMap, new FunctionFactory(), namespaces);
+        calculationTreeNode.accept(visitor);
+        ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, calculationMetadata);
+        calculationTreeNode.accept(rowVisitor);
+    }
+
+    public void apply(WSAnalysisDefinition report, List<AnalysisItem> allFields, Map<String, List<AnalysisItem>> keyMap, Map<String, List<AnalysisItem>> displayMap,
                       Map<String, List<AnalysisItem>> unqualifiedDisplayMap, Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata,
                       Map<String, UniqueKey> namespaces) throws RecognitionException {
             //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);

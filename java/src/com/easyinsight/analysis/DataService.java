@@ -3070,13 +3070,14 @@ public class DataService {
             Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
 
 
-            if (analysisDefinition.getMarmotScript() != null) {
+            if (analysisDefinition.getMarmotScript() != null && !"".equals(analysisDefinition.getMarmotScript())) {
+                Map<String, UniqueKey> namespaces = new NamespaceGenerator().generate(analysisDefinition.getDataFeedID(), analysisDefinition.getAddonReports(), conn);
                 StringTokenizer toker = new StringTokenizer(analysisDefinition.getMarmotScript(), "\r\n");
                 while (toker.hasMoreTokens()) {
                     String line = toker.nextToken();
                     if (!FunctionFactory.functionRunsOnReportLoad(line)) {
                         try {
-                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata);
+                            new ReportCalculation(line).apply(analysisDefinition, allFields, keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters, insightRequestMetadata, namespaces);
                         } catch (FunctionException fe) {
                             throw new ReportException(new AnalysisItemFault(fe.getMessage() + " in the calculation of " + line + ".", null));
                         } catch (ReportException re) {
