@@ -56,6 +56,7 @@ public class AnalysisBasedFeed extends Feed {
 
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
+        long start = System.currentTimeMillis();
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         //analysisDefinition.updateFromParameters(parameters);
         InsightRequestMetadata localInsightRequestMetadata = new InsightRequestMetadata();
@@ -218,12 +219,16 @@ public class AnalysisBasedFeed extends Feed {
         for (Map.Entry<FilterDefinition, AnalysisItem> entry : filterMap.entrySet()) {
             entry.getKey().setField(entry.getValue());
         }
+
+        dataSet.getAudits().add(new ReportAuditEvent(ReportAuditEvent.QUERY, "Running addon " + getName() + " took " + (System.currentTimeMillis() - start) + " ms"));
+
         List<String> addonWarnings = localInsightRequestMetadata.getWarnings();
         List<ReportAuditEvent> events = dataSet.getAudits();
 
         if (cacheKey != null) {
             ReportCache.instance().storeAddonReport(analysisDefinition.getDataFeedID(), cacheKey, dataSet, analysisDefinition.getCacheMinutes());
         }
+
         return dataSet;
     }
 }

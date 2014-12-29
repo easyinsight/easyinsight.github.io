@@ -43,4 +43,24 @@ public class ReportAuditEvent implements Serializable {
     public void setEventLabel(String eventLabel) {
         this.eventLabel = eventLabel;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ReportAuditEvent that = (ReportAuditEvent) o;
+
+        if (auditType != null ? !auditType.equals(that.auditType) : that.auditType != null) return false;
+        if (eventLabel != null ? !eventLabel.equals(that.eventLabel) : that.eventLabel != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = auditType != null ? auditType.hashCode() : 0;
+        result = 31 * result + (eventLabel != null ? eventLabel.hashCode() : 0);
+        return result;
+    }
 }
