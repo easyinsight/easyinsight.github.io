@@ -40,7 +40,7 @@ public class NotSureWhatToCallThisYet {
     }
 
     public DataSet yargh(InsightRequestMetadata insightRequestMetadata, Set<AnalysisItem> analysisItems, EIConnection conn,
-                      Collection<FilterDefinition> reportFilters) {
+                      Collection<FilterDefinition> reportFilters, WSAnalysisDefinition report) {
         try {
             Map<DateKey, Yargh> nodeMap = new HashMap<DateKey, Yargh>();
             AnalysisDateDimension baseDate = insightRequestMetadata.getBaseDate();
@@ -65,6 +65,7 @@ public class NotSureWhatToCallThisYet {
                 if (base.getKey() instanceof DerivedKey) {
 
                     DerivedKey dKey = (DerivedKey) base.getKey();
+                    System.out.println("\t" + dKey.getFeedID());
                     for (CompositeFeedNode node : compositeFeedNodes) {
                         if (node.getDataFeedID() == dKey.getFeedID()) {
                             onThisLevel = true;
@@ -79,7 +80,6 @@ public class NotSureWhatToCallThisYet {
                 if (onThisLevel) {
 
                     if (base.hasType(AnalysisItemTypes.MEASURE)) {
-                        System.out.println("Base item = " + base.toDisplay() + " on " + getName());
                         AnalysisDateDimension itemDate = findDateDimension(base, baseDate.getDateLevel());
                         if (itemDate != null) {
                             insightRequestMetadata.addAudit(base, "Date comparison used date of " + itemDate.toDisplay());
@@ -209,29 +209,35 @@ public class NotSureWhatToCallThisYet {
                 }*/
                 if (!altPath) {
                     AnalysisDateDimension dateDimension = entry.getKey().dateDimension;
-                    if (dateDimension instanceof DerivedAnalysisDateDimension) {
+                    //if (dateDimension instanceof DerivedAnalysisDateDimension) {
                         Yargh yargh = entry.getValue();
                         yargh.analysisItems.addAll(otherItems);
+                        System.out.println("date dim " + dateDimension.toDisplay() + " contained " + yargh.analysisItems);
                         //AnalysisBasedFeed distinctCachedSourceFeed = new AnalysisBasedFeed();
                         WSListDefinition list = new WSListDefinition();
                         list.setDataFeedID(feed.getFeedID());
                         list.setColumns(new ArrayList<>(yargh.analysisItems));
                         list.setFilterDefinitions(new ArrayList<>(yargh.filters));
+                    list.setLogReport(report.isLogReport());
+                        list.setJoinOverrides(report.getJoinOverrides());
                         //list.getColumns().addAll(otherItems);
                         /*list.setAddonReports(report.getAddonReports());
                         list.setAddedItems(report.getAddedItems());*/
                         AnalysisBasedFeed reportFeed = new AnalysisBasedFeed();
+                        reportFeed.setName("Data source for " + dateDimension.toDisplay());
                         reportFeed.setAnalysisDefinition(list);
 
                         DataSet childSet = reportFeed.getAggregateDataSet(yargh.analysisItems, yargh.filters, insightRequestMetadata, getFields(), false, conn);
+                        dataSet.getAudits().addAll(childSet.getAudits());
                         for (IRow row : childSet.getRows()) {
                             Value value = row.getValue(dateDimension);
                             row.addValue(baseDate.createAggregateKey(), value);
                             dataSet.addRow(row);
                         }
-                    } else {
+                    /*} else {
                         Yargh yargh = entry.getValue();
                         yargh.analysisItems.addAll(otherItems);
+                        System.out.println("date dim " + dateDimension.toDisplay() + " contained " + yargh.analysisItems);
                         for (FilterDefinition filterDefinition : dateFilters) {
                             FilterDefinition clone = filterDefinition.clone();
                             clone.setField(dateDimension);
@@ -243,7 +249,7 @@ public class NotSureWhatToCallThisYet {
                             row.addValue(baseDate.createAggregateKey(), value);
                             dataSet.addRow(row);
                         }
-                    }
+                    }*/
                 }
             }
 
