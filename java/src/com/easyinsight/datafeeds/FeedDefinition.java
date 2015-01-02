@@ -85,6 +85,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean defaultToFullJoins;
     private boolean defaultToOptimized;
     private boolean autoCombined;
+    private boolean fieldRenames;
+
+    public boolean isFieldRenames() {
+        return fieldRenames;
+    }
+
+    public void setFieldRenames(boolean fieldRenames) {
+        this.fieldRenames = fieldRenames;
+    }
 
     public boolean isAutoCombined() {
         return autoCombined;
