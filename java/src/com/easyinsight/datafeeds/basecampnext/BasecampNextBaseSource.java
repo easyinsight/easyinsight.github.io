@@ -95,7 +95,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = (JSONArray) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = (JSONArray) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
                     restMethod.releaseConnection();
                     successful = true;
                 }
@@ -150,7 +151,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
                     successful = true;
                 }
             } catch (IOException e) {
@@ -200,7 +202,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
                     successful = true;
                 }
             } catch (IOException e) {
