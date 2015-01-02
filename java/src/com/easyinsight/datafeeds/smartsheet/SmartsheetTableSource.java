@@ -469,6 +469,11 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
         return jsonObject;
     }
 
+    @Override
+    public boolean isMigrateRequired() {
+        return false;
+    }
+
     protected boolean otherwiseChanged() {
         boolean blah = rebuildFields;
         rebuildFields = false;
