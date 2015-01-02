@@ -83,6 +83,19 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
+    public void loadingProgress(int current, int total, String message, String callDataID, EIConnection conn) {
+        if (callDataID != null) {
+            DataSourceRefreshEvent info = new DataSourceRefreshEvent();
+            info.setDataSourceID(getParentSourceID() == 0 ? getDataFeedID() : getParentSourceID());
+            info.setDataSourceName(message);
+            info.setType(DataSourceRefreshEvent.PROGRESS);
+            info.setUserId(SecurityUtil.getUserID());
+            info.setCurrent(current);
+            info.setMax(total);
+            ServiceUtil.instance().updateStatus(callDataID, ServiceUtil.RUNNING, info, conn);
+        }
+    }
+
     public DataSet getDataSet(Map<String, Key> keys, java.util.Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, java.util.Date lastRefreshDate,
                               Map<String, Object> refreshProperties) throws ReportException {
         throw new UnsupportedOperationException();
@@ -202,9 +215,12 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         Map<String, Key> keys = newDataSourceFields(parentDefinition);
         List<AnalysisItem> fields = createAnalysisItems(keys, conn, parentDefinition);
         conn.setAutoCommit(false);
-        List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
+        List<AnalysisItem> newFields = new ArrayList<>();
         boolean renamed = false;
-        for (AnalysisItem field : fields) {
+        Iterator<AnalysisItem> fieldIter = fields.iterator();
+        List<FieldChange> fieldChanges = new ArrayList<>();
+        while (fieldIter.hasNext()) {
+            AnalysisItem field = fieldIter.next();
             if (field == null) {
                 continue;
             }
@@ -214,12 +230,15 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             AnalysisItem existingField = findAnalysisItemByKey(field.getKey().toKeyString());
             if (existingField == null) {
                 newFields.add(field);
-            } /*else if (!existingField.toDisplay().equals(field.toDisplay())) {
+            } else if (isFieldRenames() && !existingField.toDisplay().equals(field.toDisplay())) {
                 renamed = true;
                 existingField.setDisplayName(field.getDisplayName());
+            }
+            /*if (existingField != null && existingField.getType() != field.getType()) {
+                fieldChanges.add(new FieldChange(existingField, field, getDataFeedID()));
             }*/
         }
-        if (newFields.size() > 0 || otherwiseChanged()) {
+        if (newFields.size() > 0 || otherwiseChanged() || renamed) {
             changed = true;
             System.out.println("Discovered new fields = " + newFields);
             for (AnalysisItem newField : newFields) {
@@ -228,7 +247,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             new DataSourceInternalService().updateFeedDefinition(this, conn, true, false);
         }
-        return new MigrationResult(changed, keys);
+        return new MigrationResult(changed, keys, fieldChanges, newFields.size() > 0, renamed);
     }
 
     public String tempLoad(Map<String, Key> keys, Date now, @Nullable FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, EIConnection conn, boolean fullRefresh,
@@ -320,12 +339,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         }
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime,
-                               boolean fullRefresh, List<ReportFault> warnings, Map<String, Object> refreshProperties) throws Exception {
-        boolean changed = false;
+    public MigrationResult refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime,
+                                       boolean fullRefresh, List<ReportFault> warnings, Map<String, Object> refreshProperties) throws Exception {
+
         beforeRefresh(conn);
         MigrationResult migrationResult = migrations(conn, this);
-        changed = migrationResult.isChanged() || changed;
         Map<String, Key> keyMap = migrationResult.getKeyMap();
 
         conn.commit();
@@ -340,7 +358,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             CachedAddonDataSource.triggerUpdates(getDataFeedID(), conn);
         }
 
-        return changed;
+        return migrationResult;
     }
 
     protected void refreshDone() {
