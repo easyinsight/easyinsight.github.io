@@ -218,6 +218,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         List<AnalysisItem> newFields = new ArrayList<>();
         boolean renamed = false;
         Iterator<AnalysisItem> fieldIter = fields.iterator();
+        boolean fieldRenamesEnabled = isFieldRenames() || (parentDefinition != null && parentDefinition.isFieldRenames());
         List<FieldChange> fieldChanges = new ArrayList<>();
         while (fieldIter.hasNext()) {
             AnalysisItem field = fieldIter.next();
@@ -230,7 +231,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             AnalysisItem existingField = findAnalysisItemByKey(field.getKey().toKeyString());
             if (existingField == null) {
                 newFields.add(field);
-            } else if (isFieldRenames() && !existingField.toDisplay().equals(field.toDisplay())) {
+            } else if (fieldRenamesEnabled && !existingField.toDisplay().equals(field.toDisplay())) {
                 renamed = true;
                 existingField.setDisplayName(field.getDisplayName());
             }
