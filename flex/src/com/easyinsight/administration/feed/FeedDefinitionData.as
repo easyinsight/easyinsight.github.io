@@ -53,6 +53,7 @@ import mx.collections.ArrayCollection;
         public var defaultToFullJoins:Boolean;
         public var defaultToOptimized:Boolean;
         public var avoidKeyDisplayCollisions:Boolean;
+        public var fieldRenames:Boolean;
 
 		public function FeedDefinitionData()
 		{
