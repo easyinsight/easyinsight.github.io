@@ -72,7 +72,7 @@ public class DataSourceListener {
                 try {
                     UserUploadService.UploadDataSource source = new UserUploadService.UploadDataSource(conn, new ArrayList<>(), new Date(),
                             dataSource, (IServerDataSourceDefinition) dataSource, callID, null);
-                    changed = source.invoke();
+                    changed = source.invoke().isChanged();
                     conn.commit();
                 } finally {
                     SecurityUtil.clearThreadLocal();

@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.core.Key;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,10 +13,29 @@ import java.util.Map;
 public class MigrationResult {
     private boolean changed;
     private Map<String, Key> keyMap;
+    private List<FieldChange> fieldChanges;
+    private boolean fieldsAdded;
+    private boolean fieldsRenamed;
 
-    public MigrationResult(boolean changed, Map<String, Key> keyMap) {
+    public MigrationResult(boolean changed, Map<String, Key> keyMap, List<FieldChange> fieldChanges, boolean fieldsAdded,
+                           boolean fieldsRenamed) {
         this.changed = changed;
         this.keyMap = keyMap;
+        this.fieldChanges = fieldChanges;
+        this.fieldsAdded = fieldsAdded;
+        this.fieldsRenamed = fieldsRenamed;
+    }
+
+    public List<FieldChange> getFieldChanges() {
+        return fieldChanges;
+    }
+
+    public boolean isFieldsAdded() {
+        return fieldsAdded;
+    }
+
+    public boolean isFieldsRenamed() {
+        return fieldsRenamed;
     }
 
     public boolean isChanged() {

@@ -432,9 +432,10 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     public void validateTableSetup(EIConnection conn) throws SQLException {
     }
 
-    public boolean refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings,
-                               Map<String, Object> refreshProperties) throws Exception {
+    public MigrationResult refreshData(long accountID, Date now, EIConnection conn, FeedDefinition parentDefinition, String callDataID, Date lastRefreshTime, boolean fullRefresh, List<ReportFault> warnings,
+                                       Map<String, Object> refreshProperties) throws Exception {
         boolean changed = false;
+        boolean discoveredNewFields = false;
         DataTypeMutex.mutex().lock(getFeedType(), getDataFeedID());
         try {
             long startTime = System.currentTimeMillis();
@@ -455,8 +456,8 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             for (IServerDataSourceDefinition source : sources) {
                 if (source instanceof CompositeServerDataSource) {
                     CompositeServerDataSource compositeServerDataSource = (CompositeServerDataSource) source;
-                    boolean childChange = compositeServerDataSource.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime, fullRefresh, warnings, refreshProperties);
-                    if (childChange) {
+                    MigrationResult childChange = compositeServerDataSource.refreshData(accountID, now, conn, this, callDataID, lastRefreshTime, fullRefresh, warnings, refreshProperties);
+                    if (childChange.isChanged()) {
                         changed = true;
                     }
                 } else {
@@ -476,6 +477,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 ServerDataSourceDefinition serverDataSourceDefinition = (ServerDataSourceDefinition) source;
                 MigrationResult migrationResult = serverDataSourceDefinition.migrations(conn, this);
                 changed = migrationResult.isChanged() || changed;
+                discoveredNewFields = migrationResult.isFieldsAdded() || discoveredNewFields;
                 keyMap.put(serverDataSourceDefinition.getDataFeedID(), migrationResult.getKeyMap());
             }
             conn.commit();
@@ -525,7 +527,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             DataTypeMutex.mutex().unlock(getFeedType());
         }
 
-        return changed;
+        return new MigrationResult(changed, new HashMap<>(), new ArrayList<>(), discoveredNewFields, false);
     }
 
     protected void refreshDone() {

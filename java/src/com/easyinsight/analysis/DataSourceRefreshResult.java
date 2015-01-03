@@ -12,6 +12,15 @@ public class DataSourceRefreshResult implements Serializable {
     private Date date;
     private ReportFault warning;
     private boolean newFields;
+    private boolean discoveredNewFields;
+
+    public boolean isDiscoveredNewFields() {
+        return discoveredNewFields;
+    }
+
+    public void setDiscoveredNewFields(boolean discoveredNewFields) {
+        this.discoveredNewFields = discoveredNewFields;
+    }
 
     public boolean isNewFields() {
         return newFields;

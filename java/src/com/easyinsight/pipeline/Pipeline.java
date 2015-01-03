@@ -295,8 +295,14 @@ public abstract class Pipeline {
     }
 
     public DataSet toDataSet(DataSet dataSet) {
+        Set<ReportAuditEvent> events = new LinkedHashSet<>(dataSet.getAudits());
         for (IComponent component : components) {
             dataSet = component.apply(dataSet, pipelineData);
+            for (ReportAuditEvent event : dataSet.getAudits()) {
+                if (!events.contains(event)) {
+                    events.add(event);
+                }
+            }
         }
         DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getAllRequestedItems()), new HashMap<AnalysisItem, AnalysisItem>(),
                 pipelineData.getReport());
@@ -304,6 +310,7 @@ public abstract class Pipeline {
             component.decorate(results);
         }
         dataSet.setAdditionalProperties(results.getAdditionalProperties());
+        dataSet.setAudits(new ArrayList<>(events));
         return dataSet;
     }
 

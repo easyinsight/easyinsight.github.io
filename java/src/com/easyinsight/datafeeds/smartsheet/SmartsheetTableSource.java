@@ -105,6 +105,9 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     Map results = (Map) rawJSONRequestForObject("https://api.smartsheet.com/1.1/sheet/" + table);
                     List rows = (List) results.get("rows");
                     DataTypeGuesser guesser = new DataTypeGuesser();
+
+                    Map<String, String> toDisplay = new HashMap<>();
+
                     for (int i = 0; i < rows.size(); i++ ) {
                         Object obj = rows.get(i);
 
@@ -119,6 +122,10 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                                 if (valueObj != null) {
                                     String string = valueObj.toString();
                                     guesser.addValue(testing.getKey(), new StringValue(string));
+                                    Object displayValueObj = cell.get("displayValue");
+                                    if (displayValueObj != null) {
+                                        toDisplay.put(testing.getKey().toKeyString(), displayValueObj.toString());
+                                    }
                                 }
                             }
                         }
@@ -128,6 +135,20 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                         for (AnalysisItem item : generatedFields) {
                             keys.remove(item.getKey().toKeyString());
                             AnalysisItem existing = newFields.get(item.getKey().toKeyString());
+                            if (item.hasType(AnalysisItemTypes.MEASURE)) {
+                                AnalysisMeasure measure = (AnalysisMeasure) item;
+
+                                String guess = toDisplay.get(item.getKey().toKeyString());
+                                if (guess != null) {
+                                    if (guess.startsWith("$")) {
+                                        measure.setAggregation(AggregationTypes.AVERAGE);
+                                        measure.setFormattingType(FormattingConfiguration.CURRENCY);
+                                    } else if (guess.endsWith("%")) {
+                                        measure.setFormattingType(FormattingConfiguration.PERCENTAGE);
+                                    }
+                                }
+
+                            }
                             item.setDisplayName(existing.getDisplayName());
                         }
                         fields.addAll(generatedFields);
@@ -218,7 +239,18 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                                 row.addValue(key, valueObj.toString());
                             }
                         } else {
-                            row.addValue(key, valueObj.toString());
+                            boolean percentHandle = false;
+                            if (item != null && item.hasType(AnalysisItemTypes.MEASURE) && cell.get("displayValue") != null) {
+                                String displayValue = cell.get("displayValue").toString();
+                                if (displayValue.endsWith("%")) {
+                                    double value = Double.parseDouble(valueObj.toString()) * 100;
+                                    row.addValue(key, value);
+                                    percentHandle = true;
+                                }
+                            }
+                            if (!percentHandle) {
+                                row.addValue(key, valueObj.toString());
+                            }
                         }
                     }
                 }
@@ -250,6 +282,8 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
     public String validateCredentials() {
         return null;
     }
+
+
 
     @Override
     public void customStorage(Connection conn) throws SQLException {
@@ -406,7 +440,9 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    jsonObject = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    System.out.println(jsonObject);
                     successful = true;
                 }
             } catch (IOException e) {
@@ -431,6 +467,11 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
             throw new RuntimeException("Smartsheet could not be reached due to a large number of current users, please try again in a bit.");
         }
         return jsonObject;
+    }
+
+    @Override
+    public boolean isMigrateRequired() {
+        return false;
     }
 
     protected boolean otherwiseChanged() {

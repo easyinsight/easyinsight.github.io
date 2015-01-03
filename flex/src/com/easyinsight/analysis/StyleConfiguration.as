@@ -76,6 +76,7 @@ public class StyleConfiguration {
     public static function getDataSourceItems(dataSource:FeedDefinitionData):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new CheckBoxReportFormItem("Should this data source be visible to everyone in the account?", "accountVisible", dataSource.accountVisible, dataSource));
+        items.addItem(new CheckBoxReportFormItem("Should this data source rename fields when they change on the source connection?", "fieldRenames", dataSource.fieldRenames, dataSource));
         items.addItem(new TextReportFormItem("What should this data source be named?", "feedName", dataSource.feedName, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source clean up old, duplicate fields when saved?", "fieldCleanupEnabled", dataSource.fieldCleanupEnabled, dataSource));
         items.addItem(new CheckBoxReportFormItem("Should the data source default to full joins?", "defaultToFullJoins", dataSource.defaultToFullJoins, dataSource));

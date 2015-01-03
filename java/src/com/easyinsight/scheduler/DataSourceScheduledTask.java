@@ -242,7 +242,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
         }
 
         public boolean invoke() throws Exception {
-            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings, null);
+            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings, null).isChanged();
             sourceToRefresh.setLastRefreshStart(now);
             if (changed) {
                 new DataSourceInternalService().updateFeedDefinition(sourceToRefresh, conn, true, true);

@@ -100,7 +100,9 @@ public class AsyncReport {
                 }
                 if (serverAssigned) {
                     Integer count = loadMap.get(assignedServer);
-                    loadMap.put(assignedServer, count + 1);
+                    if (count != null) {
+                        loadMap.put(assignedServer, count + 1);
+                    }
                 }
             }
             workStmt.close();
@@ -384,7 +386,7 @@ public class AsyncReport {
         }
         int elapsedTime = 0;
         Object result = null;
-        while (result == null && elapsedTime < TIMEOUT) {
+        while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
             result = MemCachedManager.instance().get("async" + requestID);
             if (result == null) {
                 elapsedTime += 100;
@@ -406,7 +408,7 @@ public class AsyncReport {
 
             int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null && elapsedTime < TIMEOUT) {
+            while (dataResults == null && elapsedTime < REPORT_TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
                     elapsedTime += 100;
@@ -466,7 +468,7 @@ public class AsyncReport {
 
             int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null && elapsedTime < TIMEOUT) {
+            while (dataResults == null && elapsedTime < REPORT_TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
                     elapsedTime += 100;
@@ -489,7 +491,8 @@ public class AsyncReport {
         }
     }
 
-    public static final int TIMEOUT = 60000;
+    public static final int REPORT_TIMEOUT = 300000;
+    public static final int DATA_SOURCE_TIMEOUT = 2400000;
 
     public static ResultData asyncDataSet(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata)  {
         try {
@@ -503,7 +506,7 @@ public class AsyncReport {
 
             int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null && elapsedTime < TIMEOUT) {
+            while (dataResults == null && elapsedTime < REPORT_TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
                     elapsedTime += 100;
@@ -537,7 +540,7 @@ public class AsyncReport {
 
             int elapsedTime = 0;
             ResultData dataResults = null;
-            while (dataResults == null && elapsedTime < TIMEOUT) {
+            while (dataResults == null && elapsedTime < REPORT_TIMEOUT) {
                 dataResults = (ResultData) MemCachedManager.instance().get("async" + reqID);
                 if (dataResults == null) {
                     elapsedTime += 100;

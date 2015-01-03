@@ -59,7 +59,6 @@ import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.util.ServiceUtil;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
-import com.xerox.amazonws.sqs2.SQSException;
 import com.xerox.amazonws.sqs2.SQSUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -2311,6 +2310,31 @@ public class UserUploadService {
         }
     }
 
+    public Collection<BasecampNextAccount> getSmartsheetTablesForAccount() {
+        try {
+            List<DataSourceDescriptor> dataSources = new FeedService().searchForSubscribedFeeds();
+            List<SmartsheetTableSource> smartsheetTables = new ArrayList<>();
+            for (DataSourceDescriptor dataSourceDescriptor : dataSources) {
+                if (dataSourceDescriptor.getDataSourceType() == FeedType.SMARTSHEET_TABLE.getType()) {
+                    SmartsheetTableSource smartsheetTableSource = (SmartsheetTableSource) feedStorage.getFeedDefinitionData(dataSourceDescriptor.getId());
+                    smartsheetTables.add(smartsheetTableSource);
+                }
+            }
+            Set<String> tokens = new HashSet<>();
+            for (SmartsheetTableSource source : smartsheetTables) {
+                String accessToken = source.getAccessToken();
+                tokens.add(accessToken);
+            }
+            if (tokens.size() == 1) {
+                return smartsheetTables.get(0).getTables();
+            }
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            return null;
+        }
+    }
+
     public Collection<BasecampNextAccount> getSmartsheetTables(SmartsheetTableSource dataSource) {
         try {
             return dataSource.getTables();
@@ -2366,11 +2390,11 @@ public class UserUploadService {
                         try {
                             conn.setAutoCommit(false);
                             Date now = new Date();
-                            boolean changed = new DataSourceFactory().createSource(conn, new ArrayList<>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
+                            MigrationResult changed = new DataSourceFactory().createSource(conn, new ArrayList<>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
                             conn.commit();
                             DataSourceRefreshResult result = new DataSourceRefreshResult();
                             result.setDate(now);
-                            result.setNewFields(changed && dataSource.rebuildFieldWindow());
+                            result.setNewFields(changed.isChanged() && dataSource.rebuildFieldWindow());
                             ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result, conn);
                         } catch (ReportException re) {
                             if (!conn.getAutoCommit()) {
@@ -2444,7 +2468,7 @@ public class UserUploadService {
     }
 
     public static interface IUploadDataSource {
-        public boolean invoke() throws Exception;
+        public MigrationResult invoke() throws Exception;
     }
 
     public static class SQSUploadDataSource implements IUploadDataSource {
@@ -2459,7 +2483,7 @@ public class UserUploadService {
             this.callID = callID;
         }
 
-        public boolean invoke() throws Exception {
+        public MigrationResult invoke() throws Exception {
             MessageQueue msgQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseRequestQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             MessageQueue responseQueue = SQSUtils.connectToQueue(ConfigLoader.instance().getDatabaseResponseQueue(), "0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             String requestID = dataSourceID + "^" + System.currentTimeMillis() + "^" + callID;
@@ -2519,7 +2543,7 @@ public class UserUploadService {
             if (!success) {
                 throw new ReportException(new DataSourceConnectivityReportFault("The connection timed out.", dataSource));
             }
-            return changed;
+            return new MigrationResult(changed, new HashMap<>(), new ArrayList<>(), false, false);
         }
     }
 
@@ -2543,11 +2567,11 @@ public class UserUploadService {
             this.refreshProperties = refreshProperties;
         }
 
-        public boolean invoke() throws Exception {
-            boolean changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings, refreshProperties);
+        public MigrationResult invoke() throws Exception {
+            MigrationResult changed = refreshable.refreshData(SecurityUtil.getAccountID(), new Date(), conn, null, callID, sourceToRefresh.getLastRefreshStart(), false, warnings, refreshProperties);
             sourceToRefresh.setVisible(true);
             sourceToRefresh.setLastRefreshStart(now);
-            if (changed) {
+            if (changed.isChanged()) {
                 new DataSourceInternalService().updateFeedDefinition(sourceToRefresh, conn, true, true);
             } else {
                 feedStorage.updateDataFeedConfiguration(sourceToRefresh, conn);
@@ -2810,6 +2834,7 @@ public class UserUploadService {
                 }
 
                 boolean changed = false;
+                boolean newFields = false;
                 for (FeedDefinition sourceToRefresh : sourcesToRefresh) {
                     if (sourceToRefresh instanceof IServerDataSourceDefinition && (sourceToRefresh.getDataSourceType() == DataSourceInfo.STORED_PULL ||
                             sourceToRefresh.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL)) {
@@ -2817,7 +2842,9 @@ public class UserUploadService {
                         DataSourceRefreshEvent info = new DataSourceRefreshEvent();
                         info.setDataSourceName("Synchronizing with " + refreshable.getFeedName());
                         ServiceUtil.instance().updateStatus(callID, ServiceUtil.RUNNING, info, conn);
-                        changed = changed || new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID, null).invoke();
+                        MigrationResult migrationResult = new DataSourceFactory().createSource(conn, warnings, now, sourceToRefresh, refreshable, callID, null).invoke();
+                        changed = changed || migrationResult.isChanged();
+                        newFields = newFields || migrationResult.isFieldsAdded();
                         PreparedStatement stmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_REFRESH_LOG (REFRESH_TIME, DATA_SOURCE_ID) VALUES (?, ?)");
                         stmt.setTimestamp(1, new Timestamp(now.getTime()));
                         stmt.setLong(2, sourceToRefresh.getDataFeedID());
@@ -2833,6 +2860,7 @@ public class UserUploadService {
                 DataSourceRefreshResult result = new DataSourceRefreshResult();
                 result.setDate(now);
                 result.setWarning(warning);
+                result.setDiscoveredNewFields(newFields);
                 result.setNewFields(sourcesToRefresh.size() == 1 && sourcesToRefresh.get(0).rebuildFieldWindow() && changed);
                 ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result, conn);
 

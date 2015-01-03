@@ -132,7 +132,7 @@ public class DatabaseListener implements Runnable {
                                 try {
                                     UserUploadService.UploadDataSource source = new UserUploadService.UploadDataSource(conn, new ArrayList<ReportFault>(), new Date(),
                                             dataSource, (IServerDataSourceDefinition) dataSource, null, null);
-                                    changed = source.invoke();
+                                    changed = source.invoke().isChanged();
                                     conn.commit();
                                 } finally {
                                     SecurityUtil.clearThreadLocal();
