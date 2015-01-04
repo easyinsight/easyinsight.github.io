@@ -98,10 +98,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    IOUtils.copy(restMethod.getResponseBodyAsStream(), baos);
-                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));
-                    jsonObject = (JSONArray) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = (JSONArray) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
                     restMethod.releaseConnection();
                     successful = true;
                 }
@@ -156,10 +154,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    IOUtils.copy(restMethod.getResponseBodyAsStream(), baos);
-                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));
-                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
                     successful = true;
                 }
             } catch (IOException e) {
@@ -209,10 +205,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    IOUtils.copy(restMethod.getResponseBodyAsStream(), baos);
-                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));
-                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    String string = restMethod.getResponseBodyAsString();
+                    jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
                     successful = true;
                 }
             } catch (IOException e) {
