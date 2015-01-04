@@ -425,6 +425,7 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
 
     protected Object rawJSONRequestForObject(String path) {
         HttpClient client = new HttpClient();
+        client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
         HttpMethod restMethod = new GetMethod(path);
 
         restMethod.setRequestHeader("Authorization", "Bearer " + accessToken);
