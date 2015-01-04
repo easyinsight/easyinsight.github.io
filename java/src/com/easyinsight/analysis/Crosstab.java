@@ -244,9 +244,15 @@ public class Crosstab {
                     }
                     CrosstabValue cv = new CrosstabValue(value, null, analysisItem);
                     array[j + crosstabDefinition.getColumns().size() + rowOffset][i + crosstabDefinition.getRows().size() + k] = cv;
-                    if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0 && crosstabDefinition.getColumns().size() == 1 && crosstabDefinition.getRows().size() == 1) {
-                        cv.addDTValue(crosstabDefinition.getColumns().get(0).qualifiedName(), columnSection.values.get(0));
-                        cv.addDTValue(crosstabDefinition.getRows().get(0).qualifiedName(), rowSection.values.get(0));
+                    if (analysisItem.getLinks() != null && analysisItem.getLinks().size() > 0) {
+                        for (int ctr = 0; ctr < crosstabDefinition.getColumns().size(); ctr++) {
+                            AnalysisItem column = crosstabDefinition.getColumns().get(ctr);
+                            cv.addDTValue(column.qualifiedName(), columnSection.values.get(ctr));
+                        }
+                        for (int ctr = 0; ctr < crosstabDefinition.getRows().size(); ctr++) {
+                            AnalysisItem row = crosstabDefinition.getRows().get(ctr);
+                            cv.addDTValue(row.qualifiedName(), rowSection.values.get(ctr));
+                        }
                     }
                 }
             }

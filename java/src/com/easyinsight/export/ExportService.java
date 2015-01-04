@@ -764,25 +764,28 @@ public class ExportService {
                             sb.append("\"");
 
 
-                            if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getColumns().get(0).qualifiedName())) {
-
-                                String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getColumns().get(0).qualifiedName()), crosstabDefinition.getColumns().get(0), exportMetadata);
-                                sb.append(" data-drillthrough");
-                                sb.append(crosstabDefinition.getColumns().get(0).getAnalysisItemID());
-                                sb.append("=\"");
-                                sb.append(encodedValue);
-                                sb.append("\"");
+                            for (AnalysisItem column : crosstabDefinition.getColumns()) {
+                                if (crosstabValue.getDtMap().containsKey(column.qualifiedName())) {
+                                    String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(column.qualifiedName()), column, exportMetadata);
+                                    sb.append(" data-drillthrough");
+                                    sb.append(column.getAnalysisItemID());
+                                    sb.append("=\"");
+                                    sb.append(encodedValue);
+                                    sb.append("\"");
+                                }
                             }
 
-                            if (crosstabValue.getDtMap().containsKey(crosstabDefinition.getRows().get(0).qualifiedName())) {
-
-                                String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(crosstabDefinition.getRows().get(0).qualifiedName()), crosstabDefinition.getRows().get(0), exportMetadata);
-                                sb.append(" data-drillthrough");
-                                sb.append(crosstabDefinition.getRows().get(0).getAnalysisItemID());
-                                sb.append("=\"");
-                                sb.append(encodedValue);
-                                sb.append("\"");
+                            for (AnalysisItem column : crosstabDefinition.getRows()) {
+                                if (crosstabValue.getDtMap().containsKey(column.qualifiedName())) {
+                                    String encodedValue = toDrillthroughValue(crosstabValue.getDtMap().get(column.qualifiedName()), column, exportMetadata);
+                                    sb.append(" data-drillthrough");
+                                    sb.append(column.getAnalysisItemID());
+                                    sb.append("=\"");
+                                    sb.append(encodedValue);
+                                    sb.append("\"");
+                                }
                             }
+
                             if (crosstabValue.isSummaryValue()) {
                                 sb.append(" style=\"color:").append(summaryTextColor).append("\"");
                             }
