@@ -14,6 +14,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.userupload.DataTypeGuesser;
+import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
@@ -21,11 +22,14 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.poi.util.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -440,8 +444,11 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    String string = restMethod.getResponseBodyAsString();
-                    jsonObject = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    IOUtils.copy(restMethod.getResponseBodyAsStream(), baos);
+                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));
+                    jsonObject = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    //jsonObject = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
                     System.out.println(jsonObject);
                     successful = true;
                 }
