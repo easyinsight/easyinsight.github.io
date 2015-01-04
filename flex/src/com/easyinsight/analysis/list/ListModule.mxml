@@ -55,6 +55,7 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.controls.advancedDataGridClasses.SortInfo;
         import mx.events.DragEvent;
@@ -603,6 +604,9 @@
             var listDef:ListDefinition;
             if (report != null) {
                 listDef = report as ListDefinition;
+                if (listDef.logReport) {
+                    Alert.show("using data view origin");
+                }
             } else {
                 listDef = this.listDef;
             }
@@ -611,6 +615,9 @@
                 item.sort = 0;
                 var columnIndex:int = findColumnIndex(item.qualifiedName());
                 item.itemPosition = columnIndex;
+                if (listDef.logReport) {
+                    Alert.show("assigned " + columnIndex + " to " + item.qualifiedName());
+                }
                 if (dataGrid != null) {
                     var column:AdvancedDataGridColumn = dataGrid.columns[columnIndex];
                     if (column != null) {
