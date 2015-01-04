@@ -37,11 +37,15 @@ List = {
                     }
                     f["drillthrough_values"] = _.inject(x.data(), function(m, e, i, l) {
 
-                            if(i.match(/^drillthrough/))
-                                m[i.replace(/^drillthrough/, "")] = decodeURI(e);
+
+                            if(i.match(/^drillthrough/)) {
+
+                                m[i.replace(/^drillthrough/, "")] = e;
+                            }
+
                             return m; },
                         {});
-
+                    console.log(f);
                     drillThrough(f);
                 })
             }, null, targetDiv);
