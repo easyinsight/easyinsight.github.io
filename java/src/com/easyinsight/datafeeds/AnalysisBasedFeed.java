@@ -79,7 +79,7 @@ public class AnalysisBasedFeed extends Feed {
             WSListDefinition listDefinition = (WSListDefinition) analysisDefinition;
             listDefinition.getColumns().addAll(originalItems);
         }
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure().values());
+        List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure(true).values());
         Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
         Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();
         Map<Long, List<AnalysisItem>> fieldsGroupedByOriginalFieldID = new HashMap<Long, List<AnalysisItem>>();

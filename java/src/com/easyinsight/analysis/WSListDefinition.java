@@ -248,6 +248,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
         addItems("", getColumns(), structure);
     }
 
+    public void createReportStructure(Map<String, AnalysisItem> structure, boolean noItemPosition) {
+        if (noItemPosition) {
+            addItems("", getColumns(), structure, true);
+        } else {
+            addItems("", getColumns(), structure);
+        }
+    }
+
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         setColumns(items("", structure));
     }
