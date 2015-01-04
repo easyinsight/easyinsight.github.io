@@ -635,6 +635,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
         String table;
         if (analysisDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            if (dataSet.getAsyncSavedReport() != null) {
+                analysisDefinition = dataSet.getAsyncSavedReport();
+            }
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
                 return null;
             }
@@ -664,6 +667,9 @@ public class DeliveryScheduledTask extends ScheduledTask {
             }
         } else if (analysisDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
             DataSet dataSet = DataService.listDataSet(analysisDefinition, insightRequestMetadata, conn);
+            if (dataSet.getAsyncSavedReport() != null) {
+                analysisDefinition = dataSet.getAsyncSavedReport();
+            }
             if (dataSet.getRows().size() == 0 && !sendIfNoData) {
                 return null;
             }
