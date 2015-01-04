@@ -1044,6 +1044,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 AnalysisItem analysisItem = items.get(i);
                 if (analysisItem != null) {
                     structure.put(compositeKey, analysisItem);
+                    if (logReport) {
+                        System.out.println("Stored item " + analysisItem.toDisplay() + " with position " + i);
+                    }
                     analysisItem.setItemPosition(i);
                 }
             }
