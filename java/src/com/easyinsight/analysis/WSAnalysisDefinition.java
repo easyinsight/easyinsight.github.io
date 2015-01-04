@@ -1001,13 +1001,17 @@ public abstract class WSAnalysisDefinition implements Serializable {
         if (itemPosition) {
             itemPositionLogic();
         }
-        createReportStructure(structure);
+        createReportStructure(structure, !itemPosition);
         return structure;
     }
 
     protected void itemPositionLogic() { }
 
     public abstract void createReportStructure(Map<String, AnalysisItem> structure);
+
+    public void createReportStructure(Map<String, AnalysisItem> structure, boolean noItemPosition) {
+        createReportStructure(structure);
+    }
 
     public abstract void populateFromReportStructure(Map<String, AnalysisItem> structure);
 
@@ -1047,6 +1051,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     protected void addItems(String key, List<AnalysisItem> items, Map<String, AnalysisItem> structure) {
+        addItems(key, items, structure, false);
+    }
+
+    protected void addItems(String key, List<AnalysisItem> items, Map<String, AnalysisItem> structure, boolean noItemPosition) {
         if (logReport) {
             Thread.dumpStack();
         }
@@ -1059,7 +1067,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
                     if (logReport) {
                         System.out.println("Stored item " + analysisItem.toDisplay() + " with position " + i);
                     }
-                    analysisItem.setItemPosition(i);
+                    if (!noItemPosition) {
+                        analysisItem.setItemPosition(i);
+                    }
                 }
             }
         }
