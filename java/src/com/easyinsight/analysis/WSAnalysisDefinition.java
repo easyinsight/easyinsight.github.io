@@ -1047,6 +1047,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     protected void addItems(String key, List<AnalysisItem> items, Map<String, AnalysisItem> structure) {
+        if (logReport) {
+            Thread.dumpStack();
+        }
         if (items != null) {
             for (int i = 0; i < items.size(); i++) {
                 String compositeKey = key + "-" + i;
