@@ -428,7 +428,7 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
         HttpMethod restMethod = new GetMethod(path);
 
         restMethod.setRequestHeader("Authorization", "Bearer " + accessToken);
-        restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=utf-8");
+        restMethod.setRequestHeader("Content-Type", "Content-Type: application/json; charset=UTF-8");
         restMethod.setRequestHeader("User-Agent", "Easy Insight (http://www.easy-insight.com/)");
         boolean successful = false;
         Object jsonObject = null;
