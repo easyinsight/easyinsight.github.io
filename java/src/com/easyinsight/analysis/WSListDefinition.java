@@ -234,13 +234,17 @@ public class WSListDefinition extends WSAnalysisDefinition {
         return columnList;
     }
 
-    public void createReportStructure(Map<String, AnalysisItem> structure) {
+    protected void itemPositionLogic() {
         Collections.sort(getColumns(), new Comparator<AnalysisItem>() {
 
             public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
                 return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
             }
         });
+    }
+
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
+
         addItems("", getColumns(), structure);
     }
 

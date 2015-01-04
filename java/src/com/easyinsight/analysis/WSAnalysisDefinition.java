@@ -993,10 +993,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     }
 
     public Map<String, AnalysisItem> createStructure() {
+        return createStructure(false);
+    }
+
+    public Map<String, AnalysisItem> createStructure(boolean itemPosition) {
         Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();
+        if (itemPosition) {
+            itemPositionLogic();
+        }
         createReportStructure(structure);
         return structure;
     }
+
+    protected void itemPositionLogic() { }
 
     public abstract void createReportStructure(Map<String, AnalysisItem> structure);
 
