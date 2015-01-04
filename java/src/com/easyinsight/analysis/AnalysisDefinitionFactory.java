@@ -186,7 +186,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setPublicWithKey(wsAnalysisDefinition.isPublicWithKey());
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());
         analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());
-        analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure());
+        analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure(true));
         analysisDefinition.setAddedItems(wsAnalysisDefinition.getAddedItems());
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromFilters(wsAnalysisDefinition.getFilterDefinitions()));
         analysisDefinition.setAnalysisID(wsAnalysisDefinition.getAnalysisID());
