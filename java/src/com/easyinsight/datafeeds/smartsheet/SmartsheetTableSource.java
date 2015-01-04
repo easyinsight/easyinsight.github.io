@@ -26,6 +26,7 @@ import org.apache.poi.util.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.SocketException;
@@ -445,10 +446,16 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    String string = restMethod.getResponseBodyAsString();
+                    /*ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     IOUtils.copy(restMethod.getResponseBodyAsStream(), baos);
-                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));
-                    jsonObject = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
+                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));*/
+                    Charset defaultCharset = Charset.defaultCharset();
+                    System.out.println(defaultCharset.toString());
+                    string = new String(string.getBytes(defaultCharset), "UTF-8");
+                    System.out.println(string);
+                    //ByteArrayInputStream bais = new ByteArrayInputStream(string.getBytes("UTF-8"));
+                    jsonObject = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
                     //jsonObject = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
                     System.out.println(jsonObject);
                     successful = true;
