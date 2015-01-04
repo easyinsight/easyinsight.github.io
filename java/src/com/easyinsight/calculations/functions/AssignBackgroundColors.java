@@ -34,7 +34,10 @@ public class AssignBackgroundColors extends Function {
                 target.setValueExtension(textValueExtension);
             }
             textValueExtension.setColor(0xFFFFFF);
-            textValueExtension.setBackgroundColor(colorCache.colorForValue(colorSource));
+            Integer color = colorCache.colorForValue(colorSource);
+            if (color != null) {
+                textValueExtension.setBackgroundColor(color);
+            }
         } catch (Exception e) {
             LogClass.error(e);
         }

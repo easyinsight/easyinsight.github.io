@@ -4483,6 +4483,11 @@ public class ExportService {
 
         StringBuilder sb = new StringBuilder();
         java.util.List<AnalysisItem> items = new java.util.ArrayList<AnalysisItem>(report.getAllAnalysisItems());
+        if (report.isLogReport()) {
+            for (AnalysisItem item : items) {
+                System.out.println(item.toDisplay() + " - " + item.getItemPosition());
+            }
+        }
         items.remove(null);
         Comparator sortOrder = new java.util.Comparator<AnalysisItem>() {
 
