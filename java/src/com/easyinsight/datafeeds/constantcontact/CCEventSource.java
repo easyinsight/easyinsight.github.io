@@ -116,7 +116,7 @@ public class CCEventSource extends ConstantContactBaseSource {
             ccSource.setEventIDs(ids);
             return dataSet;
         } catch (Exception e) {
-            LogClass.error(e);
+            e.printStackTrace();
             return new DataSet();
         }
     }
