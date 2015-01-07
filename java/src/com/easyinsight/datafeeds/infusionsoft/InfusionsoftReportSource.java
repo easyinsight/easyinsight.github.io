@@ -155,7 +155,8 @@ public class InfusionsoftReportSource extends ServerDataSourceDefinition {
             } while (hasMoreResults);
             return dataSet;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            LogClass.error(e);
+            return new DataSet();
         }
     }
 
