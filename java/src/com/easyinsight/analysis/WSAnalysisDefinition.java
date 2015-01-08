@@ -1056,7 +1056,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     protected void addItems(String key, List<AnalysisItem> items, Map<String, AnalysisItem> structure, boolean noItemPosition) {
         if (logReport) {
-            Thread.dumpStack();
+            //Thread.dumpStack();
         }
         if (items != null) {
             for (int i = 0; i < items.size(); i++) {

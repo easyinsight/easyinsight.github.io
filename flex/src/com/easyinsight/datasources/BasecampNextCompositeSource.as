@@ -12,6 +12,7 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     public var accessToken:String;
     public var refreshToken:String;
     public var useProjectUpdatedAt:Boolean;
+    public var skipCalendar:Boolean;
 
     public function BasecampNextCompositeSource() {
         super();

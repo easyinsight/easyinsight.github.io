@@ -113,7 +113,7 @@ public class BasecampNextCalendarSource extends BasecampNextBaseSource {
         HttpClient httpClient = new HttpClient();
         try {
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
-            if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+            if (basecampNextCompositeSource.isSkipCalendar()) {
                 return new DataSet();
             }
             if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {

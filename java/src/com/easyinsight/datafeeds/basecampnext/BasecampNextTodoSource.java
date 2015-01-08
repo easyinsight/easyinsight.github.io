@@ -147,10 +147,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
             for (Project project : projects) {
                 if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
                     if (lastRefreshDate != null && project.getUpdatedAt().before(lastRefreshDate)) {
-                        System.out.println("skipping project " + project.getName() + " updated at " + project.getUpdatedAt());
                         continue;
-                    } else {
-                        System.out.println("not skipping " + project.getName() + " updated at " + project.getUpdatedAt());
                     }
                     DataSet dataSet = new DataSet();
                     String projectID = project.getId();

@@ -235,7 +235,6 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                                 int asInt = (int) dVal;
                                 double asDAgain = (double) asInt;
                                 if ((asDAgain - asInt) < .0001) {
-                                    System.out.println(asInt);
                                     row.addValue(key, new StringValue(String.valueOf(asInt)));
                                 } else {
                                     row.addValue(key, valueObj.toString());
@@ -447,18 +446,7 @@ public class SmartsheetTableSource extends SmartsheetBaseSource {
                     }
                 } else {
                     String string = restMethod.getResponseBodyAsString();
-                    /*ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    IOUtils.copy(restMethod.getResponseBodyAsStream(), baos);
-                    String string = new String(baos.toByteArray(), Charset.forName("UTF-8"));*/
-                    /*System.out.println(string);
-                    Charset defaultCharset = Charset.defaultCharset();
-                    System.out.println(defaultCharset.toString());
-                    string = new String(string.getBytes(defaultCharset), "UTF-8");
-                    System.out.println(string);*/
-                    //ByteArrayInputStream bais = new ByteArrayInputStream(string.getBytes("UTF-8"));
                     jsonObject = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
-                    //jsonObject = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string.getBytes("UTF-8"));
-                    System.out.println(jsonObject);
                     successful = true;
                 }
             } catch (IOException e) {

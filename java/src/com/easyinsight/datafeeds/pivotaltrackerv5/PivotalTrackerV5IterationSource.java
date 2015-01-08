@@ -70,7 +70,6 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                     userMap.put(id, name);
                 }
             } catch (Exception e) {
-                System.out.println("!");
                 // they may not have access to membership information for this project
             }
 
@@ -87,7 +86,6 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                             iterationToStateMap.put(id, "Done");
                         }
                         page++;
-                        System.out.println("got back " + iterations.size());
                     } while (iterations.size() > 0);
                 }
                 {
@@ -101,7 +99,6 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                             iterationToStateMap.put(id, "Current");
                         }
                         page++;
-                        System.out.println("got back " + iterations.size());
                     } while (iterations.size() > 0);
                 }
                 {
@@ -115,12 +112,11 @@ public class PivotalTrackerV5IterationSource extends PivotalTrackerV5BaseSource 
                             iterationToStateMap.put(id, "Backlog");
                         }
                         page++;
-                        System.out.println("got back " + iterations.size());
                     } while (iterations.size() > 0);
                 }
 
             } catch (Exception e) {
-                System.out.println("blah");
+                // ignore
             }
         }
         ((PivotalTrackerV5CompositeSource) parentDefinition).setIterationToStoryMap(iterationToStoryMap);

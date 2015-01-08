@@ -204,7 +204,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
                     } else {
                         long sourceID = Long.parseLong(parts[0]);
                         String responseID = parts[4];
-                        System.out.println("got response with id = " + sourceID);
+
                         if (sourceID == dataSourceID && requestID.equals(responseID)) {
                             responseQueue.deleteMessage(message);
                             boolean successful = Boolean.parseBoolean(parts[1]);
