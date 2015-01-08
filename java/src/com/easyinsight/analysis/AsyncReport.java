@@ -216,7 +216,7 @@ public class AsyncReport {
                         try {
                             PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
                                     "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
-                                    "WHERE USER.USER_ID = ?");
+                                    "WHERE USER.USER_ID = ? AND USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
                             queryStmt.setLong(1, fuserID);
                             ResultSet queryRS = queryStmt.executeQuery();
                             queryRS.next();
