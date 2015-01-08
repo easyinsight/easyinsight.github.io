@@ -251,10 +251,17 @@ public class ExportService {
     }
 
     public void runNow(long id) {
-        ScheduledDelivery scheduledDelivery = (ScheduledDelivery) getActivityByID(id);
+        ScheduledActivity activity = getActivityByID(id);;
+
         EIConnection conn = Database.instance().getConnection();
         try {
-            scheduledDelivery.taskNow(conn);
+            if (activity instanceof ScheduledDelivery) {
+                ScheduledDelivery scheduledDelivery = (ScheduledDelivery) activity;
+                scheduledDelivery.taskNow(conn);
+            } else if (activity instanceof ActivitySequence) {
+                ActivitySequence scheduledDelivery = (ActivitySequence) activity;
+                scheduledDelivery.taskNow(conn);
+            }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

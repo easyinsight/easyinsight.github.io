@@ -23,6 +23,7 @@ public abstract class ScheduledActivity {
     public static final int REPORT_DELIVERY = 2;
     public static final int SCORECARD_DELIVERY = 3;
     public static final int GENERAL_DELIVERY = 4;
+    public static final int SEQUENCE = 5;
 
     private String problemMessage;
     private int problemLevel;
@@ -124,6 +125,9 @@ public abstract class ScheduledActivity {
                 break;
             case ScheduledActivity.GENERAL_DELIVERY:
                 scheduledActivity = new GeneralDelivery();
+                break;
+            case ScheduledActivity.SEQUENCE:
+                scheduledActivity = new ActivitySequence();
                 break;
             default:
                 throw new RuntimeException();
