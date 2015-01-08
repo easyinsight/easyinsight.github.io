@@ -40,6 +40,11 @@
                 dsWindow.activity = activity;
                 PopUpManager.addPopUp(dsWindow, this, true);
                 PopUpUtil.centerPopUp(dsWindow);
+            } else if (activity is ActivitySequence) {
+                var aWindow:SequenceWindow = new SequenceWindow();
+                aWindow.activity = activity as ActivitySequence;
+                PopUpManager.addPopUp(aWindow, this, true);
+                PopUpUtil.centerPopUp(aWindow);
             } else {
                 var window:ActivityWindow = new ActivityWindow();
                 window.activity = activity as ScheduledDelivery;
@@ -199,6 +204,13 @@
 
         [Bindable]
         private var notifyText:String;
+
+        private function addSequence():void {
+            var window:SequenceWindow = new SequenceWindow();
+            window.addEventListener(ScheduleActivityEvent.NEW_ACTIVITY, newActivity, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="exportService" id="exportService">
         <mx:method name="getScheduledActivities" result="gotActivities()"/>
@@ -219,6 +231,7 @@
                 <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="flatSaveButton"/>
                 <mx:Button label="Add Multi Report/Dashboard Delivery..." click="newGeneral()" styleName="flatSaveButton"/>
                 <mx:Button label="Add Data Source Refresh..." click="additionalDSRefresh()" styleName="flatSaveButton" visible="{showDSButton}"/>
+                <mx:Button label="Add Sequence..." click="addSequence()" styleName="flatSaveButton"/>
                 <mx:Spacer width="100%"/>
                 <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
             </mx:HBox>
