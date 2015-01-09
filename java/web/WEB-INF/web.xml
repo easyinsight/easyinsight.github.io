@@ -27,17 +27,16 @@
         <param-value>true</param-value>
     </context-param>
 
-
     <filter>
         <filter-name>CSRFGuard</filter-name>
         <filter-class>org.owasp.csrfguard.CsrfGuardFilter</filter-class>
-        <!-- <async-supported>true</async-supported> -->
+         <async-supported>true</async-supported>
     </filter>
 
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
-        <!-- <async-supported>true</async-supported> -->
+         <async-supported>true</async-supported>
         <!--<init-param>-->
         <!--<param-name>logLevel</param-name>-->
         <!--<param-value>DEBUG</param-value>-->
@@ -96,698 +95,694 @@
 
     <servlet>
         <servlet-name>CreateUser</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.CreateUserServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>CreateFlatFileSource</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.CreateFlatFileSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>RefreshFlatFileSource</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.RefreshFlatFileSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>CreateConfiguration</servlet-name>
         <display-name>CreateConfiguration</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>CreateConfiguration</servlet-name>
         <servlet-class>com.easyinsight.html.CreateConfigurationServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>UsageServlet</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.UsageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>ReportInfo</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.ReportInfoServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
     <servlet>
         <servlet-name>DashboardInfo</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.DashboardInfoServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>DataSourceSuggestions</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.SuggestedActionsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>TokenRedirect</servlet-name>
         <display-name>TokenRedirect</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>TokenRedirect</servlet-name>
         <servlet-class>com.easyinsight.users.TokenRedirectServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>AsyncList</servlet-name>
         <display-name>AsyncList</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>AsyncList</servlet-name>
         <servlet-class>com.easyinsight.html.AsyncListServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>AsyncMultiSummary</servlet-name>
         <display-name>AsyncMultiSummary</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>AsyncMultiSummary</servlet-name>
         <servlet-class>com.easyinsight.html.AsyncMultiSummaryServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>UnsubscribeServlet</servlet-name>
         <display-name>UnsubscribeServlet</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>UnsubscribeServlet</servlet-name>
         <servlet-class>com.easyinsight.users.UnsubscribeServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Image</servlet-name>
         <display-name>Image</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Image</servlet-name>
         <servlet-class>com.easyinsight.export.ImageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>FileUpload</servlet-name>
         <display-name>FileUpload</display-name>
-
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>FileUpload</servlet-name>
         <servlet-class>com.easyinsight.scheduler.FileUploadServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>UploadExportImage</servlet-name>
         <display-name>UploadExportImage</display-name>
-        <!-- <async-supported>true</async-supported> -->
-
+        <servlet-name>UploadExportImage</servlet-name>
         <servlet-class>com.easyinsight.scheduler.UploadExportImageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>HtmlImage</servlet-name>
         <display-name>HtmlImage</display-name>
-        <!-- <async-supported>true</async-supported> -->
-
+        <servlet-name>HtmlImage</servlet-name>
         <servlet-class>com.easyinsight.export.HTMLImageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Invoice</servlet-name>
         <display-name>Invoice</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Invoice</servlet-name>
         <servlet-class>com.easyinsight.export.InvoiceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Excel</servlet-name>
         <display-name>Excel</display-name>
-        <!-- <async-supported>true</async-supported> -->
-
+        <servlet-name>Excel</servlet-name>
         <servlet-class>com.easyinsight.export.ExcelServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Reactivation</servlet-name>
         <display-name>Reactivation</display-name>
-        <!-- <async-supported>true</async-supported> -->
-
+        <servlet-name>Reactivation</servlet-name>
         <servlet-class>com.easyinsight.users.ReactivationServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>SetupReactivation</servlet-name>
         <display-name>SetupReactivation</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>SetupReactivation</servlet-name>
         <servlet-class>com.easyinsight.users.SetupReactivationServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>MissingRefreshServlet</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.MissingRefreshServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ExportExcel</servlet-name>
         <display-name>ExportExcel</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ExportExcel</servlet-name>
         <servlet-class>com.easyinsight.export.ExportExcelServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ExportPDF</servlet-name>
-        <display-name>ExportPDF</display-name>
-        <!-- <async-supported>true</async-supported> -->
-        <servlet-class>com.easyinsight.export.ExportPDFServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>ListDataSourcesByTag</servlet-name>
         <display-name>ListDataSourcesByTag</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ListDataSourcesByTag</servlet-name>
         <servlet-class>com.easyinsight.api.v3.ListDataSourcesServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
+
+    <servlet>
+        <display-name>ExportPDF</display-name>
+        <servlet-name>ExportPDF</servlet-name>
+        <servlet-class>com.easyinsight.export.ExportPDFServlet</servlet-class>
+         <async-supported>true</async-supported>
+    </servlet>
+
     <servlet>
         <servlet-name>ScheduledDeliveryHistory</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.ScheduledDeliveryHistoryServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ExportActivity</servlet-name>
         <display-name>ExportActivity</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ExportActivity</servlet-name>
         <servlet-class>com.easyinsight.export.ExportScheduledActivityServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>HtmlDashboardPDF</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.export.DashboardPDFServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>CreateAutoDashboard</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.datafeeds.DataSourceSuggestionServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>QuickReportDeliverySetup</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.export.QuickReportDeliveryServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>CreateAutoDataSource</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.datafeeds.CreateAutoDataSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Lock</servlet-name>
         <display-name>Lock</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Lock</servlet-name>
         <servlet-class>com.easyinsight.api.v3.LockServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>BenchmarkHistory</servlet-name>
         <display-name>BenchmarkHistory</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>BenchmarkHistory</servlet-name>
         <servlet-class>com.easyinsight.api.v3.BenchmarkServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Done</servlet-name>
         <display-name>Done</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Done</servlet-name>
         <servlet-class>com.easyinsight.html.DoneServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Semaphore</servlet-name>
         <display-name>Semaphore</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Semaphore</servlet-name>
         <servlet-class>com.easyinsight.api.v3.SemaphoreServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ImportActivity</servlet-name>
         <display-name>ImportActivity</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ImportActivity</servlet-name>
         <servlet-class>com.easyinsight.export.ImportScheduledActivityServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ReportInfoAPI</servlet-name>
         <display-name>ReportInfoAPI</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ReportInfoAPI</servlet-name>
         <servlet-class>com.easyinsight.api.v3.ReportExtendedInfoServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>EIAdmin</servlet-name>
         <display-name>EIAdmin</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>EIAdmin</servlet-name>
         <servlet-class>com.easyinsight.datafeeds.custom.EIAdminServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>HTMLExcel</servlet-name>
         <display-name>HTMLExcel</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>HTMLExcel</servlet-name>
         <servlet-class>com.easyinsight.html.HTMLExcelServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>HTMLPDF</servlet-name>
         <display-name>HTMLPDF</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>HTMLPDF</servlet-name>
         <servlet-class>com.easyinsight.html.HTMLPDFServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>HTMLPNG</servlet-name>
         <display-name>HTMLPNG</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>HTMLPNG</servlet-name>
         <servlet-class>com.easyinsight.html.HTMLPNGServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ThreadDump</servlet-name>
         <display-name>ThreadDump</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ThreadDump</servlet-name>
         <servlet-class>com.easyinsight.datafeeds.custom.ThreadDumpServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>EmailReport</servlet-name>
         <display-name>EmailReport</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>EmailReport</servlet-name>
         <servlet-class>com.easyinsight.export.EmailServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>GetDataSource</servlet-name>
         <display-name>GetDataSource</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>GetDataSource</servlet-name>
         <servlet-class>com.easyinsight.api.v3.GetDataSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>PDF</servlet-name>
         <display-name>PDF</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>PDF</servlet-name>
         <servlet-class>com.easyinsight.export.PDFServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
 
     <servlet>
-        <servlet-name>DefineDataSource</servlet-name>
         <display-name>DefineDataSource</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>DefineDataSource</servlet-name>
         <servlet-class>com.easyinsight.api.v3.DefineDataSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>AddUsers</servlet-name>
         <display-name>AddUsers</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>AddUsers</servlet-name>
         <servlet-class>com.easyinsight.api.v3.AddUserServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>GetUsers</servlet-name>
         <display-name>GetUsers</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>GetUsers</servlet-name>
         <servlet-class>com.easyinsight.api.v3.GetUsersServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>GroupAdmin</servlet-name>
         <display-name>GroupAdmin</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>GroupAdmin</servlet-name>
         <servlet-class>com.easyinsight.api.v3.GetGroupsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>GroupInfo</servlet-name>
         <display-name>GroupInfo</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>GroupInfo</servlet-name>
         <servlet-class>com.easyinsight.api.v3.GetGroupServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Me</servlet-name>
         <display-name>Me</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Me</servlet-name>
         <servlet-class>com.easyinsight.api.v3.MeServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>DefineCompositeDataSource</servlet-name>
         <display-name>DefineCompositeDataSource</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>DefineCompositeDataSource</servlet-name>
         <servlet-class>com.easyinsight.api.v3.DefineCompositeDataSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>TriggerCache</servlet-name>
         <display-name>TriggerCache</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>TriggerCache</servlet-name>
         <servlet-class>com.easyinsight.datafeeds.CacheServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>AvailableTimeZones</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.AvailableTimeZoneServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ReplaceRows</servlet-name>
         <display-name>ReplaceRows</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ReplaceRows</servlet-name>
         <servlet-class>com.easyinsight.api.v3.ReplaceRowsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>AddRows</servlet-name>
         <display-name>AddRows</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>AddRows</servlet-name>
         <servlet-class>com.easyinsight.api.v3.AddRowsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>AddField</servlet-name>
         <display-name>AddField</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>AddField</servlet-name>
         <servlet-class>com.easyinsight.api.v3.AddFieldServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>UpdateRows</servlet-name>
         <display-name>UpdateRows</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>UpdateRows</servlet-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>DrillThrough</servlet-name>
         <display-name>DrillThrough</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>DrillThrough</servlet-name>
         <servlet-class>com.easyinsight.html.DrillthroughServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>HeatMap</servlet-name>
         <display-name>HeatMap</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>HeatMap</servlet-name>
         <servlet-class>com.easyinsight.html.HeatMapServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>TopoMap</servlet-name>
         <display-name>TopoMap</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>TopoMap</servlet-name>
         <servlet-class>com.easyinsight.html.TopoMapServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ReportMarkdown</servlet-name>
         <display-name>ReportMarkdown</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ReportMarkdown</servlet-name>
         <servlet-class>com.easyinsight.html.ReportMarkdownServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>NewUser</servlet-name>
         <display-name>NewUser</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>NewUser</servlet-name>
         <servlet-class>com.easyinsight.servlet.NewUserServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>UpdateRowsByPK</servlet-name>
         <display-name>UpdateRowsByPK</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>UpdateRowsByPK</servlet-name>
         <servlet-class>com.easyinsight.api.v3.UpdateRowsPKServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>BulkUpdateRows</servlet-name>
         <display-name>BulkUpdateRows</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>BulkUpdateRows</servlet-name>
         <servlet-class>com.easyinsight.api.v3.BulkUpdateRowsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>RunReport</servlet-name>
         <display-name>RunReport</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>RunReport</servlet-name>
         <servlet-class>com.easyinsight.api.v3.RunReportServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>DataSourceTags</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.DataSourceTagServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>ReportTags</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.ReportTagServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>RecentActions</servlet-name>
         <display-name>RecentActions</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>RecentActions</servlet-name>
         <servlet-class>com.easyinsight.api.v3.RecentActionsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>RunReportJSON</servlet-name>
         <display-name>RunReportJSON</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>RunReportJSON</servlet-name>
         <servlet-class>com.easyinsight.api.v3.RunReportJSONServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>FieldsServlet</servlet-name>
         <display-name>FieldsServlet</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>FieldsServlet</servlet-name>
         <servlet-class>com.easyinsight.api.v3.FieldsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Commit</servlet-name>
         <display-name>Commit</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Commit</servlet-name>
         <servlet-class>com.easyinsight.api.v3.CommitServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>HtmlExport</servlet-name>
         <display-name>HtmlExport</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>HtmlExport</servlet-name>
         <servlet-class>com.easyinsight.html.HtmlExportServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Gauge</servlet-name>
         <display-name>Gauge</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Gauge</servlet-name>
         <servlet-class>com.easyinsight.html.GaugeServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ReportHeader</servlet-name>
         <display-name>ReportHeader</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ReportHeader</servlet-name>
         <servlet-class>com.easyinsight.html.ReportHeaderImageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>SendGridEmailEvent</servlet-name>
         <display-name>SendGridEmailEvent</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>SendGridEmailEvent</servlet-name>
         <servlet-class>com.easyinsight.email.SendGridEmailEventServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>BeginTransaction</servlet-name>
         <display-name>BeginTransaction</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>BeginTransaction</servlet-name>
         <servlet-class>com.easyinsight.api.v3.BeginTransactionServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>LoadRows</servlet-name>
         <display-name>LoadRows</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>LoadRows</servlet-name>
         <servlet-class>com.easyinsight.api.v3.LoadRowsServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>Health</servlet-name>
         <display-name>Health</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>Health</servlet-name>
         <servlet-class>com.easyinsight.api.v3.HealthServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>OAuth</servlet-name>
         <display-name>OAuth</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>OAuth</servlet-name>
         <servlet-class>com.easyinsight.users.OAuthServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ColumnChart</servlet-name>
         <display-name>ColumnChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ColumnChart</servlet-name>
         <servlet-class>com.easyinsight.html.ColumnChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>ApproveSales</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.salesautomation.ApproveSalesEmailServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>GetSalesEmail</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.salesautomation.GetSalesEmailAccountServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>PlotChart</servlet-name>
         <display-name>PlotChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>PlotChart</servlet-name>
         <servlet-class>com.easyinsight.html.PlotChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>DiagramChart</servlet-name>
         <display-name>DiagramChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>DiagramChart</servlet-name>
         <servlet-class>com.easyinsight.html.DiagramChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>TwoAxisChart</servlet-name>
         <display-name>TwoAxisChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>TwoAxisChart</servlet-name>
         <servlet-class>com.easyinsight.html.LineChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>LineChartD3</servlet-name>
         <display-name>LineChartD3</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>LineChartD3</servlet-name>
         <servlet-class>com.easyinsight.html.LineD3ChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>LineChartMeasureD3</servlet-name>
         <display-name>LineChartMeasureD3</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>LineChartMeasureD3</servlet-name>
         <servlet-class>com.easyinsight.html.LineD3MeasureChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>StackedChart</servlet-name>
         <display-name>StackedChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>StackedChart</servlet-name>
         <servlet-class>com.easyinsight.html.StackedColumnChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>TreeServlet</servlet-name>
         <display-name>TreeServlet</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>TreeServlet</servlet-name>
         <servlet-class>com.easyinsight.html.TreeServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>BubbleChart</servlet-name>
         <display-name>BubbleChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>BubbleChart</servlet-name>
         <servlet-class>com.easyinsight.html.BubbleChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>PieChart</servlet-name>
         <display-name>PieChart</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>PieChart</servlet-name>
         <servlet-class>com.easyinsight.html.PieChartServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>DataSourceRefresh</servlet-name>
         <display-name>DataSourceRefresh</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>DataSourceRefresh</servlet-name>
         <servlet-class>com.easyinsight.html.DataSourceRefreshServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>CompleteInstallation</servlet-name>
         <display-name>CompleteInstallation</display-name>
+        <servlet-name>CompleteInstallation</servlet-name>
         <servlet-class>com.easyinsight.html.CompleteInstallationServlet</servlet-class>
-        <!-- <async-supported>true</async-supported> -->
+         <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ConnectionInstalled</servlet-name>
         <display-name>ConnectionInstalled</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ConnectionInstalled</servlet-name>
         <servlet-class>com.easyinsight.html.ConnectionInstalledServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ConnectionImage</servlet-name>
         <display-name>ConnectionImage</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ConnectionImage</servlet-name>
         <servlet-class>com.easyinsight.html.ConnectionImageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>ConnectionImageByDataSource</servlet-name>
         <display-name>ConnectionImageByDataSource</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>ConnectionImageByDataSource</servlet-name>
         <servlet-class>com.easyinsight.html.ConnectionImageByDataSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>RefreshStatus</servlet-name>
         <display-name>RefreshStatus</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>RefreshStatus</servlet-name>
         <servlet-class>com.easyinsight.html.RefreshStatusServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
-        <servlet-name>WhiteLabelImage</servlet-name>
         <display-name>WhiteLabelImage</display-name>
-        <!-- <async-supported>true</async-supported> -->
+        <servlet-name>WhiteLabelImage</servlet-name>
         <servlet-class>com.easyinsight.html.WhiteLabelImageServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>ReportListServlet</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.DataSourceInfoServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>CompositeSource</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.CompositeSourceServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>ScheduledDeliveryRun</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.RunDeliveryServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <!-- MessageBroker Servlet -->
     <servlet>
-        <servlet-name>MessageBrokerServlet</servlet-name>
         <display-name>MessageBrokerServlet</display-name>
+        <servlet-name>MessageBrokerServlet</servlet-name>
         <servlet-class>com.easyinsight.servlet.EIFlex</servlet-class>
         <init-param>
             <param-name>services.configuration.file</param-name>
@@ -798,14 +793,14 @@
             <param-value>/WEB-INF/flex</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
-        <!-- <async-supported>true</async-supported> -->
+        <async-supported>true</async-supported>
     </servlet>
 
 
     <servlet>
         <servlet-name>DeleteConfiguration</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.DeleteConfigurationServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
@@ -823,25 +818,25 @@
             <param-name>realm</param-name>
             <param-value>https://www.easy-insight.com/</param-value>
         </init-param>
-        <!-- <async-supported>true</async-supported> -->
+         <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>FilterValueServlet</servlet-name>
         <servlet-class>com.easyinsight.html.FilterValueServlet</servlet-class>
-        <!-- <async-supported>true</async-supported> -->
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>JSONMeServlet</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.api.v3.JSONMeServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet>
         <servlet-name>ReportsByTagServlet</servlet-name>
-        <!-- <async-supported>true</async-supported> -->
         <servlet-class>com.easyinsight.html.ReportsByTagServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet-mapping>
