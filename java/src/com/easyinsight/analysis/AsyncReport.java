@@ -6,12 +6,15 @@ import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.CachedAddonDataSource;
 import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.DataSourceThreadPool;
 import com.mysql.jdbc.Statement;
+import org.hibernate.Session;
 
 import java.io.*;
 import java.sql.PreparedStatement;
@@ -119,17 +122,19 @@ public class AsyncReport {
                         }
                     }
                     if (server == null) {
-                        throw new RuntimeException("Could not find a server to assign tasks.");
+                        System.out.println("No worker servers available--waiting and trying again.");
+                        Thread.sleep(10000);
+                    } else {
+                        updateStmt.setInt(1, ASSIGNED);
+                        updateStmt.setInt(2, server);
+                        updateStmt.setLong(3, requestID);
+                        updateStmt.executeUpdate();
                     }
-                    updateStmt.setInt(1, ASSIGNED);
-                    updateStmt.setInt(2, server);
-                    updateStmt.setLong(3, requestID);
-                    updateStmt.executeUpdate();
                 }
                 updateStmt.close();
             }
             conn.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
         } finally {
@@ -147,14 +152,14 @@ public class AsyncReport {
             u.setInt(3, serverID);
             u.executeUpdate();
             u.close();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public void claimAndRun() throws InterruptedException {
+    public synchronized void claimAndRun() throws InterruptedException {
         Long requestID = null;
         byte[] reportBytes = null;
         byte[] metadataBytes = null;
@@ -162,11 +167,14 @@ public class AsyncReport {
         long userID = 0;
         long dataSourceID = 0;
         String callID = null;
+        long taskID = 0;
+        long cacheID = 0;
         do {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
-                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, user_id, data_source_id, call_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
+                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, " +
+                        "user_id, data_source_id, call_id, task_id, cache_source_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
                 q.setInt(1, ASSIGNED);
                 q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
@@ -178,6 +186,8 @@ public class AsyncReport {
                     userID = rs.getLong(5);
                     dataSourceID = rs.getLong(6);
                     callID = rs.getString(7);
+                    taskID = rs.getLong(8);
+                    cacheID = rs.getLong(9);
                     PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                     u.setInt(1, IN_PROGRESS);
                     u.setLong(2, requestID);
@@ -186,7 +196,7 @@ public class AsyncReport {
                 }
                 q.close();
                 conn.commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LogClass.error(e);
                 conn.rollback();
             } finally {
@@ -289,10 +299,10 @@ public class AsyncReport {
                             ResultData rh = new ResultData();
                             conn = Database.instance().getConnection();
                             try {
-                                results = new DataService().getEmbeddedResultsForReport(report, new ArrayList<>(), localMetadata, new ArrayList<>(), conn);
+                                results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
                                 rh.results = results;
                                 rh.report = report;
-                            } catch (Exception e) {
+                            } catch (Throwable e) {
                                 rh.exception = e;
                             } finally {
                                 Database.closeConnection(conn);
@@ -309,7 +319,7 @@ public class AsyncReport {
                                     rh.dataSet = dataSet;
                                     rh.report = report;
                                     MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                                } catch (Exception e) {
+                                } catch (Throwable e) {
                                     rh.exception = e;
                                     MemCachedManager.instance().add("async" + frequestID, 100, rh);
                                 }
@@ -332,34 +342,117 @@ public class AsyncReport {
                         AsyncReport.releaseAsync();
                     }
 
-                } catch (Exception e) {
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
-                        u.setInt(1, FINISHED);
-                        u.setLong(2, frequestID);
-                        u.executeUpdate();
-                        u.close();
-                    } catch (Exception e1) {
-                        LogClass.error(e1);
-                    } finally {
-                        Database.closeConnection(conn);
-                    }
+                } catch (Throwable e) {
+                    markDone(frequestID);
                     LogClass.error(e);
                 }
             });
         } else if (requestType == DATA_SOURCE_REFRESH) {
-            final long fdataSourceID = dataSourceID;
-            final String fcallID = callID;
-            DataSourceListener.dataSource(fdataSourceID, fcallID, requestID);
+            DataSourceListener.dataSource(dataSourceID, callID, requestID);
+        } else if (requestType == SCHEDULED_TASK) {
+            // load the task...
+            ScheduledTask scheduledTask = null;
+            Session session = Database.instance().createSession();
+            try {
+                session.getTransaction().begin();
+                List tasks = session.createQuery("from ScheduledTask where scheduledTaskID = ?").setLong(0, taskID).list();
+                if (tasks.size() > 0) {
+                    scheduledTask = (ScheduledTask) tasks.get(0);
+                }
+                session.getTransaction().commit();
+            } catch (Throwable e) {
+                session.getTransaction().rollback();
+            } finally {
+                session.close();
+            }
+            if (scheduledTask == null) {
+                markDone(requestID);
+            } else {
+                final ScheduledTask fTask = scheduledTask;
+                final Long frequestID = requestID;
+                System.out.println("queueing " + frequestID + " -- " + fTask.getScheduledTaskID());
+                DataSourceThreadPool.instance().addActivity(() -> {
+                    fTask.run();
+                    markDone(frequestID);
+                });
+            }
+        } else if (requestType == CACHE_REBUILD) {
+            final long fcacheID = cacheID;
+            final Long frequestID = requestID;
+            DataSourceThreadPool.instance().addActivity(() -> {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    CachedAddonDataSource.runReport(conn, fcacheID, true);
+                } catch (Throwable e) {
+                    LogClass.error(e);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+                markDone(frequestID);
+            });
         }
 
+    }
+
+    protected void markDone(Long frequestID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+            u.setInt(1, AsyncReport.FINISHED);
+            u.setLong(2, frequestID);
+            u.executeUpdate();
+            u.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public static final int REPORT_EDITOR = 1;
     public static final int REPORT_END_USER = 2;
     public static final int REPORT_DATA_SET = 3;
     public static final int DATA_SOURCE_REFRESH = 4;
+    public static final int SCHEDULED_TASK = 5;
+    public static final int CACHE_REBUILD = 6;
+
+    public static void cacheRebuild(long cacheDataSourceID) {
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, cache_source_id, request_created, request_type) VALUES (?, ?, ?, ?)");
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setLong(2, cacheDataSourceID);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, CACHE_REBUILD);
+            reqStmt.execute();
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void schedulerTask(long taskID) {
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, task_id, request_created, request_type) VALUES (?, ?, ?, ?)");
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setLong(2, taskID);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, SCHEDULED_TASK);
+            reqStmt.execute();
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public static boolean dataSourceRefresh(long sourceID, String callID) throws Exception {
 
@@ -378,7 +471,7 @@ public class AsyncReport {
             requestID = Database.instance().getAutoGenKey(reqStmt);
             reqStmt.close();
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
@@ -423,7 +516,7 @@ public class AsyncReport {
             }
             dataResults.dataResults.setReport(dataResults.report);
             return dataResults.dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
@@ -483,7 +576,7 @@ public class AsyncReport {
             }
             dataResults.dataResults.setReport(dataResults.report);
             return dataResults.dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
@@ -520,7 +613,7 @@ public class AsyncReport {
                 throw dataResults.exception;
             }
             return dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -559,7 +652,7 @@ public class AsyncReport {
                 throw dataResults.exception;
             }
             return dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
