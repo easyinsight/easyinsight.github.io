@@ -4,6 +4,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +15,7 @@ import java.io.IOException;
  * Date: 5/5/14
  * Time: 10:30 AM
  */
+@WebServlet(value = "/triggerCache", asyncSupported = true)
 public class CacheServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

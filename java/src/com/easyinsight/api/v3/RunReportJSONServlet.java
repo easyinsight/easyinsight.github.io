@@ -9,6 +9,7 @@ import nu.xom.Document;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,7 @@ import java.text.SimpleDateFormat;
  * Date: 11/28/11
  * Time: 3:27 PM
  */
+@WebServlet(value = "/json/RunReport", asyncSupported = true)
 public class RunReportJSONServlet extends JSONServlet {
     @Override
     protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {

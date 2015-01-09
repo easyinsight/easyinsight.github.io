@@ -13,6 +13,7 @@ import com.easyinsight.storage.DataStorage;
 import nu.xom.Document;
 import nu.xom.Nodes;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import java.util.Map;
  * Date: 3/12/13
  * Time: 11:58 AM
  */
+@WebServlet(value = "/xml/addField", asyncSupported = true)
 public class AddFieldServlet extends APIServlet {
     @Override
     protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {

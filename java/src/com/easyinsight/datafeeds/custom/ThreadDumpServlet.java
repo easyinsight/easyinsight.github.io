@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import java.util.*;
  * Date: 2/9/12
  * Time: 1:20 PM
  */
+@WebServlet(value = "/admin/threads", asyncSupported = true)
 public class ThreadDumpServlet extends HttpServlet {
 
     @Override

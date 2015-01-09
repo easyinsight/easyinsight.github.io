@@ -18,6 +18,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ import java.util.*;
  * Date: 6/20/12
  * Time: 9:45 AM
  */
+@WebServlet(value = "/drillThrough", asyncSupported = true)
 public class DrillthroughServlet extends HtmlServlet {
 
     protected String getValue(JSONObject jsonObject, String param) {

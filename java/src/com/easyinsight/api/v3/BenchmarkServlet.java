@@ -7,6 +7,7 @@ import nu.xom.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +18,7 @@ import java.sql.Timestamp;
  * Date: 7/27/13
  * Time: 11:33 PM
  */
+@WebServlet(value = "/benchmarkHistory", asyncSupported = true)
 public class BenchmarkServlet extends JSONServlet {
 
     @Override

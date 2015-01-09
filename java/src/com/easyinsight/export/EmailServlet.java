@@ -5,6 +5,7 @@ import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.html.HtmlServlet;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  * Date: 6/6/12
  * Time: 1:07 PM
  */
+@WebServlet(value = "/emailReport", asyncSupported = true)
 public class EmailServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest req, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

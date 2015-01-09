@@ -5,6 +5,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
  * Date: May 11, 2010
  * Time: 8:42:48 AM
  */
+@WebServlet(value = "/unsubscribe", asyncSupported = true)
 public class UnsubscribeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {

@@ -8,6 +8,7 @@ import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ import java.util.Date;
  * Date: 10/2/13
  * Time: 1:39 PM
  */
+@WebServlet(value = "/newUser", asyncSupported = true)
 public class NewUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
