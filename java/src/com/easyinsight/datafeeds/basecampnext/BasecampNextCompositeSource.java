@@ -46,6 +46,8 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     private boolean useProjectUpdatedAt;
     private boolean skipCalendar;
 
+    public static final int COMMENTS = 1;
+
     public boolean isUseProjectUpdatedAt() {
         return useProjectUpdatedAt;
     }
@@ -60,19 +62,6 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
 
     public void setSkipCalendar(boolean skipCalendar) {
         this.skipCalendar = skipCalendar;
-    }
-
-    private transient List<BasecampComment> comments;
-
-    public void addComment(BasecampComment comment) {
-        if (comments == null) {
-            comments = new LinkedList<>();
-        }
-        comments.add(comment);
-    }
-
-    public List<BasecampComment> getComments() {
-        return comments;
     }
 
 
@@ -301,7 +290,6 @@ public class BasecampNextCompositeSource extends CompositeServerDataSource {
     protected void refreshDone() {
         super.refreshDone();
         projectCache = null;
-        comments = null;
     }
 
     public Collection<BasecampNextAccount> getBasecampAccounts() {
