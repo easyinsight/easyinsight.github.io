@@ -180,6 +180,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             conn = Database.instance().getConnection();
             try {
                 System.out.println("Running report " + id);
+                //AsyncReport.cacheRebuild(id);
                 runReport(conn, id, true);
             } catch (Throwable e) {
                 if (!conn.getAutoCommit()) {
@@ -362,14 +363,13 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                 int startYear;
                 if (flatDateFilter.getStartYear() != 0) {
                     startYear = flatDateFilter.getStartYear();
-                    int endYear = 2014;
+                    int endYear = 2015;
                     Calendar cal = Calendar.getInstance();
                     if (lastRefreshDate != null && lastRefreshDate.getTime() > 10000) {
                         cal.add(Calendar.YEAR, -1);
                     } else {
                         cal.set(Calendar.YEAR, startYear);
                     }
-
 
                     boolean keepGoing = true;
                     do {
@@ -406,7 +406,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    private FilterDefinition findPartitionFilter(WSAnalysisDefinition report) {
+    public static FilterDefinition findPartitionFilter(WSAnalysisDefinition report) {
         String name = report.getCachePartitionFilter();
         if (name == null || "".equals(name)) {
             return null;
