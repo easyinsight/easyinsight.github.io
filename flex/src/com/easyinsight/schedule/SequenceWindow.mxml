@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:schedule="com.easyinsight.schedule.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        public var activity:ActivitySequence;
+
+        [Bindable]
+        private var customLabel:String;
+
+        private function addActivity():void {
+            var window:ActivityForSequenceWindow = new ActivityForSequenceWindow();
+            window.addEventListener(SequenceEvent.ADD_TO_SEQUENCE, onAdd, false, 0, true);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onAdd(event:SequenceEvent):void {
+            activities.addItem(event.activity);
+        }
+
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (activity == null) {
+                activities = new ArrayCollection();
+                newActivity = true;
+            } else {
+                activities = activity.activities;
+                newActivity = false;
+            }
+        }
+
+        private function deleteSelected():void {
+            //var activityList:ArrayCollection = new ArrayCollection();
+            for each (var activity:ScheduledActivity in activities) {
+                if (activity.selected) {
+                    activities.removeItemAt(activities.getItemIndex(activity));
+                }
+            }
+        }
+
+        private function save():void {
+            if (activity == null) {
+                activity = new ActivitySequence();
+            }
+            if (scheduleConfiguration.save()) {
+                activity.activities = activities;
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, activity));
+                var utcOffset:int = new Date().getTimezoneOffset();
+                ProgressAlert.alert(this, "Saving...", null, exportService.addOrUpdateSchedule);
+                exportService.addOrUpdateSchedule.send(activity, utcOffset);
+            }
+        }
+
+        [Bindable]
+        private var newActivity:Boolean;
+
+        private function runNow():void {
+            ProgressAlert.alert(this, "Running...", "The activity should now have been run.", exportService.runNow);
+            exportService.runNow.send(activity.scheduledActivityID);
+        }
+
+        private function ran():void {
+
+        }
+
+        private function saved():void {
+            if (newActivity) {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.NEW_ACTIVITY, activity));
+            } else {
+                dispatchEvent(new ScheduleActivityEvent(ScheduleActivityEvent.EDIT_ACTIVITY, activity));
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        [Bindable]
+        private var activities:ArrayCollection;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="exportService" id="exportService">
+        <mx:method name="addOrUpdateSchedule" result="saved()"/>
+        <mx:method name="runNow" result="ran()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <schedule:ScheduleConfiguration activity="{activity}" id="scheduleConfiguration"/>
+        <mx:HRule width="100%"/>
+        <mx:HBox width="100%">
+            <mx:Button label="Add Activity..." click="addActivity()" styleName="flatSaveButton"/>
+            <mx:Spacer width="100%"/>
+            <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
+        </mx:HBox>
+        <mx:DataGrid dataProvider="{activities}" dragEnabled="true" dropEnabled="true" dragMoveEnabled="true">
+            <mx:columns>
+                <mx:DataGridColumn dataField="" headerText=""
+                                   itemRenderer="com.easyinsight.schedule.ScheduleCheckbox" width="30" sortable="false"/>
+                <util:EIDataGridColumn dataField="activityDisplay" headerText="Activity" width="250"
+                                       itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+                <util:EIDataGridColumn dataField="interval" headerText="When" width="300"
+                                       itemRenderer="com.easyinsight.util.RolloverLabelGridColumn"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:HRule width="100%"/>
+    </mx:VBox>
+    <mx:HBox>
+        <util:SaveButton label="Save" click="save()"/>
+        <util:SaveButton label="Run Now" click="runNow()" visible="{!newActivity}"/>
+        <util:CancelButton label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+</util:EITitleWindow>

@@ -1271,7 +1271,8 @@ public class FeedStorage {
         rs.next();
         String urlKey = rs.getString(1);
         String name = rs.getString(2);
-        int dataSourceType = rs.getInt(3);
+        int dataSourceType = rs.getInt(4);
+
         DataSourceDescriptor dsd = new DataSourceDescriptor(name, dataSourceID, dataSourceType, true, rs.getInt(3));
         dsd.setUrlKey(urlKey);
         return dsd;

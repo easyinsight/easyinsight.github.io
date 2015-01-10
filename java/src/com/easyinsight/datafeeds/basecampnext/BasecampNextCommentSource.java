@@ -58,25 +58,11 @@ public class BasecampNextCommentSource extends BasecampNextBaseSource {
 
         try {
             BasecampNextCompositeSource basecampNextCompositeSource = (BasecampNextCompositeSource) parentDefinition;
-            Map<String, List<BasecampComment>> map = new HashMap<>();
-            if (basecampNextCompositeSource.getComments() == null) {
-                return null;
-            }
-            for (BasecampComment basecampComment : basecampNextCompositeSource.getComments()) {
-                String projectID = basecampComment.getProjectID();
-                List<BasecampComment> comments = map.get(projectID);
-                if (comments == null) {
-                    comments = new LinkedList<>();
-                    map.put(projectID, comments);
-                }
-                comments.add(basecampComment);
-            }
 
-            //
+            List<BasecampComment> comments;
 
-            for (Map.Entry<String, List<BasecampComment>> entry : map.entrySet()) {
-
-                for (BasecampComment basecampComment : entry.getValue()) {
+            while ((comments = (List<BasecampComment>) basecampNextCompositeSource.next(BasecampNextCompositeSource.COMMENTS)) != null) {
+                for (BasecampComment basecampComment : comments) {
                     DataSet dataSet = new DataSet();
                     IRow row = dataSet.createRow();
                     row.addValue(keys.get(COMMENT_ID), basecampComment.getId());
@@ -93,7 +79,6 @@ public class BasecampNextCommentSource extends BasecampNextBaseSource {
                         IDataStorage.updateData(dataSet, Arrays.asList((IWhere) stringWhere));
                     }
                 }
-
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

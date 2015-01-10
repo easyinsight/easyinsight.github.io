@@ -1598,6 +1598,7 @@ public class DataService {
             dataSet.setAsyncSavedReport(rh.report);
             return dataSet;
         } else {
+            handleTimezoneData(conn, insightRequestMetadata);
             ReportRetrieval reportRetrieval;
             try {
                 reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -2809,7 +2810,7 @@ public class DataService {
         private static void asyncReportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
 
-            if (analysisDefinition.isPassThroughFilters()) {
+            /*if (analysisDefinition.isPassThroughFilters()) {
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     map.put(filter.getFilterID(), filter);
@@ -2828,7 +2829,7 @@ public class DataService {
                 }
                 insightRequestMetadata.setFilters(toPass);
                 analysisDefinition.setFilterDefinitions(toSet);
-            } else if (customFilters != null) {
+            } else*/ if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
@@ -2839,7 +2840,7 @@ public class DataService {
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
 
-            if (analysisDefinition.isPassThroughFilters()) {
+            /*if (analysisDefinition.isPassThroughFilters()) {
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     map.put(filter.getFilterID(), filter);
@@ -2858,7 +2859,7 @@ public class DataService {
                 }
                 insightRequestMetadata.setFilters(toPass);
                 analysisDefinition.setFilterDefinitions(toSet);
-            } else if (customFilters != null) {
+            } else*/ if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
@@ -2913,6 +2914,13 @@ public class DataService {
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
             insightRequestMetadata.setAvoidKeyDisplayCollisions(feed.getDataSource().isAvoidKeyDisplayCollisions());
+
+            /*if (analysisDefinition.getCachePartitionFilter() != null) {
+                FilterDefinition filter = CachedAddonDataSource.findPartitionFilter(analysisDefinition);
+                if (filter != null) {
+                    insightRequestMetadata.setFilters(Arrays.asList(filter));
+                }
+            }*/
 
             if (analysisDefinition.getBaseDate() != null && !"".equals(analysisDefinition.getBaseDate())) {
                 AnalysisItem targetItem = null;

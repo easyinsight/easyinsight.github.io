@@ -128,6 +128,8 @@
         <mapping class="com.easyinsight.users.ExternalLogin"/>
         <mapping class="com.easyinsight.users.QuickbaseExternalLogin"/>
         <mapping class="com.easyinsight.database.VolumeSnapshotTask"/>
+        <mapping class="com.easyinsight.users.ActivitySequenceTask"/>
+        <mapping class="com.easyinsight.users.ActivitySequenceTaskGenerator"/>
         <mapping class="com.easyinsight.database.DatabaseVolumeScheduler"/>
         <mapping class="com.easyinsight.billing.BillingTaskGenerator" />
         <mapping class="com.easyinsight.billing.BillingScheduledTask" />

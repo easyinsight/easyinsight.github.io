@@ -19,7 +19,7 @@ import org.hibernate.Session;
 @Entity
 @Table(name="scheduled_task")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class ScheduledTask implements Runnable {
+public class ScheduledTask implements Runnable {
     public static final int SCHEDULED = 1;
     public static final int RUNNING = 2;
     public static final int COMPLETED = 3;
@@ -53,6 +53,10 @@ public abstract class ScheduledTask implements Runnable {
 
     public void setTaskType(int taskType) {
         this.taskType = taskType;
+    }
+
+    public void internalExecute(Date now, EIConnection conn) throws Exception {
+        execute(now, conn);
     }
 
     public void run() {
@@ -141,5 +145,7 @@ public abstract class ScheduledTask implements Runnable {
         this.taskGeneratorID = taskGeneratorID;
     }
 
-    protected abstract void execute(Date now, EIConnection conn) throws Exception;
+    protected void execute(Date now, EIConnection conn) throws Exception {
+
+    }
 }
