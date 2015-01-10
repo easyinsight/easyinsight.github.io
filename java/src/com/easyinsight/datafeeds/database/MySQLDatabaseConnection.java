@@ -25,6 +25,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     private String databaseName;
     private String dbUserName;
     private String dbPassword;
+    private String keyAsLimit;
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Host", "host");
@@ -33,9 +34,18 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         factory.addField("Database User Name", "dbUserName");
         factory.addPassword("Database Password", "dbPassword", true);
         factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
-        factory.addField("Use SSL", "useSSL", HTMLConnectionProperty.CHECKBOX);
+        factory.addFieldWithDefault("Use SSL", "useSSL", HTMLConnectionProperty.CHECKBOX, "true");
         factory.addFieldWithDefault("Connection Timeout (minutes)", "timeout", HTMLConnectionProperty.INTEGER, "20");
+        factory.setName("MySQL");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
+    public String getKeyAsLimit() {
+        return keyAsLimit;
+    }
+
+    public void setKeyAsLimit(String keyAsLimit) {
+        this.keyAsLimit = keyAsLimit;
     }
 
     public String getHost() {
@@ -119,6 +129,14 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         queryStmt.close();
     }
 
+    @Override
+    protected String keyAsLimit() {
+        if (keyAsLimit != null && !"".equals(keyAsLimit.trim())) {
+            return keyAsLimit;
+        }
+        return null;
+    }
+
     protected boolean usePaging() {
         return useSSL;
     }
@@ -143,7 +161,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         deleteStmt.executeUpdate();
         deleteStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO mysql_database_connection (data_source_id, host_name, server_port, database_name," +
-                "database_username, database_password, query_string, rebuild_fields, timeout, use_ssl) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "database_username, database_password, query_string, rebuild_fields, timeout, use_ssl, key_as_limit) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, host);
         insertStmt.setInt(3, port);
@@ -162,6 +180,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
         insertStmt.setBoolean(8, isRebuildFields());
         insertStmt.setInt(9, getTimeout());
         insertStmt.setBoolean(10, isUseSSL());
+        insertStmt.setString(11, getKeyAsLimit());
         insertStmt.execute();
         insertStmt.close();
     }
@@ -170,7 +189,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement loadStmt = conn.prepareStatement("SELECT host_name, server_port, database_name, database_username," +
-                "database_password, query_string, rebuild_fields, timeout, use_ssl FROM mysql_database_connection WHERE data_source_id = ?");
+                "database_password, query_string, rebuild_fields, timeout, use_ssl, key_as_limit FROM mysql_database_connection WHERE data_source_id = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -190,6 +209,7 @@ public class MySQLDatabaseConnection extends ServerDatabaseConnection {
             setRebuildFields(rs.getBoolean(7));
             setTimeout(rs.getInt(8));
             setUseSSL(rs.getBoolean(9));
+            setKeyAsLimit(rs.getString(10));
         }
         loadStmt.close();
     }
