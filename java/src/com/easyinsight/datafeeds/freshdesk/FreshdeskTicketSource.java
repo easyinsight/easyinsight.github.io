@@ -185,7 +185,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
             detailIDs = detailIDs.subList(0, threshold);
         }
 
-        int detailCtr = 0;
+        /*int detailCtr = 0;
         for (String detailID : detailIDs) {
 
             loadingProgress(detailCtr, detailIDs.size(), "Retrieving history for ticket " + detailCtr + " of " + detailIDs.size() + "...", callDataID);
@@ -278,7 +278,7 @@ public class FreshdeskTicketSource extends FreshdeskBaseSource {
                     LogClass.userError(e.getMessage(), e);
                 }
             //}
-        }
+        }*/
 
         freshdeskCompositeSource.setAssignmentUpdates(assignmentUpdates);
         freshdeskCompositeSource.setStatusUpdates(statusUpdates);
