@@ -115,7 +115,7 @@
                         if(f["type"] == "report") {
                         %>
                         <div class="gridReportMenu" id="<%= id %>_<%= f.id %>" data-report-target="<%= f.id %>"><span class="<%= f.id %>_name"><%- f.report.name %></span>:
-                            <% if(typeof(f["tag"]) != "undefined") { %>
+                            <% if(!userJSON.embedded && typeof(f["tag"]) != "undefined") { %>
                             <div class="btn-group report-dropdown-btn">
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
                                 <ul class="dropdown-menu report-dropdown">
@@ -124,15 +124,17 @@
 
                             </div>
                             <% } %>
-                            <% if(location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
+                            <% if(!userJSON.embedded && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
                             <a href="/app/html/report/<%= f.report.metadata.key %>" class="btn btn-default navigate-button">Navigate</a>
                             <% } %>
                             <div class="btn-group">
                                     <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="/app/exportExcel?reportID=<%= f.report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
-                                        <li><a href="/app/exportPDF?reportID=<%= f.report.metadata.key %>"><button class="btn btn-inverse">Export to PDF</button></a></li>
+                                        <li><a href="#" class="report_excel">Export to Excel</a></li>
+                                        <li><a href="#" class="report_pdf">Export to PDF</a></li>
+                                        <% if (!userJSON.embedded) { %>
                                         <li><a href="#" class="emailReportButton" data-key="<%= f.report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
+                                        <% } %>
                                     </ul>
                             </div>
                             <a class="grid_back_button" href="#"><button class="btn btn-default">Back</button></a></div>
@@ -170,7 +172,7 @@
                         <div class="dashboardReportHeader"><%- report.name %></div>
 
                         <div class="reportMenu">
-                            <% if(typeof(tag) != "undefined") { %>
+                            <% if(typeof(tag) != "undefined" && !userJSON.embedded) { %>
                             <div class="btn-group report-dropdown-btn">
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
                                 <ul class="dropdown-menu report-dropdown">
@@ -179,15 +181,17 @@
 
                             </div>
                             <% } %>
-                            <% if(location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
+                            <% if(!userJSON.embedded && location.pathname.match(/^\/app\/html\/(report|dashboard)\/[a-zA-Z0-9]+/)) { %>
                             <a href="/app/html/report/<%= report.metadata.key %>" class="btn btn-default navigate-button">Navigate</a>
                             <% } %>
                             <div class="btn-group">
                                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Export <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/app/exportExcel?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to Excel</button></a></li>
-                                    <li><a href="/app/exportPDF?reportID=<%= report.metadata.key %>"><button class="btn btn-inverse">Export to PDF</button></a></li>
-                                    <li><a href="#" class="emailReportButton" data-key="<%= report.metadata.key %>"><button class="btn btn-inverse">Email Report</button></a></li>
+                                    <li><a href="#" class="report_excel">Export to Excel</a></li>
+                                    <li><a href="#" class="report_pdf">Export to PDF</a></li>
+                                    <% if (!userJSON.embedded) { %>
+                                    <li><a href="#" class="emailReportButton" data-key="<%= report.metadata.key %>">Email Report</a></li>
+                                    <% } %>
                                 </ul>
                             </div>
                         </div>
@@ -344,7 +348,7 @@
                               <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                             </div>
                         </div>
-                        <div class="form-group multi-value-list">
+                        <div class="form-group multi-value-list" style="height: 300px;overflow:auto;border: 1px;border-color: #CCCCCC;border-style: solid;padding: 5px">
                             <%= multi_value_results({data: data, results: data}) %>
                         </div>
                     </div>
