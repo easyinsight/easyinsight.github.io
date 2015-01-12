@@ -12,6 +12,7 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
+import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UserUploadService;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
@@ -88,7 +89,7 @@ public class DatabaseListener implements Runnable {
                         continue;
                     }
                     System.out.println("firing up a refresh on " + sourceID);
-                    Thread thread = new Thread(new Runnable() {
+                    DataSourceThreadPool.instance().addActivity(new Runnable() {
 
                         public void run() {
                             boolean changed;
@@ -98,7 +99,7 @@ public class DatabaseListener implements Runnable {
                                 FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(sourceID, conn);
                                 UserStub dataSourceUser = null;
                                 List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
-                                for (FeedConsumer owner : owners){
+                                for (FeedConsumer owner : owners) {
                                     if (owner.type() == FeedConsumer.USER) {
                                         dataSourceUser = (UserStub) owner;
                                     }
@@ -137,7 +138,7 @@ public class DatabaseListener implements Runnable {
                                 } finally {
                                     SecurityUtil.clearThreadLocal();
                                 }
-                            } catch (Exception e) {
+                            } catch (Throwable e) {
                                 LogClass.error(e);
                                 if (!conn.getAutoCommit()) {
                                     conn.rollback();
@@ -168,7 +169,7 @@ public class DatabaseListener implements Runnable {
                     thread.setDaemon(true);
                     thread.start();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LogClass.error(e);
             }
         }
