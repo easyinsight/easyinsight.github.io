@@ -25,6 +25,7 @@ var multi_field_value_results;
 
 var saveConfiguration;
 var startFullRenderPDF;
+var reportToExcel;
 
 var busyIndicator;
 busyIndicator = busyIndicator || (function () {
@@ -669,15 +670,27 @@ var fullRenderPDF = function (obj, dashboardID, drillthroughID, pdfData) {
 
 }
 
-var renderExcel = function (obj, dashboardID, drillthroughID, force) {
+var renderExcel = function (obj, dashboardID, drillthroughID, reportID) {
     if (obj.type == "report") {
-        toExcel(obj, dashboardID, drillthroughID);
+        if (typeof(reportID) != "undefined") {
+            if (obj.report.id == reportID) {
+                toExcel(obj, dashboardID, drillthroughID);
+            }
+        } else {
+            toExcel(obj, dashboardID, drillthroughID);
+        }
     }
 }
 
-var renderPDF = function (obj, dashboardID, drillthroughID, force) {
+var renderPDF = function (obj, dashboardID, drillthroughID, reportID) {
     if (obj.type == "report") {
-        toPDF(obj, dashboardID, drillthroughID);
+        if (typeof(reportID) != "undefined") {
+            if (obj.report.id == reportID) {
+                toPDF(obj, dashboardID, drillthroughID);
+            }
+        } else {
+            toPDF(obj, dashboardID, drillthroughID);
+        }
     }
 }
 
@@ -1053,7 +1066,6 @@ $(function () {
                 f.filter.selected = selMap;
                 var selectVals = toSelectedArray(selMap);
                 var label;
-                console.log(selMap["All"]);
                 if(selMap["All"]) {
                     label = "All";
                 } else {
@@ -1478,7 +1490,27 @@ $(function () {
         })
 
         $(".export_excel").click(function(e) {
-            renderExcel(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+            renderExcel(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"]);
+        })
+
+        $(".report_excel").click(function(e) {
+            var c = $(e.target);
+            var a = c.parent();
+            while(typeof(a.attr("data-report-target")) == "undefined") {
+                a = a.parent();
+            }
+            var cc = a.attr("data-report-target");
+            renderExcel(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], cc);
+        })
+
+        $(".report_pdf").click(function(e) {
+            var c = $(e.target);
+            var a = c.parent();
+            while(typeof(a.attr("data-report-target")) == "undefined") {
+                a = a.parent();
+            }
+            var cc = a.attr("data-report-target");
+            renderPDF(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], cc);
         })
 
         startFullRenderPDF = function (obj, dashboardID, drillthroughID) {

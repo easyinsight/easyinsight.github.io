@@ -224,10 +224,10 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                     ctr = 0;
 
                     if (keyAsLimit != null) {
-                        pagedQuery = query.replace(";", "") + " where " + keyAsLimit + " > " + lastID + " limit 5000";
+                        pagedQuery = query.replace(";", "") + " where " + keyAsLimit + " > " + lastID + " limit 25000";
                         System.out.println(pagedQuery);
                     } else if (usePaging() && !query.toLowerCase().contains(" limit ")) {
-                        pagedQuery = query.replace(";", "") + " limit 5000 offset " + offset;
+                        pagedQuery = query.replace(";", "") + " limit 25000 offset " + offset;
                         System.out.println(pagedQuery);
                     }
 
