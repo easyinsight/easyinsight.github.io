@@ -12,7 +12,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.userupload.DataSourceThreadPool;
+import com.easyinsight.userupload.*;
 import com.mysql.jdbc.Statement;
 import org.hibernate.Session;
 
@@ -34,6 +34,8 @@ import java.util.Map;
 public class AsyncReport {
 
     private static ThreadLocal<AsyncReportLocal> asyncReportLocals = new ThreadLocal<>();
+
+
 
     private static class AsyncReportLocal {
         private boolean inAsync;
@@ -169,12 +171,14 @@ public class AsyncReport {
         String callID = null;
         long taskID = 0;
         long cacheID = 0;
+        String uploadKey = null;
+        String fileName = null;
         do {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
                 PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, " +
-                        "user_id, data_source_id, call_id, task_id, cache_source_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
+                        "user_id, data_source_id, call_id, task_id, cache_source_id, upload_key, file_name FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
                 q.setInt(1, ASSIGNED);
                 q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
@@ -188,6 +192,8 @@ public class AsyncReport {
                     callID = rs.getString(7);
                     taskID = rs.getLong(8);
                     cacheID = rs.getLong(9);
+                    uploadKey = rs.getString(10);
+                    fileName = rs.getString(11);
                     PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                     u.setInt(1, IN_PROGRESS);
                     u.setLong(2, requestID);
@@ -390,6 +396,189 @@ public class AsyncReport {
                 }
                 markDone(frequestID);
             });
+        } else if (requestType == FILE_UPLOAD_ANALYZE) {
+            final Long frequestID = requestID;
+            final String fFileName = fileName;
+            final String fUploadKey = uploadKey;
+            DataSourceThreadPool.instance().addActivity(() -> {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    FlatFileUploadContext context = new FlatFileUploadContext();
+                    context.setFileName(fFileName);
+                    context.setUploadKey(fUploadKey);
+                    UploadResponse response = new UserUploadService().analyzeUploadWithConn(context, conn);
+                    MemCachedManager.instance().add("async" + frequestID, 100, response);
+                } catch (Throwable e) {
+                    LogClass.error(e);
+                } finally {
+                    Database.closeConnection(conn);
+                }
+                markDone(frequestID);
+            });
+        } else if (requestType == FILE_UPLOAD_CREATE) {
+            try {
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
+                final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
+                final Long frequestID = requestID;
+                final long fuserID = userID;
+                final String fFileName = fileName;
+                final String fUploadKey = uploadKey;
+                DataSourceThreadPool.instance().addActivity(() -> {
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        conn.setAutoCommit(false);
+                        PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                                "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
+                                "WHERE USER.USER_ID = ? AND USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
+                        queryStmt.setLong(1, fuserID);
+                        ResultSet queryRS = queryStmt.executeQuery();
+                        queryRS.next();
+                        String userName = queryRS.getString(1);
+                        int accountType = queryRS.getInt(2);
+                        boolean accountAdmin = queryRS.getBoolean(3);
+                        int firstDayOfWeek = queryRS.getInt(4);
+                        long accountID = queryRS.getLong(8);
+                        long userPersonaID = queryRS.getLong("USER.persona_ID");
+                        String personaName = null;
+                        if (userPersonaID > 0) {
+                            PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
+                            personaNameStmt.setLong(1, userPersonaID);
+                            ResultSet personaRS = personaNameStmt.executeQuery();
+                            if (personaRS.next()) {
+                                personaName = personaRS.getString(1);
+                            }
+                            personaNameStmt.close();
+                        }
+                        SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                        try {
+                            FlatFileUploadContext context = new FlatFileUploadContext();
+                            context.setFileName(fFileName);
+                            context.setUploadKey(fUploadKey);
+                            UploadResponse response = new UserUploadService().createDataSourceWithConn(uploadContextBlob.getName(),
+                                    uploadContextBlob.getUploadContext(), uploadContextBlob.getAnalysisItems(), uploadContextBlob.isAccountVisible(), conn);
+                            MemCachedManager.instance().add("async" + frequestID, 100, response);
+                        } finally {
+                            SecurityUtil.clearThreadLocal();
+                        }
+                        conn.commit();
+                    } catch (Throwable e) {
+                        conn.rollback();
+                        LogClass.error(e);
+                    } finally {
+                        conn.setAutoCommit(true);
+                        Database.closeConnection(conn);
+                    }
+                    markDone(frequestID);
+                });
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+        } else if (requestType == FILE_REPLACE_ANALYZE) {
+            try {
+                final Long frequestID = requestID;
+                final long fuserID = userID;
+                final long fdataSourceID = dataSourceID;
+                final String fUploadKey = uploadKey;
+                DataSourceThreadPool.instance().addActivity(() -> {
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        conn.setAutoCommit(false);
+                        PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                                "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
+                                "WHERE USER.USER_ID = ? AND USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
+                        queryStmt.setLong(1, fuserID);
+                        ResultSet queryRS = queryStmt.executeQuery();
+                        queryRS.next();
+                        String userName = queryRS.getString(1);
+                        int accountType = queryRS.getInt(2);
+                        boolean accountAdmin = queryRS.getBoolean(3);
+                        int firstDayOfWeek = queryRS.getInt(4);
+                        long accountID = queryRS.getLong(8);
+                        long userPersonaID = queryRS.getLong("USER.persona_ID");
+                        String personaName = null;
+                        if (userPersonaID > 0) {
+                            PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
+                            personaNameStmt.setLong(1, userPersonaID);
+                            ResultSet personaRS = personaNameStmt.executeQuery();
+                            if (personaRS.next()) {
+                                personaName = personaRS.getString(1);
+                            }
+                            personaNameStmt.close();
+                        }
+                        SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                        try {
+                            AnalyzeUploadResponse response = new UserUploadService().analyzeUpdate(fdataSourceID, fUploadKey, true);
+                            MemCachedManager.instance().add("async" + frequestID, 100, response);
+                        } finally {
+                            SecurityUtil.clearThreadLocal();
+                        }
+                        conn.commit();
+                    } catch (Throwable e) {
+                        conn.rollback();
+                        LogClass.error(e);
+                    } finally {
+                        conn.setAutoCommit(true);
+                        Database.closeConnection(conn);
+                    }
+                    markDone(frequestID);
+                });
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
+        } else if (requestType == FILE_REPLACE_UPLOAD) {
+            try {
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
+                final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
+                final Long frequestID = requestID;
+                final long fuserID = userID;
+                final String fUploadKey = uploadKey;
+                DataSourceThreadPool.instance().addActivity(() -> {
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        conn.setAutoCommit(false);
+                        PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                                "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
+                                "WHERE USER.USER_ID = ? AND USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
+                        queryStmt.setLong(1, fuserID);
+                        ResultSet queryRS = queryStmt.executeQuery();
+                        queryRS.next();
+                        String userName = queryRS.getString(1);
+                        int accountType = queryRS.getInt(2);
+                        boolean accountAdmin = queryRS.getBoolean(3);
+                        int firstDayOfWeek = queryRS.getInt(4);
+                        long accountID = queryRS.getLong(8);
+                        long userPersonaID = queryRS.getLong("USER.persona_ID");
+                        String personaName = null;
+                        if (userPersonaID > 0) {
+                            PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
+                            personaNameStmt.setLong(1, userPersonaID);
+                            ResultSet personaRS = personaNameStmt.executeQuery();
+                            if (personaRS.next()) {
+                                personaName = personaRS.getString(1);
+                            }
+                            personaNameStmt.close();
+                        }
+                        SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+                        try {
+                            new UserUploadService().updateData(uploadContextBlob.getDataSourceID(), fUploadKey,
+                                    uploadContextBlob.isUpdate(), uploadContextBlob.getAnalysisItems(), true);
+                            MemCachedManager.instance().add("async" + frequestID, 100, true);
+                        } finally {
+                            SecurityUtil.clearThreadLocal();
+                        }
+                        conn.commit();
+                    } catch (Throwable e) {
+                        conn.rollback();
+                        LogClass.error(e);
+                    } finally {
+                        conn.setAutoCommit(true);
+                        Database.closeConnection(conn);
+                    }
+                    markDone(frequestID);
+                });
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
         }
 
     }
@@ -415,9 +604,179 @@ public class AsyncReport {
     public static final int DATA_SOURCE_REFRESH = 4;
     public static final int SCHEDULED_TASK = 5;
     public static final int CACHE_REBUILD = 6;
+    public static final int FILE_UPLOAD_ANALYZE = 7;
+    public static final int FILE_UPLOAD_CREATE = 8;
+    public static final int FILE_REPLACE_ANALYZE = 9;
+    public static final int FILE_REPLACE_UPLOAD = 10;
+
+    public static UploadResponse fileUpload(FlatFileUploadContext context) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, upload_key, file_name, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setString(2, context.getUploadKey());
+            reqStmt.setString(3, context.getFileName());
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, FILE_UPLOAD_ANALYZE);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+            return (UploadResponse) result;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static UploadResponse fileCreate(String fileName, FlatFileUploadContext context, List<AnalysisItem> items, boolean accountVisible) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, request_created, request_type, user_id) " +
+                            "VALUES (?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            UploadContextBlob blob = new UploadContextBlob();
+            blob.setName(fileName);
+            blob.setUploadContext(context);
+            blob.setAnalysisItems(items);
+            blob.setAccountVisible(accountVisible);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(blob);
+            oos.flush();
+            byte[] blobBytes = baos.toByteArray();
+            reqStmt.setBytes(2, blobBytes);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, FILE_UPLOAD_CREATE);
+            reqStmt.setLong(5, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+            return (UploadResponse) result;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static AnalyzeUploadResponse analyzeFileUpdate(long feedID, String uploadKey) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, upload_key, data_source_id, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setString(2, uploadKey);
+            reqStmt.setLong(3, feedID);
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, FILE_REPLACE_ANALYZE);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+            return (AnalyzeUploadResponse) result;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void fileUpdateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, upload_key, request_created, request_type, user_id) " +
+                            "VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            UploadContextBlob blob = new UploadContextBlob();
+            blob.setDataSourceID(feedID);
+            blob.setAnalysisItems(newFields);
+            blob.setUpdate(update);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(blob);
+            oos.flush();
+            byte[] blobBytes = baos.toByteArray();
+            reqStmt.setBytes(2, blobBytes);
+            reqStmt.setString(3, uploadKey);
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, FILE_REPLACE_UPLOAD);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void cacheRebuild(long cacheDataSourceID) {
-
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, cache_source_id, request_created, request_type) VALUES (?, ?, ?, ?)");
