@@ -1286,8 +1286,36 @@ public class UserUploadService {
     }
 
     public UploadResponse analyzeUpload(UploadContext uploadContext) {
-        UploadResponse uploadResponse;
+
+        boolean async;
         EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                async = false;
+            } else {
+                async = rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        if (async && uploadContext instanceof FlatFileUploadContext) {
+            try {
+                return AsyncReport.fileUpload((FlatFileUploadContext) uploadContext);
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        UploadResponse uploadResponse;
+        conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
 
@@ -1430,8 +1458,36 @@ public class UserUploadService {
     }
 
     public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
-        UploadResponse uploadResponse;
+
+        boolean async;
         EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                async = false;
+            } else {
+                async = rs.getBoolean(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        if (async && uploadContext instanceof FlatFileUploadContext) {
+            try {
+                return AsyncReport.fileCreate(name, (FlatFileUploadContext) uploadContext, analysisItems, accountVisible);
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        UploadResponse uploadResponse;
+        conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             byte[] bytes = null;
@@ -2006,7 +2062,41 @@ public class UserUploadService {
     }
 
     public AnalyzeUploadResponse analyzeUpdate(long feedID, String uploadKey) {
+        return analyzeUpdate(feedID, uploadKey, false);
+    }
+
+    public AnalyzeUploadResponse analyzeUpdate(long feedID, String uploadKey, boolean noAsync) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
+
+        boolean async = false;
+        if (!noAsync) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next()) {
+                    async = false;
+                } else {
+                    async = rs.getBoolean(1);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+
+            if (async) {
+                try {
+                    return AsyncReport.analyzeFileUpdate(feedID, uploadKey);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
         EIConnection conn = Database.instance().getConnection();
         AnalyzeUploadResponse analyzeUploadResponse = new AnalyzeUploadResponse();
         try {
@@ -2100,69 +2190,114 @@ public class UserUploadService {
     }
 
     public void updateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields) {
+        updateData(feedID, uploadKey, update, newFields, false);
+    }
+
+    public void updateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields, boolean noAsync) {
         SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
-            FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
 
-            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
-
-            byte retrieveBuf[];
-            retrieveBuf = new byte[1];
-            InputStream bfis = object.getObjectContent();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            while (bfis.read(retrieveBuf) != -1) {
-                baos.write(retrieveBuf);
-            }
-            byte[] resultBytes = baos.toByteArray();
-            baos = null;
-            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-            ZipInputStream zin = new ZipInputStream(bais);
-            zin.getNextEntry();
-
-            byte[] buffer = new byte[8192];
-            ByteArrayOutputStream fout = new ByteArrayOutputStream();
-            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-            int nBytes;
-            while ((nBytes = zin.read(buffer)) != -1) {
-                bufOS.write(buffer, 0, nBytes);
-            }
-            /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                bufOS.write(c);
-            }*/
-            bufOS.close();
-            fout.close();
-
-            byte[] bytes = fout.toByteArray();
-
-            bufOS = null;
-            fout = null;
-
-            System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
-
-            PreparedStatement dbStmt = conn.prepareStatement("SELECT special_storage FROM account WHERE account_id = ?");
-            dbStmt.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = dbStmt.executeQuery();
-            rs.next();
-            String specialStorage = rs.getString(1);
-            dbStmt.close();
-
-            if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
-                if (specialStorage != null) {
-                    System.out.println("Using Redshift file update...");
-                    RedshiftFileUpdate task = new RedshiftFileUpdate();
-                    task.setFeedID(feedID);
-                    task.setNewFields(newFields);
-                    task.setUpdate(update);
-                    task.setUserID(SecurityUtil.getUserID());
-                    task.setAccountID(SecurityUtil.getAccountID());
-                    task.updateData(feedID, update, conn, bytes);
+        if (!noAsync) {
+            boolean async;
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+                ps.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next()) {
+                    async = false;
                 } else {
-                    System.out.println("Using legacy file update...");
-                    FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
+                    async = rs.getBoolean(1);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+
+            if (async) {
+                try {
+                    AsyncReport.fileUpdateData(feedID, uploadKey, update, newFields);
+                    return;
+                } catch (Exception e) {
+                    LogClass.error(e);
+                    throw new RuntimeException(e);
+                }
+            }
+
+        }
+
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                conn.setAutoCommit(false);
+                System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
+                FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
+
+                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
+
+                byte retrieveBuf[];
+                retrieveBuf = new byte[1];
+                InputStream bfis = object.getObjectContent();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while (bfis.read(retrieveBuf) != -1) {
+                    baos.write(retrieveBuf);
+                }
+                byte[] resultBytes = baos.toByteArray();
+                baos = null;
+                ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+                ZipInputStream zin = new ZipInputStream(bais);
+                zin.getNextEntry();
+
+                byte[] buffer = new byte[8192];
+                ByteArrayOutputStream fout = new ByteArrayOutputStream();
+                BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+                int nBytes;
+                while ((nBytes = zin.read(buffer)) != -1) {
+                    bufOS.write(buffer, 0, nBytes);
+                }
+                /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                    bufOS.write(c);
+                }*/
+                bufOS.close();
+                fout.close();
+
+                byte[] bytes = fout.toByteArray();
+
+                bufOS = null;
+                fout = null;
+
+                System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
+
+                PreparedStatement dbStmt = conn.prepareStatement("SELECT special_storage FROM account WHERE account_id = ?");
+                dbStmt.setLong(1, SecurityUtil.getAccountID());
+                ResultSet rs = dbStmt.executeQuery();
+                rs.next();
+                String specialStorage = rs.getString(1);
+                dbStmt.close();
+
+                if (dataSource.getUploadFormat() instanceof CsvFileUploadFormat) {
+                    if (specialStorage != null) {
+                        System.out.println("Using Redshift file update...");
+                        RedshiftFileUpdate task = new RedshiftFileUpdate();
+                        task.setFeedID(feedID);
+                        task.setNewFields(newFields);
+                        task.setUpdate(update);
+                        task.setUserID(SecurityUtil.getUserID());
+                        task.setAccountID(SecurityUtil.getAccountID());
+                        task.updateData(feedID, update, conn, bytes);
+                    } else {
+                        System.out.println("Using legacy file update...");
+                        FileProcessOptimizedUpdateScheduledTask task = new FileProcessOptimizedUpdateScheduledTask();
+                        task.setFeedID(feedID);
+                        task.setNewFields(newFields);
+                        task.setUpdate(update);
+                        task.setUserID(SecurityUtil.getUserID());
+                        task.setAccountID(SecurityUtil.getAccountID());
+                        task.updateData(feedID, update, conn, bytes);
+                    }
+                } else {
+                    FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
                     task.setFeedID(feedID);
                     task.setNewFields(newFields);
                     task.setUpdate(update);
@@ -2170,24 +2305,15 @@ public class UserUploadService {
                     task.setAccountID(SecurityUtil.getAccountID());
                     task.updateData(feedID, update, conn, bytes);
                 }
-            } else {
-                FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
-                task.setFeedID(feedID);
-                task.setNewFields(newFields);
-                task.setUpdate(update);
-                task.setUserID(SecurityUtil.getUserID());
-                task.setAccountID(SecurityUtil.getAccountID());
-                task.updateData(feedID, update, conn, bytes);
+                conn.commit();
+            } catch (Throwable e) {
+                LogClass.error(e);
+                conn.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                conn.setAutoCommit(true);
+                Database.closeConnection(conn);
             }
-            conn.commit();
-        } catch (Throwable e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
     }
 
     public void updateData(long feedID, String uploadKey, boolean update) {

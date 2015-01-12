@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Collection;
  * Date: 6/11/13
  * Time: 3:40 PM
  */
-public class AnalyzeUploadResponse {
+public class AnalyzeUploadResponse implements Serializable {
     private Collection<FieldUploadInfo> fieldUploadInfos;
     private String error;
 

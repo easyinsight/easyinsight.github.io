@@ -1,5 +1,6 @@
 package com.easyinsight.userupload;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
  * Date: Jun 14, 2008
  * Time: 12:40:04 AM
  */
-public class UploadResponse {
+public class UploadResponse implements Serializable {
     private boolean successful;
     private String failureMessage;
     private long feedID;
