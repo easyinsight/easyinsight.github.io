@@ -1552,11 +1552,11 @@ $(function () {
 
 
         $(".export_pdf").click(function(e) {
-            renderPDF(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+            renderPDF(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"]);
         })
 
         $(".export_png").click(function(e) {
-            renderPNG(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"], true);
+            renderPNG(graph, dashboardJSON["id"], dashboardJSON["drillthroughID"]);
         })
 
         saveConfiguration = function (name, key) {
