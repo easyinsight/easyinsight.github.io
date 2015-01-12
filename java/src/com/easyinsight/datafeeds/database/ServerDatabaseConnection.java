@@ -213,7 +213,8 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
             String keyAsLimit = keyAsLimit();
             Connection connection = createConnection();
             try {
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+                statement.setFetchSize(5000);
                 String pagedQuery = query;
 
                 int offset = 0;
