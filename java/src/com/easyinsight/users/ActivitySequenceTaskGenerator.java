@@ -9,10 +9,7 @@ import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -42,29 +39,33 @@ public class ActivitySequenceTaskGenerator extends TaskGenerator {
 
     @Override
     public List<ScheduledTask> generateTasks(Date now, EIConnection conn) throws SQLException {
-        ScheduleType scheduleType = getScheduleType(conn);
-        Date lastRunTime = findStartTaskDate();
+        try {
+            ScheduleType scheduleType = getScheduleType(conn);
+            Date lastRunTime = findStartTaskDate();
 
-        String timezoneID = null;
-        PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
-                "scheduled_account_activity.account_id = account.account_id");
-        tzStmt.setLong(1, activityID);
-        ResultSet tsRZ = tzStmt.executeQuery();
-        if (tsRZ.next()) {
-            timezoneID = tsRZ.getString(1);
+            String timezoneID = null;
+            PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
+                    "scheduled_account_activity.account_id = account.account_id");
+            tzStmt.setLong(1, activityID);
+            ResultSet tsRZ = tzStmt.executeQuery();
+            if (tsRZ.next()) {
+                timezoneID = tsRZ.getString(1);
+            }
+            tzStmt.close();
+            Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
+            if (time == null) {
+                return Collections.emptyList();
+            }
+            ActivitySequenceTask task = new ActivitySequenceTask();
+            task.setActivityID(activityID);
+            task.setStatus(ScheduledTask.SCHEDULED);
+            task.setExecutionDate(time);
+            task.setTaskGeneratorID(getTaskGeneratorID());
+            setLastTaskDate(time);
+            return Arrays.asList((ScheduledTask) task);
+        } catch (Exception e) {
+            return new ArrayList<>();
         }
-        tzStmt.close();
-        Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
-        if (time == null) {
-            return Collections.emptyList();
-        }
-        ActivitySequenceTask task = new ActivitySequenceTask();
-        task.setActivityID(activityID);
-        task.setStatus(ScheduledTask.SCHEDULED);
-        task.setExecutionDate(time);
-        task.setTaskGeneratorID(getTaskGeneratorID());
-        setLastTaskDate(time);
-        return Arrays.asList((ScheduledTask) task);
     }
 
     private ScheduleType getScheduleType(EIConnection conn) throws SQLException {
