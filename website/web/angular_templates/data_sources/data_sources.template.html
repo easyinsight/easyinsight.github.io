@@ -27,12 +27,12 @@
         <thead>
         <tr>
             <th ng-if="user.designer" style="width: 42px;"></th>
-            <th>Data Source Name</th>
-            <th style="width:150px">Last Refresh Time</th>
+            <th style="cursor: pointer;" ng-click="order('name')">Data Source Name</th>
+            <th ng-click="order('last_refresh')" style="width:150px;cursor:pointer;">Last Refresh Time</th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="data_source in (filtered = (data_sources | tagged:tags))" ng-init="show_tags = false">
+        <tr ng-repeat="data_source in (filtered = (data_sources | orderBy:ordered_by | tagged:tags))" ng-init="show_tags = false">
             <td ng-show="user.designer">
                 <input type="checkbox" ng-model="data_source.selected" />
                 <i class="glyphicon tag-value" ng-class="{'glyphicon-tag': data_source.tags.length == 0, 'glyphicon-tags': data_source.tags.length > 0 }" ng-click="show_tags = !show_tags" />

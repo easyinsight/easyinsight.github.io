@@ -29,13 +29,18 @@
         };
         $scope.loadSuggestions();
 
-        /*$http.get("/app/dataSourceSuggestions.json").then(function (d) {
-            $scope.suggestions = d.data.suggestions;
-        })*/
     }]);
 
     eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", function ($scope, $http, PageInfo, $filter, $modal) {
         PageInfo.setTitle("Data Sources");
+        $scope.ordered_by = "name";
+        $scope.order = function(val) {
+            if($scope.ordered_by == val) {
+                $scope.ordered_by = "-" + val;
+            } else {
+                $scope.ordered_by = val;
+            }
+        }
         $scope.load = $http.get("/app/dataSources.json");
         $scope.load.then(function (d) {
             $scope.data_sources = d.data.data_sources;
