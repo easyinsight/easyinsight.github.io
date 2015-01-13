@@ -674,10 +674,14 @@ var renderExcel = function (obj, dashboardID, drillthroughID, reportID) {
     if (obj.type == "report") {
         if (typeof(reportID) != "undefined") {
             if (obj.report.id == reportID) {
-                toExcel(obj, dashboardID, drillthroughID);
+                toExcel(obj, dashboardID, drillthroughID, reportID);
             }
         } else {
-            toExcel(obj, dashboardID, drillthroughID);
+            toExcel(obj, dashboardID, drillthroughID, reportID);
+        }
+    } else if (obj.type != "text" && obj.type != "image") {
+        for (var i = 0; i < obj.children.length; i++) {
+            renderExcel(obj.children[i], dashboardID, drillthroughID, reportID);
         }
     }
 }
@@ -686,10 +690,14 @@ var renderPDF = function (obj, dashboardID, drillthroughID, reportID) {
     if (obj.type == "report") {
         if (typeof(reportID) != "undefined") {
             if (obj.report.id == reportID) {
-                toPDF(obj, dashboardID, drillthroughID);
+                toPDF(obj, dashboardID, drillthroughID, reportID);
             }
         } else {
-            toPDF(obj, dashboardID, drillthroughID);
+            toPDF(obj, dashboardID, drillthroughID, reportID);
+        }
+    } else if (obj.type != "text" && obj.type != "image") {
+        for (var i = 0; i < obj.children.length; i++) {
+            renderPDF(obj.children[i], dashboardID, drillthroughID, reportID);
         }
     }
 }
