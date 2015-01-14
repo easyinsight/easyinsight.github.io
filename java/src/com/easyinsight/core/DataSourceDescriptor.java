@@ -178,8 +178,10 @@ public class DataSourceDescriptor extends EIDescriptor {
         jo.put("tags", ja);
         if (lastDataTime != null) {
             jo.put("last_refresh_time", dateFormat.format(lastDataTime));
+            jo.put("last_refresh", lastDataTime.getTime());
         } else {
             jo.put("last_refresh_time", "");
+            jo.put("last_refresh", 0);
         }
         if(FeedType.valueOf(getDataSourceType()).equals(FeedType.COMPOSITE)) {
             jo.put("type", "composite");
