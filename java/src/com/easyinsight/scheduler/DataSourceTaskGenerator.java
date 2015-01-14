@@ -65,7 +65,7 @@ public class DataSourceTaskGenerator extends TaskGenerator {
                         timezoneID = tsRZ.getString(1);
                     }
                     tzStmt.close();
-                    Date time = scheduleType.runTime(lastRunTime, now, null);
+                    Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
                     if (time == null) {
                         return Collections.emptyList();
                     }
