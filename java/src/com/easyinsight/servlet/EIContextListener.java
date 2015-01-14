@@ -80,6 +80,7 @@ public class EIContextListener implements ServletContextListener {
                 }
 
                 healthListener = new HealthListener();
+                healthListener.initialSetup();
                 healthThread = new Thread(healthListener);
                 healthThread.setName("Health Listener");
                 healthThread.setDaemon(true);
