@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
+import com.easyinsight.analysis.definitions.WSTextDefinition;
 import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
@@ -432,6 +433,8 @@ public class AsyncReport {
                             results = new DataService().getYTDResults(report, localMetadata);
                         } else if (report instanceof WSCompareYearsDefinition) {
                             results = new DataService().getCompareYearsResults(report, localMetadata);
+                        } else if (report instanceof WSTextDefinition) {
+                            results = new DataService().getTextDataResults((WSTextDefinition) report, localMetadata);
                         } else {
                             results = new DataService().list(report, localMetadata);
                         }
@@ -441,22 +444,24 @@ public class AsyncReport {
                         MemCachedManager.instance().add("async" + frequestID, 100, rh);
                     } else if (frequestType == REPORT_END_USER) {
                         EmbeddedResults results;
-                        /*if (report instanceof WSCrosstabDefinition) {
-
-                            results = getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
-                        } else if (report instanceof WSKPIDefinition) {
-                            results = getTrendDataResults((WSKPIDefinition) report, localMetadata);
-                        } else if (report instanceof WSTreeDefinition) {
-                            results = getTreeDataResults((WSTreeDefinition) report, localMetadata);
-                        } else if (report instanceof WSYTDDefinition) {
-                            results = getYTDResults(report, localMetadata);
-                        } else if (report instanceof WSCompareYearsDefinition) {
-                            results = getCompareYearsResults(report, localMetadata);
-                        } else {*/
                         ResultData rh = new ResultData();
                         conn = Database.instance().getConnection();
                         try {
-                            results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
+                            if (report instanceof WSCrosstabDefinition) {
+                                results = new DataService().getEmbeddedCrosstabResults((WSCrosstabDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSYTDDefinition) {
+                                results = new DataService().getEmbeddedYTDResults((WSYTDDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSKPIDefinition) {
+                                results = new DataService().getEmbeddedTrendDataResults((WSKPIDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSTreeDefinition) {
+                                results = new DataService().getEmbeddedTreeResults((WSTreeDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSCompareYearsDefinition) {
+                                results = new DataService().getEmbeddedCompareYearsResults((WSCompareYearsDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSTextDefinition) {
+                                results = new DataService().getEmbeddedTextResults((WSTextDefinition) report, insightRequestMetadata, conn);
+                            } else {
+                                results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
+                            }
                             rh.results = results;
                             rh.report = report;
                         } catch (Throwable e) {
