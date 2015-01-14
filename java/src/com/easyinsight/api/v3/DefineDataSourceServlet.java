@@ -7,6 +7,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import nu.xom.*;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  * Date: 1/3/11
  * Time: 1:35 PM
  */
+@WebServlet(value = "/xml/defineDataSource", asyncSupported = true)
 public class DefineDataSourceServlet extends APIServlet {
 
     @Override

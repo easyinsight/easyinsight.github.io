@@ -11,6 +11,7 @@ import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.NumberFormat;
@@ -23,6 +24,7 @@ import java.util.Map;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
+@WebServlet(value = "/pieChart", asyncSupported = true)
 public class PieChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

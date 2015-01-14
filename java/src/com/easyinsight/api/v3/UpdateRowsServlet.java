@@ -17,6 +17,7 @@ import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -33,6 +34,7 @@ import java.util.Map;
  * Date: 1/3/11
  * Time: 1:35 PM
  */
+@WebServlet(value = "/xml/updateRows", asyncSupported = true)
 public class UpdateRowsServlet extends APIServlet {
 
     @Override

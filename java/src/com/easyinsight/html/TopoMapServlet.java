@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -27,6 +28,7 @@ import java.util.List;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
+@WebServlet(value = "/topoMap", asyncSupported = true)
 public class TopoMapServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

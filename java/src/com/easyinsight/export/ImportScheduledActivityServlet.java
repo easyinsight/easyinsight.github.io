@@ -9,6 +9,7 @@ import com.easyinsight.email.UserStub;
 import nu.xom.Document;
 import nu.xom.Element;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,6 +20,7 @@ import java.util.Iterator;
  * Date: 10/10/12
  * Time: 2:15 PM
  */
+@WebServlet(value = "/importActivity", asyncSupported = true)
 public class ImportScheduledActivityServlet extends APIServlet {
 
     @Override

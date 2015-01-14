@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@WebServlet(value = "/json/dataSourceSuggestions", asyncSupported = true)
 public class SuggestedActionsServlet extends JSONServlet {
 
     @Override

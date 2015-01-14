@@ -7,6 +7,7 @@ import net.minidev.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  * Time: 11:37 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/scheduling/history", asyncSupported = true)
 public class ScheduledDeliveryHistoryServlet extends JSONServlet {
 
     @Override

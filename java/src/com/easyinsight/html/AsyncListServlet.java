@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
@@ -23,6 +24,7 @@ import java.util.Map;
  * Date: 5/29/14
  * Time: 10:29 AM
  */
+@WebServlet(value = "/asyncList", asyncSupported = true)
 public class AsyncListServlet extends HtmlServlet {
 
     private static String toDrillthroughValue(Value value) throws UnsupportedEncodingException {

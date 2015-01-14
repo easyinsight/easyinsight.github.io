@@ -7,12 +7,14 @@ import net.minidev.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
 /**
  * Created by Alan on 11/11/14.
  */
+@WebServlet(value = "/scheduling/missing_refreshes.json", asyncSupported = true)
 public class MissingRefreshServlet extends JSONServlet {
 
     @Override

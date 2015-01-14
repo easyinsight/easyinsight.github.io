@@ -12,6 +12,7 @@ import com.easyinsight.userupload.UserUploadService;
 import net.minidev.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * Time: 1:58 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/connection/createFlatFileSource", asyncSupported = true)
 public class CreateFlatFileSourceServlet extends JSONServlet {
 
     @Override

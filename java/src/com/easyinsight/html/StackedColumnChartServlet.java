@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -21,6 +22,7 @@ import java.util.*;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
+@WebServlet(value = "/stackedChart", asyncSupported = true)
 public class StackedColumnChartServlet extends HtmlServlet {
 
     private static interface Populator {

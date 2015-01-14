@@ -11,6 +11,7 @@ import com.easyinsight.export.ExportMetadata;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.DateFormat;
@@ -22,6 +23,7 @@ import java.util.*;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
+@WebServlet(value = "/twoAxisChart", asyncSupported = true)
 public class LineChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

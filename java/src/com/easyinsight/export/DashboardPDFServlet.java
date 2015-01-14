@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +35,7 @@ import java.util.Map;
  * Date: 6/30/14
  * Time: 2:51 PM
  */
+@WebServlet(value = "/htmlDashboardPDF", asyncSupported = true)
 public class DashboardPDFServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

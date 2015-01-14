@@ -12,6 +12,7 @@ import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +28,7 @@ import java.util.List;
  * Time: 4:31 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/filterValue", asyncSupported = true)
 public class FilterValueServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

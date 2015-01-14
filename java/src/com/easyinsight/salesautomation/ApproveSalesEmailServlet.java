@@ -6,6 +6,7 @@ import net.minidev.json.parser.JSONParser;
 import org.apache.commons.io.IOUtils;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import java.util.List;
  * Date: 6/27/14
  * Time: 1:45 PM
  */
+@WebServlet(value = "/approveSalesEmails", asyncSupported = true)
 public class ApproveSalesEmailServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

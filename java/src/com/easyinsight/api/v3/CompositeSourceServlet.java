@@ -7,6 +7,7 @@ import com.easyinsight.datafeeds.*;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  * Time: 5:49 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/composite", asyncSupported = true)
 public class CompositeSourceServlet extends JSONServlet {
     @Override
     protected ResponseInfo processPost(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {

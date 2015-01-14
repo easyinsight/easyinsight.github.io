@@ -15,6 +15,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.*;
 import nu.xom.*;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,6 +27,7 @@ import java.util.*;
  * Date: 1/3/11
  * Time: 1:35 PM
  */
+@WebServlet(value = "/xml/updateRowsByPK", asyncSupported = true)
 public class UpdateRowsPKServlet extends APIServlet {
 
     @Override

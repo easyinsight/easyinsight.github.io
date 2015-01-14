@@ -17,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.DateFormat;
@@ -28,6 +29,7 @@ import java.util.*;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
+@WebServlet(value = "/lineChartMeasureD3", asyncSupported = true)
 public class LineD3MeasureChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
@@ -36,58 +38,6 @@ public class LineD3MeasureChartServlet extends HtmlServlet {
         AnalysisItem eventPointLabel = twoAxisDefinition.getEventPointLabel();
         twoAxisDefinition.setEventPoint(null);
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
-
-
-
-        /*JSONArray events = new JSONArray();
-        if (eventPoint != null) {
-            WSListDefinition temp = new WSListDefinition();
-            temp.setDataFeedID(twoAxisDefinition.getDataFeedID());
-            temp.setColumns(Arrays.asList(eventPoint, eventPointLabel));
-            Feed feed = FeedRegistry.instance().getFeed(twoAxisDefinition.getDataFeedID(), conn);
-            temp.setFilterDefinitions(feed.getIntrinsicFilters(conn));
-            temp.setAddedItems(twoAxisDefinition.getAddedItems());
-            temp.setAddonReports(twoAxisDefinition.getAddonReports());
-            DataSet tempSet = DataService.listDataSet(temp, insightRequestMetadata, conn);
-            for (IRow row : tempSet.getRows()) {
-                DateValue eventPointValue = (DateValue) row.getValue(eventPoint);
-                Value eventPointLabelValue = row.getValue(eventPointLabel);
-                JSONObject eventObject = new JSONObject();
-                eventObject.put("date", dFormat.format(eventPointValue.getDate()));
-                eventObject.put("label", eventPointLabelValue);
-                events.put(eventObject);
-            }
-        }
-
-        JSONObject generalGoalValue = null;
-        AnalysisItem goal = twoAxisDefinition.getGoal();
-        if (goal != null) {
-            WSListDefinition temp = new WSListDefinition();
-            temp.setDataFeedID(twoAxisDefinition.getDataFeedID());
-            List<AnalysisItem> columns = new ArrayList<>();
-            columns.add(goal);
-            AnalysisMeasure m = (AnalysisMeasure) goal;
-            m.setAggregation(AggregationTypes.AVERAGE);
-            temp.setColumns(columns);
-            Feed feed = FeedRegistry.instance().getFeed(twoAxisDefinition.getDataFeedID(), conn);
-            temp.setFilterDefinitions(feed.getIntrinsicFilters(conn));
-            temp.setAddedItems(twoAxisDefinition.getAddedItems());
-            temp.setAddonReports(twoAxisDefinition.getAddonReports());
-            DataSet tempSet = DataService.listDataSet(temp, insightRequestMetadata, conn);
-            IRow row = tempSet.getRow(0);
-            *//*for (IRow row : tempSet.getRows()) {*//*
-            Value goalValue = row.getValue(goal);
-            generalGoalValue = new JSONObject();
-            AnalysisDateDimension date = (AnalysisDateDimension) twoAxisDefinition.getXaxis();
-
-            if (twoAxisDefinition.getGoalDateLevel() == AnalysisDateDimension.MONTH_LEVEL) {
-                if (date.getDateLevel() == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
-                    goalValue = new NumericValue(goalValue.toDouble() * 3);
-                }
-            }
-
-            generalGoalValue.put("goal", goalValue.toDouble());
-        }*/
 
         JSONObject object = new JSONObject();
 
