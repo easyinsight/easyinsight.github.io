@@ -2,12 +2,14 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.io.Serializable;
+
 /**
 * User: jamesboe
 * Date: 12/2/11
 * Time: 6:06 PM
 */
-public class TimeIntervalValue {
+public class TimeIntervalValue implements Serializable {
     private Value dateValue;
     private Value value;
 
