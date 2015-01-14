@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import java.util.Map;
  * Date: 12/3/11
  * Time: 9:45 AM
  */
-public class CompareYearsRow {
+public class CompareYearsRow implements Serializable {
     private AnalysisItem measure;
     private Map<String, CompareYearsResult> results = new HashMap<String, CompareYearsResult>();
 

@@ -51,7 +51,7 @@ public class DeliveryTaskGenerator extends TaskGenerator {
             }
             tzStmt.close();
         }
-        Date time = scheduleType.runTime(lastRunTime, now, null);
+        Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
         if (time != null) {
             DeliveryScheduledTask deliveryTask = new DeliveryScheduledTask();
             deliveryTask.setTaskType(ScheduledTask.EMAIL);

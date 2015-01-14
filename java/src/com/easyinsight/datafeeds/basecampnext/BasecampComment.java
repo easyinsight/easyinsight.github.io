@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecampnext;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Date;
  * Date: 7/6/14
  * Time: 1:28 PM
  */
-public class BasecampComment {
+public class BasecampComment implements Serializable {
     private String id;
     private String projectID;
     private Date createdAt;

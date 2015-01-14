@@ -244,9 +244,6 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        if (insightRequestMetadata.getFilterPropertiesMap().containsKey(this)) {
-            return start;
-        }
         List<Value> valueSet = new ArrayList<Value>();
         for (Object valueObject : filteredValues) {
             Value value;

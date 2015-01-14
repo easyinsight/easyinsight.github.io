@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.Map;
  * Date: 9/5/12
  * Time: 2:18 PM
  */
-public class TreeRow {
+public class TreeRow implements Serializable {
     private Map<String, Object> values = new HashMap<String, Object>();
     private Value groupingColumn;
     private Value sortColumn;

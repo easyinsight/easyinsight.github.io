@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.composite;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.database.EIConnection;
@@ -19,6 +20,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -524,6 +526,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             timeStmt.close();
             CachedAddonDataSource.triggerUpdates(getDataFeedID(), conn);
         } finally {
+            clearTempFiles();
             DataTypeMutex.mutex().unlock(getFeedType());
         }
 
@@ -682,5 +685,81 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
         }
         return analysisItem;
+    }
+
+    private class Temp {
+        private int type;
+        private File tempDir;
+        private int saveCtr;
+        private int readCtr;
+    }
+
+    private transient Map<Integer, Temp> temps ;
+
+    public void startTemp(int type, String callID) {
+        if (temps == null) {
+            temps = new HashMap<>();
+        }
+        if (callID == null) {
+            callID = String.valueOf(getDataFeedID() + "a" + System.currentTimeMillis());
+        }
+        File base = new File(ConfigLoader.instance().getRedshiftCSVPath(), type + "x" + callID);
+        base.mkdir();
+        Temp temp = new Temp();
+        temp.tempDir = base;
+        temp.type = type;
+        temps.put(type, temp);
+    }
+
+
+
+    public void tempPersist(int type, Object object) {
+        try {
+            Temp temp = temps.get(type);
+            File file = new File(temp.tempDir, type + "." + temp.saveCtr);
+            FileOutputStream fos = new FileOutputStream(file);
+            BufferedOutputStream bos = new BufferedOutputStream(fos, 1024);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(object);
+            oos.close();
+            temp.saveCtr++;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Object next(int type) {
+        try {
+            Temp temp = temps.get(type);
+            if (temp.readCtr == temp.saveCtr) {
+                return null;
+            }
+            File[] files = temp.tempDir.listFiles((dir, name) -> (name.startsWith(type + ".")));
+            File file = files[temp.readCtr];
+            FileInputStream fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            temp.readCtr++;
+            Object obj = ois.readObject();
+            ois.close();
+            return obj;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void clearTempFiles() {
+        try {
+            if (temps != null) {
+                for (Temp temp : temps.values()) {
+                    for (File file : temp.tempDir.listFiles()) {
+                        file.delete();
+                    }
+                    temp.tempDir.delete();
+                }
+                temps = null;
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
     }
 }

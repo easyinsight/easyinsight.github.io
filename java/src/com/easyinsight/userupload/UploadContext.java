@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 * Date: Mar 27, 2010
 * Time: 3:21:51 PM
 */
-public abstract class UploadContext {
+public abstract class UploadContext implements Serializable {
     public abstract String validateUpload(EIConnection conn) throws SQLException;
     public abstract List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception;
 

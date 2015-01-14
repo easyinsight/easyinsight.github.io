@@ -27,7 +27,7 @@ public class HealthListener implements Runnable {
     private boolean running = true;
 
     public void run() {
-        initialSetup();
+        //initialSetup();
 
         while (running) {
             try {
@@ -99,7 +99,7 @@ public class HealthListener implements Runnable {
         }
     }
 
-    private void initialSetup() {
+    public void initialSetup() {
         EIConnection conn = Database.instance().getConnection();
         try {
             String host = InetAddress.getLocalHost().getHostName();

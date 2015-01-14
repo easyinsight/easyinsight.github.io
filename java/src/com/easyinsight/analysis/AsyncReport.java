@@ -2,26 +2,28 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.WSCompareYearsDefinition;
 import com.easyinsight.analysis.definitions.WSKPIDefinition;
+import com.easyinsight.analysis.definitions.WSTextDefinition;
 import com.easyinsight.analysis.definitions.WSYTDDefinition;
 import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.CachedAddonDataSource;
 import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.userupload.DataSourceThreadPool;
+import com.easyinsight.userupload.*;
 import com.mysql.jdbc.Statement;
+import org.hibernate.Session;
 
 import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -31,6 +33,8 @@ import java.util.Map;
 public class AsyncReport {
 
     private static ThreadLocal<AsyncReportLocal> asyncReportLocals = new ThreadLocal<>();
+
+
 
     private static class AsyncReportLocal {
         private boolean inAsync;
@@ -119,17 +123,19 @@ public class AsyncReport {
                         }
                     }
                     if (server == null) {
-                        throw new RuntimeException("Could not find a server to assign tasks.");
+                        System.out.println("No worker servers available--waiting and trying again.");
+                        Thread.sleep(10000);
+                    } else {
+                        updateStmt.setInt(1, ASSIGNED);
+                        updateStmt.setInt(2, server);
+                        updateStmt.setLong(3, requestID);
+                        updateStmt.executeUpdate();
                     }
-                    updateStmt.setInt(1, ASSIGNED);
-                    updateStmt.setInt(2, server);
-                    updateStmt.setLong(3, requestID);
-                    updateStmt.executeUpdate();
                 }
                 updateStmt.close();
             }
             conn.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             conn.rollback();
         } finally {
@@ -147,14 +153,14 @@ public class AsyncReport {
             u.setInt(3, serverID);
             u.executeUpdate();
             u.close();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public void claimAndRun() throws InterruptedException {
+    public synchronized void claimAndRun() throws InterruptedException {
         Long requestID = null;
         byte[] reportBytes = null;
         byte[] metadataBytes = null;
@@ -162,11 +168,16 @@ public class AsyncReport {
         long userID = 0;
         long dataSourceID = 0;
         String callID = null;
+        long taskID = 0;
+        long cacheID = 0;
+        String uploadKey = null;
+        String fileName = null;
         do {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
-                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, user_id, data_source_id, call_id FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
+                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, " +
+                        "user_id, data_source_id, call_id, task_id, cache_source_id, upload_key, file_name FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
                 q.setInt(1, ASSIGNED);
                 q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
@@ -178,6 +189,10 @@ public class AsyncReport {
                     userID = rs.getLong(5);
                     dataSourceID = rs.getLong(6);
                     callID = rs.getString(7);
+                    taskID = rs.getLong(8);
+                    cacheID = rs.getLong(9);
+                    uploadKey = rs.getString(10);
+                    fileName = rs.getString(11);
                     PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                     u.setInt(1, IN_PROGRESS);
                     u.setLong(2, requestID);
@@ -186,7 +201,7 @@ public class AsyncReport {
                 }
                 q.close();
                 conn.commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LogClass.error(e);
                 conn.rollback();
             } finally {
@@ -198,168 +213,559 @@ public class AsyncReport {
             }
         } while (requestID == null);
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String time = sdf.format(new Date());
         if (requestType == REPORT_EDITOR || requestType == REPORT_END_USER || requestType == REPORT_DATA_SET) {
+            System.out.println(time + ":" + " Async Report Run");
+            asyncReport(requestID, reportBytes, metadataBytes, requestType, userID);
+        } else if (requestType == DATA_SOURCE_REFRESH) {
+            System.out.println(time + ":" + " Async Data Source Refresh");
+            DataSourceListener.dataSource(dataSourceID, callID, requestID);
+        } else if (requestType == SCHEDULED_TASK) {
+            // load the task...
+            System.out.println(time + ":" + " Async Scheduled Task");
+            asyncTask(requestID, taskID);
+        } else if (requestType == CACHE_REBUILD) {
+            System.out.println(time + ":" + " Async Cache Rebuild");
+            asyncCache(cacheID, requestID);
+        } else if (requestType == FILE_UPLOAD_ANALYZE) {
+            System.out.println(time + ":" + " Async Analyze File Upload - " + uploadKey);
+            asyncAnalyzeFileUpload(requestID, fileName, uploadKey);
+        } else if (requestType == FILE_UPLOAD_CREATE) {
+            System.out.println(time + ":" + " Async Create File Data Source - " + uploadKey);
+            asyncCreateFileUpload(requestID, reportBytes, userID, uploadKey, fileName);
+        } else if (requestType == FILE_REPLACE_ANALYZE) {
+            System.out.println(time + ":" + " Async Analyze File Data Source Update");
+            asyncAnalyzeFileReplace(requestID, userID, dataSourceID, uploadKey);
+        } else if (requestType == FILE_REPLACE_UPLOAD) {
+            System.out.println(time + ":" + " Async Replace or Append File Data Source");
+            asyncFileReplace(requestID, reportBytes, userID, uploadKey);
+        }
 
-            final Long frequestID = requestID;
-            final byte[] freportBytes = reportBytes;
-            final byte[] fmetadataBytes = metadataBytes;
-            final int frequestType = requestType;
-            final long fuserID = userID;
+    }
 
-
+    protected void asyncFileReplace(Long requestID, byte[] reportBytes, long userID, String uploadKey) {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
+            final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
             DataSourceThreadPool.instance().addActivity(() -> {
-
+                EIConnection conn = Database.instance().getConnection();
                 try {
-                    AsyncReport.establishAsync();
+                    conn.setAutoCommit(false);
+                    populateThreadLocal(userID, conn);
                     try {
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
-                                    "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
-                                    "WHERE USER.USER_ID = ? AND USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
-                            queryStmt.setLong(1, fuserID);
-                            ResultSet queryRS = queryStmt.executeQuery();
-                            queryRS.next();
-                            String userName = queryRS.getString(1);
-                            int accountType = queryRS.getInt(2);
-                            boolean accountAdmin = queryRS.getBoolean(3);
-                            int firstDayOfWeek = queryRS.getInt(4);
-                            long accountID = queryRS.getLong(8);
-                            long userPersonaID = queryRS.getLong("USER.persona_ID");
-                            String personaName = null;
-                            if (userPersonaID > 0) {
-                                PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
-                                personaNameStmt.setLong(1, userPersonaID);
-                                ResultSet personaRS = personaNameStmt.executeQuery();
-                                if (personaRS.next()) {
-                                    personaName = personaRS.getString(1);
-                                }
-                                personaNameStmt.close();
-                            }
-                            SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
-
-                        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
-                        WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
-                        ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
-                        InsightRequestMetadata insightRequestMetadata = (InsightRequestMetadata) ois.readObject();
-                        InsightRequestMetadata localMetadata = new InsightRequestMetadata();
-                        localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                        localMetadata.setNoAsync(true);
-
-                        System.out.println("Asynchronous execution of " + report.getName());
-
-                        if (frequestType == REPORT_EDITOR) {
-                            DataResults results;
-                            if (report instanceof WSCrosstabDefinition) {
-                                results = new DataService().getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
-                            } else if (report instanceof WSKPIDefinition) {
-                                results = new DataService().getTrendDataResults((WSKPIDefinition) report, localMetadata);
-                            } else if (report instanceof WSTreeDefinition) {
-                                results = new DataService().getTreeDataResults((WSTreeDefinition) report, localMetadata);
-                            } else if (report instanceof WSYTDDefinition) {
-                                results = new DataService().getYTDResults(report, localMetadata);
-                            } else if (report instanceof WSCompareYearsDefinition) {
-                                results = new DataService().getCompareYearsResults(report, localMetadata);
-                            } else {
-                                results = new DataService().list(report, localMetadata);
-                            }
-                            ResultData rh = new ResultData();
-                            rh.dataResults = results;
-                            rh.report = report;
-                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                        } else if (frequestType == REPORT_END_USER) {
-                            EmbeddedResults results;
-                            /*if (report instanceof WSCrosstabDefinition) {
-
-                                results = getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
-                            } else if (report instanceof WSKPIDefinition) {
-                                results = getTrendDataResults((WSKPIDefinition) report, localMetadata);
-                            } else if (report instanceof WSTreeDefinition) {
-                                results = getTreeDataResults((WSTreeDefinition) report, localMetadata);
-                            } else if (report instanceof WSYTDDefinition) {
-                                results = getYTDResults(report, localMetadata);
-                            } else if (report instanceof WSCompareYearsDefinition) {
-                                results = getCompareYearsResults(report, localMetadata);
-                            } else {*/
-                            ResultData rh = new ResultData();
-                            conn = Database.instance().getConnection();
-                            try {
-                                results = new DataService().getEmbeddedResultsForReport(report, new ArrayList<>(), localMetadata, new ArrayList<>(), conn);
-                                rh.results = results;
-                                rh.report = report;
-                            } catch (Exception e) {
-                                rh.exception = e;
-                            } finally {
-                                Database.closeConnection(conn);
-                            }
-                            //}
-                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                        } else if (frequestType == REPORT_DATA_SET) {
-                            conn = Database.instance().getConnection();
-                            try {
-                                ResultData rh = new ResultData();
-                                try {
-                                    DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
-                                    dataSet.setAsyncSavedReport(report);
-                                    rh.dataSet = dataSet;
-                                    rh.report = report;
-                                    MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                                } catch (Exception e) {
-                                    rh.exception = e;
-                                    MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                                }
-                            } finally {
-                                Database.closeConnection(conn);
-                            }
-                        }
-                        conn = Database.instance().getConnection();
-                        try {
-                            PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
-                            u.setInt(1, FINISHED);
-                            u.setLong(2, frequestID);
-                            u.executeUpdate();
-                            u.close();
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
+                        new UserUploadService().updateData(uploadContextBlob.getDataSourceID(), uploadKey,
+                                uploadContextBlob.isUpdate(), uploadContextBlob.getAnalysisItems(), true);
+                        MemCachedManager.instance().add("async" + requestID, 100, true);
                     } finally {
                         SecurityUtil.clearThreadLocal();
-                        AsyncReport.releaseAsync();
+                    }
+                    conn.commit();
+                } catch (Throwable e) {
+                    conn.rollback();
+                    LogClass.error(e);
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                }
+                markDone(requestID);
+            });
+        } catch (Throwable e) {
+            LogClass.error(e);
+        }
+    }
+
+    protected void asyncAnalyzeFileReplace(Long requestID, long userID, long dataSourceID, String uploadKey) {
+        try {
+            DataSourceThreadPool.instance().addActivity(() -> {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    conn.setAutoCommit(false);
+                    populateThreadLocal(userID, conn);
+                    try {
+                        AnalyzeUploadResponse response = new UserUploadService().analyzeUpdate(dataSourceID, uploadKey, true);
+                        MemCachedManager.instance().add("async" + requestID, 100, response);
+                    } finally {
+                        SecurityUtil.clearThreadLocal();
+                    }
+                    conn.commit();
+                } catch (Throwable e) {
+                    conn.rollback();
+                    LogClass.error(e);
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                }
+                markDone(requestID);
+            });
+        } catch (Throwable e) {
+            LogClass.error(e);
+        }
+    }
+
+    protected void asyncCreateFileUpload(Long requestID, byte[] reportBytes, long userID, String uploadKey, String fileName) {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
+            final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
+            DataSourceThreadPool.instance().addActivity(() -> {
+                EIConnection conn = Database.instance().getConnection();
+                try {
+                    conn.setAutoCommit(false);
+                    populateThreadLocal(userID, conn);
+                    try {
+                        FlatFileUploadContext context = new FlatFileUploadContext();
+                        context.setFileName(fileName);
+                        context.setUploadKey(uploadKey);
+                        UploadResponse response = new UserUploadService().createDataSourceWithConn(uploadContextBlob.getName(),
+                                uploadContextBlob.getUploadContext(), uploadContextBlob.getAnalysisItems(), uploadContextBlob.isAccountVisible(), conn);
+                        MemCachedManager.instance().add("async" + requestID, 100, response);
+                    } finally {
+                        SecurityUtil.clearThreadLocal();
+                    }
+                    conn.commit();
+                } catch (Throwable e) {
+                    conn.rollback();
+                    LogClass.error(e);
+                } finally {
+                    conn.setAutoCommit(true);
+                    Database.closeConnection(conn);
+                }
+                markDone(requestID);
+            });
+        } catch (Throwable e) {
+            LogClass.error(e);
+        }
+    }
+
+    protected void asyncAnalyzeFileUpload(Long frequestID, String fFileName, String fUploadKey) {
+        DataSourceThreadPool.instance().addActivity(() -> {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                FlatFileUploadContext context = new FlatFileUploadContext();
+                context.setFileName(fFileName);
+                context.setUploadKey(fUploadKey);
+                UploadResponse response = new UserUploadService().analyzeUploadWithConn(context, conn);
+                MemCachedManager.instance().add("async" + frequestID, 100, response);
+            } catch (Throwable e) {
+                LogClass.error(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+            markDone(frequestID);
+        });
+    }
+
+    protected void asyncCache(long fcacheID, Long frequestID) {
+        DataSourceThreadPool.instance().addActivity(() -> {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                CachedAddonDataSource.runReport(conn, fcacheID, true);
+            } catch (Throwable e) {
+                LogClass.error(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+            markDone(frequestID);
+        });
+    }
+
+    protected void asyncTask(Long requestID, long taskID) {
+        ScheduledTask scheduledTask = null;
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List tasks = session.createQuery("from ScheduledTask where scheduledTaskID = ?").setLong(0, taskID).list();
+            if (tasks.size() > 0) {
+                scheduledTask = (ScheduledTask) tasks.get(0);
+            }
+            session.getTransaction().commit();
+        } catch (Throwable e) {
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+        if (scheduledTask == null) {
+            markDone(requestID);
+        } else {
+            final ScheduledTask fTask = scheduledTask;
+            final Long frequestID = requestID;
+            DataSourceThreadPool.instance().addActivity(() -> {
+                fTask.run();
+                markDone(frequestID);
+            });
+        }
+    }
+
+    protected void asyncReport(Long frequestID, byte[] freportBytes, byte[] fmetadataBytes, int frequestType, long fuserID) {
+        DataSourceThreadPool.instance().addActivity(() -> {
+
+            try {
+                AsyncReport.establishAsync();
+                try {
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        populateThreadLocal(fuserID, conn);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        Database.closeConnection(conn);
                     }
 
-                } catch (Exception e) {
-                    EIConnection conn = Database.instance().getConnection();
+                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
+                    WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
+                    ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
+                    InsightRequestMetadata insightRequestMetadata = (InsightRequestMetadata) ois.readObject();
+                    InsightRequestMetadata localMetadata = new InsightRequestMetadata();
+                    localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                    localMetadata.setNoAsync(true);
+
+                    System.out.println("Asynchronous execution of " + report.getName());
+
+                    if (frequestType == REPORT_EDITOR) {
+                        DataResults results;
+                        if (report instanceof WSCrosstabDefinition) {
+                            results = new DataService().getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
+                        } else if (report instanceof WSKPIDefinition) {
+                            results = new DataService().getTrendDataResults((WSKPIDefinition) report, localMetadata);
+                        } else if (report instanceof WSTreeDefinition) {
+                            results = new DataService().getTreeDataResults((WSTreeDefinition) report, localMetadata);
+                        } else if (report instanceof WSYTDDefinition) {
+                            results = new DataService().getYTDResults(report, localMetadata);
+                        } else if (report instanceof WSCompareYearsDefinition) {
+                            results = new DataService().getCompareYearsResults(report, localMetadata);
+                        } else if (report instanceof WSTextDefinition) {
+                            results = new DataService().getTextDataResults((WSTextDefinition) report, localMetadata);
+                        } else {
+                            results = new DataService().list(report, localMetadata);
+                        }
+                        ResultData rh = new ResultData();
+                        rh.dataResults = results;
+                        rh.report = report;
+                        MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                    } else if (frequestType == REPORT_END_USER) {
+                        EmbeddedResults results;
+                        ResultData rh = new ResultData();
+                        conn = Database.instance().getConnection();
+                        try {
+                            if (report instanceof WSCrosstabDefinition) {
+                                results = new DataService().getEmbeddedCrosstabResults((WSCrosstabDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSYTDDefinition) {
+                                results = new DataService().getEmbeddedYTDResults((WSYTDDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSKPIDefinition) {
+                                results = new DataService().getEmbeddedTrendDataResults((WSKPIDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSTreeDefinition) {
+                                results = new DataService().getEmbeddedTreeResults((WSTreeDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSCompareYearsDefinition) {
+                                results = new DataService().getEmbeddedCompareYearsResults((WSCompareYearsDefinition) report, insightRequestMetadata, conn);
+                            } else if (report instanceof WSTextDefinition) {
+                                results = new DataService().getEmbeddedTextResults((WSTextDefinition) report, insightRequestMetadata, conn);
+                            } else {
+                                results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
+                            }
+                            rh.results = results;
+                            rh.report = report;
+                        } catch (Throwable e) {
+                            rh.exception = e;
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                        //}
+                        MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                    } else if (frequestType == REPORT_DATA_SET) {
+                        conn = Database.instance().getConnection();
+                        try {
+                            ResultData rh = new ResultData();
+                            try {
+                                DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
+                                dataSet.setAsyncSavedReport(report);
+                                rh.dataSet = dataSet;
+                                rh.report = report;
+                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                            } catch (Throwable e) {
+                                rh.exception = e;
+                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                            }
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                    }
+                    conn = Database.instance().getConnection();
                     try {
                         PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                         u.setInt(1, FINISHED);
                         u.setLong(2, frequestID);
                         u.executeUpdate();
                         u.close();
-                    } catch (Exception e1) {
-                        LogClass.error(e1);
                     } finally {
                         Database.closeConnection(conn);
                     }
-                    LogClass.error(e);
+                } finally {
+                    SecurityUtil.clearThreadLocal();
+                    AsyncReport.releaseAsync();
                 }
-            });
-        } else if (requestType == DATA_SOURCE_REFRESH) {
-            final long fdataSourceID = dataSourceID;
-            final String fcallID = callID;
-            DataSourceListener.dataSource(fdataSourceID, fcallID, requestID);
-        }
 
+            } catch (Throwable e) {
+                markDone(frequestID);
+                LogClass.error(e);
+            }
+        });
+    }
+
+    protected void populateThreadLocal(long fuserID, EIConnection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT USERNAME, ACCOUNT.ACCOUNT_TYPE, USER.account_admin," +
+                "ACCOUNT.FIRST_DAY_OF_WEEK, USER.first_name, USER.name, USER.email, USER.ACCOUNT_ID, USER.PERSONA_ID, USER.TEST_ACCOUNT_VISIBLE FROM USER, ACCOUNT " +
+                "WHERE USER.USER_ID = ? AND USER.ACCOUNT_ID = ACCOUNT.ACCOUNT_ID");
+        queryStmt.setLong(1, fuserID);
+        ResultSet queryRS = queryStmt.executeQuery();
+        queryRS.next();
+        String userName = queryRS.getString(1);
+        int accountType = queryRS.getInt(2);
+        boolean accountAdmin = queryRS.getBoolean(3);
+        int firstDayOfWeek = queryRS.getInt(4);
+        long accountID = queryRS.getLong(8);
+        long userPersonaID = queryRS.getLong("USER.persona_ID");
+        String personaName = null;
+        if (userPersonaID > 0) {
+            PreparedStatement personaNameStmt = conn.prepareStatement("SELECT persona.persona_name FROM persona WHERE persona_id = ?");
+            personaNameStmt.setLong(1, userPersonaID);
+            ResultSet personaRS = personaNameStmt.executeQuery();
+            if (personaRS.next()) {
+                personaName = personaRS.getString(1);
+            }
+            personaNameStmt.close();
+        }
+        SecurityUtil.populateThreadLocal(userName, fuserID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
+    }
+
+    protected void markDone(Long frequestID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+            u.setInt(1, AsyncReport.FINISHED);
+            u.setLong(2, frequestID);
+            u.executeUpdate();
+            u.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public static final int REPORT_EDITOR = 1;
     public static final int REPORT_END_USER = 2;
     public static final int REPORT_DATA_SET = 3;
     public static final int DATA_SOURCE_REFRESH = 4;
+    public static final int SCHEDULED_TASK = 5;
+    public static final int CACHE_REBUILD = 6;
+    public static final int FILE_UPLOAD_ANALYZE = 7;
+    public static final int FILE_UPLOAD_CREATE = 8;
+    public static final int FILE_REPLACE_ANALYZE = 9;
+    public static final int FILE_REPLACE_UPLOAD = 10;
+
+    public static UploadResponse fileUpload(FlatFileUploadContext context) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, upload_key, file_name, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setString(2, context.getUploadKey());
+            reqStmt.setString(3, context.getFileName());
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, FILE_UPLOAD_ANALYZE);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+            return (UploadResponse) result;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static UploadResponse fileCreate(String fileName, FlatFileUploadContext context, List<AnalysisItem> items, boolean accountVisible) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, request_created, request_type, user_id) " +
+                            "VALUES (?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            UploadContextBlob blob = new UploadContextBlob();
+            blob.setName(fileName);
+            blob.setUploadContext(context);
+            blob.setAnalysisItems(items);
+            blob.setAccountVisible(accountVisible);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(blob);
+            oos.flush();
+            byte[] blobBytes = baos.toByteArray();
+            reqStmt.setBytes(2, blobBytes);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, FILE_UPLOAD_CREATE);
+            reqStmt.setLong(5, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+            return (UploadResponse) result;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static AnalyzeUploadResponse analyzeFileUpdate(long feedID, String uploadKey) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, upload_key, data_source_id, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setString(2, uploadKey);
+            reqStmt.setLong(3, feedID);
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, FILE_REPLACE_ANALYZE);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+            return (AnalyzeUploadResponse) result;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void fileUpdateData(long feedID, String uploadKey, boolean update, List<AnalysisItem> newFields) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, upload_key, request_created, request_type, user_id) " +
+                            "VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            UploadContextBlob blob = new UploadContextBlob();
+            blob.setDataSourceID(feedID);
+            blob.setAnalysisItems(newFields);
+            blob.setUpdate(update);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(blob);
+            oos.flush();
+            byte[] blobBytes = baos.toByteArray();
+            reqStmt.setBytes(2, blobBytes);
+            reqStmt.setString(3, uploadKey);
+            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(5, FILE_REPLACE_UPLOAD);
+            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.execute();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void cacheRebuild(long cacheDataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, cache_source_id, request_created, request_type) VALUES (?, ?, ?, ?)");
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setLong(2, cacheDataSourceID);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, CACHE_REBUILD);
+            reqStmt.execute();
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void schedulerTask(long taskID) {
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, task_id, request_created, request_type) VALUES (?, ?, ?, ?)");
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setLong(2, taskID);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, SCHEDULED_TASK);
+            reqStmt.execute();
+            reqStmt.close();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
 
     public static boolean dataSourceRefresh(long sourceID, String callID) throws Exception {
 
@@ -378,7 +784,7 @@ public class AsyncReport {
             requestID = Database.instance().getAutoGenKey(reqStmt);
             reqStmt.close();
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
@@ -423,7 +829,7 @@ public class AsyncReport {
             }
             dataResults.dataResults.setReport(dataResults.report);
             return dataResults.dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
@@ -483,7 +889,7 @@ public class AsyncReport {
             }
             dataResults.dataResults.setReport(dataResults.report);
             return dataResults.dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
@@ -520,7 +926,7 @@ public class AsyncReport {
                 throw dataResults.exception;
             }
             return dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -559,7 +965,7 @@ public class AsyncReport {
                 throw dataResults.exception;
             }
             return dataResults;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));

@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import java.util.Map;
  * Date: 9/10/11
  * Time: 11:47 AM
  */
-public class CrosstabValue {
+public class CrosstabValue implements Serializable {
     private Value value;
     private AnalysisItem header;
     private AnalysisItem measure;

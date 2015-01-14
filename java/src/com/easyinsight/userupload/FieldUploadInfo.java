@@ -2,6 +2,7 @@ package com.easyinsight.userupload;
 
 import com.easyinsight.analysis.AnalysisItem;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * Date: Mar 27, 2010
  * Time: 11:58:38 AM
  */
-public class FieldUploadInfo {
+public class FieldUploadInfo implements Serializable {
     private AnalysisItem guessedItem;
     private List<String> sampleValues;
 

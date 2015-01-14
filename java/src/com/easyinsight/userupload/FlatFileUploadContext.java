@@ -9,6 +9,7 @@ import com.easyinsight.scheduler.FileProcessOptimizedCreateScheduledTask;
 import com.easyinsight.scheduler.RedshiftFileCreate;
 import com.easyinsight.security.SecurityUtil;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +20,7 @@ import java.util.*;
  * Date: Mar 27, 2010
  * Time: 3:21:36 PM
  */
-public class FlatFileUploadContext extends UploadContext {
+public class FlatFileUploadContext extends UploadContext implements Serializable  {
     private String uploadKey;
     private String fileName;
 

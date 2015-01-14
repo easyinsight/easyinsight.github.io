@@ -53,18 +53,6 @@ public class RefreshFlatFileSourceServlet extends JSONServlet {
         org.json.JSONObject jo = new org.json.JSONObject();
         jo.put("success", true);
         ri = new ResponseInfo(200, jo.toString());
-        /*if(userCreationResponse.isSuccessful()) {
-            if(!jo.has("success"))
-                jo.put("success", true);
-            jo.put("user", uto.toJSON(md));
-            ri = new ResponseInfo(200, jo.toString());
-        } else {
-            jo.put("success", false);
-            if(!jo.has("error")) {
-                jo.put("error", userCreationResponse.getFailureMessage());
-            }
-            ri = new ResponseInfo(500, jo.toString());
-        }*/
 
         return ri;
     }

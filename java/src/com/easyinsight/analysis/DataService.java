@@ -1187,7 +1187,41 @@ public class DataService {
         }
     }
 
+    public EmbeddedTrendDataResults getEmbeddedTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+        long start = System.currentTimeMillis();
+        SecurityUtil.authorizeReport(analysisDefinition.getAnalysisID(), Roles.PUBLIC);
+        TrendResult trendResult = createTrendOutcomes(analysisDefinition, insightRequestMetadata, conn);
+        //trendOutcomes = targetOutcomes;
+        EmbeddedTrendDataResults trendDataResults = new EmbeddedTrendDataResults();
+        trendDataResults.setTrendOutcomes(trendResult.trendOutcomes);
+        trendDataResults.setNowString(trendResult.nowString);
+        trendDataResults.setPreviousString(trendResult.previousString);
+        trendDataResults.setDataSourceInfo(trendResult.dataSourceInfo);
+
+        trendDataResults.setDefinition(analysisDefinition);
+        reportViewBenchmark(analysisDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+        return trendDataResults;
+    }
+
     public EmbeddedTrendDataResults getEmbeddedTrendDataResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSKPIDefinition crosstabReport = (WSKPIDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, crosstabReport, conn, customFilters, null);
+                ResultData resultData = AsyncReport.asyncEndUserResults(crosstabReport, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return (EmbeddedTrendDataResults) resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedTrendDataResults results = new EmbeddedTrendDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1246,67 +1280,125 @@ public class DataService {
         }
     }
 
+    public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(WSCrosstabDefinition crosstabReport, InsightRequestMetadata insightRequestMetadata,
+                                                                  EIConnection conn) throws SQLException {
+        long start = System.currentTimeMillis();
+        ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, null, null);
+        Crosstab crosstab = new Crosstab();
+        crosstab.crosstab(crosstabReport, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
+        CrosstabValue[][] values = crosstab.toTable(crosstabReport, insightRequestMetadata, conn);
+
+        List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
+        int rowOffset = crosstabReport.getMeasures().size() > 1 ? 3 : 2;
+        for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + rowOffset; j++) {
+            Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
+            if (crosstabReport.isExcludeZero()) {
+                CrosstabValue summaryValue = values[j][((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size())];
+                if (summaryValue != null && summaryValue.getValue() != null && summaryValue.getValue().toDouble() != null && summaryValue.getValue().toDouble() == 0) {
+                    continue;
+                }
+            }
+            for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + (!crosstabReport.isNoRowSummaries() ? 1 : 0)); i++) {
+                CrosstabValue crosstabValue = values[j][i];
+                if (crosstabValue == null) {
+
+                } else {
+                    resultMap.put(String.valueOf(i), crosstabValue);
+                }
+            }
+            CrosstabMapWrapper crosstabMapWrapper = new CrosstabMapWrapper();
+            crosstabMapWrapper.setMap(resultMap);
+            resultData.add(crosstabMapWrapper);
+        }
+        EmbeddedCrosstabDataResults crossTabDataResults = new EmbeddedCrosstabDataResults();
+        crossTabDataResults.setDataSet(resultData);
+        crossTabDataResults.setDefinition(crosstabReport);
+        crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1);
+        crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+        reportViewBenchmark(crosstabReport, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+        return crossTabDataResults;
+    }
+
     public EmbeddedCrosstabDataResults getEmbeddedCrosstabResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                                   List<FilterDefinition> drillthroughFilters) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            long start = System.currentTimeMillis();
-            SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
-            LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
-            WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
-            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, drillthroughFilters);
-            Crosstab crosstab = new Crosstab();
-            crosstab.crosstab(crosstabReport, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
-            CrosstabValue[][] values = crosstab.toTable(crosstabReport, insightRequestMetadata, conn);
-
-            List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
-            int rowOffset = crosstabReport.getMeasures().size() > 1 ? 3 : 2;
-            for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + rowOffset; j++) {
-                Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
-                if (crosstabReport.isExcludeZero()) {
-                    CrosstabValue summaryValue = values[j][((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size())];
-                    if (summaryValue != null && summaryValue.getValue() != null && summaryValue.getValue().toDouble() != null && summaryValue.getValue().toDouble() == 0) {
-                        continue;
-                    }
-                }
-                for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + (!crosstabReport.isNoRowSummaries() ? 1 : 0)); i++) {
-                    CrosstabValue crosstabValue = values[j][i];
-                    if (crosstabValue == null) {
-
-                    } else {
-                        resultMap.put(String.valueOf(i), crosstabValue);
-                    }
-                }
-                CrosstabMapWrapper crosstabMapWrapper = new CrosstabMapWrapper();
-                crosstabMapWrapper.setMap(resultMap);
-                resultData.add(crosstabMapWrapper);
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, crosstabReport, conn, customFilters, drillthroughFilters);
+                ResultData resultData = AsyncReport.asyncEndUserResults(crosstabReport, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return (EmbeddedCrosstabDataResults) resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
             }
-            EmbeddedCrosstabDataResults crossTabDataResults = new EmbeddedCrosstabDataResults();
-            crossTabDataResults.setDataSet(resultData);
-            crossTabDataResults.setDefinition(crosstabReport);
-            crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1);
-            crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-            reportViewBenchmark(crosstabReport, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
-            return crossTabDataResults;
-        } catch (com.easyinsight.security.SecurityException se) {
-            EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
-            results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
-            return results;
-        } catch (ReportException re) {
-            EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
-            results.setReportFault(re.getReportFault());
-            return results;
-        } catch (Exception e) {
-            LogClass.error(e);
-            EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
-            results.setReportFault(new ServerError(e.getMessage()));
-            return results;
-        } finally {
-            if (success) {
-                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+        } else {
+            boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                long start = System.currentTimeMillis();
+                SecurityUtil.authorizeReport(reportID, Roles.PUBLIC);
+                LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + reportID);
+                WSCrosstabDefinition crosstabReport = (WSCrosstabDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, crosstabReport, conn, customFilters, drillthroughFilters);
+                Crosstab crosstab = new Crosstab();
+                crosstab.crosstab(crosstabReport, reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet()));
+                CrosstabValue[][] values = crosstab.toTable(crosstabReport, insightRequestMetadata, conn);
+
+                List<CrosstabMapWrapper> resultData = new ArrayList<CrosstabMapWrapper>();
+                int rowOffset = crosstabReport.getMeasures().size() > 1 ? 3 : 2;
+                for (int j = 0; j < (crosstab.getRowSections().size() + crosstabReport.getColumns().size()) + rowOffset; j++) {
+                    Map<String, CrosstabValue> resultMap = new HashMap<String, CrosstabValue>();
+                    if (crosstabReport.isExcludeZero()) {
+                        CrosstabValue summaryValue = values[j][((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size())];
+                        if (summaryValue != null && summaryValue.getValue() != null && summaryValue.getValue().toDouble() != null && summaryValue.getValue().toDouble() == 0) {
+                            continue;
+                        }
+                    }
+                    for (int i = 0; i < ((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + (!crosstabReport.isNoRowSummaries() ? 1 : 0)); i++) {
+                        CrosstabValue crosstabValue = values[j][i];
+                        if (crosstabValue == null) {
+
+                        } else {
+                            resultMap.put(String.valueOf(i), crosstabValue);
+                        }
+                    }
+                    CrosstabMapWrapper crosstabMapWrapper = new CrosstabMapWrapper();
+                    crosstabMapWrapper.setMap(resultMap);
+                    resultData.add(crosstabMapWrapper);
+                }
+                EmbeddedCrosstabDataResults crossTabDataResults = new EmbeddedCrosstabDataResults();
+                crossTabDataResults.setDataSet(resultData);
+                crossTabDataResults.setDefinition(crosstabReport);
+                crossTabDataResults.setColumnCount((crosstab.getColumnSections().size() * crosstabReport.getMeasures().size()) + crosstabReport.getRows().size() + 1);
+                crossTabDataResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+                reportViewBenchmark(crosstabReport, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+                return crossTabDataResults;
+            } catch (com.easyinsight.security.SecurityException se) {
+                EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+                results.setReportFault(new ServerError("You don't have access to this report. Check with your administrator about altering access privileges."));
+                return results;
+            } catch (ReportException re) {
+                EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+                results.setReportFault(re.getReportFault());
+                return results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                if (success) {
+                    UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+                }
+                Database.closeConnection(conn);
             }
-            Database.closeConnection(conn);
         }
     }
 
@@ -1598,6 +1690,7 @@ public class DataService {
             dataSet.setAsyncSavedReport(rh.report);
             return dataSet;
         } else {
+            handleTimezoneData(conn, insightRequestMetadata);
             ReportRetrieval reportRetrieval;
             try {
                 reportRetrieval = ReportRetrieval.reportEditor(insightRequestMetadata, analysisDefinition, conn);
@@ -1715,8 +1808,48 @@ public class DataService {
         return new MultiSummaryData(analysisDefinition, ExportService.createExportMetadata(conn, insightRequestMetadata), dataSet, childSets, reportMap, addedJoinColumn);
     }
 
+    public EmbeddedTreeDataResults getEmbeddedTreeResults(WSTreeDefinition report, InsightRequestMetadata insightRequestMetadata,
+                                                          EIConnection conn) throws SQLException {
+        long start = System.currentTimeMillis();
+        SecurityUtil.authorizeReport(report.getAnalysisID(), Roles.PUBLIC, conn);
+        handleTimezoneData(conn, insightRequestMetadata);
+        LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + report.getAnalysisID());
+        ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, report, conn, null, null);
+
+        DataSet dataSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+        TreeData treeData = new TreeData(report, (AnalysisHierarchyItem) report.getHierarchy(), null, dataSet);
+        for (IRow row : dataSet.getRows()) {
+            treeData.addRow(row);
+        }
+        List<TreeRow> rows = treeData.toTreeRows(reportRetrievalNow.getPipeline().getPipelineData());
+        EmbeddedTreeDataResults crossTabDataResults = new EmbeddedTreeDataResults();
+        crossTabDataResults.setTreeRows(rows);
+        crossTabDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+        crossTabDataResults.setDefinition(report);
+        reportViewBenchmark(report, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+        return crossTabDataResults;
+    }
+
     public EmbeddedTreeDataResults getEmbeddedTreeResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                           List<FilterDefinition> drillthroughFilters) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSTreeDefinition ytdReport = (WSTreeDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, ytdReport, conn, customFilters, drillthroughFilters);
+                ResultData resultData = AsyncReport.asyncEndUserResults(ytdReport, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return (EmbeddedTreeDataResults) resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedTreeDataResults results = new EmbeddedTreeDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
@@ -1759,8 +1892,46 @@ public class DataService {
         }
     }
 
+    public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(WSCompareYearsDefinition wsytdDefinition, InsightRequestMetadata insightRequestMetadata,
+                                                                          EIConnection conn) throws SQLException {
+        long start = System.currentTimeMillis();
+        SecurityUtil.authorizeReport(wsytdDefinition.getAnalysisID(), Roles.PUBLIC);
+        handleTimezoneData(conn, insightRequestMetadata);
+        ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, null, null);
+        DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+        YearStuff ytdStuff = YTDUtil.getYearStuff(wsytdDefinition, nowSet, reportRetrievalNow.getPipeline().getPipelineData(),
+                reportRetrievalNow.getPipeline().getPipelineData().getAllRequestedItems());
+        Map<String, Object> additionalProperties = new HashMap<String, Object>();
+        additionalProperties.put("headers", ytdStuff.getHeaders());
+        EmbeddedCompareYearsDataResults ytdDataResults = new EmbeddedCompareYearsDataResults();
+        ytdDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+        ytdDataResults.setAdditionalProperties(additionalProperties);
+        ytdDataResults.setDataSet(ytdStuff.getRows());
+        ytdDataResults.setDefinition(wsytdDefinition);
+        reportViewBenchmark(wsytdDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+        return ytdDataResults;
+    }
+
     public EmbeddedCompareYearsDataResults getEmbeddedCompareYearsResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                                           List<FilterDefinition> drillthroughFilters) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSCompareYearsDefinition ytdReport = (WSCompareYearsDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, ytdReport, conn, customFilters, drillthroughFilters);
+                ResultData resultData = AsyncReport.asyncEndUserResults(ytdReport, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return (EmbeddedCompareYearsDataResults) resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedCompareYearsDataResults results = new EmbeddedCompareYearsDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
@@ -1803,6 +1974,11 @@ public class DataService {
     }
 
     public CompareYearsDataResults getCompareYearsResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
+            return (CompareYearsDataResults) AsyncReport.asyncDataResults(report, insightRequestMetadata);
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
@@ -1836,8 +2012,54 @@ public class DataService {
         }
     }
 
+    public EmbeddedYTDDataResults getEmbeddedYTDResults(WSYTDDefinition wsytdDefinition, InsightRequestMetadata insightRequestMetadata, EIConnection conn) throws SQLException {
+
+        long start = System.currentTimeMillis();
+
+        handleTimezoneData(conn, insightRequestMetadata);
+
+        if (wsytdDefinition.getTimeDimension() instanceof AnalysisDateDimension) {
+            AnalysisDateDimension date = (AnalysisDateDimension) wsytdDefinition.getTimeDimension();
+            if (date.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL) {
+                date.setDateLevel(AnalysisDateDimension.MONTH_FLAT);
+            }
+        }
+        ReportRetrieval reportRetrievalNow = ReportRetrieval.reportView(insightRequestMetadata, wsytdDefinition, conn, null, null);
+        DataSet nowSet = reportRetrievalNow.getPipeline().toDataSet(reportRetrievalNow.getDataSet());
+        YTDStuff ytdStuff = YTDUtil.getYTDStuff(wsytdDefinition, nowSet, insightRequestMetadata, conn, reportRetrievalNow.getPipeline().getPipelineData(),
+                reportRetrievalNow.getPipeline().getPipelineData().getAllRequestedItems());
+        Map<String, Object> additionalProperties = new HashMap<>();
+        additionalProperties.put("timeIntervals", ytdStuff.getIntervals());
+        EmbeddedYTDDataResults ytdDataResults = new EmbeddedYTDDataResults();
+        ytdDataResults.setDataSourceInfo(reportRetrievalNow.getDataSourceInfo());
+        ytdDataResults.setAdditionalProperties(additionalProperties);
+        ytdDataResults.setDataSet(ytdStuff.values);
+        ytdDataResults.setDefinition(wsytdDefinition);
+        reportViewBenchmark(wsytdDefinition, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+        return ytdDataResults;
+    }
+
     public EmbeddedYTDDataResults getEmbeddedYTDResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                         List<FilterDefinition> drillthroughFilters) {
+
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSYTDDefinition ytdReport = (WSYTDDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, ytdReport, conn, customFilters, drillthroughFilters);
+                ResultData resultData = AsyncReport.asyncEndUserResults(ytdReport, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return (EmbeddedYTDDataResults) resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedYTDDataResults results = new EmbeddedYTDDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
@@ -1885,6 +2107,11 @@ public class DataService {
     }
 
     public YTDDataResults getYTDResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
+            return (YTDDataResults) AsyncReport.asyncDataResults(report, insightRequestMetadata);
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
@@ -2237,6 +2464,11 @@ public class DataService {
     }
 
     public TreeDataResults getTreeDataResults(WSTreeDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
+            return (TreeDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2275,10 +2507,45 @@ public class DataService {
         }
     }
 
+    public EmbeddedTextDataResults getEmbeddedTextResults(WSTextDefinition report, InsightRequestMetadata insightRequestMetadata,
+                                                          EIConnection conn) throws SQLException {
 
+        long start = System.currentTimeMillis();
+        SecurityUtil.authorizeReport(report.getAnalysisID(), Roles.PUBLIC);
+        handleTimezoneData(conn, insightRequestMetadata);
+        LogClass.info(SecurityUtil.getUserID(false) + " retrieving " + report.getAnalysisID());
+        Map<String, DerivedAnalysisDimension> map = report.beforeRun(insightRequestMetadata);
+        ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, report, conn, null, null);
+        DataSet dataSet = reportRetrieval.getPipeline().toDataSet(reportRetrieval.getDataSet());
+        String text = report.createText(map, dataSet);
+        EmbeddedTextDataResults results = new EmbeddedTextDataResults();
+        results.setText(text);
+        results.setDefinition(report);
+        results.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+        reportViewBenchmark(report, System.currentTimeMillis() - start - insightRequestMetadata.getDatabaseTime(), insightRequestMetadata.getDatabaseTime(), conn);
+        return results;
+    }
 
     public EmbeddedTextDataResults getEmbeddedTextResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters, InsightRequestMetadata insightRequestMetadata,
                                                   List<FilterDefinition> drillthroughFilters) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSTextDefinition ytdReport = (WSTextDefinition) new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, ytdReport, conn, customFilters, drillthroughFilters);
+                ResultData resultData = AsyncReport.asyncEndUserResults(ytdReport, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return (EmbeddedTextDataResults) resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedTextDataResults results = new EmbeddedTextDataResults();
+                results.setReportFault(new ServerError(e.getMessage()));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2325,6 +2592,11 @@ public class DataService {
     }
 
     public TextDataResults getTextDataResults(WSTextDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
+            return (TextDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2363,6 +2635,11 @@ public class DataService {
     }
 
     public CrossTabDataResults getCrosstabDataResults(WSCrosstabDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            System.out.println("Requesting report for asynchronous run...");
+            return (CrossTabDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
+        }
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2809,7 +3086,7 @@ public class DataService {
         private static void asyncReportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
 
-            if (analysisDefinition.isPassThroughFilters()) {
+            /*if (analysisDefinition.isPassThroughFilters()) {
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     map.put(filter.getFilterID(), filter);
@@ -2828,7 +3105,7 @@ public class DataService {
                 }
                 insightRequestMetadata.setFilters(toPass);
                 analysisDefinition.setFilterDefinitions(toSet);
-            } else if (customFilters != null) {
+            } else*/ if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
@@ -2839,7 +3116,7 @@ public class DataService {
         private static ReportRetrieval reportView(InsightRequestMetadata insightRequestMetadata, WSAnalysisDefinition analysisDefinition, EIConnection conn,
                                                   @Nullable List<FilterDefinition> customFilters, @Nullable List<FilterDefinition> drillThroughFilters) throws SQLException {
 
-            if (analysisDefinition.isPassThroughFilters()) {
+            /*if (analysisDefinition.isPassThroughFilters()) {
                 Map<Long, FilterDefinition> map = new HashMap<Long, FilterDefinition>();
                 for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
                     map.put(filter.getFilterID(), filter);
@@ -2858,7 +3135,7 @@ public class DataService {
                 }
                 insightRequestMetadata.setFilters(toPass);
                 analysisDefinition.setFilterDefinitions(toSet);
-            } else if (customFilters != null) {
+            } else*/ if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
             if (drillThroughFilters != null) {
@@ -2913,6 +3190,13 @@ public class DataService {
             insightRequestMetadata.setNoDataOnNoJoin(analysisDefinition.isNoDataOnNoJoin());
             insightRequestMetadata.setLogReport(analysisDefinition.isLogReport());
             insightRequestMetadata.setAvoidKeyDisplayCollisions(feed.getDataSource().isAvoidKeyDisplayCollisions());
+
+            /*if (analysisDefinition.getCachePartitionFilter() != null) {
+                FilterDefinition filter = CachedAddonDataSource.findPartitionFilter(analysisDefinition);
+                if (filter != null) {
+                    insightRequestMetadata.setFilters(Arrays.asList(filter));
+                }
+            }*/
 
             if (analysisDefinition.getBaseDate() != null && !"".equals(analysisDefinition.getBaseDate())) {
                 AnalysisItem targetItem = null;

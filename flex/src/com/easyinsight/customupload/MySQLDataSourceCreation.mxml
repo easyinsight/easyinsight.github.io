@@ -45,6 +45,7 @@
             obj.timeout = timeoutInput.value;
             obj.copyingFromSource = copyingFrom;
             obj.useSSL = sslCheckbox.selected;
+            obj.keyAsLimit = queryWithKeyInput.text;
             return obj;
         }
 
@@ -56,6 +57,7 @@
             userName = ds.dbUserName;
             query = ds.query;
             connTimeout = ds.timeout;
+            queryWithKey = ds.keyAsLimit;
             requireSSL = ds.useSSL;
             sourceExists = feedDefinition.feedName != null && feedDefinition.feedName != "";
         }
@@ -86,6 +88,7 @@
             obj.timeout = timeoutInput.value;
             obj.copyingFromSource = copyingFrom;
             obj.useSSL = sslCheckbox.selected;
+            obj.keyAsLimit = queryWithKeyInput.text;
         }
 
         public function validate():Boolean {
@@ -145,6 +148,9 @@
         [Bindable]
         private var password:String;
 
+        [Bindable]
+        private var queryWithKey:String;
+
         ]]></mx:Script>
     <mx:RemoteObject id="feedService" destination="feeds">
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
@@ -174,7 +180,10 @@
                 <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true" text="{password}"/>
             </mx:FormItem>
             <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
-                <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="30"/>
+                <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="60"/>
+            </mx:FormItem>
+            <mx:FormItem label="Query with Key:" labelWidth="200">
+                <mx:TextInput id="queryWithKeyInput" fontWeight="normal" fontFamily="Lucida Grande" text="{queryWithKey}"/>
             </mx:FormItem>
             <mx:FormItem label="Require SSL:" labelWidth="200">
                 <mx:CheckBox id="sslCheckbox" selected="{requireSSL}"/>

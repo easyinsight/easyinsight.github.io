@@ -51,7 +51,6 @@ public class SalesforceFeed extends Feed {
         if (indexed) {
             DataStorage source = DataStorage.readConnection(getFields(), getFeedID(), getFeedType());
             try {
-                insightRequestMetadata.setGmtData(getDataSource().gmtTime());
                 dataSet = source.retrieveData(analysisItems, filters, null, insightRequestMetadata);
                 return dataSet;
             } catch (SQLException e) {

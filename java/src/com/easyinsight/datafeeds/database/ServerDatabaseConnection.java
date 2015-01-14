@@ -198,6 +198,10 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
 
     protected abstract Connection createConnection() throws SQLException;
 
+    protected String keyAsLimit() {
+        return null;
+    }
+
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         Map<String, AnalysisItem> map = new HashMap<String, AnalysisItem>();
@@ -206,18 +210,25 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
         }
         try {
             DataSet dataSet = new DataSet();
+            String keyAsLimit = keyAsLimit();
             Connection connection = createConnection();
             try {
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY);
+                statement.setFetchSize(5000);
                 String pagedQuery = query;
 
                 int offset = 0;
+                long lastID = -1;
 
                 int ctr;
                 do {
                     ctr = 0;
-                    if (usePaging() && !query.toLowerCase().contains(" limit ")) {
-                        pagedQuery = query.replace(";", "") + " limit 5000 offset " + offset;
+
+                    if (keyAsLimit != null) {
+                        pagedQuery = query.replace(";", "") + " where " + keyAsLimit + " > " + lastID + " limit 25000";
+                        System.out.println(pagedQuery);
+                    } else if (usePaging() && !query.toLowerCase().contains(" limit ")) {
+                        pagedQuery = query.replace(";", "") + " limit 25000 offset " + offset;
                         System.out.println(pagedQuery);
                     }
 
@@ -229,6 +240,10 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                         int columnCount = rs.getMetaData().getColumnCount();
                         for (int i = 1; i <= columnCount; i++) {
                             String columnName = rs.getMetaData().getColumnName(i);
+                            if (keyAsLimit != null && keyAsLimit.equals(columnName)) {
+                                long id = rs.getLong(keyAsLimit);
+                                lastID = Math.max(lastID, id);
+                            }
                             AnalysisItem analysisItem = map.get(columnName);
                             if (analysisItem == null) {
                                 continue;
@@ -310,7 +325,7 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                     }
                     offset += ctr;
                     rs.close();
-                } while (ctr == 5000 && usePaging());
+                } while (ctr != 0 && (usePaging() || keyAsLimit != null));
                 IDataStorage.insertData(dataSet);
             } finally {
                 connection.close();

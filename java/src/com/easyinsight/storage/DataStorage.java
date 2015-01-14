@@ -1079,11 +1079,6 @@ public class DataStorage implements IDataStorage {
             LogClass.error("On running " + queryBuilder.toString(), e);
             throw new RuntimeException(e);
         }
-        for (AdvancedFilterProperties properties : insightRequestMetadata.getFilterPropertiesMap().values()) {
-            Statement stmt = storageConn.createStatement();
-            stmt.execute("DROP TABLE " + properties.getTable());
-            stmt.close();
-        }
         dataRS.close();
         queryStmt.close();
         System.out.println("got " + dataSet.getRows().size() + " rows for " + getTableName());
@@ -1289,12 +1284,7 @@ public class DataStorage implements IDataStorage {
             Iterator<FilterDefinition> filterIter = filters.iterator();
             while (filterIter.hasNext()) {
                 FilterDefinition filterDefinition = filterIter.next();
-                AdvancedFilterProperties advancedFilterProperties = insightRequestMetadata.getFilterPropertiesMap().get(filterDefinition);
-                if (advancedFilterProperties != null) {
-                    whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), advancedFilterProperties.getTable(), advancedFilterProperties.getKey()));
-                } else {
-                    whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
-                }
+                whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
                 if (filterIter.hasNext()) {
                     whereBuilder.append(" AND ");
                 }
@@ -1305,10 +1295,6 @@ public class DataStorage implements IDataStorage {
     private void createFromClause(int version, StringBuilder fromBuilder, InsightRequestMetadata insightRequestMetadata) {
         String tableName = "df" + feedID + "v" + version;
         fromBuilder.append(tableName);
-        for (AdvancedFilterProperties properties : insightRequestMetadata.getFilterPropertiesMap().values()) {
-            String table = properties.getTable();
-            fromBuilder.append(",").append(table);
-        }
     }
 
     private void addAdditionalKeysToSelect(Collection<Key> additionalKeys, StringBuilder selectBuilder, Collection<Key> groupByItems) {
