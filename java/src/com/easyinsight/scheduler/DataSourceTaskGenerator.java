@@ -57,14 +57,16 @@ public class DataSourceTaskGenerator extends TaskGenerator {
                     return super.generateTasks(now, conn);
                 } else {
                     String timezoneID = null;
-                    PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
-                            "scheduled_account_activity.account_id = account.account_id");
-                    tzStmt.setLong(1, activityID);
-                    ResultSet tsRZ = tzStmt.executeQuery();
-                    if (tsRZ.next()) {
-                        timezoneID = tsRZ.getString(1);
+                    if (scheduleType.isUseAccountTimezone()) {
+                        PreparedStatement tzStmt = conn.prepareStatement("SELECT timezone FROM account, scheduled_account_activity WHERE scheduled_account_activity.scheduled_account_activity_id = ? AND " +
+                                "scheduled_account_activity.account_id = account.account_id");
+                        tzStmt.setLong(1, activityID);
+                        ResultSet tsRZ = tzStmt.executeQuery();
+                        if (tsRZ.next()) {
+                            timezoneID = tsRZ.getString(1);
+                        }
+                        tzStmt.close();
                     }
-                    tzStmt.close();
                     Date time = scheduleType.runTime(lastRunTime, now, timezoneID);
                     if (time == null) {
                         return Collections.emptyList();
