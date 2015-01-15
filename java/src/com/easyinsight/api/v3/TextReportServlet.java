@@ -8,9 +8,14 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import net.minidev.json.JSONObject;
 import nu.xom.Attribute;
 import nu.xom.Document;
 import nu.xom.Element;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -50,10 +55,18 @@ public class TextReportServlet extends HttpServlet {
                 InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                 EmbeddedTextDataResults results = new DataService().getEmbeddedTextResults(reportID, 0, new ArrayList<>(), insightRequestMetadata, new ArrayList<>());
                 String text = results.getText();
-                resp.getOutputStream().write(text.getBytes());
+                HttpClient client = new HttpClient();
+                PostMethod postMethod = new PostMethod("https://hooks.slack.com/services/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");
+                JSONObject jo = new JSONObject();
+                jo.put("text", text);
+                String content = "payload=" + jo.toString();
+                StringRequestEntity entity = new StringRequestEntity(content, "application/json", "UTF-8");
+                postMethod.setRequestEntity(entity);
+                client.executeMethod(postMethod);
+                //resp.getOutputStream().write(text.getBytes());
                 resp.getOutputStream().flush();
             } else {
-                resp.getOutputStream().write("Report not found.".getBytes());
+                //resp.getOutputStream().write("Report not found.".getBytes());
                 resp.getOutputStream().flush();
             }
         } catch (Exception e) {
