@@ -59,10 +59,12 @@ public class TextReportServlet extends HttpServlet {
                 PostMethod postMethod = new PostMethod("https://hooks.slack.com/services/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");
                 JSONObject jo = new JSONObject();
                 jo.put("text", text);
-                String content = "payload=" + jo.toString();
+                String content = jo.toString();
                 StringRequestEntity entity = new StringRequestEntity(content, "application/json", "UTF-8");
                 postMethod.setRequestEntity(entity);
                 client.executeMethod(postMethod);
+                String string = postMethod.getResponseBodyAsString();
+                System.out.println(string);
                 //resp.getOutputStream().write(text.getBytes());
                 resp.getOutputStream().flush();
             } else {
@@ -78,9 +80,24 @@ public class TextReportServlet extends HttpServlet {
         }
     }
 
+    public static void main(String[] args) throws IOException {
+        HttpClient client = new HttpClient();
+        PostMethod postMethod = new PostMethod("https://hooks.slack.com/services/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");
+        JSONObject jo = new JSONObject();
+        jo.put("text", "Hrm.");
+        String content = jo.toString();
+        System.out.println(content);
+        StringRequestEntity entity = new StringRequestEntity(content, "application/json", "UTF-8");
+        postMethod.setRequestEntity(entity);
+        client.executeMethod(postMethod);
+        String string = postMethod.getResponseBodyAsString();
+        System.out.println(string);
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         String reportName = request.getParameter("text");
+        System.out.println(request.getParameter("token"));
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement ps = conn.prepareStatement("SELECT analysis.analysis_id FROM analysis, user_to_analysis WHERE analysis.title = ? AND " +
@@ -93,7 +110,16 @@ public class TextReportServlet extends HttpServlet {
                 InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                 EmbeddedTextDataResults results = new DataService().getEmbeddedTextResults(reportID, 0, new ArrayList<>(), insightRequestMetadata, new ArrayList<>());
                 String text = results.getText();
-                resp.getOutputStream().write(text.getBytes());
+                HttpClient client = new HttpClient();
+                PostMethod postMethod = new PostMethod("https://hooks.slack.com/services/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");
+                JSONObject jo = new JSONObject();
+                jo.put("text", text);
+                String content = jo.toString();
+                StringRequestEntity entity = new StringRequestEntity(content, "application/json", "UTF-8");
+                postMethod.setRequestEntity(entity);
+                client.executeMethod(postMethod);
+                String string = postMethod.getResponseBodyAsString();
+                System.out.println(string);
                 resp.getOutputStream().flush();
             } else {
                 resp.getOutputStream().write("Report not found.".getBytes());
