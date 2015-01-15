@@ -17,11 +17,9 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -36,6 +34,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     private boolean loadComments;
     private boolean hackMethod = false;
     private String zdApiKey;
+    private Date fixedStartDate;
 
     public ZendeskCompositeSource() {
         setFeedName("Zendesk");
@@ -47,6 +46,14 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
 
     public void setHackMethod(boolean hackMethod) {
         this.hackMethod = hackMethod;
+    }
+
+    public Date getFixedStartDate() {
+        return fixedStartDate;
+    }
+
+    public void setFixedStartDate(Date fixedStartDate) {
+        this.fixedStartDate = fixedStartDate;
     }
 
     public List<CustomFieldTag> customFieldTags() {
@@ -136,8 +143,9 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
         clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, DATA_SOURCE_ID, LOAD_COMMENTS, HACK_METHOD) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, DATA_SOURCE_ID, " +
+                "LOAD_COMMENTS, HACK_METHOD, FIXED_START_DATE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, url);
         insertStmt.setString(2, zdUserName);
         if (zdPassword != null && (zdApiKey == null || zdApiKey.isEmpty())) {
@@ -152,6 +160,11 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         insertStmt.setLong(5, getDataFeedID());
         insertStmt.setBoolean(6, isLoadComments());
         insertStmt.setBoolean(7, hackMethod);
+        if (fixedStartDate == null) {
+            insertStmt.setNull(8, Types.DATE);
+        } else {
+            insertStmt.setDate(8, new java.sql.Date(fixedStartDate.getTime()));
+        }
         insertStmt.execute();
         insertStmt.close();
     }
@@ -178,7 +191,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, LOAD_COMMENTS, HACK_METHOD FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, LOAD_COMMENTS, HACK_METHOD, FIXED_START_DATE FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -191,6 +204,10 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
                 zdPassword = PasswordStorage.decryptString(zdPassword);
             }
             hackMethod = rs.getBoolean(6);
+            Date fixedStartDate = rs.getDate(7);
+            if (fixedStartDate != null) {
+                this.fixedStartDate = new Date(fixedStartDate.getTime());
+            }
         }
     }
 
