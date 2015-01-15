@@ -12,6 +12,7 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     public var zdApiKey:String;
     public var loadComments:Boolean;
     public var hackMethod:Boolean;
+    public var fixedStartDate:Date;
 
     public function ZendeskDataSource() {
         super();
@@ -19,13 +20,13 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     }
 
     override public function createAdminPages():ArrayCollection {
-            var pages:ArrayCollection = new ArrayCollection();
+        var pages:ArrayCollection = new ArrayCollection();
 
-            var config:ZendeskConfiguration = new ZendeskConfiguration();
-            config.label = "Zendesk Server Configuration";
-            pages.addItem(config);
-            return pages;
-        }
+        var config:ZendeskConfiguration = new ZendeskConfiguration();
+        config.label = "Zendesk Server Configuration";
+        pages.addItem(config);
+        return pages;
+    }
 
 
     override public function getFeedType():int {
