@@ -6,6 +6,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.config.ConfigLoader;
 import com.easyinsight.logging.LogClass;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import java.util.Iterator;
  * Date: Aug 24, 2009
  * Time: 10:08:18 AM
  */
+@WebServlet(value = "/TokenRedirect", asyncSupported = true)
 public class TokenRedirectServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
           throws ServletException, IOException {

@@ -8,6 +8,7 @@ import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.Map;
  * Time: 9:13 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/diagramChart", asyncSupported = true)
 public class DiagramChartServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

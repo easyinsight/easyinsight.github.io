@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +15,7 @@ import java.io.IOException;
  * Date: 10/31/14
  * Time: 2:53 PM
  */
+@WebServlet(value = "/done", asyncSupported = true)
 public class DoneServlet extends HttpServlet {
 
     @Override

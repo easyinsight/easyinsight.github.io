@@ -11,6 +11,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.json.JSONException;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  * Date: 2/19/14
  * Time: 12:58 PM
  */
+@WebServlet(value = "/json/groupInfo", asyncSupported = true)
 public class GetGroupServlet extends JSONServlet {
 
     @Override

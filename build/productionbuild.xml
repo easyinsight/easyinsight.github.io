@@ -61,7 +61,7 @@
     </target>
 
     <target name="downloadBackendInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="aBackend" operation="download" />
     </target>
 
     <target name="downloadLargeInstances">
@@ -650,6 +650,16 @@
                   accessId="0AWCBQ78TJR8QCY8ABG2"
                   secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
                   bucket="eiproduction"
+                  publicRead="false">
+            <fileset dir="${code.path}" includes="code.zip"/>
+        </S3Upload>
+    </target>
+
+    <target name="uploadStaging">
+        <S3Upload verbose="true"
+                  accessId="0AWCBQ78TJR8QCY8ABG2"
+                  secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
+                  bucket="eistaging"
                   publicRead="false">
             <fileset dir="${code.path}" includes="code.zip"/>
         </S3Upload>

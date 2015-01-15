@@ -6,6 +6,7 @@ import com.easyinsight.export.DeliveryScheduledTask;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportProperties;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
  * Date: 5/23/12
  * Time: 4:56 PM
  */
+@WebServlet(value = "/htmlExport", asyncSupported = true)
 public class HtmlExportServlet extends HtmlServlet {
 
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,

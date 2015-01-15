@@ -4,6 +4,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 11:41 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/me.json", asyncSupported = true)
 public class JSONMeServlet extends JSONServlet {
     @Override
     protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {

@@ -8,6 +8,7 @@ import nu.xom.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -17,6 +18,7 @@ import java.util.concurrent.Semaphore;
  * Date: 7/27/13
  * Time: 5:50 PM
  */
+@WebServlet(value = "/semaphore", asyncSupported = true)
 public class SemaphoreServlet extends JSONServlet {
 
     @Override

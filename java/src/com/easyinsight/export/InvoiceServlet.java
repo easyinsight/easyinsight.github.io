@@ -9,6 +9,7 @@ import com.easyinsight.users.AccountCreditCardBillingInfo;
 import org.hibernate.Session;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import java.util.Date;
  * Date: Oct 28, 2010
  * Time: 11:22:02 AM
  */
+@WebServlet(value = "/invoice", asyncSupported = true)
 public class InvoiceServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

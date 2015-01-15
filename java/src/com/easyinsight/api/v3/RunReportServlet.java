@@ -10,6 +10,7 @@ import nu.xom.Attribute;
 import nu.xom.Document;
 import nu.xom.Element;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -25,6 +26,7 @@ import java.util.Map;
  * Date: 11/28/11
  * Time: 3:27 PM
  */
+@WebServlet(value = "/xml/RunReport", asyncSupported = true)
 public class RunReportServlet extends APIServlet {
     @Override
     protected ResponseInfo processXML(Document document, EIConnection conn, HttpServletRequest request) throws Exception {

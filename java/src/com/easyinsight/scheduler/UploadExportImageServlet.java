@@ -10,6 +10,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -22,6 +23,7 @@ import java.sql.PreparedStatement;
  * Date: 7/8/13
  * Time: 1:26 PM
  */
+@WebServlet(value = "/uploadExportImage", asyncSupported = true)
 public class UploadExportImageServlet extends HttpServlet {
 
     @Override

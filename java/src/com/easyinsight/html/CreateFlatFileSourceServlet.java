@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  * Time: 1:58 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/connection/createFlatFileSource", asyncSupported = true)
 public class CreateFlatFileSourceServlet extends HttpServlet {
 
     @Override

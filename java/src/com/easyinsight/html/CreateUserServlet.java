@@ -11,6 +11,7 @@ import com.easyinsight.users.*;
 import net.minidev.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ import java.util.Set;
  * Time: 1:58 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/account/createUser", asyncSupported = true)
 public class CreateUserServlet extends JSONServlet {
 
     @Override

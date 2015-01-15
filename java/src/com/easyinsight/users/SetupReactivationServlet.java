@@ -9,6 +9,7 @@ import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import java.io.IOException;
  * Date: 9/16/14
  * Time: 10:38 AM
  */
+@WebServlet(value = "/setupReactivation", asyncSupported = true)
 public class SetupReactivationServlet extends JSONServlet {
 
     @Override

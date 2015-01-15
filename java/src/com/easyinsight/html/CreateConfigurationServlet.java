@@ -8,6 +8,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ import java.util.Map;
  * Time: 5:08 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/createConfiguration", asyncSupported = true)
 public class CreateConfigurationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         SecurityUtil.populateThreadLocalFromSession(request);

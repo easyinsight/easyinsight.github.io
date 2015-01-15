@@ -14,6 +14,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +30,7 @@ import java.util.zip.ZipOutputStream;
  * Date: 7/8/13
  * Time: 1:26 PM
  */
+@WebServlet(value = "/fileUpload", asyncSupported = true)
 public class FileUploadServlet extends HttpServlet {
 
     @Override
