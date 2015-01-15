@@ -1,12 +1,17 @@
 package com.easyinsight.watchdog.app;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
+
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.util.security.Constraint;
+
+import java.util.Collections;
 
 /**
  * User: James Boe
@@ -24,22 +29,37 @@ public class AppWatchdogServer {
 
     public void initialize() throws Exception {
         server = new Server(4000);
+        ServletHandler handler = new ServletHandler();
+        handler.addServletWithMapping(AppWatchdogServlet.class, "/*");
+
+        HashLoginService hls = new HashLoginService("EI Watchdog");
+        hls.setConfig("jar:file:watchdog.jar!/realm.properties");
+        server.addBean(hls);
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        context.addServlet(AppWatchdogServlet.class, "/*");
+
         Constraint constraint = new Constraint();
+
         constraint.setName(Constraint.__BASIC_AUTH);
+
         constraint.setRoles(new String[]{"admin"});
         constraint.setAuthenticate(true);
 
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
+        ConstraintMapping constraintMapping = new ConstraintMapping();
+        constraintMapping.setPathSpec("/*");
+        constraintMapping.setConstraint(constraint);
 
-        SecurityHandler sh = new SecurityHandler();
-        sh.setUserRealm(new HashUserRealm("MyRealm","realm.properties"));
-        sh.setConstraintMappings(new ConstraintMapping[]{cm});
+        ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        securityHandler.setLoginService(hls);
+        securityHandler.setAuthenticator(new BasicAuthenticator());
+        securityHandler.setConstraintMappings(Collections.singletonList(constraintMapping));
+        server.setHandler(securityHandler);
+        securityHandler.setHandler(handler);
 
-        Context update = new Context(server,"/",Context.SESSIONS);
-        update.addHandler(sh);
-        update.addServlet(new ServletHolder(new AppWatchdogServlet()), "/*");
+        server.dumpStdErr();
         server.start();
+        server.dumpStdErr();
+        securityHandler.dumpStdErr();
     }
 }
