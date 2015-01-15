@@ -116,11 +116,6 @@
     </rule>
 
     <rule>
-        <from>^/reportText/([A-Za-z0-9]+)</from>
-        <to>/TextReport?text=$1</to>
-    </rule>
-
-    <rule>
         <from>^/html/user/([A-Za-z0-9]+)/report/drillthrough/([A-Za-z0-9]+)/embed$</from>
         <to>/embed/embeddedReport.jsp?drillthroughKey=$2&amp;embedKey=$1</to>
     </rule>
