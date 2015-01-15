@@ -238,16 +238,23 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(zendeskCompositeSource);
         Calendar cal = Calendar.getInstance();
-        if (lastStart == null) {
-            cal.add(Calendar.YEAR, -5);
+        if (lastStart == null || lastStart.getTime() < 1000) {
+            if (zendeskCompositeSource.getFixedStartDate() != null) {
+                cal.setTime(zendeskCompositeSource.getFixedStartDate());
+            } else {
+                cal.add(Calendar.MONTH, -6);
+            }
         } else {
             cal.setTime(lastStart);
             cal.add(Calendar.DAY_OF_YEAR, -1);
         }
         Key noteKey = zendeskCompositeSource.getField(TICKET_ID).toBaseKey();
-        DateFormat adf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
         Date start = new Date(System.currentTimeMillis() - (1000 * 60 * 60));
         long time = cal.getTimeInMillis() / 1000;
+
+
+
         String nextPage = zendeskCompositeSource.getUrl() + "/api/v2/exports/tickets.json?start_time=" + time;
         List<Comment> commentList = new ArrayList<Comment>();
 
@@ -274,6 +281,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                             }
                         }
                     }
+
 
                     String status = queryField(map, "status");
                     if (!"Deleted".equals(status)) {
@@ -305,9 +313,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                                                     firstComment = false;
                                                     row.addValue(DESCRIPTION, event.get("html_body").toString());
                                                 }
-                                                // description?
-                                                /*System.out.println("author ID = " + event.get("authorID"));
-                                                System.out.println("html body = " + event.get("html_body"));*/
                                             }
                                             if (event.get("field_name") != null) {
 
@@ -420,8 +425,6 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 if (safeguard == 50) {
                     return null;
                 }
-                // https://asejur.zendesk.com/api/v2/exports/tickets.json?start_time=1404236653
-                // https://asejur.zendesk.com/api/v2/exports/tickets.json?start_time=1404322404
                 nextPage = ticketObjects.get("next_page").toString();
                 long ms = Long.parseLong(nextPage.split("\\=")[1]) * 1000;
                 Calendar c2 = Calendar.getInstance();

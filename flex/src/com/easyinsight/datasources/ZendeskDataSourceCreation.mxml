@@ -38,7 +38,12 @@
             ds.zdApiKey = passwordInput.text;
             ds.url = urlInput.text;
             ds.loadComments = includeComments;
-        }
+            if (initialImportCheckbox.selected) {
+                var date:Date = startDateChooser.selectedDate;
+                ds.fixedStartDate = date;
+            } else {
+                ds.fixedStartDate = null;
+            }}
 
         public function validate():Boolean {
             return true;
@@ -52,6 +57,15 @@
         <mx:Label text="Zendesk URL:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
     </mx:HBox>
+    <mx:Form>
+        <mx:FormItem label="Should your initial import only include data from a certain start date?">
+            <mx:CheckBox id="initialImportCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="Start Date" enabled="{initialImportCheckbox.selected}">
+            <mx:DateField id="startDateChooser"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Text width="700" text="If you have a considerable amount of historical data, you may find it quicker to create your Easy Insight connection to FreshBooks with a subset of that data. You can always change this date to pull back older data."/>
     <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
             <mx:FormItem label="Include Comments:" direction="horizontal">
                 <mx:CheckBox id="commentsCheckbox" selected="{includeComments}" change="inactiveCheckbox_changeHandler(event)"/>

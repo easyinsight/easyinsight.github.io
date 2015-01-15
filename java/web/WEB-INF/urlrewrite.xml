@@ -332,6 +332,11 @@
     </rule>
 
     <rule>
+        <from>/availableTimeZones.json</from>
+        <to>/json/availableTimeZones</to>
+    </rule>
+
+    <rule>
         <from>/recentActions.json</from>
         <to>/json/recentActions</to>
     </rule>
