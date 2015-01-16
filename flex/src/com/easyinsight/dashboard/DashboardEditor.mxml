@@ -477,14 +477,14 @@
         private function goReport():void {
             if (_dashboard.id == 0) {
                 createRequiredPromptWindow("You need to save this dashboard first.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id, urlKey:_dashboard.urlKey})));
                 });
             } else if (dashboardChanged) {
                 createRequiredPromptWindow("You have unsaved changes to this dashboard.", function ():void {
-                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                    dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id, urlKey:_dashboard.urlKey})));
                 });
             } else {
-                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id})));
+                dispatchEvent(new AnalyzeEvent(new PerspectiveInfo(PerspectiveInfo.DASHBOARD_VIEW, {dashboardID:_dashboard.id, urlKey:_dashboard.urlKey})));
             }
         }
 

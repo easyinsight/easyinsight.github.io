@@ -213,17 +213,23 @@ public class AsyncReport {
             }
         } while (requestID == null);
 
+        String name;
+        if (userID == 0) {
+            name = "anonymous user";
+        } else {
+            name = "User " + userID;
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String time = sdf.format(new Date());
         if (requestType == REPORT_EDITOR || requestType == REPORT_END_USER || requestType == REPORT_DATA_SET) {
-            System.out.println(time + ":" + " Async Report Run");
+            // log internally...
             asyncReport(requestID, reportBytes, metadataBytes, requestType, userID);
         } else if (requestType == DATA_SOURCE_REFRESH) {
-            System.out.println(time + ":" + " Async Data Source Refresh");
+            System.out.println(time + ":" + " Async data source refresh of " + dataSourceID + " by " + name);
             DataSourceListener.dataSource(dataSourceID, callID, requestID);
         } else if (requestType == SCHEDULED_TASK) {
             // load the task...
-            System.out.println(time + ":" + " Async Scheduled Task");
+            //System.out.println(time + ":" + " Async scheduled task" + );
             asyncTask(requestID, taskID);
         } else if (requestType == CACHE_REBUILD) {
             System.out.println(time + ":" + " Async Cache Rebuild");
@@ -384,6 +390,7 @@ public class AsyncReport {
         } finally {
             session.close();
         }
+
         if (scheduledTask == null) {
             markDone(requestID);
         } else {
@@ -397,7 +404,7 @@ public class AsyncReport {
     }
 
     protected void asyncReport(Long frequestID, byte[] freportBytes, byte[] fmetadataBytes, int frequestType, long fuserID) {
-        DataSourceThreadPool.instance().addActivity(() -> {
+        ReportThreadPool.instance().addActivity(() -> {
 
             try {
                 AsyncReport.establishAsync();
@@ -419,7 +426,20 @@ public class AsyncReport {
                     localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
                     localMetadata.setNoAsync(true);
 
-                    System.out.println("Asynchronous execution of " + report.getName());
+                    String name;
+                    if (SecurityUtil.getUserID(false) == 0) {
+                        name = "anonymous user";
+                    } else {
+                        name = SecurityUtil.getUserName();
+                    }
+                    String reportName;
+                    if (report.getName() == null) {
+                        reportName = "temporary report";
+                    } else {
+                        reportName = report.getName();
+                    }
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                    System.out.println(sdf.format(new Date()) + ": Asynchronous execution of " + reportName + " by " + name);
 
                     if (frequestType == REPORT_EDITOR) {
                         DataResults results;
@@ -730,6 +750,40 @@ public class AsyncReport {
         }
     }
 
+    public static void cacheRebuildAndWait(long cacheDataSourceID) {
+        long requestID;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, cache_source_id, request_created, request_type) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            reqStmt.setInt(1, WAITING_ASSIGN);
+            reqStmt.setLong(2, cacheDataSourceID);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, CACHE_REBUILD);
+            reqStmt.execute();
+            reqStmt.close();
+            requestID = Database.instance().getAutoGenKey(reqStmt);
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        try {
+            int elapsedTime = 0;
+            Object result = null;
+            while (result == null && elapsedTime < DATA_SOURCE_TIMEOUT) {
+                result = MemCachedManager.instance().get("async" + requestID);
+                if (result == null) {
+                    elapsedTime += 100;
+                    Thread.sleep(100);
+                }
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void cacheRebuild(long cacheDataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -965,11 +1019,46 @@ public class AsyncReport {
                 throw dataResults.exception;
             }
             return dataResults;
+        } catch (ReportException re) {
+            EmbeddedResults embeddedDataResults;
+            if (analysisDefinition instanceof WSCrosstabDefinition) {
+                embeddedDataResults = new EmbeddedCrosstabDataResults();
+            } else if (analysisDefinition instanceof WSYTDDefinition) {
+                embeddedDataResults = new EmbeddedYTDDataResults();
+            } else if (analysisDefinition instanceof WSKPIDefinition) {
+                embeddedDataResults = new EmbeddedTrendDataResults();
+            } else if (analysisDefinition instanceof WSTreeDefinition) {
+                embeddedDataResults = new EmbeddedTreeDataResults();
+            } else if (analysisDefinition instanceof WSCompareYearsDefinition) {
+                embeddedDataResults = new EmbeddedCompareYearsDataResults();
+            } else if (analysisDefinition instanceof WSTextDefinition) {
+                embeddedDataResults = new EmbeddedTextDataResults();
+            } else {
+                embeddedDataResults = new EmbeddedDataResults();
+            }
+            embeddedDataResults.setReportFault(re.getReportFault());
+            ResultData resultData = new ResultData();
+            resultData.results = embeddedDataResults;
+            return resultData;
         } catch (Throwable e) {
             LogClass.error(e);
-            EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
+            EmbeddedResults embeddedDataResults;
+            if (analysisDefinition instanceof WSCrosstabDefinition) {
+                embeddedDataResults = new EmbeddedCrosstabDataResults();
+            } else if (analysisDefinition instanceof WSYTDDefinition) {
+                embeddedDataResults = new EmbeddedYTDDataResults();
+            } else if (analysisDefinition instanceof WSKPIDefinition) {
+                embeddedDataResults = new EmbeddedTrendDataResults();
+            } else if (analysisDefinition instanceof WSTreeDefinition) {
+                embeddedDataResults = new EmbeddedTreeDataResults();
+            } else if (analysisDefinition instanceof WSCompareYearsDefinition) {
+                embeddedDataResults = new EmbeddedCompareYearsDataResults();
+            } else if (analysisDefinition instanceof WSTextDefinition) {
+                embeddedDataResults = new EmbeddedTextDataResults();
+            } else {
+                embeddedDataResults = new EmbeddedDataResults();
+            }
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
-            //return embeddedDataResults;
             ResultData resultData = new ResultData();
             resultData.results = embeddedDataResults;
             return resultData;
