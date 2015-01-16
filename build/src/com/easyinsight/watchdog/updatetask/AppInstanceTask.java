@@ -31,6 +31,7 @@ import java.net.URLEncoder;
 import java.io.InputStream;
 import java.io.IOException;
 import java.security.SignatureException;
+import java.util.concurrent.*;
 
 /**
  * User: James Boe
@@ -81,14 +82,28 @@ public class AppInstanceTask extends Task {
 
     public void execute() throws BuildException {
         try {
+            BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+            ThreadPoolExecutor tpe = new ThreadPoolExecutor(25, 25, 5, TimeUnit.MINUTES, queue);
+            List<Instance> instances = getInstances();
+            final CountDownLatch latch = new CountDownLatch(instances.size());
             HttpClient httpClient = new HttpClient();
             httpClient.getParams().setAuthenticationPreemptive(true);
             Credentials defaultcreds = new UsernamePasswordCredentials(getUserName(), getPassword());
             httpClient.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-            for (Instance instance : getInstances()) {
-                HttpMethod updateMethod = new GetMethod("http://" + instance.host + ":4000/?operation=" + getOperation() + "&type=" + URLEncoder.encode(instance.type, "UTF-8") + "&role=" + URLEncoder.encode(getRole(), "UTF-8"));
-                httpClient.executeMethod(updateMethod);
+            for (Instance instance : instances) {
+                tpe.execute(() -> {
+                    try {
+                        HttpMethod updateMethod = new GetMethod("http://" + instance.host + ":4000/?operation=" + getOperation() + "&type=" + URLEncoder.encode(instance.type, "UTF-8") + "&role=" + URLEncoder.encode(getRole(), "UTF-8"));
+                        httpClient.executeMethod(updateMethod);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        latch.countDown();
+                    }
+                });
             }
+            latch.await();
+            tpe.shutdown();
         } catch (Exception e) {
             e.printStackTrace();
             throw new BuildException(e);
