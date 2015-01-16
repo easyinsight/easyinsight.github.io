@@ -42,7 +42,9 @@ import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
 import com.easyinsight.datafeeds.mailchimp.*;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
+import com.easyinsight.datafeeds.netsuite.NetsuiteCompositeSource;
 import com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection;
+import com.easyinsight.datafeeds.netsuite.NetsuiteTableSource;
 import com.easyinsight.datafeeds.oracle.*;
 import com.easyinsight.datafeeds.pivotaltracker.PivotalTrackerBaseSource;
 import com.easyinsight.datafeeds.pivotaltrackerv5.*;
@@ -470,6 +472,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.TEAMWORK_TIME, TeamworkTimeSource.class);
         registerType(FeedType.INFUSIONSOFT_PRODUCT_CATEGORY, InfusionsoftProductCategorySource.class);
         registerType(FeedType.INFUSIONSOFT_PRODUCT_TO_CATEGORY, InfusionsoftProductToCategorySource.class);
+        registerType(FeedType.NETSUITE_COMPOSITE, NetsuiteCompositeSource.class);
+        registerType(FeedType.NETSUITE_TABLE, NetsuiteTableSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {
