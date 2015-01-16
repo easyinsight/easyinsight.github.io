@@ -89,7 +89,9 @@ public class AppWatchdog {
             AWSCredentials credentials = new AWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eiproduction");
-            S3Object object = s3Service.getObject(bucket, "code.zip");
+            S3Bucket stagingBucket = s3Service.getBucket("eistaging");
+            S3Bucket codeBucket = role.toLowerCase().contains("staging") ? stagingBucket : bucket;
+            S3Object object = s3Service.getObject(codeBucket, "code.zip");
             writeFile(object, fos);
             S3Object setEnvObject = s3Service.getObject(bucket, "setenv.sh-" + role + "-" + type);
             File m = new File("/opt/watchdog/setenv.sh");
