@@ -515,7 +515,11 @@ public class ReportDelivery extends ScheduledDelivery {
         int reportFormatValue = formatStringToValue(reportFormat);
         setReportFormat(reportFormatValue);
         if(getReportFormat() == 3) {
-            setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) jsonObject.get("delivery_info")));
+            List list = (List) jsonObject.get("delivery_info");
+            if (list != null && list.size() > 0) {
+                setDeliveryExtension(DeliveryExtension.fromJSON((net.minidev.json.JSONObject) list.get(0)));
+            }
+
         }
     }
 
