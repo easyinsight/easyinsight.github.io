@@ -101,7 +101,6 @@ import com.easyinsight.datasources.PivotalTrackerBaseSource;
 import com.easyinsight.datasources.PivotalTrackerV5CompositeSource;
 import com.easyinsight.datasources.PostgresDatabaseConnection;
 import com.easyinsight.datasources.RedboothCompositeSource;
-import com.easyinsight.datasources.SampleSalesDataSource;
 import com.easyinsight.datasources.SmartsheetTableSource;
 import com.easyinsight.datasources.Solve360CompositeDataSource;
 import com.easyinsight.datasources.TeamworkCompositeSource;
@@ -223,7 +222,6 @@ public class TORegistry {
         var basecamp:BaseCampDataSource;
         var highrise:HighRiseDataSource;
         var token:HighriseAdditionalToken;
-        var sss:SampleSalesDataSource;
         var google:GoogleAnalyticsDataSource;
         var salesforce:SalesforceFeedDefinition;
         var cloudwatch:CloudWatchDataSource;
