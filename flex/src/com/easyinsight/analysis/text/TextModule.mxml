@@ -5,6 +5,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.TextReportDragEvent;
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.list.SizeOverrideEvent;
 
@@ -81,7 +82,10 @@
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
-
+            if (event is TextReportDragEvent) {
+                var tEvent:TextReportDragEvent = event as TextReportDragEvent;
+                markdownTextArea.text += ("{[" + tEvent.name + "]}");
+            }
         }
 
         private function apply():void {

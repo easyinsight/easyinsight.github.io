@@ -17,6 +17,7 @@ import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.analysis.TextReportDragEvent;
 
 import mx.collections.ArrayCollection;
 
@@ -68,9 +69,10 @@ public class TextControlBar extends ReportControlBar implements IReportControlBa
     }
 
     public function addItem(analysisItem:AnalysisItem):void {
-        listViewGrouping.addAnalysisItem(analysisItem);
+        dispatchEvent(new TextReportDragEvent(analysisItem.display));
+        /*listViewGrouping.addAnalysisItem(analysisItem);
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
-        dispatchEvent(new AnalysisChangedEvent(false));
+        dispatchEvent(new AnalysisChangedEvent(false));*/
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {
