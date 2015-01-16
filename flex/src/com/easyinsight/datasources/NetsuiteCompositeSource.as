@@ -12,21 +12,20 @@ import com.easyinsight.customupload.NetsuiteDataSourceCreation;
 import mx.collections.ArrayCollection;
 
 [Bindable]
-[RemoteClass(alias="com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection")]
-public class NetsuiteQueryConnection extends ServerDataSourceDefinition {
+[RemoteClass(alias="com.easyinsight.datafeeds.netsuite.NetsuiteCompositeSource")]
+public class NetsuiteCompositeSource extends CompositeServerDataSource {
 
-    public var query:String;
-    public var timeout:int = 5;
-    public var rebuildFields:Boolean;
-    public var netsuiteUserName:String;
-    public var netsuitePassword:String;
+    public var tables:ArrayCollection;
+    public var nsUsername:String;
+    public var nsPassword:String;
     public var accountID:String;
+    public var netsuiteRole:String;
 
-    public function NetsuiteQueryConnection() {
+    public function NetsuiteCompositeSource() {
     }
 
     override public function getFeedType():int {
-        return DataSourceType.NETSUITE;
+        return DataSourceType.NETSUITE_COMPOSITE;
     }
 
     override public function createAdminPages():ArrayCollection {
