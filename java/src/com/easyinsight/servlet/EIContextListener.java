@@ -11,9 +11,7 @@ import com.easyinsight.datafeeds.CacheTimer;
 import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.custom.ThreadDumpWatcher;
-import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.datafeeds.database.DatabaseListener;
-//import com.easyinsight.datafeeds.database.ReportListener;
 import com.easyinsight.datafeeds.database.ReportListener;
 import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.logging.LogClass;
@@ -22,6 +20,7 @@ import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.userupload.DataSourceThreadPool;
+import com.easyinsight.userupload.ReportThreadPool;
 import com.easyinsight.util.ServiceUtil;
 
 import javax.servlet.ServletContextEvent;
@@ -52,6 +51,7 @@ public class EIContextListener implements ServletContextListener {
                 SystemSettings.initialize();
                 ServiceUtil.initialize();
                 DataSourceThreadPool.initialize();
+                ReportThreadPool.initialize();
                 CurrencyRetrieval.initialize();
 
                 new Migrations().migrate();
@@ -80,6 +80,7 @@ public class EIContextListener implements ServletContextListener {
                 }
 
                 healthListener = new HealthListener();
+                healthListener.initialSetup();
                 healthThread = new Thread(healthListener);
                 healthThread.setName("Health Listener");
                 healthThread.setDaemon(true);
@@ -119,6 +120,9 @@ public class EIContextListener implements ServletContextListener {
         }
         if (DataSourceThreadPool.instance() != null) {
             DataSourceThreadPool.instance().shutdown();
+        }
+        if (ReportThreadPool.instance() != null) {
+            ReportThreadPool.instance().shutdown();
         }
         if (scheduler != null) {
             scheduler.stop();

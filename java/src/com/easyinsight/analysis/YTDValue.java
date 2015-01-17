@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
 * Date: 12/2/11
 * Time: 6:06 PM
 */
-public class YTDValue {
+public class YTDValue implements Serializable {
     private AnalysisMeasure analysisMeasure;
     private AnalysisMeasure benchmarkMeasure;
     private Value ytd;

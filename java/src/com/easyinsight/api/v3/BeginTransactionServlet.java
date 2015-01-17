@@ -12,6 +12,7 @@ import com.easyinsight.util.RandomTextGenerator;
 import nu.xom.Document;
 import nu.xom.Nodes;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -22,6 +23,7 @@ import java.util.Map;
  * Date: 1/3/11
  * Time: 1:35 PM
  */
+@WebServlet(value = "/xml/beginTransaction", asyncSupported = true)
 public class BeginTransactionServlet extends APIServlet {
 
     @Override

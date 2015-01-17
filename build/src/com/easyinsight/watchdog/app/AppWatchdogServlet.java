@@ -1,7 +1,5 @@
 package com.easyinsight.watchdog.app;
 
-import org.mortbay.jetty.security.Password;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

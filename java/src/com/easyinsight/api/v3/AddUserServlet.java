@@ -12,6 +12,7 @@ import com.easyinsight.users.UserTransferObject;
 import net.minidev.json.JSONObject;
 import org.json.JSONArray;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,6 +24,7 @@ import java.util.List;
  * Date: 3/21/14
  * Time: 12:06 PM
  */
+@WebServlet(value = "/json/addUsers", asyncSupported = true)
 public class AddUserServlet extends JSONServlet {
 
     @Override

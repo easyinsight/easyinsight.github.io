@@ -7,6 +7,7 @@ import com.easyinsight.preferences.PreferencesService;
 import com.easyinsight.security.SecurityUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import java.util.SimpleTimeZone;
  * Date: 5/24/12
  * Time: 2:50 PM
  */
+@WebServlet(value = "/reportHeader", asyncSupported = true)
 public class ReportHeaderImageServlet extends HttpServlet {
 
     @Override

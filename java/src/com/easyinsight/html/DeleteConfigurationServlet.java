@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
  * Time: 5:08 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/deleteConfiguration", asyncSupported = true)
 public class DeleteConfigurationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         JSONObject jo = new JSONObject();

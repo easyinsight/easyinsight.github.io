@@ -13,6 +13,7 @@ import com.easyinsight.userupload.UserUploadService;
 import net.minidev.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * Time: 1:58 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/connection/refreshFlatFileSource", asyncSupported = true)
 public class RefreshFlatFileSourceServlet extends JSONServlet {
 
     @Override
@@ -51,18 +53,6 @@ public class RefreshFlatFileSourceServlet extends JSONServlet {
         org.json.JSONObject jo = new org.json.JSONObject();
         jo.put("success", true);
         ri = new ResponseInfo(200, jo.toString());
-        /*if(userCreationResponse.isSuccessful()) {
-            if(!jo.has("success"))
-                jo.put("success", true);
-            jo.put("user", uto.toJSON(md));
-            ri = new ResponseInfo(200, jo.toString());
-        } else {
-            jo.put("success", false);
-            if(!jo.has("error")) {
-                jo.put("error", userCreationResponse.getFailureMessage());
-            }
-            ri = new ResponseInfo(500, jo.toString());
-        }*/
 
         return ri;
     }

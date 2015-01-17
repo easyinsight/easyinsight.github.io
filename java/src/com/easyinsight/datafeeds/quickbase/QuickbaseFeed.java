@@ -4,7 +4,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -12,7 +11,6 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.QuickbaseExternalLogin;
-import com.easyinsight.users.User;
 import nu.xom.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.client.HttpClient;
@@ -65,7 +63,6 @@ public class QuickbaseFeed extends Feed {
             if (indexed) {
                 DataStorage source = DataStorage.readConnection(getFields(), getFeedID(), getFeedType());
                 try {
-                    insightRequestMetadata.setGmtData(getDataSource().gmtTime());
                     dataSet = source.retrieveData(analysisItems, filters, null, insightRequestMetadata);
                 } catch (SQLException e) {
                     LogClass.error(e);

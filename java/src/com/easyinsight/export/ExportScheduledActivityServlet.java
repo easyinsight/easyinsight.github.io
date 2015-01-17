@@ -8,6 +8,7 @@ import com.easyinsight.database.EIConnection;
 import nu.xom.Document;
 import nu.xom.Element;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  * Date: 10/10/12
  * Time: 2:15 PM
  */
+@WebServlet(value = "/exportActivity", asyncSupported = true)
 public class ExportScheduledActivityServlet extends APIServlet {
 
     @Override

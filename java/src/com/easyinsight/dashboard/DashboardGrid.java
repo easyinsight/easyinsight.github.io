@@ -8,6 +8,7 @@ import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.scorecard.Scorecard;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -265,15 +266,27 @@ public class DashboardGrid extends DashboardElement {
 
         grid.put("show_label", showLabel);
         grid.put("label", getLabel());
-        List<FilterDefinition> curFilters = new ArrayList(parentFilters);
+        List<FilterDefinition> curFilters = new ArrayList<>(parentFilters);
         curFilters.addAll(this.getFilters());
         JSONArray jsonRows = new JSONArray();
         for(int i = 0;i < rows;i++) {
             JSONArray jsonColumns = new JSONArray();
             for(int j = 0;j < columns;j ++) {
                 DashboardGridItem item = findItem(i, j);
-
-                jsonColumns.put(item.getDashboardElement().toJSON(metadata, curFilters));
+                if (item != null && item.getDashboardElement() != null) {
+                    try {
+                        jsonColumns.put(item.getDashboardElement().toJSON(metadata, curFilters));
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                        DashboardText dText = new DashboardText();
+                        dText.setText("");
+                        jsonColumns.put(dText.toJSON(metadata, curFilters));
+                    }
+                } else {
+                    DashboardText dText = new DashboardText();
+                    dText.setText("");
+                    jsonColumns.put(dText.toJSON(metadata, curFilters));
+                }
             }
             jsonRows.put(jsonColumns);
         }

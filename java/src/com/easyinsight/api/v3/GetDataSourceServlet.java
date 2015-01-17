@@ -8,6 +8,7 @@ import nu.xom.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  * Date: 10/3/13
  * Time: 9:01 AM
  */
+@WebServlet(value = "/json/GetDataSource", asyncSupported = true)
 public class GetDataSourceServlet extends JSONServlet {
     @Override
     protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {

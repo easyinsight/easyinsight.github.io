@@ -3393,6 +3393,7 @@ public class AnalysisService {
                                 insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
                             }
                         }
+                        accountStmt.close();
                     } finally {
                         Database.closeConnection(conn);
                     }

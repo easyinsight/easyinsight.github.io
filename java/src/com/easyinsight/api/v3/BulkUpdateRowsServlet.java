@@ -17,6 +17,7 @@ import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import nu.xom.*;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ import java.util.Map;
  * Date: 1/3/11
  * Time: 1:35 PM
  */
+@WebServlet(value = "/xml/bulkUpdateRows", asyncSupported = true)
 public class BulkUpdateRowsServlet extends APIServlet {
 
     @Override

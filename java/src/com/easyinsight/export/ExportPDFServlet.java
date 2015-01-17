@@ -5,6 +5,7 @@ import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.html.HtmlServlet;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
@@ -14,6 +15,7 @@ import java.net.URLEncoder;
  * Date: Oct 28, 2010
  * Time: 11:22:26 AM
  */
+@WebServlet(value = "/exportPDF", asyncSupported = true)
 public class ExportPDFServlet extends HtmlServlet {
 
     @Override

@@ -9,6 +9,7 @@ import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.security.SecurityUtil;
 import net.minidev.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,6 +23,7 @@ import java.util.List;
  * Date: 9/24/14
  * Time: 3:32 PM
  */
+@WebServlet(value = "/quickReportDeliverySetup", asyncSupported = true)
 public class QuickReportDeliveryServlet extends JSONServlet {
     @Override
     protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {

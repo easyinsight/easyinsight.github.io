@@ -12,6 +12,7 @@ import com.easyinsight.util.RandomTextGenerator;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ import java.util.Set;
  * Date: 9/23/14
  * Time: 2:10 PM
  */
+@WebServlet(value = "/autoDataSourceAction", asyncSupported = true)
 public class CreateAutoDataSourceServlet extends HttpServlet {
 
     public static final String CREATE_COMPOSITE = "create_composite";

@@ -64,7 +64,7 @@
         private var newActivity:Boolean;
 
         private function runNow():void {
-            ProgressAlert.alert(this, "Running...", "The activity should now have been run.", exportService.runNow);
+            ProgressAlert.alert(this, "Running...", "The sequence has started running. You'll receive an email when it completes.", exportService.runNow);
             exportService.runNow.send(activity.scheduledActivityID);
         }
 

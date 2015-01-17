@@ -7,6 +7,7 @@ import nu.xom.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,6 +20,7 @@ import java.util.Date;
  * Date: 7/27/13
  * Time: 5:50 PM
  */
+@WebServlet(value = "/lock", asyncSupported = true)
 public class LockServlet extends JSONServlet {
     @Override
     protected ResponseInfo processJSON(net.minidev.json.JSONObject document, EIConnection conn, HttpServletRequest request) throws Exception {

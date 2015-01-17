@@ -27,14 +27,14 @@ public class DataSourceThreadPool {
     }
 
     public void shutdown() {
-        System.out.println("Shutting down primary thread pool...");
+        System.out.println("Shutting down data source thread pool...");
         try {
             tpe.shutdown();
             tpe.awaitTermination(5, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             // ignore
         }
-        System.out.println("Shut down primary thread pool.");
+        System.out.println("Shut down data source thread pool.");
     }
 
     public static DataSourceThreadPool instance() {

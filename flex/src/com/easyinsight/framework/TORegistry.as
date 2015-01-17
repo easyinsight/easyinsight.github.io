@@ -94,7 +94,7 @@ import com.easyinsight.datasources.LinkedInDataSource;
 import com.easyinsight.datasources.LinkedinCompositeDataSource;
 import com.easyinsight.datasources.MailChimpCompositeSource;
 import com.easyinsight.datasources.MySQLDatabaseConnection;
-import com.easyinsight.datasources.NetsuiteQueryConnection;
+import com.easyinsight.datasources.NetsuiteCompositeSource;
 import com.easyinsight.datasources.OracleDatabaseConnection;
 import com.easyinsight.datasources.OracleSalesCloudCompositeSource;
 import com.easyinsight.datasources.PivotalTrackerBaseSource;
@@ -315,7 +315,7 @@ public class TORegistry {
         var internalSource:InternalCompositeSource;
         var trello:TrelloCompositeSource;
         var infusion:InfusionsoftCompositeSource;
-        var netsuite:NetsuiteQueryConnection;
+        var netsuite:NetsuiteCompositeSource;
         var distinct:DistinctCachedSource;
         var git:GithubCompositeSource;
         var fresh:FreshdeskDataSource;

@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/json/availableTimeZones", asyncSupported = true)
 public class AvailableTimeZoneServlet extends JSONServlet {
 
     @Override

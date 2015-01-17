@@ -148,7 +148,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
         BindingUtils.bindProperty(reportCanvas, "stackTrace", this, "stackTrace");
         canvas.addChild(reportCanvas);
         addChild(canvas);
-        noData = new NoData();
+        noData = new EndUserNoData();
         loadReportRenderer();
     }
 
@@ -160,7 +160,7 @@ public class EmbeddedViewFactory extends Canvas implements IRetrievable {
 
     private var canvas:Canvas;
 
-    private var noData:NoData;
+    private var noData:EndUserNoData;
 
     private var _spaceSides:Boolean = true;
 

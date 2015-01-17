@@ -3,7 +3,9 @@ package com.easyinsight.analysis;
 import com.easyinsight.dashboard.Dashboard;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -21,6 +23,8 @@ public class FilterHTMLMetadata {
     private String filterKey = "reportbase";
     private List<FilterDefinition> filters;
 
+    private Map<String, AnalysisItemResultMetadata> cache = new HashMap<>();
+
     public boolean isEmbedded() {
         return embedded;
     }
@@ -35,6 +39,10 @@ public class FilterHTMLMetadata {
 
     public void setDrillthroughKey(String drillthroughKey) {
         this.drillthroughKey = drillthroughKey;
+    }
+
+    public Map<String, AnalysisItemResultMetadata> getCache() {
+        return cache;
     }
 
     public String createOnChange() {

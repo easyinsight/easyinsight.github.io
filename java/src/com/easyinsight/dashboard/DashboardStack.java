@@ -415,17 +415,34 @@ public class DashboardStack extends DashboardElement {
         JSONArray stackItems = new JSONArray();
         stack.put("stack_items", stackItems);
         for (DashboardStackItem item : getGridItems()) {
-            String label;
-            if (item.getDashboardElement() instanceof DashboardReport) {
-                label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
-            } else {
-                label = item.getDashboardElement().getLabel();
-            }
-            JSONObject stackItem = new JSONObject();
-            stackItem.put("label", label);
+            try {
+                if (item != null && item.getDashboardElement() != null) {
+                    String label;
+                    if (item.getDashboardElement() instanceof DashboardReport) {
+                        label = ((DashboardReport) item.getDashboardElement()).getReport().getName();
+                    } else {
+                        label = item.getDashboardElement().getLabel();
+                    }
+                    JSONObject stackItem = new JSONObject();
+                    stackItem.put("label", label);
 
-            stackItem.put("item", item.getDashboardElement().toJSON(metadata, curFilters));
-            stackItems.put(stackItem);
+                    stackItem.put("item", item.getDashboardElement().toJSON(metadata, curFilters));
+                    stackItems.put(stackItem);
+                } else {
+                    JSONObject stackItem = new JSONObject();
+                    stackItem.put("label", "");
+                    DashboardText dText = new DashboardText();
+                    dText.setText("");
+                    stackItems.put(dText.toJSON(metadata, curFilters));
+                }
+            } catch (Exception e) {
+                JSONObject stackItem = new JSONObject();
+                stackItem.put("label", "");
+                DashboardText dText = new DashboardText();
+                dText.setText("");
+                stackItems.put(dText.toJSON(metadata, curFilters));
+            }
+
         }
 
         return stack;

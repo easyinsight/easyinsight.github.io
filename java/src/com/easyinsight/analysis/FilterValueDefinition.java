@@ -244,9 +244,6 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        if (insightRequestMetadata.getFilterPropertiesMap().containsKey(this)) {
-            return start;
-        }
         List<Value> valueSet = new ArrayList<Value>();
         for (Object valueObject : filteredValues) {
             Value value;
@@ -422,12 +419,21 @@ public class FilterValueDefinition extends FilterDefinition {
         WSAnalysisDefinition report = filterHTMLMetadata.getReport();
         long dashboardID = db == null ? 0 : db.getId();
         long reportID = report == null ? 0 : report.getAnalysisID();
+
         AnalysisItemResultMetadata metadata = null;
-        try {
-            metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
-        } catch (Exception e) {
-            LogClass.error(e);
-            return null;
+
+        if (!"".equals(getParentFilters())) {
+            metadata = filterHTMLMetadata.getCache().get(getField().qualifiedName());
+        }
+
+        if (metadata == null) {
+            try {
+                metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
+                filterHTMLMetadata.getCache().put(getField().qualifiedName(), metadata);
+            } catch (Exception e) {
+                LogClass.error(e);
+                return null;
+            }
         }
         if (metadata.getReportFault() != null) {
             return null;
@@ -483,8 +489,6 @@ public class FilterValueDefinition extends FilterDefinition {
                     existingChoices.put(obj.toString(), true);
                 }
             }
-
-            System.out.println("values = " + existingChoices);
 
             jo.put("selected", existingChoices);
             if(getParentFilters() != null && !getParentFilters().isEmpty()) {

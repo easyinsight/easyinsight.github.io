@@ -8,6 +8,7 @@ import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +23,7 @@ import java.util.SimpleTimeZone;
  * Date: 5/24/12
  * Time: 2:50 PM
  */
+@WebServlet(value = "/connectionImageByDataSource", asyncSupported = true)
 public class ConnectionImageByDataSourceServlet extends HttpServlet {
 
     @Override

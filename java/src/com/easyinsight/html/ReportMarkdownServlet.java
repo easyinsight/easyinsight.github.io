@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
  * Time: 10:47 AM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/reportMarkdown", asyncSupported = true)
 public class ReportMarkdownServlet extends HttpServlet {
 
     private String trace(AnalysisItem analysisItem, Key key, EIConnection conn, Feed baseFeed) throws SQLException {

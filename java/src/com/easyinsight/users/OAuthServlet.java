@@ -12,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ import java.sql.ResultSet;
  * Date: May 7, 2010
  * Time: 12:27:16 AM
  */
+@WebServlet(value = "/oauth", asyncSupported = true)
 public class OAuthServlet extends HttpServlet {
 
     @Override

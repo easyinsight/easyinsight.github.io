@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * Time: 1:22 PM
  * To change this template use File | Settings | File Templates.
  */
+@WebServlet(value = "/html/reportTags.json", asyncSupported = true)
 public class ReportTagServlet extends JSONServlet {
 
 

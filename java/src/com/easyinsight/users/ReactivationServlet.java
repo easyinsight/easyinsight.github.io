@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,6 +12,7 @@ import java.io.IOException;
  * Date: 9/16/14
  * Time: 10:38 AM
  */
+@WebServlet(value = "/reactivation", asyncSupported = true)
 public class ReactivationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

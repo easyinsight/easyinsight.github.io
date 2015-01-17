@@ -9,6 +9,7 @@ import net.minidev.json.parser.JSONParser;
 import org.apache.commons.io.IOUtils;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +23,7 @@ import java.sql.PreparedStatement;
  * Date: 10/9/12
  * Time: 3:33 PM
  */
+@WebServlet(value = "/sendGridEvent", asyncSupported = true)
 public class SendGridEmailEventServlet extends HttpServlet {
 
     public static final int NO_RESULT = 0;

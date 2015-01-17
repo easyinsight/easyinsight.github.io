@@ -1064,9 +1064,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 AnalysisItem analysisItem = items.get(i);
                 if (analysisItem != null) {
                     structure.put(compositeKey, analysisItem);
-                    if (logReport) {
-                        System.out.println("Stored item " + analysisItem.toDisplay() + " with position " + i);
-                    }
                     if (!noItemPosition) {
                         analysisItem.setItemPosition(i);
                     }
@@ -1521,7 +1518,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> set = new HashSet<AnalysisItem>();
         final Map<AnalysisItem, Integer> positions = new HashMap<AnalysisItem, Integer>();
         if (multiFieldFilterDefinition.isAll()) {
-            System.out.println("Using all logic...");
             int i = 0;
             if (!multiFieldFilterDefinition.excludeReportFields()) {
                 for (AnalysisItem column : columns) {
@@ -1648,10 +1644,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         final Map<String, Integer> fieldOrderingMap = new HashMap<String, Integer>();
         if (multiFieldFilterDefinition.getFieldOrdering() != null && multiFieldFilterDefinition.getFieldOrdering().size() > 0) {
-            System.out.println("Using explicit field ordering...");
             int j = 0;
             for (AnalysisItemHandle handle : multiFieldFilterDefinition.getFieldOrdering()) {
-                System.out.println("\tHandle " + handle.getName() + " = " + j);
                 fieldOrderingMap.put(handle.getName(), j++);
             }
         }
@@ -1689,7 +1683,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
         if (set.size() > 0) {
             int i = 0;
-            System.out.println("Assigned results = " + clones);
             for (AnalysisItem item : clones) {
                 item.setItemPosition(i++);
             }

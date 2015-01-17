@@ -48,7 +48,10 @@
     </target>
 
     <target name="shutdownStagingInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="shutdown" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="StagingWorker" operation="shutdown" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="shutdown" />
+        </parallel>
     </target>
 
     <target name="shutdownLargeInstances">
@@ -57,11 +60,14 @@
    </target>
 
     <target name="downloadStagingInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="download" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="StagingWorker" operation="download" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="download" />
+        </parallel>
     </target>
 
     <target name="downloadBackendInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="aBackend" operation="download" />
     </target>
 
     <target name="downloadLargeInstances">
@@ -75,7 +81,10 @@
     </target>
 
     <target name="updateStagingInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="update" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="StagingWorker" operation="update" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="update" />
+        </parallel>
     </target>
 
     <target name="updateInstances">
@@ -83,7 +92,10 @@
     </target>
 
     <target name="startStagingInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="startup" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="StagingWorker" operation="startup" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Staging" operation="startup" />
+        </parallel>
     </target>
 
     <target name="startLargeInstances">
@@ -251,6 +263,8 @@
             <include name="**"/>
             <exclude name="tags/**"/>
         </javac>
+        <copyfile src="../build/src/realm.properties"
+                  dest="${watchdog.archive.path}/realm.properties" />
         <unzip dest="${watchdog.archive.path}">
             <fileset dir="../build/lib">
                 <include name="*.jar"/>
@@ -650,6 +664,16 @@
                   accessId="0AWCBQ78TJR8QCY8ABG2"
                   secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
                   bucket="eiproduction"
+                  publicRead="false">
+            <fileset dir="${code.path}" includes="code.zip"/>
+        </S3Upload>
+    </target>
+
+    <target name="uploadStaging">
+        <S3Upload verbose="true"
+                  accessId="0AWCBQ78TJR8QCY8ABG2"
+                  secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
+                  bucket="eistaging"
                   publicRead="false">
             <fileset dir="${code.path}" includes="code.zip"/>
         </S3Upload>

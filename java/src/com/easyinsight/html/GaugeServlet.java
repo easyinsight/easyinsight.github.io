@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.msgpack.util.json.JSON;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.NumberFormat;
@@ -21,6 +22,7 @@ import java.util.Calendar;
  * Date: 7/5/12
  * Time: 3:29 PM
  */
+@WebServlet(value = "/gauge", asyncSupported = true)
 public class GaugeServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

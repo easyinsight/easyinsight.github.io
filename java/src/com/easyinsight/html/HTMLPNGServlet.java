@@ -12,6 +12,7 @@ import com.easyinsight.export.ExportService;
 import com.itextpdf.text.Element;
 import org.json.JSONObject;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
  * Date: 5/3/14
  * Time: 2:03 PM
  */
+@WebServlet(value = "/htmlPNG", asyncSupported = true)
 public class HTMLPNGServlet extends HtmlServlet {
     @Override
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {

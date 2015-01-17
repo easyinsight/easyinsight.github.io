@@ -8,6 +8,7 @@ import com.easyinsight.html.HtmlServlet;
 import com.easyinsight.security.SecurityUtil;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import java.net.URLEncoder;
  * Date: Oct 28, 2010
  * Time: 11:22:26 AM
  */
+@WebServlet(value = "/exportExcel", asyncSupported = true)
 public class ExportExcelServlet extends HtmlServlet {
 
     @Override

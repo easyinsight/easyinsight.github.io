@@ -15,6 +15,7 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.TempStorage;
 import nu.xom.*;
 
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,6 +31,7 @@ import java.util.Map;
  * Date: 1/3/11
  * Time: 1:35 PM
  */
+@WebServlet(value = "/xml/loadRows", asyncSupported = true)
 public class LoadRowsServlet extends APIServlet {
 
     @Override

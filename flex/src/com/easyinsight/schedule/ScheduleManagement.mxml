@@ -231,7 +231,7 @@
                 <mx:Button label="Add Report Delivery..." click="newReportDelivery()" styleName="flatSaveButton"/>
                 <mx:Button label="Add Multi Report/Dashboard Delivery..." click="newGeneral()" styleName="flatSaveButton"/>
                 <mx:Button label="Add Data Source Refresh..." click="additionalDSRefresh()" styleName="flatSaveButton" visible="{showDSButton}"/>
-                <mx:Button label="Add Sequence..." click="addSequence()" styleName="flatSaveButton"/>
+                <mx:Button label="Add Sequence..." click="addSequence()" styleName="flatSaveButton" visible="{showDSButton}"/>
                 <mx:Spacer width="100%"/>
                 <mx:Button label="Delete Selected" click="deleteSelected()" styleName="flatRedButton"/>
             </mx:HBox>

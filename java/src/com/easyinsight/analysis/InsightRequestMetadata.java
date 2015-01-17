@@ -73,6 +73,9 @@ public class InsightRequestMetadata implements Serializable {
     private transient Set<AnalysisItem> originalDateItems;
 
     public Map<String, Boolean> getTimeshiftState() {
+        if (timeshiftState == null) {
+            timeshiftState = new HashMap<>();
+        }
         return timeshiftState;
     }
 
@@ -212,6 +215,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public void addAudit(AnalysisItem field, String audit) {
+        if (fieldAudits == null) {
+            fieldAudits = new HashMap<>();
+        }
         List<String> audits = fieldAudits.get(field.toDisplay());
         if (audits == null) {
             audits = new ArrayList<String>();
@@ -221,6 +227,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public void addFieldAudit(String fieldName, String audit) {
+        if (fieldAudits == null) {
+            fieldAudits = new HashMap<>();
+        }
         List<String> audits = fieldAudits.get(fieldName);
         if (audits == null) {
             audits = new ArrayList<String>();
@@ -230,6 +239,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public void addAudit(FilterDefinition filter, String audit) {
+        if (filterAudits == null) {
+            filterAudits = new HashMap<>();
+        }
         List<String> audits = filterAudits.get(filter.label(false));
         if (audits == null) {
             audits = new ArrayList<String>();
@@ -259,8 +271,6 @@ public class InsightRequestMetadata implements Serializable {
     private transient int fetchSize;
 
     private transient Map<AnalysisItem, Boolean> distinctFieldMap = new HashMap<AnalysisItem, Boolean>();
-
-    private transient Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap = new HashMap<FilterDefinition, AdvancedFilterProperties>();
 
     private transient Collection<FilterDefinition> filters;
 
@@ -297,6 +307,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Set<FilterDefinition> getSuppressedFilters() {
+        if (suppressedFilters == null) {
+            suppressedFilters = new HashSet<>();
+        }
         return suppressedFilters;
     }
 
@@ -307,6 +320,9 @@ public class InsightRequestMetadata implements Serializable {
     private long databaseTime = 0;
 
     public Map<AnalysisItem, Boolean> getDistinctFieldMap() {
+        if (distinctFieldMap == null) {
+            distinctFieldMap = new HashMap<>();
+        }
         return distinctFieldMap;
     }
 
@@ -320,14 +336,6 @@ public class InsightRequestMetadata implements Serializable {
 
     public void setFetchSize(int fetchSize) {
         this.fetchSize = fetchSize;
-    }
-
-    public Map<FilterDefinition, AdvancedFilterProperties> getFilterPropertiesMap() {
-        return filterPropertiesMap;
-    }
-
-    public void setFilterPropertiesMap(Map<FilterDefinition, AdvancedFilterProperties> filterPropertiesMap) {
-        this.filterPropertiesMap = filterPropertiesMap;
     }
 
     public boolean isNoDataOnNoJoin() {
@@ -375,6 +383,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Set<AnalysisItem> getPostProcessJoins() {
+        if (postProcessJoins == null) {
+            postProcessJoins = new HashSet<>();
+        }
         return postProcessJoins;
     }
 
@@ -403,6 +414,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public String getDerived(AnalysisItem analysisItem) {
+        if (derivedFieldAssignmentMap == null) {
+            derivedFieldAssignmentMap = new HashMap<>();
+        }
         String pipeline = derivedFieldAssignmentMap.get(analysisItem);
         if (pipeline == null) {
             if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
@@ -418,6 +432,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public void assign(AnalysisItem analysisItem, String pipeline) {
+        if (pipelineAssignmentMap == null) {
+            pipelineAssignmentMap = new HashMap<>();
+        }
         Set<String> pipelines = pipelineAssignmentMap.get(analysisItem);
         if (pipelines == null) {
             pipelines = new HashSet<String>();
@@ -440,6 +457,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Map<UniqueKey, AnalysisItem> getUniqueIteMap() {
+        if (uniqueIteMap == null) {
+            uniqueIteMap = new HashMap<>();
+        }
         return uniqueIteMap;
     }
 
@@ -448,6 +468,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Map<String, UniqueKey> getFieldToUniqueMap() {
+        if (fieldToUniqueMap == null) {
+            fieldToUniqueMap = new HashMap<>();
+        }
         return fieldToUniqueMap;
     }
 
@@ -504,6 +527,10 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public List<AnalysisItemOverride> getHierarchyOverrides() {
+
+        if (hierarchyOverrides == null) {
+            hierarchyOverrides = new ArrayList<>();
+        }
         return hierarchyOverrides;
     }
 
@@ -560,6 +587,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Map<String, Pipeline> getPipelineMap() {
+        if (pipelineMap == null) {
+            pipelineMap = new HashMap<>();
+        }
         return pipelineMap;
     }
 
@@ -570,6 +600,9 @@ public class InsightRequestMetadata implements Serializable {
     private transient List<String> intermediatePipelines = new ArrayList<String>();
 
     public List<String> getIntermediatePipelines() {
+        if (intermediatePipelines == null) {
+            intermediatePipelines = new ArrayList<>();
+        }
         return intermediatePipelines;
     }
 
@@ -580,6 +613,9 @@ public class InsightRequestMetadata implements Serializable {
     private Map<String, String> pipelineAssignments = new HashMap<String, String>();
 
     public void assignFieldToPipeline(String field, String pipelineName) {
+        if (pipelineAssignments == null) {
+            pipelineAssignments = new HashMap<>();
+        }
         pipelineAssignments.put(field, pipelineName);
     }
 
@@ -588,6 +624,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public List<AnalysisItem> getFieldsForPipeline(String name) {
+        if (pipelineFieldMap == null) {
+            pipelineFieldMap = new HashMap<>();
+        }
         return pipelineFieldMap.get(name);
     }
 
@@ -598,6 +637,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public void assignFilterToPipeline(String field, String pipelineName) {
+        if (filterAssignments == null) {
+            filterAssignments = new HashMap<>();
+        }
         filterAssignments.put(field, pipelineName);
     }
 

@@ -2,12 +2,14 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.io.Serializable;
+
 /**
  * User: jamesboe
  * Date: 12/3/11
  * Time: 9:43 AM
  */
-public class CompareYearsResult {
+public class CompareYearsResult implements Serializable {
     private Value value;
     private Value header;
     private boolean percentChange;
