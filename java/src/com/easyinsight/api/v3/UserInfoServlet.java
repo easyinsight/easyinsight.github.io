@@ -50,7 +50,7 @@ public class UserInfoServlet extends JSONServlet {
         JSONObject responseObject = new JSONObject();
         User u = UserUploadService.retrieveUser(conn);
         ExportMetadata md = ExportService.createExportMetadata(conn);
-        List<EIDescriptor> accountReports = new UserUploadService().getAccountReports();
+        List<EIDescriptor> accountReports = new UserUploadService().getAccountReports(conn);
         int count;
         PreparedStatement newsStmt = conn.prepareStatement("SELECT news_dismiss_date FROM USER WHERE user_id = ?");
         newsStmt.setLong(1, SecurityUtil.getUserID());

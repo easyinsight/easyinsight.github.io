@@ -250,18 +250,44 @@ public class ExportService {
 
     }
 
-    public void runNow(long id) {
-        ScheduledActivity activity = getActivityByID(id);;
+    public boolean runNow(long id) {
+        ScheduledActivity activity = getActivityByID(id);
 
         EIConnection conn = Database.instance().getConnection();
         try {
             if (activity instanceof ScheduledDelivery) {
                 ScheduledDelivery scheduledDelivery = (ScheduledDelivery) activity;
                 scheduledDelivery.taskNow(conn);
+                return true;
             } else if (activity instanceof ActivitySequence) {
-                ActivitySequence scheduledDelivery = (ActivitySequence) activity;
-                scheduledDelivery.taskNow(conn);
+
+                long userID = SecurityUtil.getUserID();
+                PreparedStatement ps = conn.prepareStatement("SELECT email FROM user WHERE user_id = ?");
+                ps.setLong(1, userID);
+                ResultSet rs = ps.executeQuery();
+                String email;
+                rs.next();
+                email = rs.getString(1);
+                ps.close();
+
+                new Thread(() -> {
+                    try {
+                        EIConnection c = Database.instance().getConnection();
+                        try {
+                            ActivitySequence scheduledDelivery = (ActivitySequence) activity;
+                            scheduledDelivery.taskNow(c);
+                            new SendGridEmail().sendEmail(email, "Your sequence of refreshes has completed.", "Your sequence of refreshes has completed.",
+                                    "support@easy-insight.com", false, "Easy Insight");
+                        } finally {
+                            Database.closeConnection(c);
+                        }
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                    }
+                }).start();
+                return false;
             }
+            return true;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

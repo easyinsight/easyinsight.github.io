@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
     <mx:Metadata>
-		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
-		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
-	</mx:Metadata>
+        [Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+        [Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
@@ -67,13 +67,13 @@
     </mx:Form>
     <mx:Text width="700" text="If you have a considerable amount of historical data, you may find it quicker to create your Easy Insight connection to FreshBooks with a subset of that data. You can always change this date to pull back older data."/>
     <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
-            <mx:FormItem label="Include Comments:" direction="horizontal">
-                <mx:CheckBox id="commentsCheckbox" selected="{includeComments}" change="inactiveCheckbox_changeHandler(event)"/>
-                <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="Check this box to enable comment synchronization."/>
-            </mx:FormItem>
+        <mx:FormItem label="Include Comments:" direction="horizontal">
+            <mx:CheckBox id="commentsCheckbox" selected="{includeComments}" change="inactiveCheckbox_changeHandler(event)"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="Check this box to enable comment synchronization."/>
+        </mx:FormItem>
     </mx:Form>
     <mx:TextArea width="700" text="Your Zendesk URL is the browser URL you normally use to connect to Zendesk. For example, if you access Zendesk as yourcompanyname.zendesk.com, put yourcompanyname in as the Zendesk URL."
-            editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
+                 editable="false" selectable="false" focusEnabled="false" fontSize="12"/>
     <mx:HBox>
         <mx:Label text="Zendesk Email:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>

@@ -73,6 +73,7 @@ public class ActivitySequence extends ScheduledActivity {
             if (!connection.getAutoCommit()) {
                 connection.rollback();
             }
+            throw new RuntimeException(e);
         } finally {
             connection.setAutoCommit(false);
         }
