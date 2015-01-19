@@ -85,6 +85,7 @@ public class AppInstanceTask extends Task {
             BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
             ThreadPoolExecutor tpe = new ThreadPoolExecutor(25, 25, 5, TimeUnit.MINUTES, queue);
             List<Instance> instances = getInstances();
+
             final CountDownLatch latch = new CountDownLatch(instances.size());
             HttpClient httpClient = new HttpClient();
             httpClient.getParams().setAuthenticationPreemptive(true);
@@ -93,6 +94,7 @@ public class AppInstanceTask extends Task {
             for (Instance instance : instances) {
                 tpe.execute(() -> {
                     try {
+                        System.out.println("sending download to " + instance.host);
                         HttpMethod updateMethod = new GetMethod("http://" + instance.host + ":4000/?operation=" + getOperation() + "&type=" + URLEncoder.encode(instance.type, "UTF-8") + "&role=" + URLEncoder.encode(getRole(), "UTF-8"));
                         httpClient.executeMethod(updateMethod);
                     } catch (IOException e) {
@@ -144,14 +146,8 @@ public class AppInstanceTask extends Task {
         DocumentBuilder builder = factory.newDocumentBuilder();
 
         Document document = builder.parse(content);
-
+        System.out.println("looking for " + getRole() + " to run operation " + getOperation());
         List<Instance> instances = new ArrayList<>();
-
-        try {
-            printDocument(document, System.out);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
         NodeList transactions = document.getElementsByTagName("reservationSet");
         if (transactions.getLength() == 0) {
             System.out.println("No running transactions");
