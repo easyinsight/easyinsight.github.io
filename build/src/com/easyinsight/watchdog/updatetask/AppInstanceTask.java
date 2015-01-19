@@ -85,6 +85,7 @@ public class AppInstanceTask extends Task {
             BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
             ThreadPoolExecutor tpe = new ThreadPoolExecutor(25, 25, 5, TimeUnit.MINUTES, queue);
             List<Instance> instances = getInstances();
+
             final CountDownLatch latch = new CountDownLatch(instances.size());
             HttpClient httpClient = new HttpClient();
             httpClient.getParams().setAuthenticationPreemptive(true);
@@ -145,7 +146,7 @@ public class AppInstanceTask extends Task {
         DocumentBuilder builder = factory.newDocumentBuilder();
 
         Document document = builder.parse(content);
-
+        System.out.println("looking for " + getRole() + " to run operation " + getOperation());
         List<Instance> instances = new ArrayList<>();
         NodeList transactions = document.getElementsByTagName("reservationSet");
         if (transactions.getLength() == 0) {

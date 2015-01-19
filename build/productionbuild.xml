@@ -67,7 +67,7 @@
     </target>
 
     <target name="downloadBackendInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="aBackend" operation="download" />
+        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
     </target>
 
     <target name="downloadLargeInstances">
