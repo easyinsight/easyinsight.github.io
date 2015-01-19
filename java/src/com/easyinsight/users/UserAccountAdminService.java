@@ -38,6 +38,32 @@ public class UserAccountAdminService {
         return zones;
     }
 
+    public String adminResetPassword(long userID, String password) {
+        SecurityUtil.authorizeAccountAdmin();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            if (user.getAccount().getAccountID() != SecurityUtil.getAccountID()) {
+                throw new SecurityException();
+            }
+            if (user.isAnalyst()) {
+                return "You can only reset passwords on viewers.";
+            }
+            user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
+            user.setInitialSetupDone(true);
+            session.update(user);
+            session.getTransaction().commit();
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public void resendInvite(long userID) {
         SecurityUtil.authorizeAccountAdmin();
         Session session = Database.instance().createSession();
@@ -779,13 +805,6 @@ public class UserAccountAdminService {
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, boolean sendEmail) {
         return addUserToAccount(userTransferObject, userDLSList, requirePasswordChange, DEFAULT, sendEmail);
     }
-
-    /*
-    on pricing change
-
-     */
-
-
 
     public void downgradeAccount(int toType) {
         if (toType == Account.ADMINISTRATOR) {
