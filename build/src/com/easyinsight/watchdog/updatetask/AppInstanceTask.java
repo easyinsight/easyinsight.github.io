@@ -93,6 +93,7 @@ public class AppInstanceTask extends Task {
             for (Instance instance : instances) {
                 tpe.execute(() -> {
                     try {
+                        System.out.println("sending download to " + instance.host);
                         HttpMethod updateMethod = new GetMethod("http://" + instance.host + ":4000/?operation=" + getOperation() + "&type=" + URLEncoder.encode(instance.type, "UTF-8") + "&role=" + URLEncoder.encode(getRole(), "UTF-8"));
                         httpClient.executeMethod(updateMethod);
                     } catch (IOException e) {
@@ -146,12 +147,6 @@ public class AppInstanceTask extends Task {
         Document document = builder.parse(content);
 
         List<Instance> instances = new ArrayList<>();
-
-        try {
-            printDocument(document, System.out);
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
         NodeList transactions = document.getElementsByTagName("reservationSet");
         if (transactions.getLength() == 0) {
             System.out.println("No running transactions");
