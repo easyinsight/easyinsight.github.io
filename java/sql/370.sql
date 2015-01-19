@@ -29,3 +29,10 @@ create table activity_sequence_task_generator (
   primary key (activity_sequence_task_generator_id),
   constraint activity_sequence_task_generator_ibfk1 foreign key (task_generator_id) references task_generator (task_generator_id) on delete cascade
 );
+
+alter table mysql_database_connection add key_as_limit varchar(100) default null;
+
+alter table async_report_request add upload_key varchar(255) default null;
+alter table async_report_request add file_name varchar(255) default null;
+
+alter table zendesk add fixed_start_date date default null;
