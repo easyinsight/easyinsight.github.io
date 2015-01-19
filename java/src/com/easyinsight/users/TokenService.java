@@ -134,9 +134,9 @@ public class TokenService {
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
             } else if (type == FeedType.GOOGLE_PROVISIONING.getType()) {
-                String scope = "https://apps-apis.google.com/a/feeds/user/";
-                consumer = new CommonsHttpOAuthConsumer("119099431019.apps.googleusercontent.com", "UuuYup6nE4M2PjnOv_jEg8Ki");
+                consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
                 consumer.setMessageSigner(new HmacSha1MessageSigner());
+                String scope = "https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/";
                 provider = new CommonsHttpOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
                         "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");

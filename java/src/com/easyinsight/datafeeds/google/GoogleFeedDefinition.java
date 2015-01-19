@@ -96,6 +96,9 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
         try {
+            if (externalPin != null) {
+                pin = externalPin;
+            }
             if (pin != null && !"".equals(pin)) {
                 OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");

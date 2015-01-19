@@ -127,7 +127,7 @@ public class GoogleDataProvider {
         try {
             PreparedStatement existsStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, WORKSHEETURL FROM GOOGLE_FEED, DATA_FEED, UPLOAD_POLICY_USERS " +
                     "WHERE GOOGLE_FEED.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND UPLOAD_POLICY_USERS.FEED_ID = " +
-                    "UPLOAD_POLICY_USERS.FEED_ID AND USER_ID = ? AND UPLOAD_POLICY_USERS.USER_ID = ?");
+                    "UPLOAD_POLICY_USERS.USER_ID AND USER_ID = ? AND UPLOAD_POLICY_USERS.USER_ID = ?");
             existsStmt.setLong(1, SecurityUtil.getUserID());
             existsStmt.setInt(2, Roles.OWNER);
             ResultSet rs = existsStmt.executeQuery();
