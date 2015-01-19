@@ -8,9 +8,11 @@
                 </mx:FormItem>
             </mx:AddChild>
             <mx:RemoveChild target="{convertButton}"/>
+            <mx:RemoveChild target="{resetPasswordButton}"/>
         </mx:State>
         <mx:State name="initialCreateNoEmail">
             <mx:RemoveChild target="{convertButton}"/>
+            <mx:RemoveChild target="{resetPasswordButton}"/>
         </mx:State>
     </util:states>
 	<mx:Metadata>
@@ -309,6 +311,14 @@
 
         [Bindable]
         private var assignedDashboardIsFixedView:Boolean;
+
+        private function resetPassword():void {
+            var resetWindow:ResetPasswordWindow = new ResetPasswordWindow();
+            resetWindow.userID = userID;
+            PopUpManager.addPopUp(resetWindow, this, true);
+            PopUpUtil.centerPopUp(resetWindow);
+            PopUpManager.removePopUp(this);
+        }
         ]]>
 	</mx:Script>
     <mx:RemoteObject destination="dashboardService" id="dashboardService">
@@ -417,6 +427,7 @@
         <util:SaveButton label="{createLabel}" click="save()"/>
         <util:SaveButton label="{resendLabel}" click="resendInvitation()" id="resendButton"/>
         <util:SaveButton label="Convert to Designer" click="convertToViewer()" id="convertButton"/>
+        <util:SaveButton label="Reset Password" click="resetPassword()" id="resetPasswordButton"/>
         <util:CancelButton label="Cancel" click="cancel()"/>
     </mx:HBox>
 	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="40"/>
