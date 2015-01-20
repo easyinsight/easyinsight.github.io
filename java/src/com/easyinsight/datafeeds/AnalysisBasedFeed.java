@@ -79,23 +79,22 @@ public class AnalysisBasedFeed extends Feed {
             WSListDefinition listDefinition = (WSListDefinition) analysisDefinition;
             listDefinition.getColumns().addAll(originalItems);
         }
-        List<AnalysisItem> fields = new ArrayList<AnalysisItem>(analysisDefinition.createStructure(false).values());
-        Map<Key, List<Key>> map = new HashMap<Key, List<Key>>();
-        Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();
-        Map<Long, List<AnalysisItem>> fieldsGroupedByOriginalFieldID = new HashMap<Long, List<AnalysisItem>>();
+        List<AnalysisItem> fields = new ArrayList<>(analysisDefinition.createStructure(false).values());
+        Map<Key, List<Key>> map = new HashMap<>();
+        Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<>();
+        Map<Long, List<AnalysisItem>> fieldsGroupedByOriginalFieldID = new HashMap<>();
         for (AnalysisItem analysisItem : analysisItems) {
-            System.out.println("item " + analysisItem.toDisplay() + " based on " + analysisItem.getBasedOnReportField() + " with original " + analysisItem.toOriginalDisplayName());
             if (analysisItem.getBasedOnReportField() != null && analysisItem.getBasedOnReportField() > 0) {
                 List<AnalysisItem> items = fieldsGroupedByOriginalFieldID.get(analysisItem.getBasedOnReportField());
                 if (items == null) {
-                    items = new ArrayList<AnalysisItem>();
+                    items = new ArrayList<>();
                     fieldsGroupedByOriginalFieldID.put(analysisItem.getBasedOnReportField(), items);
                 }
                 items.add(analysisItem);
             } else {
                 List<AnalysisItem> items = fieldsGroupedByOriginalDisplayName.get(analysisItem.getOriginalDisplayName());
                 if (items == null) {
-                    items = new ArrayList<AnalysisItem>();
+                    items = new ArrayList<>();
                     fieldsGroupedByOriginalDisplayName.put(analysisItem.getOriginalDisplayName(), items);
                 }
                 items.add(analysisItem);
@@ -197,6 +196,7 @@ public class AnalysisBasedFeed extends Feed {
             analysisDefinition.getFilterDefinitions().addAll(insightRequestMetadata.getFilters());
 
         }
+        localInsightRequestMetadata.setNoAsync(true);
         DataSet dataSet = DataService.listDataSet(analysisDefinition, localInsightRequestMetadata, conn);
         // map this data set back into the original one
         for (Map.Entry<Key, List<Key>> entry : map.entrySet()) {
