@@ -2863,7 +2863,6 @@ public class DataService {
                     PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
                     ps.setLong(1, accountID);
                     ResultSet rs = ps.executeQuery();
-                    rs.next();
                     if (!rs.next()) {
                         insightRequestMetadata.setNoAsync(true);
                     } else {
