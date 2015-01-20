@@ -36,11 +36,14 @@ import java.util.Arrays;
  * Date: 11/28/11
  * Time: 3:27 PM
  */
-@WebServlet(value = "/TextReport", asyncSupported = true)
+//@WebServlet(value = "/TextReport", asyncSupported = true)
 public class TextReportServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+
+
+
         String reportName = request.getParameter("text");
         System.out.println(request.getParameter("token"));
         EIConnection conn = Database.instance().getConnection();
@@ -97,6 +100,8 @@ public class TextReportServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
         String reportName = request.getParameter("text");
+        String token = request.getParameter("token");
+
         System.out.println(request.getParameter("token"));
         EIConnection conn = Database.instance().getConnection();
         try {
