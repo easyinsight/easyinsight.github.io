@@ -18,16 +18,13 @@ public class InsightRequestMetadata implements Serializable {
     private int depth = 0;
     private boolean cacheForHTML;
     private transient ZoneId zoneID;
+    private boolean runningAsync;
     private AnalysisDateDimension baseDate;
-    private boolean dateJoin;
     private int utcOffset;
-    private int version;
-    private boolean refreshAllSources;
     private transient boolean avoidKeyDisplayCollisions;
     private boolean noCache;
     private List<AnalysisItemOverride> hierarchyOverrides = new ArrayList<AnalysisItemOverride>();
     private boolean aggregateQuery = true;
-    private boolean gmtData;
     private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
     private boolean optimized;
     private boolean traverseAllJoins;
@@ -53,7 +50,6 @@ public class InsightRequestMetadata implements Serializable {
 
     private transient String targetCurrency;
     private transient Map<AnalysisItem, AnalysisItem> currencyMap = new HashMap<AnalysisItem, AnalysisItem>();
-    private transient Set<AnalysisItem> postProcessJoins = new HashSet<AnalysisItem>();
     private List<AddonReport> addonReports;
     private boolean noDataOnNoJoin;
     private String ip;
@@ -71,6 +67,14 @@ public class InsightRequestMetadata implements Serializable {
     private transient AnalysisItemRetrievalStructure structure;
 
     private transient Set<AnalysisItem> originalDateItems;
+
+    public boolean isRunningAsync() {
+        return runningAsync;
+    }
+
+    public void setRunningAsync(boolean runningAsync) {
+        this.runningAsync = runningAsync;
+    }
 
     public Map<String, Boolean> getTimeshiftState() {
         if (timeshiftState == null) {
@@ -188,14 +192,6 @@ public class InsightRequestMetadata implements Serializable {
 
     public Map<String, List<String>> getFieldAudits() {
         return fieldAudits;
-    }
-
-    public boolean isDateJoin() {
-        return dateJoin;
-    }
-
-    public void setDateJoin(boolean dateJoin) {
-        this.dateJoin = dateJoin;
     }
 
     public AnalysisDateDimension getBaseDate() {
@@ -378,17 +374,6 @@ public class InsightRequestMetadata implements Serializable {
         this.addonReports = addonReports;
     }
 
-    public void addPostProcessJoin(AnalysisItem analysisItem) {
-        postProcessJoins.add(analysisItem);
-    }
-
-    public Set<AnalysisItem> getPostProcessJoins() {
-        if (postProcessJoins == null) {
-            postProcessJoins = new HashSet<>();
-        }
-        return postProcessJoins;
-    }
-
     public String getIp() {
         return ip;
     }
@@ -398,6 +383,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Map<AnalysisItem, AnalysisItem> getCurrencyMap() {
+        if (currencyMap == null) {
+            currencyMap = new HashMap<>();
+        }
         return currencyMap;
     }
 
@@ -510,14 +498,6 @@ public class InsightRequestMetadata implements Serializable {
         this.joinOverrides = joinOverrides;
     }
 
-    public boolean isGmtData() {
-        return gmtData;
-    }
-
-    public void setGmtData(boolean gmtData) {
-        this.gmtData = gmtData;
-    }
-
     public boolean isAggregateQuery() {
         return aggregateQuery;
     }
@@ -546,28 +526,12 @@ public class InsightRequestMetadata implements Serializable {
         this.noCache = noCache;
     }
 
-    public boolean isRefreshAllSources() {
-        return refreshAllSources;
-    }
-
-    public void setRefreshAllSources(boolean refreshAllSources) {
-        this.refreshAllSources = refreshAllSources;
-    }
-
     public int getUtcOffset() {
         return utcOffset;
     }
 
     public void setUtcOffset(int utcOffset) {
         this.utcOffset = utcOffset;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     public Date getNow() {
@@ -646,10 +610,16 @@ public class InsightRequestMetadata implements Serializable {
     public void pipelineAssign(AnalysisItem analysisItem) {
         String name = getPipelineNameForField(analysisItem.toDisplay());
         if (name != null) {
+            if (derivedFieldAssignmentMap == null) {
+                derivedFieldAssignmentMap = new HashMap<>();
+            }
             derivedFieldAssignmentMap.put(analysisItem, name);
+            if (pipelineFieldMap == null) {
+                pipelineFieldMap = new HashMap<>();
+            }
             List<AnalysisItem> fields = pipelineFieldMap.get(name);
             if (fields == null) {
-                fields = new ArrayList<AnalysisItem>();
+                fields = new ArrayList<>();
                 pipelineFieldMap.put(name, fields);
             }
             assign(analysisItem, name);

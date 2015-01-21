@@ -1,9 +1,8 @@
 package com.easyinsight.userupload;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import com.easyinsight.util.TimeoutThreadPoolExecutor;
+
+import java.util.concurrent.*;
 
 /**
  * User: jamesboe
@@ -18,7 +17,7 @@ public class ReportThreadPool {
 
     public static void initialize() {
         ReportThreadPool pool = new ReportThreadPool();
-        pool.tpe = new ThreadPoolExecutor(5, 5, 5, TimeUnit.MINUTES, pool.queue);
+        pool.tpe = new TimeoutThreadPoolExecutor(5, 5, 5, TimeUnit.MINUTES, pool.queue, 10, TimeUnit.MINUTES);
         instance = pool;
     }
 
@@ -35,6 +34,10 @@ public class ReportThreadPool {
             // ignore
         }
         System.out.println("Shut down report thread pool.");
+    }
+
+    public void interruptActivity() {
+
     }
 
     public static ReportThreadPool instance() {

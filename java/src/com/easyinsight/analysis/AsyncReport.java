@@ -8,6 +8,7 @@ import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CachedAddonDataSource;
+import com.easyinsight.datafeeds.UserThreadMutex;
 import com.easyinsight.datafeeds.database.DataSourceListener;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -33,7 +34,6 @@ import java.util.*;
 public class AsyncReport {
 
     private static ThreadLocal<AsyncReportLocal> asyncReportLocals = new ThreadLocal<>();
-
 
 
     private static class AsyncReportLocal {
@@ -404,131 +404,137 @@ public class AsyncReport {
     }
 
     protected void asyncReport(Long frequestID, byte[] freportBytes, byte[] fmetadataBytes, int frequestType, long fuserID) {
-        ReportThreadPool.instance().addActivity(() -> {
 
-            try {
-                AsyncReport.establishAsync();
-                try {
-                    EIConnection conn = Database.instance().getConnection();
-                    try {
-                        populateThreadLocal(fuserID, conn);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        Database.closeConnection(conn);
-                    }
+        ReportThreadPool.instance().addActivity(new AsyncRequestRunnable(frequestID) {
+                                                    @Override
+                                                    public void run() {
+                                                        try {
+                                                            AsyncReport.establishAsync();
 
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
-                    WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
-                    ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
-                    InsightRequestMetadata insightRequestMetadata = (InsightRequestMetadata) ois.readObject();
-                    InsightRequestMetadata localMetadata = new InsightRequestMetadata();
-                    localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
-                    localMetadata.setNoAsync(true);
+                                                            try {
+                                                                EIConnection conn = Database.instance().getConnection();
+                                                                try {
+                                                                    populateThreadLocal(fuserID, conn);
+                                                                } catch (Exception e) {
+                                                                    throw new RuntimeException(e);
+                                                                } finally {
+                                                                    Database.closeConnection(conn);
+                                                                }
 
-                    String name;
-                    if (SecurityUtil.getUserID(false) == 0) {
-                        name = "anonymous user";
-                    } else {
-                        name = SecurityUtil.getUserName();
-                    }
-                    String reportName;
-                    if (report.getName() == null) {
-                        reportName = "temporary report";
-                    } else {
-                        reportName = report.getName();
-                    }
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    System.out.println(sdf.format(new Date()) + ": Asynchronous execution of " + reportName + " by " + name);
+                                                                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
+                                                                WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
+                                                                ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
+                                                                InsightRequestMetadata insightRequestMetadata = (InsightRequestMetadata) ois.readObject();
+                                                                InsightRequestMetadata localMetadata = new InsightRequestMetadata();
+                                                                localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
+                                                                localMetadata.setNoAsync(true);
+                                                                localMetadata.setRunningAsync(true);
 
-                    if (frequestType == REPORT_EDITOR) {
-                        DataResults results;
-                        if (report instanceof WSCrosstabDefinition) {
-                            results = new DataService().getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
-                        } else if (report instanceof WSKPIDefinition) {
-                            results = new DataService().getTrendDataResults((WSKPIDefinition) report, localMetadata);
-                        } else if (report instanceof WSTreeDefinition) {
-                            results = new DataService().getTreeDataResults((WSTreeDefinition) report, localMetadata);
-                        } else if (report instanceof WSYTDDefinition) {
-                            results = new DataService().getYTDResults(report, localMetadata);
-                        } else if (report instanceof WSCompareYearsDefinition) {
-                            results = new DataService().getCompareYearsResults(report, localMetadata);
-                        } else if (report instanceof WSTextDefinition) {
-                            results = new DataService().getTextDataResults((WSTextDefinition) report, localMetadata);
-                        } else {
-                            results = new DataService().list(report, localMetadata);
-                        }
-                        ResultData rh = new ResultData();
-                        rh.dataResults = results;
-                        rh.report = report;
-                        MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                    } else if (frequestType == REPORT_END_USER) {
-                        EmbeddedResults results;
-                        ResultData rh = new ResultData();
-                        conn = Database.instance().getConnection();
-                        try {
-                            if (report instanceof WSCrosstabDefinition) {
-                                results = new DataService().getEmbeddedCrosstabResults((WSCrosstabDefinition) report, insightRequestMetadata, conn);
-                            } else if (report instanceof WSYTDDefinition) {
-                                results = new DataService().getEmbeddedYTDResults((WSYTDDefinition) report, insightRequestMetadata, conn);
-                            } else if (report instanceof WSKPIDefinition) {
-                                results = new DataService().getEmbeddedTrendDataResults((WSKPIDefinition) report, insightRequestMetadata, conn);
-                            } else if (report instanceof WSTreeDefinition) {
-                                results = new DataService().getEmbeddedTreeResults((WSTreeDefinition) report, insightRequestMetadata, conn);
-                            } else if (report instanceof WSCompareYearsDefinition) {
-                                results = new DataService().getEmbeddedCompareYearsResults((WSCompareYearsDefinition) report, insightRequestMetadata, conn);
-                            } else if (report instanceof WSTextDefinition) {
-                                results = new DataService().getEmbeddedTextResults((WSTextDefinition) report, insightRequestMetadata, conn);
-                            } else {
-                                results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
-                            }
-                            rh.results = results;
-                            rh.report = report;
-                        } catch (Throwable e) {
-                            rh.exception = e;
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
-                        //}
-                        MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                    } else if (frequestType == REPORT_DATA_SET) {
-                        conn = Database.instance().getConnection();
-                        try {
-                            ResultData rh = new ResultData();
-                            try {
-                                DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
-                                dataSet.setAsyncSavedReport(report);
-                                rh.dataSet = dataSet;
-                                rh.report = report;
-                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                            } catch (Throwable e) {
-                                rh.exception = e;
-                                MemCachedManager.instance().add("async" + frequestID, 100, rh);
-                            }
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
-                    }
-                    conn = Database.instance().getConnection();
-                    try {
-                        PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
-                        u.setInt(1, FINISHED);
-                        u.setLong(2, frequestID);
-                        u.executeUpdate();
-                        u.close();
-                    } finally {
-                        Database.closeConnection(conn);
-                    }
-                } finally {
-                    SecurityUtil.clearThreadLocal();
-                    AsyncReport.releaseAsync();
-                }
+                                                                String name;
+                                                                if (SecurityUtil.getUserID(false) == 0) {
+                                                                    name = "anonymous user";
+                                                                } else {
+                                                                    name = SecurityUtil.getUserName();
+                                                                }
+                                                                String reportName;
+                                                                if (report.getName() == null) {
+                                                                    reportName = "temporary report";
+                                                                } else {
+                                                                    reportName = report.getName();
+                                                                }
+                                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                                                                System.out.println(sdf.format(new Date()) + ": Asynchronous execution of " + reportName + " by " + name);
 
-            } catch (Throwable e) {
-                markDone(frequestID);
-                LogClass.error(e);
-            }
-        });
+                                                                if (frequestType == REPORT_EDITOR) {
+                                                                    DataResults results;
+                                                                    if (report instanceof WSCrosstabDefinition) {
+                                                                        results = new DataService().getCrosstabDataResults((WSCrosstabDefinition) report, localMetadata);
+                                                                    } else if (report instanceof WSKPIDefinition) {
+                                                                        results = new DataService().getTrendDataResults((WSKPIDefinition) report, localMetadata);
+                                                                    } else if (report instanceof WSTreeDefinition) {
+                                                                        results = new DataService().getTreeDataResults((WSTreeDefinition) report, localMetadata);
+                                                                    } else if (report instanceof WSYTDDefinition) {
+                                                                        results = new DataService().getYTDResults(report, localMetadata);
+                                                                    } else if (report instanceof WSCompareYearsDefinition) {
+                                                                        results = new DataService().getCompareYearsResults(report, localMetadata);
+                                                                    } else if (report instanceof WSTextDefinition) {
+                                                                        results = new DataService().getTextDataResults((WSTextDefinition) report, localMetadata);
+                                                                    } else {
+                                                                        results = new DataService().list(report, localMetadata);
+                                                                    }
+                                                                    ResultData rh = new ResultData();
+                                                                    rh.dataResults = results;
+                                                                    rh.report = report;
+                                                                    MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                                                                } else if (frequestType == REPORT_END_USER) {
+                                                                    EmbeddedResults results;
+                                                                    ResultData rh = new ResultData();
+                                                                    conn = Database.instance().getConnection();
+                                                                    try {
+                                                                        if (report instanceof WSCrosstabDefinition) {
+                                                                            results = new DataService().getEmbeddedCrosstabResults((WSCrosstabDefinition) report, insightRequestMetadata, conn);
+                                                                        } else if (report instanceof WSYTDDefinition) {
+                                                                            results = new DataService().getEmbeddedYTDResults((WSYTDDefinition) report, insightRequestMetadata, conn);
+                                                                        } else if (report instanceof WSKPIDefinition) {
+                                                                            results = new DataService().getEmbeddedTrendDataResults((WSKPIDefinition) report, insightRequestMetadata, conn);
+                                                                        } else if (report instanceof WSTreeDefinition) {
+                                                                            results = new DataService().getEmbeddedTreeResults((WSTreeDefinition) report, insightRequestMetadata, conn);
+                                                                        } else if (report instanceof WSCompareYearsDefinition) {
+                                                                            results = new DataService().getEmbeddedCompareYearsResults((WSCompareYearsDefinition) report, insightRequestMetadata, conn);
+                                                                        } else if (report instanceof WSTextDefinition) {
+                                                                            results = new DataService().getEmbeddedTextResults((WSTextDefinition) report, insightRequestMetadata, conn);
+                                                                        } else {
+                                                                            results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
+                                                                        }
+                                                                        rh.results = results;
+                                                                        rh.report = report;
+                                                                    } catch (Throwable e) {
+                                                                        rh.exception = e;
+                                                                    } finally {
+                                                                        Database.closeConnection(conn);
+                                                                    }
+                                                                    //}
+                                                                    MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                                                                } else if (frequestType == REPORT_DATA_SET) {
+                                                                    conn = Database.instance().getConnection();
+                                                                    try {
+                                                                        ResultData rh = new ResultData();
+                                                                        try {
+                                                                            DataSet dataSet = DataService.listDataSet(report, localMetadata, conn);
+                                                                            dataSet.setAsyncSavedReport(report);
+                                                                            rh.dataSet = dataSet;
+                                                                            rh.report = report;
+                                                                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                                                                        } catch (Throwable e) {
+                                                                            rh.exception = e;
+                                                                            MemCachedManager.instance().add("async" + frequestID, 100, rh);
+                                                                        }
+                                                                    } finally {
+                                                                        Database.closeConnection(conn);
+                                                                    }
+                                                                }
+                                                                conn = Database.instance().getConnection();
+                                                                try {
+                                                                    PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
+                                                                    u.setInt(1, FINISHED);
+                                                                    u.setLong(2, frequestID);
+                                                                    u.executeUpdate();
+                                                                    u.close();
+                                                                } finally {
+                                                                    Database.closeConnection(conn);
+                                                                }
+                                                            } finally {
+                                                                SecurityUtil.clearThreadLocal();
+                                                                AsyncReport.releaseAsync();
+                                                            }
+
+                                                        } catch (Throwable e) {
+                                                            markDone(frequestID);
+                                                            LogClass.error(e);
+                                                        }
+                                                    }
+                                                }
+        );
     }
 
     protected void populateThreadLocal(long fuserID, EIConnection conn) throws SQLException {
@@ -862,7 +868,15 @@ public class AsyncReport {
         }
     }
 
-    public static DataResults asyncDataResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata, EIConnection conn)  {
+    public static DataResults asyncDataResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
+        boolean success;
+        try {
+            success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (ReportException e) {
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        }
         try {
             long reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_EDITOR);
 
@@ -888,6 +902,10 @@ public class AsyncReport {
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
             return embeddedDataResults;
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
         }
     }
 
@@ -916,7 +934,15 @@ public class AsyncReport {
         return requestID;
     }
 
-    public static DataResults asyncDataResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata)  {
+    public static DataResults asyncDataResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata) {
+        boolean success;
+        try {
+            success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        } catch (ReportException e) {
+            ListDataResults embeddedDataResults = new ListDataResults();
+            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            return embeddedDataResults;
+        }
         try {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
@@ -948,13 +974,18 @@ public class AsyncReport {
             ListDataResults embeddedDataResults = new ListDataResults();
             embeddedDataResults.setReportFault(new ServerError("Something went wrong in running the report."));
             return embeddedDataResults;
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
         }
     }
 
     public static final int REPORT_TIMEOUT = 300000;
     public static final int DATA_SOURCE_TIMEOUT = 2400000;
 
-    public static ResultData asyncDataSet(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata)  {
+    public static ResultData asyncDataSet(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         try {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
@@ -983,10 +1014,15 @@ public class AsyncReport {
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
         }
     }
 
-    public static ResultData asyncEndUserResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata)  {
+    public static ResultData asyncEndUserResults(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata) {
+        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         try {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
@@ -1062,6 +1098,10 @@ public class AsyncReport {
             ResultData resultData = new ResultData();
             resultData.results = embeddedDataResults;
             return resultData;
+        } finally {
+            if (success) {
+                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
+            }
         }
     }
 }

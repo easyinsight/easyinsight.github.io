@@ -1216,13 +1216,13 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedTrendDataResults results = new EmbeddedTrendDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 Database.closeConnection(conn);
             }
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -1270,7 +1270,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + reportID, e);
             EmbeddedTrendDataResults embeddedDataResults = new EmbeddedTrendDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         } finally {
             if (success) {
@@ -1333,13 +1333,13 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 Database.closeConnection(conn);
             }
         } else {
-            boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+            boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
             EIConnection conn = Database.instance().getConnection();
             try {
                 long start = System.currentTimeMillis();
@@ -1391,7 +1391,7 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedCrosstabDataResults results = new EmbeddedCrosstabDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 if (success) {
@@ -1598,7 +1598,7 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, boolean ignoreCache) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long startTime = System.currentTimeMillis();
@@ -1669,7 +1669,7 @@ public class DataService {
         } catch (Exception e) {
             LogClass.error(e);
             EmbeddedDataResults results = new EmbeddedDataResults();
-            results.setReportFault(new ServerError(e.getMessage()));
+            results.setReportFault(new ServerError(errorToUserError(e)));
             return results;
         } finally {
             if (success) {
@@ -1738,7 +1738,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e);
             ListDataResults embeddedDataResults = new ListDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         }
     }
@@ -1844,13 +1844,13 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedTreeDataResults results = new EmbeddedTreeDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 Database.closeConnection(conn);
             }
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1926,13 +1926,13 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedCompareYearsDataResults results = new EmbeddedCompareYearsDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 Database.closeConnection(conn);
             }
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -1979,7 +1979,7 @@ public class DataService {
             System.out.println("Requesting report for asynchronous run...");
             return (CompareYearsDataResults) AsyncReport.asyncDataResults(report, insightRequestMetadata);
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2054,13 +2054,13 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedYTDDataResults results = new EmbeddedYTDDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 Database.closeConnection(conn);
             }
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2109,10 +2109,9 @@ public class DataService {
     public YTDDataResults getYTDResults(WSAnalysisDefinition report, InsightRequestMetadata insightRequestMetadata) {
         accountAsyncHack(insightRequestMetadata);
         if (!insightRequestMetadata.isNoAsync()) {
-            System.out.println("Requesting report for asynchronous run...");
             return (YTDDataResults) AsyncReport.asyncDataResults(report, insightRequestMetadata);
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         // get the core data
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -2429,7 +2428,11 @@ public class DataService {
     }
 
     public TrendDataResults getTrendDataResults(WSKPIDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            return (TrendDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
+        }
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
@@ -2453,7 +2456,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             TrendDataResults embeddedDataResults = new TrendDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         } finally {
             if (success) {
@@ -2469,7 +2472,7 @@ public class DataService {
             System.out.println("Requesting report for asynchronous run...");
             return (TreeDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -2497,7 +2500,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             TreeDataResults embeddedDataResults = new TreeDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         } finally {
             if (success) {
@@ -2540,13 +2543,13 @@ public class DataService {
             } catch (Exception e) {
                 LogClass.error(e);
                 EmbeddedTextDataResults results = new EmbeddedTextDataResults();
-                results.setReportFault(new ServerError(e.getMessage()));
+                results.setReportFault(new ServerError(errorToUserError(e)));
                 return results;
             } finally {
                 Database.closeConnection(conn);
             }
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -2572,7 +2575,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + reportID, e);
             EmbeddedTextDataResults embeddedDataResults = new EmbeddedTextDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         } finally {
             if (success) {
@@ -2597,7 +2600,7 @@ public class DataService {
             System.out.println("Requesting report for asynchronous run...");
             return (TextDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -2624,7 +2627,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             TextDataResults embeddedDataResults = new TextDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         } finally {
             if (success) {
@@ -2640,7 +2643,7 @@ public class DataService {
             System.out.println("Requesting report for asynchronous run...");
             return (CrossTabDataResults) AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
         }
-        boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+        boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {
             long start = System.currentTimeMillis();
@@ -2692,7 +2695,7 @@ public class DataService {
         } catch (Throwable e) {
             LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
             CrossTabDataResults embeddedDataResults = new CrossTabDataResults();
-            embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+            embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
             return embeddedDataResults;
         } finally {
             if (success) {
@@ -2702,7 +2705,12 @@ public class DataService {
         }
     }
 
-
+    private static String errorToUserError(Throwable e) {
+        if ("sleep interrupted".equals(e.getMessage())) {
+            return "The report timed out.";
+        }
+        return e.getMessage();
+    }
 
     private Map<String, DataResults> simpleCache = new WeakHashMap<String, DataResults>();
     private Map<String, EmbeddedDataResults> simpleEmbeddedCache = new WeakHashMap<String, EmbeddedDataResults>();
@@ -2769,15 +2777,14 @@ public class DataService {
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
         accountAsyncHack(insightRequestMetadata);
         if (!insightRequestMetadata.isNoAsync()) {
-            System.out.println("Requesting report for asynchronous run...");
             return AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
         } else {
             boolean success;
             try {
-                success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
+                success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
             } catch (ReportException e) {
                 ListDataResults embeddedDataResults = new ListDataResults();
-                embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+                embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
                 return embeddedDataResults;
             }
             EIConnection conn = Database.instance().getConnection();
@@ -2841,7 +2848,7 @@ public class DataService {
             } catch (Throwable e) {
                 LogClass.error(e.getMessage() + " on running report " + analysisDefinition.getAnalysisID(), e);
                 ListDataResults embeddedDataResults = new ListDataResults();
-                embeddedDataResults.setReportFault(new ServerError(e.getMessage()));
+                embeddedDataResults.setReportFault(new ServerError(errorToUserError(e)));
                 return embeddedDataResults;
             } finally {
                 if (success) {
