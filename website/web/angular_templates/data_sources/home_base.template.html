@@ -9,10 +9,10 @@
 </div>
 <div class="container corePageWell">
     <div class="row">
-        <div class="col-md-3" ng-if="!user.only_show_top_reports">
+        <div class="col-md-2" ng-if="!user.only_show_top_reports">
             <div ng-include="'/angular_templates/data_sources/recent_actions.template.html'"></div>
         </div>
-        <div ng-class="{'col-md-9': !user.only_show_top_reports, 'col-md-12': user.only_show_top_reports}">
+        <div ng-class="{'col-md-10': !user.only_show_top_reports, 'col-md-12': user.only_show_top_reports}">
             <div app-view-segment="1"></div>
         </div>
     </div>

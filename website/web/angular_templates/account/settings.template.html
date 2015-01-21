@@ -1,6 +1,14 @@
 <div cg-busy="loading" />
 <div ng-if="saved" class="alert alert-success">Saved!</div>
 <form role="form" method="POST" name="settingsForm" ng-submit="submit()" novalidate>
+
+    <div class="form-group">
+        <label for="timezone">Time Zone</label>
+        <select id="timezone" class="form-control" name="timezone" ng-model="settings.timezone" ng-options="timezone.zone_id as timezone.zone_id for timezone in timezones">
+
+        </select>
+    </div>
+
     <div class="form-group">
         <label for="locale">Locale</label>
         <select id="locale" class="form-control" name="locale" ng-model="settings.locale">

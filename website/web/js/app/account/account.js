@@ -217,6 +217,11 @@ eiAccounts.controller("AccountSettingsController", ["$scope", "$http", function(
         $scope.settings = c.data.settings;
     })
 
+    $http.get("/app/availableTimeZones.json").then(function(c) {
+        $scope.timezones = c.data.timezones;
+        console.log(c.data.timezones);
+    });
+
     $scope.submit = function() {
         $scope.saved = false;
         $scope.loading = $http.post("/app/account_settings.json", JSON.stringify($scope.settings));

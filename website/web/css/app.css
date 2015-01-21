@@ -265,7 +265,7 @@ a {
 }
 
 .tag-select {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .browse-by-tag {
@@ -461,7 +461,7 @@ fieldset[disabled] .btn-alt-primary.active {
     color: #333;
     margin-top: 0;
     margin-bottom: 0;
-    font-size: 18px;
+    font-size: 14px;
     padding-top: 0;
 }
 
@@ -469,7 +469,7 @@ fieldset[disabled] .btn-alt-primary.active {
     padding-top:3px;
     padding-bottom:3px;
     font-weight:normal;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 @media(max-width:480px) {

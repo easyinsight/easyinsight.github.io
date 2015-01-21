@@ -206,7 +206,8 @@
             }
 
             $scope.delete_selected = function() {
-                var to_delete = $filter("tagged")($scope.reports, $scope.tags, $scope.current_folder.id).filter(function (e, i, l) {
+
+                var to_delete = $filter("tagged")($scope.reports, $scope.tags).filter(function (e, i, l) {
                     return e.selected;
                 })
                 if (to_delete.length > 0) {
