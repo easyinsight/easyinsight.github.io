@@ -108,15 +108,6 @@ public class CompositeFeed extends Feed {
             compositeFeedNodes.add(reportNode);
         }
 
-        /*if (insightRequestMetadata.getBaseDate() != null) {
-            try {
-                return blah(insightRequestMetadata, analysisItems, compositeFeedNodes, conn, filters);
-            } catch (CloneNotSupportedException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            }
-        }*/
-
         List<IJoin> connections = null;
 
         boolean joinsOverridden = false;
@@ -232,15 +223,17 @@ public class CompositeFeed extends Feed {
 
 
         for (CompositeFeedNode node : compositeFeedNodes) {
-            QueryStateNode queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata, filters, this);
+            QueryStateNode queryStateNode;
+            try {
+                queryStateNode = node.createQueryStateNode(conn, getFields(), insightRequestMetadata, filters, this);
+            } catch (Exception e) {
+                LogClass.error(e);
+                continue;
+            }
             QueryNodeKey queryNodeKey = node.createQueryNodeKey();
             queryNodeMap.put(queryNodeKey, queryStateNode);
             graph.addVertex(queryStateNode);
             for (AnalysisItem analysisItem : analysisItems) {
-                if (insightRequestMetadata.getPostProcessJoins().contains(analysisItem)) {
-                    itemSet.remove(analysisItem);
-                    continue;
-                }
                 if (queryStateNode.handles(analysisItem)) {
                     itemSet.remove(analysisItem);
                     neededNodes.put(queryNodeKey, queryStateNode);
@@ -253,9 +246,6 @@ public class CompositeFeed extends Feed {
             if (filters != null) {
                 for (FilterDefinition filterDefinition : filters) {
                     if (filterDefinition.isSingleSource() && filterDefinition.getField() != null) {
-                        if (insightRequestMetadata.getPostProcessJoins().contains(filterDefinition.getField())) {
-                            continue;
-                        }
                         if (queryStateNode.handles(filterDefinition.getField())) {
                             queryStateNode.addFilter(filterDefinition);
                         } else if (alwaysPassThrough(filterDefinition.getField())) {
