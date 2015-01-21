@@ -958,18 +958,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
         }
 
-
-
-        for (AnalysisItem analysisItem : map.values()) {
-            if (analysisItem.hasType(AnalysisItemTypes.DERIVED_DIMENSION)) {
-                DerivedAnalysisDimension derivedAnalysisDimension = (DerivedAnalysisDimension) analysisItem;
-                if (derivedAnalysisDimension.getDerivationCode().contains("loadfromjoin")) {
-                    insightRequestMetadata.addPostProcessJoin(analysisItem);
-                }
-            }
-        }
-
-        return new HashSet<AnalysisItem>(map.values());
+        return new HashSet<>(map.values());
     }
 
     private long toID(Key key) {
