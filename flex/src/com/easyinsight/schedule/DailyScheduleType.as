@@ -15,7 +15,7 @@ public class DailyScheduleType extends ScheduleType {
         } else {
             minuteString = String(minute);
         }
-        if (useAccountTimezone) {
+        if (useAccountTimezone && User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
             return "Daily on " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
         } else {
             return "Daily on " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";

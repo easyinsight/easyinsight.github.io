@@ -15,7 +15,7 @@ public class WeekdayScheduleType extends ScheduleType {
         } else {
             minuteString = String(minute);
         }
-        if (useAccountTimezone) {
+        if (useAccountTimezone && User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
             return "Every Weekday on " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
         } else {
             return "Every Weekday on " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";

@@ -34,7 +34,7 @@ public class WeeklyScheduleType extends ScheduleType {
         } else if (dayOfWeek == 7) {
             day = "Saturday";
         }
-        if (useAccountTimezone) {
+        if (useAccountTimezone && User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
             return "Every " + day + " at " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
         } else {
             return "Every " + day + " at " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";
