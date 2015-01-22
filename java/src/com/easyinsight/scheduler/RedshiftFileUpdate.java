@@ -71,7 +71,7 @@ public class RedshiftFileUpdate {
                 feedDefinition.getFields().addAll(newFields);
             }
             feedDefinition.setLastRefreshStart(new Date());
-            new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn);
+            new DataSourceInternalService().updateFeedDefinition(feedDefinition, conn, false, true, update);
             tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
             if (update) {
                 tableDef.truncate();

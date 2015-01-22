@@ -41,15 +41,19 @@ public class DataSourceInternalService {
     }
 
     public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn) throws Exception {
-        updateFeedDefinition(feedDefinition, conn, false, true);
+        updateFeedDefinition(feedDefinition, conn, false, true, false);
     }
 
     public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate, boolean updateComposite) throws Exception {
+        updateFeedDefinition(feedDefinition, conn, systemUpdate, updateComposite, false);
+    }
+
+    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate, boolean updateComposite, boolean forceSkipMigrate) throws Exception {
         DataStorage metadata = null;
         try {
             feedDefinition.beforeSave(conn);
             FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
-            if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
+            if (feedDefinition instanceof DistinctCachedSource || (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL)) {
                 List<AnalysisItem> existingFields = existingFeed.getFields();
                 if (systemUpdate) {
                     metadata = DataStorage.writeConnection(feedDefinition, conn, 0, systemUpdate);
@@ -57,7 +61,7 @@ public class DataSourceInternalService {
                     metadata = DataStorage.writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), systemUpdate);
                 }
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-                int version = metadata.migrate(existingFields, feedDefinition.getFields(), feedDefinition.isMigrateRequired());
+                int version = metadata.migrate(existingFields, feedDefinition.getFields(), feedDefinition.isMigrateRequired() && !forceSkipMigrate);
                 feedStorage.updateVersion(feedDefinition, version, conn);
                 metadata.commit();
             } else {
