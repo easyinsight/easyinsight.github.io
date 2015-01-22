@@ -1,4 +1,4 @@
-var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
+var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'eiFilters']);
 
 easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
 
@@ -77,9 +77,10 @@ easyInsight.config(["$httpProvider", function($httpProvider) {
 
 easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q", "$window",
     function ($rootScope, $http, $location, PageInfo, $q, $window) {
-    $rootScope.user = {
-        "username": "..."
-    };
+        $rootScope.user = {
+            "username": "..."
+        };
+        $rootScope.filters = [{"name": "blah", "value": 35, "type": "rolling"}, {"name": "blah2", "type": "single", "value": 26}];
         var user_defer = $q.defer();
     $rootScope.user_promise = user_defer.promise;
 

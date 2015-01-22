@@ -29,6 +29,7 @@
     <script type="text/javascript" src="/js/app/data_sources/data_sources.js"></script>
     <script type="text/javascript" src="/js/app/account/account.js"></script>
     <script type="text/javascript" src="/js/app/connection/connection.js"></script>
+    <script type="text/javascript" src="/js/app/filters.js"></script>
     <base href="/a/"></base>
 </head>
 <body>
@@ -86,6 +87,9 @@
         </ul>
     </div>
 </nav>
+<div ng-repeat="filter in filters">
+<filter-view filter="filter"></filter-view>
+</div>
 <div app-view-segment="0" />
 </body>
 </html>
