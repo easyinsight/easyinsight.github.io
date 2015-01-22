@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*">
 	<mx:Metadata>
 		[Event(name="analysisStateChange", type="com.easyinsight.analysis.AnalysisStateChangeEvent")]
 	</mx:Metadata>
@@ -165,7 +165,7 @@
             <node label="Topo Map" type="{AnalysisDefinition.TOPO}"/>
         </node>
     </mx:XMLList>
-    <mx:PopUpMenuButton id="p2" 
+    <listing:ArghButton id="p2"
             dataProvider="{xmlList}" label="{reportLabel}"
             labelField="@label" width="150" popUpStyleName="CustomPopupMenu"
             showRoot="false" itemClick="itemClickHandler(event);" open="WindowManagement.manager.hideReport()" close="WindowManagement.manager.restoreReport()"
