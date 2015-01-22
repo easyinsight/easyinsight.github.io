@@ -193,6 +193,8 @@
             dashboardRenderer.refreshData();
         }
 
+        public var urlKey:String;
+
         [Bindable]
         private var logoVisible:Boolean = false;
 
