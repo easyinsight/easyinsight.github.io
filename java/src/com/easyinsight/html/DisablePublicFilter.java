@@ -11,7 +11,7 @@ import java.io.IOException;
  * Time: 1:34 PM
  * To change this template use File | Settings | File Templates.
  */
-@WebFilter(urlPatterns = "/*", asyncSupported = true)
+@WebFilter(filterName = "DisablePublic", asyncSupported = true)
 public class DisablePublicFilter implements Filter {
     public void destroy() {
     }

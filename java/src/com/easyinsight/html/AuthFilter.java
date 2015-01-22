@@ -20,7 +20,7 @@ import java.util.Map;
  * Date: 5/24/12
  * Time: 9:26 AM
  */
-@WebFilter(value = {"/html/*", "/billing/*"}, asyncSupported = true)
+@WebFilter(filterName="AuthFilter", asyncSupported = true)
 public class AuthFilter implements Filter {
 
     public void init(FilterConfig filterConfig) throws ServletException {

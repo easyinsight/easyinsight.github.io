@@ -19,7 +19,7 @@ import java.sql.SQLException;
  * Date: 6/16/12
  * Time: 11:07 AM
  */
-@WebFilter(urlPatterns = "/html/*", asyncSupported = true)
+@WebFilter(filterName="ValidAccountFilter", asyncSupported = true)
 public class ValidAccountFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
 

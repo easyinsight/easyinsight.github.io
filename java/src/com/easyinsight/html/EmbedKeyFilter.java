@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Date: 11/4/13
  * Time: 11:49 AM
  */
-@WebFilter(value = "/html/user/*", asyncSupported = true)
+@WebFilter(filterName = "EmbedKeyFilter", asyncSupported = true)
 public class EmbedKeyFilter implements Filter {
     public void destroy() {
     }

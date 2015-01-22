@@ -18,7 +18,7 @@ import java.io.InputStream;
  * Time: 11:10 AM
  * To change this template use File | Settings | File Templates.
  */
-@WebFilter(value = "/html/filterValue", asyncSupported = true)
+@WebFilter(filterName="FilterPublic", asyncSupported = true)
 public class FilterPublicFilter implements Filter {
     public void destroy() {
     }

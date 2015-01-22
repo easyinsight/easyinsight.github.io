@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Date: 11/4/13
  * Time: 11:49 AM
  */
-@WebFilter(value = "/html/report/*", asyncSupported = true)
+@WebFilter(filterName = "ReportFilter", asyncSupported = true)
 public class ReportFilter implements Filter {
     public void destroy() {
     }

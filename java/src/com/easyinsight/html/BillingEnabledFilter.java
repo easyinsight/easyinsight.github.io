@@ -15,7 +15,7 @@ import java.io.IOException;
  * Time: 8:43 AM
  * To change this template use File | Settings | File Templates.
  */
-@WebFilter(value = "/billing/*", asyncSupported = true)
+@WebFilter(filterName = "BillingEnabled", asyncSupported = true)
 public class BillingEnabledFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
 

@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * Time: 1:21 PM
  * To change this template use File | Settings | File Templates.
  */
-@WebFilter(urlPatterns = "/html/dashboard/*", asyncSupported = true)
+@WebFilter(filterName="DashboardFilter", asyncSupported = true)
 public class DashboardFilter implements Filter {
     public void destroy() {
     }

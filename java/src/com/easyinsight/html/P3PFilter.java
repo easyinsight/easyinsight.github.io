@@ -12,7 +12,7 @@ import java.io.IOException;
  * Time: 3:24 PM
  * To change this template use File | Settings | File Templates.
  */
-@WebFilter(value = "/*", asyncSupported = true)
+@WebFilter(filterName = "P3PFilter", asyncSupported = true)
 public class P3PFilter implements Filter {
     public void destroy() {
     }

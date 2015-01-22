@@ -12,7 +12,7 @@ import java.io.IOException;
  * Date: 5/24/12
  * Time: 9:26 AM
  */
-@WebFilter(value = {"/html/*", "/embed/*", "/billing/*"}, asyncSupported = true)
+@WebFilter(filterName = "NoCache", asyncSupported = true)
 public class NoCacheFilter implements Filter {
 
     public void init(FilterConfig filterConfig) throws ServletException {

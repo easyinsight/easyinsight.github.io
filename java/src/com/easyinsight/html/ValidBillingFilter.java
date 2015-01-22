@@ -19,7 +19,7 @@ import java.sql.SQLException;
  * Date: 6/16/12
  * Time: 11:07 AM
  */
-@WebFilter(value = "/billing/*", asyncSupported = true)
+@WebFilter(filterName = "ValidBillingFilter", asyncSupported = true)
 public class ValidBillingFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
 
