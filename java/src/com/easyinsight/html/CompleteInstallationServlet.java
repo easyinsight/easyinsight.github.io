@@ -31,9 +31,14 @@ public class CompleteInstallationServlet extends HttpServlet {
             long dataSourceID = new FeedStorage().dataSourceIDForDataSource(dataSourceKey);
             FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
             CredentialsResponse credentialsResponse = new UserUploadService().completeInstallation(dataSource);
-            String callDataID = credentialsResponse.getCallDataID();
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("callDataID", callDataID);
+            if (!credentialsResponse.isSuccessful()) {
+                req.getSession().setAttribute("connectionError", credentialsResponse.getFailureMessage());
+                jsonObject.put("failureMessage", credentialsResponse.getFailureMessage());
+            } else {
+                String callDataID = credentialsResponse.getCallDataID();
+                jsonObject.put("callDataID", callDataID);
+            }
             response.setContentType("application/json");
             response.getOutputStream().write(jsonObject.toString().getBytes());
             response.getOutputStream().flush();
