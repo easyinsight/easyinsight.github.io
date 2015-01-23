@@ -67,12 +67,12 @@
     function startRefresh() {
         $.getJSON('/app/completeInstallation?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
             if (typeof(data["failureMessage"]) != "undefined") {
-                window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true&problemCode="+data["problemCode"]);
+                window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true");
             } else {
                 var callDataID = data["callDataID"];
                 again(callDataID, "Refreshing the data source...");
             }
-        });
+        }).error(function() { window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true"); });
     }
 
     function onCallData(data, callDataID) {
@@ -88,7 +88,7 @@
                 window.location.replace(data["url"]);
             });
         } else {
-            window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true&problemCode="+data["problemCode"]);
+            window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true");
             // problem
         }
     }

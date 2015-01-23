@@ -39,7 +39,7 @@
 <div class="container corePageWell" style="margin-top: 20px">
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <h3>We offer two options for connecting Easy Insight to MySQL:</h3>
+            <h3>We offer two options for connecting Easy Insight to <%= factory.getName()%>:</h3>
         </div>
     </div>
     <div class="row">
@@ -54,26 +54,25 @@
     </div>
     <%
         if (request.getParameter("error") != null) {
-            if (request.getSession().getAttribute("connectionError") == null) {
-    %>
+            %>
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <div class="alert alert-danger">Something went wrong in trying to create the connection. Check the configuration information you used.</div>
-        </div>
-    </div><%
-} else {
-%>
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="alert alert-danger"><%= request.getSession().getAttribute("connectionError")%></div>
+            <div class="alert alert-danger">
+            <%
+            if (request.getSession().getAttribute("failureMessage") != null) {
+                %>
+                <%= request.getSession().getAttribute("failureMessage") %>
+                <% request.getSession().removeAttribute("failureMessage"); %>
+                <%
+            } else {
+                %>
+                Something went wrong in trying to create the connection. Check the configuration information you used.</div>
+            <% } %>
         </div>
     </div>
     <%
-            request.getSession().removeAttribute("connectionError");
-        }
         }
     %>
-
     <div class="row">
         <div class="col-md-6 col-md-offset-2">
             <form class="well" method="post" action="/app/html/connectionCreationAction.jsp">
@@ -86,7 +85,7 @@
                     for (HTMLConnectionProperty property : factory.getProperties()) {
 
                 %>
-                <label for="<%= property.getSafeProperty()%>" class="promptLabel"><%=property.getField()%></label>
+                <label for="<%= property.getSafeProperty()%>" class="promptLabel databaseFormItem"><%=property.getField()%></label>
                 <%
                     if (property.isPassword()) {
                 %>
@@ -98,7 +97,7 @@
                 <%
                 } else if (property.getType() == HTMLConnectionProperty.CHECKBOX) {
                 %>
-                <input type="checkbox" class="form-control" style="text-align: left;height:10px" name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>"/>
+                <input type="checkbox" style="text-align: left;height:14px" name="<%= property.getSafeProperty()%>" id="<%= property.getSafeProperty()%>"<% if ("true".equals(property.getDefaultValue())) { %> checked="checked" <% } %> /><br>
                 <%
                 } else {
                 %>
