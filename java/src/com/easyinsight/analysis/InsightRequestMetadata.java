@@ -435,6 +435,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Set<String> getPipelines(AnalysisItem analysisItem) {
+        if (pipelineAssignmentMap == null) {
+            pipelineAssignmentMap = new HashMap<>();
+        }
         Set<String> pipelines = pipelineAssignmentMap.get(analysisItem);
         if (pipelines == null) {
             pipelines = new HashSet<String>();
