@@ -287,6 +287,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public List<String> getWarnings() {
+        if (warnings == null) {
+            warnings = new ArrayList<>();
+        }
         return warnings;
     }
 
