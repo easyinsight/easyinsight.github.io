@@ -60,6 +60,7 @@ import com.easyinsight.util.ServiceUtil;
 import com.xerox.amazonws.sqs2.Message;
 import com.xerox.amazonws.sqs2.MessageQueue;
 import com.xerox.amazonws.sqs2.SQSUtils;
+import org.apache.poi.util.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -1236,38 +1237,8 @@ public class UserUploadService {
             } else {
                 byte[] bytes = null;
                 if (uploadContext instanceof FlatFileUploadContext) {
-                    AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                    S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
-                    byte retrieveBuf[];
-                    retrieveBuf = new byte[1];
-                    InputStream bfis = object.getObjectContent();
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    while (bfis.read(retrieveBuf) != -1) {
-                        baos.write(retrieveBuf);
-                    }
-                    byte[] resultBytes = baos.toByteArray();
-                    ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-                    ZipInputStream zin = new ZipInputStream(bais);
-                    zin.getNextEntry();
-
-                    byte[] buffer = new byte[8192];
-                    ByteArrayOutputStream fout = new ByteArrayOutputStream();
-                    BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-                    int nBytes;
-                    while ((nBytes = zin.read(buffer)) != -1) {
-                        bufOS.write(buffer, 0, nBytes);
-                    }
-                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                        bufOS.write(c);
-                    }*/
-                    bufOS.close();
-                    fout.close();
-
-                    bytes = fout.toByteArray();
-
-                    baos = null;
-                    bufOS = null;
-                    fout = null;
+                    String uploadKey = ((FlatFileUploadContext) uploadContext).getUploadKey();
+                    bytes = bytesFromS3((FlatFileUploadContext) uploadContext);
                 }
                 List<AnalysisItem> fields = uploadContext.guessFields(conn, bytes);
                 List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
@@ -1285,19 +1256,48 @@ public class UserUploadService {
         return uploadResponse;
     }
 
+    protected byte[] bytesFromS3(FlatFileUploadContext uploadContext) throws IOException {
+        byte[] bytes;AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+        S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
+        byte retrieveBuf[];
+        retrieveBuf = new byte[1];
+        InputStream bfis = object.getObjectContent();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (bfis.read(retrieveBuf) != -1) {
+            baos.write(retrieveBuf);
+        }
+        byte[] resultBytes = baos.toByteArray();
+        ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+        ZipInputStream zin = new ZipInputStream(bais);
+        zin.getNextEntry();
+
+        byte[] buffer = new byte[8192];
+        ByteArrayOutputStream fout = new ByteArrayOutputStream();
+        BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+        int nBytes;
+        while ((nBytes = zin.read(buffer)) != -1) {
+            bufOS.write(buffer, 0, nBytes);
+        }
+                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                        bufOS.write(c);
+                    }*/
+        bufOS.close();
+        fout.close();
+
+        bytes = fout.toByteArray();
+
+        baos = null;
+        bufOS = null;
+        fout = null;
+        return bytes;
+    }
+
     public UploadResponse analyzeUpload(UploadContext uploadContext) {
 
         boolean async;
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            if (!rs.next()) {
-                async = false;
-            } else {
-                async = rs.getBoolean(1);
-            }
+            async = determineAsync(conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -1326,38 +1326,7 @@ public class UserUploadService {
             } else {
                 byte[] bytes = null;
                 if (uploadContext instanceof FlatFileUploadContext) {
-                    AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                    S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
-                    byte retrieveBuf[];
-                    retrieveBuf = new byte[1];
-                    InputStream bfis = object.getObjectContent();
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    while (bfis.read(retrieveBuf) != -1) {
-                        baos.write(retrieveBuf);
-                    }
-                    byte[] resultBytes = baos.toByteArray();
-                    ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-                    ZipInputStream zin = new ZipInputStream(bais);
-                    zin.getNextEntry();
-
-                    byte[] buffer = new byte[8192];
-                    ByteArrayOutputStream fout = new ByteArrayOutputStream();
-                    BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-                    int nBytes;
-                    while ((nBytes = zin.read(buffer)) != -1) {
-                        bufOS.write(buffer, 0, nBytes);
-                    }
-                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                        bufOS.write(c);
-                    }*/
-                    bufOS.close();
-                    fout.close();
-
-                    bytes = fout.toByteArray();
-
-                    baos = null;
-                    bufOS = null;
-                    fout = null;
+                    bytes = bytesFromS3((FlatFileUploadContext) uploadContext);
                 }
                 List<AnalysisItem> fields = uploadContext.guessFields(conn, bytes);
                 List<FieldUploadInfo> fieldInfos = new ArrayList<FieldUploadInfo>();
@@ -1383,78 +1352,67 @@ public class UserUploadService {
         return uploadResponse;
     }
 
-    /*public UploadResponse createStubSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
-        UploadResponse uploadResponse;
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, null);
-            PreparedStatement ps1 = conn.prepareStatement("SELECT URL_KEY FROM DATA_FEED WHERE DATA_FEED_ID = ?");
-            ps1.setLong(1, dataSourceID);
-            ResultSet urlRS = ps1.executeQuery();
-            urlRS.next();
-            String urlKey = urlRS.getString(1);
-            ps1.close();
-            conn.commit();
-            uploadResponse = new UploadResponse(dataSourceID, urlKey);
-        } catch (Throwable e) {
-            LogClass.error(e);
-            conn.rollback();
-            uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-        return uploadResponse;
-    }*/
-
-
     public UploadResponse createDataSourceWithConn(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible, EIConnection conn)
         throws Exception{
+
         UploadResponse uploadResponse;
 
-            byte[] bytes = null;
-            if (uploadContext instanceof FlatFileUploadContext) {
-                FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
-                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
+        byte[] bytes = null;
+        if (uploadContext instanceof FlatFileUploadContext) {
+            FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
+            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+            S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
 
-                byte retrieveBuf[];
-                retrieveBuf = new byte[1];
-                InputStream bfis = object.getObjectContent();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                while (bfis.read(retrieveBuf) != -1) {
-                    baos.write(retrieveBuf);
-                }
-                byte[] resultBytes = baos.toByteArray();
-                ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-                ZipInputStream zin = new ZipInputStream(bais);
-                zin.getNextEntry();
+            byte retrieveBuf[];
+            retrieveBuf = new byte[1];
+            InputStream bfis = object.getObjectContent();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            IOUtils.copy(bfis, baos);
+            /*while (bfis.read(retrieveBuf) != -1) {
+                baos.write(retrieveBuf);
+            }*/
+            byte[] resultBytes = baos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+            ZipInputStream zin = new ZipInputStream(bais);
+            zin.getNextEntry();
 
-                byte[] buffer = new byte[8192];
-                ByteArrayOutputStream fout = new ByteArrayOutputStream();
-                BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-                int nBytes;
-                while ((nBytes = zin.read(buffer)) != -1) {
-                    bufOS.write(buffer, 0, nBytes);
-                }
-                /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                    bufOS.write(c);
-                }*/
-                bufOS.close();
-                fout.close();
+            byte[] buffer = new byte[8192];
+            ByteArrayOutputStream fout = new ByteArrayOutputStream();
+            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+            int nBytes;
+            IOUtils.copy(zin, bufOS);
+            /*while ((nBytes = zin.read(buffer)) != -1) {
+                bufOS.write(buffer, 0, nBytes);
+            }*/
+            /*for (int c = zin.read(); c != -1; c = zin.read()) {
+                bufOS.write(c);
+            }*/
+            bufOS.close();
+            fout.close();
 
-                bytes = fout.toByteArray();
+            bytes = fout.toByteArray();
 
-                baos = null;
-                bufOS = null;
-                fout = null;
-            }
-            System.out.println("bytes size = " + bytes.length);
-            long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
-            uploadResponse = new UploadResponse(dataSourceID);
+            baos = null;
+            bufOS = null;
+            fout = null;
+        }
+        System.out.println("bytes size = " + bytes.length);
+        long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
+        uploadResponse = new UploadResponse(dataSourceID);
 
-            return uploadResponse;
+        return uploadResponse;
+    }
+
+    protected boolean determineAsync(EIConnection conn) throws SQLException {
+        boolean async;PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
+        ps.setLong(1, SecurityUtil.getAccountID());
+        ResultSet rs = ps.executeQuery();
+        if (!rs.next()) {
+            async = false;
+        } else {
+            async = rs.getBoolean(1);
+        }
+        return async;
     }
 
     public UploadResponse createDataSource(String name, UploadContext uploadContext, List<AnalysisItem> analysisItems, boolean accountVisible) {
@@ -1462,14 +1420,7 @@ public class UserUploadService {
         boolean async;
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            if (!rs.next()) {
-                async = false;
-            } else {
-                async = rs.getBoolean(1);
-            }
+            async = determineAsync(conn);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -2072,14 +2023,7 @@ public class UserUploadService {
         if (!noAsync) {
             EIConnection conn = Database.instance().getConnection();
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
-                ps.setLong(1, SecurityUtil.getAccountID());
-                ResultSet rs = ps.executeQuery();
-                if (!rs.next()) {
-                    async = false;
-                } else {
-                    async = rs.getBoolean(1);
-                }
+                async = determineAsync(conn);
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
@@ -2200,14 +2144,7 @@ public class UserUploadService {
             boolean async;
             EIConnection conn = Database.instance().getConnection();
             try {
-                PreparedStatement ps = conn.prepareStatement("SELECT account.async_requests FROM account WHERE account_id = ?");
-                ps.setLong(1, SecurityUtil.getAccountID());
-                ResultSet rs = ps.executeQuery();
-                if (!rs.next()) {
-                    async = false;
-                } else {
-                    async = rs.getBoolean(1);
-                }
+                async = determineAsync(conn);
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
@@ -2476,6 +2413,11 @@ public class UserUploadService {
 
     public CredentialsResponse completeInstallation(final FeedDefinition dataSource, final FeedDefinition withParent) {
         SecurityUtil.authorizeFeed(dataSource.getDataFeedID(), Roles.OWNER);
+        AccountStats stats = new UserAccountAdminService().getAccountStats();
+        if (new DataSourceTypeRegistry().billingInfoForType(dataSource.getFeedType()) == ConnectionBillingType.SMALL_BIZ &&
+                stats.getCurrentSmallBizConnections() >= (stats.getAddonSmallBizConnections() + stats.getCoreSmallBizConnections())) {
+            return new CredentialsResponse(false, "You've reached your connection limit. You'll need to add more connections through the Account page.", dataSource.getDataFeedID());
+        }
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
