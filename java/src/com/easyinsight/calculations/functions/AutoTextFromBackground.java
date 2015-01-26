@@ -38,6 +38,7 @@ public class AutoTextFromBackground extends Function {
         }
         int color = textValueExtension.getBackgroundColor();
         Color c = new Color(color);
+        System.out.println("red = " + c.getRed() + ", green = " + c.getGreen() + ", blue = " + c.getBlue());
         if (c.getRed() > 150 && c.getGreen() > 150 && c.getBlue() > 150) {
             textValueExtension.setColor(0x000000);
         } else {
