@@ -2,7 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="WebServicesClient" name="WebServices Client">
-      <configuration />
+      <configuration ws.engine="Glassfish / JAX-WS 2.X RI / Metro 1.X / JWSDP 2.0" />
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
@@ -15,3 +15,4 @@
     <orderEntry type="library" name="Glassfish / JAX-WS 2.X RI / Metro 1.X / JWSDP 2.0" level="project" />
   </component>
 </module>
+
