@@ -61,6 +61,17 @@ public class CreateFlatFileSourceServlet extends HttpServlet {
             List<FieldUploadInfo> infos = response.getInfos();
             List<AnalysisItem> items = infos.stream().map(FieldUploadInfo::getGuessedItem).collect(Collectors.toList());
             UploadResponse creationResponse = new UserUploadService().createDataSource(dataSourceName, context, items, true);
+            if (!creationResponse.isSuccessful()) {
+                org.json.JSONObject jo = new org.json.JSONObject();
+                jo.put("error", creationResponse.getFailureMessage());
+                jo.put("success", false);
+                resp.setContentType("application/json");
+                resp.setStatus(200);
+                ResponseInfo ri = new ResponseInfo(200, jo.toString());
+                resp.getOutputStream().write(ri.getResponseBody().getBytes());
+                resp.getOutputStream().flush();
+                return;
+            }
             long dataSourceID = creationResponse.getFeedID();
             EIConnection conn = Database.instance().getConnection();
             try {

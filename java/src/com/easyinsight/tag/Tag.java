@@ -94,6 +94,11 @@ public class Tag implements Serializable {
     public JSONObject toJSON(ExportMetadata md) throws JSONException {
         JSONObject jo = new JSONObject();
         jo.put("name", getName());
+        if (getName().length() > 12) {
+            jo.put("short_name", getName().substring(0, 12) + "...");
+        } else {
+            jo.put("short_name", getName());
+        }
         jo.put("id", getId());
         return jo;
     }

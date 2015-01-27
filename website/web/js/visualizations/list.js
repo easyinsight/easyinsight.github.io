@@ -45,7 +45,6 @@ List = {
 
                             return m; },
                         {});
-                    console.log(f);
                     drillThrough(f);
                 })
             }, null, targetDiv);

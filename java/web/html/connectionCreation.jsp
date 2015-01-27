@@ -20,8 +20,7 @@
             if (request.getParameter("error") == null) {
                 response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID));
             } else {
-                response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID + "&error=" + request.getParameter("error") + "&" +
-                        (request.getParameter("problemCode") == null ? "" : ("problemCode=" + request.getParameter("problemCode")))));
+                response.sendRedirect(RedirectUtil.getURL(request, "/app/html/databaseConnection.jsp?connectionID=" + connectionID + "&error=" + request.getParameter("error")));
             }
             return;
         } else if (connectionID == FeedType.STATIC.getType()) {

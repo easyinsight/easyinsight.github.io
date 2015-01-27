@@ -38,8 +38,8 @@ public class RunReportServlet extends APIServlet {
         } catch (NumberFormatException e) {
             insightResponse = new AnalysisService().openAnalysisIfPossible(reportIDString);
         }
-        SecurityUtil.authorizeInsight(insightResponse.getInsightDescriptor().getId());
-        WSAnalysisDefinition report = new AnalysisService().openAnalysisDefinition(insightResponse.getInsightDescriptor().getId());
+        SecurityUtil.authorizeInsight(insightResponse.getInsightDescriptor().getId(), conn);
+        WSAnalysisDefinition report = AnalysisService.openAnalysisDefinitionWithConn(insightResponse.getInsightDescriptor().getId(), conn);
         populateFiltersFromRequest(request, report);
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.setNoLogging(true);
@@ -65,7 +65,7 @@ public class RunReportServlet extends APIServlet {
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < results.getHeaders().length; i++) {
                     AnalysisItem headerItem = results.getHeaders()[i];
-                    if (headerItem == analysisItem) {
+                    if (headerItem.equals(analysisItem)) {
                         com.easyinsight.core.Value value = listRow.getValues()[i];
                         Element val = new Element("value");
                         val.addAttribute(new Attribute("field", headerItem.toDisplay()));

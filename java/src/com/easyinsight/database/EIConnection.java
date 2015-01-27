@@ -12,10 +12,10 @@ import java.util.concurrent.Executor;
  * Date: Apr 12, 2009
  * Time: 11:02:04 AM
  */
-public class EIConnection implements Connection {
+public class EIConnection implements Connection, AutoCloseable {
 
     private Connection conn;
-    private CommitEventListener listener = new CommitEventListener();  
+    private CommitEventListener listener = new CommitEventListener();
 
     public EIConnection(Connection conn) {
         this.conn = conn;

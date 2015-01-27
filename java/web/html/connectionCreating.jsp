@@ -2,6 +2,10 @@
 <%@ page import="com.easyinsight.security.SecurityUtil" %>
 <%@ page import="com.easyinsight.html.HtmlConstants" %>
 <%@ page import="com.easyinsight.datafeeds.*" %>
+<%@ page import="com.easyinsight.database.Database" %>
+<%@ page import="com.easyinsight.database.EIConnection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <html lang="en">
 <head>
@@ -27,12 +31,27 @@
 
         FeedResponse feedResponse = new FeedService().openFeedIfPossible(request.getParameter("dataSourceID"));
         FeedDefinition dataSource;
+        String summary = "";
         if (feedResponse.getStatus() == FeedResponse.SUCCESS) {
 
             dataSource = new FeedStorage().getFeedDefinitionData(feedResponse.getFeedDescriptor().getId());
             if (dataSource.postOAuthSetup(request) != null) {
                 response.sendRedirect(dataSource.postOAuthSetup(request));
                 return;
+            }
+
+            int dataSourceType = dataSource.getFeedType().getType();
+            try (EIConnection conn = Database.instance().getConnection()) {
+                try (PreparedStatement ps = conn.prepareStatement("SELECT SOLUTION.SUMMARY FROM SOLUTION WHERE DATA_SOURCE_TYPE = ?")) {
+                    ps.setInt(1, dataSourceType);
+                    ResultSet rs = ps.executeQuery();
+                    if (rs.next()) {
+                        summary = rs.getString(1);
+                        if (summary == null) {
+                            summary = "";
+                        }
+                    }
+                }
             }
         } else {
             response.sendRedirect("/serverError.jsp");
@@ -47,9 +66,13 @@
 
     function startRefresh() {
         $.getJSON('/app/completeInstallation?dataSourceID=<%= request.getParameter("dataSourceID") %>', function(data) {
-            var callDataID = data["callDataID"];
-            again(callDataID, "Refreshing the data source...");
-        });
+            if (typeof(data["failureMessage"]) != "undefined") {
+                window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true");
+            } else {
+                var callDataID = data["callDataID"];
+                again(callDataID, "Refreshing the data source...");
+            }
+        }).error(function() { window.location.replace("/app/html/connections/<%= dataSource.getFeedType().getType() %>?error=true"); });
     }
 
     function onCallData(data, callDataID) {
@@ -85,12 +108,25 @@
     <jsp:param name="userName" value="<%= userName %>"/>
     <jsp:param name="headerActive" value="<%= HtmlConstants.DATA_SOURCES_AND_REPORTS %>"/>
 </jsp:include>
-<div class="container corePageWell">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12" style="background-color:#0084b4">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2" style="text-align:center">
+                    <h2 style="color:#FFFFFF;margin-top: 20px;margin-bottom: 20px">
+                        Creating your connection...
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container corePageWell" style="margin-top: 20px;">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="row" style="margin-top:30px">
+                    <div class="row" style="margin-top:30px;margin-bottom: 30px">
                         <div class="col-md-12">
                             <p style="font-weight: normal;margin-bottom: 10px">Easy Insight is pulling over the data from your target connection. Depending on how much data you have, this process may take several minutes.</div>
                         </div>
@@ -114,6 +150,11 @@
                             </div>
                         </div>
                     </div>
+                <div class="row" style="margin-top:30px">
+                    <div class="col-md-12">
+                        <p style="font-weight: normal;margin-bottom: 10px"><%= summary %></div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>

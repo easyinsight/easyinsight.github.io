@@ -1099,7 +1099,7 @@ public class ExportService {
 
         for (AnalysisItem analysisItem : items) {
             for (AnalysisItem headerItem : listDataResults.getHeaders()) {
-                if (headerItem == analysisItem) {
+                if (headerItem.equals(analysisItem)) {
                     com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, fontSize, com.itextpdf.text.Font.BOLD,
                             new BaseColor(headerTextColor.getRed(), headerTextColor.getGreen(), headerTextColor.getBlue()));
                     PdfPCell cell = new PdfPCell(new Phrase(analysisItem.toUnqualifiedDisplay(), boldFont));
@@ -1116,7 +1116,7 @@ public class ExportService {
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < listDataResults.getHeaders().length; i++) {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                    if (headerItem == analysisItem) {
+                    if (headerItem.equals(analysisItem)) {
                         PdfPCell valueCell = new PdfPCell(new Phrase(""));
                         valueCell.setMinimumHeight(minimumSize);
                         table.addCell(valueCell);
@@ -1133,7 +1133,7 @@ public class ExportService {
                     }
                     for (int i = 0; i < listDataResults.getHeaders().length; i++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                        if (headerItem == analysisItem) {
+                        if (headerItem.equals(analysisItem)) {
                             Value value = listRow.getValues()[i];
                             com.itextpdf.text.Font.FontFamily fontFamily = com.itextpdf.text.Font.FontFamily.HELVETICA;
                             int fontStyle = 0;
@@ -1191,7 +1191,7 @@ public class ExportService {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[j];
 
-                        if (headerItem == analysisItem) {
+                        if (headerItem.equals(analysisItem)) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 double summary = listDataResults.getSummaries()[j];
                                 if (Double.isNaN(summary) || Double.isInfinite(summary)) {
@@ -4298,7 +4298,7 @@ public class ExportService {
                     linkMap.put(analysisItem, defaultLink);
                 }
                 for (AnalysisItem headerItem : listDataResults.getHeaders()) {
-                    if (headerItem == analysisItem) {
+                    if (headerItem.equals(analysisItem)) {
                         sb.append("<th style=\"").append(thStyle).append("\">");
                         sb.append(headerItem.toUnqualifiedDisplay());
                         sb.append("</th>");
@@ -4345,7 +4345,7 @@ public class ExportService {
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < listDataResults.getHeaders().length; i++) {
                     AnalysisItem headerItem = listDataResults.getHeaders()[i];
-                    if (headerItem == analysisItem) {
+                    if (headerItem.equals(analysisItem)) {
                         StringBuilder styleString = new StringBuilder(tdStyle);
                         String align = "left";
                         if (headerItem.getReportFieldExtension() != null && headerItem.getReportFieldExtension() instanceof TextReportFieldExtension) {
@@ -4460,7 +4460,7 @@ public class ExportService {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[j];
 
-                        if (headerItem == analysisItem) {
+                        if (headerItem.equals(analysisItem)) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 Value summary = (Value) listDataResults.getAdditionalProperties().get("summary" + headerItem.qualifiedName());
                                 if (summary == null) {
@@ -4777,7 +4777,7 @@ public class ExportService {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[j];
 
-                        if (headerItem == analysisItem) {
+                        if (headerItem.equals(analysisItem)) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 Value summary = (Value) listDataResults.getAdditionalProperties().get("summary" + headerItem.qualifiedName());
                                 if (summary == null) {

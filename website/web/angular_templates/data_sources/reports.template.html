@@ -154,7 +154,7 @@
     <div class="tag-list">
         <div ng-repeat="tag in tags" class="row" style="margin-bottom: 5px">
             <div class="col-md-12">
-                <a  class="btn btn-default tag-select" ng-class="{selected: tag.enabled, active: tag.enabled}" data-toggle="button" ng-click="toggleTag(tag)">{{ tag.name }}</a>
+                <a  class="btn btn-default tag-select" ng-class="{selected: tag.enabled, active: tag.enabled}" data-toggle="button" ng-click="toggleTag(tag)">{{ tag.short_name }}</a>
             </div>
         </div>
     </div>

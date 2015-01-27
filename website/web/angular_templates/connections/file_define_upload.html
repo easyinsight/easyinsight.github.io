@@ -1,4 +1,11 @@
 <div cg-busy="save" />
+<div class="row" ng-show="error != null && error != ''">
+    <div class="col-md-12">
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    </div>
+</div>
 <form role="form" method="POST" name="dataSourceForm" ng-submit="submit()" novalidate>
     <div class="form-group">
         <label for="data_source_name">What should this data source be called?</label>
