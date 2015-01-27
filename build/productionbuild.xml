@@ -44,7 +44,10 @@
     </target>
 
     <target name="shutdownInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="shutdown" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="shutdown" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Database" operation="shutdown" />
+        </parallel>
     </target>
 
     <target name="shutdownStagingInstances">
@@ -55,8 +58,10 @@
     </target>
 
     <target name="shutdownLargeInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="shutdown" />
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="shutdown" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="shutdown" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="shutdown" />
+        </parallel>
    </target>
 
     <target name="downloadStagingInstances">
@@ -67,17 +72,24 @@
     </target>
 
     <target name="downloadBackendInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="download" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Database" operation="download" />
+        </parallel>
     </target>
 
     <target name="downloadLargeInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="download"/>
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="download"/>
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="download"/>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="download"/>
+        </parallel>
     </target>
 
     <target name="updateLargeInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="update" />
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="update" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="update" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="update" />
+        </parallel>
     </target>
 
     <target name="updateStagingInstances">
@@ -88,7 +100,10 @@
     </target>
 
     <target name="updateInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="update" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="update" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Database" operation="update" />
+        </parallel>
     </target>
 
     <target name="startStagingInstances">
@@ -99,12 +114,17 @@
     </target>
 
     <target name="startLargeInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="startup" />
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="startup" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Frontend" operation="startup" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="API" operation="startup" />
+        </parallel>
     </target>
 
     <target name="startInstances">
-        <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="startup" />
+        <parallel>
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Backend" operation="startup" />
+            <OrderInstances userName="einsight" password="eJAqp0Q~j!n>L" role="Database" operation="startup" />
+        </parallel>
     </target>
 
     <target name="orderInstances">
