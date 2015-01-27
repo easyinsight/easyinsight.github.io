@@ -4460,7 +4460,7 @@ public class ExportService {
                     for (int j = 0; j < listDataResults.getHeaders().length; j++) {
                         AnalysisItem headerItem = listDataResults.getHeaders()[j];
 
-                        if (headerItem == analysisItem) {
+                        if (headerItem.equals(analysisItem)) {
                             if (headerItem.hasType(AnalysisItemTypes.MEASURE)) {
                                 Value summary = (Value) listDataResults.getAdditionalProperties().get("summary" + headerItem.qualifiedName());
                                 if (summary == null) {
