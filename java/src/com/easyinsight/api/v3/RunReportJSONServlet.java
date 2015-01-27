@@ -55,7 +55,7 @@ public class RunReportJSONServlet extends JSONServlet {
             for (AnalysisItem analysisItem : items) {
                 for (int i = 0; i < results.getHeaders().length; i++) {
                     AnalysisItem headerItem = results.getHeaders()[i];
-                    if (headerItem == analysisItem) {
+                    if (headerItem.equals(analysisItem)) {
                         Value value = listRow.getValues()[i];
                         String valueString;
                         if (value.type() == Value.DATE) {

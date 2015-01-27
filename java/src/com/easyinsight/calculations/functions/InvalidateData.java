@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class InvalidateData extends Function {
     public Value evaluate() {
-        calculationMetadata.getConnection().setAutoCommit(false);
+        /*calculationMetadata.getConnection().setAutoCommit(false);
         try {
             long dataSourceID = calculationMetadata.getDashboard().getDataSourceID();
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, calculationMetadata.getConnection());
@@ -39,7 +39,7 @@ public class InvalidateData extends Function {
             }
         } finally {
             calculationMetadata.getConnection().setAutoCommit(true);
-        }
+        }*/
         return new EmptyValue();
     }
 

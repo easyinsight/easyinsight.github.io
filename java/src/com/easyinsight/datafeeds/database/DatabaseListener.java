@@ -166,8 +166,6 @@ public class DatabaseListener implements Runnable {
                             }
                         }
                     });
-                    thread.setDaemon(true);
-                    thread.start();
                 }
             } catch (Throwable e) {
                 LogClass.error(e);

@@ -287,6 +287,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public List<String> getWarnings() {
+        if (warnings == null) {
+            warnings = new ArrayList<>();
+        }
         return warnings;
     }
 
@@ -432,6 +435,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Set<String> getPipelines(AnalysisItem analysisItem) {
+        if (pipelineAssignmentMap == null) {
+            pipelineAssignmentMap = new HashMap<>();
+        }
         Set<String> pipelines = pipelineAssignmentMap.get(analysisItem);
         if (pipelines == null) {
             pipelines = new HashSet<String>();

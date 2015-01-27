@@ -69,10 +69,15 @@
         protected override function commitProperties():void {
             super.commitProperties();
             if (_activity != null) {
-                if (_activity.scheduleType.useAccountTimezone) {
+                if (_activity.scheduleType.useAccountTimezone && User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
                     timezone = User.getInstance().accountTimezone;
                 } else {
-                    timezone = "(UTC" + (_activity.scheduleType.timeOffset > 0 ? "-" : "+") + (_activity.scheduleType.timeOffset / 60) + ":00)";
+                    if (_activity.scheduleType.timeOffset == 0) {
+                        var offset:int = new Date().getTimezoneOffset();
+                        timezone = "(UTC" + (offset > 0 ? "-" : "+") + (offset / 60) + ":00)";
+                    } else {
+                        timezone = "(UTC" + (_activity.scheduleType.timeOffset > 0 ? "-" : "+") + (_activity.scheduleType.timeOffset / 60) + ":00)";
+                    }
                 }
                 hour = _activity.scheduleType.hour;
                 minute = _activity.scheduleType.minute;
@@ -145,6 +150,8 @@
             } else {
                 _activity.scheduleType.useAccountTimezone = false;
             }
+            var offset:int = new Date().getTimezoneOffset();
+            _activity.scheduleType.timeOffset = offset;
             return true;
         }
 

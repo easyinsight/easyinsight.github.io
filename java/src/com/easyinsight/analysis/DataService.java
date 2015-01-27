@@ -1407,21 +1407,13 @@ public class DataService {
     public EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
 
-        accountAsyncHack(insightRequestMetadata);
         EmbeddedResults embeddedResults;
-        if (!insightRequestMetadata.isNoAsync()) {
-            ReportRetrieval.asyncReportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
-            ResultData resultData = AsyncReport.asyncEndUserResults(analysisDefinition, insightRequestMetadata);
-            resultData.results.setDefinition(resultData.report);
-            return resultData.results;
-        } else {
-            ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
-            DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
-            analysisDefinition.untweakReport(null);
-            embeddedResults = results.toEmbeddedResults();
-            embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
-            embeddedResults.setDefinition(analysisDefinition);
-        }
+        ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
+        DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
+        analysisDefinition.untweakReport(null);
+        embeddedResults = results.toEmbeddedResults();
+        embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
+        embeddedResults.setDefinition(analysisDefinition);
 
         return embeddedResults;
     }
@@ -1598,6 +1590,24 @@ public class DataService {
 
     public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                               InsightRequestMetadata insightRequestMetadata, @Nullable List<FilterDefinition> drillThroughFilters, boolean ignoreCache) {
+        accountAsyncHack(insightRequestMetadata);
+        if (!insightRequestMetadata.isNoAsync()) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                ReportRetrieval.asyncReportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
+                ResultData resultData = AsyncReport.asyncEndUserResults(analysisDefinition, insightRequestMetadata);
+                resultData.results.setDefinition(resultData.report);
+                return resultData.results;
+            } catch (Exception e) {
+                LogClass.error(e);
+                EmbeddedDataResults results = new EmbeddedDataResults();
+                results.setReportFault(new ServerError(errorToUserError(e)));
+                return results;
+            } finally {
+                Database.closeConnection(conn);
+            }
+        }
         boolean success = !insightRequestMetadata.isRunningAsync() && UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
         EIConnection conn = Database.instance().getConnection();
         try {

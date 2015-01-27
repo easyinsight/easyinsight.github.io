@@ -43,6 +43,9 @@ public class AutoBackgroundColor extends Function {
         Value target = getParameter(0);
         double instanceValue = getParameter(0).toDouble();
         Scale scale = (Scale) statCache.getResult();
+        if (scale.min < 0) {
+            scale.min = -(Math.log(Math.abs(scale.min)));
+        }
         double range = scale.max - scale.min;
         double place = (instanceValue > 0 ? Math.log(instanceValue) : 0) / range;
         Color c1 = new Color(color1);
