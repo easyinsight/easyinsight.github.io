@@ -1,25 +1,21 @@
 <form ng-submit="save_schedule()">
     <div class="row">
-    <div class="col-md-12" style="font-weight: 500">How do you want to set up this report email?</div>
+    <div class="col-md-12">How do you want to set up this report email?</div>
 </div>
-<div class="row scheduleRow">
-    <div class="col-md-2">HTML Email:</div>
-    <div class="col-md-10"><input type="checkbox" ng-model="schedule.html_email" /></div>
+<div class="row">
+    <div class="col-md-4">HTML Email</div>
+    <div class="col-md-2"><input type="checkbox" ng-model="schedule.html_email" /></div>
+    <div class="col-md-2"><a ng-if="schedule.type == 'report'" style="cursor:pointer" ng-click="add_link()">Link</a></div>
 </div>
-<div class="row scheduleRow">
-    <div class="col-md-10 col-md-offset-2">
-        <a ng-if="schedule.type == 'report'" style="cursor:pointer" ng-click="add_link()">Add Link to Report</a>
-    </div>
+<div class="row">
+    <div class="col-md-4">Subject Line:</div>
+    <div class="col-md-8"><input type="text" ng-model="schedule.subject" class="form-control" /></div>
 </div>
-<div class="row scheduleRow">
-    <div class="col-md-2">Subject Line:</div>
-    <div class="col-md-10"><input type="text" ng-model="schedule.subject" class="form-control" /></div>
+<div class="row">
+    <div class="col-md-4">Email Body:</div>
+    <div class="col-md-8"><textarea id="body_text" ng-model="schedule.body" class="form-control" rows="15" /></div>
 </div>
-<div class="row scheduleRow">
-    <div class="col-md-2">Email Body:</div>
-    <div class="col-md-10"><textarea id="body_text" ng-model="schedule.body" class="form-control" rows="15" /></div>
-</div>
-<div class="row scheduleRow">
+<div class="row">
     <div class="col-md-8 col-md-offset-4">
         <input type="submit" class="btn btn-primary" value="Save" />
     </div>

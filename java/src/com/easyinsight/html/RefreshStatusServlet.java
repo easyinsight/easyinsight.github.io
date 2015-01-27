@@ -45,8 +45,7 @@ public class RefreshStatusServlet extends HttpServlet {
                 if (callData.getStatus() == ServiceUtil.FAILED) {
                     if (callData.getResult() instanceof DataSourceConnectivityReportFault) {
                         DataSourceConnectivityReportFault fault = (DataSourceConnectivityReportFault) callData.getResult();
-                        jsonObject.put("problemHTML", fault.getMessage());
-                        req.getSession().setAttribute("failureMessage", fault.getMessage());
+                        jsonObject.put("problemHTML", fault.toHTML());
                     } else {
                         jsonObject.put("problemHTML", "Something went wrong in pulling data for this data source.");
                     }

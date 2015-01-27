@@ -34,7 +34,7 @@ public class RecentActionsServlet extends JSONServlet {
         JSONObject responseObject = new JSONObject();
 
         ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(), conn, new InsightRequestMetadata());
-        Collection<ActionLog> actions = new AdminService().getRecentHTMLActions(conn);
+        Collection<ActionLog> actions = new AdminService().getRecentHTMLActions();
         JSONArray array = new JSONArray(actions.stream().sequential().filter(a ->
                 (
                         (a instanceof ActionReportLog && a.getActionType() == ActionReportLog.VIEW) ||

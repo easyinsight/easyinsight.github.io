@@ -11,7 +11,6 @@ import com.easyinsight.userupload.FlatFileUploadContext;
 import com.easyinsight.userupload.UploadResponse;
 import com.easyinsight.userupload.UserUploadService;
 import net.minidev.json.JSONObject;
-import org.json.JSONException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -41,31 +40,19 @@ public class RefreshFlatFileSourceServlet extends JSONServlet {
     protected ResponseInfo processJSON(JSONObject jsonObject, EIConnection conn, HttpServletRequest request) throws Exception {
         String uploadKey = jsonObject.get("upload_key").toString();
         String dataSourceURLKey = jsonObject.get("data_source_id").toString();
-        int operation;
-        if (jsonObject.get("operation") instanceof String) {
-            operation = Integer.parseInt(jsonObject.get("operation").toString());
-        } else {
-            operation = (Integer) jsonObject.get("operation");
-        }
+        int operation = (Integer) jsonObject.get("operation");
         PreparedStatement ps = conn.prepareStatement("SELECT data_feed_id FROM data_feed where API_KEY = ?");
         ps.setString(1, dataSourceURLKey);
         ResultSet rs = ps.executeQuery();
         rs.next();
         long dataSourceID = rs.getLong(1);
 
-        ResponseInfo ri;
-        try {
-            new UserUploadService().updateData(dataSourceID, uploadKey, operation == 2);
+        new UserUploadService().updateData(dataSourceID, uploadKey, operation == 2);
 
-            org.json.JSONObject jo = new org.json.JSONObject();
-            jo.put("success", true);
-            ri = new ResponseInfo(200, jo.toString());
-        } catch (Exception e) {
-            org.json.JSONObject jo = new org.json.JSONObject();
-            jo.put("success", false);
-            jo.put("error", e.getCause().getMessage());
-            ri = new ResponseInfo(200, jo.toString());
-        }
+        ResponseInfo ri;
+        org.json.JSONObject jo = new org.json.JSONObject();
+        jo.put("success", true);
+        ri = new ResponseInfo(200, jo.toString());
 
         return ri;
     }

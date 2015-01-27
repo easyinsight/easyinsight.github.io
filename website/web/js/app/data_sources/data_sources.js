@@ -241,9 +241,6 @@
             })
             if (v.length > 0) {
                 return input.filter(function (e, i, l) {
-                    if (e.folder != folder) {
-                        return false;
-                    }
                     var i, j;
                     for (i = 0; i < v.length; i++) {
                         for (j = 0; j < e.tags.length; j++) {

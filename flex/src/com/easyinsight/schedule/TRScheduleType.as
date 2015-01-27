@@ -15,7 +15,7 @@ public class TRScheduleType extends ScheduleType {
         } else {
             minuteString = String(minute);
         }
-        if (useAccountTimezone && User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
+        if (useAccountTimezone) {
             return "Every T/R on " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
         } else {
             return "Every T/R on " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";

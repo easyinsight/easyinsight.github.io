@@ -28,7 +28,7 @@ public class MonthlyScheduleType extends ScheduleType {
         } else {
             suffix = "th";
         }
-        if (useAccountTimezone && User.getInstance().accountTimezone != null && User.getInstance().accountTimezone != "") {
+        if (useAccountTimezone) {
             return dayOfMonth + suffix + " day of the month at " + hour + ":" + minuteString + " (" + User.getInstance().accountTimezone + ")";
         } else {
             return dayOfMonth + suffix + " day of the month at " + hour + ":" + minuteString + " (UTC" + (timeOffset > 0 ? "-" : "+") + (timeOffset / 60) + ":00)";

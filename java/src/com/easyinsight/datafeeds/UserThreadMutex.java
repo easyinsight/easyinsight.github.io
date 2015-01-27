@@ -18,7 +18,7 @@ public class UserThreadMutex {
 
     private static final UserThreadMutex mutex = new UserThreadMutex();
 
-    private Map<Long, Semaphore> mutexMap = new HashMap<>();
+    private Map<Long, Semaphore> mutexMap = new HashMap<Long, Semaphore>();
 
     public static UserThreadMutex mutex() {
         return mutex;
@@ -29,25 +29,33 @@ public class UserThreadMutex {
         boolean success = false;
 
         int tries = 0;
-        while (!success && tries < 30) {
+        while (!success && tries < 5) {
             try {
-                Semaphore semaphore;
-                synchronized(this) {
-                    semaphore = mutexMap.get(userID);
-                    if (semaphore == null) {
-                        semaphore = new Semaphore(SystemSettings.instance().getSemaphoreLimit());
-                        mutexMap.put(userID, semaphore);
-                    }
-                }
-
-                success = semaphore.tryAcquire();
-                if (!success) {
-                    System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
-                    success = semaphore.tryAcquire(1000, TimeUnit.MILLISECONDS);
+                Semaphore semaphore = mutexMap.get(userID);
+                if (semaphore == null) {
+                    semaphore = new Semaphore(SystemSettings.instance().getSemaphoreLimit());
+                    mutexMap.put(userID, semaphore);
+                    success = semaphore.tryAcquire();
                     if (!success) {
-                        System.out.println("No luck, incrementing tries to " + (tries + 1));
-                        tries++;
+                        System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
+                        success = semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
+                        if (!success) {
+                            System.out.println("No luck, incrementing tries to " + (tries + 1));
+                            tries++;
+                        }
                     }
+                    //return success;
+                } else {
+                    success = semaphore.tryAcquire();
+                    if (!success) {
+                        System.out.println(userID + " could not retrieve a user thread semaphore, retrying and waiting.");
+                        success = semaphore.tryAcquire(60000, TimeUnit.MILLISECONDS);
+                        if (!success) {
+                            System.out.println("No luck, incrementing tries to " + (tries + 1));
+                            tries++;
+                        }
+                    }
+                    //return success;
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -58,15 +66,15 @@ public class UserThreadMutex {
             throw new ReportException(new GenericReportFault("Too many requests, wait a bit for this report to run."));
         }
 
-        return true;
+        return success;
     }
 
     public static Map<Long, Semaphore> summarize() {
-        return new HashMap<>(mutex().mutexMap);
+        return new HashMap<Long, Semaphore>(mutex().mutexMap);
     }
 
     public static void release() {
-        Map<Long, Semaphore> copy = new HashMap<>(mutex().mutexMap);
+        Map<Long, Semaphore> copy = new HashMap<Long, Semaphore>(mutex().mutexMap);
         for (Map.Entry<Long, Semaphore> entry : copy.entrySet()) {
             entry.getValue().release();
         }

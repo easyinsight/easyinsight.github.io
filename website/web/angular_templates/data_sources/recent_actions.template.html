@@ -8,7 +8,7 @@
     </div>
     <ul class="nav nav-list">
         <li ng-repeat="suggestion in suggestions">
-            <a class="two-column-nav-action" href="#" ng-click="suggestionClicked(suggestion)" style="padding-top:3px;padding-bottom:3px;">{{ suggestion.label }}</a>
+            <button class="btn btn-link two-column-nav-action" ng-click="suggestionClicked(suggestion)" style="padding-top:3px;padding-bottom:3px;">{{ suggestion.label }}</button>
         </li>
     </ul>
 </div>
