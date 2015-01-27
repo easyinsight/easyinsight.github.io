@@ -92,6 +92,11 @@
     </rule>
 
     <rule>
+        <from>^/html/report/([A-Za-z0-9]+).json$</from>
+        <to>/html/reportMetadata?reportID=$1</to>
+    </rule>
+
+    <rule>
         <from>^/reportHeader/([A-Za-z0-9]+)$</from>
         <to>/reportHeader?imageID=$1</to>
     </rule>
