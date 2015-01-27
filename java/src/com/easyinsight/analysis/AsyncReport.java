@@ -429,6 +429,7 @@ public class AsyncReport {
                                                                 localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
                                                                 localMetadata.setNoAsync(true);
                                                                 localMetadata.setRunningAsync(true);
+                                                                localMetadata.setCacheForHTML(insightRequestMetadata.isCacheForHTML());
 
                                                                 String name;
                                                                 if (SecurityUtil.getUserID(false) == 0) {
