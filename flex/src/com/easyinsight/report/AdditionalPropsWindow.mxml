@@ -184,7 +184,7 @@
             window.afterScript = _analysisDefinition.reportRunMarmotScript;
             window.addEventListener(MarmotScriptEvent.SAVE_SCRIPT, onScript, false, 0, true);
             WindowManagement.manager.addWindow(window);
-            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
         }
 
