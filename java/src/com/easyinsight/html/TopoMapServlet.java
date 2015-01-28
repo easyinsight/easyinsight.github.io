@@ -57,6 +57,15 @@ public class TopoMapServlet extends HtmlServlet {
             populatePointData(insightRequestMetadata, conn, wsMap, object, longitude, latitude, pointMeasure, pointGrouping);
         }
 
+        if ("Leaflet".equals(wsMap.getMap())) {
+            object.put("centerLong", wsMap.getCenterLong());
+            object.put("centerLat", wsMap.getCenterLat());
+            object.put("defaultZoom", wsMap.getDefaultZoom());
+            object.put("maxZoom", wsMap.getMaxZoom());
+            object.put("radius", wsMap.getRadius());
+            object.put("blur", wsMap.getBlur());
+        }
+
         response.setContentType("application/json");
         response.getOutputStream().write(object.toString().getBytes());
         response.getOutputStream().flush();
