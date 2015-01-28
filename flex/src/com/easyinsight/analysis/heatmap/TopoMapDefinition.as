@@ -23,6 +23,12 @@ public class TopoMapDefinition extends AnalysisDefinition {
     public var pointColors:ArrayCollection = new ArrayCollection();
     public var map:String = "US States";
     public var mapID:int;
+    public var centerLong:String;
+    public var centerLat:String;
+    public var defaultZoom:int;
+    public var maxZoom:int;
+    public var radius:int;
+    public var blur:int;
 
     public function TopoMapDefinition() {
         super();
