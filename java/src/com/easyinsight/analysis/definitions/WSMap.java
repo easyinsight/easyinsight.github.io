@@ -26,6 +26,60 @@ public class WSMap extends WSAnalysisDefinition {
     private List<MultiColor> pointColors = new ArrayList<>();
     private long mapID;
     private transient String[] boundSet;
+    private String centerLong;
+    private String centerLat;
+    private int defaultZoom;
+    private int maxZoom;
+    private int radius;
+    private int blur;
+
+    public String getCenterLong() {
+        return centerLong;
+    }
+
+    public void setCenterLong(String centerLong) {
+        this.centerLong = centerLong;
+    }
+
+    public String getCenterLat() {
+        return centerLat;
+    }
+
+    public void setCenterLat(String centerLat) {
+        this.centerLat = centerLat;
+    }
+
+    public int getDefaultZoom() {
+        return defaultZoom;
+    }
+
+    public void setDefaultZoom(int defaultZoom) {
+        this.defaultZoom = defaultZoom;
+    }
+
+    public int getMaxZoom() {
+        return maxZoom;
+    }
+
+    public void setMaxZoom(int maxZoom) {
+        this.maxZoom = maxZoom;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+
+    public int getBlur() {
+        return blur;
+    }
+
+    public void setBlur(int blur) {
+        this.blur = blur;
+    }
 
     public String[] getBoundSet() {
         return boundSet;
@@ -205,6 +259,12 @@ public class WSMap extends WSAnalysisDefinition {
         regionFillEnd = (int) findNumberProperty(properties, "regionFillEnd", 0x0);
         pointColors = multiColorProperty(properties, "pointColors");
         noDataFill = (int) findNumberProperty(properties, "noDataFill", 0xCCCCCC);
+        radius = (int) findNumberProperty(properties, "radius", 15);
+        blur = (int) findNumberProperty(properties, "blur", 15);
+        centerLat = findStringProperty(properties, "centerLat", "");
+        centerLong = findStringProperty(properties, "centerLong", "");
+        defaultZoom = (int) findNumberProperty(properties, "defaultZoom", 4);
+        maxZoom = (int) findNumberProperty(properties, "maxZoom", 7);
     }
 
     @Override
@@ -215,6 +275,12 @@ public class WSMap extends WSAnalysisDefinition {
         properties.add(new ReportNumericProperty("regionFillEnd", regionFillEnd));
         properties.add(new ReportNumericProperty("noDataFill", noDataFill));
         properties.add(ReportMultiColorProperty.fromColors(pointColors, "pointColors"));
+        properties.add(new ReportNumericProperty("radius", radius));
+        properties.add(new ReportNumericProperty("blur", blur));
+        properties.add(new ReportNumericProperty("defaultZoom", defaultZoom));
+        properties.add(new ReportNumericProperty("maxZoom", maxZoom));
+        properties.add(new ReportStringProperty("centerLat", centerLat));
+        properties.add(new ReportStringProperty("centerLong", centerLong));
         return properties;
     }
 
@@ -226,7 +292,11 @@ public class WSMap extends WSAnalysisDefinition {
     public JSONObject toJSON(HTMLReportMetadata htmlReportMetadata, List<FilterDefinition> parentDefinitions) throws JSONException {
 
         JSONObject areaChart = super.toJSON(htmlReportMetadata, parentDefinitions);
-        areaChart.put("type", "topomap");
+        if ("Leaflet".equals(getMap())) {
+            areaChart.put("type", "leaflet");
+        } else {
+            areaChart.put("type", "topomap");
+        }
         areaChart.put("key", getUrlKey());
         areaChart.put("url", "/app/topoMap");
         areaChart.put("parameters", new JSONObject());
