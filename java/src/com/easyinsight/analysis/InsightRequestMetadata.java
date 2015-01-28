@@ -298,6 +298,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Map<String, Boolean> getFilterOverrideMap() {
+        if (filterOverrideMap == null) {
+            filterOverrideMap = new HashMap<>();
+        }
         return filterOverrideMap;
     }
 
