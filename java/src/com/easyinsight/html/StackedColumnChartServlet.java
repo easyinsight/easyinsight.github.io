@@ -425,6 +425,12 @@ public class StackedColumnChartServlet extends HtmlServlet {
                             stackMap.put(key, min);
                         }
                         Double y = point.getY().toDouble();
+                        if (min == null) {
+                            min = 0.;
+                        }
+                        if (y == null) {
+                            y = 0.;
+                        }
                         Double delta = y - min;
                         maxY = Math.max(maxY, y);
                         JSONObject jo = new JSONObject();
