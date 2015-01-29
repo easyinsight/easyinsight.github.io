@@ -1258,37 +1258,22 @@ public class UserUploadService {
 
     protected byte[] bytesFromS3(FlatFileUploadContext uploadContext) throws IOException {
         byte[] bytes;AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-        S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
-        byte retrieveBuf[];
-        retrieveBuf = new byte[1];
+        S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadContext.getUploadKey() + ".zip"));
+
         InputStream bfis = object.getObjectContent();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while (bfis.read(retrieveBuf) != -1) {
-            baos.write(retrieveBuf);
-        }
+        IOUtils.copy(bfis, baos);
         byte[] resultBytes = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
         ZipInputStream zin = new ZipInputStream(bais);
         zin.getNextEntry();
-
-        byte[] buffer = new byte[8192];
         ByteArrayOutputStream fout = new ByteArrayOutputStream();
         BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-        int nBytes;
-        while ((nBytes = zin.read(buffer)) != -1) {
-            bufOS.write(buffer, 0, nBytes);
-        }
-                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                        bufOS.write(c);
-                    }*/
+        IOUtils.copy(zin, bufOS);
         bufOS.close();
         fout.close();
 
         bytes = fout.toByteArray();
-
-        baos = null;
-        bufOS = null;
-        fout = null;
         return bytes;
     }
 
@@ -2049,28 +2034,20 @@ public class UserUploadService {
             AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
             S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
 
-            byte retrieveBuf[];
-            retrieveBuf = new byte[1];
+
             InputStream bfis = object.getObjectContent();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            while (bfis.read(retrieveBuf) != -1) {
-                baos.write(retrieveBuf);
-            }
+            IOUtils.copy(bfis, baos);
             byte[] resultBytes = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
             ZipInputStream zin = new ZipInputStream(bais);
             zin.getNextEntry();
 
-            byte[] buffer = new byte[8192];
+
             ByteArrayOutputStream fout = new ByteArrayOutputStream();
             BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-            int nBytes;
-            while ((nBytes = zin.read(buffer)) != -1) {
-                bufOS.write(buffer, 0, nBytes);
-            }
-            /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                bufOS.write(c);
-            }*/
+            IOUtils.copy(zin, bufOS);
+
             bufOS.close();
             fout.close();
 
