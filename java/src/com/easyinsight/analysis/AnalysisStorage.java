@@ -500,7 +500,7 @@ public class AnalysisStorage {
         }
         queryStmt.close();
         if (testAccountVisible) {
-            PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
+            PreparedStatement queryAccountStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, analysis.TITLE, DATA_FEED_ID, REPORT_TYPE, URL_KEY, ACCOUNT_VISIBLE, FOLDER FROM ANALYSIS, USER_TO_ANALYSIS, USER WHERE " +
                     "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = user.user_id and user.account_id = ? and analysis.account_visible = ? and temporary_report = ? AND " +
                     "analysis.data_feed_id = ?");
             queryAccountStmt.setLong(1, accountID);
@@ -509,7 +509,7 @@ public class AnalysisStorage {
             queryAccountStmt.setLong(4, dataSourceID);
             ResultSet accountRS = queryAccountStmt.executeQuery();
             while (accountRS.next()) {
-                descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), Roles.OWNER, accountRS.getBoolean(6)));
+                descriptors.add(new InsightDescriptor(accountRS.getLong(1), accountRS.getString(2), accountRS.getLong(3), accountRS.getInt(4), accountRS.getString(5), new Date(), "", Roles.OWNER, accountRS.getBoolean(6), accountRS.getInt(7), ""));
             }
             queryAccountStmt.close();
         }
