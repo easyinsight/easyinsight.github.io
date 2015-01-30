@@ -278,7 +278,9 @@ public class FieldRule {
     }
 
     public boolean matches(AnalysisItem analysisItem) {
-        if (getTag() != null) {
+        if (isAll()) {
+            return true;
+        } else if (getTag() != null) {
             Tag tag = getTag();
             if (analysisItem.getTags() != null) {
                 for (Tag test : analysisItem.getTags()) {
