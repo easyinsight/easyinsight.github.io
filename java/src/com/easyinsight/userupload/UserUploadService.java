@@ -17,6 +17,8 @@ import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
+import com.easyinsight.datafeeds.composite.FederatedDataSource;
+import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.infusionsoft.*;
@@ -1941,6 +1943,44 @@ public class UserUploadService {
             } finally {
                 Database.closeConnection(timeConn);
             }
+
+            /*Set<Long> cacheSources = new HashSet<>();
+            if (feedDefinition instanceof CompositeFeedDefinition) {
+                CompositeFeedDefinition c = (CompositeFeedDefinition) feedDefinition;
+                for (CompositeFeedNode node : c.getCompositeFeedNodes()) {
+                    if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                        // retrieve the source this is based on, refresh that
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement ps = conn.prepareStatement("SELECT data_feed_id FROM distinct_cached_addon_report_source, analysis WHERE data_source_id = ? AND " +
+                                    "distinct_cached_addon_report_source.report_id = analysis.analysis_id");
+                            ps.setLong(1, node.getDataFeedID());
+                            ResultSet rs = ps.executeQuery();
+                            if (rs.next()) {
+                                long cacheSourceID = rs.getLong(1);
+                                System.out.println(cacheSourceID);
+                                cacheSources.add(cacheSourceID);
+                            }
+                            ps.close();
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                    }
+                }
+                for (Long cacheSourceID : cacheSources) {
+                    FeedDefinition dataSource = feedStorage.getFeedDefinitionData(cacheSourceID);
+                    if (dataSource instanceof FederatedDataSource) {
+                        FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
+                        List<FederationSource> sources = federatedDataSource.getSources();
+                        for (FederationSource source : sources) {
+                            source.getDataSourceID();
+                        }
+                    }
+                }
+            }*/
+
+
+
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (DataSourceMutex.mutex().lock(feedDefinition.getDataFeedID())) {
                     final String callID = ServiceUtil.instance().longRunningCall(feedDefinition.getDataFeedID());
@@ -2390,6 +2430,7 @@ public class UserUploadService {
 
     public CredentialsResponse completeInstallation(final FeedDefinition dataSource, final FeedDefinition withParent) {
         SecurityUtil.authorizeFeed(dataSource.getDataFeedID(), Roles.OWNER);
+
         AccountStats stats = new UserAccountAdminService().getAccountStats();
         if (new DataSourceTypeRegistry().billingInfoForType(dataSource.getFeedType()) == ConnectionBillingType.SMALL_BIZ &&
                 stats.getCurrentSmallBizConnections() >= (stats.getAddonSmallBizConnections() + stats.getCoreSmallBizConnections())) {
@@ -2397,6 +2438,7 @@ public class UserUploadService {
         }
         EIConnection conn = Database.instance().getConnection();
         try {
+            boolean async = determineAsync(conn);
             conn.setAutoCommit(false);
             final IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) dataSource;
             serverDataSourceDefinition.create(conn, null, withParent);
@@ -2427,7 +2469,16 @@ public class UserUploadService {
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                 final String personaName = SecurityUtil.getPersonaName();
-                DataSourceThreadPool.instance().addActivity(new Runnable() {
+                Refresh refresh;
+                if (async) {
+                    refresh = new AsynchronousRefresh(userName, userID, accountID,
+                            accountType, accountAdmin, firstDayOfWeek, personaName, dataSource, callID);
+                } else {
+                    refresh = new SynchronousRefresh(userName, userID, accountID,
+                            accountType, accountAdmin, firstDayOfWeek, personaName, dataSource, callID);
+                }
+                DataSourceThreadPool.instance().addActivity(refresh);
+                /*DataSourceThreadPool.instance().addActivity(new Runnable() {
 
                     public void run() {
                         SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
@@ -2459,7 +2510,7 @@ public class UserUploadService {
                             SecurityUtil.clearThreadLocal();
                         }
                     }
-                });
+                });*/
             }
             return credentialsResponse;
         } catch (ReportException re) {
