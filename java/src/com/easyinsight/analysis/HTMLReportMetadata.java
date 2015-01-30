@@ -13,6 +13,7 @@ public class HTMLReportMetadata {
     private int verticalMargin;
     private boolean fullScreenHeight = true;
     private boolean embedded;
+    private FilterHTMLMetadata filterMetadata;
 
     public HTMLReportMetadata() {
     }
@@ -27,6 +28,14 @@ public class HTMLReportMetadata {
 
     public void setEmbedded(boolean embedded) {
         this.embedded = embedded;
+    }
+
+    public FilterHTMLMetadata getFilterMetadata() {
+        return filterMetadata;
+    }
+
+    public void setFilterMetadata(FilterHTMLMetadata filterMetadata) {
+        this.filterMetadata = filterMetadata;
     }
 
     public JSONObject createStyleProperties() {
