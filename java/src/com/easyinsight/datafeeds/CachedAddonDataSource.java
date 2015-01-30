@@ -180,8 +180,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             conn = Database.instance().getConnection();
             try {
                 System.out.println("Running report " + id);
-                //AsyncReport.cacheRebuild(id);
-                runReport(conn, id, true);
+                AsyncReport.cacheRebuild(id);
+                //runReport(conn, id, true);
             } catch (Throwable e) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
