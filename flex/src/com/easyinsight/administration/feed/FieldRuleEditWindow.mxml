@@ -79,6 +79,9 @@
                     ruleType = "on data source";
                     index1 = 4;
                     selectedDataSource = fieldRule.dataSourceID;
+                } else if (fieldRule.all) {
+                    ruleType = "all fields";
+                    index1 = 5;
                 }
                 if (fieldRule.link != null) {
                     selectedAction = "add a link";
@@ -150,6 +153,12 @@
                 fieldRule.tag = null;
                 fieldRule.explicitField = null;
                 fieldRule.type = 0;
+            } else if (index1 == 5) {
+                fieldRule.dataSourceName = null;
+                fieldRule.dataSourceID = 0;
+                fieldRule.tag = null;
+                fieldRule.explicitField = null;
+                fieldRule.all = true;
             } else {
                 Alert.show("You need to choose a criteria.");
                 return;
@@ -191,6 +200,8 @@
                 index1 = 3;
             } else if (selectedRule == "on data source") {
                 index1 = 4;
+            } else if (selectedRule == "all fields") {
+                index1 = 5;
             } else {
                 index1 = 0;
             }
@@ -325,6 +336,7 @@
                     <mx:String>named</mx:String>
                     <mx:String>of type</mx:String>
                     <mx:String>on data source</mx:String>
+                    <mx:String>all fields</mx:String>
                 </mx:Array>
             </mx:ArrayCollection>
         </mx:dataProvider>
@@ -353,6 +365,7 @@
         <mx:Box>
             <util:SmartComboBox id="dataSourceBox" selectedValue="{selectedDataSource}" selectedProperty="dataFeedID" dataProvider="{dataSources}" labelField="dataSourceName"/>
         </mx:Box>
+        <mx:Box/>
     </mx:ViewStack>
     <mx:ComboBox id="actionBox" selectedItem="{selectedAction}" change="actionChange()">
         <mx:dataProvider>
