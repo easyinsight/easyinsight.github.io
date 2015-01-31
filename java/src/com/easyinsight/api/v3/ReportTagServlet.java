@@ -3,6 +3,8 @@ package com.easyinsight.api.v3;
 import com.easyinsight.analysis.AnalysisService;
 import com.easyinsight.analysis.InsightResponse;
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.dashboard.DashboardDescriptor;
+import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.export.ExportMetadata;
@@ -73,16 +75,30 @@ public class ReportTagServlet extends JSONServlet {
             uus.saveTag(conn, -1, chosenTag);
         }
 
-        InsightResponse response = new AnalysisService().openAnalysisIfPossible(String.valueOf(request.getParameter("reportID")));
-        EIDescriptor descriptor = response.getInsightDescriptor();
-        if (response.getInsightDescriptor() != null) {
-            if (chosenTag != null) {
-                uus.tagReportsAndDashboards(Arrays.asList(descriptor), chosenTag, conn);
+        String reportID = request.getParameter("reportID");
+        if (reportID == null) {
+            String dashboardURLKey = request.getParameter("dashboardID");
+            long dashboardID = DashboardService.canAccessDashboard(dashboardURLKey, conn);
+            if (dashboardID > 0) {
+                DashboardDescriptor desc = new DashboardDescriptor();
+                desc.setId(dashboardID);
+                uus.tagReportsAndDashboards(Arrays.asList(desc), chosenTag, conn);
+                return new ResponseInfo(ResponseInfo.ALL_GOOD, chosenTag.toJSON(md).toString());
+            } else {
+                return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");
             }
-            return new ResponseInfo(ResponseInfo.ALL_GOOD, chosenTag.toJSON(md).toString());
-
-        } else
-            return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");
+        } else {
+            InsightResponse response = new AnalysisService().openAnalysisIfPossible(reportID);
+            EIDescriptor descriptor = response.getInsightDescriptor();
+            if (response.getInsightDescriptor() != null) {
+                if (chosenTag != null) {
+                    uus.tagReportsAndDashboards(Arrays.asList(descriptor), chosenTag, conn);
+                }
+                return new ResponseInfo(ResponseInfo.ALL_GOOD, chosenTag.toJSON(md).toString());
+            } else {
+                return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");
+            }
+        }
     }
 
     @Override
@@ -90,14 +106,28 @@ public class ReportTagServlet extends JSONServlet {
         final FeedStorage fs = new FeedStorage();
         Tag t = new Tag(Long.parseLong(String.valueOf(request.getParameter("tagID"))), null, false, false, false);
         UserUploadService uus = new UserUploadService();
-        InsightResponse response = new AnalysisService().openAnalysisIfPossible(String.valueOf(request.getParameter("reportID")));
-        EIDescriptor descriptor = response.getInsightDescriptor();
-        if (response.getInsightDescriptor() != null) {
-            uus.untagReportsAndDashboards(Arrays.asList(descriptor), t, conn);
-            uus.checkReportsTag(t, conn);
-            return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
-        } else
-            return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");
+        String reportID = request.getParameter("reportID");
+        if (reportID == null) {
+            String dashboardURLKey = request.getParameter("dashboardID");
+            long dashboardID = DashboardService.canAccessDashboard(dashboardURLKey, conn);
+            if (dashboardID > 0) {
+                DashboardDescriptor desc = new DashboardDescriptor();
+                desc.setId(dashboardID);
+                uus.untagReportsAndDashboards(Arrays.asList(desc), t, conn);
+                return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
+            } else {
+                return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");
+            }
+        } else {
+            InsightResponse response = new AnalysisService().openAnalysisIfPossible(String.valueOf(request.getParameter("reportID")));
+            EIDescriptor descriptor = response.getInsightDescriptor();
+            if (response.getInsightDescriptor() != null) {
+                uus.untagReportsAndDashboards(Arrays.asList(descriptor), t, conn);
+                uus.checkReportsTag(t, conn);
+                return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
+            } else
+                return new ResponseInfo(ResponseInfo.UNAUTHORIZED, "");
+        }
     }
 
     @Override

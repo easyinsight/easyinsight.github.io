@@ -421,9 +421,29 @@ public class DashboardService {
 
     }
 
-    public long canAccessDashboard(String urlKey) {
+    public static long canAccessDashboard(String urlKey, EIConnection conn) throws SQLException {
+        long dashboardID = 0;
         try {
-            long dashboardID = 0;
+            PreparedStatement stmt = conn.prepareStatement("SELECT DASHBOARD_ID FROM DASHBOARD WHERE URL_KEY = ?");
+            stmt.setString(1, urlKey);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                dashboardID = rs.getLong(1);
+            } else {
+                LogClass.error("Attempt to retrieve dashboard " + urlKey + " which doesn't exist.");
+            }
+            stmt.close();
+            SecurityUtil.authorizeDashboard(dashboardID, conn);
+            return dashboardID;
+        } catch (com.easyinsight.security.SecurityException e) {
+
+            return 0;
+        }
+    }
+
+    public long canAccessDashboard(String urlKey) {
+        long dashboardID = 0;
+        try {
             EIConnection conn = Database.instance().getConnection();
             try {
                 PreparedStatement stmt = conn.prepareStatement("SELECT DASHBOARD_ID FROM DASHBOARD WHERE URL_KEY = ?");
@@ -431,7 +451,10 @@ public class DashboardService {
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     dashboardID = rs.getLong(1);
+                } else {
+                    LogClass.error("Attempt to retrieve dashboard " + urlKey + " which doesn't exist.");
                 }
+                stmt.close();
             } catch (SQLException se) {
                 LogClass.error(se);
                 throw new RuntimeException(se);
@@ -441,6 +464,7 @@ public class DashboardService {
             SecurityUtil.authorizeDashboard(dashboardID);
             return dashboardID;
         } catch (com.easyinsight.security.SecurityException e) {
+
             return 0;
         }
     }
