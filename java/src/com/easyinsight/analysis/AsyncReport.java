@@ -768,8 +768,8 @@ public class AsyncReport {
             reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             reqStmt.setInt(4, CACHE_REBUILD);
             reqStmt.execute();
-            reqStmt.close();
             requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
