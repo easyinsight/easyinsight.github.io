@@ -29,7 +29,7 @@ public class UserThreadMutex {
         boolean success = false;
 
         int tries = 0;
-        while (!success && tries < 150) {
+        while (!success && tries < 300) {
             try {
                 Semaphore semaphore;
                 synchronized(this) {
