@@ -378,6 +378,16 @@
     </rule>
 
     <rule>
+        <from>/dashboards/([A-Za-z0-9]+)/tags/?$</from>
+        <to>/html/reportTags.json?dashboardID=$1</to>
+    </rule>
+
+    <rule>
+        <from>/dashboards/([A-Za-z0-9]+)/tags/([A-Za-z0-9]+)$</from>
+        <to>/html/reportTags.json?dashboardID=$1&amp;tagID=$2</to>
+    </rule>
+
+    <rule>
         <from>/html/connections/([A-Za-z0-9]+)</from>
         <to>/html/connectionCreation.jsp?connectionID=$1</to>
     </rule>
