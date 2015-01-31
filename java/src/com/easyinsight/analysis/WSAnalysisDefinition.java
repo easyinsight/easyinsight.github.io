@@ -87,6 +87,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int TEXT = 41;
     public static final int TOPO = 42;
     public static final int MULTI_SUMMARY = 43;
+    public static final int VISUAL_TREE = 44;
 
     private String name;
     private String collapseOn;
@@ -1416,7 +1417,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 }
             }
             if (!found) {
-                JSONObject j = f.toJSON(new FilterHTMLMetadata(this));
+                FilterHTMLMetadata fM = htmlReportMetadata.getFilterMetadata();
+                if (fM == null) {
+                    fM = new FilterHTMLMetadata(this);
+                }
+                JSONObject j = f.toJSON(fM);
                 if (j != null) {
                     filters.put(j);
                 }
