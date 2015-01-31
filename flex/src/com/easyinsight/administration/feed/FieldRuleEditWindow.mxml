@@ -327,7 +327,7 @@
         ]]></mx:Script>
     <mx:HBox verticalAlign="middle">
     <mx:Text text="For all fields "/>
-    <mx:ComboBox id="ruleTypeBox" selectedItem="{ruleType}" change="ruleTypeChange()">
+    <mx:ComboBox id="ruleTypeBox" selectedItem="{ruleType}" change="ruleTypeChange()" rowCount="6">
         <mx:dataProvider>
             <mx:ArrayCollection>
                 <mx:Array>
