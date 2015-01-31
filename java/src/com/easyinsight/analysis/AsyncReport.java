@@ -865,7 +865,7 @@ public class AsyncReport {
         } else if (result instanceof Exception) {
             throw (Exception) result;
         } else {
-            throw new RuntimeException("result was " + result);
+            throw new RuntimeException("The data source refresh timed out.");
         }
     }
 
@@ -982,8 +982,8 @@ public class AsyncReport {
         }
     }
 
-    public static final int REPORT_TIMEOUT = 300000;
-    public static final int DATA_SOURCE_TIMEOUT = 2400000;
+    public static final int REPORT_TIMEOUT = 1000 * 60 * 5; // 300 seconds
+    public static final int DATA_SOURCE_TIMEOUT = 1000 * 60 * 300; // 1000 * 60 * 60
 
     public static ResultData asyncDataSet(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata) {
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
