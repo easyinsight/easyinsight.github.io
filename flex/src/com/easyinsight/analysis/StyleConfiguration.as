@@ -69,6 +69,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
         items.addItem(new ImageReportFormItem("Header Image", "headerImage", dashboard.headerImage, dashboard));
         items.addItem(new CheckBoxReportFormItem("Full-Size Header Image", "imageFullHeader", dashboard.imageFullHeader, dashboard));
+        items.addItem(new CheckBoxReportFormItem("Include Header Image in HTML", "includeHeaderInHTML", dashboard.includeHeaderInHTML, dashboard));
         items.addItem(new ComboBoxReportFormItem("Color Set", "colorSet", dashboard.colorSet, dashboard, [ "Primary", "Secondary", "None"]));
         return items;
     }
