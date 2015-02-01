@@ -64,6 +64,8 @@
 
         dashboard = new DashboardService().getDashboardView(dashboardID, positions);
 
+        boolean showHeader = dashboard.isIncludeHeaderInHTML();
+
         try {
             new AdminService().logAction(new ActionDashboardLog(SecurityUtil.getUserID(false), ActionDashboardLog.VIEW, dashboard.getId()));
         } catch (Exception e) {
@@ -123,7 +125,7 @@
         <div class="row controlsRow">
 
             <div class="col-md-4 reportBlah">
-                <% if (!onlyTopReports) { %>
+                <% if (!onlyTopReports && userName != null) { %>
                 <a class="reportControl visible-sm visible-md visible-lg" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
                 <% } %>
             </div>
@@ -208,6 +210,7 @@
     <jsp:include page="refreshingDataSource.jsp"/>
     <jsp:include page="embedDashboardWindow.jsp"/>
     <jsp:include page="modalIndicator.jsp"/>
+    <%= showHeader ? uiData.createHeader(dashboard.getName()) : "" %>
     <div id="base"/>
 </div>
 
