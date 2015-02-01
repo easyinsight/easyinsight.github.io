@@ -1944,43 +1944,6 @@ public class UserUploadService {
                 Database.closeConnection(timeConn);
             }
 
-            /*Set<Long> cacheSources = new HashSet<>();
-            if (feedDefinition instanceof CompositeFeedDefinition) {
-                CompositeFeedDefinition c = (CompositeFeedDefinition) feedDefinition;
-                for (CompositeFeedNode node : c.getCompositeFeedNodes()) {
-                    if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
-                        // retrieve the source this is based on, refresh that
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            PreparedStatement ps = conn.prepareStatement("SELECT data_feed_id FROM distinct_cached_addon_report_source, analysis WHERE data_source_id = ? AND " +
-                                    "distinct_cached_addon_report_source.report_id = analysis.analysis_id");
-                            ps.setLong(1, node.getDataFeedID());
-                            ResultSet rs = ps.executeQuery();
-                            if (rs.next()) {
-                                long cacheSourceID = rs.getLong(1);
-                                System.out.println(cacheSourceID);
-                                cacheSources.add(cacheSourceID);
-                            }
-                            ps.close();
-                        } finally {
-                            Database.closeConnection(conn);
-                        }
-                    }
-                }
-                for (Long cacheSourceID : cacheSources) {
-                    FeedDefinition dataSource = feedStorage.getFeedDefinitionData(cacheSourceID);
-                    if (dataSource instanceof FederatedDataSource) {
-                        FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
-                        List<FederationSource> sources = federatedDataSource.getSources();
-                        for (FederationSource source : sources) {
-                            source.getDataSourceID();
-                        }
-                    }
-                }
-            }*/
-
-
-
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (DataSourceMutex.mutex().lock(feedDefinition.getDataFeedID())) {
                     final String callID = ServiceUtil.instance().longRunningCall(feedDefinition.getDataFeedID());
@@ -2478,39 +2441,6 @@ public class UserUploadService {
                             accountType, accountAdmin, firstDayOfWeek, personaName, dataSource, callID);
                 }
                 DataSourceThreadPool.instance().addActivity(refresh);
-                /*DataSourceThreadPool.instance().addActivity(new Runnable() {
-
-                    public void run() {
-                        SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            conn.setAutoCommit(false);
-                            Date now = new Date();
-                            MigrationResult changed = new DataSourceFactory().createSource(conn, new ArrayList<>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
-                            conn.commit();
-                            DataSourceRefreshResult result = new DataSourceRefreshResult();
-                            result.setDate(now);
-                            result.setNewFields(changed.isChanged() && dataSource.rebuildFieldWindow());
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result, conn);
-                        } catch (ReportException re) {
-                            if (!conn.getAutoCommit()) {
-                                conn.rollback();
-                            }
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault(), conn);
-                        } catch (Exception e) {
-                            LogClass.error(e);
-                            if (!conn.getAutoCommit()) {
-                                conn.rollback();
-                            }
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage(), conn);
-                        } finally {
-                            conn.setAutoCommit(true);
-                            Database.closeConnection(conn);
-                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
-                            SecurityUtil.clearThreadLocal();
-                        }
-                    }
-                });*/
             }
             return credentialsResponse;
         } catch (ReportException re) {
@@ -2854,6 +2784,28 @@ public class UserUploadService {
                         CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
                         for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
                             FeedDefinition child = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+                            if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                                // retrieve the source this is based on, refresh that
+                                PreparedStatement ps = conn.prepareStatement("SELECT data_feed_id FROM distinct_cached_addon_report_source, analysis WHERE data_source_id = ? AND " +
+                                        "distinct_cached_addon_report_source.report_id = analysis.analysis_id");
+                                ps.setLong(1, node.getDataFeedID());
+                                ResultSet rs = ps.executeQuery();
+                                if (rs.next()) {
+                                    long cacheSourceID = rs.getLong(1);
+                                    System.out.println(cacheSourceID);
+                                    FeedDefinition dataSource = feedStorage.getFeedDefinitionData(cacheSourceID, conn);
+                                    if (dataSource instanceof FederatedDataSource) {
+                                        FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
+                                        List<FederationSource> sources = federatedDataSource.getSources();
+                                        for (FederationSource source : sources) {
+                                            long id = source.getDataSourceID();
+                                            sourcesToRefresh.add(feedStorage.getFeedDefinitionData(id, conn));
+                                        }
+                                    }
+                                }
+                                ps.close();
+
+                            }
                             sourcesToRefresh.add(child);
                         }
                     } else {
