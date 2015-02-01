@@ -170,7 +170,7 @@
     <div class="container-fluid">
         <div class="row controlsRow">
             <div class="col-md-4 reportBlah visible-sm visible-md visible-lg">
-                <% if (!onlyTopReports) { %>
+                <% if (!onlyTopReports && userName != null) { %>
                     <a class="reportControl" href="/a/data_sources/<%= dataSourceDescriptor.getUrlKey() %>">Back to <%= StringEscapeUtils.escapeHtml(dataSourceDescriptor.getName())%></a>
                 <% } %>
             </div>
@@ -243,7 +243,9 @@
                             <%
                                 if(userName != null) {
                                 FeedMetadata feedMetadata = new DataService().getFeedMetadata(report.getDataFeedID());
-                                if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL || feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
+                                if (feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE ||
+                                        feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.COMPOSITE_PULL ||
+                                        feedMetadata.getDataSourceInfo().getType() == DataSourceInfo.STORED_PULL) {
                             %>
                             <li>
                                 <a href="#" onclick="refreshDataSource('<%= dataSourceDescriptor.getUrlKey() %>')">Refresh the Data Source</a>
