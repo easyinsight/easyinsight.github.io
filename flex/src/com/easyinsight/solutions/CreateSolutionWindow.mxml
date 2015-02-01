@@ -71,6 +71,7 @@
             solutionCategory = this._solution.category - 1;
             archiveName = _solution.solutionArchiveName;
             dataSourceType = String(_solution.dataSourceType);
+            onInstallText = _solution.summary;
             if (solution.image != null) {
                 var loader:Loader = new Loader();
                 loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
@@ -81,6 +82,9 @@
         [Bindable]
         private var dataSourceType:String;
 
+        [Bindable]
+        private var onInstallText:String;
+
         private function save():void {
             if (_solution == null) {
                 _solution = new Solution();
@@ -89,6 +93,7 @@
             _solution.solutionTier = accountTierBox.selectedIndex + 1;
             _solution.category = solutionCategoryBox.selectedIndex + 1;
             _solution.dataSourceType = int(typeInput.text);
+            _solution.summary = onInstallArea.text;
 
             if (_solution.solutionID == 0) {
                 solutionService.addSolution.send(_solution);
@@ -157,6 +162,9 @@
             </mx:FormItem>
             <mx:FormItem label="Data Source Type:">
                 <mx:TextInput id="typeInput" text="{dataSourceType}"/>
+            </mx:FormItem>
+            <mx:FormItem label="On Install Text:">
+                <mx:TextArea width="400" height="200" id="onInstallArea" text="{onInstallText}"/>
             </mx:FormItem>
         </mx:Form>
     <mx:HBox width="100%" horizontalAlign="center">

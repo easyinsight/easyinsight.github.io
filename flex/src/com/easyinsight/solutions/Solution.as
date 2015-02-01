@@ -27,6 +27,7 @@ import mx.collections.ArrayCollection;
         public var category:int;
         public var logoLink:String;
         public var dataSourceType:int;
+        public var summary:String;
 
 		public function Solution()
 		{
