@@ -432,6 +432,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             }
         }
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setNoAsync(true);
         DataSet reportSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         DataSet dataSet = new DataSet();
         for (IRow reportRow : reportSet.getRows()) {
