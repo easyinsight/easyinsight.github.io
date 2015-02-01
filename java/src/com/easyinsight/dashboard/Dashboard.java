@@ -65,6 +65,7 @@ public class Dashboard implements Cloneable, Serializable {
     private boolean fillStackHeaders;
     private int reportHorizontalPadding = 20;
     private Link defaultDrillthrough;
+    private boolean includeHeaderInHTML;
     private Map<String, FilterDefinition> overridenFilters = new HashMap<String, FilterDefinition>();
 
     private ImageDescriptor headerImage;
@@ -103,6 +104,14 @@ public class Dashboard implements Cloneable, Serializable {
 
     public void setReportHeaderTextColor(int reportHeaderTextColor) {
         this.reportHeaderTextColor = reportHeaderTextColor;
+    }
+
+    public boolean isIncludeHeaderInHTML() {
+        return includeHeaderInHTML;
+    }
+
+    public void setIncludeHeaderInHTML(boolean includeHeaderInHTML) {
+        this.includeHeaderInHTML = includeHeaderInHTML;
     }
 
     public String getColorSet() {
