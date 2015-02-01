@@ -22,6 +22,15 @@ public class Solution {
     private byte[] image;
     private boolean accessible;
     private int category;
+    private String summary;
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
 
     public int getDataSourceType() {
         return dataSourceType;

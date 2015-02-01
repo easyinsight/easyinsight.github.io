@@ -421,7 +421,7 @@ public class SolutionService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, INDUSTRY, COPY_DATA, " +
-                    "SOLUTION_TIER, CATEGORY, logo_link, data_source_type) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "SOLUTION_TIER, CATEGORY, logo_link, data_source_type, summary) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             int i = 1;
             insertSolutionStmt.setString(i++, solution.getName());
@@ -430,7 +430,8 @@ public class SolutionService {
             insertSolutionStmt.setInt(i++, solution.getSolutionTier());
             insertSolutionStmt.setInt(i++, solution.getCategory());
             insertSolutionStmt.setString(i++, solution.getLogoLink());
-            insertSolutionStmt.setInt(i, solution.getDataSourceType());
+            insertSolutionStmt.setInt(i++, solution.getDataSourceType());
+            insertSolutionStmt.setString(i, solution.getSummary());
             insertSolutionStmt.execute();
             long solutionID = Database.instance().getAutoGenKey(insertSolutionStmt);
             conn.commit();
@@ -452,7 +453,7 @@ public class SolutionService {
             conn.setAutoCommit(false);
             PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, INDUSTRY = ?,  " +
                     "COPY_DATA = ?, SOLUTION_TIER = ?, CATEGORY = ?, " +
-                    "logo_link = ?, DATA_SOURCE_TYPE = ? WHERE SOLUTION_ID = ?",
+                    "logo_link = ?, DATA_SOURCE_TYPE = ?, SUMMARY = ? WHERE SOLUTION_ID = ?",
                     Statement.RETURN_GENERATED_KEYS);
             updateSolutionStmt.setString(1, solution.getName());
             updateSolutionStmt.setString(2, solution.getIndustry());
@@ -461,7 +462,8 @@ public class SolutionService {
             updateSolutionStmt.setInt(5, solution.getCategory());
             updateSolutionStmt.setString(6, solution.getLogoLink());
             updateSolutionStmt.setInt(7, solution.getDataSourceType());
-            updateSolutionStmt.setLong(8, solution.getSolutionID());
+            updateSolutionStmt.setString(8, solution.getSummary());
+            updateSolutionStmt.setLong(9, solution.getSolutionID());
             updateSolutionStmt.executeUpdate();
             conn.commit();
         } catch (Exception e) {
@@ -1075,7 +1077,7 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, INDUSTRY, COPY_DATA, SOLUTION_ARCHIVE_NAME, SOLUTION_TIER," +
-                    "solution_image, CATEGORY, logo_link, data_source_type FROM SOLUTION WHERE SOLUTION_TIER <= ?");
+                    "solution_image, CATEGORY, logo_link, data_source_type, summary FROM SOLUTION WHERE SOLUTION_TIER <= ?");
             getSolutionsStmt.setInt(1, Account.ADMINISTRATOR);
 
             ResultSet rs = getSolutionsStmt.executeQuery();
@@ -1100,6 +1102,7 @@ public class SolutionService {
                 solution.setLogoLink(rs.getString(9));
                 solution.setDataSourceType(rs.getInt(10));
                 solution.setInstallable(solution.getDataSourceType() > 0);
+                solution.setSummary(rs.getString(11));
                 solutions.add(solution);
             }
             Collections.sort(solutions, new Comparator<Solution>() {
