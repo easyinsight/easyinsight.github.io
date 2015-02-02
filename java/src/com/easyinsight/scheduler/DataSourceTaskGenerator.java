@@ -122,6 +122,9 @@ public class DataSourceTaskGenerator extends TaskGenerator {
                 case ScheduleType.MONTHLY:
                     schedule = new MonthlyScheduleType();
                     break;
+                case ScheduleType.NEVER:
+                    schedule = new NeverScheduleType();
+                    break;
                 default:
                     throw new RuntimeException();
             }
