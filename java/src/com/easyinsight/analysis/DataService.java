@@ -1405,7 +1405,8 @@ public class DataService {
 
 
     public EmbeddedResults getEmbeddedResultsForReport(WSAnalysisDefinition analysisDefinition, List<FilterDefinition> customFilters,
-                                                        InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn) throws Exception {
+                                                        InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn,
+                                                        boolean ignoreCache) throws Exception {
 
         EmbeddedResults embeddedResults;
         ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
@@ -1414,6 +1415,19 @@ public class DataService {
         embeddedResults = results.toEmbeddedResults();
         embeddedResults.setDataSourceInfo(reportRetrieval.getDataSourceInfo());
         embeddedResults.setDefinition(analysisDefinition);
+
+        boolean tooManyResults = false;
+        if (embeddedResults instanceof EmbeddedDataResults) {
+            EmbeddedDataResults listDataResults = (EmbeddedDataResults) embeddedResults;
+            if (!ignoreCache && analysisDefinition.getGeneralSizeLimit() > 0 && (listDataResults.getRows().length > analysisDefinition.getGeneralSizeLimit())) {
+                tooManyResults = true;
+            }
+        }
+        if (tooManyResults) {
+            cacheEmbeddedReportResults(analysisDefinition.getAnalysisID(), (EmbeddedDataResults) embeddedResults);
+            embeddedResults = truncateEmbeddedResults((EmbeddedDataResults) embeddedResults, analysisDefinition.getGeneralSizeLimit());
+            embeddedResults.getAdditionalProperties().put("cappedResults", ((EmbeddedDataResults) embeddedResults).getUid());
+        }
 
         return embeddedResults;
     }
@@ -1595,6 +1609,7 @@ public class DataService {
             EIConnection conn = Database.instance().getConnection();
             try {
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(reportID, conn);
+                insightRequestMetadata.setNoCache(ignoreCache);
                 ReportRetrieval.asyncReportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
                 ResultData resultData = AsyncReport.asyncEndUserResults(analysisDefinition, insightRequestMetadata);
                 resultData.results.setDefinition(resultData.report);
@@ -1637,23 +1652,11 @@ public class DataService {
                 return null;
             }
             analysisDefinition.setDataFeedID(dataSourceID);
-            EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn);
+            EmbeddedResults results = getEmbeddedResultsForReport(analysisDefinition, customFilters, insightRequestMetadata, drillThroughFilters, conn, ignoreCache);
             if (cacheKey != null) {
                 ReportCache.instance().storeReport(dataSourceID, cacheKey, results, analysisDefinition.getCacheMinutes());
             }
 
-            boolean tooManyResults = false;
-            if (results instanceof EmbeddedDataResults) {
-                EmbeddedDataResults listDataResults = (EmbeddedDataResults) results;
-                if (!ignoreCache && analysisDefinition.getGeneralSizeLimit() > 0 && (listDataResults.getRows().length > analysisDefinition.getGeneralSizeLimit())) {
-                    tooManyResults = true;
-                }
-            }
-            if (tooManyResults) {
-                cacheEmbeddedReportResults(analysisDefinition.getAnalysisID(), (EmbeddedDataResults) results);
-                results = truncateEmbeddedResults((EmbeddedDataResults) results, analysisDefinition.getGeneralSizeLimit());
-                results.getAdditionalProperties().put("cappedResults", ((EmbeddedDataResults) results).getUid());
-            }
             if (insightRequestMetadata.isCacheForHTML()) {
                 String req = String.valueOf("chtml" + System.currentTimeMillis());
                 results.setCacheForHTMLKey(req);
@@ -2756,7 +2759,7 @@ public class DataService {
     }
 
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        return list(analysisDefinition, insightRequestMetadata, false);
+        return list(analysisDefinition, insightRequestMetadata, insightRequestMetadata.isNoCache());
     }
 
     public static void handleTimezoneData(EIConnection conn, InsightRequestMetadata insightRequestMetadata) {
@@ -2787,6 +2790,7 @@ public class DataService {
     public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata, boolean ignoreCache) {
         accountAsyncHack(insightRequestMetadata);
         if (!insightRequestMetadata.isNoAsync()) {
+            insightRequestMetadata.setNoCache(ignoreCache);
             return AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata);
         } else {
             boolean success;

@@ -430,6 +430,7 @@ public class AsyncReport {
                                                                 localMetadata.setNoAsync(true);
                                                                 localMetadata.setRunningAsync(true);
                                                                 localMetadata.setCacheForHTML(insightRequestMetadata.isCacheForHTML());
+                                                                localMetadata.setNoCache(insightRequestMetadata.isNoCache());
 
                                                                 String name;
                                                                 if (SecurityUtil.getUserID(false) == 0) {
@@ -485,7 +486,8 @@ public class AsyncReport {
                                                                         } else if (report instanceof WSTextDefinition) {
                                                                             results = new DataService().getEmbeddedTextResults((WSTextDefinition) report, insightRequestMetadata, conn);
                                                                         } else {
-                                                                            results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
+                                                                            results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn,
+                                                                                    insightRequestMetadata.isNoCache());
                                                                         }
                                                                         rh.results = results;
                                                                         rh.report = report;
