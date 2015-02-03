@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.GenericReportFault;
 import com.easyinsight.analysis.ReportException;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.servlet.SystemSettings;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class UserThreadMutex {
         boolean success = false;
 
         int tries = 0;
-        while (!success && tries < 300) {
+        while (!success && tries < 120) {
             try {
                 Semaphore semaphore;
                 synchronized(this) {
@@ -47,6 +48,10 @@ public class UserThreadMutex {
                     if (!success) {
                         System.out.println("No luck, incrementing tries to " + (tries + 1));
                         tries++;
+                        if (tries == 118) {
+                            LogClass.error("This sucks, but releasing lock by force for " + userID);
+                            semaphore.release();
+                        }
                     }
                 }
             } catch (InterruptedException e) {
