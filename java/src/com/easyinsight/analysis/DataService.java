@@ -1737,6 +1737,7 @@ public class DataService {
 
         try {
             // how do we make this async...
+            insightRequestMetadata.setNoCache(true);
             accountAsyncHack(insightRequestMetadata, conn);
             if (!insightRequestMetadata.isNoAsync()) {
                 return AsyncReport.asyncDataResults(analysisDefinition, insightRequestMetadata, conn);
