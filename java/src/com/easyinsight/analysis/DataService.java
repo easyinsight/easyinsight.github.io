@@ -901,14 +901,6 @@ public class DataService {
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, int utfOffset, long reportID, long dashboardID,
                                                               @Nullable WSAnalysisDefinition report, List<FilterDefinition> additionalFilters, FilterDefinition requester,
                                                               @Nullable Dashboard dashboard) {
-        boolean success;
-        try {
-            success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));
-        } catch (ReportException e) {
-            AnalysisItemResultMetadata metadata = new AnalysisItemResultMetadata();
-            metadata.setReportFault(e.getReportFault());
-            return metadata;
-        }
         EIConnection conn = Database.instance().getConnection();
         try {
             if (reportID > 0) {
@@ -936,9 +928,6 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            if (success) {
-                UserThreadMutex.mutex().release(SecurityUtil.getUserID(false));
-            }
             Database.closeConnection(conn);
         }
     }
