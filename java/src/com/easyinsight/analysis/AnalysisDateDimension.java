@@ -94,6 +94,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public static final int WEEK_OF_YEAR_FLAT = 10;
     public static final int QUARTER_OF_YEAR_LEVEL = 11;
     public static final int QUARTER_OF_YEAR_FLAT = 12;
+    public static final int FISCAL_YEAR = 13;
+    public static final int FISCAL_QUARTER_OF_YEAR_LEVEL = 14;
+    public static final int FISCAL_QUARTER_OF_YEAR_FLAT = 15;
 
     public AnalysisDateDimension(Key key, boolean group, int dateLevel) {
         super(key, group);
@@ -455,6 +458,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 dateValue.setDateTime(true);
             }
             dateValue.setDateLevel(getDateLevel());
+            dateValue.setZonedDateTime(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()));
+            dateValue.setLocalDate(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate());
         }
         return resultValue;
     }
