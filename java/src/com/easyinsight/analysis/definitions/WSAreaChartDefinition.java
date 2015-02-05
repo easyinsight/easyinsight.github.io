@@ -95,7 +95,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
         return properties;
     }
 
-    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
+    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap, InsightRequestMetadata insightRequestMetadata) {
         if (autoScale && getXaxis() != null && getXaxis().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             int daysDuration = 0;
             /*AnalysisDateDimension start;
@@ -109,8 +109,8 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
                 for (FilterDefinition filterDefinition : getFilterDefinitions()) {
                     if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                        long now = System.currentTimeMillis();
-                        daysDuration = (int) ((now - MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, new Date())) / (1000 * 60 * 60 * 24));
+                        daysDuration = rollingFilterDefinition.periodTo(new Date(), insightRequestMetadata).getDays();
+
                     } else if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
                         daysDuration = (int) ((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
