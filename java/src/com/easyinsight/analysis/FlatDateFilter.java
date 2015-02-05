@@ -80,20 +80,23 @@ public class FlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         if (database.getDialect() == Database.MYSQL) {
             if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
                 return "month(" + getField().toKeySQL() + ") = (? + 1)";
             else
                 return "year(" + getField().toKeySQL() + ") = ?";
         } else {
-            return "EXTRACT(year FROM " + getField().toKeySQL() + ") = ?";
+            if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
+                return "EXTRACT(month FROM " + getField().toKeySQL() + ") = (? + 1)";
+            else
+                return "EXTRACT(year FROM " + getField().toKeySQL() + ") = ?";
         }
     }
 
     @Override
     public boolean validForQuery() {
-        return true;
+        return false;
     }
 
     @Override
