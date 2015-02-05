@@ -2202,7 +2202,7 @@ public class DataStorage implements IDataStorage {
                             value = new EmptyValue();
                         } else {
                             DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            dateValue.calculate(cal);
+                            dateValue.calculate(true, insightRequestMetadata.createZoneID());
                             value = dateValue;
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
@@ -2303,7 +2303,7 @@ stmt.setFetchSize(Integer.MIN_VALUE);
                             value = new EmptyValue();
                         } else {
                             DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            dateValue.calculate(cal);
+                            dateValue.calculate(true, insightRequestMetadata.createZoneID());
                             value = dateValue;
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
