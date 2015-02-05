@@ -186,9 +186,9 @@ public class RollingFilterDefinition extends FilterDefinition {
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.LAST_YEAR_TO_NOW, "Last Year to Now", "dayofyear(nowdate() - years(1), 1)", "dayofyear(nowdate() - years(1), dayofyear(nowdate()))"));
 
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_WEEK, "Next Full Week", "dayofweek(nowdateforfilter() + weeks(1), 1)", "dayofweek(nowdateforfilter() + weeks(1), 7)"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_MONTH, "Next Full Month", "dayofmonth(nowdate() + months(1), 1)", "dayofmonth(nowdate() + months(1), daysinmonth(nowdate()))"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_QUARTER, "Next Full Quarter", "dayofquarter(nowdate() + quarters(1), 1)", "dayofquarter(nowdate() + quarters(1), daysinquarter(nowdate()))"));
-        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_YEAR, "Next Full Year", "dayofyear(nowdate() + years(1), 1)", "dayofyear(nowdate() + years(1), daysinyear(nowdate()))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_MONTH, "Next Full Month", "dayofmonth(nowdate() + months(1), 1)", "dayofmonth(nowdate() + months(1), daysinmonth(nowdate() + months(1)))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_QUARTER, "Next Full Quarter", "dayofquarter(nowdate() + quarters(1), 1)", "dayofquarter(nowdate() + quarters(1), daysinquarter(nowdate() + quarters(1)))"));
+        additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.NEXT_FULL_YEAR, "Next Full Year", "dayofyear(nowdate() + years(1), 1)", "dayofyear(nowdate() + years(1), daysinyear(nowdate() + years(1)))"));
 
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_WEEK, "This Week", "dayofweek(nowdateforfilter(), firstdayofweek())", "dayofweek(nowdateforfilter(), lastdayofweek())"));
         additionalIntervals.add(createInterval(MaterializedRollingFilterDefinition.THIS_MONTH, "This Month", "dayofmonth(nowdate(), 1)", "dayofmonth(nowdate(), daysinmonth(nowdate()))"));
@@ -467,11 +467,6 @@ public class RollingFilterDefinition extends FilterDefinition {
     public boolean dateTime(InsightRequestMetadata insightRequestMetadata) {
         AnalysisDateDimension date = (AnalysisDateDimension) getField();
         return (date.isTimeshift(insightRequestMetadata));
-        /*if (date.getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || date.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
-            return true;
-        } else {
-            return false;
-        }*/
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {

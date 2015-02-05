@@ -67,9 +67,9 @@ public class DateValue extends Value implements Serializable {
         this.dateTime = dateTime;
     }
 
-    public void calculate(boolean dateOnly, ZoneId zoneId) {
+    public void calculate(boolean dateTime, ZoneId zoneId) {
         if (date != null) {
-            if (dateOnly) {
+            if (!dateTime) {
                 if (localDate == null) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(date);
