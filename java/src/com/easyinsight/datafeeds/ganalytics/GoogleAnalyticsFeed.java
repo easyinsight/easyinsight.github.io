@@ -22,6 +22,8 @@ import com.google.gdata.util.ServiceException;
 import com.google.gdata.util.ServiceForbiddenException;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -264,13 +266,10 @@ public class GoogleAnalyticsFeed extends Feed {
                         endDate = dateRange.getEndDate();
                     } else if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                        if (rollingFilterDefinition.getStartDate() != null) {
-                            startDate = rollingFilterDefinition.getStartDate();
-                        } else {
-                            startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, insightRequestMetadata.getNow()));
-                        }
+
+                        startDate = rollingFilterDefinition.startTime(insightRequestMetadata);
                         if (rollingFilterDefinition.getEndDate() != null) {
-                            endDate = rollingFilterDefinition.getEndDate();
+                            endDate = rollingFilterDefinition.endTime(insightRequestMetadata);
                         } else {
                             endDate = insightRequestMetadata.getNow();
                         }

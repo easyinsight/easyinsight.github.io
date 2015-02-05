@@ -9,6 +9,8 @@ import java.io.ByteArrayInputStream;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 import com.easyinsight.logging.LogClass;
@@ -165,7 +167,7 @@ public class SalesforceFeed extends Feed {
                     }
                     RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
                     Date endDate = insightRequestMetadata.getNow();
-                    Date startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
+                    Date startDate = rollingFilterDefinition.startTime(insightRequestMetadata);
                     whereBuilder.append(filter.getField().getKey().toKeyString());
                     whereBuilder.append(" >= ");
                     whereBuilder.append(sdf.format(startDate));
