@@ -186,7 +186,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                 if (row == null) {
                     row = dataSet.createRow();
                     DateValue dateValue = new DateValue(date, new NumericValue(date.getTime()));
-                    dateValue.calculate(dateDim.isTimeshift(insightRequestMetadata) ? shiftedCal : cal);
+                    dateValue.calculate(dateDim.isTimeshift(insightRequestMetadata), insightRequestMetadata.createZoneID());
                     row.addValue(dateDim.createAggregateKey(), dateValue);
                 }
 
@@ -204,7 +204,7 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                     if (row == null) {
                         row = dataSet.createRow();
                         DateValue dateValue = new DateValue(date, new NumericValue(date.getTime()));
-                        dateValue.calculate(dateDim.isTimeshift(insightRequestMetadata) ? shiftedCal : cal);
+                        dateValue.calculate(dateDim.isTimeshift(insightRequestMetadata), insightRequestMetadata.createZoneID());
                         row.addValue(dateDim.createAggregateKey(), dateValue);
                         row.addValue(getYaxis().createAggregateKey(), yAxisValue);
                     }
