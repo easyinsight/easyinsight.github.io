@@ -30,7 +30,7 @@ public class NullFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         return null;
     }
 

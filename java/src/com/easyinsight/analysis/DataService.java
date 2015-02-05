@@ -3339,7 +3339,7 @@ public class DataService {
                 }
             }
 
-            analysisDefinition.tweakReport(aliases);
+            analysisDefinition.tweakReport(aliases, insightRequestMetadata);
 
             List<AnalysisItem> allFields = new ArrayList<AnalysisItem>(feed.getFields());
 

@@ -56,8 +56,8 @@ public class NamedFilterReference extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
-        return filter.toQuerySQL(tableName, database);
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
+        return filter.toQuerySQL(tableName, database, insightRequestMetadata);
     }
 
     @Override
