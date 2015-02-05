@@ -2166,7 +2166,7 @@ public class DataStorage implements IDataStorage {
         if (filters.size() > 0) {
             sqlBuilder.append(" WHERE ");
             for (FilterDefinition filterDefinition : filters) {
-                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
+                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName(), database, insightRequestMetadata));
                 sqlBuilder.append(",");
             }
             sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
