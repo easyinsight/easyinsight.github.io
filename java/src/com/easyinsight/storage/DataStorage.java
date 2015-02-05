@@ -1284,7 +1284,7 @@ public class DataStorage implements IDataStorage {
             Iterator<FilterDefinition> filterIter = filters.iterator();
             while (filterIter.hasNext()) {
                 FilterDefinition filterDefinition = filterIter.next();
-                whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
+                whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database, insightRequestMetadata));
                 if (filterIter.hasNext()) {
                     whereBuilder.append(" AND ");
                 }
