@@ -6,10 +6,7 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -21,48 +18,39 @@ import java.util.TimeZone;
  */
 public class DayOfMonth extends Function {
     public Value evaluate() {
-        Date startDate = null;
+        ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+        LocalDate startDate = null;
         if (params.size() == 0) {
-            startDate = new Date();
+            startDate = LocalDate.now(zoneId);
         } else {
             Value start = params.get(0);
             if (start.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) start;
-                startDate = dateValue.getDate();
+                startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
+                //startDate = dateValue.getDate();
             } else if (start.type() == Value.NUMBER) {
-                startDate = new Date(start.toDouble().longValue());
+                startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
+                //startDate = new Date(start.toDouble().longValue());
             }
         }
         if (startDate != null) {
-            if (calculationMetadata != null && calculationMetadata.isFilterTimeShift()) {
-                Instant instant = startDate.toInstant();
-                ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
 
-                ZonedDateTime zdt = instant.atZone(zoneId);
+                /*Instant instant = startDate.toInstant();
+
+
+                ZonedDateTime zdt = instant.atZone(zoneId);*/
 
                 // pathway enhanced network
 
                 if (params.size() == 2) {
-                    zdt = zdt.withDayOfMonth(params.get(1).toDouble().intValue());
-                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    instant = zdt.toInstant();
-                    Date date = Date.from(instant);
+                    startDate = startDate.withDayOfMonth(params.get(1).toDouble().intValue());
+                    Date date = Date.from(startDate.atStartOfDay().atZone(zoneId).toInstant());
                     System.out.println("result = " + date);
                     return new DateValue(date);
                 } else {
-                    return new NumericValue(zdt.getDayOfMonth());
+                    return new NumericValue(startDate.getDayOfMonth());
                 }
-            } else {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(startDate.getTime());
-                if (params.size() == 2) {
-                    int dayToSet = params.get(1).toDouble().intValue();
-                    calendar.set(Calendar.DAY_OF_MONTH, dayToSet);
-                    return new DateValue(calendar.getTime());
-                } else {
-                    return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
-                }
-            }
+
         } else {
             return new EmptyValue();
         }
