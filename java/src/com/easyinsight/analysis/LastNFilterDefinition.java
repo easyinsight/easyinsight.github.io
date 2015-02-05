@@ -28,7 +28,7 @@ public class LastNFilterDefinition extends FilterDefinition {
         return new MaterializedLastNFilterDefinition(getField(), limit);
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         // TODO: implement
         StringBuilder queryBuilder = new StringBuilder();
         return queryBuilder.toString();

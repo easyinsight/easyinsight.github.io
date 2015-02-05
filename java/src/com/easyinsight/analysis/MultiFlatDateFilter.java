@@ -170,7 +170,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         /*return "year(" + getField().toKeySQL() + ") = ?";*/
         return null;
     }

@@ -230,7 +230,7 @@ public class FilterRangeDefinition extends FilterDefinition {
         }
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         String lowerOperator = (getLowerOperator() == LESS_THAN) ? ">" : ">=";
         String upperOperator = (getUpperOperator() == LESS_THAN) ? "<" : "<=";
         StringBuilder queryBuilder = new StringBuilder();

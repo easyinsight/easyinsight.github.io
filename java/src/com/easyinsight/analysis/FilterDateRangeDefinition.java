@@ -256,7 +256,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         return items;
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
 
