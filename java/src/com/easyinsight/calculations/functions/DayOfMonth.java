@@ -26,7 +26,11 @@ public class DayOfMonth extends Function {
             Value start = params.get(0);
             if (start.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) start;
-                startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
+                if (dateValue.getLocalDate() != null) {
+                    startDate = dateValue.getLocalDate();
+                } else {
+                    startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
+                }
                 //startDate = dateValue.getDate();
             } else if (start.type() == Value.NUMBER) {
                 startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
