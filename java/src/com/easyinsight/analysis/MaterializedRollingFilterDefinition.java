@@ -632,9 +632,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 } else if (mode == RollingFilterDefinition.BEFORE) {
                     allowed = dateValue.getLocalDate().isBefore(endDate) || dateValue.getLocalDate().isEqual(endDate);
                 } else {
-                    System.out.println(dateValue.getLocalDate());
+
                     allowed = (limitDate.isBefore(dateValue.getLocalDate()) || limitDate.isEqual(dateValue.getLocalDate())) &&
                             (dateValue.getLocalDate().isBefore(endDate) || dateValue.getLocalDate().isEqual(endDate));
+                    System.out.println("comparing " + dateValue.getLocalDate() + " to " + limitDate + " and " + endDate + " got " + allowed);
                 }
             } else {
                 DateValue originalValue = (DateValue) value.getOriginalValue();
