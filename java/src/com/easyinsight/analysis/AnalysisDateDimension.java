@@ -458,6 +458,8 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 dateValue.setDateTime(true);
             }
             dateValue.setDateLevel(getDateLevel());
+            System.out.println("local date = " + dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate() + " where date = " +
+                dateValue.getDate());
             dateValue.setZonedDateTime(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()));
             dateValue.setLocalDate(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate());
         }
