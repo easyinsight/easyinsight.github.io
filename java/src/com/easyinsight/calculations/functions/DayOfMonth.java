@@ -6,6 +6,10 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -30,31 +34,56 @@ public class DayOfMonth extends Function {
             }
         }
         if (startDate != null) {
-            Calendar calendar = Calendar.getInstance();
             if (calculationMetadata != null && calculationMetadata.isFilterTimeShift()) {
-                int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-                String string;
-                if (time > 0) {
-                    string = "GMT-"+Math.abs(time);
-                } else if (time < 0) {
-                    string = "GMT+"+Math.abs(time);
+                Instant instant = startDate.toInstant();
+                ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+
+                ZonedDateTime zdt = instant.atZone(zoneId);
+
+                // pathway enhanced network
+
+                if (params.size() == 2) {
+                    zdt = zdt.withDayOfMonth(params.get(1).toDouble().intValue());
+                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    instant = zdt.toInstant();
+                    Date date = Date.from(instant);
+                    System.out.println("result = " + date);
+                    return new DateValue(date);
                 } else {
-                    string = "GMT";
+                    return new NumericValue(zdt.getDayOfMonth());
                 }
-                TimeZone timeZone = TimeZone.getTimeZone(string);
-                calendar.setTimeZone(timeZone);
-            }
-            calendar.setTimeInMillis(startDate.getTime());
-            if (params.size() == 2) {
-                int dayToSet = params.get(1).toDouble().intValue();
-                calendar.set(Calendar.DAY_OF_MONTH, dayToSet);
-                return new DateValue(calendar.getTime());
             } else {
-                return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(startDate.getTime());
+                if (params.size() == 2) {
+                    int dayToSet = params.get(1).toDouble().intValue();
+                    calendar.set(Calendar.DAY_OF_MONTH, dayToSet);
+                    return new DateValue(calendar.getTime());
+                } else {
+                    return new NumericValue(calendar.get(Calendar.DAY_OF_MONTH));
+                }
             }
         } else {
             return new EmptyValue();
         }
+    }
+
+    public static void main(String[] args) {
+
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -2);
+        Instant instant = cal.getTime().toInstant();
+
+        ZoneId zoneId = ZoneId.systemDefault();
+        //ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+        System.out.println(zoneId.getId());
+        ZonedDateTime zdt = instant.atZone(zoneId);
+        zdt = zdt.withDayOfMonth(1);
+        zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        instant = zdt.toInstant();
+        Date date = Date.from(instant);
+        System.out.println(date);
     }
 
     public int getParameterCount() {

@@ -6,6 +6,8 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
+import java.time.*;
+import java.time.temporal.IsoFields;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -38,59 +40,18 @@ public class DayOfQuarter extends Function {
             }
         }
         if (startDate != null) {
-            Calendar cal = Calendar.getInstance();
-            int today = cal.get(Calendar.DAY_OF_YEAR);
-            if (calculationMetadata != null && calculationMetadata.isFilterTimeShift()) {
-                int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-                String string;
-                if (time > 0) {
-                    string = "GMT-"+Math.abs(time);
-                } else if (time < 0) {
-                    string = "GMT+"+Math.abs(time);
-                } else {
-                    string = "GMT";
-                }
-                TimeZone timeZone = TimeZone.getTimeZone(string);
-                cal.setTimeZone(timeZone);
-            }
-            cal.setTimeInMillis(startDate.getTime());
-
+            ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+            Instant instant1 = startDate.toInstant();
+            LocalDate localDate = instant1.atZone(zoneId).toLocalDate();
 
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
-                int i = 1;
-                int month = cal.get(Calendar.MONTH);
-                int firstMonth = month / 3 * 3;
-                cal.set(Calendar.MONTH, firstMonth);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                int quarter = month / 3;
-                int newQuarter = quarter;
-                while (quarter == newQuarter) {
-                    if (i == dayToSet) {
-                        break;
-                    }
-                    cal.add(Calendar.DAY_OF_YEAR, 1);
-                    newQuarter = (int) Math.floor(cal.get(Calendar.MONTH) / 3);
-                    i++;
-                }
-                return new DateValue(cal.getTime());
+                localDate = localDate.with(IsoFields.DAY_OF_QUARTER, dayToSet);
+                Instant instant = localDate.atStartOfDay().atZone(zoneId).toInstant();
+                Date d = Date.from(instant);
+                return new DateValue(d);
             } else {
-                int i = 0;
-                int month = cal.get(Calendar.MONTH);
-                int firstMonth = month / 3 * 3;
-                cal.set(Calendar.MONTH, firstMonth);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                int quarter = month / 3;
-                int newQuarter = quarter;
-                while (quarter == newQuarter) {
-                    if (cal.get(Calendar.DAY_OF_YEAR) == today) {
-                        break;
-                    }
-                    cal.add(Calendar.DAY_OF_YEAR, 1);
-                    newQuarter = (int) Math.floor(cal.get(Calendar.MONTH) / 3);
-                    i++;
-                }
-                return new NumericValue(i);
+                return new NumericValue(localDate.get(IsoFields.DAY_OF_QUARTER));
             }
         } else {
             return new EmptyValue();
