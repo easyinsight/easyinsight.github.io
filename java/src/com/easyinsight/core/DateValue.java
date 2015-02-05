@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -23,11 +25,29 @@ public class DateValue extends Value implements Serializable {
     private int minute;
     private int dateLevel;
     private boolean dateTime;
+    private LocalDate localDate;
+    private ZonedDateTime zonedDateTime;
 
     private String format;
     private static final long serialVersionUID = 8170674055682369820L;
 
     public DateValue() {
+    }
+
+    public LocalDate getLocalDate() {
+        return localDate;
+    }
+
+    public void setLocalDate(LocalDate localDate) {
+        this.localDate = localDate;
+    }
+
+    public ZonedDateTime getZonedDateTime() {
+        return zonedDateTime;
+    }
+
+    public void setZonedDateTime(ZonedDateTime zonedDateTime) {
+        this.zonedDateTime = zonedDateTime;
     }
 
     public int getDateLevel() {
@@ -101,6 +121,13 @@ public class DateValue extends Value implements Serializable {
     public DateValue(Date date) {
         this.date = date;
     }
+
+    public DateValue(Date date, LocalDate localDate) {
+        this.date = date;
+        this.localDate = localDate;
+    }
+
+
 
     public DateValue(Date date, Value sortValue) {
         this.date = date;

@@ -1115,7 +1115,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return null;
     }
 
-    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
+    public void tweakReport(Map<AnalysisItem, AnalysisItem> aliasMap, InsightRequestMetadata insightRequestMetadata) {
     }
 
     public void untweakReport(Map<AnalysisItem, AnalysisItem> aliasMap) {
