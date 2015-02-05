@@ -5,6 +5,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -15,7 +16,8 @@ import java.util.TimeZone;
  */
 public class DateHackComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        Calendar cal = Calendar.getInstance();
+        ZoneId zoneId = pipelineData.getInsightRequestMetadata().createZoneID();
+        /*Calendar cal = Calendar.getInstance();
         Calendar shiftedCal = Calendar.getInstance();
         int time = pipelineData.getInsightRequestMetadata().getUtcOffset() / 60;
         String string;
@@ -27,7 +29,7 @@ public class DateHackComponent implements IComponent {
             string = "GMT";
         }
         TimeZone timeZone = TimeZone.getTimeZone(string);
-        shiftedCal.setTimeZone(timeZone);
+        shiftedCal.setTimeZone(timeZone);*/
 
         for (IRow row : dataSet.getRows()) {
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
@@ -36,7 +38,7 @@ public class DateHackComponent implements IComponent {
                     Value value = row.getValue(date);
                     if (value != null && value.type() == Value.DATE) {
                         DateValue dateValue = (DateValue) value;
-                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()) ? shiftedCal : cal);
+                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()), zoneId);
                     }
                 }
             }

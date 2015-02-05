@@ -66,6 +66,7 @@ public class LineChartComponent implements IComponent {
                     map1.put("trend", entry.getValue().getValue());
                     values.add(map1);
                 }
+
                 Calendar cal = Calendar.getInstance();
                 Calendar shiftedCal = Calendar.getInstance();
                 int time = pipelineData.getInsightRequestMetadata().getUtcOffset() / 60;
@@ -83,7 +84,7 @@ public class LineChartComponent implements IComponent {
                     Value value = map1.get("date");
                     if (value.type() == Value.DATE) {
                         DateValue dateValue = (DateValue) value;
-                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()) ? shiftedCal : cal);
+                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()), pipelineData.getInsightRequestMetadata().createZoneID());
                     }
                 }
                 trendLineValues = values;

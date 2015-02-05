@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -66,22 +67,29 @@ public class DateValue extends Value implements Serializable {
         this.dateTime = dateTime;
     }
 
-    public void calculate(Calendar cal) {
+    public void calculate(boolean dateOnly, ZoneId zoneId) {
         if (date != null) {
-            cal.setTime(date);
-            year = cal.get(Calendar.YEAR);
-            month = cal.get(Calendar.MONTH);
-            day = cal.get(Calendar.DAY_OF_MONTH);
-            hour = cal.get(Calendar.HOUR_OF_DAY);
-            minute = cal.get(Calendar.MINUTE);
-            /*Calendar cal2 = Calendar.getInstance();
-            cal2.set(Calendar.YEAR, year);
-            cal2.set(Calendar.MONTH, month);
-            cal2.set(Calendar.DAY_OF_MONTH, day);
-            cal2.set(Calendar.HOUR, hour);
-            cal2.set(Calendar.MINUTE, minute);
-            date = cal2.getTime();
-            System.out.println("and now time = " + date);*/
+            if (dateOnly) {
+                if (localDate == null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(date);
+                    localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                            cal.get(Calendar.MONTH) + 1,
+                            cal.get(Calendar.DAY_OF_MONTH));
+                }
+                year = localDate.getYear();
+                month = localDate.getMonthValue();
+                day = localDate.getDayOfMonth();
+            } else {
+                if (zonedDateTime == null) {
+                    zonedDateTime = date.toInstant().atZone(zoneId);
+                }
+                year = zonedDateTime.getYear();
+                month = zonedDateTime.getMonthValue();
+                day = zonedDateTime.getDayOfMonth();
+                hour = zonedDateTime.getHour();
+                minute = zonedDateTime.getMinute();
+            }
         }
     }
 
