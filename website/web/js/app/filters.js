@@ -1,25 +1,30 @@
 (function() {
-    var eiFilters = angular.module("eiFilters", []);
+    var eiFilters = angular.module("eiFilters", ["UrlMapService"]);
 
     eiFilters.controller('rollingFilter', ["$scope", function($scope) {
-        console.log("ROLLING")
+        // TODO: IMPLEMENT THE REST
     }]);
 
     eiFilters.controller('singleFilter', ["$scope", function($scope) {
-        console.log("SINGLE")
+        // TODO: IMPLEMENTATION
     }]);
 
     eiFilters.controller("baseFilter", ["$scope", function($scope) {
 
-    }])
+    }]);
 
-
+    eiFilters.controller("patternMatchFilterController", ["$scope", function($scope) {
+        $scope.$watch('filter.pattern', function(oldValue, newValue) {
+            if(oldValue != newValue)
+                $scope.$emit("filterChanged");
+        });
+    }]);
 
     eiFilters.directive('filterView', [function() {
         return {
             restrict: "E",
             controller: "baseFilter",
-            templateUrl: "/angular_templates/filters/base_filter.template.html",
+            templateUrl: "/angular_templates/filter/base_filter.template.html",
             scope: {
                 filter: '=filter'
             }
@@ -29,23 +34,11 @@
 
     var URL_MAP = {
         "rolling": "rolling_date.template.html",
-        "single": "single_value.template.html"
+        "single": "single_value.template.html",
+        "pattern_filter": "pattern_filter.template.html"
     };
 
-    eiFilters.directive("specificFilter", ["$http", "$compile", function($http, $compile) {
-        return {
-            restrict: "E",
-            link: function(scope, element, attrs) {
-                var url =
-                $http.get("/angular_templates/filters/" + URL_MAP[scope.filter.type]).then(
-                    function(c) {
-                        element.html(c.data).show();
-                        $compile(element.contents())(scope);
-                    }
-                );
-            },
-            scope: "="
-        };
+    eiFilters.run(["UrlMap", function(UrlMap) {
+        UrlMap.registerUrls("filter", URL_MAP);
     }])
-
 })();

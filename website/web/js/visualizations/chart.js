@@ -1,10 +1,10 @@
 Chart = {
 
-    getTree:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getTree: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
+                    generate: function () {
                         var chart = nv.models.indentedTree()
                             .tableClass('table table-bordered table-hover table-condensed') //for bootstrap styling
                             .columns(data["columns"]);
@@ -12,18 +12,25 @@ Chart = {
 
                         d3.select("#" + target + " .reportArea").datum(data["values"]).call(chart);
 
-                        chart.dispatch.on("elementClick", function(e) {
+                        chart.dispatch.on("elementClick", function (e) {
                             var dt = e.dt;
-                            var f = {"reportID": dt["data-reportid"], "drillthroughID": dt["data-drillthroughid"], "source": dt["data-source"],
-                                "drillthroughKey": drillthroughKey, "filters": filters, "drillthrough_values": {}};
+                            var f = {
+                                "reportID": dt["data-reportid"],
+                                "drillthroughID": dt["data-drillthroughid"],
+                                "source": dt["data-source"],
+                                "drillthroughKey": drillthroughKey,
+                                "filters": filters,
+                                "drillthrough_values": {}
+                            };
                             if (dashboardID != -1) {
                                 f["dashboardID"] = dashboardID;
                             }
-                            f["drillthrough_values"] = _.inject(dt, function(m, e, i, l) {
+                            f["drillthrough_values"] = _.inject(dt, function (m, e, i, l) {
 
-                                    if(i.match(/^dtfield/))
+                                    if (i.match(/^dtfield/))
                                         m[i.replace(/^dtfield/, "")] = decodeURI(e);
-                                    return m; },
+                                    return m;
+                                },
                                 {});
                             drillThrough(f);
                         });
@@ -43,7 +50,7 @@ Chart = {
             curStyleSheet = Chart.findDynamicStyleSheet();
         }
 
-        curStyleSheet.insertRule("#" + target + " table tr.even {background-color:"+ Color.numToStr(properties["rowColor2"]) + ";}", 0);
+        curStyleSheet.insertRule("#" + target + " table tr.even {background-color:" + Color.numToStr(properties["rowColor2"]) + ";}", 0);
 
         // rowColor1
         curStyleSheet.insertRule("#" + target + " table tr.odd {background-color:" + Color.numToStr(properties["rowColor1"]) + ";}", 0);
@@ -71,19 +78,20 @@ Chart = {
         return curStyleSheet;
     },
 
-    getD3StackedColumnChart:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3StackedColumnChart: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var height = Chart.chartHeight(target, styleProps);
                         if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
                         }
                         var s1 = data["values"];
-                        var maxLabelSize = d3.max(s1, function(d) {
-                            return d3.max(d.values, function(e) { return e.x.length } );
+                        var maxLabelSize = d3.max(s1, function (d) {
+                            return d3.max(d.values, function (e) {
+                                return e.x.length
+                            });
                         });
                         var rWidth = $("#d3Div" + target).width() - 80 - 40;
                         var maxTextSize = maxLabelSize * 7 * s1[0].values.length;
@@ -112,16 +120,23 @@ Chart = {
                         }
 
                         /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                        if (customWidth > -1) {
-                            chart.width(customWidth);
-                        }*/
+                         if (customWidth > -1) {
+                         chart.width(customWidth);
+                         }*/
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
-                            chart.multibar.dispatch.on("elementClick", function(e) {
+                            chart.multibar.dispatch.on("elementClick", function (e) {
                                 var drillthrough = data["drillthrough"];
-                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                    "drillthrough_values": {}};
+                                var f = {
+                                    "reportID": dtOptions["reportID"],
+                                    "drillthroughID": dtOptions["id"],
+                                    "embedded": dtOptions["embedded"],
+                                    "source": dtOptions["source"],
+                                    "drillthroughKey": drillthroughKey,
+                                    "filters": filters,
+                                    "drillthrough_values": {}
+                                };
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
                                 f["drillthrough_values"][drillthrough["stack"]] = e.series.key;
                                 if (dashboardID != -1) {
@@ -159,14 +174,11 @@ Chart = {
     },
 
 
-
-    getD3StackedBarChart:function (target, params, showLabels, styleProps, filters, drillthroughKey, iframedInUI, dashboardID) {
+    getD3StackedBarChart: function (target, params, showLabels, styleProps, filters, drillthroughKey, iframedInUI, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-
-                        Chart.phantomJSFix();
+                    generate: function () {
 
                         var height = Chart.chartHeightWithIFrame(target, styleProps, iframedInUI);
 
@@ -203,7 +215,7 @@ Chart = {
                         }
 
                         var chart = nv.models.multiBarHorizontalChart()
-                            .x(function(d) {
+                            .x(function (d) {
                                 if (d.x.length > maxChars) {
                                     return d.x.substring(0, maxChars) + "...";
                                 } else {
@@ -224,9 +236,9 @@ Chart = {
                         }
 
                         /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                        if (customWidth > -1) {
-                            chart.width(customWidth);
-                        }*/
+                         if (customWidth > -1) {
+                         chart.width(customWidth);
+                         }*/
 
                         var floatingY = data["floatingY"];
                         if (floatingY) {
@@ -237,11 +249,11 @@ Chart = {
                             if (data["dateAxis"]) {
                                 chart.cumulativeDateAxis(true);
                                 var maxX = data["maxY"];
-                                chart.minX(function(d) {
+                                chart.minX(function (d) {
                                     return d.xMin;
                                 }).forceY([minX, maxX]);
                             } else {
-                                chart.minX(function(d) {
+                                chart.minX(function (d) {
                                     return d.xMin;
                                 }).forceY([minX]);
                             }
@@ -249,10 +261,17 @@ Chart = {
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
-                            chart.multibar.dispatch.on("elementClick", function(e) {
+                            chart.multibar.dispatch.on("elementClick", function (e) {
                                 var drillthrough = data["drillthrough"];
-                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                    "drillthrough_values": {}};
+                                var f = {
+                                    "reportID": dtOptions["reportID"],
+                                    "drillthroughID": dtOptions["id"],
+                                    "embedded": dtOptions["embedded"],
+                                    "source": dtOptions["source"],
+                                    "drillthroughKey": drillthroughKey,
+                                    "filters": filters,
+                                    "drillthrough_values": {}
+                                };
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
                                 f["drillthrough_values"][drillthrough["stack"]] = e.series.key;
                                 if (dashboardID != -1) {
@@ -264,7 +283,7 @@ Chart = {
 
                         if (data["dateAxis"]) {
                             data["yFormat"].type = "msToDate";
-                            var msFormat = { type: "measure", precision: 0, numberFormat: 4};
+                            var msFormat = {type: "measure", precision: 0, numberFormat: 4};
                             chart.valueFormat(Chart.createFormat(msFormat));
                         }
 
@@ -279,7 +298,9 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        nv.utils.windowResize(function () {
+                            chart.update()
+                        });
 
 
                         return chart;
@@ -290,12 +311,11 @@ Chart = {
         };
     },
 
-    getBulletChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getBulletChartCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var s1 = data["values"][0];
 
                         var title = s1.title;
@@ -325,12 +345,11 @@ Chart = {
         };
     },
 
-    getD3PieChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3PieChartCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var height = Chart.chartHeight(target, styleProps);
                         if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
@@ -362,8 +381,12 @@ Chart = {
 
                         var chart = nv.models.pieChart()
                             //.width(width)
-                            .x(function(d) { return d.label })
-                            .y(function(d) { return d.value })
+                            .x(function (d) {
+                                return d.label
+                            })
+                            .y(function (d) {
+                                return d.value
+                            })
                             .showLabels(true)
                             .color(colors)
                             .height(height)
@@ -372,11 +395,11 @@ Chart = {
                             .labelThreshold(0.02)
                             .labelType(pieLabelType)
                             /*.donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
-                            .donutRatio(0.35)*/
+                             .donutRatio(0.35)*/
                             .margin({top: 20, right: 20, bottom: 20, left: 20})
-                            .tooltipContent(function(key, x, e, graph) {
+                            .tooltipContent(function (key, x, e, graph) {
                                 return '<h3>' + key + '</h3>' +
-                                    '<p><b>' +  x + '</b></p>' +
+                                    '<p><b>' + x + '</b></p>' +
                                     '<h4><b>' + e.point.percent + '%</b> of <b>' + e.point.total + '</b></h4>';
                             });
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
@@ -390,10 +413,17 @@ Chart = {
 
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
-                            chart.pie.dispatch.on("elementClick", function(e) {
+                            chart.pie.dispatch.on("elementClick", function (e) {
                                 var drillthrough = data["drillthrough"];
-                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                    "drillthrough_values": {}};
+                                var f = {
+                                    "reportID": dtOptions["reportID"],
+                                    "drillthroughID": dtOptions["id"],
+                                    "embedded": dtOptions["embedded"],
+                                    "source": dtOptions["source"],
+                                    "drillthroughKey": drillthroughKey,
+                                    "filters": filters,
+                                    "drillthrough_values": {}
+                                };
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.label;
                                 if (dashboardID != -1) {
                                     f["dashboardID"] = dashboardID;
@@ -401,7 +431,6 @@ Chart = {
                                 drillThrough(f);
                             });
                         }
-
 
 
                         d3.select('#d3Div' + target)
@@ -421,12 +450,11 @@ Chart = {
         };
     },
 
-    getD3ColumnChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3ColumnChartCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var height = Chart.chartHeight(target, styleProps);
                         if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
@@ -435,8 +463,10 @@ Chart = {
 
                         var s1 = data["values"];
 
-                        var maxLabelSize = d3.max(s1, function(d) {
-                            return d3.max(d.values, function(e) { return e.x.length } );
+                        var maxLabelSize = d3.max(s1, function (d) {
+                            return d3.max(d.values, function (e) {
+                                return e.x.length
+                            });
                         });
                         var rWidth = $("#d3Div" + target).width() - 85 - 40;
                         var maxTextSize = maxLabelSize * 7 * s1[0].values.length;
@@ -455,22 +485,23 @@ Chart = {
                                 colors.push(point.color);
                             }
                             chart = nv.models.discreteBarChart()
-                                //.width(width)
                                 .height(height)
                                 .color(colors)
                                 .staggerLabels(!useRotate && needStagger)
                                 .transitionDuration(350)  //how fast do you want the lines to transition?
-                                .tooltipContent(function(key, x, y, e, graph) {
+                                .tooltipContent(function (key, x, y, e, graph) {
                                     return '<b>' + x + '</b>' +
-                                        '<p>' +  y + '</p>'
+                                        '<p>' + y + '</p>'
                                 })
                                 .showYAxis(true)        //Show the y-axis
                                 .showXAxis(true)        //Show the x-axis
-                                .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 60), left: 85});
-                            /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                            if (customWidth > -1) {
-                                chart.width(customWidth);
-                            }*/
+                                .margin({
+                                    top: 20,
+                                    right: 40,
+                                    bottom: useRotate ? 120 : (needStagger ? 60 : 60),
+                                    left: 85
+                                });
+
                             if (data["valueLabel"]) {
                                 chart.showValues(true);
                                 if (data["yFormat"]) {
@@ -479,10 +510,17 @@ Chart = {
                             }
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
-                                chart.discretebar.dispatch.on("elementClick", function(e) {
+                                chart.discretebar.dispatch.on("elementClick", function (e) {
                                     var drillthrough = data["drillthrough"];
-                                    var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                        "drillthrough_values": {}};
+                                    var f = {
+                                        "reportID": dtOptions["reportID"],
+                                        "drillthroughID": dtOptions["id"],
+                                        "embedded": dtOptions["embedded"],
+                                        "source": dtOptions["source"],
+                                        "drillthroughKey": drillthroughKey,
+                                        "filters": filters,
+                                        "drillthrough_values": {}
+                                    };
                                     f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
                                     if (dashboardID != -1) {
                                         f["dashboardID"] = dashboardID;
@@ -493,23 +531,35 @@ Chart = {
                             Chart.assignAxisMinMaxValues(chart, data, false);
                         } else {
                             chart = nv.models.multiBarChart()
-                            //.width(width)
-                            .height(height)
-                            .reduceXTicks(false)
-                            .showControls(false)
-                            .staggerLabels(!useRotate && needStagger)
-                            .transitionDuration(350)  //how fast do you want the lines to transition?
-                            .showYAxis(true)        //Show the y-axis
-                            .showXAxis(true)        //Show the x-axis
-                            .margin({top: 20, right: 40, bottom: useRotate ? 120 : (needStagger ? 60 : 60), left: 80});
+                                //.width(width)
+                                .height(height)
+                                .reduceXTicks(false)
+                                .showControls(false)
+                                .staggerLabels(!useRotate && needStagger)
+                                .transitionDuration(350)  //how fast do you want the lines to transition?
+                                .showYAxis(true)        //Show the y-axis
+                                .showXAxis(true)        //Show the x-axis
+                                .margin({
+                                    top: 20,
+                                    right: 40,
+                                    bottom: useRotate ? 120 : (needStagger ? 60 : 60),
+                                    left: 80
+                                });
                             if (data["drillthrough"]) {
                                 var dtOptions = $.extend(true, {}, data["drillthrough"]);
                                 if (dtOptions["id"]) {
                                 }
-                                chart.multibar.dispatch.on("elementClick", function(e) {
+                                chart.multibar.dispatch.on("elementClick", function (e) {
                                     var drillthrough = data["drillthrough"];
-                                    var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                        "drillthrough_values": {}};
+                                    var f = {
+                                        "reportID": dtOptions["reportID"],
+                                        "drillthroughID": dtOptions["id"],
+                                        "embedded": dtOptions["embedded"],
+                                        "source": dtOptions["source"],
+                                        "drillthroughKey": drillthroughKey,
+                                        "filters": filters,
+                                        "drillthrough_values": {}
+                                    };
                                     f["drillthrough_values"][dtOptions["xaxis"]] = e.point.x;
                                     if (dashboardID != -1) {
                                         f["dashboardID"] = dashboardID;
@@ -518,13 +568,11 @@ Chart = {
                                 });
                             }
                             /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                            if (customWidth > -1) {
-                                chart.width(customWidth);
-                            }*/
+                             if (customWidth > -1) {
+                             chart.width(customWidth);
+                             }*/
                             Chart.assignAxisMinMaxValues(chart, data, true);
                         }
-
-
 
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 30, -70, charLimit);
@@ -551,12 +599,11 @@ Chart = {
         };
     },
 
-    getD3BarChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3BarChartCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var s1 = data["values"];
 
                         var maxLen = 0;
@@ -599,7 +646,7 @@ Chart = {
 
                         var customWidth = -1;
                         var chart = nv.models.multiBarHorizontalChart()
-                            .x(function(d) {
+                            .x(function (d) {
                                 if (d.x.length > maxChars) {
                                     return d.x.substring(0, maxChars) + "...";
                                 } else {
@@ -611,14 +658,16 @@ Chart = {
                             .transitionDuration(350)  //how fast do you want the lines to transition?
                             //.margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
                             .margin({top: 10, right: 30, bottom: 45, left: leftNeeded});
-                        chart.multibar.barColor(function(d, i) { return d.color });
+                        chart.multibar.barColor(function (d, i) {
+                            return d.color
+                        });
                         var floatingY = data["floatingY"];
                         if (floatingY) {
                             var vals = s1[0].values;
                             var minX = d3.min(vals, function (d) {
                                 return d.minY;
                             });
-                            chart.minX(function(d) {
+                            chart.minX(function (d) {
                                 return d.minY;
                             }).forceY([minX]);
                         }
@@ -633,10 +682,17 @@ Chart = {
                         }
                         if (data["drillthrough"]) {
                             var dtOptions = $.extend(true, {}, data["drillthrough"]);
-                            chart.multibar.dispatch.on("elementClick", function(e) {
+                            chart.multibar.dispatch.on("elementClick", function (e) {
                                 var drillthrough = data["drillthrough"];
-                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                    "drillthrough_values": {}};
+                                var f = {
+                                    "reportID": dtOptions["reportID"],
+                                    "drillthroughID": dtOptions["id"],
+                                    "embedded": dtOptions["embedded"],
+                                    "source": dtOptions["source"],
+                                    "drillthroughKey": drillthroughKey,
+                                    "filters": filters,
+                                    "drillthrough_values": {}
+                                };
 
                                 if (dashboardID != -1) {
                                     f["dashboardID"] = dashboardID;
@@ -651,16 +707,15 @@ Chart = {
 
                         if (data["dateAxis"]) {
                             data["yFormat"].type = "msToDate";
-                            var msFormat = { type: "measure", precision: 0, numberFormat: 4};
+                            var msFormat = {type: "measure", precision: 0, numberFormat: 4};
                             chart.valueFormat(Chart.createFormat(msFormat));
-                            chart.tooltipContent(function(key, x, e, graph) {
+                            chart.tooltipContent(function (key, x, e, graph) {
                                 return '<h3>' + key + '</h3>';
                             });
                         }
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, -leftNeeded + 10, 40);
                         Chart.assignAxisMinMaxValues(chart, data, true);
-
 
 
                         d3.select('#d3Div' + target)
@@ -670,7 +725,9 @@ Chart = {
 
                         Chart.canvasHeights(target, styleProps);
 
-                        nv.utils.windowResize(function() { chart.update() });
+                        nv.utils.windowResize(function () {
+                            chart.update()
+                        });
                         return chart;
                     }
                 });
@@ -679,8 +736,8 @@ Chart = {
         };
     },
 
-    canvasHeights:function (target, styleProps) {
-        var h = $("#d3Div"+ target).height();
+    canvasHeights: function (target, styleProps) {
+        var h = $("#d3Div" + target).height();
         var customWidth = -1;
         var w;
         if (customWidth > -1) {
@@ -688,11 +745,11 @@ Chart = {
         } else {
             w = $("#d3Div" + target).width();
         }
-        $("#d3Canvas"+target).attr('height', h);
-        $("#d3Canvas"+target).attr('width', w);
+        $("#d3Canvas" + target).attr('height', h);
+        $("#d3Canvas" + target).attr('width', w);
     },
 
-    chartHeightWithIFrame:function (target, styleProps, iframedInUI) {
+    chartHeightWithIFrame: function (target, styleProps, iframedInUI) {
         var height;
         var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
         if (customHeight > -1) {
@@ -708,7 +765,7 @@ Chart = {
             }
 
         } else {
-            var raHeight = $('#'+target+'ReportArea').height();
+            var raHeight = $('#' + target + 'ReportArea').height();
             if (typeof(raHeight) != "undefined" && raHeight > 150) {
                 height = raHeight;
             } else {
@@ -718,7 +775,7 @@ Chart = {
         return height;
     },
 
-    chartHeight:function (target, styleProps) {
+    chartHeight: function (target, styleProps) {
         var height;
         var customHeight = styleProps != null ? styleProps["customHeight"] : -1;
         if (customHeight > -1) {
@@ -752,12 +809,11 @@ Chart = {
         return height;
     },
 
-    getD3ScatterCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3ScatterCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var s1 = data["values"];
 
                         var minY = null;
@@ -794,20 +850,9 @@ Chart = {
                             .margin({top: 20, right: 40, bottom: 60, left: 80});
                         chart.tooltipX(null);
                         chart.tooltipY(null);
-                        chart.tooltip(function(key, x, y, e, c, a) { return '<h3>' + key + '</h3>' + '<h3>' + a + "</h3>" + '<p>'+data["xTitle"]+': <b>' + x + '</b></p>' + '<p>'+data["yTitle"]+': <b>' + y + '</b></p>' });
-
-                        /*
-                         .tooltipContent(function(key, x, e, graph) {
-                         return '<h3>' + key + '</h3>' +
-                         '<p><b>' +  x + '</b></p>' +
-                         '<h4><b>' + e.point.percent + '%</b> of <b>' + e.point.total + '</b></h4>';
-                         */
-
-                        /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                        if (customWidth > -1) {
-                            chart.width(customWidth);
-                        }*/
-
+                        chart.tooltip(function (key, x, y, e, c, a) {
+                            return '<h3>' + key + '</h3>' + '<h3>' + a + "</h3>" + '<p>' + data["xTitle"] + ': <b>' + x + '</b></p>' + '<p>' + data["yTitle"] + ': <b>' + y + '</b></p>'
+                        });
 
                         if (data["point"]) {
                             chart.sizeRange([200, 200]);
@@ -828,10 +873,17 @@ Chart = {
                             if (dtOptions["id"]) {
 
                             }
-                            chart.scatter.dispatch.on("elementClick", function(e) {
+                            chart.scatter.dispatch.on("elementClick", function (e) {
                                 var drillthrough = data["drillthrough"];
-                                var f = {"reportID": dtOptions["reportID"], "drillthroughID": dtOptions["id"], "embedded": dtOptions["embedded"], "source": dtOptions["source"], "drillthroughKey": drillthroughKey, "filters": filters,
-                                    "drillthrough_values": {}};
+                                var f = {
+                                    "reportID": dtOptions["reportID"],
+                                    "drillthroughID": dtOptions["id"],
+                                    "embedded": dtOptions["embedded"],
+                                    "source": dtOptions["source"],
+                                    "drillthroughKey": drillthroughKey,
+                                    "filters": filters,
+                                    "drillthrough_values": {}
+                                };
                                 f["drillthrough_values"][dtOptions["xaxis"]] = e.point.a;
                                 if (dashboardID != -1) {
                                     f["dashboardID"] = dashboardID;
@@ -844,13 +896,11 @@ Chart = {
                         Chart.assignAxisMinMaxValues(chart, data, true);
 
 
-
                         d3.select('#d3Div' + target)
                             //.attr('width', width)
                             .attr('height', height)
                             .datum(s1)
                             .call(chart);
-
 
 
                         var calcYMax = chart.yAxis.scale()(maxY);
@@ -876,7 +926,7 @@ Chart = {
         };
     },
 
-    assignAxisLabels:function (xAxis, yAxis, data, xLabelDistance, yLabelDistance, limit) {
+    assignAxisLabels: function (xAxis, yAxis, data, xLabelDistance, yLabelDistance, limit) {
         xAxis.axisLabel(data["xTitle"]);
         if (typeof(data["xFormat"]) != "undefined") {
             xAxis.tickFormat(Chart.createFormat(data["xFormat"], limit));
@@ -889,7 +939,7 @@ Chart = {
         yAxis.axisLabelDistance(yLabelDistance);
     },
 
-    assignAxisMinMaxValues:function (chart, data, showLegend) {
+    assignAxisMinMaxValues: function (chart, data, showLegend) {
 
         if (showLegend) {
             if (data["showLegend"]) {
@@ -911,15 +961,15 @@ Chart = {
         }
     },
 
-    createFormat:function (formatInfo, limit) {
-        return function(d) {
+    createFormat: function (formatInfo, limit) {
+        return function (d) {
             if (formatInfo.type == "msToDate") {
                 var format = d3.time.format("%m/%d/%Y");
                 return format(new Date(d));
             } else if (formatInfo.type == "measure") {
                 var precision = formatInfo.precision;
                 var numberFormat = formatInfo.numberFormat;
-                var numberFormatter = d3.format(",."+precision+"f");
+                var numberFormatter = d3.format(",." + precision + "f");
                 if (numberFormat == 2) {
                     var currencySymbol = formatInfo.currencySymbol;
                     return currencySymbol + numberFormatter(d);
@@ -942,7 +992,7 @@ Chart = {
         }
     },
 
-    truncate:function(limit, val) {
+    truncate: function (limit, val) {
         if (val.length > limit) {
             return val.substring(0, limit) + "...";
         } else {
@@ -950,68 +1000,39 @@ Chart = {
         }
     },
 
-    ieTest:function() {
+    ieTest: function () {
         var rv = -1;
-        if (navigator.appName == 'Microsoft Internet Explorer')
-        {
+        if (navigator.appName == 'Microsoft Internet Explorer') {
             var ua = navigator.userAgent;
-            var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
+            var re = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
             if (re.exec(ua) != null)
-                rv = parseFloat( RegExp.$1 );
+                rv = parseFloat(RegExp.$1);
         }
-        else if (navigator.appName == 'Netscape')
-        {
+        else if (navigator.appName == 'Netscape') {
             var ua = navigator.userAgent;
-            var re  = new RegExp("Trident/.*rv:([0-9]{1,}[\\.0-9]{0,})");
+            var re = new RegExp("Trident/.*rv:([0-9]{1,}[\\.0-9]{0,})");
             if (re.exec(ua) != null)
-                rv = parseFloat( RegExp.$1 );
+                rv = parseFloat(RegExp.$1);
         }
         return rv > -1;
     },
 
-    phantomJSFix:function() {
-        if (!Function.prototype.bind) {
-            Function.prototype.bind = function (oThis) {
-                if (typeof this !== "function") {
-                    // closest thing possible to the ECMAScript 5
-                    // internal IsCallable function
-                    throw "TypeError : Function.prototype.bind - what is trying to be bound is not callable";
-                }
-
-                var aArgs = Array.prototype.slice.call(arguments, 1),
-                    fToBind = this,
-                    fNOP = function () {},
-                    fBound = function () {
-                        return fToBind.apply(this instanceof fNOP && oThis
-                                ? this
-                                : oThis,
-                            aArgs.concat(Array.prototype.slice.call(arguments)));
-                    };
-
-                fNOP.prototype = this.prototype;
-                fBound.prototype = new fNOP();
-
-                return fBound;
-            };
-        }
-    },
-
-    millisecond:function(format, val, precision) {
-        if(val ==  0)
+    millisecond: function (format, val, precision) {
+        if (val == 0)
             return String("");
         if (typeof(precision) == "undefined") {
             precision = 0;
         }
         var result = "";
-        if(format == "s")
+        if (format == "s")
             val = val * 1000;
         var unsigned = Math.abs(val);
         var milliseconds, seconds, minutes, hours, days;
         if (unsigned < 60000) {
             seconds = Math.floor(unsigned / 1000);
-            milliseconds =  (val % 1000);
+            milliseconds = (val % 1000);
             result = seconds + "s:";
-            if(format == "ms")
+            if (format == "ms")
                 result = result + milliseconds + "ms";
         } else if (unsigned < (60000 * 60)) {
             minutes = Math.floor(unsigned / 60000);
@@ -1044,15 +1065,12 @@ Chart = {
         return String(result);
     },
 
-    getD3LineMeasureCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3LineMeasureCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var s1 = data["values"];
-
-
 
 
                         var height = Chart.chartHeight(target, styleProps);
@@ -1070,31 +1088,12 @@ Chart = {
                             .showXAxis(true)        //Show the x-axis
                             .margin({top: 20, right: 40, bottom: 40, left: 80});
 
-                        /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                         if (customWidth > -1) {
-                         chart.width(customWidth);
-                         }*/
-
-
-
-
-                        /*if (data["relative_line"]) {
-                            chart.showYAxis(false);
-                            chart.yAxis.tickFormat(function(d, i) {
-                                return map[i][d];
-                            });
-                        }*/
-
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65);
                         Chart.assignAxisMinMaxValues(chart, data);
 
 
-
                         var dateFormat = data["date_format"];
 
-                        /*chart.xAxis.tickFormat(function(d) {
-                            return d3.time.format(dateFormat)(new Date(d))
-                        });*/
 
                         var svg = d3.select('#d3Div' + target);
 
@@ -1102,42 +1101,7 @@ Chart = {
                             .datum(s1)
                             .call(chart);
 
-                        /*var events = data["events"];
-                        if (typeof(events) != "undefined") {
-                            var calcYMax = chart.yAxis.scale()(maxY);
-                            var calcYMin = chart.yAxis.scale()(minY);
-                            var targ = d3.select('#d3Div' + target + " .nv-linesWrap");
-                            for (var eventIdx = 0; eventIdx < events.length; eventIdx++) {
-                                var event = events[eventIdx];
-                                var time = format.parse(event.date);
-                                var calcX = chart.xAxis.scale()(time);
-                                targ.append("g").append("rect").attr("height", (calcYMin - calcYMax)).attr("width", 3).style("fill", "#0000FF").attr("x", calcX).attr("y", 0);
-                                targ.append("foreignObject").attr("width", 100).attr("height", 100).attr("y", (calcYMin - calcYMax) / 2).attr("x", calcX + 5).append("xhtml:body").attr("class", "report_annotation").style("font", "12px 'Helvetica Neue'").html("<p>"+event.label+"</p>");
-                            }
-
-                        }
-
-
-                        if (typeof(singleGoalValue) != "undefined") {
-                            var goal = singleGoalValue["goal"];
-                            var calcXMax = chart.xAxis.scale()(maxX);
-                            var calcXMin = chart.xAxis.scale()(minX);
-                            var calcY = chart.yAxis.scale()(goal);
-                            var goalTarg = d3.select('#d3Div' + target + " .nv-linesWrap");
-                            var calcXWidth = (calcXMax - calcXMin);
-                            goalTarg.append("g").append("rect").attr("width", calcXWidth).attr("height", 2).style("fill", "#88AACC").attr("x", 0).attr("y", calcY);
-                            goalTarg.append("text").attr("y", calcY + 5).attr("x", calcXWidth / 2).style("font", "12px 'Helvetica Neue'").text("Goal");
-                        }*/
-                        //goalTarg.append("foreignObject").attr("width", 100).attr("height", 100).attr("y", (calcYMin - calcYMax) / 2).attr("x", calcX + 5).append("xhtml:body").attr("class", "report_annotation").style("font", "12px 'Helvetica Neue'").html("<p>"+event.label+"</p>");
-
-                        /*var seriesIndex = 0;
-                         var selector = 'g.nv-series-'+seriesIndex+' circle';
-                         d3.selectAll(selector).classed("hover",true);*/
-                        //d3.select('#d3Div' + target + ' g.nv-scatterwrap g.nv-series-0 path.nv-point').style('fill-opacity', 1).style('stroke-opacity', 1);
-
                         Chart.canvasHeights(target, styleProps);
-
-                        //nv.utils.windowResize(function() { chart.update() });
                         return chart;
                     }
                 });
@@ -1146,12 +1110,11 @@ Chart = {
         };
     },
 
-    getD3LineCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3LineCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var s1 = data["values"];
 
                         var format = d3.time.format("%m/%d/%Y");
@@ -1194,7 +1157,7 @@ Chart = {
                         }
 
                         var axisMinY = 0;
-                        var axisMaxY = maxY + (maxY *.05);
+                        var axisMaxY = maxY + (maxY * .05);
 
                         var height = Chart.chartHeight(target, styleProps);
                         if (Chart.ieTest()) {
@@ -1212,16 +1175,14 @@ Chart = {
                             .margin({top: 20, right: 40, bottom: 40, left: 80});
 
                         /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                        if (customWidth > -1) {
-                            chart.width(customWidth);
-                        }*/
-
-
+                         if (customWidth > -1) {
+                         chart.width(customWidth);
+                         }*/
 
 
                         if (data["relative_line"]) {
                             chart.showYAxis(false);
-                            chart.yAxis.tickFormat(function(d, i) {
+                            chart.yAxis.tickFormat(function (d, i) {
                                 return map[i][d];
                             });
                         }
@@ -1233,7 +1194,7 @@ Chart = {
 
                         var dateFormat = data["date_format"];
 
-                        chart.xAxis.tickFormat(function(d) {
+                        chart.xAxis.tickFormat(function (d) {
                             return d3.time.format(dateFormat)(new Date(d))
                         });
 
@@ -1253,7 +1214,7 @@ Chart = {
                                 var time = format.parse(event.date);
                                 var calcX = chart.xAxis.scale()(time);
                                 targ.append("g").append("rect").attr("height", (calcYMin - calcYMax)).attr("width", 3).style("fill", "#0000FF").attr("x", calcX).attr("y", 0);
-                                targ.append("foreignObject").attr("width", 100).attr("height", 100).attr("y", (calcYMin - calcYMax) / 2).attr("x", calcX + 5).append("xhtml:body").attr("class", "report_annotation").style("font", "12px 'Helvetica Neue'").html("<p>"+event.label+"</p>");
+                                targ.append("foreignObject").attr("width", 100).attr("height", 100).attr("y", (calcYMin - calcYMax) / 2).attr("x", calcX + 5).append("xhtml:body").attr("class", "report_annotation").style("font", "12px 'Helvetica Neue'").html("<p>" + event.label + "</p>");
                             }
 
                         }
@@ -1272,8 +1233,8 @@ Chart = {
                         //goalTarg.append("foreignObject").attr("width", 100).attr("height", 100).attr("y", (calcYMin - calcYMax) / 2).attr("x", calcX + 5).append("xhtml:body").attr("class", "report_annotation").style("font", "12px 'Helvetica Neue'").html("<p>"+event.label+"</p>");
 
                         /*var seriesIndex = 0;
-                        var selector = 'g.nv-series-'+seriesIndex+' circle';
-                        d3.selectAll(selector).classed("hover",true);*/
+                         var selector = 'g.nv-series-'+seriesIndex+' circle';
+                         d3.selectAll(selector).classed("hover",true);*/
                         //d3.select('#d3Div' + target + ' g.nv-scatterwrap g.nv-series-0 path.nv-point').style('fill-opacity', 1).style('stroke-opacity', 1);
 
                         Chart.canvasHeights(target, styleProps);
@@ -1287,12 +1248,11 @@ Chart = {
         };
     },
 
-    getD3AreaCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3AreaCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
-                    generate: function() {
-                        Chart.phantomJSFix();
+                    generate: function () {
                         var height = Chart.chartHeight(target, styleProps);
                         if (Chart.ieTest()) {
                             $("#d3Div" + target).height(height);
@@ -1321,19 +1281,18 @@ Chart = {
                             .margin({top: 20, right: 40, bottom: 50, left: 76});
 
                         /*var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
-                        if (customWidth > -1) {
-                            chart.width(customWidth);
-                        }*/
+                         if (customWidth > -1) {
+                         chart.width(customWidth);
+                         }*/
 
                         Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65);
                         Chart.assignAxisMinMaxValues(chart, data);
 
                         var dateFormat = data["date_format"];
 
-                        chart.xAxis.tickFormat(function(d) {
+                        chart.xAxis.tickFormat(function (d) {
                             return d3.time.format(dateFormat)(new Date(d))
                         });
-
 
 
                         d3.select('#d3Div' + target)
@@ -1353,7 +1312,7 @@ Chart = {
         };
     },
 
-    cleanup:function (target) {
+    cleanup: function (target) {
         if (Chart.charts[target]) {
             var tt = $("#" + target);
             tt.unbind("jqplotDataClick");
