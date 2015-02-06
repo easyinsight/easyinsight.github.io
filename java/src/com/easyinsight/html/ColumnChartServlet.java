@@ -9,6 +9,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.export.ExportService;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.annotation.WebServlet;
@@ -25,6 +26,13 @@ import java.util.*;
 public class ColumnChartServlet extends HtmlServlet {
     protected void doStuff(HttpServletRequest request, HttpServletResponse response, InsightRequestMetadata insightRequestMetadata,
                            EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws Exception {
+        JSONObject object = processData(insightRequestMetadata, conn, report, md);
+        response.setContentType("application/json");
+        response.getOutputStream().write(object.toString().getBytes());
+        response.getOutputStream().flush();
+    }
+
+    public static JSONObject processData(InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, ExportMetadata md) throws JSONException {
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         if (dataSet.getAsyncSavedReport() != null) {
             report = dataSet.getAsyncSavedReport();
@@ -186,8 +194,7 @@ public class ColumnChartServlet extends HtmlServlet {
         }
 
         object.put("values", blahArray);
-        response.setContentType("application/json");
-        response.getOutputStream().write(object.toString().getBytes());
-        response.getOutputStream().flush();
+        return object;
     }
+
 }

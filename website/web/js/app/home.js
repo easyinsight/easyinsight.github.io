@@ -1,154 +1,183 @@
-var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy']);
+(function() {
+    // PhantomJS Bind fix
+    if (!Function.prototype.bind) {
+        Function.prototype.bind = function (oThis) {
+            if (typeof this !== "function") {
+                // closest thing possible to the ECMAScript 5
+                // internal IsCallable function
+                throw "TypeError : Function.prototype.bind - what is trying to be bound is not callable";
+            }
 
-easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                fNOP = function () {},
+                fBound = function () {
+                    return fToBind.apply(this instanceof fNOP && oThis
+                            ? this
+                            : oThis,
+                        aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
 
-    $locationProvider.html5Mode(true);
-    $routeSegmentProvider.when("/missing", "missing").
-        segment("missing", {
-            templateUrl: '/angular_templates/missing.template.html',
-            controller: "MissingFileController"
-        });
-    $routeProvider.otherwise({ redirectTo: "/missing" });
-}])
+            fNOP.prototype = this.prototype;
+            fBound.prototype = new fNOP();
 
-easyInsight.factory('PageInfo', function() {
-    var title = '';
-    return {
-        title: function() {
-            if(title.length == 0)
-                return "Easy Insight";
-            return "Easy Insight - " + title;
-        },
-        setTitle: function(value) {
-            title = value;
-        }
+            return fBound;
+        };
     }
-})
 
-easyInsight.controller('MissingFileController', ["PageInfo", function(PageInfo) {
-    PageInfo.setTitle("Not Found");
-}]);
+    var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'eiReporting']);
 
-easyInsight.controller("globalSearchController", ["$scope", "$http", "$timeout", function($scope, $http, $timeout) {
-    $scope.search = {
-        "text": ""
-    };
+    easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
 
-    $scope.iconFactory = function(result) {
-        if(result.type == "dashboard") {
-            return "glyphicon-list-alt";
-        } else if (result.type == "report") {
-            return "glyphicon-th-list"
-        }
-        else
-            return "glyphicon-book";
-    };
-
-    $scope.$watch("search.text", function(newVal, oldVal, scope) {
-        if(scope.type_delay != null) {
-            $timeout.cancel(scope.type_delay);
-        }
-
-        scope.type_delay = $timeout(function() {
-            scope.results = [];
-            if(newVal.length > 0) {
-                var searchText = "/app/search?query=" + encodeURIComponent(newVal);
-                scope.loading = $http.get(searchText);
-                scope.loading.then(function(d) {
-                    if(d.config.url == searchText)
-                        $scope.results = d.data.results;
-                })
-            }
-        }, 250
-        );
-    });
-}]);
-
-easyInsight.config(["$httpProvider", function($httpProvider) {
-    $httpProvider.interceptors.push(["$q", function($q) {
-        return {
-            'request': function(config) {
-                config.headers["X-REQUESTED-WITH"] = "XmlHttpRequest";
-                return config;
-            }
-        }
+        $locationProvider.html5Mode(true);
+        $routeSegmentProvider.when("/missing", "missing").
+            segment("missing", {
+                templateUrl: '/angular_templates/missing.template.html',
+                controller: "MissingFileController"
+            });
+        $routeProvider.otherwise({redirectTo: "/missing"});
     }])
-}])
 
-easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q", "$window",
-    function ($rootScope, $http, $location, PageInfo, $q, $window) {
-    $rootScope.user = {
-        "username": "..."
-    };
-        var user_defer = $q.defer();
-    $rootScope.user_promise = user_defer.promise;
-
-    $http.get("/app/userInfo.json").success(function (d, r) {
-        if (r == 401)
-            window.location = "/app/login.jsp";
-        else {
-            $rootScope.bookmarks = d.bookmarks;
-            $rootScope.user = d.user;
-            user_defer.resolve($rootScope.user);
-            $rootScope.news_alert = d.news_alert;
+    easyInsight.factory('PageInfo', function () {
+        var title = '';
+        return {
+            title: function () {
+                if (title.length == 0)
+                    return "Easy Insight";
+                return "Easy Insight - " + title;
+            },
+            setTitle: function (value) {
+                title = value;
+            }
         }
-    }).error(function () {
-        window.location = "/app/login.jsp";
     });
 
-    $rootScope.numKeys = function(obj) {
-        if(!obj) return 0;
-        return Object.keys(obj).length;
-    }
-    $rootScope.PageInfo = PageInfo;
-    $rootScope.mobile = function() {
-        return navigator && navigator.userAgent && navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
-    }
+    easyInsight.controller('MissingFileController', ["PageInfo", function (PageInfo) {
+        PageInfo.setTitle("Not Found");
+    }]);
 
-        $rootScope.getOffset = function() {
-            return new Date().getTimezoneOffset();
-        }
+    easyInsight.controller("globalSearchController", ["$scope", "$http", "$timeout", function ($scope, $http, $timeout) {
+        $scope.search = {
+            "text": ""
+        };
 
-        $rootScope.isSearchEnabled = function() {
-            return $window.location.host == "localhost" || $window.location.host == "j8staging.easy-insight.com";
-        }
-
-}]);
-
-easyInsight.directive("passwordVerify", function() {
-   return {
-      require: "ngModel",
-      scope: {
-        passwordVerify: '='
-      },
-      link: function(scope, element, attrs, ctrl) {
-        scope.$watch(function() {
-            var combined;
-            if (scope.passwordVerify || ctrl.$viewValue) {
-               combined = scope.passwordVerify + '_' + ctrl.$viewValue;
+        $scope.iconFactory = function (result) {
+            if (result.type == "dashboard") {
+                return "glyphicon-list-alt";
+            } else if (result.type == "report") {
+                return "glyphicon-th-list"
             }
-            return combined;
-        }, function(value) {
-            if(scope.passwordVerify && !ctrl.$viewValue) {
-                ctrl.$setValidity("passwordVerify", false);
+            else
+                return "glyphicon-book";
+        };
+
+        $scope.$watch("search.text", function (newVal, oldVal, scope) {
+            if (scope.type_delay != null) {
+                $timeout.cancel(scope.type_delay);
             }
-            if (value) {
-                ctrl.$parsers.unshift(function(viewValue) {
-                    var origin = scope.passwordVerify;
-                    if (origin !== viewValue) {
+
+            scope.type_delay = $timeout(function () {
+                    scope.results = [];
+                    if (newVal.length > 0) {
+                        var searchText = "/app/search?query=" + encodeURIComponent(newVal);
+                        scope.loading = $http.get(searchText);
+                        scope.loading.then(function (d) {
+                            if (d.config.url == searchText)
+                                $scope.results = d.data.results;
+                        })
+                    }
+                }, 250
+            );
+        });
+    }]);
+
+    easyInsight.config(["$httpProvider", function ($httpProvider) {
+        $httpProvider.interceptors.push(["$q", function ($q) {
+            return {
+                'request': function (config) {
+                    config.headers["X-REQUESTED-WITH"] = "XmlHttpRequest";
+                    return config;
+                }
+            }
+        }])
+    }]);
+
+    easyInsight.run(["$rootScope", "$http", "$location", "PageInfo", "$q", "$window",
+        function ($rootScope, $http, $location, PageInfo, $q, $window) {
+            $rootScope.user = {
+                "username": "..."
+            };
+            var user_defer = $q.defer();
+            $rootScope.user_promise = user_defer.promise;
+
+            $http.get("/app/userInfo.json").success(function (d, r) {
+                if (r == 401)
+                    window.location = "/app/login.jsp";
+                else {
+                    $rootScope.bookmarks = d.bookmarks;
+                    $rootScope.user = d.user;
+                    user_defer.resolve($rootScope.user);
+                    $rootScope.news_alert = d.news_alert;
+                }
+            }).error(function () {
+                window.location = "/app/login.jsp";
+            });
+
+            $rootScope.numKeys = function (obj) {
+                if (!obj) return 0;
+                return Object.keys(obj).length;
+            };
+            $rootScope.PageInfo = PageInfo;
+
+            $rootScope.mobile = function () {
+                return navigator && navigator.userAgent && navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
+            };
+
+            $rootScope.getOffset = function () {
+                return new Date().getTimezoneOffset();
+            };
+
+            $rootScope.isSearchEnabled = function () {
+                return $window.location.host == "localhost" || $window.location.host == "j8staging.easy-insight.com";
+            }
+
+        }]);
+
+    easyInsight.directive("passwordVerify", function () {
+        return {
+            require: "ngModel",
+            scope: {
+                passwordVerify: '='
+            },
+            link: function (scope, element, attrs, ctrl) {
+                scope.$watch(function () {
+                    var combined;
+                    if (scope.passwordVerify || ctrl.$viewValue) {
+                        combined = scope.passwordVerify + '_' + ctrl.$viewValue;
+                    }
+                    return combined;
+                }, function (value) {
+                    if (scope.passwordVerify && !ctrl.$viewValue) {
                         ctrl.$setValidity("passwordVerify", false);
-                        return undefined;
-                    } else {
-                        ctrl.$setValidity("passwordVerify", true);
-                        return viewValue;
+                    }
+                    if (value) {
+                        ctrl.$parsers.unshift(function (viewValue) {
+                            var origin = scope.passwordVerify;
+                            if (origin !== viewValue) {
+                                ctrl.$setValidity("passwordVerify", false);
+                                return undefined;
+                            } else {
+                                ctrl.$setValidity("passwordVerify", true);
+                                return viewValue;
+                            }
+                        });
                     }
                 });
             }
-        });
-     }
-   };
-});
+        };
+    });
 
-easyInsight.value('cgBusyDefaults',{
-    templateUrl: '/angular_templates/angular-busy.html'
-});
+    easyInsight.value('cgBusyDefaults', {
+        templateUrl: '/angular_templates/angular-busy.html'
+    });
+}());

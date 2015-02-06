@@ -448,11 +448,11 @@ public class HtmlServlet extends HttpServlet {
 
 
 
-    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
+    protected static void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
         configureAxesBase(object, chart, xAxisItem, yAxisItem, exportMetadata);
     }
 
-    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, List<AnalysisItem> items, ExportMetadata exportMetadata) throws JSONException {
+    protected static void configureAxes(org.json.JSONObject object, WSChartDefinition chart, AnalysisItem xAxisItem, List<AnalysisItem> items, ExportMetadata exportMetadata) throws JSONException {
         int aggregation = 0;
         boolean aggChanged = true;
         for (AnalysisItem item : items) {
@@ -472,7 +472,7 @@ public class HtmlServlet extends HttpServlet {
 
     }
 
-    protected void configureAxes(org.json.JSONObject object, WSChartDefinition chart, List<AnalysisItem> items, AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
+    protected static void configureAxes(org.json.JSONObject object, WSChartDefinition chart, List<AnalysisItem> items, AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
         int aggregation = 0;
         boolean aggChanged = true;
         for (AnalysisItem item : items) {
@@ -492,7 +492,7 @@ public class HtmlServlet extends HttpServlet {
 
     }
 
-    protected void configureAxesBase(org.json.JSONObject object, WSChartDefinition chart, @Nullable AnalysisItem xAxisItem,
+    protected static void configureAxesBase(org.json.JSONObject object, WSChartDefinition chart, @Nullable AnalysisItem xAxisItem,
                                      @Nullable AnalysisItem yAxisItem, ExportMetadata exportMetadata) throws JSONException {
 
         if (chart.getxAxisLabel() != null && !"".equals(chart.getxAxisLabel())) {
@@ -539,7 +539,7 @@ public class HtmlServlet extends HttpServlet {
         object.put("showLegend", chart.isShowLegend());
     }
 
-    protected org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure, ExportMetadata exportMetadata) throws JSONException {
+    protected static org.json.JSONObject createFormatObject(AnalysisItem xaxisMeasure, ExportMetadata exportMetadata) throws JSONException {
         org.json.JSONObject object = new org.json.JSONObject();
         if (xaxisMeasure.hasType(AnalysisItemTypes.MEASURE)) {
             AnalysisMeasure measure = (AnalysisMeasure) xaxisMeasure;

@@ -15,7 +15,7 @@
                 <fileset dir="../lib">
                     <include name="**/*.jar"/>
                 </fileset>
-                <fileset file="../../java/lib/core/servlet-api.jar"/>
+                <fileset file="/opt/apache-tomcat-8.0.15/lib/servlet-api.jar"/>
             </classpath>
             <include name="**"/>
             <exclude name="tags/**"/>

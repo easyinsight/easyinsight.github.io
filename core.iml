@@ -7,6 +7,7 @@
           <unit-entry name="hibernate.cfg.xml" />
           <unit-entry name="src/hibernate.cfg.xml" value="8c92e1a8-62f9-4e17-8bcd-38d889c74b8c" />
         </datasource-map>
+        <naming-strategy-map />
         <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/java/src/hibernate.cfg.xml" />
       </configuration>
     </facet>
@@ -30,7 +31,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$/java">
       <sourceFolder url="file://$MODULE_DIR$/java/src" isTestSource="false" />
@@ -46,7 +47,7 @@
         <jarDirectory url="file://$MODULE_DIR$/java/lib/cxf2" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="jdk" jdkName="1.6" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library name="core">
@@ -99,15 +100,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/j2ee.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
       <library name="blazeds">
         <CLASSES>
           <root url="file://$MODULE_DIR$/java/lib/blazeds" />
@@ -147,6 +139,6 @@
         <jarDirectory url="file://$MODULE_DIR$/java/lib/gnip" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" scope="PROVIDED" name="Tomcat 8.0.15" level="application_server_libraries" />
   </component>
 </module>
-

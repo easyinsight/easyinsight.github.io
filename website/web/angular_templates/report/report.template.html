@@ -1,0 +1,6 @@
+<div class="filters">
+    <div class="filterBoxLabel" ng-if="report.filters.length > 0">Filters:</div>
+    <div class="filter" ng-repeat="filter in report.filters"><filter-view filter="filter"></filter-view></div>
+</div>
+
+<svg column-chart ng-model="data" />
