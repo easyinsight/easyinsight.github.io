@@ -1,5 +1,5 @@
 (function () {
-    var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy', 'ui.bootstrap', 'ui.keypress']);
+    var eiDataSources = angular.module("eiDataSources", ['route-segment', 'view-segment', 'cgBusy', 'ui.bootstrap', 'ui.keypress', 'ngStorage']);
 
     eiDataSources.controller("homeBaseController", ["$scope", "$http", function ($scope, $http) {
 
@@ -31,8 +31,10 @@
 
     }]);
 
-    eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", function ($scope, $http, PageInfo, $filter, $modal) {
-        PageInfo.setTitle("Data Sources");
+    eiDataSources.controller("dataSourceListController", ["$scope", "$http", "PageInfo", "$filter", "$modal", "$localStorage",
+        function ($scope, $http, PageInfo, $filter, $modal, $localStorage) {
+
+            $scope.$storage = $localStorage.$default({ use_grid: true });
         $scope.ordered_by = "name";
         $scope.order = function(val) {
             if($scope.ordered_by == val) {
@@ -40,7 +42,7 @@
             } else {
                 $scope.ordered_by = val;
             }
-        }
+        };
         $scope.load = $http.get("/app/dataSources.json");
         $scope.load.then(function (d) {
             $scope.data_sources = d.data.data_sources;
@@ -50,12 +52,12 @@
         });
         $scope.toggleTag = function (tag) {
             tag.enabled = !tag.enabled;
-        }
+        };
 
         $scope.delete_selected = function () {
             var to_delete = $filter("tagged")($scope.data_sources, $scope.tags).filter(function (e, i, l) {
                 return e.selected;
-            })
+            });
             if (to_delete.length > 0) {
 
                 $scope.to_delete = to_delete;
