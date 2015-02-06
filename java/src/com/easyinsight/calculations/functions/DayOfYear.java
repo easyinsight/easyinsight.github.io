@@ -35,10 +35,8 @@ public class DayOfYear extends Function {
                 } else {
                     startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
                 }
-                //startDate = dateValue.getDate();
             } else if (start.type() == Value.NUMBER) {
                 startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
-                //startDate = new Date(start.toDouble().longValue());
             }
         }
         if (startDate != null) {
