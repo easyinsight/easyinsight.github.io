@@ -7,8 +7,6 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.Value;
 
-import java.util.Calendar;
-
 /**
  * User: jamesboe
  * Date: 6/3/13
@@ -22,8 +20,7 @@ public class DateLevelFunction extends Function {
             int level = Integer.parseInt(minusQuotes(1));
             AnalysisDateDimension dateDimension = new AnalysisDateDimension();
             dateDimension.setDateLevel(level);
-            Value result = dateDimension.transformValue(dateValue, new InsightRequestMetadata(), false, Calendar.getInstance());
-            System.out.println("transformed " + dateValue + " into " + result);
+            Value result = dateDimension.transformValue(dateValue, new InsightRequestMetadata(), false);
             return result;
         }
         return new EmptyValue();
