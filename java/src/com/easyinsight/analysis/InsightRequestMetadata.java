@@ -22,7 +22,7 @@ public class InsightRequestMetadata implements Serializable {
     private AnalysisDateDimension baseDate;
     private int utcOffset;
     private transient boolean avoidKeyDisplayCollisions;
-    private boolean noCache;
+    private boolean noCache = true;
     private List<AnalysisItemOverride> hierarchyOverrides = new ArrayList<AnalysisItemOverride>();
     private boolean aggregateQuery = true;
     private List<JoinOverride> joinOverrides = new ArrayList<JoinOverride>();
@@ -298,6 +298,9 @@ public class InsightRequestMetadata implements Serializable {
     }
 
     public Map<String, Boolean> getFilterOverrideMap() {
+        if (filterOverrideMap == null) {
+            filterOverrideMap = new HashMap<>();
+        }
         return filterOverrideMap;
     }
 

@@ -1857,6 +1857,30 @@ public class AnalysisService {
                 }
             }
 
+            Iterator<FilterDefinition> iter = endFilters.iterator();
+            while (iter.hasNext()) {
+                FilterDefinition filter = iter.next();
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition filterValueDefinition = (FilterValueDefinition) filter;
+                    if (filterValueDefinition.getFilteredValues() != null &&
+                            filterValueDefinition.getFilteredValues().size() == 1 &&
+                            filterValueDefinition.getFilteredValues().get(0) != null &&
+                            "All".equals(filterValueDefinition.getFilteredValues().get(0).toString())) {
+                        iter.remove();
+                    }
+                } else if (filter instanceof RollingFilterDefinition) {
+                    RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                    if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.ALL) {
+                        iter.remove();
+                    }
+                } else if (filter instanceof FlatDateFilter) {
+                    FlatDateFilter flatDateFilter = (FlatDateFilter) filter;
+                    if (flatDateFilter.getDateLevel() != AnalysisDateDimension.MONTH_LEVEL && flatDateFilter.getValue() == 0) {
+                        iter.remove();
+                    }
+                }
+            }
+
             DrillThroughResponse drillThroughResponse = new DrillThroughResponse();
             EIDescriptor descriptor;
             if (drillThrough.getReportID() != null && drillThrough.getReportID() != 0) {
@@ -1974,6 +1998,13 @@ public class AnalysisService {
         }
         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
             AnalysisDateDimension dateDimension = (AnalysisDateDimension) analysisItem;
+            if (value.type() == Value.STRING && "[ No Value ]".equals(value.toString())) {
+                NullFilter nullFilter = new NullFilter();
+                nullFilter.setField(dateDimension);
+                nullFilter.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
+                nullFilter.setDrillthrough(true);
+                return nullFilter;
+            }
             DerivedAnalysisDimension asTextDimension = new DerivedAnalysisDimension();
             String targetDisplay = dateDimension.toOriginalDisplayName();
             if (report.getFilterDefinitions() != null) {
@@ -3161,6 +3192,7 @@ public class AnalysisService {
 
             public void run() {
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, 0, null);
+                long id = 0;
                 try {
                     EIConnection conn = Database.instance().getConnection();
                     try {
@@ -3180,8 +3212,9 @@ public class AnalysisService {
                         UploadPolicy policy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
                         cachedAddonDataSource.setUploadPolicy(policy);
 
-                        long id = cachedAddonDataSource.create(conn, null, null);
-                        CachedAddonDataSource.runReport(conn, id, false);
+                        id = cachedAddonDataSource.create(conn, null, null);
+
+                        //CachedAddonDataSource.runReport(conn, id, false);
 
                         /*PreparedStatement reportSourceQuery = conn.prepareStatement("SELECT DATA_SOURCE_ID FROM distinct_cached_addon_report_source WHERE REPORT_ID = ?");
                         reportSourceQuery.setLong(1, reportID);
@@ -3204,6 +3237,9 @@ public class AnalysisService {
                     } finally {
                         conn.setAutoCommit(true);
                         Database.closeConnection(conn);
+                    }
+                    if (id > 0) {
+                        AsyncReport.cacheRebuildAndWait(id);
                     }
                 } finally {
                     SecurityUtil.clearThreadLocal();

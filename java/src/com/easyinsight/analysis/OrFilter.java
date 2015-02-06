@@ -106,11 +106,11 @@ public class OrFilter extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         StringBuilder sb = new StringBuilder();
         for (FilterDefinition filter : filters) {
             if (filter.isEnabled() && filter.validForQuery()) {
-                sb.append(filter.toQuerySQL(tableName, database));
+                sb.append(filter.toQuerySQL(tableName, database, insightRequestMetadata));
                 sb.append(" OR ");
             }
         }

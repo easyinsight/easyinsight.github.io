@@ -224,7 +224,7 @@ public class PipelinePointInTime implements IComponent {
 
         Calendar calendar = Calendar.getInstance();
         for (IRow row : resultSet.getRows()) {
-            row.addValue(target.createAggregateKey(), target.transformValue(row.getValue(stageDate.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false, calendar));
+            row.addValue(target.createAggregateKey(), target.transformValue(row.getValue(stageDate.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false));
         }
         return resultSet;
     }

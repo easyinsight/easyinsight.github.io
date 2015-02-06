@@ -6,6 +6,11 @@ import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.temporal.IsoFields;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -17,39 +22,18 @@ import java.util.TimeZone;
  */
 public class DayOfYear extends Function {
     public Value evaluate() {
-        Date startDate = null;
-        if (params.size() == 0) {
-            startDate = new Date();
-        } else {
-            Value start = params.get(0);
-            if (start.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) start;
-                startDate = dateValue.getDate();
-            }
-        }
+        ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+        LocalDate startDate = date();
         if (startDate != null) {
-            Calendar calendar = Calendar.getInstance();
-            if (calculationMetadata != null && calculationMetadata.isFilterTimeShift()) {
-                int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-                String string;
-                if (time > 0) {
-                    string = "GMT-"+Math.abs(time);
-                } else if (time < 0) {
-                    string = "GMT+"+Math.abs(time);
-                } else {
-                    string = "GMT";
-                }
-                TimeZone timeZone = TimeZone.getTimeZone(string);
-                calendar.setTimeZone(timeZone);
-            }
-            calendar.setTimeInMillis(startDate.getTime());
-            //return new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
+            LocalDate localDate = startDate;
+
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
-                calendar.set(Calendar.DAY_OF_YEAR, dayToSet);
-                return new DateValue(calendar.getTime());
+                localDate = localDate.withDayOfYear(dayToSet);
+                Instant instant = localDate.atStartOfDay().atZone(zoneId).toInstant();
+                return new DateValue(Date.from(instant));
             } else {
-                return new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
+                return new NumericValue(localDate.getDayOfYear());
             }
         } else {
             return new EmptyValue();

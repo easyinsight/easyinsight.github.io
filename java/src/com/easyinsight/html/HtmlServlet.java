@@ -244,6 +244,8 @@ public class HtmlServlet extends HttpServlet {
                 }
                 if (zoneID != null) {
                     insightRequestMetadata.setZoneID(ZoneId.of(zoneID));
+                } else {
+                    DataService.handleTimezoneData(conn, insightRequestMetadata);
                 }
                 ExportMetadata md = ExportService.createExportMetadata(SecurityUtil.getAccountID(false), conn, insightRequestMetadata);
                 long start = System.currentTimeMillis();

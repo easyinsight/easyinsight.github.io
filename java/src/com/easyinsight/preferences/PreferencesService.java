@@ -509,7 +509,6 @@ public class PreferencesService {
                             List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, filterID).list();
                             if (results.size() > 0) {
                                 FilterDefinition filter = (FilterDefinition) results.get(0);
-                                filter.getField().afterLoad();
                                 filter.afterLoad();
                                 filters.add(filter);
                             }

@@ -47,15 +47,22 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     public static final int CUSTOM_FIELD_COMPANY = 2;
 
     private String url = "";
-    private boolean includeEmails;
+    private boolean includeEmails = true;
     private boolean joinDealsToContacts;
-    private boolean includeContactNotes;
-    private boolean includeCompanyNotes;
-    private boolean includeDealNotes;
-    private boolean includeCaseNotes;
+    private boolean includeContactNotes = true;
+    private boolean includeCompanyNotes = true;
+    private boolean includeDealNotes = true;
+    private boolean includeCaseNotes = true;
     private boolean joinTasksToContacts;
     private String token;
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
+
+    public static final int ACTIVITIES = 1;
+    public static final int EMAILS = 2;
+    public static final int CASE_NOTES = 3;
+    public static final int CONTACT_NOTES = 4;
+    public static final int DEAL_NOTES = 5;
+    public static final int COMPANY_NOTES = 6;
 
     public List<CustomFieldTag> customFieldTags() {
         List<CustomFieldTag> customTags = new ArrayList<CustomFieldTag>();
@@ -639,7 +646,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
                 HighRiseTaskSource.DONE_AT.equals(name)) {
             return true;
         }
-        if (HighRiseCaseNotesSource.NOTE_CREATED_AT.equals(name)) {
+        if (HighRiseCaseNotesSource.NOTE_CREATED_AT.equals(name) || HighRiseDealNotesSource.NOTE_CREATED_AT.equals(name) ||
+                HighRiseCompanyNotesSource.NOTE_CREATED_AT.equals(name) || HighRiseContactNotesSource.NOTE_CREATED_AT.equals(name) ||
+                HighRiseActivitySource.NOTE_CREATED_AT.equals(name) ||
+                HighRiseCaseNotesSource.NOTE_UPDATED_AT.equals(name) || HighRiseDealNotesSource.NOTE_UPDATED_AT.equals(name) ||
+                HighRiseCompanyNotesSource.NOTE_UPDATED_AT.equals(name) || HighRiseContactNotesSource.NOTE_UPDATED_AT.equals(name) ||
+                HighRiseActivitySource.NOTE_UPDATED_AT.equals(name) ) {
             return true;
         }
         return false;

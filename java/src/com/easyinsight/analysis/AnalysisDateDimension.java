@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.functions.DayOfWeek;
 import com.easyinsight.core.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -10,9 +11,13 @@ import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.Date;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * User: James Boe
@@ -94,6 +99,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public static final int WEEK_OF_YEAR_FLAT = 10;
     public static final int QUARTER_OF_YEAR_LEVEL = 11;
     public static final int QUARTER_OF_YEAR_FLAT = 12;
+    public static final int FISCAL_YEAR = 13;
+    public static final int FISCAL_QUARTER_OF_YEAR_LEVEL = 14;
+    public static final int FISCAL_QUARTER_OF_YEAR_FLAT = 15;
 
     public AnalysisDateDimension(Key key, boolean group, int dateLevel) {
         super(key, group);
@@ -240,7 +248,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
 
     //private transient Calendar calendar;
 
-    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift, Calendar calendar) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata, boolean timezoneShift) {
         if (cachedDateFormat == null) {
             if (customDateFormat == null) {
                 cachedDateFormat = defaultDateFormat;
@@ -267,8 +275,25 @@ public class AnalysisDateDimension extends AnalysisDimension {
             throw new ReportException(new AnalysisItemFault(iae.getMessage(), this));
         }
         Value resultValue;
+        LocalDate ld = null;
+        ZonedDateTime zd = null;
         if (tempDate != null) {
+            java.time.temporal.Temporal temporal;
             if (timezoneShift) {
+                ZonedDateTime zdt = tempDate.toInstant().atZone(insightRequestMetadata.createZoneID());
+                zd = zdt;
+                temporal = zdt;
+            } else {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(tempDate);
+                LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1,
+                        cal.get(Calendar.DAY_OF_MONTH));
+                ld = localDate;
+                temporal = localDate;
+            }
+
+            /*if (timezoneShift) {
                 int time = insightRequestMetadata.getUtcOffset() / 60;
                 String string;
                 if (time > 0) {
@@ -288,61 +313,105 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 calendar = Calendar.getInstance();
                 calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
             }
-            calendar.setTimeInMillis(tempDate.getTime());
+            calendar.setTimeInMillis(tempDate.getTime());*/
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
-                        calendar.set(Calendar.MONTH, 0);
+                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, 0).with(ChronoField.DAY_OF_YEAR, 2);
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.MONTH, 0);
                         calendar.set(Calendar.DAY_OF_YEAR, 2);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case QUARTER_OF_YEAR_LEVEL:
-                        calendar.set(Calendar.MONTH, (calendar.get(Calendar.MONTH)) / 3 * 3);
+                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3 * 3 + 1);
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.MONTH, (calendar.get(Calendar.MONTH)) / 3 * 3);
                         calendar.set(Calendar.DAY_OF_MONTH, 1);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                     case MONTH_LEVEL:
-                        calendar.set(Calendar.DAY_OF_MONTH, 1);
+                        temporal = temporal.with(ChronoField.DAY_OF_MONTH, 2);
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.DAY_OF_MONTH, 1);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case WEEK_LEVEL:
-                        calendar.set(Calendar.DAY_OF_WEEK, SecurityUtil.getFirstDayOfWeek());
+                        temporal = temporal.with(ChronoField.DAY_OF_WEEK, DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()).getValue());
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.DAY_OF_WEEK, SecurityUtil.getFirstDayOfWeek());
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case DAY_LEVEL:
-                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        //temporal = temporal.with(ChronoField.DAY_OF_MONTH, 2);
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case HOUR_LEVEL:
-                        calendar.set(Calendar.MINUTE, 0);
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case MINUTE_LEVEL:
-                        calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     default:
                         throw new RuntimeException();
                 }
 
-                finalDate = calendar.getTime();
+                if (timezoneShift) {
+                    ZonedDateTime zdt = (ZonedDateTime) temporal;
+                    Instant instant = zdt.toInstant();
+                    finalDate = Date.from(instant);
+                } else {
+                    LocalDate localDate = (LocalDate) temporal;
+                    Instant instant = localDate.atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
+                    finalDate = Date.from(instant);
+                }
+
+
+
+                //finalDate = calendar.getTime();
                 if (outputDateFormat != null && outputDateFormat.length() > 0) {
                     try {
-                        resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new DateValue(finalDate), new NumericValue(finalDate.getTime()));
+                        resultValue = new StringValue(DateTimeFormatter.ofPattern(outputDateFormat).format(temporal), new DateValue(finalDate), new NumericValue(finalDate.getTime()));
                     } catch (IllegalArgumentException e) {
                         throw new ReportException(new AnalysisItemFault(e.getMessage() + " output format of " + outputDateFormat + " on " + toDisplay() + ".", this));
                     }
@@ -352,15 +421,17 @@ public class AnalysisDateDimension extends AnalysisDimension {
             } else {
                 switch (dateLevel) {
                     case QUARTER_OF_YEAR_FLAT:
-                        int quarter = (calendar.get(Calendar.MONTH)) / 3 + 1;
+                        //int quarter = (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3 * 3 + 1
+                        int quarter = (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3 + 1;
                         resultValue = new StringValue("Q" + quarter);
                         break;
                     case MONTH_FLAT:
                         if (outputDateFormat != null && outputDateFormat.length() > 0) {
-                            resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new NumericValue(calendar.get(Calendar.MONTH)));
+                            resultValue = new StringValue(DateTimeFormatter.ofPattern(outputDateFormat).format(temporal), new NumericValue(temporal.get(ChronoField.MONTH_OF_YEAR) - 1));
                             break;
                         }
-                        int month = calendar.get(Calendar.MONTH);
+                        int month = temporal.get(ChronoField.MONTH_OF_YEAR) - 1;
+                        //int month = calendar.get(Calendar.MONTH);
                         switch (month) {
                             case Calendar.JANUARY:
                                 resultValue = new StringValue("January", new NumericValue(0));
@@ -403,10 +474,10 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         }
                         break;
                     case DAY_OF_YEAR_FLAT:
-                        resultValue = new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
+                        resultValue = new NumericValue(temporal.get(ChronoField.DAY_OF_YEAR));
                         break;
                     case DAY_OF_WEEK_FLAT:
-                        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+                        int dayOfWeek = temporal.get(ChronoField.DAY_OF_WEEK);
                         switch (dayOfWeek) {
                             case Calendar.MONDAY:
                                 resultValue = new StringValue("Monday", new NumericValue(1));
@@ -436,15 +507,24 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         break;
                     case WEEK_OF_YEAR_FLAT:
                         if (outputDateFormat != null && outputDateFormat.length() > 0) {
-                            resultValue = new StringValue(new SimpleDateFormat(outputDateFormat).format(calendar.getTime()), new NumericValue(calendar.get(Calendar.WEEK_OF_YEAR)));
+                            resultValue = new StringValue(DateTimeFormatter.ofPattern(outputDateFormat).format(temporal), new NumericValue(temporal.get(ChronoField.ALIGNED_WEEK_OF_YEAR)));
                             break;
                         }
-                        resultValue = new NumericValue(calendar.get(Calendar.WEEK_OF_YEAR));
+                        resultValue = new NumericValue(temporal.get(ChronoField.ALIGNED_WEEK_OF_YEAR));
                         break;
                     default:
                         throw new RuntimeException();
                 }
-                resultValue.setOriginalValue(new DateValue(tempDate));
+                if (timezoneShift) {
+                    ZonedDateTime zdt = (ZonedDateTime) temporal;
+                    Instant instant = zdt.toInstant();
+                    finalDate = Date.from(instant);
+                } else {
+                    LocalDate localDate = (LocalDate) temporal;
+                    Instant instant = localDate.atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
+                    finalDate = Date.from(instant);
+                }
+                resultValue.setOriginalValue(new DateValue(finalDate));
             }
         } else {
             resultValue = new EmptyValue();
@@ -455,6 +535,30 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 dateValue.setDateTime(true);
             }
             dateValue.setDateLevel(getDateLevel());
+
+            if (zd == null) {
+                dateValue.setZonedDateTime(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()));
+            } else {
+                dateValue.setZonedDateTime(zd);
+            }
+            if (ld == null) {
+                dateValue.setLocalDate(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate());
+            } else {
+                dateValue.setLocalDate(ld);
+            }
+
+        } else if (resultValue.getOriginalValue() != null && resultValue.getOriginalValue().type() == Value.DATE) {
+            DateValue dateValue = (DateValue) resultValue.getOriginalValue();
+            if (zd == null) {
+                dateValue.setZonedDateTime(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()));
+            } else {
+                dateValue.setZonedDateTime(zd);
+            }
+            if (ld == null) {
+                dateValue.setLocalDate(dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate());
+            } else {
+                dateValue.setLocalDate(ld);
+            }
         }
         return resultValue;
     }

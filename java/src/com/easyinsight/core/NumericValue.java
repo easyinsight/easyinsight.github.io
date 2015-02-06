@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class NumericValue extends Value implements Serializable {
 
     private Double value;
-    private transient Aggregation aggregation;
+    private Aggregation aggregation;
     private static final long serialVersionUID = -9170406442789546755L;
 
     private int calendarType;

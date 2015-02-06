@@ -211,7 +211,7 @@ public class FilterValueDefinition extends FilterDefinition {
         setFilteredValues(values);
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         StringBuilder queryBuilder = new StringBuilder();
 
         String columnName = getField().toKeySQL();

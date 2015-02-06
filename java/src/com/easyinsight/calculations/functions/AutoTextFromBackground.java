@@ -3,6 +3,7 @@ package com.easyinsight.calculations.functions;
 import cern.jet.stat.Descriptive;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.TextValueExtension;
+import com.easyinsight.analysis.WSCrosstabDefinition;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.StatCacheBuilder;
@@ -21,16 +22,24 @@ public class AutoTextFromBackground extends Function {
 
     @Override
     public Value evaluate() {
-        String statName = minusBrackets(getParameterName(0));
-        AnalysisItem statMeasure = findDataSourceItem(0);
+        AnalysisItem statMeasure;
+        if (paramCount() == 0) {
+            if (calculationMetadata.getReport() instanceof WSCrosstabDefinition) {
+                WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) calculationMetadata.getReport();
+                statMeasure = crosstabDefinition.getMeasures().get(0);
+            } else {
+                return new EmptyValue();
+            }
+        } else {
+            String statName = minusBrackets(getParameterName(0));
 
-        // rtbportal
-        if (statMeasure == null) {
-            throw new FunctionException("Could not find the specified field " + statName);
+            statMeasure = findDataSourceItem(0);
+            if (statMeasure == null) {
+                throw new FunctionException("Could not find the specified field " + statName);
+            }
         }
 
-
-        Value target = getParameter(0);
+        Value target = getRow().getValue(statMeasure);
 
         TextValueExtension textValueExtension = (TextValueExtension) target.getValueExtension();
         if (textValueExtension == null) {
@@ -53,6 +62,6 @@ public class AutoTextFromBackground extends Function {
 
     @Override
     public int getParameterCount() {
-        return 1;
+        return -1;
     }
 }

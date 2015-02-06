@@ -45,7 +45,7 @@ public class FilterPatternDefinition extends FilterDefinition {
         return new MaterializedFilterPatternDefinition(getField(), pattern, caseSensitive, regex, autoWildCard);
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
         queryBuilder.append(columnName);

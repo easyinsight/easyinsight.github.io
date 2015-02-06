@@ -146,7 +146,7 @@ public class MultiFieldFilterDefinition extends FilterDefinition implements IFie
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         return null;
     }
 

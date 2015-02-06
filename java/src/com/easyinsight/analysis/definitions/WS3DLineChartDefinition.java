@@ -50,7 +50,7 @@ public class WS3DLineChartDefinition extends WSTwoAxisDefinition {
                     if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
                         long now = System.currentTimeMillis();
-                        daysDuration = (int)((now - MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, new Date())) / (1000 * 60 * 60 * 24));
+                        //daysDuration = (int)((now - MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, new Date())) / (1000 * 60 * 60 * 24));
                     } else if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
                         daysDuration = (int)((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));

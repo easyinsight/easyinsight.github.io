@@ -51,7 +51,7 @@ public class LineChartComponent implements IComponent {
                 for (IRow row : dataSet.getRows()) {
                     Value xAxisValue = row.getValue(lineChartDefinition.getXaxis());
                     Value measureValue = row.getValue(measure);
-                    Value aggregated = trend.transformValue(xAxisValue, new InsightRequestMetadata(), false, calendar);
+                    Value aggregated = trend.transformValue(xAxisValue, new InsightRequestMetadata(), false);
                     Aggregation aggregation = map.get(aggregated);
                     if (aggregation == null) {
                         aggregation = new AggregationFactory(measure, false).getAggregation(AggregationTypes.AVERAGE);
@@ -66,6 +66,7 @@ public class LineChartComponent implements IComponent {
                     map1.put("trend", entry.getValue().getValue());
                     values.add(map1);
                 }
+
                 Calendar cal = Calendar.getInstance();
                 Calendar shiftedCal = Calendar.getInstance();
                 int time = pipelineData.getInsightRequestMetadata().getUtcOffset() / 60;
@@ -83,7 +84,7 @@ public class LineChartComponent implements IComponent {
                     Value value = map1.get("date");
                     if (value.type() == Value.DATE) {
                         DateValue dateValue = (DateValue) value;
-                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()) ? shiftedCal : cal);
+                        dateValue.calculate(date.isTimeshift(pipelineData.getInsightRequestMetadata()), pipelineData.getInsightRequestMetadata().createZoneID());
                     }
                 }
                 trendLineValues = values;

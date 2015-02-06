@@ -350,7 +350,7 @@ public class FilterDefinition implements Serializable, Cloneable {
         throw new UnsupportedOperationException();
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         throw new UnsupportedOperationException();
     }
 

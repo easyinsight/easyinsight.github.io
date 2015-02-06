@@ -1155,10 +1155,14 @@ public class ApplicationSkin implements Serializable {
     }
 
     private static int fromHex(Object color) {
-        String colorString = color.toString();
-        if (colorString.length() == 7) {
-            colorString = colorString.substring(1, 7);
+        try {
+            String colorString = color.toString();
+            if (colorString.length() == 7) {
+                colorString = colorString.substring(1, 7);
+            }
+            return Integer.parseInt(colorString, 16);
+        } catch (NumberFormatException e) {
+            return 0;
         }
-        return Integer.parseInt(colorString, 16);
     }
 }

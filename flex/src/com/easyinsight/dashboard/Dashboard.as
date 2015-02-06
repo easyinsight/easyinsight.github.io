@@ -41,6 +41,7 @@ public class Dashboard {
 
     public var absoluteSizing:Boolean = true;
     public var reportAccessProblem:Boolean;
+    public var includeHeaderInHTML:Boolean;
 
     public var fillStackHeaders:Boolean = true;
     public var stackFill1Start:int = 0x0084B4;

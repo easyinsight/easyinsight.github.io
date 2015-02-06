@@ -35,7 +35,7 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
         AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
         dateDim.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
         Calendar calendar = Calendar.getInstance();
-        value = analysisItem.transformValue(value, insightRequestMetadata, true, calendar);
+        value = analysisItem.transformValue(value, insightRequestMetadata, true);
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             Date date = dateValue.getDate();

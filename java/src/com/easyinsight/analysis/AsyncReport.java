@@ -429,6 +429,8 @@ public class AsyncReport {
                                                                 localMetadata.setUtcOffset(insightRequestMetadata.getUtcOffset());
                                                                 localMetadata.setNoAsync(true);
                                                                 localMetadata.setRunningAsync(true);
+                                                                localMetadata.setCacheForHTML(insightRequestMetadata.isCacheForHTML());
+                                                                localMetadata.setNoCache(insightRequestMetadata.isNoCache());
 
                                                                 String name;
                                                                 if (SecurityUtil.getUserID(false) == 0) {
@@ -484,7 +486,8 @@ public class AsyncReport {
                                                                         } else if (report instanceof WSTextDefinition) {
                                                                             results = new DataService().getEmbeddedTextResults((WSTextDefinition) report, insightRequestMetadata, conn);
                                                                         } else {
-                                                                            results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn);
+                                                                            results = new DataService().getEmbeddedResultsForReport(report, null, localMetadata, new ArrayList<>(), conn,
+                                                                                    insightRequestMetadata.isNoCache());
                                                                         }
                                                                         rh.results = results;
                                                                         rh.report = report;
@@ -767,8 +770,8 @@ public class AsyncReport {
             reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             reqStmt.setInt(4, CACHE_REBUILD);
             reqStmt.execute();
-            reqStmt.close();
             requestID = Database.instance().getAutoGenKey(reqStmt);
+            reqStmt.close();
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -864,7 +867,7 @@ public class AsyncReport {
         } else if (result instanceof Exception) {
             throw (Exception) result;
         } else {
-            throw new RuntimeException("result was " + result);
+            throw new RuntimeException("The data source refresh timed out.");
         }
     }
 
@@ -981,8 +984,8 @@ public class AsyncReport {
         }
     }
 
-    public static final int REPORT_TIMEOUT = 300000;
-    public static final int DATA_SOURCE_TIMEOUT = 2400000;
+    public static final int REPORT_TIMEOUT = 1000 * 60 * 5; // 300 seconds
+    public static final int DATA_SOURCE_TIMEOUT = 1000 * 60 * 300; // 1000 * 60 * 60
 
     public static ResultData asyncDataSet(final WSAnalysisDefinition analysisDefinition, final InsightRequestMetadata insightRequestMetadata) {
         boolean success = UserThreadMutex.mutex().acquire(SecurityUtil.getUserID(false));

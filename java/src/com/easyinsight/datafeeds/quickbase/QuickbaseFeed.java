@@ -25,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -154,9 +156,8 @@ public class QuickbaseFeed extends Feed {
                 queryBuilder.append(" AND ");
             } else if (filter instanceof RollingFilterDefinition) {
                 RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
-                Date now = insightRequestMetadata.getNow();
-                long startTime = MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, now);
-                long endTime = MaterializedRollingFilterDefinition.findEndDate(rollingFilterDefinition, now);
+                long startTime = rollingFilterDefinition.startTime(insightRequestMetadata).getTime();
+                long endTime = rollingFilterDefinition.endTime(insightRequestMetadata).getTime();
                 long workingEndDate = endTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
                 long workingStartDate = startTime + insightRequestMetadata.getUtcOffset() * 1000 * 60;
                 if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {

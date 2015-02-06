@@ -69,6 +69,7 @@ public class StyleConfiguration {
         items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
         items.addItem(new ImageReportFormItem("Header Image", "headerImage", dashboard.headerImage, dashboard));
         items.addItem(new CheckBoxReportFormItem("Full-Size Header Image", "imageFullHeader", dashboard.imageFullHeader, dashboard));
+        items.addItem(new CheckBoxReportFormItem("Include Header Image in HTML", "includeHeaderInHTML", dashboard.includeHeaderInHTML, dashboard));
         items.addItem(new ComboBoxReportFormItem("Color Set", "colorSet", dashboard.colorSet, dashboard, [ "Primary", "Secondary", "None"]));
         return items;
     }
@@ -200,6 +201,7 @@ public class StyleConfiguration {
         }
         if (report is TopoMapDefinition) {
             var items:ArrayCollection = new ArrayCollection();
+            items.addItem(new ComboBoxReportFormItem("Map", "map", TopoMapDefinition(report).map, report, [ "US States", "World", "TN", "CO", "HI", "Leaflet" ]));
             items.addItem(new FieldFormItem("Longitude", "longitude", TopoMapDefinition(report).longitude, report, allFields, AnalysisItemTypes.DIMENSION));
             items.addItem(new FieldFormItem("Latitude", "latitude", TopoMapDefinition(report).latitude, report, allFields, AnalysisItemTypes.DIMENSION));
             items.addItem(new FieldFormItem("Point Measure", "pointMeasure", TopoMapDefinition(report).pointMeasure, report, allFields, AnalysisItemTypes.MEASURE));
@@ -208,6 +210,12 @@ public class StyleConfiguration {
             items.addItem(new ColorReportFormItem("Region Fill End", "regionFillEnd",  TopoMapDefinition(report).regionFillEnd, report));
             items.addItem(new ColorReportFormItem("No Data Fill", "noDataFill",  TopoMapDefinition(report).noDataFill, report));
             items.addItem(new MultiColorReportFormItem("Point Colors", "pointColors", TopoMapDefinition(report).pointColors, report));
+            items.addItem(new TextReportFormItem("Center Latitude Point", "centerLat", TopoMapDefinition(report).centerLat, report));
+            items.addItem(new TextReportFormItem("Center Longitude Point", "centerLong", TopoMapDefinition(report).centerLong, report));
+            items.addItem(new NumericReportFormItem("Default Zoom Level", "defaultZoom", TopoMapDefinition(report).defaultZoom, report, 0, 1000));
+            items.addItem(new NumericReportFormItem("Max Zoom Level", "maxZoom", TopoMapDefinition(report).maxZoom, report, 0, 1000));
+            items.addItem(new NumericReportFormItem("Point Radius", "radius", TopoMapDefinition(report).radius, report, 0, 50));
+            items.addItem(new NumericReportFormItem("Point Blur", "blur", TopoMapDefinition(report).blur, report, 0, 50));
             sections.addItem({label: "Map Options", items: items});
         }
         return sections;
@@ -554,9 +562,6 @@ public class StyleConfiguration {
         if (report is TextReport) {
             items.addItem(new ColorReportFormItem("Text Color", "fontColor", TextReport(report).fontColor, report));
             items.addItem(new TextReportFormItem("Font Name (custom)", "customFontFamily", report.customFontFamily, report, "useCustomFontFamily"));
-        }
-        if (report is TopoMapDefinition) {
-            items.addItem(new ComboBoxReportFormItem("Map", "map", TopoMapDefinition(report).map, report, [ "US States", "World", "TN", "CO", "HI" ]));
         }
         var sort:Sort = new Sort();
         sort.fields = [ new SortField("label")];

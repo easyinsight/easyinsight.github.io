@@ -73,7 +73,7 @@ public class Account {
     private long accountID;
 
     @Column(name="async_requests")
-    private boolean asyncRequests;
+    private boolean asyncRequests = true;
 
     @Column(name="core_small_biz_connections")
     private int coreSmallBizConnections;

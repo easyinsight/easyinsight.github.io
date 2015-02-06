@@ -1284,7 +1284,7 @@ public class DataStorage implements IDataStorage {
             Iterator<FilterDefinition> filterIter = filters.iterator();
             while (filterIter.hasNext()) {
                 FilterDefinition filterDefinition = filterIter.next();
-                whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
+                whereBuilder.append(filterDefinition.toQuerySQL(getTableName(), database, insightRequestMetadata));
                 if (filterIter.hasNext()) {
                     whereBuilder.append(" AND ");
                 }
@@ -2166,7 +2166,7 @@ public class DataStorage implements IDataStorage {
         if (filters.size() > 0) {
             sqlBuilder.append(" WHERE ");
             for (FilterDefinition filterDefinition : filters) {
-                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName(), database));
+                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName(), database, insightRequestMetadata));
                 sqlBuilder.append(",");
             }
             sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
@@ -2202,7 +2202,7 @@ public class DataStorage implements IDataStorage {
                             value = new EmptyValue();
                         } else {
                             DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            dateValue.calculate(cal);
+                            dateValue.calculate(true, insightRequestMetadata.createZoneID());
                             value = dateValue;
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
@@ -2303,7 +2303,7 @@ stmt.setFetchSize(Integer.MIN_VALUE);
                             value = new EmptyValue();
                         } else {
                             DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            dateValue.calculate(cal);
+                            dateValue.calculate(true, insightRequestMetadata.createZoneID());
                             value = dateValue;
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {

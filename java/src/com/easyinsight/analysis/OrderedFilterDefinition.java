@@ -53,7 +53,7 @@ public class OrderedFilterDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

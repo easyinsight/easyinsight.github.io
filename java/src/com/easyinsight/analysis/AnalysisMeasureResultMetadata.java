@@ -31,7 +31,7 @@ public class AnalysisMeasureResultMetadata extends AnalysisItemResultMetadata {
 
    public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
        Calendar calendar = Calendar.getInstance();
-        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata, false, calendar).toDouble();
+        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata, false).toDouble();
         if (doubleValue != null) {
             if (lowestValue == null) {
                 lowestValue = doubleValue;

@@ -17,6 +17,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -88,7 +90,9 @@ public abstract class AmazonBaseFeed extends Feed {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
                         analysisDateDimension = (AnalysisDateDimension) rollingFilterDefinition.getField();
                         endDate = insightRequestMetadata.getNow();
-                        startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
+                        LocalDate ld = MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate);
+                        Instant instant = ld.atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
+                        startDate = Date.from(instant);
                     }
                 }
             }

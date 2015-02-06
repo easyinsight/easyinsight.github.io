@@ -14,11 +14,9 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
 
 import java.sql.Connection;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -30,6 +28,8 @@ public class SampleTaskSource extends ServerDataSourceDefinition {
     public static final String TASK_CREATED_AT = "Task Created At";
     public static final String TASK_COMPLETED_AT = "Task Completed At";
     public static final String TASK_DUE = "Task Due At";
+    public static final String TASK_NO_ZONE = "Task No Zone";
+    public static final String TASK_GMT = "Task GMT";
 
     public SampleTaskSource() {
         setFeedName("Tasks");
@@ -46,18 +46,36 @@ public class SampleTaskSource extends ServerDataSourceDefinition {
         fieldBuilder.addField(TASK_CREATED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(TASK_COMPLETED_AT, new AnalysisDateDimension());
         fieldBuilder.addField(TASK_DUE, new AnalysisDateDimension());
+        fieldBuilder.addField(TASK_NO_ZONE, new AnalysisDateDimension(true));
+        fieldBuilder.addField(TASK_GMT, new AnalysisDimension());
     }
 
     @Override
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         DataSet dataSet = new DataSet();
         try {
-            for (int i = -500; i < 500; i++) {
-                ZonedDateTime zdt = ZonedDateTime.now();
-                zdt = zdt.plusDays(i);
+            Map<Integer, IRow> map = new HashMap<>();
+            for (int i = -20000; i < 5000; i++) {
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(TASK_ID), String.valueOf(i));
+                map.put(i, row);
+            }
+            ZoneId utc = ZoneId.of("UTC");
+            for (int i = -20000; i < 5000; i++) {
+                ZonedDateTime zdt = ZonedDateTime.now(utc);
+                zdt = zdt.plusHours(i);
+                IRow row = map.get(i);
                 row.addValue(keys.get(TASK_CREATED_AT), new DateValue(Date.from(zdt.toInstant())));
+                row.addValue(keys.get(TASK_GMT), zdt.toString());
+                //row.addValue(keys.get(TASK_NO_ZONE), new DateValue(Date.from(zdt.toInstant())));
+            }
+
+            for (int i = -20000; i < 5000; i++) {
+                ZonedDateTime zdt = ZonedDateTime.now();
+                zdt = zdt.plusDays(i);
+                IRow row = map.get(i);
+                row.addValue(keys.get(TASK_NO_ZONE), new DateValue(Date.from(zdt.toInstant())));
+                //row.addValue(keys.get(TASK_NO_ZONE), new DateValue(Date.from(zdt.toInstant())));
             }
             IDataStorage.insertData(dataSet);
         } catch (Exception e) {

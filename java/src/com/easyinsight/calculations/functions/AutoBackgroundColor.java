@@ -3,6 +3,7 @@ package com.easyinsight.calculations.functions;
 import cern.jet.stat.Descriptive;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.TextValueExtension;
+import com.easyinsight.analysis.WSCrosstabDefinition;
 import com.easyinsight.calculations.Function;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.StatCacheBuilder;
@@ -22,26 +23,59 @@ public class AutoBackgroundColor extends Function {
 
     @Override
     public Value evaluate() {
-        String statName = minusBrackets(getParameterName(0));
-        AnalysisItem statMeasure = findDataSourceItem(0);
-        String color1String = minusQuotes(getParameter(1)).toString();
-        if (color1String.length() == 7) {
-            color1String = color1String.substring(1, 7);
-        }
-        int color1 = Integer.parseInt(color1String, 16);
-        String color2String = minusQuotes(getParameter(2)).toString();
-        if (color2String.length() == 7) {
-            color2String = color2String.substring(1, 7);
-        }
-        int color2 = Integer.parseInt(color2String, 16);
-        if (statMeasure == null) {
-            throw new FunctionException("Could not find the specified field " + statName);
+        AnalysisItem statMeasure;
+        int color1;
+        int color2;
+
+        if (paramCount() == 0) {
+            if (calculationMetadata.getReport() instanceof WSCrosstabDefinition) {
+                WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) calculationMetadata.getReport();
+                statMeasure = crosstabDefinition.getMeasures().get(0);
+                color2 = crosstabDefinition.getSummaryBackgroundColor();
+                color1 = 0xFFFFFF;
+            } else {
+                return new EmptyValue();
+            }
+        } else if (paramCount() == 1) {
+            if (calculationMetadata.getReport() instanceof WSCrosstabDefinition) {
+                WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) calculationMetadata.getReport();
+                statMeasure = crosstabDefinition.getMeasures().get(0);
+                String color2String = minusQuotes(getParameter(2)).toString();
+                if (color2String.length() == 7) {
+                    color2String = color2String.substring(1, 7);
+                }
+                color2 = Integer.parseInt(color2String, 16);
+                color1 = 0xFFFFFF;
+            } else {
+                return new EmptyValue();
+            }
+        } else {
+            String statName = minusBrackets(getParameterName(0));
+
+            statMeasure = findDataSourceItem(0);
+            String color1String = minusQuotes(getParameter(1)).toString();
+            if (color1String.length() == 7) {
+                color1String = color1String.substring(1, 7);
+            }
+
+            color1 = Integer.parseInt(color1String, 16);
+            String color2String = minusQuotes(getParameter(2)).toString();
+            if (color2String.length() == 7) {
+                color2String = color2String.substring(1, 7);
+            }
+
+            color2 = Integer.parseInt(color2String, 16);
+            if (statMeasure == null) {
+                throw new FunctionException("Could not find the specified field " + statName);
+            }
         }
         String processName = statMeasure.qualifiedName();
         StatCalculationCache statCache = (StatCalculationCache) calculationMetadata.getCache(new StatCacheBuilder(null, statMeasure,
                 d -> new Scale(Descriptive.min(d), Math.log(Descriptive.max(d)))), processName);
-        Value target = getParameter(0);
-        double instanceValue = getParameter(0).toDouble();
+        Value target = getRow().getValue(statMeasure);
+        //Value target = getParameter(0);
+        double instanceValue = target.toDouble();
+        System.out.println("instance value = " + instanceValue);
         Scale scale = (Scale) statCache.getResult();
         if (scale.min < 0) {
             scale.min = -(Math.log(Math.abs(scale.min)));
@@ -83,6 +117,6 @@ public class AutoBackgroundColor extends Function {
 
     @Override
     public int getParameterCount() {
-        return 3;
+        return -1;
     }
 }

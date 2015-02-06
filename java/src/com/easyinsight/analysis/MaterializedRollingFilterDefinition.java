@@ -7,7 +7,6 @@ import com.easyinsight.security.SecurityUtil;
 import java.time.*;
 import java.util.Date;
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * User: James Boe
@@ -56,8 +55,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int THIS_FISCAL_YEAR = -19;
     public static final int PRIOR_FISCAL_YEAR = -20;
 
-    private long limitDate;
-    private long endDate;
+    private LocalDate limitDate;
+    private LocalDate endDate;
+    private ZonedDateTime limitDateTime;
+    private ZonedDateTime endDateTime;
+    private boolean dateTime;
     private int interval;
     private int mode;
 
@@ -67,31 +69,31 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             now = new Date();
         }
         interval = rollingFilterDefinition.getInterval();
-        limitDate = findStartDate(rollingFilterDefinition, now, insightRequestMetadata);
-        endDate = findEndDate(rollingFilterDefinition, now, insightRequestMetadata);
-        AnalysisDateDimension date = (AnalysisDateDimension) rollingFilterDefinition.getField();
-        /*if (date.isTimeshift() && rollingFilterDefinition.getInterval() <= ALL) {
-            endDate = endDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
-            limitDate = limitDate + insightRequestMetadata.getUtcOffset() * 1000 * 60;
-        }*/
-        if (rollingFilterDefinition.getInterval() > ALL) {
-            if (rollingFilterDefinition.getStartDate() != null && rollingFilterDefinition.getEndDate() == null) {
-                mode = RollingFilterDefinition.AFTER;
-            } else if (rollingFilterDefinition.getStartDate() == null && rollingFilterDefinition.getEndDate() != null) {
-                mode = RollingFilterDefinition.BEFORE;
-            }
+        if (rollingFilterDefinition.dateTime(insightRequestMetadata)) {
+            dateTime = true;
+            limitDateTime = findStartDateTime(rollingFilterDefinition, now, insightRequestMetadata);
+            endDateTime = findEndDateTime(rollingFilterDefinition, now, insightRequestMetadata);
         } else {
-            mode = rollingFilterDefinition.getCustomBeforeOrAfter();
+            dateTime = false;
+            limitDate = findStartDate(rollingFilterDefinition, now, insightRequestMetadata);
+            endDate = findEndDate(rollingFilterDefinition, now, insightRequestMetadata);
+        }
+        if (rollingFilterDefinition.getStartDate() != null && rollingFilterDefinition.getEndDate() == null) {
+            mode = RollingFilterDefinition.AFTER;
+        } else if (rollingFilterDefinition.getStartDate() == null && rollingFilterDefinition.getEndDate() != null) {
+            mode = RollingFilterDefinition.BEFORE;
+        } else {
+            mode = 0;
         }
     }
 
-    public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+    public static LocalDate findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
         return findStartDate(rollingFilterDefinition, now, new InsightRequestMetadata());
     }
 
-    public static long findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
+    public static LocalDate findStartDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         if (rollingFilterDefinition.getStartDate() != null) {
-            return rollingFilterDefinition.getStartDate().getTime();
+            return (LocalDate) rollingFilterDefinition.getStartDate();
         }
         int interval = rollingFilterDefinition.getInterval();
         if (interval < 0) {
@@ -99,20 +101,20 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 if (i.getIntervalNumber() == interval) {
                     rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
                     if (rollingFilterDefinition.getStartDate() != null) {
-                        return rollingFilterDefinition.getStartDate().getTime();
+                        return (LocalDate) rollingFilterDefinition.getStartDate();
                     }
                 }
             }
         } else if (interval > ALL) {
             rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
             if (rollingFilterDefinition.getStartDate() != null) {
-                return rollingFilterDefinition.getStartDate().getTime();
+                return (LocalDate) rollingFilterDefinition.getStartDate();
             }
         }
         int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
+        /*Calendar cal = Calendar.getInstance();
+        cal.setTime(now);*/
         if (!(rollingFilterDefinition.getField() instanceof AnalysisDateDimension)) {
             throw new RuntimeException("Report attempted to run a rolling filter on field " + rollingFilterDefinition.getField().toDisplay() + " - " + rollingFilterDefinition.getField().getAnalysisItemID());
         }
@@ -134,21 +136,22 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             targetDayOfWeek = DayOfWeek.SATURDAY;
         }
 
-        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift(insightRequestMetadata)) {
 
-            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
-            ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+            ZoneId zoneId = insightRequestMetadata.createZoneID();
+
+            LocalDate zdt = LocalDate.now(zoneId);
+            //ZonedDateTime zdt = ZonedDateTime.now(zoneId);
             switch (interval) {
                 case CUSTOM:
                     if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
                             rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
                         switch (intervalType) {
-                            case 0:
+                            /*case 0:
                                 zdt = zdt.plusMinutes(intervalAmount);
                                 break;
                             case 1:
                                 zdt = zdt.plusHours(intervalAmount);
-                                break;
+                                break;*/
                             case 2:
                                 zdt = zdt.plusDays(intervalAmount);
                                 break;
@@ -165,194 +168,216 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                     }
                     break;
                 case DAY_TO_NOW:
-                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                     break;
                 case WEEK_TO_NOW:
                     zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
-                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                     break;
                 case MONTH_TO_NOW:
-                    zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    zdt = zdt.withDayOfMonth(1);
                     break;
                 case QUARTER_TO_NOW:
                     int month = zdt.getMonthValue() - 1;
                     int quarterMonth = month - (month % 3) + 1;
                     zdt = zdt.withMonth(quarterMonth);
-                    zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    zdt = zdt.withDayOfMonth(1);
                     break;
                 case YEAR_TO_NOW:
-                    zdt = zdt.withDayOfYear(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    zdt = zdt.withDayOfYear(1).withDayOfMonth(1);
                     break;
                 case DAY:
                     zdt = zdt.minusDays(1);
                     break;
                 case WEEK:
-                    zdt = zdt.minusWeeks(1);
+                    zdt = zdt.minusDays(6);
                     break;
                 case MONTH:
-                    zdt = zdt.minusMonths(1);
+                    zdt = zdt.minusDays(29);
                     break;
                 case YEAR:
-                    zdt = zdt.minusYears(1);
+                    zdt = zdt.minusDays(364);
                     break;
                 case QUARTER:
-                    zdt = zdt.minusMonths(3);
+                    zdt = zdt.minusDays(89);
                     break;
                 case LAST_FULL_DAY:
-                    zdt = zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    zdt = zdt.minusDays(1);
                     break;
                 case LAST_FULL_WEEK:
                     zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
-                    zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                     break;
                 case LAST_FULL_MONTH:
-                    zdt = zdt.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    zdt = zdt.minusMonths(1).withDayOfMonth(1);
                     break;
                 case LAST_YEAR:
-                    zdt = zdt.minusYears(1).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    zdt = zdt.minusYears(1).withDayOfYear(1);
                     break;
                 case LAST_FULL_QUARTER:
                     // TODO: ?
                     break;
                 default:
-                    if (rollingFilterDefinition.getStartDate() == null) {
+                    /*if (rollingFilterDefinition.getStartDate() == null) {
                         return 0;
-                    }
-                    return rollingFilterDefinition.getStartDate().getTime();
+                    }*/
+                    return (LocalDate) rollingFilterDefinition.getStartDate();
             }
-            Instant instant = zdt.toInstant();
-            return Date.from(instant).getTime();
-        } else {
-            switch (interval) {
-                case CUSTOM:
-                    if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
-                            rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
-                        switch (intervalType) {
-                            case 0:
-                                cal.add(Calendar.MINUTE, intervalAmount);
-                                break;
-                            case 1:
-                                cal.add(Calendar.HOUR_OF_DAY, intervalAmount);
-                                break;
-                            case 2:
-                                cal.add(Calendar.DAY_OF_YEAR, intervalAmount);
-                                break;
-                            case 3:
-                                cal.add(Calendar.WEEK_OF_YEAR, intervalAmount);
-                                break;
-                            case 4:
-                                cal.add(Calendar.MONTH, intervalAmount);
-                                break;
-                            case 5:
-                                cal.add(Calendar.YEAR, intervalAmount);
-                                break;
-                        }
-                    }
-                    break;
-                case DAY_TO_NOW:
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    break;
-                case WEEK_TO_NOW:
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    cal.set(Calendar.DAY_OF_WEEK, 1);
-                    break;
-                case MONTH_TO_NOW:
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    cal.set(Calendar.DAY_OF_MONTH, 1);
-                    break;
-                case QUARTER_TO_NOW:
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    int quarterMonth = cal.get(Calendar.MONTH) - cal.get(Calendar.MONTH) % 3;
-                    cal.set(Calendar.MONTH, quarterMonth);
-                    cal.set(Calendar.DAY_OF_MONTH, 1);
-                    break;
-                case YEAR_TO_NOW:
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    cal.set(Calendar.DAY_OF_YEAR, 1);
-                    break;
-                case DAY:
-                    cal.setTimeInMillis(cal.getTimeInMillis() - (60 * 60 * 1000 * 24));
-                    break;
-                case WEEK:
-                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L));
-                    break;
-                case MONTH:
-                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L));
-                    break;
-                case YEAR:
-                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 365L));
-                    break;
-                case QUARTER:
-                    cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L * 3L));
-                    break;
-                case LAST_FULL_DAY:
-                    cal.add(Calendar.DAY_OF_YEAR, -1);
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    break;
-                case LAST_FULL_WEEK:
-                    cal.add(Calendar.WEEK_OF_YEAR, -1);
-                    cal.set(Calendar.DAY_OF_WEEK, 1);
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    break;
-                case LAST_FULL_MONTH:
-                    cal.add(Calendar.MONTH, -1);
-                    cal.set(Calendar.DAY_OF_MONTH, 1);
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    break;
-                case LAST_YEAR:
-                    cal.add(Calendar.YEAR, -1);
-                    cal.set(Calendar.MONTH, Calendar.JANUARY);
-                    cal.set(Calendar.DAY_OF_MONTH, 1);
-                    cal.set(Calendar.HOUR_OF_DAY, 0);
-                    cal.set(Calendar.MINUTE, 0);
-                    cal.set(Calendar.SECOND, 0);
-                    cal.set(Calendar.MILLISECOND, 0);
-                    break;
-                case LAST_FULL_QUARTER:
-                    // TODO: ?
-                    break;
-                default:
-                    if (rollingFilterDefinition.getStartDate() == null) {
-                        return 0;
-                    }
-                    return rollingFilterDefinition.getStartDate().getTime();
-            }
-            return cal.getTimeInMillis();
-        }
+            return zdt;
+            /*Instant instant = zdt.toInstant();
+            return Date.from(instant).getTime();*/
+        //} else {
+
 
     }
 
-    public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
+    public static ZonedDateTime findStartDateTime(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
+        if (rollingFilterDefinition.getStartDate() != null) {
+            return (ZonedDateTime) rollingFilterDefinition.getStartDate();
+        }
+        int interval = rollingFilterDefinition.getInterval();
+        if (interval < 0) {
+            for (CustomRollingInterval i : RollingFilterDefinition.createAdditionalIntervals()) {
+                if (i.getIntervalNumber() == interval) {
+                    rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+                    if (rollingFilterDefinition.getStartDate() != null) {
+                        return (ZonedDateTime) rollingFilterDefinition.getStartDate();
+                    }
+                }
+            }
+        } else if (interval > ALL) {
+            rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+            if (rollingFilterDefinition.getStartDate() != null) {
+                return (ZonedDateTime) rollingFilterDefinition.getStartDate();
+            }
+        }
+        int intervalAmount = -rollingFilterDefinition.getCustomIntervalAmount();
+        int intervalType = rollingFilterDefinition.getCustomIntervalType();
+        /*Calendar cal = Calendar.getInstance();
+        cal.setTime(now);*/
+        if (!(rollingFilterDefinition.getField() instanceof AnalysisDateDimension)) {
+            throw new RuntimeException("Report attempted to run a rolling filter on field " + rollingFilterDefinition.getField().toDisplay() + " - " + rollingFilterDefinition.getField().getAnalysisItemID());
+        }
+        int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+        DayOfWeek targetDayOfWeek;
+        if (firstDayOfWeek == Calendar.SUNDAY) {
+            targetDayOfWeek = DayOfWeek.SUNDAY;
+        } else if (firstDayOfWeek == Calendar.MONDAY) {
+            targetDayOfWeek = DayOfWeek.MONDAY;
+        } else if (firstDayOfWeek == Calendar.TUESDAY) {
+            targetDayOfWeek = DayOfWeek.TUESDAY;
+        } else if (firstDayOfWeek == Calendar.WEDNESDAY) {
+            targetDayOfWeek = DayOfWeek.WEDNESDAY;
+        } else if (firstDayOfWeek == Calendar.THURSDAY) {
+            targetDayOfWeek = DayOfWeek.THURSDAY;
+        } else if (firstDayOfWeek == Calendar.FRIDAY) {
+            targetDayOfWeek = DayOfWeek.FRIDAY;
+        } else {
+            targetDayOfWeek = DayOfWeek.SATURDAY;
+        }
+
+
+        ZoneId zoneId = insightRequestMetadata.createZoneID();
+
+        ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+        //ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+        switch (interval) {
+            case CUSTOM:
+                if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
+                        rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
+                    switch (intervalType) {
+                        case 0:
+                            zdt = zdt.plusMinutes(intervalAmount);
+                            break;
+                        case 1:
+                            zdt = zdt.plusHours(intervalAmount);
+                          break;
+                        case 2:
+                            zdt = zdt.plusDays(intervalAmount);
+                            break;
+                        case 3:
+                            zdt = zdt.plusWeeks(intervalAmount);
+                            break;
+                        case 4:
+                            zdt = zdt.plusMonths(intervalAmount);
+                            break;
+                        case 5:
+                            zdt = zdt.plusYears(intervalAmount);
+                            break;
+                    }
+                }
+                break;
+            case DAY_TO_NOW:
+                zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case WEEK_TO_NOW:
+                zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
+                zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case MONTH_TO_NOW:
+                zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case QUARTER_TO_NOW:
+                int month = zdt.getMonthValue() - 1;
+                int quarterMonth = month - (month % 3) + 1;
+                zdt = zdt.withMonth(quarterMonth);
+                zdt = zdt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case YEAR_TO_NOW:
+                zdt = zdt.withDayOfYear(1).withHour(0).withDayOfMonth(1).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case DAY:
+                zdt = zdt.minusDays(1);
+                break;
+            case WEEK:
+                zdt = zdt.minusDays(7);
+                break;
+            case MONTH:
+                zdt = zdt.minusDays(30);
+                break;
+            case YEAR:
+                zdt = zdt.minusDays(365);
+                break;
+            case QUARTER:
+                zdt = zdt.minusDays(90);
+                break;
+            case LAST_FULL_DAY:
+                zdt = zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case LAST_FULL_WEEK:
+                zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
+                zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case LAST_FULL_MONTH:
+                zdt = zdt.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case LAST_YEAR:
+                zdt = zdt.minusYears(1).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case LAST_FULL_QUARTER:
+                // TODO: ?
+                break;
+            default:
+                    /*if (rollingFilterDefinition.getStartDate() == null) {
+                        return 0;
+                    }*/
+                return (ZonedDateTime) rollingFilterDefinition.getStartDate();
+        }
+        return zdt;
+            /*Instant instant = zdt.toInstant();
+            return Date.from(instant).getTime();*/
+        //} else {
+
+
+    }
+
+    public static LocalDate findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now) {
         return findEndDate(rollingFilterDefinition, now, new InsightRequestMetadata());
     }
 
-    public static long findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
+    public static LocalDate findEndDate(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
         if (rollingFilterDefinition.getEndDate() != null) {
-            return rollingFilterDefinition.getEndDate().getTime();
+            return (LocalDate) rollingFilterDefinition.getEndDate();
         }
         int interval = rollingFilterDefinition.getInterval();
         if (interval < 0) {
@@ -360,33 +385,41 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 if (i.getIntervalNumber() == interval) {
                     rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
                     if (rollingFilterDefinition.getEndDate() != null) {
-                        return rollingFilterDefinition.getEndDate().getTime();
+                        return (LocalDate) rollingFilterDefinition.getEndDate();
                     }
                 }
             }
         } else if (interval > ALL) {
             rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
             if (rollingFilterDefinition.getEndDate() != null) {
-                return rollingFilterDefinition.getEndDate().getTime();
+                return (LocalDate) rollingFilterDefinition.getEndDate();
             }
         }
         int intervalAmount = rollingFilterDefinition.getCustomIntervalAmount();
         int intervalType = rollingFilterDefinition.getCustomIntervalType();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(now);
-        if (((AnalysisDateDimension) rollingFilterDefinition.getField()).isTimeshift(insightRequestMetadata)) {
-            int time = insightRequestMetadata.getUtcOffset() / 60;
-            String string;
-            if (time > 0) {
-                string = "GMT-"+time;
-            } else if (time < 0) {
-                string = "GMT+"+time;
-            } else {
-                string = "GMT";
-            }
-            TimeZone timeZone = TimeZone.getTimeZone(string);
-            cal.setTimeZone(timeZone);
+        ZoneId zoneId = insightRequestMetadata.createZoneID();
+
+
+
+        int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+        DayOfWeek targetDayOfWeek;
+        if (firstDayOfWeek == Calendar.SUNDAY) {
+            targetDayOfWeek = DayOfWeek.SUNDAY;
+        } else if (firstDayOfWeek == Calendar.MONDAY) {
+            targetDayOfWeek = DayOfWeek.MONDAY;
+        } else if (firstDayOfWeek == Calendar.TUESDAY) {
+            targetDayOfWeek = DayOfWeek.TUESDAY;
+        } else if (firstDayOfWeek == Calendar.WEDNESDAY) {
+            targetDayOfWeek = DayOfWeek.WEDNESDAY;
+        } else if (firstDayOfWeek == Calendar.THURSDAY) {
+            targetDayOfWeek = DayOfWeek.THURSDAY;
+        } else if (firstDayOfWeek == Calendar.FRIDAY) {
+            targetDayOfWeek = DayOfWeek.FRIDAY;
+        } else {
+            targetDayOfWeek = DayOfWeek.SATURDAY;
         }
+
+        LocalDate zdt = LocalDate.now(zoneId);
         switch (interval) {
             case DAY_TO_NOW:
             case WEEK_TO_NOW:
@@ -405,84 +438,155 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.NEXT ||
                         rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.BEFORE) {
                     switch (intervalType) {
-                        case 0:
-                            cal.add(Calendar.MINUTE, intervalAmount);
-                            break;
-                        case 1:
-                            cal.add(Calendar.HOUR_OF_DAY, intervalAmount);
-                            break;
                         case 2:
-                            cal.add(Calendar.DAY_OF_YEAR, intervalAmount);
+                            zdt = zdt.plusDays(intervalAmount);
                             break;
                         case 3:
-                            cal.add(Calendar.WEEK_OF_YEAR, intervalAmount);
+                            zdt = zdt.plusWeeks(intervalAmount);
                             break;
                         case 4:
-                            cal.add(Calendar.MONTH, intervalAmount);
+                            zdt = zdt.plusMonths(intervalAmount);
                             break;
                         case 5:
-                            cal.add(Calendar.YEAR, intervalAmount);
+                            zdt = zdt.plusYears(intervalAmount);
                             break;
                     }
                 }
                 break;
             case LAST_FULL_DAY:
-                cal.add(Calendar.DAY_OF_YEAR, -1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                cal.add(Calendar.DAY_OF_YEAR, 1);
-                cal.add(Calendar.MILLISECOND, -1);
+                zdt = zdt.minusDays(1);
                 break;
             case LAST_FULL_WEEK:
-                cal.add(Calendar.WEEK_OF_YEAR, -1);
-                cal.set(Calendar.DAY_OF_WEEK, 1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                cal.add(Calendar.WEEK_OF_YEAR, 1);
-                cal.add(Calendar.MILLISECOND, -1);
+                zdt = zdt.minusWeeks(1).with(targetDayOfWeek).minusDays(1);
                 break;
             case LAST_FULL_MONTH:
-                cal.add(Calendar.MONTH, -1);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                cal.add(Calendar.MONTH, 1);
-                cal.add(Calendar.MILLISECOND, -1);
+                zdt = zdt.withDayOfMonth(1).minusDays(1);
                 break;
             case LAST_YEAR:
-                cal.add(Calendar.YEAR, -1);
-                cal.set(Calendar.MONTH, 0);
-                cal.set(Calendar.DAY_OF_MONTH, 1);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
+                zdt = zdt.withDayOfYear(1).minusDays(1);
                 break;
             case LAST_FULL_QUARTER:
                 // TODO: ?
                 break;
             default:
-                if (rollingFilterDefinition.getEndDate() == null) {
-                    return 0;
-                }
-                return rollingFilterDefinition.getEndDate().getTime();
+                return (LocalDate) rollingFilterDefinition.getEndDate();
         }
-        return cal.getTimeInMillis();
+        return zdt;
+    }
+
+    public static ZonedDateTime findEndDateTime(RollingFilterDefinition rollingFilterDefinition, Date now, InsightRequestMetadata insightRequestMetadata) {
+        if (rollingFilterDefinition.getEndDate() != null) {
+            return (ZonedDateTime) rollingFilterDefinition.getEndDate();
+        }
+        int interval = rollingFilterDefinition.getInterval();
+        if (interval < 0) {
+            for (CustomRollingInterval i : RollingFilterDefinition.createAdditionalIntervals()) {
+                if (i.getIntervalNumber() == interval) {
+                    rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+                    if (rollingFilterDefinition.getEndDate() != null) {
+                        return (ZonedDateTime) rollingFilterDefinition.getEndDate();
+                    }
+                }
+            }
+        } else if (interval > ALL) {
+            rollingFilterDefinition.applyCalculationsBeforeRun(null, null, null, null, null, null, null, insightRequestMetadata);
+            if (rollingFilterDefinition.getEndDate() != null) {
+                return (ZonedDateTime) rollingFilterDefinition.getEndDate();
+            }
+        }
+        int intervalAmount = rollingFilterDefinition.getCustomIntervalAmount();
+        int intervalType = rollingFilterDefinition.getCustomIntervalType();
+        ZoneId zoneId = insightRequestMetadata.createZoneID();
+
+
+
+        int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
+        DayOfWeek targetDayOfWeek;
+        if (firstDayOfWeek == Calendar.SUNDAY) {
+            targetDayOfWeek = DayOfWeek.SUNDAY;
+        } else if (firstDayOfWeek == Calendar.MONDAY) {
+            targetDayOfWeek = DayOfWeek.MONDAY;
+        } else if (firstDayOfWeek == Calendar.TUESDAY) {
+            targetDayOfWeek = DayOfWeek.TUESDAY;
+        } else if (firstDayOfWeek == Calendar.WEDNESDAY) {
+            targetDayOfWeek = DayOfWeek.WEDNESDAY;
+        } else if (firstDayOfWeek == Calendar.THURSDAY) {
+            targetDayOfWeek = DayOfWeek.THURSDAY;
+        } else if (firstDayOfWeek == Calendar.FRIDAY) {
+            targetDayOfWeek = DayOfWeek.FRIDAY;
+        } else {
+            targetDayOfWeek = DayOfWeek.SATURDAY;
+        }
+
+        ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+        switch (interval) {
+            case DAY_TO_NOW:
+            case WEEK_TO_NOW:
+            case MONTH_TO_NOW:
+            case QUARTER_TO_NOW:
+            case YEAR_TO_NOW:
+            case DAY:
+            case WEEK:
+            case MONTH:
+            case YEAR:
+            case QUARTER:
+            case ALL_TIME:
+                // do nothing, now is fine
+                break;
+            case CUSTOM:
+                if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.NEXT ||
+                        rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.BEFORE) {
+                    switch (intervalType) {
+                        case 2:
+                            zdt = zdt.plusDays(intervalAmount);
+                            break;
+                        case 3:
+                            zdt = zdt.plusWeeks(intervalAmount);
+                            break;
+                        case 4:
+                            zdt = zdt.plusMonths(intervalAmount);
+                            break;
+                        case 5:
+                            zdt = zdt.plusYears(intervalAmount);
+                            break;
+                    }
+                }
+                break;
+            case LAST_FULL_DAY:
+                zdt = zdt.minusDays(1).withHour(23).withMinute(59).withSecond(59);
+                break;
+            case LAST_FULL_WEEK:
+                zdt = zdt.minusWeeks(1).with(targetDayOfWeek).minusDays(1).withHour(23).withMinute(59).withSecond(59);
+                break;
+            case LAST_FULL_MONTH:
+                zdt = zdt.withDayOfMonth(1).minusDays(1).withHour(23).withMinute(59).withSecond(59);
+                break;
+            case LAST_YEAR:
+                zdt = zdt.withDayOfYear(1).minusDays(1).withHour(23).withMinute(59).withSecond(59);
+                break;
+            case LAST_FULL_QUARTER:
+                // TODO: ?
+                break;
+            default:
+                return (ZonedDateTime) rollingFilterDefinition.getEndDate();
+        }
+        return zdt;
     }
 
     @Override
     public void log(InsightRequestMetadata insightRequestMetadata, FilterDefinition filterDefinition) {
-        if (limitDate > 0) {
-            insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " +  new Date(limitDate));
+        if (limitDate != null) {
+            insightRequestMetadata.addAudit(filterDefinition, "Start date on processing in memory is " + limitDate);
         }
-        if (endDate > 0) {
-            insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + (((AnalysisDateDimension) filterDefinition.getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " +  new Date(endDate));
+        if (endDate != null) {
+            insightRequestMetadata.addAudit(filterDefinition, "End date on processing in memory is " + endDate);
+        }
+
+        if (limitDateTime != null) {
+            insightRequestMetadata.addAudit(filterDefinition, "Start date/time on processing in memory is " + limitDateTime);
+        }
+        if (endDateTime != null) {
+            insightRequestMetadata.addAudit(filterDefinition, "End date/time on processing in memory is " + endDateTime);
         }
     }
 
@@ -491,29 +595,62 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             return true;
         }
         boolean allowed = false;
-        if (interval == LAST_DAY) {
-            allowed = true;
-        } else if (value.type() == Value.DATE) {
-            DateValue dateValue = (DateValue) value;
-            if (mode == RollingFilterDefinition.AFTER) {
-                allowed = limitDate <= dateValue.getDate().getTime();
-            } else if (mode == RollingFilterDefinition.BEFORE) {
-                allowed = dateValue.getDate().getTime() <= endDate;
+        if (dateTime) {
+            if (interval == LAST_DAY) {
+                allowed = true;
+            } else if (value.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) value;
+
+                if (mode == RollingFilterDefinition.AFTER) {
+                    allowed = limitDateTime.isBefore(dateValue.getZonedDateTime()) || limitDateTime.isEqual(dateValue.getZonedDateTime());
+                } else if (mode == RollingFilterDefinition.BEFORE) {
+                    allowed = dateValue.getZonedDateTime().isBefore(endDateTime) || dateValue.getZonedDateTime().isEqual(endDateTime);
+                } else {
+                    allowed = (limitDateTime.isBefore(dateValue.getZonedDateTime()) || limitDateTime.isEqual(dateValue.getZonedDateTime())) &&
+                            (dateValue.getZonedDateTime().isBefore(endDateTime) || dateValue.getZonedDateTime().isEqual(endDateTime));
+                }
             } else {
-                allowed = limitDate <= dateValue.getDate().getTime() && dateValue.getDate().getTime() <= endDate;
+                DateValue originalValue = (DateValue) value.getOriginalValue();
+                if (originalValue != null) {
+                    if (mode == RollingFilterDefinition.AFTER) {
+                        allowed = limitDate.isBefore(originalValue.getLocalDate()) || limitDate.isEqual(originalValue.getLocalDate());
+                    } else if (mode == RollingFilterDefinition.BEFORE) {
+                        allowed = originalValue.getLocalDate().isBefore(endDate) || originalValue.getLocalDate().isEqual(endDate);
+                    } else {
+                        allowed = (limitDate.isBefore(originalValue.getLocalDate()) || limitDate.isEqual(originalValue.getLocalDate())) &&
+                                (originalValue.getLocalDate().isBefore(endDate) || originalValue.getLocalDate().isEqual(endDate));
+                    }
+                }
             }
         } else {
-            DateValue originalValue = (DateValue) value.getOriginalValue();
-            if (originalValue != null) {
+            if (interval == LAST_DAY) {
+                allowed = true;
+            } else if (value.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) value;
                 if (mode == RollingFilterDefinition.AFTER) {
-                    allowed = limitDate <= originalValue.getDate().getTime();
+                    allowed = limitDate.isBefore(dateValue.getLocalDate()) || limitDate.isEqual(dateValue.getLocalDate());
                 } else if (mode == RollingFilterDefinition.BEFORE) {
-                    allowed = originalValue.getDate().getTime() <= endDate;
+                    allowed = dateValue.getLocalDate().isBefore(endDate) || dateValue.getLocalDate().isEqual(endDate);
                 } else {
-                    allowed = limitDate <= originalValue.getDate().getTime() && originalValue.getDate().getTime() <= endDate;
+
+                    allowed = (limitDate.isBefore(dateValue.getLocalDate()) || limitDate.isEqual(dateValue.getLocalDate())) &&
+                            (dateValue.getLocalDate().isBefore(endDate) || dateValue.getLocalDate().isEqual(endDate));
+                }
+            } else {
+                DateValue originalValue = (DateValue) value.getOriginalValue();
+                if (originalValue != null) {
+                    if (mode == RollingFilterDefinition.AFTER) {
+                        allowed = limitDate.isBefore(originalValue.getLocalDate()) || limitDate.isEqual(originalValue.getLocalDate());
+                    } else if (mode == RollingFilterDefinition.BEFORE) {
+                        allowed = originalValue.getLocalDate().isBefore(endDate) || originalValue.getLocalDate().isEqual(endDate);
+                    } else {
+                        allowed = (limitDate.isBefore(originalValue.getLocalDate()) || limitDate.isEqual(originalValue.getLocalDate())) &&
+                                (originalValue.getLocalDate().isBefore(endDate) || originalValue.getLocalDate().isEqual(endDate));
+                    }
                 }
             }
         }
+
         return allowed;
     }
 }

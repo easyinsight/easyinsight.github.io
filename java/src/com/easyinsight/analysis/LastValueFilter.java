@@ -64,7 +64,7 @@ public class LastValueFilter extends FilterDefinition {
         return new MaterializedLastValueFilter(getField());
     }
 
-    public String toQuerySQL(String tableName, Database database) {
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
         return null;
     }
 

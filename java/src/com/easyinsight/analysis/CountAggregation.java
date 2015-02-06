@@ -19,8 +19,6 @@ public class CountAggregation extends Aggregation {
 
     private boolean usingDistinctSet;
 
-    private Double distinctValue;
-
     public void setCount(double count) {
         this.count = count;
     }

@@ -70,7 +70,8 @@ public class DataSourceListener {
                 stmt.close();
                 SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
                 try {
-                    UserUploadService.UploadDataSource source = new UserUploadService.UploadDataSource(conn, new ArrayList<>(), new Date(),
+
+                    UserUploadService.IUploadDataSource source = new UserUploadService.DataSourceFactory().createSource(conn, new ArrayList<>(), new Date(),
                             dataSource, (IServerDataSourceDefinition) dataSource, callID, null);
                     changed = source.invoke().isChanged();
                     conn.commit();

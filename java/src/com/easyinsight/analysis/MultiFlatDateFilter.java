@@ -156,7 +156,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
     @Override
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedMultiFlatDateFilter(getField(), levels, level);
+        return new MaterializedMultiFlatDateFilter(getField(), levels, level, insightRequestMetadata);
     }
 
     @Override
@@ -169,19 +169,68 @@ public class MultiFlatDateFilter extends FilterDefinition {
         setLevels(wrappers);
     }
 
+    public boolean dateTime() {
+        AnalysisDateDimension date = (AnalysisDateDimension) getField();
+        return (date.isTimeshift());
+    }
+
     @Override
-    public String toQuerySQL(String tableName, Database database) {
-        /*return "year(" + getField().toKeySQL() + ") = ?";*/
+    public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
+        if (!dateTime()) {
+            StringBuilder sb = new StringBuilder();
+            if (level == AnalysisDateDimension.MONTH_FLAT) {
+                if (database.getDialect() == Database.MYSQL) {
+                    sb.append("month(" + getField().toKeySQL() + ") IN (");
+                } else {
+                    sb.append("extract(month from " + getField().toKeySQL() + ") IN (");
+                }
+                for (DateLevelWrapper wrapper : levels) {
+                    sb.append("?,");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                sb.append(")");
+                return sb.toString();
+            } else if (level == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
+
+            } else if (level == AnalysisDateDimension.YEAR_LEVEL) {
+                if (database.getDialect() == Database.MYSQL) {
+                    sb.append("year(" + getField().toKeySQL() + ") IN (");
+                } else {
+                    sb.append("extract(year from " + getField().toKeySQL() + ") IN (");
+                }
+                for (DateLevelWrapper wrapper : levels) {
+                    sb.append("?,");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                sb.append(")");
+                return sb.toString();
+            } else if (level == AnalysisDateDimension.WEEK_LEVEL) {
+
+            } else if (level == AnalysisDateDimension.MONTH_LEVEL) {
+
+            }
+        }
         return null;
     }
 
     @Override
     public boolean validForQuery() {
-        return false;
+        return !dateTime() && (level == AnalysisDateDimension.MONTH_FLAT || level == AnalysisDateDimension.YEAR_LEVEL);
     }
 
     @Override
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        if (!dateTime()) {
+            if (level == AnalysisDateDimension.MONTH_FLAT) {
+                for (DateLevelWrapper wrapper : levels) {
+                    preparedStatement.setInt(start++, wrapper.getDateLevel() + 1);
+                }
+            } else if (level == AnalysisDateDimension.YEAR_LEVEL) {
+                for (DateLevelWrapper wrapper : levels) {
+                    preparedStatement.setInt(start++, Integer.parseInt(wrapper.getShortDisplay()));
+                }
+            }
+        }
         /*preparedStatement.setInt(start++, value);
         return start;*/
         return start;

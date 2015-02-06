@@ -180,8 +180,8 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             conn = Database.instance().getConnection();
             try {
                 System.out.println("Running report " + id);
-                //AsyncReport.cacheRebuild(id);
-                runReport(conn, id, true);
+                AsyncReport.cacheRebuild(id);
+                //runReport(conn, id, true);
             } catch (Throwable e) {
                 if (!conn.getAutoCommit()) {
                     conn.rollback();
@@ -432,6 +432,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             }
         }
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setNoAsync(true);
         DataSet reportSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         DataSet dataSet = new DataSet();
         for (IRow reportRow : reportSet.getRows()) {

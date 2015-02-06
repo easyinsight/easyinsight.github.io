@@ -42,6 +42,7 @@ var fullReportTemplate;
 
 var gaugeTemplate;
 var d3Template;
+var leafletD3Template;
 var configurationDropdownTemplate;
 var reportListTemplate;
 
@@ -544,6 +545,9 @@ var renderReport = function (o, dashboardID, drillthroughID, reload) {
     } else if (obj.metadata.type == "topomap") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Map.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, iframeKey != "", dashboardID))}));
+    } else if (obj.metadata.type == "leaflet") {
+        $("#" + id + " .reportArea").html(leafletD3Template({id: id}));
+        $.ajax($.extend(postData, {success: confirmRender(o, LeafletMap.getMap(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, iframeKey != "", dashboardID))}));
     } else if (obj.metadata.type == "stacked_bar") {
         $("#" + id + " .reportArea").html(d3Template({id: id}));
         $.ajax($.extend(postData, {success: confirmRender(o, Chart.getD3StackedBarChart(id, obj.metadata.parameters, true, obj.metadata.styles, fullFilters, drillthroughID, dashboardID))}));
@@ -800,6 +804,7 @@ $(function () {
         imageTemplate = _.template($("#image_template", s).html());
         gaugeTemplate = _.template($("#gauge_template", s).html());
         d3Template = _.template($("#d3_template", s).html());
+        leafletD3Template = _.template($("#leaflet_d3_template", s).html());
         email_modal = _.template($("#email_modal", s).html());
         multi_value_results = _.template($("#multi_value_results_template", s).html());
         multi_field_value_results = _.template($("#multi_value_results_template", s).html());

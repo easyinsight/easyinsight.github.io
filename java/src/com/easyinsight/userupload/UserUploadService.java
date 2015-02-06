@@ -17,6 +17,8 @@ import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextAccount;
 import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
+import com.easyinsight.datafeeds.composite.FederatedDataSource;
+import com.easyinsight.datafeeds.composite.FederationSource;
 import com.easyinsight.datafeeds.database.ServerDatabaseConnection;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.infusionsoft.*;
@@ -1258,37 +1260,22 @@ public class UserUploadService {
 
     protected byte[] bytesFromS3(FlatFileUploadContext uploadContext) throws IOException {
         byte[] bytes;AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-        S3Object object = s3.getObject(new GetObjectRequest("archival1", ((FlatFileUploadContext) uploadContext).getUploadKey() + ".zip"));
-        byte retrieveBuf[];
-        retrieveBuf = new byte[1];
+        S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadContext.getUploadKey() + ".zip"));
+
         InputStream bfis = object.getObjectContent();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        while (bfis.read(retrieveBuf) != -1) {
-            baos.write(retrieveBuf);
-        }
+        IOUtils.copy(bfis, baos);
         byte[] resultBytes = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
         ZipInputStream zin = new ZipInputStream(bais);
         zin.getNextEntry();
-
-        byte[] buffer = new byte[8192];
         ByteArrayOutputStream fout = new ByteArrayOutputStream();
         BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-        int nBytes;
-        while ((nBytes = zin.read(buffer)) != -1) {
-            bufOS.write(buffer, 0, nBytes);
-        }
-                    /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                        bufOS.write(c);
-                    }*/
+        IOUtils.copy(zin, bufOS);
         bufOS.close();
         fout.close();
 
         bytes = fout.toByteArray();
-
-        baos = null;
-        bufOS = null;
-        fout = null;
         return bytes;
     }
 
@@ -1956,6 +1943,7 @@ public class UserUploadService {
             } finally {
                 Database.closeConnection(timeConn);
             }
+
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (DataSourceMutex.mutex().lock(feedDefinition.getDataFeedID())) {
                     final String callID = ServiceUtil.instance().longRunningCall(feedDefinition.getDataFeedID());
@@ -2049,28 +2037,20 @@ public class UserUploadService {
             AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
             S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
 
-            byte retrieveBuf[];
-            retrieveBuf = new byte[1];
+
             InputStream bfis = object.getObjectContent();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            while (bfis.read(retrieveBuf) != -1) {
-                baos.write(retrieveBuf);
-            }
+            IOUtils.copy(bfis, baos);
             byte[] resultBytes = baos.toByteArray();
             ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
             ZipInputStream zin = new ZipInputStream(bais);
             zin.getNextEntry();
 
-            byte[] buffer = new byte[8192];
+
             ByteArrayOutputStream fout = new ByteArrayOutputStream();
             BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-            int nBytes;
-            while ((nBytes = zin.read(buffer)) != -1) {
-                bufOS.write(buffer, 0, nBytes);
-            }
-            /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                bufOS.write(c);
-            }*/
+            IOUtils.copy(zin, bufOS);
+
             bufOS.close();
             fout.close();
 
@@ -2413,6 +2393,7 @@ public class UserUploadService {
 
     public CredentialsResponse completeInstallation(final FeedDefinition dataSource, final FeedDefinition withParent) {
         SecurityUtil.authorizeFeed(dataSource.getDataFeedID(), Roles.OWNER);
+
         AccountStats stats = new UserAccountAdminService().getAccountStats();
         if (new DataSourceTypeRegistry().billingInfoForType(dataSource.getFeedType()) == ConnectionBillingType.SMALL_BIZ &&
                 stats.getCurrentSmallBizConnections() >= (stats.getAddonSmallBizConnections() + stats.getCoreSmallBizConnections())) {
@@ -2420,6 +2401,7 @@ public class UserUploadService {
         }
         EIConnection conn = Database.instance().getConnection();
         try {
+            boolean async = determineAsync(conn);
             conn.setAutoCommit(false);
             final IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) dataSource;
             serverDataSourceDefinition.create(conn, null, withParent);
@@ -2450,39 +2432,15 @@ public class UserUploadService {
                 final boolean accountAdmin = SecurityUtil.isAccountAdmin();
                 final int firstDayOfWeek = SecurityUtil.getFirstDayOfWeek();
                 final String personaName = SecurityUtil.getPersonaName();
-                DataSourceThreadPool.instance().addActivity(new Runnable() {
-
-                    public void run() {
-                        SecurityUtil.populateThreadLocal(userName, userID, accountID, accountType, accountAdmin, firstDayOfWeek, personaName);
-                        EIConnection conn = Database.instance().getConnection();
-                        try {
-                            conn.setAutoCommit(false);
-                            Date now = new Date();
-                            MigrationResult changed = new DataSourceFactory().createSource(conn, new ArrayList<>(), now, dataSource, serverDataSourceDefinition, callID, null).invoke();
-                            conn.commit();
-                            DataSourceRefreshResult result = new DataSourceRefreshResult();
-                            result.setDate(now);
-                            result.setNewFields(changed.isChanged() && dataSource.rebuildFieldWindow());
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.DONE, result, conn);
-                        } catch (ReportException re) {
-                            if (!conn.getAutoCommit()) {
-                                conn.rollback();
-                            }
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, re.getReportFault(), conn);
-                        } catch (Exception e) {
-                            LogClass.error(e);
-                            if (!conn.getAutoCommit()) {
-                                conn.rollback();
-                            }
-                            ServiceUtil.instance().updateStatus(callID, ServiceUtil.FAILED, e.getMessage(), conn);
-                        } finally {
-                            conn.setAutoCommit(true);
-                            Database.closeConnection(conn);
-                            DataSourceMutex.mutex().unlock(dataSource.getDataFeedID());
-                            SecurityUtil.clearThreadLocal();
-                        }
-                    }
-                });
+                Refresh refresh;
+                if (async) {
+                    refresh = new AsynchronousRefresh(userName, userID, accountID,
+                            accountType, accountAdmin, firstDayOfWeek, personaName, dataSource, callID);
+                } else {
+                    refresh = new SynchronousRefresh(userName, userID, accountID,
+                            accountType, accountAdmin, firstDayOfWeek, personaName, dataSource, callID);
+                }
+                DataSourceThreadPool.instance().addActivity(refresh);
             }
             return credentialsResponse;
         } catch (ReportException re) {
@@ -2826,6 +2784,28 @@ public class UserUploadService {
                         CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedDefinition;
                         for (CompositeFeedNode node : compositeFeedDefinition.getCompositeFeedNodes()) {
                             FeedDefinition child = feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
+                            if (node.getDataSourceType() == FeedType.DISTINCT_CACHED_ADDON.getType()) {
+                                // retrieve the source this is based on, refresh that
+                                PreparedStatement ps = conn.prepareStatement("SELECT data_feed_id FROM distinct_cached_addon_report_source, analysis WHERE data_source_id = ? AND " +
+                                        "distinct_cached_addon_report_source.report_id = analysis.analysis_id");
+                                ps.setLong(1, node.getDataFeedID());
+                                ResultSet rs = ps.executeQuery();
+                                if (rs.next()) {
+                                    long cacheSourceID = rs.getLong(1);
+                                    System.out.println(cacheSourceID);
+                                    FeedDefinition dataSource = feedStorage.getFeedDefinitionData(cacheSourceID, conn);
+                                    if (dataSource instanceof FederatedDataSource) {
+                                        FederatedDataSource federatedDataSource = (FederatedDataSource) dataSource;
+                                        List<FederationSource> sources = federatedDataSource.getSources();
+                                        for (FederationSource source : sources) {
+                                            long id = source.getDataSourceID();
+                                            sourcesToRefresh.add(feedStorage.getFeedDefinitionData(id, conn));
+                                        }
+                                    }
+                                }
+                                ps.close();
+
+                            }
                             sourcesToRefresh.add(child);
                         }
                     } else {
