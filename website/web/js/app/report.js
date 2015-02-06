@@ -9,12 +9,9 @@
         $http.get("/app/html/report/" + $routeParams.id + ".json?timezoneOffset=" + $scope.getOffset() + "&data=true").then(function(c) {
             $scope.report = c.data.report;
             $scope.data = c.data.data.values;
-
-
         });
 
         $scope.$on("filterChanged", function() {
-            console.log("filter changed");
             var filters = $scope.report.filters.reduce(function(m, e, i, l) {m[e.id] = e; return m;}, {})
             $http.post("/app/html/report/" + $routeParams.id + "/data.json", JSON.stringify({"filters": filters})).then(function(c) {
                 $scope.data = c.data.values;
