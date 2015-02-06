@@ -24,12 +24,11 @@ public class StepTransformComponent implements IComponent {
     }
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        Calendar calendar = Calendar.getInstance();
         for (IRow row : dataSet.getRows()) {
             if (target == null) {
-                row.addValue(analysisStep.createAggregateKey(), analysisStep.transformValue(row.getValue(analysisStep.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false, calendar));
+                row.addValue(analysisStep.createAggregateKey(), analysisStep.transformValue(row.getValue(analysisStep.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false));
             } else {
-                row.addValue(target.createAggregateKey(), target.transformValue(row.getValue(target.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false, calendar));
+                row.addValue(target.createAggregateKey(), target.transformValue(row.getValue(target.createAggregateKey()), pipelineData.getInsightRequestMetadata(), false));
             }
         }
         return dataSet;
