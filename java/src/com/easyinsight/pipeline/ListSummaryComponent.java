@@ -51,6 +51,7 @@ public class ListSummaryComponent implements IComponent {
             recalc.setAddonReports(pipelineData.getReport().getAddonReports());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(pipelineData.getInsightRequestMetadata().getUtcOffset());
+            insightRequestMetadata.setZoneID(pipelineData.getInsightRequestMetadata().getZoneID());
             DataSet recalcSet = DataService.listDataSet(recalc, insightRequestMetadata, pipelineData.getConn());
 
             if (pipelineData.getReport().getReportRunMarmotScript() != null && !"".equals(pipelineData.getReport().getReportRunMarmotScript())) {

@@ -51,7 +51,7 @@ public class LineChartComponent implements IComponent {
                 for (IRow row : dataSet.getRows()) {
                     Value xAxisValue = row.getValue(lineChartDefinition.getXaxis());
                     Value measureValue = row.getValue(measure);
-                    Value aggregated = trend.transformValue(xAxisValue, new InsightRequestMetadata(), false, calendar);
+                    Value aggregated = trend.transformValue(xAxisValue, new InsightRequestMetadata(), false);
                     Aggregation aggregation = map.get(aggregated);
                     if (aggregation == null) {
                         aggregation = new AggregationFactory(measure, false).getAggregation(AggregationTypes.AVERAGE);

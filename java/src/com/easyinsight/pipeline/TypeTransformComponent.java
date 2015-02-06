@@ -61,7 +61,7 @@ public class TypeTransformComponent implements IComponent {
                         }
                     }
 
-                    Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift, map.get(analysisItem));
+                    Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata(), shift);
                     if (transformedValue != value) {
                         row.addValue(analysisItem.createAggregateKey(), transformedValue);
                     }
