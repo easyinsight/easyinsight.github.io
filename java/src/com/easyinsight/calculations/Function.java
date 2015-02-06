@@ -4,6 +4,9 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.*;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,5 +197,26 @@ public abstract class Function implements IFunction {
 
     public List<Value> getValueSet(int i) {
         return columns.get(i);
+    }
+
+    protected LocalDate date() {
+        ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+        LocalDate startDate = null;
+        if (params.size() == 0) {
+            startDate = LocalDate.now(zoneId);
+        } else {
+            Value start = params.get(0);
+            if (start.type() == Value.DATE) {
+                DateValue dateValue = (DateValue) start;
+                if (dateValue.getLocalDate() != null) {
+                    startDate = dateValue.getLocalDate();
+                } else {
+                    startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
+                }
+            } else if (start.type() == Value.NUMBER) {
+                startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
+            }
+        }
+        return startDate;
     }
 }
