@@ -7,9 +7,7 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.security.SecurityUtil;
 
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjuster;
@@ -27,23 +25,28 @@ import java.util.TimeZone;
  */
 public class DayOfWeek extends Function {
     public Value evaluate() {
-        Date startDate = null;
+        ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+        LocalDate startDate = null;
         if (params.size() == 0) {
-            startDate = new Date();
+            startDate = LocalDate.now(zoneId);
         } else {
             Value start = params.get(0);
             if (start.type() == Value.DATE) {
                 DateValue dateValue = (DateValue) start;
-                startDate = dateValue.getDate();
+                if (dateValue.getLocalDate() != null) {
+                    startDate = dateValue.getLocalDate();
+                } else {
+                    startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
+                }
             } else if (start.type() == Value.NUMBER) {
-                startDate = new Date(start.toDouble().longValue());
+                startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
             }
         }
         if (startDate != null) {
-            Calendar calendar = Calendar.getInstance();
+            /*Calendar calendar = Calendar.getInstance();
 
 
-            ZonedDateTime zdt = startDate.toInstant().atZone(ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60))));
+            ZonedDateTime zdt = startDate.toInstant().atZone(ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60))));*/
 
 
 
@@ -57,33 +60,23 @@ public class DayOfWeek extends Function {
                 WeekFields weekFields = WeekFields.of(firstDayOfWeek, 1);
                 TemporalField adjuster = weekFields.dayOfWeek();
                 long tFrom = adjuster.getFrom(dow);
-                zdt = zdt.with(adjuster, tFrom);
-
-                Date result = Date.from(zdt.toInstant());
+                startDate = startDate.with(adjuster, tFrom);
+                //zdt = zdt.with(adjuster, tFrom);
+                Instant instant = startDate.atStartOfDay().atZone(zoneId).toInstant();
+                Date result = Date.from(instant);
 
                 return new DateValue(result);
             } else {
-                int time = calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60;
-                String string;
-                if (time > 0) {
-                    string = "GMT-"+Math.abs(time);
-                } else if (time < 0) {
-                    string = "GMT+"+Math.abs(time);
-                } else {
-                    string = "GMT";
-                }
-                TimeZone timeZone = TimeZone.getTimeZone(string);
-                calendar.setTimeZone(timeZone);
-                calendar.setTimeInMillis(startDate.getTime());
-                calendar.setFirstDayOfWeek(SecurityUtil.getFirstDayOfWeek());
+                return new NumericValue(Utils.inverseDayOfWeek(startDate.getDayOfWeek()));
             }
-            return new NumericValue(calendar.get(Calendar.DAY_OF_WEEK));
         } else {
             return new EmptyValue();
         }
     }
 
-    protected java.time.DayOfWeek translateDayOfWeek(int dayToSet) {
+
+
+    public static java.time.DayOfWeek translateDayOfWeek(int dayToSet) {
         java.time.DayOfWeek dow;
         switch(dayToSet) {
             case Calendar.SUNDAY:
