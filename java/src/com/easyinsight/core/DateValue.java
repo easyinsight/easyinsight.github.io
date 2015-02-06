@@ -78,14 +78,15 @@ public class DateValue extends Value implements Serializable {
                             cal.get(Calendar.DAY_OF_MONTH));
                 }
                 year = localDate.getYear();
-                month = localDate.getMonthValue();
+                month = localDate.getMonthValue() - 1;
                 day = localDate.getDayOfMonth();
+                System.out.println(date + ": " + year + " - " + month + " - " + day);
             } else {
                 if (zonedDateTime == null) {
                     zonedDateTime = date.toInstant().atZone(zoneId);
                 }
                 year = zonedDateTime.getYear();
-                month = zonedDateTime.getMonthValue();
+                month = zonedDateTime.getMonthValue() - 1;
                 day = zonedDateTime.getDayOfMonth();
                 hour = zonedDateTime.getHour();
                 minute = zonedDateTime.getMinute();

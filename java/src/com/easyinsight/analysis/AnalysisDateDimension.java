@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.functions.DayOfWeek;
 import com.easyinsight.core.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -329,7 +330,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case QUARTER_OF_YEAR_LEVEL:
-                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, 2);
+                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3 * 3 + 1);
                         if (timezoneShift) {
                             temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
                                     with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
@@ -353,11 +354,16 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case WEEK_LEVEL:
-                        calendar.set(Calendar.DAY_OF_WEEK, SecurityUtil.getFirstDayOfWeek());
+                        temporal = temporal.with(ChronoField.DAY_OF_WEEK, DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()).getValue());
+                        if (timezoneShift) {
+                            temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
+                                    with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
+                        }
+                        /*calendar.set(Calendar.DAY_OF_WEEK, SecurityUtil.getFirstDayOfWeek());
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
-                        calendar.set(Calendar.MILLISECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case DAY_LEVEL:
                         //temporal = temporal.with(ChronoField.DAY_OF_MONTH, 2);
