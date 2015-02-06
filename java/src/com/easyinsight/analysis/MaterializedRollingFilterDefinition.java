@@ -193,13 +193,13 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                     zdt = zdt.minusDays(6);
                     break;
                 case MONTH:
-                    zdt = zdt.minusDays(30);
+                    zdt = zdt.minusDays(29);
                     break;
                 case YEAR:
-                    zdt = zdt.minusYears(1);
+                    zdt = zdt.minusDays(364);
                     break;
                 case QUARTER:
-                    zdt = zdt.minusMonths(3);
+                    zdt = zdt.minusDays(89);
                     break;
                 case LAST_FULL_DAY:
                     zdt = zdt.minusDays(1);
@@ -330,16 +330,16 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 zdt = zdt.minusDays(1);
                 break;
             case WEEK:
-                zdt = zdt.minusWeeks(1);
+                zdt = zdt.minusDays(7);
                 break;
             case MONTH:
-                zdt = zdt.minusMonths(1);
+                zdt = zdt.minusDays(30);
                 break;
             case YEAR:
-                zdt = zdt.minusYears(1);
+                zdt = zdt.minusDays(365);
                 break;
             case QUARTER:
-                zdt = zdt.minusMonths(3);
+                zdt = zdt.minusDays(90);
                 break;
             case LAST_FULL_DAY:
                 zdt = zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
