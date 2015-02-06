@@ -7,7 +7,9 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 
 import java.time.*;
+import java.time.temporal.ChronoField;
 import java.time.temporal.IsoFields;
+import java.time.temporal.Temporal;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -23,6 +25,10 @@ public class DayOfQuarter extends Function {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         return (int) Math.floor(cal.get(Calendar.MONTH) / 3);
+    }
+
+    public static int quarter(Temporal temporal) {
+        return (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3;
     }
 
     public Value evaluate() {
