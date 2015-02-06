@@ -193,7 +193,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                     zdt = zdt.minusDays(6);
                     break;
                 case MONTH:
-                    zdt = zdt.minusMonths(1);
+                    zdt = zdt.minusDays(30);
                     break;
                 case YEAR:
                     zdt = zdt.minusYears(1);

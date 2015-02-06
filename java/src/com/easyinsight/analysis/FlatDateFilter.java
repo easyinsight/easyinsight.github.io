@@ -76,80 +76,41 @@ public class FlatDateFilter extends FilterDefinition {
 
     @Override
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedFlatDateFilter(getField(), dateLevel, value);
+        return new MaterializedFlatDateFilter(getField(), dateLevel, value, insightRequestMetadata);
+    }
+
+    public boolean dateTime() {
+        AnalysisDateDimension date = (AnalysisDateDimension) getField();
+        return (date.isTimeshift());
     }
 
     @Override
     public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
-        if (database.getDialect() == Database.MYSQL) {
-            if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
-                return "month(" + getField().toKeySQL() + ") = (? + 1)";
-            else
-                return "year(" + getField().toKeySQL() + ") = ?";
-        } else {
-            if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
-                return "EXTRACT(month FROM " + getField().toKeySQL() + ") = (? + 1)";
-            else
-                return "EXTRACT(year FROM " + getField().toKeySQL() + ") = ?";
+        if (!dateTime()) {
+            if (database.getDialect() == Database.MYSQL) {
+                if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
+                    return "month(" + getField().toKeySQL() + ") = (? + 1)";
+                else
+                    return "year(" + getField().toKeySQL() + ") = ?";
+            } else {
+                if (dateLevel == AnalysisDateDimension.MONTH_LEVEL)
+                    return "EXTRACT(month FROM " + getField().toKeySQL() + ") = (? + 1)";
+                else
+                    return "EXTRACT(year FROM " + getField().toKeySQL() + ") = ?";
+            }
         }
+        return null;
     }
 
     @Override
     public boolean validForQuery() {
-        return false;
+        return !dateTime();
     }
 
     @Override
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         preparedStatement.setInt(start++, value);
         return start;
-    }
-
-    @Override
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        StringBuilder sb = new StringBuilder();
-        String filterName = "filter" + getFilterID();
-        String onChange = "updateFilter('filter" + getFilterID() + "','" + filterHTMLMetadata.getFilterKey() + "'," + filterHTMLMetadata.createOnChange() + ")";
-        sb.append(label(true));
-        sb.append("<select style=\"margin-left:5px;margin-top:5px;margin-right:5px\" id=\"").append(filterName).append("\" onchange=\"").append(onChange).append("\">");
-        if (dateLevel == AnalysisDateDimension.MONTH_LEVEL) {
-            List<String> months = Arrays.asList("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
-            for (int i = 0; i < 12; i++) {
-                sb.append("<option value=\"");
-                sb.append(i);
-                sb.append("\"");
-                if (i == this.getValue())
-                    sb.append(" selected=\"selected\"");
-                sb.append(">");
-                sb.append(months.get(i));
-                sb.append("</option>");
-            }
-        } else {
-            AnalysisDateDimensionResultMetadata metadata = (AnalysisDateDimensionResultMetadata) new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(),
-                    getField(), 0, 0, 0, filterHTMLMetadata.getReport());
-            Date earliestDate = metadata.getEarliestDate();
-            Date latestDate = metadata.getLatestDate();
-            Calendar cal = Calendar.getInstance();
-
-            cal.setTime(earliestDate);
-            int startYear = cal.get(Calendar.YEAR);
-            cal.setTime(latestDate);
-            int endYear = cal.get(Calendar.YEAR);
-            List<String> stringList = new ArrayList<String>();
-            for (int i = startYear; i <= endYear; i++) {
-                stringList.add(String.valueOf(i));
-            }
-
-            for (String value : stringList) {
-                if (value.equals(String.valueOf(value))) {
-                    sb.append("<option selected=\"selected\">").append(value).append("</option>");
-                } else {
-                    sb.append("<option>").append(value).append("</option>");
-                }
-            }
-        }
-        sb.append("</select>");
-        return sb.toString();
     }
 
     @Override
