@@ -10,7 +10,6 @@ import java.time.*;
 import java.time.temporal.IsoFields;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * User: jamesboe
@@ -27,22 +26,10 @@ public class DayOfQuarter extends Function {
     }
 
     public Value evaluate() {
-        Date startDate = null;
-        if (params.size() == 0) {
-            startDate = new Date();
-        } else {
-            Value start = params.get(0);
-            if (start.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) start;
-                startDate = dateValue.getDate();
-            } else if (start.type() == Value.NUMBER) {
-                startDate = new Date(start.toDouble().longValue());
-            }
-        }
-        if (startDate != null) {
-            ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
-            Instant instant1 = startDate.toInstant();
-            LocalDate localDate = instant1.atZone(zoneId).toLocalDate();
+        ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+        LocalDate localDate = date();
+        if (localDate != null) {
+
 
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();

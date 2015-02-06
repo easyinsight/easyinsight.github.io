@@ -26,31 +26,8 @@ import java.util.TimeZone;
 public class DayOfWeek extends Function {
     public Value evaluate() {
         ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
-        LocalDate startDate = null;
-        if (params.size() == 0) {
-            startDate = LocalDate.now(zoneId);
-        } else {
-            Value start = params.get(0);
-            if (start.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) start;
-                if (dateValue.getLocalDate() != null) {
-                    startDate = dateValue.getLocalDate();
-                } else {
-                    startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
-                }
-            } else if (start.type() == Value.NUMBER) {
-                startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
-            }
-        }
+        LocalDate startDate = date();
         if (startDate != null) {
-            /*Calendar calendar = Calendar.getInstance();
-
-
-            ZonedDateTime zdt = startDate.toInstant().atZone(ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60))));*/
-
-
-
-
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
 
@@ -61,7 +38,6 @@ public class DayOfWeek extends Function {
                 TemporalField adjuster = weekFields.dayOfWeek();
                 long tFrom = adjuster.getFrom(dow);
                 startDate = startDate.with(adjuster, tFrom);
-                //zdt = zdt.with(adjuster, tFrom);
                 Instant instant = startDate.atStartOfDay().atZone(zoneId).toInstant();
                 Date result = Date.from(instant);
 

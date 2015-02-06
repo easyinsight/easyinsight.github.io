@@ -23,22 +23,7 @@ import java.util.TimeZone;
 public class DayOfYear extends Function {
     public Value evaluate() {
         ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
-        LocalDate startDate = null;
-        if (params.size() == 0) {
-            startDate = LocalDate.now(zoneId);
-        } else {
-            Value start = params.get(0);
-            if (start.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) start;
-                if (dateValue.getLocalDate() != null) {
-                    startDate = dateValue.getLocalDate();
-                } else {
-                    startDate = dateValue.getDate().toInstant().atZone(zoneId).toLocalDate();
-                }
-            } else if (start.type() == Value.NUMBER) {
-                startDate = new Date(start.toDouble().longValue()).toInstant().atZone(zoneId).toLocalDate();
-            }
-        }
+        LocalDate startDate = date();
         if (startDate != null) {
             LocalDate localDate = startDate;
 
