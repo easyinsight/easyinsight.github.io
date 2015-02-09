@@ -227,7 +227,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Temporal workingEndDate;
         if (dateTime(insightRequestMetadata)) {
             ZonedDateTime startZDT = startDate.toInstant().atZone(insightRequestMetadata.createZoneID());
+            startZDT = startZDT.withHour(0).withMinute(0).withSecond(0).withNano(0);
             ZonedDateTime endZDT = endDate.toInstant().atZone(insightRequestMetadata.createZoneID());
+            endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
             insightRequestMetadata.addAudit(this, "Start date/time on in memory is " + startZDT);
             insightRequestMetadata.addAudit(this, "End date/time on in memory query is " + endZDT);
             workingStartDate = startZDT;
@@ -304,7 +306,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
         if (dateTime(insightRequestMetadata)) {
             ZonedDateTime startZDT = startDate.toInstant().atZone(insightRequestMetadata.createZoneID());
+            startZDT = startZDT.withHour(0).withMinute(0).withSecond(0).withNano(0);
             ZonedDateTime endZDT = endDate.toInstant().atZone(insightRequestMetadata.createZoneID());
+            endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
             insightRequestMetadata.addAudit(this, "Start date/time on database query is " + startZDT);
             insightRequestMetadata.addAudit(this, "End date/time on database query is " + endZDT);
             preparedStatement.setTimestamp(start++, new java.sql.Timestamp(toOldJava(insightRequestMetadata, startZDT).getTime()));
