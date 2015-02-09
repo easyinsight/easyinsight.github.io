@@ -2,8 +2,11 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 
 /**
  * User: James Boe
@@ -12,22 +15,46 @@ import java.util.Date;
  */
 public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDefinition {
 
-    private Date lowValue;
-    private Date highValue;
+    private Temporal lowValue;
+    private Temporal highValue;
+    private boolean dateTime;
 
-    public MaterializedFilterDateRangeDefinition(AnalysisItem key, Date lowValue, Date highValue, boolean sliding) {
+    public MaterializedFilterDateRangeDefinition(AnalysisItem key, Temporal lowValue, Temporal highValue, FilterDateRangeDefinition filter, InsightRequestMetadata insightRequestMetadata) {
         super(key);
         this.lowValue = lowValue;
         this.highValue = highValue;
+        dateTime = filter.dateTime(insightRequestMetadata);
     }
 
     public boolean allows(Value value) {
-        boolean allowed = false;        
-        if (value.type() == Value.DATE) {
-            DateValue dateValue = (DateValue) value;
-            allowed = dateValue.getDate().compareTo(lowValue) >= 0 && dateValue.getDate().compareTo(highValue) <= 0;
+        boolean allowed = false;
+        DateValue dateValue = findDateValue(value);
+        if (dateValue != null) {
+            if (dateTime) {
+                ZonedDateTime zdt = dateValue.getZonedDateTime();
+                allowed = (zdt.isEqual((java.time.chrono.ChronoZonedDateTime<?>) lowValue) || zdt.isAfter((java.time.chrono.ChronoZonedDateTime<?>) lowValue)) &&
+                        (zdt.isEqual((java.time.chrono.ChronoZonedDateTime<?>) highValue) || zdt.isBefore((java.time.chrono.ChronoZonedDateTime<?>) highValue));
+            } else {
+                LocalDate localDate = dateValue.getLocalDate();
+                allowed = (localDate.isEqual((java.time.chrono.ChronoLocalDate) lowValue) || localDate.isAfter((java.time.chrono.ChronoLocalDate) lowValue)) &&
+                        (localDate.isEqual((java.time.chrono.ChronoLocalDate) highValue) || localDate.isBefore((java.time.chrono.ChronoLocalDate) highValue));
+            }
+            System.out.println(dateValue.getLocalDate() + " - " + allowed);
         }
         return allowed;
+    }
+
+    @Nullable
+    private DateValue findDateValue(Value value) {
+        if (value.type() == Value.DATE) {
+            return (DateValue) value;
+        } else if (value.type() == Value.STRING) {
+            Value originalValue = value.getOriginalValue();
+            if (originalValue.type() == Value.DATE) {
+                return (DateValue) originalValue;
+            }
+        }
+        return null;
     }
 
     @Override
