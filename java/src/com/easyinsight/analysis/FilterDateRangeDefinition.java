@@ -63,6 +63,32 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     @Column(name="slider_range")
     private boolean sliderRange = true;
 
+    @Transient
+    private int startDateDay;
+
+    @Transient
+    private int startDateMonth;
+
+    @Transient
+    private int startDateYear;
+
+    @Transient
+    private int endDateDay;
+
+    @Transient
+    private int endDateMonth;
+
+    @Transient
+    private int endDateYear;
+    /*
+    public var startDateDay:int;
+    public var startDateYear:int;
+    public var startDateMonth:int;
+    public var endDateDay:int;
+    public var endDateYear:int;
+    public var endDateMonth:int;
+     */
+
     @Override
     public int type() {
         return FilterDefinition.DATE;
@@ -304,6 +330,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             startDate = new Date();
         }
 
+        insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + startDate);
+        insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + endDate);
+
         if (dateTime(insightRequestMetadata)) {
             ZonedDateTime startZDT = startDate.toInstant().atZone(insightRequestMetadata.createZoneID());
             startZDT = startZDT.withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -334,30 +363,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     @Override
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        StringBuilder sb = new StringBuilder();
-        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-        String startName = "filter" + getFilterID() + "start";
-        String endName = "filter" + getFilterID() + "end";
-        String onChange = "updateRangeFilter('filter" + getFilterID() + "'," + filterHTMLMetadata.createOnChange() + ")";
-        sb.append("<script type=\"text/javascript\">\n" +
-                "\t$(function() {\n" +
-                "\t\t$( \"#"+startName+"\" ).datePicker({clickInput:true, startDate:'1900/01/01'}).bind('dateSelected', function(e, selectedDate, $td) {" + onChange + "});\n" +
-                "\t\t$( \"#"+endName+"\" ).datePicker({clickInput:true, startDate:'1900/01/01'}).bind('dateSelected', function(e, selectedDate, $td) {" + onChange + "});\n" +
-                "\t});\n" +
-                "\t</script>");
-        sb.append("<div>");
-        if (!isToggleEnabled()) {
-            sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
-        }
-        sb.append(label(true));
-        sb.append("<input readonly=\"readonly\" type=\"text\" id=\""+startName+"\" value=\"").append(df.format(getStartDate())).append("\"/>").
-                append("<input readonly=\"readonly\" type=\"text\" id=\""+endName+"\" value=\"").append(df.format(getEndDate())).append("\"/>");
-        sb.append("</div>");
-        return sb.toString();
-    }
-
-    @Override
     public JSONObject toJSON(FilterHTMLMetadata filterHTMLMetadata) throws JSONException {
         DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         JSONObject jo = super.toJSON(filterHTMLMetadata);
@@ -381,5 +386,53 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         String startString = df.format(getStartDate());
         String endString = df.format(getEndDate());
         return startString + " to " + endString;
+    }
+
+    public int getStartDateDay() {
+        return startDateDay;
+    }
+
+    public void setStartDateDay(int startDateDay) {
+        this.startDateDay = startDateDay;
+    }
+
+    public int getStartDateMonth() {
+        return startDateMonth;
+    }
+
+    public void setStartDateMonth(int startDateMonth) {
+        this.startDateMonth = startDateMonth;
+    }
+
+    public int getStartDateYear() {
+        return startDateYear;
+    }
+
+    public void setStartDateYear(int startDateYear) {
+        this.startDateYear = startDateYear;
+    }
+
+    public int getEndDateDay() {
+        return endDateDay;
+    }
+
+    public void setEndDateDay(int endDateDay) {
+        this.endDateDay = endDateDay;
+    }
+
+    public int getEndDateMonth() {
+        return endDateMonth;
+    }
+
+    public void setEndDateMonth(int endDateMonth) {
+        this.endDateMonth = endDateMonth;
+    }
+
+    public int getEndDateYear() {
+        return endDateYear;
+    }
+
+    public void setEndDateYear(int endDateYear) {
+        this.endDateYear = endDateYear;
     }
 }

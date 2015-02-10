@@ -24,11 +24,16 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.Date;
 
@@ -863,6 +868,38 @@ public class AnalysisService {
     }
 
     public String importData(byte[] bytes, long dataSourceID) {
+        {
+            try {
+                ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+                XSSFWorkbook wb = new XSSFWorkbook(bais);
+                XSSFSheet sheet = wb.getSheetAt(0);
+                Iterator<org.apache.poi.ss.usermodel.Row> rit = sheet.rowIterator();
+                for (; rit.hasNext(); ) {
+                    org.apache.poi.ss.usermodel.Row excelRow = rit.next();
+                    Cell headerCell = excelRow.getCell(excelRow.getFirstCellNum());
+                    String headerValue = headerCell.toString().trim();
+                    for (short i = (short) (excelRow.getFirstCellNum() + 1); i < excelRow.getLastCellNum(); i++) {
+                        Cell cell = excelRow.getCell(i);
+                        if (cell != null) {
+                            if (cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC) {
+                                if (DateUtil.isCellDateFormatted(cell)) {
+                                    System.out.println(cell.getDateCellValue());
+                                    //row.addValue(key, cell.getDateCellValue());
+                                } else {
+                                    System.out.println(cell.getNumericCellValue());
+                                    //row.addValue(key, cell.getNumericCellValue());
+                                }
+                            } else {
+                                System.out.println(cell.toString());
+                                //row.addValue(key, cell.toString());
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+
+            }
+        }
         SecurityUtil.authorizeFeedAccess(dataSourceID);
         // have to translate provider name -> related provider
         EIConnection conn = Database.instance().getConnection();
@@ -3333,6 +3370,36 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
+        long accountID = SecurityUtil.getAccountID(false);
+        EIConnection conn = Database.instance().getConnection();
+        ZoneId zoneId = null;
+        try {
+            if (accountID > 0) {
+                PreparedStatement ps = conn.prepareStatement("SELECT timezone FROM account WHERE account_id = ?");
+                ps.setLong(1, accountID);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                String timezone = rs.getString(1);
+                if (timezone == null || "".equals(timezone.trim())) {
+
+                } else {
+                    zoneId = ZoneId.of(timezone);
+
+                }
+                ps.close();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        if (zoneId == null) {
+            zoneId = ZoneId.systemDefault();
+        }
+        return openAnalysisDefinition(analysisID, zoneId);
+    }
+
+    public WSAnalysisDefinition openAnalysisDefinition(long analysisID, ZoneId zoneId) {
         try {
             int role = SecurityUtil.authorizeReport(analysisID, Roles.PUBLIC);
             WSAnalysisDefinition report = analysisStorage.getAnalysisDefinition(analysisID);
@@ -3383,6 +3450,25 @@ public class AnalysisService {
                 }
             } finally {
                 Database.closeConnection(conn);
+            }
+            if (report.getFilterDefinitions() != null) {
+                for (FilterDefinition filter : report.getFilterDefinitions()) {
+                    if (filter instanceof FilterDateRangeDefinition) {
+                        FilterDateRangeDefinition date = (FilterDateRangeDefinition) filter;
+                        if (date.getStartDate() != null) {
+                            LocalDate ld = date.getStartDate().toInstant().atZone(zoneId).toLocalDate();
+                            date.setStartDateYear(ld.getYear());
+                            date.setStartDateMonth(ld.getMonthValue());
+                            date.setStartDateDay(ld.getDayOfMonth());
+                        }
+                        if (date.getEndDate() != null) {
+                            LocalDate ld = date.getEndDate().toInstant().atZone(zoneId).toLocalDate();
+                            date.setEndDateYear(ld.getYear());
+                            date.setEndDateMonth(ld.getMonthValue());
+                            date.setEndDateDay(ld.getDayOfMonth());
+                        }
+                    }
+                }
             }
             return report;
         } catch (Exception e) {
