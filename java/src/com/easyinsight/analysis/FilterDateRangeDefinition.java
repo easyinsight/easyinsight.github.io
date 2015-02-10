@@ -256,6 +256,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             startZDT = startZDT.withHour(0).withMinute(0).withSecond(0).withNano(0);
             ZonedDateTime endZDT = endDate.toInstant().atZone(insightRequestMetadata.createZoneID());
             endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            System.out.println("Start date/time is " + startZDT);
+            System.out.println("End date/time is " + endZDT);
             insightRequestMetadata.addAudit(this, "Start date/time on in memory is " + startZDT);
             insightRequestMetadata.addAudit(this, "End date/time on in memory query is " + endZDT);
             workingStartDate = startZDT;
