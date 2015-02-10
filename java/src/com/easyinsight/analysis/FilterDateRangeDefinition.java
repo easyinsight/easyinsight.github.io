@@ -253,6 +253,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Temporal workingEndDate;
         if (dateTime(insightRequestMetadata)) {
             ZonedDateTime startZDT = startDate.toInstant().atZone(insightRequestMetadata.createZoneID());
+            System.out.println("Started with " + startZDT);
             startZDT = startZDT.withHour(0).withMinute(0).withSecond(0).withNano(0);
             ZonedDateTime endZDT = endDate.toInstant().atZone(insightRequestMetadata.createZoneID());
             endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
