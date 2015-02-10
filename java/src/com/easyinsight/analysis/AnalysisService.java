@@ -3460,12 +3460,14 @@ public class AnalysisService {
                             date.setStartDateYear(ld.getYear());
                             date.setStartDateMonth(ld.getMonthValue());
                             date.setStartDateDay(ld.getDayOfMonth());
+                            System.out.println(date + " on start gave us " + ld);
                         }
                         if (date.getEndDate() != null) {
                             LocalDate ld = date.getEndDate().toInstant().atZone(zoneId).toLocalDate();
                             date.setEndDateYear(ld.getYear());
                             date.setEndDateMonth(ld.getMonthValue());
                             date.setEndDateDay(ld.getDayOfMonth());
+                            System.out.println(date + " on end gave us " + ld);
                         }
                     }
                 }
