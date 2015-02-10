@@ -3370,7 +3370,7 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition openAnalysisDefinition(long analysisID) {
-        long accountID = SecurityUtil.getAccountID(false);
+        /*long accountID = SecurityUtil.getAccountID(false);
         EIConnection conn = Database.instance().getConnection();
         ZoneId zoneId = null;
         try {
@@ -3395,7 +3395,8 @@ public class AnalysisService {
         }
         if (zoneId == null) {
             zoneId = ZoneId.systemDefault();
-        }
+        }*/
+        ZoneId zoneId = ZoneId.systemDefault();
         return openAnalysisDefinition(analysisID, zoneId);
     }
 
