@@ -116,14 +116,17 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
             if (dateValue != null) {
                 String result;
                 if (dateTime) {
-                    WeekFields weekFields = WeekFields.of(DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 1);
-                    int week = dateValue.getZonedDateTime().get(weekFields.weekOfYear());
-                    result = dateValue.getZonedDateTime().getYear() + "-" + (week < 10 ? "0" : "") + week;
+                    WeekFields weekFields = WeekFields.of(DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 4);
+                    int week = dateValue.getZonedDateTime().get(weekFields.weekOfWeekBasedYear());
+                    int year = dateValue.getLocalDate().get(weekFields.weekBasedYear());
+                    result = year + "-" + (week < 10 ? "0" : "") + week;
                 } else {
-                    WeekFields weekFields = WeekFields.of(DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 1);
-                    int week = dateValue.getLocalDate().get(weekFields.weekOfYear());
-                    result = dateValue.getLocalDate().getYear() + "-" + (week < 10 ? "0" : "") + week;
+                    WeekFields weekFields = WeekFields.of(DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 4);
+                    int week = dateValue.getLocalDate().get(weekFields.weekOfWeekBasedYear());
+                    int year = dateValue.getLocalDate().get(weekFields.weekBasedYear());
+                    result = year + "-" + (week < 10 ? "0" : "") + week;
                 }
+
                 if (valids.contains(result)) {
                     return true;
                 }
