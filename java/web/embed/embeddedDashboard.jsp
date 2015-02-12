@@ -82,7 +82,7 @@
 <body>
 <% if (showToolbar) { %>
 <div class="nav nav-pills reportNav">
-    <div class="container">
+    <div class="container-fluid">
         <div class="col-md-12">
             <div class="btn-toolbar pull-right" style="padding-top: 0;margin-top: 0">
                 <div class="btn-group reportControlBtnGroup">
@@ -114,7 +114,7 @@
 </div>
 <% } %>
 
-<div class="container">
+<div class="container-fluid">
     <%= showHeader ? uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) : "" %>
     <jsp:include page="../html/refreshingDataSource.jsp"/>
     <div id="base"/>
