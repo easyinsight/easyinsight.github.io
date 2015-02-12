@@ -165,7 +165,7 @@
 <body>
 <% if (showToolbar) { %>
 <div class="nav navbar-pills reportNav">
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-6 reportBlah">
             </div>
@@ -246,7 +246,7 @@
     </div>
 </div>
 <% } %>
-<div class="container">
+<div class="container-fluid">
     <jsp:include page="../html/exportModalWindow.jsp">
         <jsp:param name="reportID" value="<%= report.getUrlKey()%>"/>
     </jsp:include>
