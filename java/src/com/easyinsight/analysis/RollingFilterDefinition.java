@@ -216,10 +216,12 @@ public class RollingFilterDefinition extends FilterDefinition {
                             DateValue dateValue = (DateValue) value;
                             System.out.println("date value date = " + dateValue.getDate());
                             if (dateTime(insightRequestMetadata)) {
-                                if (dateValue.getZonedDateTime() == null) {
-                                    startDate = dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID());
-                                } else {
+                                if (dateValue.getZonedDateTime() != null) {
                                     startDate = dateValue.getZonedDateTime();
+                                } else if (dateValue.getLocalDate() != null) {
+                                    startDate = dateValue.getLocalDate().atStartOfDay(insightRequestMetadata.createZoneID());
+                                } else {
+                                    startDate = dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID());
                                 }
                             } else {
                                 if (dateValue.getLocalDate() == null) {
