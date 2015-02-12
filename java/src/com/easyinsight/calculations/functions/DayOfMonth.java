@@ -23,7 +23,11 @@ public class DayOfMonth extends Function {
                 // pathway enhanced network
 
                 if (params.size() == 2) {
-                    startDate = startDate.withDayOfMonth(params.get(1).toDouble().intValue());
+                    int day = params.get(1).toDouble().intValue();
+                    if (day < 1) {
+                        day = 1;
+                    }
+                    startDate = startDate.withDayOfMonth(day);
                     Date date = Date.from(startDate.atStartOfDay().atZone(zoneId).toInstant());
                     System.out.println("result = " + date);
                     return new DateValue(date);

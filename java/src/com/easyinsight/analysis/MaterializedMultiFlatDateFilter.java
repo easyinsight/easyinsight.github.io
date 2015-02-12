@@ -1,11 +1,15 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.functions.DayOfQuarter;
+import com.easyinsight.calculations.functions.DayOfWeek;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Value;
+import com.easyinsight.security.SecurityUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.WeekFields;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -94,8 +98,7 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
                     return true;
                 }
             }
-        } else if (level == AnalysisDateDimension.YEAR_LEVEL || level == AnalysisDateDimension.MONTH_LEVEL ||
-                level == AnalysisDateDimension.WEEK_LEVEL) {
+        } else if (level == AnalysisDateDimension.YEAR_LEVEL || level == AnalysisDateDimension.MONTH_LEVEL) {
             DateValue dateValue = findDateValue(value);
             if (dateValue != null) {
                 String result;
@@ -104,6 +107,26 @@ public class MaterializedMultiFlatDateFilter extends MaterializedFilterDefinitio
                 } else {
                     result = sdf.format(dateValue.getLocalDate());
                 }
+                if (valids.contains(result)) {
+                    return true;
+                }
+            }
+        } else if (level == AnalysisDateDimension.WEEK_LEVEL) {
+            DateValue dateValue = findDateValue(value);
+            if (dateValue != null) {
+                String result;
+                if (dateTime) {
+                    WeekFields weekFields = WeekFields.of(DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 4);
+                    int week = dateValue.getZonedDateTime().get(weekFields.weekOfWeekBasedYear());
+                    int year = dateValue.getLocalDate().get(weekFields.weekBasedYear());
+                    result = year + "-" + (week < 10 ? "0" : "") + week;
+                } else {
+                    WeekFields weekFields = WeekFields.of(DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 4);
+                    int week = dateValue.getLocalDate().get(weekFields.weekOfWeekBasedYear());
+                    int year = dateValue.getLocalDate().get(weekFields.weekBasedYear());
+                    result = year + "-" + (week < 10 ? "0" : "") + week;
+                }
+
                 if (valids.contains(result)) {
                     return true;
                 }

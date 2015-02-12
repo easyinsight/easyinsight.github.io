@@ -15,6 +15,10 @@ import javax.persistence.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -58,6 +62,32 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
     @Column(name="slider_range")
     private boolean sliderRange = true;
+
+    @Transient
+    private int startDateDay;
+
+    @Transient
+    private int startDateMonth;
+
+    @Transient
+    private int startDateYear;
+
+    @Transient
+    private int endDateDay;
+
+    @Transient
+    private int endDateMonth;
+
+    @Transient
+    private int endDateYear;
+    /*
+    public var startDateDay:int;
+    public var startDateYear:int;
+    public var startDateMonth:int;
+    public var endDateDay:int;
+    public var endDateYear:int;
+    public var endDateMonth:int;
+     */
 
     @Override
     public int type() {
@@ -210,38 +240,48 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         this.endDate = endDate;
     }
 
+    public boolean dateTime(InsightRequestMetadata insightRequestMetadata) {
+        AnalysisDateDimension date = (AnalysisDateDimension) getField();
+        return (date.isTimeshift(insightRequestMetadata));
+    }
+
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         /*Date workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
         Date workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);*/
 
-        Date workingEndDate = new Date(endDate.getTime());
-        Date workingStartDate = new Date(startDate.getTime());
-
-
-
-        // but now it's in the app transformed into the user time!
-        Calendar startCal = Calendar.getInstance();
-        startCal.setTime(workingStartDate);
-        startCal.set(Calendar.HOUR_OF_DAY, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.SECOND, 0);
-        startCal.set(Calendar.MILLISECOND, 0);
-        workingStartDate = startCal.getTime();
-        Calendar endCal = Calendar.getInstance();
-        endCal.setTime(workingEndDate);
-        endCal.set(Calendar.HOUR_OF_DAY, 23);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.SECOND, 59);
-        endCal.set(Calendar.MILLISECOND, 0);
-        workingEndDate = endCal.getTime();
-        AnalysisDateDimension date = (AnalysisDateDimension) getField();
-        if (date.isTimeshift(insightRequestMetadata)) {
-            workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
-            workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
+        Temporal workingStartDate;
+        Temporal workingEndDate;
+        if (dateTime(insightRequestMetadata)) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH));
+            ZonedDateTime startZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+            System.out.println("Started with " + startZDT);
+            cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH));
+            ZonedDateTime endZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+            endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            System.out.println("Start date/time is " + startZDT);
+            System.out.println("End date/time is " + endZDT);
+            insightRequestMetadata.addAudit(this, "Start date/time on in memory is " + startZDT);
+            insightRequestMetadata.addAudit(this, "End date/time on in memory query is " + endZDT);
+            workingStartDate = startZDT;
+            workingEndDate = endZDT;
+        } else {
+            LocalDate startLocalDate = startDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
+            LocalDate endLocalDate = endDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
+            insightRequestMetadata.addAudit(this, "Start date on in memory is " + startLocalDate);
+            insightRequestMetadata.addAudit(this, "End date on in memory is " + endLocalDate);
+            workingStartDate = startLocalDate;
+            workingEndDate = endLocalDate;
         }
 
-
-        return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, sliding);
+        return new MaterializedFilterDateRangeDefinition(getField(), workingStartDate, workingEndDate, this, insightRequestMetadata);
     }
 
     @Override
@@ -261,23 +301,39 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
 
 
-        queryBuilder.append(columnName);
-
-        queryBuilder.append(" >= ? AND ");
-        queryBuilder.append(columnName);
-        queryBuilder.append(" <= ?");
+        if (dateTime(insightRequestMetadata)) {
+            queryBuilder.append(columnName);
+            queryBuilder.append(" >= ? AND ");
+            queryBuilder.append(columnName);
+            queryBuilder.append(" <= ?");
+        } else {
+            if (database.getDialect() == Database.MYSQL) {
+                queryBuilder.append("date(" + columnName + ")");
+                queryBuilder.append(" >= ? AND ");
+                queryBuilder.append("date(" + columnName + ")");
+                queryBuilder.append(" <= ?");
+            } else {
+                queryBuilder.append(columnName + "::date");
+                queryBuilder.append(" >= ? AND ");
+                queryBuilder.append(columnName + "::date");
+                queryBuilder.append(" <= ?");
+            }
+        }
         return queryBuilder.toString();
     }
 
-    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        Date workingEndDate;
-        Date workingStartDate;
-        // scale the query time back to UTC because it's in the database as UTC
+    public Date toOldJava(InsightRequestMetadata insightRequestMetadata, java.time.temporal.Temporal startDate) {
+        if (startDate instanceof ZonedDateTime) {
+            Instant instant = ((ZonedDateTime) startDate).toInstant();
+            return Date.from(instant);
+        } else if (startDate instanceof LocalDate) {
+            Instant instant = ((LocalDate) startDate).atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
+            return Date.from(instant);
+        }
+        throw new RuntimeException();
+    }
 
-        AnalysisDateDimension date = (AnalysisDateDimension) getField();
-        /*System.out.println("shift = " + date.isTimeshift());
-        System.out.println("initial dates = " + endDate + " and " + startDate);
-        System.out.println("utc offset = " + insightRequestMetadata.getUtcOffset());*/
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
 
         if (endDate == null) {
             endDate = new Date();
@@ -286,50 +342,35 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             startDate = new Date();
         }
 
+        insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + startDate);
+        insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + endDate);
 
-
-        /*workingEndDate = new Date(endDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        workingStartDate = new Date(startDate.getTime() - insightRequestMetadata.getUtcOffset() * 1000 * 60);*/
-
-        workingEndDate = new Date(endDate.getTime());
-        workingStartDate = new Date(startDate.getTime());
-
-
-
-        Calendar startCal = Calendar.getInstance();
-        startCal.setTime(workingStartDate);
-        startCal.set(Calendar.HOUR_OF_DAY, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.SECOND, 0);
-        startCal.set(Calendar.MILLISECOND, 0);
-        workingStartDate = startCal.getTime();
-        Calendar endCal = Calendar.getInstance();
-        endCal.setTime(workingEndDate);
-        endCal.set(Calendar.HOUR_OF_DAY, 23);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.SECOND, 59);
-        endCal.set(Calendar.MILLISECOND, 0);
-        workingEndDate = endCal.getTime();
-
-        if (date.isTimeshift(insightRequestMetadata)) {
-            workingEndDate = new Date(workingEndDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
-            workingStartDate = new Date(workingStartDate.getTime() + insightRequestMetadata.getUtcOffset() * 1000 * 60);
-        }
-
-
-
-        /*System.out.println("end date = " + new Date(workingEndDate.getTime()));
-        System.out.println("start date = " + new Date(workingStartDate.getTime()));*/
-        /*if (date.isTimeshift()) {
-
+        if (dateTime(insightRequestMetadata)) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH));
+            ZonedDateTime startZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+            cal = Calendar.getInstance();
+            cal.setTime(endDate);
+            localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH));
+            ZonedDateTime endZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+            endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            insightRequestMetadata.addAudit(this, "Start date/time on database query is " + startZDT);
+            insightRequestMetadata.addAudit(this, "End date/time on database query is " + endZDT);
+            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(toOldJava(insightRequestMetadata, startZDT).getTime()));
+            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(toOldJava(insightRequestMetadata, endZDT).getTime()));
         } else {
-            workingEndDate = endDate;
-            workingStartDate = startDate;
-        }*/
-        insightRequestMetadata.addAudit(this, "Start date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " + workingStartDate);
-        insightRequestMetadata.addAudit(this, "End date on database query is " + (((AnalysisDateDimension) getField()).isTimeshift(insightRequestMetadata) ? " time shifted " : " not time shifted ") + " at query to " + workingEndDate);
-        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
-        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
+            LocalDate startLocalDate = startDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
+            LocalDate endLocalDate = endDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
+            insightRequestMetadata.addAudit(this, "Start date on database query is " + startLocalDate);
+            insightRequestMetadata.addAudit(this, "End date on database query is " + endLocalDate);
+            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(toOldJava(insightRequestMetadata, startLocalDate).getTime()));
+            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(toOldJava(insightRequestMetadata, endLocalDate).getTime()));
+        }
         return start;
     }
 
@@ -340,30 +381,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         } else {
             return super.createComponents(pipelineName, filterProcessor, sourceItem, columnLevel);
         }
-    }
-
-    @Override
-    public String toHTML(FilterHTMLMetadata filterHTMLMetadata) {
-        StringBuilder sb = new StringBuilder();
-        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
-        String startName = "filter" + getFilterID() + "start";
-        String endName = "filter" + getFilterID() + "end";
-        String onChange = "updateRangeFilter('filter" + getFilterID() + "'," + filterHTMLMetadata.createOnChange() + ")";
-        sb.append("<script type=\"text/javascript\">\n" +
-                "\t$(function() {\n" +
-                "\t\t$( \"#"+startName+"\" ).datePicker({clickInput:true, startDate:'1900/01/01'}).bind('dateSelected', function(e, selectedDate, $td) {" + onChange + "});\n" +
-                "\t\t$( \"#"+endName+"\" ).datePicker({clickInput:true, startDate:'1900/01/01'}).bind('dateSelected', function(e, selectedDate, $td) {" + onChange + "});\n" +
-                "\t});\n" +
-                "\t</script>");
-        sb.append("<div>");
-        if (!isToggleEnabled()) {
-            sb.append(checkboxHTML(filterHTMLMetadata.getFilterKey(), filterHTMLMetadata.createOnChange()));
-        }
-        sb.append(label(true));
-        sb.append("<input readonly=\"readonly\" type=\"text\" id=\""+startName+"\" value=\"").append(df.format(getStartDate())).append("\"/>").
-                append("<input readonly=\"readonly\" type=\"text\" id=\""+endName+"\" value=\"").append(df.format(getEndDate())).append("\"/>");
-        sb.append("</div>");
-        return sb.toString();
     }
 
     @Override
@@ -390,5 +407,53 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         String startString = df.format(getStartDate());
         String endString = df.format(getEndDate());
         return startString + " to " + endString;
+    }
+
+    public int getStartDateDay() {
+        return startDateDay;
+    }
+
+    public void setStartDateDay(int startDateDay) {
+        this.startDateDay = startDateDay;
+    }
+
+    public int getStartDateMonth() {
+        return startDateMonth;
+    }
+
+    public void setStartDateMonth(int startDateMonth) {
+        this.startDateMonth = startDateMonth;
+    }
+
+    public int getStartDateYear() {
+        return startDateYear;
+    }
+
+    public void setStartDateYear(int startDateYear) {
+        this.startDateYear = startDateYear;
+    }
+
+    public int getEndDateDay() {
+        return endDateDay;
+    }
+
+    public void setEndDateDay(int endDateDay) {
+        this.endDateDay = endDateDay;
+    }
+
+    public int getEndDateMonth() {
+        return endDateMonth;
+    }
+
+    public void setEndDateMonth(int endDateMonth) {
+        this.endDateMonth = endDateMonth;
+    }
+
+    public int getEndDateYear() {
+        return endDateYear;
+    }
+
+    public void setEndDateYear(int endDateYear) {
+        this.endDateYear = endDateYear;
     }
 }

@@ -6,7 +6,7 @@ import com.easyinsight.cache.MemCachedManager;
 import com.easyinsight.calculations.FunctionException;
 import com.easyinsight.calculations.FunctionFactory;
 import com.easyinsight.calculations.NamespaceGenerator;
-import com.easyinsight.calculations.functions.DayOfQuarter;
+import com.easyinsight.calculations.functions.*;
 import com.easyinsight.core.*;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.database.Database;
@@ -37,6 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -600,6 +601,12 @@ public class DataService {
                     } else if ("qq".equals(format)) {
                         int quarter = DayOfQuarter.quarter(date);
                         displayResult = result = String.valueOf(quarter);
+                    } else if ("yyyy-ww".equals(format)) {
+                        WeekFields weekFields = WeekFields.of(com.easyinsight.calculations.functions.DayOfWeek.translateDayOfWeek(SecurityUtil.getFirstDayOfWeek()), 4);
+                        int week = zdt.get(weekFields.weekOfYear());
+                        int year = zdt.get(weekFields.weekBasedYear());
+                        result = year + "-" + (week < 10 ? "0" : "") + week;
+                        displayResult = year + "-" + (week < 10 ? "0" : "") + week;
                     } else {
                         result = simpleDateFormat.format(date);
                         displayResult = simpleDateFormat.format(date);

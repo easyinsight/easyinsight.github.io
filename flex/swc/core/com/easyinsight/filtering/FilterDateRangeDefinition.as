@@ -11,6 +11,12 @@ package com.easyinsight.filtering
     public var sliderRange:Boolean = true;
         public var boundingStartDate:Date;
 		public var endDate:Date;
+    public var startDateDay:int;
+    public var startDateYear:int;
+    public var startDateMonth:int;
+    public var endDateDay:int;
+    public var endDateYear:int;
+    public var endDateMonth:int;
         public var boundingEndDate:Date;
         public var sliding:Boolean;
 		

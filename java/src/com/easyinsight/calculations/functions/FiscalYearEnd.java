@@ -10,10 +10,7 @@ import com.easyinsight.security.SecurityUtil;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Date;
 
 /**
@@ -24,24 +21,8 @@ import java.util.Date;
 public class FiscalYearEnd extends Function {
     @Override
     public Value evaluate() {
-        Date startDate = null;
-        if (params.size() == 0) {
-            startDate = new Date();
-        } else {
-            Value start = params.get(0);
-            if (start.type() == Value.DATE) {
-                DateValue dateValue = (DateValue) start;
-                startDate = dateValue.getDate();
-            }
-        }
-        Instant instant = startDate.toInstant();
-        ZoneId zoneId;
-        if (calculationMetadata.getInsightRequestMetadata() == null) {
-            zoneId = ZoneId.of("UTC");
-        } else {
-            zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
-        }
-        ZonedDateTime zdt = instant.atZone(zoneId);
+        ZoneId zoneId = calculationMetadata.getInsightRequestMetadata().createZoneID();
+        LocalDate zdt = date();
         try {
             if (calculationMetadata.getConnection() == null) {
                 EIConnection conn = Database.instance().getConnection();
@@ -58,7 +39,7 @@ public class FiscalYearEnd extends Function {
                     } else {
                         zdt = zdt.withMonth(fiscalYearStartMonth).minusYears(1).withDayOfMonth(1).plusYears(1).minusDays(1);
                     }
-                    instant = zdt.toInstant();
+                    Instant instant = zdt.atStartOfDay().atZone(zoneId).toInstant();
                     Date endDate = Date.from(instant);
                     ps.close();
                     return new DateValue(endDate);
@@ -78,7 +59,7 @@ public class FiscalYearEnd extends Function {
                 } else {
                     zdt = zdt.withMonth(fiscalYearStartMonth).minusYears(1).withDayOfMonth(1).plusYears(1).minusDays(1);
                 }
-                instant = zdt.toInstant();
+                Instant instant = zdt.atStartOfDay().atZone(zoneId).toInstant();
                 Date endDate = Date.from(instant);
                 ps.close();
                 return new DateValue(endDate);

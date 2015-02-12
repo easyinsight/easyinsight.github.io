@@ -275,10 +275,16 @@ import mx.rpc.events.ResultEvent;
             }
 
             if (lowField != null) {
+                if (_filterDefinition.startDateYear > 0) {
+                    _filterDefinition.startDate = new Date(_filterDefinition.startDateYear, _filterDefinition.startDateMonth, _filterDefinition.startDateDay);
+                }
                 lowField.selectedDate = _filterDefinition.startDate;
             }
 
             if (highField != null) {
+                if (_filterDefinition.endDateYear > 0) {
+                    _filterDefinition.endDate = new Date(_filterDefinition.endDateYear, _filterDefinition.endDateMonth, _filterDefinition.endDateDay);
+                }
                 highField.selectedDate = _filterDefinition.endDate;
             }
 
