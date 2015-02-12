@@ -214,23 +214,11 @@ public class RollingFilterDefinition extends FilterDefinition {
                                 dateTime(insightRequestMetadata));
                         if (value.type() == Value.DATE) {
                             DateValue dateValue = (DateValue) value;
-                            System.out.println("date value date = " + dateValue.getDate());
                             if (dateTime(insightRequestMetadata)) {
-                                if (dateValue.getZonedDateTime() != null) {
-                                    startDate = dateValue.getZonedDateTime();
-                                } else if (dateValue.getLocalDate() != null) {
-                                    startDate = dateValue.getLocalDate().atStartOfDay(insightRequestMetadata.createZoneID());
-                                } else {
-                                    startDate = dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID());
-                                }
+                                startDate = dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID());
                             } else {
-                                if (dateValue.getLocalDate() == null) {
-                                    startDate = dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
-                                } else {
-                                    startDate = dateValue.getLocalDate();
-                                }
+                                startDate = dateValue.getDate().toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
                             }
-                            System.out.println("became " + startDate);
                         } else if (value.type() == Value.NUMBER) {
                             if (dateTime(insightRequestMetadata)) {
                                 startDate = new Date(value.toDouble().longValue()).toInstant().atZone(insightRequestMetadata.createZoneID());
