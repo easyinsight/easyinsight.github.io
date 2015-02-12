@@ -30,12 +30,14 @@ public class ParseDate extends Function {
             String format = minusQuotes(1);
             SimpleDateFormat sdf = new SimpleDateFormat(format);
             Date date = sdf.parse(value);
+            System.out.println("parsed date = " + date);
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH) + 1,
                     cal.get(Calendar.DAY_OF_MONTH));
             DateValue dateValue = new DateValue(date);
+            System.out.println("local date = " + localDate);
             dateValue.setLocalDate(localDate);
             return dateValue;
         } catch (ParseException e) {
