@@ -128,7 +128,7 @@ import mx.styles.StyleManager;
 		private static const SCALE_DIAMETER:Number = 1/1.12;
 		private static const VALUE_LABEL_SIZE:Number = 0.11;
 		private static const VALUE_LABEL_Y_OFFSET:Number = 0.1;
-		private static const MINMAX_LABEL_SIZE:Number = 0.07;
+		private static const MINMAX_LABEL_SIZE:Number = 0.06;
 		
 		//-----------------------------------------------------------------------
 		// Migitgates origin-rounding drift by not unnessarily re-computing origin.
@@ -484,7 +484,7 @@ import mx.styles.StyleManager;
 				_maxLabel.x = radius + radius * Math.sin(radiansForValue(maxValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2) - _maxLabel.width;
 				_maxLabel.y = radius + radius * Math.cos(radiansForValue(maxValue)) * (SCALE_DIAMETER - TICK_LENGTH_SMALL / 2);
                 _midLabel.x = radius - (_midLabel.width / 2);
-                _midLabel.y = this.height * TICK_LENGTH_SMALL;
+                _midLabel.y = this.height * TICK_LENGTH_SMALL + 10;
 			}
 		}
 		
@@ -500,9 +500,9 @@ import mx.styles.StyleManager;
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
-			_minLabel.text = minValue.toString();
-            _midLabel.text = String((minValue + maxValue) / 2);
-			_maxLabel.text = maxValue.toString();
+			_minLabel.text = valueFormatter.format(minValue);
+            _midLabel.text = valueFormatter.format((minValue + maxValue) / 2);
+			_maxLabel.text = valueFormatter.format(maxValue);
 			
 			var fontColor:Number = getStyle("fontColor");
 			_valueLabel.setStyle("color", fontColor);
