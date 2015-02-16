@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" selectedIndex="0" rowCount="6">
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" selectedIndex="0" rowCount="8">
 	<mx:Script>
 		<![CDATA[
 			public function set formattingConfiguration(formatType:int):void {
@@ -22,6 +22,12 @@
                     case FormattingConfiguration.BYTES:
                         selectedIndex = 5;
                         break;
+                    case FormattingConfiguration.ROUNDED_NUMBER:
+                        selectedIndex = 6;
+                        break;
+                    case FormattingConfiguration.ROUNDED_CURRENCY:
+                        selectedIndex = 7;
+                        break;
 				}				
 			}		
 		
@@ -39,6 +45,8 @@
                 <mx:Object label="Interval (milliseconds)" data="{FormattingConfiguration.MILLISECONDS}" value="Interval (milliseconds)"/>
                 <mx:Object label="Interval (seconds)" data="{FormattingConfiguration.SECONDS}" value="Interval (seconds)"/>
                 <mx:Object label="Bytes" data="{FormattingConfiguration.BYTES}" value="Bytes"/>
+                <mx:Object label="Rounded Number" data="{FormattingConfiguration.ROUNDED_NUMBER}" value="Rounded Number"/>
+                <mx:Object label="Rounded Currency" data="{FormattingConfiguration.ROUNDED_CURRENCY}" value="Rounded Currency"/>
             </mx:Array>
         </mx:ArrayCollection>
     </mx:dataProvider>
