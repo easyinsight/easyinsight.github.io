@@ -71,6 +71,8 @@ public class GaugeServlet extends HtmlServlet {
                             exportMetadata.locale, false) + "</b>");
                 }
                 jsonObject.put("gaugePrecision", ((AnalysisMeasure) gaugeDefinition.getMeasure()).getPrecision());
+                jsonObject.put("rounded", gaugeDefinition.getMeasure().getFormattingType() == FormattingConfiguration.ROUNDED_CURRENCY ||
+                        gaugeDefinition.getMeasure().getFormattingType() == FormattingConfiguration.ROUNDED_NUMBER);
             }
         } else {
             if (dataSet.getRows().size() > 0) {
