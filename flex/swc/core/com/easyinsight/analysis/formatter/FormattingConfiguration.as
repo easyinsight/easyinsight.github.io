@@ -1,5 +1,6 @@
 package com.easyinsight.analysis.formatter
 {
+
 import com.easyinsight.framework.User;
 
 import mx.formatters.CurrencyFormatter;
@@ -17,7 +18,15 @@ import mx.formatters.NumberBaseRoundType;
         public static const MILLISECONDS:int = 4;
         public static const SECONDS:int = 5;
         public static const BYTES:int = 6;
-		
+        public static const ROUNDED_NUMBER:int = 7;
+        public static const ROUNDED_CURRENCY:int = 8;
+
+    public static const DEFAULT:int = 0;
+    public static const MONTH:int = 1;
+    public static const MONTH_DAY:int = 2;
+    public static const DAY:int = 3;
+    public static const DAY_HOUR:int = 4;
+
 		public function FormattingConfiguration()
 		{
 		}
@@ -66,6 +75,13 @@ import mx.formatters.NumberBaseRoundType;
                     break;
                 case BYTES:
                     formatter = new ByteFormatter();
+                    break;
+                case ROUNDED_NUMBER:
+                    formatter = new RoundedNumberFormatter();
+                    break;
+                case ROUNDED_CURRENCY:
+                    var sym:String = User.getInstance() == null ? "$" : User.getInstance().currencySymbol;
+                    formatter = new RoundedCurrencyFormatter(sym, precision);
                     break;
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
