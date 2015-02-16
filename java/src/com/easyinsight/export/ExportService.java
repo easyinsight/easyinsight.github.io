@@ -1619,6 +1619,46 @@ public class ExportService {
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
                 numberFormat.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
                 valueString = numberFormat.format(doubleValue) + "%";
+            } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.ROUNDED_NUMBER) {
+                NumberFormat numberFormatter = NumberFormat.getNumberInstance(locale);
+                numberFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
+                numberFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
+                String resultString;
+                if (doubleValue < 1000) {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue));
+                } else if (doubleValue < 1000000) {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue / 1000)) + "k";
+                } else if (doubleValue < 1000000000) {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue / 1000000)) + "m";
+                } else {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue / 1000000000)) + "b";
+                }
+                valueString = resultString;
+            } else if (analysisMeasure.getFormattingType() == FormattingConfiguration.ROUNDED_CURRENCY) {
+                NumberFormat numberFormatter = NumberFormat.getNumberInstance(locale);
+                numberFormatter.setMaximumFractionDigits(analysisMeasure.getPrecision());
+                numberFormatter.setMinimumFractionDigits(analysisMeasure.getMinPrecision());
+                boolean negative = doubleValue < 0;
+                doubleValue = Math.abs(doubleValue);
+                String resultString;
+                if (doubleValue < 1000) {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue));
+                } else if (doubleValue < 1000000) {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue / 1000)) + "k";
+                } else if (doubleValue < 1000000000) {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue / 1000000)) + "m";
+                } else {
+                    resultString = String.valueOf(numberFormatter.format(doubleValue / 1000000000)) + "b";
+                }
+                String symbolToUse = currencySymbol;
+                if (!pdf && symbolToUse.length() > 0 && symbolToUse.charAt(0) == 8364) {
+                    symbolToUse = "&euro;";
+                }
+                resultString = symbolToUse + resultString;
+                if (negative) {
+                    resultString = "(" + resultString + ")";
+                }
+                valueString = resultString;
             } else {
                 NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
                 numberFormat.setMaximumFractionDigits(analysisMeasure.getPrecision());
