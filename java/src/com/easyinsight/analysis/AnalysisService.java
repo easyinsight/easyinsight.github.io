@@ -31,16 +31,11 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.Date;
 
-import com.easyinsight.solutions.SolutionService;
-import com.easyinsight.storage.CachedCalculationTransform;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.storage.IDataTransform;
 import com.easyinsight.tag.Tag;
 import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.UploadPolicy;
@@ -1120,22 +1115,13 @@ public class AnalysisService {
 
             }
 
-            List<IDataTransform> transforms = new ArrayList<IDataTransform>();
-            if (useSource.getMarmotScript() != null && !"".equals(useSource.getMarmotScript())) {
-                StringTokenizer toker = new StringTokenizer(useSource.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    transforms.addAll(new ReportCalculation(line).apply(useSource));
-                }
-            }
-            transforms.add(new CachedCalculationTransform(useSource));
             DataStorage dataStorage = DataStorage.writeConnection(useSource, conn);
             try {
                 for (IRow row : endTargets) {
-                    dataStorage.addRow(row, useSource.getFields(), transforms);
+                    dataStorage.addRow(row, useSource.getFields());
                 }
                 for (ActualRow row : actualTargets) {
-                    dataStorage.updateRow(row, useSource.getFields(), transforms);
+                    dataStorage.updateRow(row, useSource.getFields());
                 }
                 dataStorage.commit();
             } catch (Exception e) {
@@ -1164,18 +1150,9 @@ public class AnalysisService {
         try {
             conn.setAutoCommit(false);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-            List<IDataTransform> transforms = new ArrayList<IDataTransform>();
-            if (dataSource.getMarmotScript() != null && !"".equals(dataSource.getMarmotScript())) {
-                StringTokenizer toker = new StringTokenizer(dataSource.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    transforms.addAll(new ReportCalculation(line).apply(dataSource));
-                }
-            }
-            transforms.add(new CachedCalculationTransform(dataSource));
             DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn);
             try {
-                dataStorage.addRow(actualRow, dataSource.getFields(), transforms);
+                dataStorage.addRow(actualRow, dataSource.getFields());
                 dataStorage.commit();
             } catch (Exception e) {
                 dataStorage.rollback();
@@ -1231,18 +1208,10 @@ public class AnalysisService {
         try {
             conn.setAutoCommit(false);
             FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-            List<IDataTransform> transforms = new ArrayList<IDataTransform>();
-            if (dataSource.getMarmotScript() != null && !"".equals(dataSource.getMarmotScript())) {
-                StringTokenizer toker = new StringTokenizer(dataSource.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    transforms.addAll(new ReportCalculation(line).apply(dataSource));
-                }
-            }
-            transforms.add(new CachedCalculationTransform(dataSource));
+
             DataStorage dataStorage = DataStorage.writeConnection(dataSource, conn);
             try {
-                dataStorage.updateRow(actualRow, dataSource.getFields(), transforms);
+                dataStorage.updateRow(actualRow, dataSource.getFields());
                 dataStorage.commit();
             } catch (Exception e) {
                 dataStorage.rollback();
@@ -1547,16 +1516,7 @@ public class AnalysisService {
 
             List<AnalysisItem> additionalAnalysisItems = new ArrayList<AnalysisItem>();
             Set<AnalysisItem> used = new HashSet<AnalysisItem>();
-            if (drillThrough.getMarmotScript() != null && !"".equals(drillThrough.getMarmotScript())) {
 
-                filters = new ArrayList<FilterDefinition>();
-                StringTokenizer toker = new StringTokenizer(drillThrough.getMarmotScript(), "\r\n");
-                while (toker.hasMoreTokens()) {
-                    String line = toker.nextToken();
-                    filters.addAll(new ReportCalculation(line).apply(data, new ArrayList<AnalysisItem>(report.getAllAnalysisItems()), report,
-                            analysisItem));
-                }
-            } else {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                         //
@@ -1764,7 +1724,6 @@ public class AnalysisService {
                         }
                     }
                 }
-            }
             /*WSAnalysisDefinition targetReport = new AnalysisService().openAnalysisDefinition(drillThrough.getReportID());
 
             Iterator<FilterDefinition> filterIter = filters.iterator();
