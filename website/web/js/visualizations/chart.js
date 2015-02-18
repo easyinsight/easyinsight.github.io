@@ -345,7 +345,7 @@ Chart = {
         };
     },
 
-    getD3PieChartCallback: function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
+    getD3PieChartCallback:function (target, params, showLabels, styleProps, filters, drillthroughKey, dashboardID) {
         return function (data) {
             Utils.noDataD3(data["values"], function () {
                 nv.addGraph({
@@ -926,7 +926,7 @@ Chart = {
         };
     },
 
-    assignAxisLabels: function (xAxis, yAxis, data, xLabelDistance, yLabelDistance, limit) {
+    assignAxisLabels: function (xAxis, yAxis, data, xLabelDistance, yLabelDistance, limit, yDefault) {
         xAxis.axisLabel(data["xTitle"]);
         if (typeof(data["xFormat"]) != "undefined") {
             xAxis.tickFormat(Chart.createFormat(data["xFormat"], limit));
@@ -935,6 +935,8 @@ Chart = {
         yAxis.axisLabel(data["yTitle"]);
         if (typeof(data["yFormat"]) != "undefined") {
             yAxis.tickFormat(Chart.createFormat(data["yFormat"], limit));
+        } else if (yDefault) {
+            yAxis.tickFormat(Chart.createMeasureFormat());
         }
         yAxis.axisLabelDistance(yLabelDistance);
     },
@@ -958,6 +960,14 @@ Chart = {
         var yMax = data["yMax"];
         if (typeof(yMin) != "undefined" && typeof(yMax) != "undefined") {
             chart.forceY([yMin, yMax]);
+        }
+    },
+
+    createMeasureFormat: function (formatInfo) {
+        return function (d) {
+            var precision = 2;
+            var numberFormatter = d3.format(",." + precision + "f");
+            return numberFormatter(d);
         }
     },
 
@@ -1088,7 +1098,7 @@ Chart = {
                             .showXAxis(true)        //Show the x-axis
                             .margin({top: 20, right: 40, bottom: 40, left: 80});
 
-                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65);
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65, 0, true);
                         Chart.assignAxisMinMaxValues(chart, data);
 
 
@@ -1187,7 +1197,7 @@ Chart = {
                             });
                         }
 
-                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65);
+                        Chart.assignAxisLabels(chart.xAxis, chart.yAxis, data, 40, -65, 0, true);
                         Chart.assignAxisMinMaxValues(chart, data);
 
                         chart.forceY([axisMinY, axisMaxY]);
