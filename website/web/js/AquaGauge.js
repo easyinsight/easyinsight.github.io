@@ -56,6 +56,7 @@ function AquaGauge(target) {
         /*cvs.ctx.shadowOffsetX = 0.5;
         cvs.ctx.shadowOffsetY = 0.5;*/
         var adj = cvs.ctx.measureText(value).width / 2;
+
         cvs.ctx.fillText(value, -adj, 0);
         cvs.ctx.restore();
     };
@@ -136,7 +137,22 @@ function AquaGauge(target) {
 
                 x = getX(cvs.cX, textRadius, currentAngle);
                 y = getY(cvs.cY, textRadius, currentAngle);
-                var str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                var str;
+                if (props.rounded) {
+                    if (currentVal < 1000) {
+                        str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                    } else if (currentVal < 1000000) {
+                        str = d3.format(",."+props.gaugePrecision+"f")(currentVal / 1000) + "k";
+                    } else if (currentVal < 1000000000) {
+                        str = d3.format(",."+props.gaugePrecision+"f")(currentVal / 1000000) + "m";
+                    } else {
+                        str = d3.format(",."+props.gaugePrecision+"f")(currentVal / 1000000000) + "b";
+                    }
+                } else {
+                    str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                }
+
+                //var str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
                 drawValue(cvs, x, y, currentAngle, str, true, props);
             } else {
                 var x = getX(cvs.cX, minorRadius, currentAngle);
@@ -146,7 +162,20 @@ function AquaGauge(target) {
                 if (props.showMinorScaleValue) {
                     x = getX(cvs.cX, textMinorRadious, currentAngle);
                     y = getY(cvs.cY, textMinorRadious, currentAngle);
-                    var str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                    //var str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                    if (props.rounded) {
+                        if (currentVal < 1000) {
+                            str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                        } else if (currentVal < 1000000) {
+                            str = d3.format(",."+props.gaugePrecision+"f")(currentVal / 1000) + "k";
+                        } else if (currentVal < 1000000000) {
+                            str = d3.format(",."+props.gaugePrecision+"f")(currentVal / 1000000) + "m";
+                        } else {
+                            str = d3.format(",."+props.gaugePrecision+"f")(currentVal / 1000000000) + "b";
+                        }
+                    } else {
+                        str = d3.format(",."+props.gaugePrecision+"f")(currentVal);
+                    }
                     drawValue(cvs, x, y, currentAngle, str, false, props);
                 }
             }
