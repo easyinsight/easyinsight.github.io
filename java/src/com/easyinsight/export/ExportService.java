@@ -3399,8 +3399,11 @@ public class ExportService {
 
     private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
-        WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
         DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
+        if (dataSet.getAsyncSavedReport() != null) {
+            report = dataSet.getAsyncSavedReport();
+        }
+        WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
         Crosstab crosstab = new Crosstab();
         crosstab.crosstab(crosstabDefinition, dataSet);
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
