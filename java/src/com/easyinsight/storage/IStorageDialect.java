@@ -24,7 +24,7 @@ public interface IStorageDialect {
 
     String defineTempUpdateTable();
 
-    void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception;
+    void insertData(DataSet dataSet, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception;
 
     void commit();
 }

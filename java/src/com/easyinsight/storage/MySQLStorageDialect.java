@@ -153,12 +153,7 @@ public class MySQLStorageDialect implements IStorageDialect {
         return i;
     }
 
-    public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
-        for (IRow row : dataSet.getRows()) {
-            for (IDataTransform transform : transforms) {
-                transform.handle(coreDBConn, row);
-            }
-        }
+    public void insertData(DataSet dataSet, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         StringBuilder columnBuilder = new StringBuilder();
         StringBuilder paramBuilder = new StringBuilder();
         Iterator<KeyMetadata> keyIter = keys.values().iterator();

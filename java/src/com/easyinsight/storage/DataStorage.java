@@ -55,7 +55,6 @@ public class DataStorage implements IDataStorage {
     private FeedPersistenceMetadata metadata;
     private int dataSourceType;
     private static DateDimCache dateDimCache = new DateDimCache();
-    private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
     private ReportFault warning;
     private int connectionBillingType;
 
@@ -226,12 +225,8 @@ public class DataStorage implements IDataStorage {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
             }
         }
-        List<IDataTransform> transforms = new ArrayList<IDataTransform>();
-        if (cachedCalculations.size() > 0) {
-            transforms.add(new CachedCalculationTransform(feedDefinition));
-        }
         Database database = DatabaseManager.instance().getDatabase(getMetadata(feedDefinition.getDataFeedID(), conn).getDatabase());
-        return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database, cachedCalculations, transforms, conn, feedDefinition.getUpdateKey());
+        return new TempStorage(feedDefinition.getDataFeedID(), keyMetadatas, database, cachedCalculations, conn, feedDefinition.getUpdateKey());
     }
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID, boolean systemUpdate) throws SQLException {
@@ -252,16 +247,6 @@ public class DataStorage implements IDataStorage {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.TEXT, analysisItem));
             } else {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
-            }
-        }
-        /*if (dataStorage.cachedCalculations.size() > 0) {
-            dataStorage.transforms.add(new CachedCalculationTransform(feedDefinition));
-        }*/
-        if (feedDefinition.getMarmotScript() != null && !"".equals(feedDefinition.getMarmotScript())) {
-            StringTokenizer toker = new StringTokenizer(feedDefinition.getMarmotScript(), "\r\n");
-            while (toker.hasMoreTokens()) {
-                String line = toker.nextToken();
-                dataStorage.transforms.addAll(new ReportCalculation(line).apply(feedDefinition));
             }
         }
         dataStorage.metadata = getMetadata(feedDefinition.getDataFeedID(), conn);
@@ -902,7 +887,17 @@ public class DataStorage implements IDataStorage {
                 mirrorRow.addValue(key.toBaseKey(), row.getValue(key));
             }
         }
-        insertData(mirror);
+
+        if (database.getDialect() == Database.POSTGRES) {
+            String tableName = "dt" + feedID + System.currentTimeMillis();
+            AltPostgresStorageDialect dialect = new AltPostgresStorageDialect(tableName, keys);
+            dialect.createTempTable(null, database, true);
+            dialect.insertData(mirror, (EIConnection) coreDBConn, database, dateDimCache);
+            dialect.commit();
+            insertFromSelect(tableName);
+        } else {
+            insertData(mirror);
+        }
     }
 
     /**
@@ -1427,11 +1422,6 @@ public class DataStorage implements IDataStorage {
     }
 
     public void insertData(DataSet dataSet) throws Exception {
-        for (IRow row : dataSet.getRows()) {
-            for (IDataTransform transform : transforms) {
-                transform.handle((EIConnection) coreDBConn, row);
-            }
-        }
         insertData(dataSet, keys);
     }
 
@@ -1908,10 +1898,7 @@ public class DataStorage implements IDataStorage {
         deleteStmt.close();
     }
 
-    public void addRow(IRow row, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
-        for (IDataTransform transform : transforms) {
-            transform.handle((EIConnection) coreDBConn, row);
-        }
+    public void addRow(IRow row, List<AnalysisItem> fields) throws SQLException {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("INSERT INTO ");
         sqlBuilder.append(getTableName());
@@ -1943,7 +1930,7 @@ public class DataStorage implements IDataStorage {
         insertStmt.execute();
     }
 
-    public void addRow(ActualRow actualRow, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
+    public void addRow(ActualRow actualRow, List<AnalysisItem> fields) throws SQLException {
         DataSet dataSet = new DataSet();
         IRow row = dataSet.createRow();
         for (AnalysisItem field : fields) {
@@ -1951,9 +1938,6 @@ public class DataStorage implements IDataStorage {
                 row.addValue(field.getKey(), actualRow.getValues().get(field.qualifiedName()));
             }
         }
-        for (IDataTransform transform : transforms) {
-            transform.handle((EIConnection) coreDBConn, row);
-        }
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("INSERT INTO ");
         sqlBuilder.append(getTableName());
@@ -1985,13 +1969,10 @@ public class DataStorage implements IDataStorage {
         insertStmt.execute();
     }
 
-    public void updateRow(IRow newRow, List<AnalysisItem> fields, List<IDataTransform> transforms, long rowID, List<AnalysisItem> allFields) throws SQLException {
+    public void updateRow(IRow newRow, List<AnalysisItem> fields, long rowID, List<AnalysisItem> allFields) throws SQLException {
         IRow row = rowByID(rowID, allFields);
         for (AnalysisItem field : fields) {
             row.addValue(field.getKey(), newRow.getValues().get(field.getKey()));
-        }
-        for (IDataTransform transform : transforms) {
-            transform.handle((EIConnection) coreDBConn, row);
         }
 
         StringBuilder sqlBuilder = new StringBuilder();
@@ -2019,7 +2000,7 @@ public class DataStorage implements IDataStorage {
         int rows = updateStmt.executeUpdate();
     }
 
-    public void updateRow(ActualRow actualRow, List<AnalysisItem> fields, List<IDataTransform> transforms) throws SQLException {
+    public void updateRow(ActualRow actualRow, List<AnalysisItem> fields) throws SQLException {
         DataSet dataSet = new DataSet();
         Row row = (Row) dataSet.createRow();
         row.setRowID(actualRow.getRowID());
@@ -2027,9 +2008,6 @@ public class DataStorage implements IDataStorage {
             if (field.persistable()) {
                 row.addValue(field.getKey(), actualRow.getValues().get(field.qualifiedName()));
             }
-        }
-        for (IDataTransform transform : transforms) {
-            transform.handle((EIConnection) coreDBConn, row);
         }
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("UPDATE ");

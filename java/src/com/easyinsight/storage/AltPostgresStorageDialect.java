@@ -68,8 +68,8 @@ public class AltPostgresStorageDialect implements IStorageDialect {
 
 
 
-    public void updateData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
-        insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
+    public void updateData(DataSet dataSet, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
+        insertData(dataSet, coreDBConn, storageDatabase, dateDimCache);
     }
 
     private String escape(String string) {
@@ -87,7 +87,7 @@ public class AltPostgresStorageDialect implements IStorageDialect {
         return ret;
     }
 
-    public void insertData(DataSet dataSet, List<IDataTransform> transforms, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
+    public void insertData(DataSet dataSet, EIConnection coreDBConn, Database storageDatabase, DateDimCache dateDimCache) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         int i = 0;
         StringBuilder sb = new StringBuilder();
