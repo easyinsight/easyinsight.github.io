@@ -103,15 +103,7 @@ public class UpdateRowsPKServlet extends APIServlet {
                         }
                     }
                 }
-                List<IDataTransform> transforms = new ArrayList<IDataTransform>();
-                if (dataSource.getMarmotScript() != null && !"".equals(dataSource.getMarmotScript())) {
-                    StringTokenizer toker = new StringTokenizer(dataSource.getMarmotScript(), "\r\n");
-                    while (toker.hasMoreTokens()) {
-                        String line = toker.nextToken();
-                        transforms.addAll(new ReportCalculation(line).apply(dataSource));
-                    }
-                }
-                dataStorage.updateRow(row, items, transforms, rowID, dataSource.getFields());
+                dataStorage.updateRow(row, items, rowID, dataSource.getFields());
             }
             dataStorage.commit();
             return new ResponseInfo(ResponseInfo.ALL_GOOD, "");
