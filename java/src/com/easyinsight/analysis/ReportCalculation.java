@@ -15,7 +15,6 @@ import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.PipelineData;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.IDataTransform;
 import org.antlr.runtime.RecognitionException;
 
 import java.sql.PreparedStatement;
@@ -148,25 +147,6 @@ public class ReportCalculation {
         return drillthroughCalculationMetadata.getDrillThroughFilters();
     }
 
-    public List<IDataTransform> apply(FeedDefinition dataSource) throws SQLException {
-        try {
-            DataSourceCalculationMetadata dataSourceCalculationMetadata = new DataSourceCalculationMetadata();
-            dataSourceCalculationMetadata.setDataSource(dataSource);
-            CalculationTreeNode calculationTreeNode;
-            ICalculationTreeVisitor visitor;
-            calculationTreeNode = CalculationHelper.createTree(code, false);
-            visitor = new ResolverVisitor(new HashMap<String, List<AnalysisItem>>(), new HashMap<String, List<AnalysisItem>>(),
-                    new HashMap<String, List<AnalysisItem>>(), new FunctionFactory(),
-                    new NamespaceGenerator().generate(dataSource.getDataFeedID(), null, null));
-            calculationTreeNode.accept(visitor);
-            ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(null, null, dataSourceCalculationMetadata);
-            calculationTreeNode.accept(rowVisitor);
-            return dataSourceCalculationMetadata.getTransforms();
-        } catch (RecognitionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<ActualRowLayoutItem> apply(List<AnalysisItem> analysisItems, long dataSourceID) throws SQLException {
         try {
             FormCalculationMetadata dataSourceCalculationMetadata = new FormCalculationMetadata();
@@ -254,7 +234,6 @@ public class ReportCalculation {
                              Feed feed, EIConnection conn, List<FilterDefinition> dlsFilters, InsightRequestMetadata insightRequestMetadata, boolean shift) throws RecognitionException {
         //DataSet dataSet = createDataSet(allFields, feed, dlsFilters, conn, keyMap, displayMap);
         CalculationMetadata calculationMetadata = new CalculationMetadata();
-        calculationMetadata.setFilterTimeShift(shift);
         calculationMetadata.setFeed(feed);
         calculationMetadata.setReport(report);
         calculationMetadata.setInsightRequestMetadata(insightRequestMetadata);
