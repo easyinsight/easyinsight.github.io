@@ -26,18 +26,17 @@ public class TempStorage implements IDataStorage {
     private List<AnalysisItem> cachedCalculations = new ArrayList<AnalysisItem>();
     private EIConnection coreDBConn;
 
-    private List<IDataTransform> transforms = new ArrayList<IDataTransform>();
+
 
     private String tableName;
     private Key distKey;
 
-    public TempStorage(long feedID, Map<Key, KeyMetadata> keys, Database storageDatabase, List<AnalysisItem> cachedCalculations, List<IDataTransform> transforms,
+    public TempStorage(long feedID, Map<Key, KeyMetadata> keys, Database storageDatabase, List<AnalysisItem> cachedCalculations,
                        EIConnection conn, Key distKey) {
         this.keys = keys;
         this.tableName = "dt" + feedID + System.currentTimeMillis();
         this.storageDatabase = storageDatabase;
         this.cachedCalculations = cachedCalculations;
-        this.transforms = transforms;
         this.coreDBConn = conn;
         this.distKey = distKey;
     }
@@ -54,14 +53,6 @@ public class TempStorage implements IDataStorage {
 
     public void setCachedCalculations(List<AnalysisItem> cachedCalculations) {
         this.cachedCalculations = cachedCalculations;
-    }
-
-    public List<IDataTransform> getTransforms() {
-        return transforms;
-    }
-
-    public void setTransforms(List<IDataTransform> transforms) {
-        this.transforms = transforms;
     }
 
     public String getTableName() {
@@ -102,13 +93,13 @@ public class TempStorage implements IDataStorage {
     }
 
     public void insertData(DataSet dataSet) throws Exception {
-        getStorageDialect(getTableName()).insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
+        getStorageDialect(getTableName()).insertData(dataSet, coreDBConn, storageDatabase, dateDimCache);
     }
 
     public void updateData(DataSet dataSet, List<IWhere> wheres) throws Exception {
         IStorageDialect dialect = getStorageDialect(getTableName());
         if (dialect instanceof AltPostgresStorageDialect) {
-            dialect.insertData(dataSet, transforms, coreDBConn, storageDatabase, dateDimCache);
+            dialect.insertData(dataSet, coreDBConn, storageDatabase, dateDimCache);
         } else {
             StringWhere where = (StringWhere) wheres.get(0);
             StringBuilder columnBuilder = new StringBuilder();
