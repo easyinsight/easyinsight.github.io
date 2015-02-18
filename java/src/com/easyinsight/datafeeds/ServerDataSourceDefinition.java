@@ -15,6 +15,7 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 
+import java.io.*;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -350,10 +351,17 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         conn.commit();
         if (getFields().size() != 0) {
             conn.setAutoCommit(true);
-            String tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties);
-
-            conn.setAutoCommit(false);
-            applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings, refreshProperties);
+            String tempTable = null;
+            try {
+                tempTable = tempLoad(keyMap, now, this, callDataID, lastRefreshTime, conn, fullRefresh, refreshProperties);
+                conn.setAutoCommit(false);
+                applyTempLoad(conn, accountID, null, lastRefreshTime, tempTable, fullRefresh, warnings, refreshProperties);
+            } finally {
+                if (tempTable != null) {
+                    TempStorage tempStorage = DataStorage.tempConnection(this, conn);
+                    //tempStorage.cleanupTempTable(tempTable);
+                }
+            }
 
             refreshDone();
             CachedAddonDataSource.triggerUpdates(getDataFeedID(), conn);
@@ -363,7 +371,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     }
 
     protected void refreshDone() {
-        if (getRefreshMarmotScript() != null) {
+        /*if (getRefreshMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(getRefreshMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
@@ -376,11 +384,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                     throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
                 }
             }
-        }
+        }*/
     }
 
     protected boolean clearsData(FeedDefinition parentSource) {
         return true;
     }
-
 }

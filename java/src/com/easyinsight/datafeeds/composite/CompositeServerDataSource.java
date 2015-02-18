@@ -534,7 +534,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     }
 
     protected void refreshDone() {
-        if (getRefreshMarmotScript() != null) {
+        /*if (getRefreshMarmotScript() != null) {
             StringTokenizer toker = new StringTokenizer(getRefreshMarmotScript(), "\r\n");
             while (toker.hasMoreTokens()) {
                 String line = toker.nextToken();
@@ -547,7 +547,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of data source code " + line + ".", null));
                 }
             }
-        }
+        }*/
     }
 
     public String retrievePassword() {
