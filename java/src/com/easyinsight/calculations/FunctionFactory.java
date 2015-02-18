@@ -65,8 +65,6 @@ public class FunctionFactory {
             return new ArcCosine();
         } else if (s.equals("atan")) {
             return new ArcTan();
-        } else if (s.equals("loadfromjoin")) {
-            return new LoadFromJoin();
         } else if (s.equals("nconcat")) {
             return new NConcat();
         } else if (s.equals("bracketvalue")) {
@@ -181,14 +179,10 @@ public class FunctionFactory {
             return new LabelJoin();
         } else if (s.equals("httpget")) {
             return new GetFunction();
-        } else if (s.equals("cache")) {
-            return new CacheFunction();
         } else if (s.equals("defineform")) {
             return new DefineForm();
         } else if (s.equals("fallthrough")) {
             return new FallThroughJoin();
-        } else if (s.equals("multicache")) {
-            return new MultiCacheFunction();
         } else if (s.equals("date")) {
             return new DateFunction();
         } else if (s.equals("nowdate")) {
@@ -200,7 +194,6 @@ public class FunctionFactory {
         } else if (s.equals("drillthroughfieldfilter")) {
             return new DrillthroughFieldFilter();
         } else if (s.equals("parsedate")) {
-            // parsedate("2014/" + [Month Field] + "/" + [Day Field], "yyyy/MM/dd")
             return new ParseDate();
         } else if (s.equals("fixedjoin")) {
             return new FixedJoin();
