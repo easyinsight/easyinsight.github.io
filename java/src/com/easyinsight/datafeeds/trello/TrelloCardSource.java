@@ -96,15 +96,23 @@ public class TrelloCardSource extends TrelloBaseSource {
                     JSONArray labels = (JSONArray) card.get("labels");
                     for (int k = 0; k < labels.size(); k++) {
                         JSONObject jsonObject = (JSONObject) labels.get(k);
-                        String color = jsonObject.get("color").toString();
-                        String name = jsonObject.get("name").toString();
-                        labelData.add(new LabelObject(card.get("id").toString(), name, color));
+                        try {
+                            String color = jsonObject.get("color").toString();
+                            String name = jsonObject.get("name").toString();
+                            labelData.add(new LabelObject(card.get("id").toString(), name, color));
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        }
                     }
 
                     JSONArray members = (JSONArray) card.get("idMembers");
                     for (int k = 0; k < members.size(); k++) {
                         String memberID = members.get(k).toString();
-                        memberData.add(new Member(card.get("id").toString(), memberID));
+                        try {
+                            memberData.add(new Member(card.get("id").toString(), memberID));
+                        } catch (Exception e) {
+                            LogClass.error(e);
+                        }
                     }
 
                     row.addValue(CARD_NAME, card.get("name").toString());
