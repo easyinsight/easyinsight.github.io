@@ -25,6 +25,7 @@ import com.easyinsight.util.ServiceUtil;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.nio.charset.Charset;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.*;
@@ -46,6 +47,7 @@ public class EIContextListener implements ServletContextListener {
             LogClass.info("Starting the core Easy Insight server...");
 
             if (Database.instance() == null) {
+                System.out.println("Default char set = " + Charset.defaultCharset().displayName());
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
                 SystemSettings.initialize();
