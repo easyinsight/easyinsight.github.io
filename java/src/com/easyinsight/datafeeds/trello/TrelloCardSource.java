@@ -37,6 +37,7 @@ public class TrelloCardSource extends TrelloBaseSource {
     public static final String CARD_LAST_ACTIVITY_DATE = "Card Last Activity Date";
     public static final String CARD_COUNT = "Card Count";
     public static final String CARD_URL = "Card URL";
+    public static final String CARD_CREATED = "Card Created At";
 
     public TrelloCardSource() {
         setFeedName("Cards");
@@ -52,6 +53,7 @@ public class TrelloCardSource extends TrelloBaseSource {
         fieldBuilder.addField(CARD_DESCRIPTION, new AnalysisDimension());
         fieldBuilder.addField(CARD_CLOSED, new AnalysisDimension());
         fieldBuilder.addField(CARD_LAST_ACTIVITY_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(CARD_CREATED, new AnalysisDateDimension());
         fieldBuilder.addField(CARD_COUNT, new AnalysisMeasure());
         fieldBuilder.addField(CARD_URL, new AnalysisDimension());
     }
@@ -80,7 +82,11 @@ public class TrelloCardSource extends TrelloBaseSource {
                 for (int j = 0; j < cards.size(); j++) {
                     JSONObject card = (JSONObject) cards.get(j);
                     IRow row = dataSet.createRow();
-                    row.addValue(CARD_ID, card.get("id").toString());
+                    String cardID = card.get("id").toString();
+                    row.addValue(CARD_ID, cardID);
+                    String hexString = cardID.substring(0, 8);
+                    long hexDate = Long.parseLong(hexString, 16) * 1000L;
+
                     JSONArray checklists = (JSONArray) card.get("checklists");
                     for (int k = 0; k < checklists.size(); k++) {
                         JSONObject checkListObject = (JSONObject) checklists.get(k);
@@ -114,7 +120,7 @@ public class TrelloCardSource extends TrelloBaseSource {
                             LogClass.error(e);
                         }
                     }
-
+                    row.addValue(CARD_CREATED, new DateValue(new Date(hexDate)));
                     row.addValue(CARD_NAME, card.get("name").toString());
                     row.addValue(CARD_BOARD_ID, card.get("idBoard").toString());
                     row.addValue(CARD_LIST_ID, getValue(card, "idList"));
