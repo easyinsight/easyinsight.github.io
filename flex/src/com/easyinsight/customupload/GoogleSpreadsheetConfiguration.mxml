@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<feed:DataSourceWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                       xmlns:feed="com.easyinsight.administration.feed.*" label="Basecamp Configuration">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+
+        private function reauthorize():void {
+            ProgressAlert.alert(this, "Authorizing...", null, tokenService.getOAuthURL);
+            tokenService.getOAuthURL.send(dataSource.getFeedType(), true, null, dataSource, 2, true);
+        }
+
+        private function gotURL():void {
+            var response:OAuthResponse = tokenService.getOAuthURL.lastResult as OAuthResponse;
+            if (response.successful) {
+                var requestToken:String = response.requestToken;
+                navigateToURL(new URLRequest(requestToken), "_self");
+            } else {
+                Alert.show("We had a problem with authorization setup. Please contact support@easy-insight.com.");
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="tokenService" id="tokenService">
+        <mx:method name="getOAuthURL" result="gotURL()"/>
+    </mx:RemoteObject>
+
+        <mx:Button label="Reauthorize Access" click="reauthorize()"/>
+    <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+
+</feed:DataSourceWindow>

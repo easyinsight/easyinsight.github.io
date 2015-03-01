@@ -97,30 +97,7 @@ import mx.rpc.events.ResultEvent;
 		}
 		
 		public function subscribe(event:Event):void {
-            var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
-            context.worksheetURL = _data.url;
-            uploadService = new RemoteObject();
-            uploadService.destination = "userUpload";
-            uploadService.analyzeUpload.addEventListener(ResultEvent.RESULT, analyzedStructure);
-            ProgressAlert.alert(this.parent.parent, "Analyzing the spreadsheet...", null, uploadService.analyzeUpload);
-            uploadService.analyzeUpload.send(context);
-            var fieldUploadInfo:FieldUploadInfo;
+            dispatchEvent(new GoogleSelectionEvent(_data.url));
 		}
-
-        private function analyzedStructure(event:ResultEvent):void {
-            var uploadResponse:UploadResponse = uploadService.analyzeUpload.lastResult as UploadResponse;
-            if (uploadResponse.successful) {
-                var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
-                context.worksheetURL = _data.url;
-                var window:SpreadsheetWizard = new SpreadsheetWizard();
-                window.uploadContext = context;
-                window.fields = uploadResponse.infos;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-                PopUpManager.removePopUp(this);
-            } else {
-                Alert.show(uploadResponse.failureMessage);
-            }
-        }
 	}
 }

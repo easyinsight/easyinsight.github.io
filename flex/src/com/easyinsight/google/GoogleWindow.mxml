@@ -3,14 +3,23 @@
                     width="500" height="500" creationComplete="setup()"
         paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" doubleClickEnabled="true">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.GoogleFeedDefinition;
         import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.customupload.UploadResponse;
+        import com.easyinsight.customupload.wizard.SpreadsheetWizard;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
+        import mx.rpc.events.ResultEvent;
 
         private function setup():void {
             addEventListener(AnalyzeEvent.ANALYZE, passThrough);
+            addEventListener(GoogleSelectionEvent.GOOGLE_SELECTION, onGoogleEvent);
+            addEventListener('closeWindow', passThrough);
         }
 
         private function passThrough(event:Event):void {
@@ -57,10 +66,58 @@
             dispatchEvent(event);
         }
 
+        public var newConnection:Boolean;
+        public var dataSource:GoogleFeedDefinition;
+
+        private function onGoogleEvent(event:GoogleSelectionEvent):void {
+            if (newConnection) {
+                var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
+                context.worksheetURL = event.worksheetURL;
+                selectedURL = event.worksheetURL;
+                ProgressAlert.alert(this.parent.parent, "Analyzing the spreadsheet...", null, uploadService.analyzeUpload);
+                uploadService.analyzeUpload.send(context);
+                //dispatchEvent(new Event('closeWindow', true));
+            } else {
+                dataSource.worksheetURL = event.worksheetURL;
+                feedService.updateFeedDefinition.send(dataSource);
+            }
+        }
+
+        private function updated():void {
+            Alert.show("The source should now be updated to use the specified work sheet.");
+            PopUpManager.removePopUp(this);
+        }
+
+        private var selectedURL:String;
+
+        private function analyzedStructure():void {
+            var uploadResponse:UploadResponse = uploadService.analyzeUpload.lastResult as UploadResponse;
+            if (uploadResponse.successful) {
+                //dispatchEvent(new GoogleSelectionEvent(selectedURL));
+                var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
+                context.worksheetURL = selectedURL;
+                var window:SpreadsheetWizard = new SpreadsheetWizard();
+                window.uploadContext = context;
+                window.fields = uploadResponse.infos;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+                dispatchEvent(new Event('closeWindow', true));
+                //PopUpManager.removePopUp(this);
+            } else {
+                Alert.show(uploadResponse.failureMessage);
+            }
+        }
+
         [Bindable]
         private var stackIndex:int = 0;
         ]]>
 	</mx:Script>
+    <mx:RemoteObject id="uploadService" destination="userUpload">
+        <mx:method name="analyzeUpload" result="analyzedStructure()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="updateFeedDefinition" result="updated()"/>
+    </mx:RemoteObject>
     <mx:VBox width="100%" height="100%">
         <mx:AdvancedDataGrid width="100%" height="100%"
             id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5"
