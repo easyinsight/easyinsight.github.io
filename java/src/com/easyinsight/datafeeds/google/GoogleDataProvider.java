@@ -9,6 +9,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.datafeeds.basecampnext.BasecampNextCompositeSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBCompositeSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBDataSource;
 import com.easyinsight.datafeeds.cleardb.ClearDBResponse;
@@ -64,6 +65,15 @@ public class GoogleDataProvider {
 
     public static GoogleDataProvider instance() {
         return instance;
+    }
+
+    public GoogleSpreadsheetResponse getSpreadsheets(GoogleFeedDefinition dataSource) {
+        try {
+            return dataSource.getPossibleSpreadsheets();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public GoogleSpreadsheetResponse registerToken(String verifier) {

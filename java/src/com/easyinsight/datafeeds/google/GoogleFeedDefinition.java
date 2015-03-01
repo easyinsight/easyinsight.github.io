@@ -10,20 +10,20 @@ import com.easyinsight.users.Account;
 import com.easyinsight.core.*;
 import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.userupload.DataTypeGuesser;
+import com.google.gdata.client.authn.oauth.OAuthException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.spreadsheet.ListFeed;
-import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.data.spreadsheet.*;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Date;
+import java.util.*;
 import java.net.URL;
 
+import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.util.ServiceException;
 import flex.messaging.FlexContext;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
@@ -99,9 +99,9 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             if (externalPin != null) {
                 pin = externalPin;
             }
-            if (pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) FlexContext.getHttpRequest().getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) FlexContext.getHttpRequest().getSession().getAttribute("oauthProvider");
+            if (request != null && pin != null && !"".equals(pin)) {
+                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
+                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
                 provider.retrieveAccessToken(consumer, pin.trim());
                 tokenKey = consumer.getToken();
                 tokenSecret = consumer.getTokenSecret();
@@ -267,5 +267,37 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
         return new GoogleSpreadsheetFeed(worksheetURL, tokenKey, tokenSecret);
+    }
+
+    public GoogleSpreadsheetResponse getPossibleSpreadsheets() throws OAuthException, ServiceException, IOException {
+        URL feedUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full");
+        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
+        SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
+        List<Spreadsheet> worksheets = new ArrayList<>();
+        for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
+            try {
+                List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
+                List<Worksheet> worksheetList = new ArrayList<Worksheet>();
+                for (WorksheetEntry worksheetEntry : worksheetEntries) {
+                    String title = worksheetEntry.getTitle().getPlainText();
+                    Worksheet worksheet = new Worksheet();
+                    worksheet.setSpreadsheet(entry.getTitle().getPlainText());
+                    worksheet.setTitle(title);
+                    String url = worksheetEntry.getListFeedUrl().toString();
+                    worksheet.setUrl(url);
+                    worksheetList.add(worksheet);
+                }
+                Spreadsheet spreadsheet = new Spreadsheet();
+                spreadsheet.setTitle(entry.getTitle().getPlainText());
+                spreadsheet.setChildren(worksheetList);
+                worksheets.add(spreadsheet);
+            } catch (Exception e) {
+                LogClass.error(e);
+                LogClass.debug("Skipping over spreadsheet");
+            }
+        }
+        GoogleSpreadsheetResponse response = new GoogleSpreadsheetResponse();
+        response.setSpreadsheets(worksheets);
+        return response;
     }
 }
