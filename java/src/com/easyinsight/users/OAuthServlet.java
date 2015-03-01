@@ -63,6 +63,8 @@ public class OAuthServlet extends HttpServlet {
                 redirectType = Integer.parseInt(req.getParameter("redirectTarget"));
             }
 
+            Boolean repoint = (Boolean) req.getSession().getAttribute("repoint");
+
             if (redirectType == TokenService.USER_SOURCE) {
                 OAuthConsumer consumer = (OAuthConsumer) req.getSession().getAttribute("oauthConsumer");
                 OAuthProvider provider = (OAuthProvider) req.getSession().getAttribute("oauthProvider");
@@ -125,7 +127,11 @@ public class OAuthServlet extends HttpServlet {
                     } else if (redirectType == TokenService.HTML_SETUP) {
                         redirectURL = RedirectUtil.getURL(req, "/app/html/dataSources/"+ feedDefinition.getApiKey() + "/createConnection");
                     } else {
-                        redirectURL = "https://www.easy-insight.com/app/";
+                        if (repoint) {
+                            redirectURL = "https://www.easy-insight.com/app/#repointConfig=" + feedDefinition.getApiKey();
+                        } else {
+                            redirectURL = "https://www.easy-insight.com/app/";
+                        }
                     }
                     conn.commit();
                     resp.sendRedirect(redirectURL);

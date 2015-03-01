@@ -3,7 +3,6 @@ package com.easyinsight.solutions;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.dashboard.Dashboard;
 import com.easyinsight.dashboard.DashboardDescriptor;
-import com.easyinsight.dashboard.DashboardService;
 import com.easyinsight.dashboard.DashboardStorage;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
@@ -16,8 +15,6 @@ import com.easyinsight.preferences.ApplicationSkin;
 import com.easyinsight.preferences.ApplicationSkinSettings;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.AuthorizationManager;
-import com.easyinsight.security.AuthorizationRequirement;
 import com.easyinsight.goals.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
@@ -474,11 +471,6 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
-    }
-
-    public AuthorizationRequirement determineAuthorizationRequirements(int feedType, long solutionID) {
-        FeedType type = new FeedType(feedType);
-        return new AuthorizationManager().authorize(type, solutionID);        
     }
 
     public InstallationValidation connectionInstalled(long solutionID) {
