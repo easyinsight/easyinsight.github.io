@@ -66,7 +66,7 @@ public class TokenService {
     }
 
     public OAuthResponse getOAuthResponse(int type, boolean redirect, FeedDefinition dataSource, int redirectType, HttpSession session) {
-        return getOAuthResponse(type, redirect, dataSource, redirectType, session);
+        return getOAuthResponse(type, redirect, dataSource, redirectType, session, false);
     }
 
     public OAuthResponse getOAuthResponse(int type, boolean redirect, FeedDefinition dataSource, int redirectType, HttpSession session, boolean reconfig) {
