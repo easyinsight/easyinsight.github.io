@@ -3818,9 +3818,10 @@ public class ExportService {
                 DateValue dateValue = (DateValue) value;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
-                    System.out.println("date = " + dateValue.getDate());
+                    System.out.println("date = " + dateValue.getDate() + " - " + dateValue.getLocalDate() + " - " + dateValue.getZonedDateTime() + " - " + insightRequestMetadata.getUtcOffset());
                     if (dateDim.isTimeshift(insightRequestMetadata)) {
-
+                        cal.setTime(dateValue.getDate());
+                        System.out.println("\t" + cal.getTime());
                     }
                     /*if (dateDim.isTimeshift(insightRequestMetadata)) {
                         cal.setTime(dateValue.getDate());
