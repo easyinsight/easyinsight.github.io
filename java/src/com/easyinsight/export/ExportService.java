@@ -3828,10 +3828,13 @@ public class ExportService {
                         System.out.println("\t" + zdt);
                         cal.setTimeInMillis(dateValue.getDate().getTime());
                         System.out.println("\t" + cal.getTime());
-                        Date blah = Date.from(zdt.toInstant());
+                        Calendar c1 = GregorianCalendar.from(zdt);
+                        System.out.println(c1);
+                        cell.setCellValue(c1);
+                        /*Date blah = Date.from(zdt.toInstant());
 
                         System.out.println("\t" + blah);
-                        cell.setCellValue(blah);
+                        cell.setCellValue(blah);*/
                     } else {
                         cell.setCellValue(dateValue.getDate());
                     }
