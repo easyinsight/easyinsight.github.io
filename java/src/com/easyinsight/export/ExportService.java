@@ -64,6 +64,8 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.sql.*;
 import java.text.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
@@ -3818,16 +3820,24 @@ public class ExportService {
                 DateValue dateValue = (DateValue) value;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
+
                     System.out.println("date = " + dateValue.getDate() + " - " + dateValue.getLocalDate() + " - " + dateValue.getZonedDateTime() + " - " + insightRequestMetadata.getUtcOffset());
                     if (dateDim.isTimeshift(insightRequestMetadata)) {
-                        cal.setTimeInMillis(dateValue.getDate().getTime());
-                        System.out.println("\t" + cal.getTime());
+                        ZoneId zoneId = insightRequestMetadata.createZoneID();
+                        ZonedDateTime zdt = dateValue.getDate().toInstant().atZone(zoneId);
+                        //cal.setTimeInMillis(dateValue.getDate().getTime());
+                        Date blah = Date.from(zdt.toInstant());
+
+                        System.out.println("\t" + blah);
+                        cell.setCellValue(blah);
+                    } else {
+                        cell.setCellValue(dateValue.getDate());
                     }
                     /*if (dateDim.isTimeshift(insightRequestMetadata)) {
                         cal.setTime(dateValue.getDate());
                         cell.setCellValue(cal);
                     } else {*/
-                        cell.setCellValue(dateValue.getDate());
+
                     //}
                 } else {
                     cell.setCellValue(dateValue.getDate());
