@@ -3825,7 +3825,9 @@ public class ExportService {
                     if (dateDim.isTimeshift(insightRequestMetadata)) {
                         ZoneId zoneId = insightRequestMetadata.createZoneID();
                         ZonedDateTime zdt = dateValue.getDate().toInstant().atZone(zoneId);
-                        //cal.setTimeInMillis(dateValue.getDate().getTime());
+                        System.out.println("\t" + zdt);
+                        cal.setTimeInMillis(dateValue.getDate().getTime());
+                        System.out.println("\t" + cal.getTime());
                         Date blah = Date.from(zdt.toInstant());
 
                         System.out.println("\t" + blah);
