@@ -3818,12 +3818,12 @@ public class ExportService {
                 DateValue dateValue = (DateValue) value;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
-                    if (dateDim.isTimeshift(insightRequestMetadata)) {
+                    /*if (dateDim.isTimeshift(insightRequestMetadata)) {
                         cal.setTime(dateValue.getDate());
                         cell.setCellValue(cal);
-                    } else {
+                    } else {*/
                         cell.setCellValue(dateValue.getDate());
-                    }
+                    //}
                 } else {
                     cell.setCellValue(dateValue.getDate());
                 }
