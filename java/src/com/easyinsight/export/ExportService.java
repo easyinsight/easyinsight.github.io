@@ -3820,7 +3820,7 @@ public class ExportService {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
                     System.out.println("date = " + dateValue.getDate() + " - " + dateValue.getLocalDate() + " - " + dateValue.getZonedDateTime() + " - " + insightRequestMetadata.getUtcOffset());
                     if (dateDim.isTimeshift(insightRequestMetadata)) {
-                        cal.setTime(dateValue.getDate());
+                        cal.setTimeInMillis(dateValue.getDate().getTime());
                         System.out.println("\t" + cal.getTime());
                     }
                     /*if (dateDim.isTimeshift(insightRequestMetadata)) {
