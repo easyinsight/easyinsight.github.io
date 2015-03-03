@@ -54,8 +54,17 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     private boolean includeDealNotes = true;
     private boolean includeCaseNotes = true;
     private boolean joinTasksToContacts;
+    private boolean noRecordingsCache;
     private String token;
     private List<HighriseAdditionalToken> additionalTokens = new ArrayList<HighriseAdditionalToken>();
+
+    public boolean isNoRecordingsCache() {
+        return noRecordingsCache;
+    }
+
+    public void setNoRecordingsCache(boolean noRecordingsCache) {
+        this.noRecordingsCache = noRecordingsCache;
+    }
 
     public static final int ACTIVITIES = 1;
     public static final int EMAILS = 2;
@@ -443,7 +452,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL, INCLUDE_EMAILS, join_deals_to_contacts, include_contact_notes," +
-                "include_company_notes, include_deal_notes, include_case_notes, join_tasks_to_contacts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "include_company_notes, include_deal_notes, include_case_notes, join_tasks_to_contacts, no_recordings_cache) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.setBoolean(3, includeEmails);
@@ -453,6 +462,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         basecampStmt.setBoolean(7, includeDealNotes);
         basecampStmt.setBoolean(8, includeCaseNotes);
         basecampStmt.setBoolean(9, joinTasksToContacts);
+        basecampStmt.setBoolean(10, noRecordingsCache);
         basecampStmt.execute();
         basecampStmt.close();
         if (this.token != null && !"".equals(this.token.trim())) {
@@ -481,7 +491,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement loadStmt = conn.prepareStatement("SELECT URL, INCLUDE_EMAILS, join_deals_to_contacts, include_contact_notes," +
-                "include_company_notes, include_deal_notes, include_case_notes FROM HIGHRISE WHERE FEED_ID = ?");
+                "include_company_notes, include_deal_notes, include_case_notes, no_recordings_cache FROM HIGHRISE WHERE FEED_ID = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -492,6 +502,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             this.setIncludeCompanyNotes(rs.getBoolean(5));
             this.setIncludeDealNotes(rs.getBoolean(6));
             this.setIncludeCaseNotes(rs.getBoolean(7));
+            this.setNoRecordingsCache(rs.getBoolean(8));
         }
         loadStmt.close();
         PreparedStatement additionalTokenStmt = conn.prepareStatement("SELECT TOKEN FROM highrise_additional_token where DATA_SOURCE_ID = ?");
