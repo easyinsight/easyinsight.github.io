@@ -8,10 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -53,13 +50,19 @@ public class HighriseRecordingsCache extends HighRiseBaseSource {
 
     public void populateCaches(HttpClient client, String url, FeedDefinition parentDefinition, Date lastTime, HighriseCache highriseCache, Set<String> companyIDs) throws HighRiseLoginException, ParsingException, ParseException {
 
+        HighRiseCompositeSource  highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         Builder builder = new Builder();
-        if (lastTime == null) {
+        if (lastTime == null || highRiseCompositeSource.isNoRecordingsCache()) {
             lastTime = new Date(1);
+        } else {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(lastTime);
+            cal.add(Calendar.DAY_OF_YEAR, -2);
+            lastTime = cal.getTime();
         }
         //public static final String ALTDATEFORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        HighRiseCompositeSource  highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
+
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATETIMEFORMAT);
         String dateString = dateFormat.format(lastTime);
 
