@@ -3820,30 +3820,20 @@ public class ExportService {
                 DateValue dateValue = (DateValue) value;
                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
-
-                    System.out.println("date = " + dateValue.getDate() + " - " + dateValue.getLocalDate() + " - " + dateValue.getZonedDateTime() + " - " + insightRequestMetadata.getUtcOffset());
                     if (dateDim.isTimeshift(insightRequestMetadata)) {
-                        ZoneId zoneId = insightRequestMetadata.createZoneID();
-                        ZonedDateTime zdt = dateValue.getDate().toInstant().atZone(zoneId);
-                        System.out.println("\t" + zdt);
-                        cal.setTimeInMillis(dateValue.getDate().getTime());
-                        System.out.println("\t" + cal.getTime());
-                        Calendar c1 = GregorianCalendar.from(zdt);
-                        System.out.println(c1);
-                        cell.setCellValue(c1);
-                        /*Date blah = Date.from(zdt.toInstant());
-
-                        System.out.println("\t" + blah);
-                        cell.setCellValue(blah);*/
+                        if (dateDim.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                            ZoneId zoneId = insightRequestMetadata.createZoneID();
+                            ZonedDateTime zdt = dateValue.getDate().toInstant().atZone(zoneId);
+                            cal.setTimeInMillis(dateValue.getDate().getTime());
+                            Calendar c1 = GregorianCalendar.from(zdt);
+                            cell.setCellValue(c1);
+                        } else {
+                            cal.setTime(dateValue.getDate());
+                            cell.setCellValue(cal);
+                        }
                     } else {
                         cell.setCellValue(dateValue.getDate());
                     }
-                    /*if (dateDim.isTimeshift(insightRequestMetadata)) {
-                        cal.setTime(dateValue.getDate());
-                        cell.setCellValue(cal);
-                    } else {*/
-
-                    //}
                 } else {
                     cell.setCellValue(dateValue.getDate());
                 }
