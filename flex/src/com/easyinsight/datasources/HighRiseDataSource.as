@@ -21,6 +21,7 @@ public class HighRiseDataSource extends CompositeServerDataSource {
     public var joinTasksToContacts:Boolean;
     public var token:String;
     public var additionalTokens:ArrayCollection;
+    public var noRecordingsCache:Boolean;
 
     public function HighRiseDataSource() {
         super();
