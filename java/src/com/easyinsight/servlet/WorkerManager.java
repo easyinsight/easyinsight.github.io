@@ -60,6 +60,6 @@ public class WorkerManager {
             public void run() {
                 new AsyncReport(serverID).assign();
             }
-        }, 100, 100);
+        }, 250, 250);
     }
 }
