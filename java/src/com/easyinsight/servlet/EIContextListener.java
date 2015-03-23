@@ -1,6 +1,7 @@
 package com.easyinsight.servlet;
 
 import com.easyinsight.admin.HealthListener;
+import com.easyinsight.analysis.AsyncReportPurge;
 import com.easyinsight.analysis.CurrencyRetrieval;
 import com.easyinsight.analysis.ReportCache;
 import com.easyinsight.cache.MemCachedManager;
@@ -25,7 +26,6 @@ import com.easyinsight.util.ServiceUtil;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import java.nio.charset.Charset;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.*;
@@ -47,7 +47,6 @@ public class EIContextListener implements ServletContextListener {
             LogClass.info("Starting the core Easy Insight server...");
 
             if (Database.instance() == null) {
-                System.out.println("Default char set = " + Charset.defaultCharset().displayName());
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
                 SystemSettings.initialize();
@@ -88,7 +87,7 @@ public class EIContextListener implements ServletContextListener {
                 healthThread.setDaemon(true);
                 healthThread.start();
 
-                WorkerManager.initialize();
+
                 if (ConfigLoader.instance().isDatabaseListener()) {
                     DatabaseListener.initialize();
                 }
@@ -97,7 +96,9 @@ public class EIContextListener implements ServletContextListener {
                     CacheTimer.instance().start();
                 }
                 if (ConfigLoader.instance().isReportListener()) {
+                    WorkerManager.initialize();
                     ReportListener.initialize();
+                    AsyncReportPurge.initialize();;
                 }
                 ThreadDumpWatcher.initialize();
             }
@@ -134,6 +135,10 @@ public class EIContextListener implements ServletContextListener {
         }
         if (DatabaseListener.instance() != null) {
             DatabaseListener.instance().stop();
+        }
+
+        if (AsyncReportPurge.instance() != null) {
+            AsyncReportPurge.instance().stop();
         }
 
         if (ReportListener.instance() != null) {
