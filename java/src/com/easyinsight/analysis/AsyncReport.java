@@ -162,8 +162,8 @@ public class AsyncReport {
 
     public synchronized void claimAndRun() throws InterruptedException {
         Long requestID = null;
-        byte[] reportBytes = null;
-        byte[] metadataBytes = null;
+        /*byte[] reportBytes = null;
+        byte[] metadataBytes = null;*/
         int requestType = 0;
         long userID = 0;
         long dataSourceID = 0;
@@ -176,23 +176,21 @@ public class AsyncReport {
             EIConnection conn = Database.instance().getConnection();
             try {
                 conn.setAutoCommit(false);
-                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, report, metadata, request_type, " +
+                PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, request_type, " +
                         "user_id, data_source_id, call_id, task_id, cache_source_id, upload_key, file_name FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
                 q.setInt(1, ASSIGNED);
                 q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
                 if (rs.next()) {
                     requestID = rs.getLong(1);
-                    reportBytes = rs.getBytes(2);
-                    metadataBytes = rs.getBytes(3);
-                    requestType = rs.getInt(4);
-                    userID = rs.getLong(5);
-                    dataSourceID = rs.getLong(6);
-                    callID = rs.getString(7);
-                    taskID = rs.getLong(8);
-                    cacheID = rs.getLong(9);
-                    uploadKey = rs.getString(10);
-                    fileName = rs.getString(11);
+                    requestType = rs.getInt(2);
+                    userID = rs.getLong(3);
+                    dataSourceID = rs.getLong(4);
+                    callID = rs.getString(5);
+                    taskID = rs.getLong(6);
+                    cacheID = rs.getLong(7);
+                    uploadKey = rs.getString(8);
+                    fileName = rs.getString(9);
                     PreparedStatement u = conn.prepareStatement("UPDATE async_report_request SET request_state = ? WHERE async_report_request_id = ?");
                     u.setInt(1, IN_PROGRESS);
                     u.setLong(2, requestID);
@@ -223,7 +221,7 @@ public class AsyncReport {
         String time = sdf.format(new Date());
         if (requestType == REPORT_EDITOR || requestType == REPORT_END_USER || requestType == REPORT_DATA_SET) {
             // log internally...
-            asyncReport(requestID, reportBytes, metadataBytes, requestType, userID);
+            asyncReport(requestID, requestType, userID);
         } else if (requestType == DATA_SOURCE_REFRESH) {
             System.out.println(time + ":" + " Async data source refresh of " + dataSourceID + " by " + name);
             DataSourceListener.dataSource(dataSourceID, callID, requestID);
@@ -239,27 +237,34 @@ public class AsyncReport {
             asyncAnalyzeFileUpload(requestID, fileName, uploadKey);
         } else if (requestType == FILE_UPLOAD_CREATE) {
             System.out.println(time + ":" + " Async Create File Data Source - " + uploadKey);
-            asyncCreateFileUpload(requestID, reportBytes, userID, uploadKey, fileName);
+            asyncCreateFileUpload(requestID, userID, uploadKey, fileName);
         } else if (requestType == FILE_REPLACE_ANALYZE) {
             System.out.println(time + ":" + " Async Analyze File Data Source Update");
             asyncAnalyzeFileReplace(requestID, userID, dataSourceID, uploadKey);
         } else if (requestType == FILE_REPLACE_UPLOAD) {
             System.out.println(time + ":" + " Async Replace or Append File Data Source");
-            asyncFileReplace(requestID, reportBytes, userID, uploadKey);
+            asyncFileReplace(requestID, userID, uploadKey);
         }
 
     }
 
-    protected void asyncFileReplace(Long requestID, byte[] reportBytes, long userID, String uploadKey) {
+    protected void asyncFileReplace(Long requestID, long userID, String uploadKey) {
         try {
-            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
-            final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
+
             DataSourceThreadPool.instance().addActivity(() -> {
                 EIConnection conn = Database.instance().getConnection();
                 try {
                     conn.setAutoCommit(false);
                     populateThreadLocal(userID, conn);
                     try {
+                        PreparedStatement query = conn.prepareStatement("SELECT report_bytes, metadata_bytes FROM async_report_request_details " +
+                                "WHERE async_report_request_id = ?");
+                        query.setLong(1, requestID);
+                        ResultSet detailRS = query.executeQuery();
+                        byte[] reportBytes = detailRS.getBytes(1);
+                        query.close();
+                        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
+                        final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
                         new UserUploadService().updateData(uploadContextBlob.getDataSourceID(), uploadKey,
                                 uploadContextBlob.isUpdate(), uploadContextBlob.getAnalysisItems(), true);
                         MemCachedManager.instance().add("async" + requestID, 100, true);
@@ -309,16 +314,23 @@ public class AsyncReport {
         }
     }
 
-    protected void asyncCreateFileUpload(Long requestID, byte[] reportBytes, long userID, String uploadKey, String fileName) {
+    protected void asyncCreateFileUpload(Long requestID, long userID, String uploadKey, String fileName) {
         try {
-            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
-            final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
+
             DataSourceThreadPool.instance().addActivity(() -> {
                 EIConnection conn = Database.instance().getConnection();
                 try {
                     conn.setAutoCommit(false);
                     populateThreadLocal(userID, conn);
                     try {
+                        PreparedStatement query = conn.prepareStatement("SELECT report_bytes, metadata_bytes FROM async_report_request_details " +
+                                "WHERE async_report_request_id = ?");
+                        query.setLong(1, requestID);
+                        ResultSet detailRS = query.executeQuery();
+                        byte[] reportBytes = detailRS.getBytes(1);
+                        query.close();
+                        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
+                        final UploadContextBlob uploadContextBlob = (UploadContextBlob) ois.readObject();
                         FlatFileUploadContext context = new FlatFileUploadContext();
                         context.setFileName(fileName);
                         context.setUploadKey(uploadKey);
@@ -403,7 +415,7 @@ public class AsyncReport {
         }
     }
 
-    protected void asyncReport(Long frequestID, byte[] freportBytes, byte[] fmetadataBytes, int frequestType, long fuserID) {
+    protected void asyncReport(Long frequestID, int frequestType, long fuserID) {
 
         ReportThreadPool.instance().addActivity(new AsyncRequestRunnable(frequestID) {
                                                     @Override
@@ -421,6 +433,13 @@ public class AsyncReport {
                                                                     Database.closeConnection(conn);
                                                                 }
 
+                                                                PreparedStatement query = conn.prepareStatement("SELECT report_bytes, metadata_bytes FROM async_report_request_details " +
+                                                                        "WHERE async_report_request_id = ?");
+                                                                query.setLong(1, frequestID);
+                                                                ResultSet detailRS = query.executeQuery();
+                                                                byte[] freportBytes = detailRS.getBytes(1);
+                                                                byte[] fmetadataBytes = detailRS.getBytes(2);
+                                                                query.close();
                                                                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
                                                                 WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
                                                                 ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
@@ -633,8 +652,8 @@ public class AsyncReport {
         long requestID;
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, request_created, request_type, user_id) " +
-                            "VALUES (?, ?, ?, ?, ?)",
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, request_created, request_type, user_id) " +
+                            "VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             reqStmt.setInt(1, WAITING_ASSIGN);
             UploadContextBlob blob = new UploadContextBlob();
@@ -647,13 +666,18 @@ public class AsyncReport {
             oos.writeObject(blob);
             oos.flush();
             byte[] blobBytes = baos.toByteArray();
-            reqStmt.setBytes(2, blobBytes);
-            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            reqStmt.setInt(4, FILE_UPLOAD_CREATE);
-            reqStmt.setLong(5, SecurityUtil.getUserID());
+
+            reqStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(3, FILE_UPLOAD_CREATE);
+            reqStmt.setLong(4, SecurityUtil.getUserID());
             reqStmt.execute();
             requestID = Database.instance().getAutoGenKey(reqStmt);
             reqStmt.close();
+            PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes) VALUES (?, ?)");
+            detStmt.setLong(1, requestID);
+            detStmt.setBytes(2, blobBytes);
+            detStmt.execute();
+            detStmt.close();
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -717,8 +741,8 @@ public class AsyncReport {
         long requestID;
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, upload_key, request_created, request_type, user_id) " +
-                            "VALUES (?, ?, ?, ?, ?, ?)",
+            PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, upload_key, request_created, request_type, user_id) " +
+                            "VALUES (?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             reqStmt.setInt(1, WAITING_ASSIGN);
             UploadContextBlob blob = new UploadContextBlob();
@@ -730,14 +754,18 @@ public class AsyncReport {
             oos.writeObject(blob);
             oos.flush();
             byte[] blobBytes = baos.toByteArray();
-            reqStmt.setBytes(2, blobBytes);
-            reqStmt.setString(3, uploadKey);
-            reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            reqStmt.setInt(5, FILE_REPLACE_UPLOAD);
-            reqStmt.setLong(6, SecurityUtil.getUserID());
+            reqStmt.setString(2, uploadKey);
+            reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            reqStmt.setInt(4, FILE_REPLACE_UPLOAD);
+            reqStmt.setLong(5, SecurityUtil.getUserID());
             reqStmt.execute();
             requestID = Database.instance().getAutoGenKey(reqStmt);
             reqStmt.close();
+            PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes) VALUES (?, ?)");
+            detStmt.setLong(1, requestID);
+            detStmt.setBytes(2, blobBytes);
+            detStmt.execute();
+            detStmt.close();
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -923,17 +951,21 @@ public class AsyncReport {
         oos.writeObject(insightRequestMetadata);
         oos.flush();
         byte[] metadata = baos.toByteArray();
-        PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, report, metadata, request_created, request_type, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+        PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, request_created, request_type, user_id) VALUES (?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         reqStmt.setInt(1, WAITING_ASSIGN);
-        reqStmt.setBytes(2, reportBytes);
-        reqStmt.setBytes(3, metadata);
-        reqStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-        reqStmt.setInt(5, requestType);
-        reqStmt.setLong(6, SecurityUtil.getUserID());
+        reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+        reqStmt.setInt(4, requestType);
+        reqStmt.setLong(5, SecurityUtil.getUserID());
         reqStmt.execute();
         long requestID = Database.instance().getAutoGenKey(reqStmt);
         reqStmt.close();
+        PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes, metadata_bytes) VALUES (?, ?, ?)");
+        detStmt.setLong(1, requestID);
+        detStmt.setBytes(2, reportBytes);
+        detStmt.setBytes(3, metadata);
+        detStmt.execute();
+        detStmt.close();
         return requestID;
     }
 
