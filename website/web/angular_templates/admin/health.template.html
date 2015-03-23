@@ -1,0 +1,24 @@
+<div class="well container">
+    <div class="row">
+        <div class="col-md-12">
+<table>
+    <thead>
+    <tr>
+        <th>DNS</th>
+        <th>Role</th>
+        <th>Code</th>
+        <th>Message</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="server in health_data">
+            <td>{{server.public_dns}}</td>
+            <td>{{server.role}}</td>
+            <td>{{server.extended_code}}</td>
+            <td>{{server.extended_message}}</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+</div>
+</div>

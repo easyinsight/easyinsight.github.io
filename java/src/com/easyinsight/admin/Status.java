@@ -17,6 +17,33 @@ public class Status implements Serializable {
     private HealthInfo healthInfo;
     private String extendedMessage = "All Good!";
     private String extendedCode = "Success";
+    private String publicDns;
+    private String role;
+    private String host;
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getPublicDns() {
+        return publicDns;
+    }
+
+    public void setPublicDns(String publicDns) {
+        this.publicDns = publicDns;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getExtendedMessage() {
         return extendedMessage;
@@ -74,12 +101,17 @@ public class Status implements Serializable {
             jo = new JSONObject();
         }
 
+        jo.put("host", host);
+
         jo.put("message", message);
         jo.put("extended_message", extendedMessage);
         jo.put("code", code);
         jo.put("extended_code", extendedCode);
         jo.put("time", time);
-
+        if(publicDns != null)
+            jo.put("public_dns", publicDns);
+        if(role != null)
+            jo.put("role", role);
         return jo;
     }
 }

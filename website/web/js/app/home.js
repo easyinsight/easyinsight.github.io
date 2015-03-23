@@ -25,7 +25,7 @@
         };
     }
 
-    var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'eiReporting']);
+    var easyInsight = angular.module("easyInsight", ["eiAccounts", "eiDataSources", "eiConnections", 'eiScheduling', 'eiAdmin', 'ui.bootstrap', 'ngRoute', 'route-segment', 'view-segment', 'cgBusy', 'eiReporting']);
 
     easyInsight.config(["$routeProvider", "$locationProvider", "$routeSegmentProvider", function ($routeProvider, $locationProvider, $routeSegmentProvider) {
 

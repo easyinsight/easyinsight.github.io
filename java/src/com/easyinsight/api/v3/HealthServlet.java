@@ -1,5 +1,11 @@
 package com.easyinsight.api.v3;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Tag;
 import com.easyinsight.admin.HealthListener;
 import com.easyinsight.admin.Status;
 import com.easyinsight.cache.MemCachedManager;
@@ -17,6 +23,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -61,8 +68,22 @@ public class HealthServlet extends HttpServlet {
                 } else {
                     statusList.add(status);
                 }
+                status.setHost(host);
 
                 if("json".equals(req.getParameter("format"))) {
+
+                    AmazonEC2Client ec2 = new AmazonEC2Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+                    DescribeInstancesRequest request = new DescribeInstancesRequest();
+                    request.setFilters(Arrays.asList(new Filter("private-dns-name", Arrays.asList(host + ".ec2.internal"))));
+                    DescribeInstancesResult result = ec2.describeInstances(request);
+                    if(result.getReservations().size() > 0) {
+                        List<Tag> tags = result.getReservations().get(0).getInstances().get(0).getTags();
+                        for(Tag t : tags) {
+                            if(t.getKey().equals("Role"))
+                                status.setRole(t.getValue());
+                        }
+                        status.setPublicDns(result.getReservations().get(0).getInstances().get(0).getPublicDnsName());
+                    }
                     arr.put(status.toJSON());
                 }
             }
