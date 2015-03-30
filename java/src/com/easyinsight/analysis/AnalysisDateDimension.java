@@ -317,7 +317,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
-                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, 0).with(ChronoField.DAY_OF_YEAR, 2);
+                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, 1).with(ChronoField.DAY_OF_YEAR, 2);
                         if (timezoneShift) {
                             temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
                                     with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
