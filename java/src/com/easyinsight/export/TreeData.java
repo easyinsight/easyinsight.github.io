@@ -165,7 +165,7 @@ public class TreeData {
             this.hierarchy = hierarchy;
             this.index = index;
 
-                //int value = 256 / (hierarchy.getHierarchyLevels().size() - index);
+            //int value = 256 / (hierarchy.getHierarchyLevels().size() - index);
             backgroundColor = treeDefinition.getSummaryBackgroundColor();
             if (index > 0) {
                 Color color = new Color(backgroundColor);
@@ -303,15 +303,7 @@ public class TreeData {
                 }
             }
 
-            if (treeDefinition.isSummaryTotal()) {
-                for (AnalysisItem reportItem : treeDefinition.getItems()) {
-                    if (reportItem.hasType(AnalysisItemTypes.MEASURE) && aggregateLevel != null) {
-                        Value aggregateValue = aggregateLevel.getValue(reportItem);
-                        Aggregation aggregation = grandTotalTotals.get(reportItem);
-                        aggregation.addValue(aggregateValue);
-                    }
-                }
-            }
+
 
             /*for (Map.Entry<AnalysisItem, Aggregation> entry : sumMap.entrySet()) {
                 treeRow.getValues().put(entry.getKey().qualifiedName(), entry.getValue().getValue());
@@ -499,6 +491,17 @@ public class TreeData {
             } else {
                 treeRow.setGroupingColumn(row.getValue(analysisItem));
             }
+
+            if (treeDefinition.isSummaryTotal()) {
+                for (AnalysisItem reportItem : treeDefinition.getItems()) {
+                    if (reportItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        Value aggregateValue = row.getValue(reportItem);
+                        Aggregation aggregation = grandTotalTotals.get(reportItem);
+                        aggregation.addValue(aggregateValue);
+                    }
+                }
+            }
+
             return treeRow;
         }
 
