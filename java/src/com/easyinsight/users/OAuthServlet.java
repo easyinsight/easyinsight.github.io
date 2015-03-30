@@ -127,7 +127,7 @@ public class OAuthServlet extends HttpServlet {
                     } else if (redirectType == TokenService.HTML_SETUP) {
                         redirectURL = RedirectUtil.getURL(req, "/app/html/dataSources/"+ feedDefinition.getApiKey() + "/createConnection");
                     } else {
-                        if (repoint) {
+                        if (repoint != null && repoint) {
                             redirectURL = "https://www.easy-insight.com/app/#repointConfig=" + feedDefinition.getApiKey();
                         } else {
                             redirectURL = "https://www.easy-insight.com/app/";
