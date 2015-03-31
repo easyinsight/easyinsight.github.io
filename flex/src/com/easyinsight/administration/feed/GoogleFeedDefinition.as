@@ -8,18 +8,18 @@ import com.easyinsight.datasources.IPostOAuth;
 import mx.collections.ArrayCollection;
 
 [Bindable]
-	[RemoteClass(alias="com.easyinsight.datafeeds.google.GoogleFeedDefinition")]
-	public class GoogleFeedDefinition extends ServerDataSourceDefinition
-	{
-		public var worksheetURL:String;
-        public var tokenKey:String;
-        public var tokenSecret:String;
-        public var pin:String;
-		
-		public function GoogleFeedDefinition()
-		{
-			super();
-		}
+[RemoteClass(alias="com.easyinsight.datafeeds.google.GoogleFeedDefinition")]
+public class GoogleFeedDefinition extends ServerDataSourceDefinition
+{
+    public var worksheetURL:String;
+    public var tokenKey:String;
+    public var tokenSecret:String;
+    public var pin:String;
+
+    public function GoogleFeedDefinition()
+    {
+        super();
+    }
 
     override public function createAdminPages():ArrayCollection {
         var pages:ArrayCollection = new ArrayCollection();
@@ -29,9 +29,9 @@ import mx.collections.ArrayCollection;
         return pages;
     }
 
-        override public function configClass():Class {
-            return GoogleSpreadsheetSourceCreation;
-        }
+    override public function configClass():Class {
+        return GoogleSpreadsheetSourceCreation;
+    }
 
     override public function requiresMoreSetupAfterAuth():Boolean {
         return true;
@@ -43,5 +43,5 @@ import mx.collections.ArrayCollection;
         picker.newSource = true;
         return picker;
     }
-    }
+}
 }
