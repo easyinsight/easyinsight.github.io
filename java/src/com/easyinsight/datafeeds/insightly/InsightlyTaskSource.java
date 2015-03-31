@@ -29,6 +29,7 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
     public static final String DUE_DATE = "Task Due Date";
     public static final String COMPLETED = "Task Completed";
     public static final String PERCENT_COMPLETE = "Task Percent Complete";
+    public static final String TASK_COMPLETED_ON = "Task Completed On";
     public static final String PROJECT_ID = "Task Project ID";
     public static final String OPPORTUNITY_ID = "Task Opportunity ID";
     public static final String CONTACT_ID = "Task Contact ID";
@@ -68,6 +69,7 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
         fieldBuilder.addField(DATE_UPDATED, new AnalysisDateDimension());
         fieldBuilder.addField(START_DATE, new AnalysisDateDimension());
         fieldBuilder.addField(DUE_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(TASK_COMPLETED_ON, new AnalysisDateDimension());
         fieldBuilder.addField(TASK_COUNT, new AnalysisMeasure());
         fieldBuilder.addField(PERCENT_COMPLETE, new AnalysisMeasure(FormattingConfiguration.PERCENTAGE));
     }
@@ -177,6 +179,10 @@ public class InsightlyTaskSource extends InsightlyBaseSource {
                 Object actualCloseObj = contactMap.get("START_DATE");
                 if (actualCloseObj != null) {
                     row.addValue(keys.get(START_DATE), new DateValue(sdf.parse(actualCloseObj.toString())));
+                }
+                Object taskCompletedObj = contactMap.get("COMPLETED_DATE_UTC");
+                if (taskCompletedObj != null) {
+                    row.addValue(keys.get(TASK_COMPLETED_ON), new DateValue(sdf.parse(taskCompletedObj.toString())));
                 }
                 row.addValue(keys.get(TASK_COUNT), 1);
             }
