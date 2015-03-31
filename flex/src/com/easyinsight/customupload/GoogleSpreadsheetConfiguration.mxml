@@ -27,7 +27,7 @@
         <mx:method name="getOAuthURL" result="gotURL()"/>
     </mx:RemoteObject>
 
-        <mx:Button label="Reauthorize Access" click="reauthorize()"/>
+    <mx:Button label="Reauthorize Access" click="reauthorize()"/>
     <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
 
 </feed:DataSourceWindow>

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                     width="500" height="500" creationComplete="setup()"
-        paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" doubleClickEnabled="true">
+                    paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" doubleClickEnabled="true">
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.GoogleFeedDefinition;
         import com.easyinsight.customupload.UploadConfigEvent;
@@ -72,7 +72,8 @@
         private function onGoogleEvent(event:GoogleSelectionEvent):void {
             if (newConnection) {
                 var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
-                context.worksheetURL = event.worksheetURL;
+                dataSource.worksheetURL = event.worksheetURL;
+                context.feedDefinition = dataSource;
                 selectedURL = event.worksheetURL;
                 ProgressAlert.alert(this.parent.parent, "Analyzing the spreadsheet...", null, uploadService.analyzeUpload);
                 uploadService.analyzeUpload.send(context);
@@ -95,7 +96,7 @@
             if (uploadResponse.successful) {
                 //dispatchEvent(new GoogleSelectionEvent(selectedURL));
                 var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
-                context.worksheetURL = selectedURL;
+                context.feedDefinition = dataSource;
                 var window:SpreadsheetWizard = new SpreadsheetWizard();
                 window.uploadContext = context;
                 window.fields = uploadResponse.infos;
@@ -111,7 +112,7 @@
         [Bindable]
         private var stackIndex:int = 0;
         ]]>
-	</mx:Script>
+    </mx:Script>
     <mx:RemoteObject id="uploadService" destination="userUpload">
         <mx:method name="analyzeUpload" result="analyzedStructure()"/>
     </mx:RemoteObject>
@@ -120,8 +121,8 @@
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%">
         <mx:AdvancedDataGrid width="100%" height="100%"
-            id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5"
-            defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
+                             id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5"
+                             defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
             <mx:dataProvider>
                 <mx:HierarchicalData source="{googleSpreadsheets}"/>
             </mx:dataProvider>
