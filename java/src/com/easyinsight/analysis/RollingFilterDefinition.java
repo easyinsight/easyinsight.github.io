@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.*;
 
@@ -231,6 +232,26 @@ public class RollingFilterDefinition extends FilterDefinition {
                     } else {
                         startDate = null;
                     }
+                    /*if (startDate != null) {
+                        if (((AnalysisDateDimension) getField()).isTimeshift(insightRequestMetadata)) {
+
+                            Instant instant = startDate.toInstant();
+                            ZoneId zoneId = insightRequestMetadata.createZoneID();
+                            ZonedDateTime zdt = instant.atZone(zoneId);
+                            zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                            instant = zdt.toInstant();
+                            startDate = Date.from(instant);
+                        } else {
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(startDate);
+                            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+                            cal.set(Calendar.HOUR_OF_DAY, 0);
+                            cal.set(Calendar.MINUTE, 0);
+                            cal.set(Calendar.SECOND, 0);
+                            cal.set(Calendar.MILLISECOND, 0);
+                            startDate = cal.getTime();
+                        }
+                    }*/
                     if (interval.isEndDefined()) {
                         Value value = new ReportCalculation(interval.getEndScript()).filterApply(report, allFields, keyMap, displayMap, displayMap, feed, conn, dlsFilters, insightRequestMetadata,
                                 dateTime(insightRequestMetadata));
@@ -259,6 +280,25 @@ public class RollingFilterDefinition extends FilterDefinition {
                             endDate = zdt.plusDays(1).minusNanos(1);
                         }
                     }
+                    /*if (endDate != null) {
+                        Instant instant = endDate.toInstant();
+                        if (((AnalysisDateDimension) getField()).isTimeshift(insightRequestMetadata)) {
+                            ZoneId zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(insightRequestMetadata.getUtcOffset() / 60)));
+                            ZonedDateTime zdt = instant.atZone(zoneId);
+                            zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(1).minusNanos(1);
+                            instant = zdt.toInstant();
+                            endDate = Date.from(instant);
+                        } else {
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(endDate);
+                            cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+                            cal.set(Calendar.HOUR_OF_DAY, 0);
+                            cal.set(Calendar.MINUTE, 0);
+                            cal.set(Calendar.SECOND, 0);
+                            cal.set(Calendar.MILLISECOND, 0);
+                            endDate = cal.getTime();
+                        }
+                    }*/
                 }
             }
         } catch (RecognitionException e) {
@@ -365,7 +405,11 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     public Date startTime(InsightRequestMetadata insightRequestMetadata) {
         if (startDate == null) {
-            startDate = MaterializedRollingFilterDefinition.findStartDate(this, new Date(), insightRequestMetadata);
+            if (dateTime(insightRequestMetadata)) {
+                startDate = MaterializedRollingFilterDefinition.findStartDateTime(this, new Date(), insightRequestMetadata);
+            } else {
+                startDate = MaterializedRollingFilterDefinition.findStartDate(this, new Date(), insightRequestMetadata);
+            }
         }
         if (startDate instanceof ZonedDateTime) {
             Instant instant = ((ZonedDateTime) startDate).toInstant();
@@ -402,7 +446,11 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     public Date endTime(InsightRequestMetadata insightRequestMetadata) {
         if (endDate == null) {
-            endDate = MaterializedRollingFilterDefinition.findEndDate(this, new Date(), insightRequestMetadata);
+            if (dateTime(insightRequestMetadata)) {
+                endDate = MaterializedRollingFilterDefinition.findEndDateTime(this, new Date(), insightRequestMetadata);
+            } else {
+                endDate = MaterializedRollingFilterDefinition.findEndDate(this, new Date(), insightRequestMetadata);
+            }
         }
         if (endDate instanceof ZonedDateTime) {
             Instant instant = ((ZonedDateTime) endDate).toInstant();
@@ -550,7 +598,7 @@ public class RollingFilterDefinition extends FilterDefinition {
             insightRequestMetadata = new InsightRequestMetadata();
         }
         Date now = insightRequestMetadata.getNow();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String startString = null;
         String endString = null;
 

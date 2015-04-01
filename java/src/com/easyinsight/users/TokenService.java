@@ -283,9 +283,9 @@ public class TokenService {
                 } else {
                     //requestToken = provider.retrieveRequestToken(consumer, "https://staging.easy-insight.com/app/oauth?redirectTarget="+redirectType+"&dataSourceID=" + dataSource.getApiKey());
                     if (dataSourceId != null) {
-                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
+                        requestToken = provider.retrieveRequestToken(consumer, "https://j8staging.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&dataSourceID=" + dataSourceId);
                     } else {
-                        requestToken = provider.retrieveRequestToken(consumer, "https://localhost/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
+                        requestToken = provider.retrieveRequestToken(consumer, "https://j8staging.easy-insight.com/app/oauth?redirectTarget=" + redirectType + "&type=googleProvider");
                     }
                 }
             } else {
