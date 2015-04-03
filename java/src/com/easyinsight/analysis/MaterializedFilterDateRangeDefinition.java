@@ -39,7 +39,6 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
                 allowed = (localDate.isEqual((java.time.chrono.ChronoLocalDate) lowValue) || localDate.isAfter((java.time.chrono.ChronoLocalDate) lowValue)) &&
                         (localDate.isEqual((java.time.chrono.ChronoLocalDate) highValue) || localDate.isBefore((java.time.chrono.ChronoLocalDate) highValue));
             }
-            System.out.println(dateValue.getZonedDateTime() + " - " + allowed);
         }
         return allowed;
     }

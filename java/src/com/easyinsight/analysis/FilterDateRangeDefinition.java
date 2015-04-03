@@ -332,7 +332,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             return Date.from(instant);
         } else if (startDate instanceof LocalDate) {
             Instant instant = ((LocalDate) startDate).atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
-            System.out.println("to old java converted from " + startDate + " to " + (Date.from(instant)));
             return Date.from(instant);
         }
         throw new RuntimeException();
@@ -378,8 +377,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             LocalDate endLocalDate = LocalDate.of(cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH) + 1,
                     cal.get(Calendar.DAY_OF_MONTH));
-            System.out.println("Start date on query = " + startLocalDate);
-            System.out.println("End date on query = " + endLocalDate);
             /*LocalDate startLocalDate = startDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
             LocalDate endLocalDate = endDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();*/
             insightRequestMetadata.addAudit(this, "Start date on database query is " + startLocalDate);
