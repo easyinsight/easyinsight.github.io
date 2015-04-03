@@ -128,6 +128,8 @@ public class FilterUtils {
             FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filter;
             String startDate = curFilter != null ? (String) curFilter.get("start") : null;
             String endDate = curFilter != null ? (String) curFilter.get("end") : null;
+            System.out.println("start date = " + startDate);
+            System.out.println("end date = " + endDate);
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
             if (startDate != null) {
                 System.out.println("Start date = " + startDate);
