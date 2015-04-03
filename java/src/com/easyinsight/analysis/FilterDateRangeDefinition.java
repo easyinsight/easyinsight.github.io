@@ -325,6 +325,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             return Date.from(instant);
         } else if (startDate instanceof LocalDate) {
             Instant instant = ((LocalDate) startDate).atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
+            System.out.println("to old java converted from " + startDate + " to " + (Date.from(instant)));
             return Date.from(instant);
         }
         throw new RuntimeException();
