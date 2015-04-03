@@ -3411,7 +3411,7 @@ public class AnalysisService {
             } finally {
                 Database.closeConnection(conn);
             }
-            if (report.getFilterDefinitions() != null) {
+            /*if (report.getFilterDefinitions() != null) {
                 for (FilterDefinition filter : report.getFilterDefinitions()) {
                     if (filter instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition date = (FilterDateRangeDefinition) filter;
@@ -3420,18 +3420,16 @@ public class AnalysisService {
                             date.setStartDateYear(ld.getYear());
                             date.setStartDateMonth(ld.getMonthValue());
                             date.setStartDateDay(ld.getDayOfMonth());
-                            System.out.println(date.getStartDate() + " on start gave us " + ld);
                         }
                         if (date.getEndDate() != null) {
                             LocalDate ld = date.getEndDate().toInstant().atZone(zoneId).toLocalDate();
                             date.setEndDateYear(ld.getYear());
                             date.setEndDateMonth(ld.getMonthValue());
                             date.setEndDateDay(ld.getDayOfMonth());
-                            System.out.println(date.getEndDate() + " on end gave us " + ld);
                         }
                     }
                 }
-            }
+            }*/
             return report;
         } catch (Exception e) {
             LogClass.error(e);
