@@ -80,7 +80,6 @@ public class DateValue extends Value implements Serializable {
                 year = localDate.getYear();
                 month = localDate.getMonthValue() - 1;
                 day = localDate.getDayOfMonth();
-                System.out.println(date + ": " + year + " - " + month + " - " + day);
             } else {
                 if (zonedDateTime == null) {
                     zonedDateTime = date.toInstant().atZone(zoneId);
