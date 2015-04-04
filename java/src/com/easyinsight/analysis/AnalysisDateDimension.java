@@ -2,10 +2,14 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.calculations.functions.DayOfWeek;
 import com.easyinsight.core.*;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.export.ExportMetadata;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import nu.xom.Attribute;
 import nu.xom.Element;
+import org.json.JSONException;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
@@ -18,6 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -86,7 +92,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
     private transient boolean timeshift = true;
 
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    
+
     public static final int YEAR_LEVEL = 1;
     public static final int MONTH_LEVEL = 2;
     public static final int DAY_LEVEL = 3;
@@ -281,7 +287,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             java.time.temporal.Temporal temporal;
             if (timezoneShift) {
                 ZonedDateTime zdt = tempDate.toInstant().atZone(insightRequestMetadata.createZoneID());
-                zd = zdt;
+                //zd = zdt;
                 temporal = zdt;
             } else {
                 Calendar cal = Calendar.getInstance();
@@ -289,7 +295,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
                         cal.get(Calendar.MONTH) + 1,
                         cal.get(Calendar.DAY_OF_MONTH));
-                ld = localDate;
+                //ld = localDate;
                 temporal = localDate;
             }
 
@@ -317,7 +323,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             if (dateLevel <= WEEK_LEVEL || dateLevel == QUARTER_OF_YEAR_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
-                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, 1).with(ChronoField.DAY_OF_YEAR, 2);
+                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, 1).with(ChronoField.DAY_OF_YEAR, 3);
                         if (timezoneShift) {
                             temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
                                     with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
@@ -330,7 +336,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.MILLISECOND, 0);*/
                         break;
                     case QUARTER_OF_YEAR_LEVEL:
-                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3 * 3 + 1);
+                        temporal = temporal.with(ChronoField.MONTH_OF_YEAR, (temporal.get(ChronoField.MONTH_OF_YEAR) - 1) / 3 * 3 + 1).with(ChronoField.DAY_OF_MONTH, 3);
                         if (timezoneShift) {
                             temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
                                     with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
@@ -342,7 +348,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.SECOND, 0);
                         calendar.set(Calendar.MILLISECOND, 0);*/
                     case MONTH_LEVEL:
-                        temporal = temporal.with(ChronoField.DAY_OF_MONTH, 2);
+                        temporal = temporal.with(ChronoField.DAY_OF_MONTH, 3);
                         if (timezoneShift) {
                             temporal = temporal.with(ChronoField.HOUR_OF_DAY, 0).with(ChronoField.MINUTE_OF_DAY, 0).
                                     with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.NANO_OF_SECOND, 0);
@@ -525,6 +531,11 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     finalDate = Date.from(instant);
                 }
                 resultValue.setOriginalValue(new DateValue(finalDate));
+            }
+            if (temporal instanceof LocalDate) {
+                ld = (LocalDate) temporal;
+            } else if (temporal instanceof ZonedDateTime) {
+                zd = (ZonedDateTime) temporal;
             }
         } else {
             resultValue = new EmptyValue();
