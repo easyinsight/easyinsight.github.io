@@ -432,14 +432,14 @@ public class RollingFilterDefinition extends FilterDefinition {
         throw new RuntimeException();
     }
 
-    public Period periodTo(Date date, InsightRequestMetadata insightRequestMetadata) {
+    public Period periodTo(InsightRequestMetadata insightRequestMetadata) {
         if (dateTime(insightRequestMetadata)) {
             LocalDate zdtStart = MaterializedRollingFilterDefinition.findStartDateTime(this, new Date(), insightRequestMetadata).toLocalDate();
-            LocalDate zdtEnd = date.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
+            LocalDate zdtEnd = MaterializedRollingFilterDefinition.findEndDateTime(this, new Date(), insightRequestMetadata).toLocalDate();
             return Period.between(zdtStart, zdtEnd);
         } else {
             LocalDate zdtStart = MaterializedRollingFilterDefinition.findStartDate(this, new Date(), insightRequestMetadata);
-            LocalDate zdtEnd = date.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
+            LocalDate zdtEnd = MaterializedRollingFilterDefinition.findEndDate(this, new Date(), insightRequestMetadata);
             return Period.between(zdtStart, zdtEnd);
         }
     }
