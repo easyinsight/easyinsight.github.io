@@ -851,6 +851,7 @@ public class DashboardService {
         byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
         if (bytes != null) {
             try {
+                System.out.println("Retrieved dashboard " + dashboardID + " from cache.");
                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
                 dashboard = (Dashboard) ois.readObject();
             } catch (Exception e) {
@@ -859,6 +860,7 @@ public class DashboardService {
         }
 
         if (dashboard == null) {
+            System.out.println("Had to reload " + dashboardID + " from database.");
             dashboard = dashboardStorage.getDashboard(dashboardID, conn);
         }
 
@@ -1231,13 +1233,6 @@ public class DashboardService {
                 DashboardStack dashboardStack = (DashboardStack) dashboardElement;
                 if (dashboardStack.getFilters() != null) {
                     for (FilterDefinition filterDefinition : dashboardStack.getFilters()) {
-                        if (filterDefinition.getMarmotScript() != null && !"".equals(filterDefinition.getMarmotScript().trim())) {
-                            StringTokenizer toker = new StringTokenizer(filterDefinition.getMarmotScript(), "\r\n");
-                            while (toker.hasMoreTokens()) {
-                                String line = toker.nextToken();
-                                new ReportCalculation(line).apply(filterDefinition, feed.getFields(), keyMap, displayMap, unqualifiedDisplayMap, feed, conn, dlsFilters);
-                            }
-                        }
                         if (feed.getDataSource().getMarmotScript() != null) {
                             StringTokenizer toker = new StringTokenizer(feed.getDataSource().getMarmotScript(), "\r\n");
                             while (toker.hasMoreTokens()) {
