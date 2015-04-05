@@ -771,7 +771,20 @@ public class DashboardService {
     public static Dashboard getDashboardWithConn(long dashboardID, EIConnection conn) {
         try {
             int role = SecurityUtil.authorizeDashboard(dashboardID, conn);
-            Dashboard dashboard = new DashboardStorage().getDashboard(dashboardID, conn);
+            Dashboard dashboard = null;
+            byte[] bytes = (byte[]) MemCachedManager.get("dashboard" + dashboardID);
+            if (bytes != null) {
+                try {
+                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+                    dashboard = (Dashboard) ois.readObject();
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
+
+            if (dashboard == null) {
+                dashboard = new DashboardStorage().getDashboard(dashboardID, conn);
+            }
             dashboard.setRole(role);
             return dashboard;
         } catch (Exception e) {
