@@ -112,8 +112,13 @@ public class SendGridFeed extends Feed {
                         endDate = dateRange.getEndDate();
                     } else if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                        endDate = insightRequestMetadata.getNow();
-                        //startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition, endDate));
+
+                        startDate = rollingFilterDefinition.startTime(insightRequestMetadata);
+                        if (rollingFilterDefinition.getEndDate() != null) {
+                            endDate = rollingFilterDefinition.endTime(insightRequestMetadata);
+                        } else {
+                            endDate = insightRequestMetadata.getNow();
+                        }
                     }
                 }
             }
