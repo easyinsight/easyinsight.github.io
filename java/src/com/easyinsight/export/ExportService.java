@@ -3586,7 +3586,7 @@ public class ExportService {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT report_delivery_audit_result.SUCCESSFUL, report_delivery_audit_result.MESSAGE, SEND_DATE, TARGET_EMAIL FROM " +
-                    "REPORT_DELIVERY_AUDIT left join report_delivery_audit_result on REPORT_DELIVERY_AUDIT.REPORT_DELIVERY_AUDIT_ID = report_delivery_audit_result.report_delivery_audit_result_id WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+                    "REPORT_DELIVERY_AUDIT left join report_delivery_audit_result on REPORT_DELIVERY_AUDIT.REPORT_DELIVERY_AUDIT_ID = report_delivery_audit_result.REPORT_DELIVERY_AUDIT_ID WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
             queryStmt.setLong(1, activityID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
