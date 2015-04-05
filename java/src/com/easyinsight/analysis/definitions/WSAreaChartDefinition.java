@@ -113,7 +113,7 @@ public class WSAreaChartDefinition extends WSTwoAxisDefinition {
                     if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
                         if (rollingFilterDefinition.getInterval() != MaterializedRollingFilterDefinition.ALL) {
-                            daysDuration = rollingFilterDefinition.periodTo(insightRequestMetadata).getDays();
+                            daysDuration = rollingFilterDefinition.periodTo(new Date(), insightRequestMetadata);
                         }
                     } else if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
