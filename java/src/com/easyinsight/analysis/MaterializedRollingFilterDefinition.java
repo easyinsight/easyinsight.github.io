@@ -137,93 +137,93 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         }
 
 
-            ZoneId zoneId = insightRequestMetadata.createZoneID();
+        ZoneId zoneId = insightRequestMetadata.createZoneID();
 
-            LocalDate zdt = LocalDate.now(zoneId);
-            //ZonedDateTime zdt = ZonedDateTime.now(zoneId);
-            switch (interval) {
-                case CUSTOM:
-                    if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
-                            rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
-                        switch (intervalType) {
+        LocalDate zdt = LocalDate.now(zoneId);
+        //ZonedDateTime zdt = ZonedDateTime.now(zoneId);
+        switch (interval) {
+            case CUSTOM:
+                if (rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.LAST ||
+                        rollingFilterDefinition.getCustomBeforeOrAfter() == RollingFilterDefinition.AFTER) {
+                    switch (intervalType) {
                             /*case 0:
                                 zdt = zdt.plusMinutes(intervalAmount);
                                 break;
                             case 1:
                                 zdt = zdt.plusHours(intervalAmount);
                                 break;*/
-                            case 2:
-                                zdt = zdt.plusDays(intervalAmount);
-                                break;
-                            case 3:
-                                zdt = zdt.plusWeeks(intervalAmount);
-                                break;
-                            case 4:
-                                zdt = zdt.plusMonths(intervalAmount);
-                                break;
-                            case 5:
-                                zdt = zdt.plusYears(intervalAmount);
-                                break;
-                        }
+                        case 2:
+                            zdt = zdt.plusDays(intervalAmount);
+                            break;
+                        case 3:
+                            zdt = zdt.plusWeeks(intervalAmount);
+                            break;
+                        case 4:
+                            zdt = zdt.plusMonths(intervalAmount);
+                            break;
+                        case 5:
+                            zdt = zdt.plusYears(intervalAmount);
+                            break;
                     }
-                    break;
-                case DAY_TO_NOW:
-                    //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    break;
-                case WEEK_TO_NOW:
-                    zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
-                    //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    break;
-                case MONTH_TO_NOW:
-                    zdt = zdt.withDayOfMonth(1);
-                    break;
-                case QUARTER_TO_NOW:
-                    int month = zdt.getMonthValue() - 1;
-                    int quarterMonth = month - (month % 3) + 1;
-                    zdt = zdt.withMonth(quarterMonth);
-                    zdt = zdt.withDayOfMonth(1);
-                    break;
-                case YEAR_TO_NOW:
-                    zdt = zdt.withDayOfYear(1).withDayOfMonth(1);
-                    break;
-                case DAY:
-                    zdt = zdt.minusDays(1);
-                    break;
-                case WEEK:
-                    zdt = zdt.minusDays(6);
-                    break;
-                case MONTH:
-                    zdt = zdt.minusDays(29);
-                    break;
-                case YEAR:
-                    zdt = zdt.minusDays(364);
-                    break;
-                case QUARTER:
-                    zdt = zdt.minusDays(89);
-                    break;
-                case LAST_FULL_DAY:
-                    zdt = zdt.minusDays(1);
-                    break;
-                case LAST_FULL_WEEK:
-                    zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
-                    //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
-                    break;
-                case LAST_FULL_MONTH:
-                    zdt = zdt.minusMonths(1).withDayOfMonth(1);
-                    break;
-                case LAST_YEAR:
-                    zdt = zdt.minusYears(1).withDayOfYear(1);
-                    break;
-                case LAST_FULL_QUARTER:
-                    // TODO: ?
-                    break;
-                default:
+                }
+                break;
+            case DAY_TO_NOW:
+                //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case WEEK_TO_NOW:
+                zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
+                //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case MONTH_TO_NOW:
+                zdt = zdt.withDayOfMonth(1);
+                break;
+            case QUARTER_TO_NOW:
+                int month = zdt.getMonthValue() - 1;
+                int quarterMonth = month - (month % 3) + 1;
+                zdt = zdt.withMonth(quarterMonth);
+                zdt = zdt.withDayOfMonth(1);
+                break;
+            case YEAR_TO_NOW:
+                zdt = zdt.withDayOfYear(1).withDayOfMonth(1);
+                break;
+            case DAY:
+                zdt = zdt.minusDays(1);
+                break;
+            case WEEK:
+                zdt = zdt.minusDays(6);
+                break;
+            case MONTH:
+                zdt = zdt.minusDays(29);
+                break;
+            case YEAR:
+                zdt = zdt.minusDays(364);
+                break;
+            case QUARTER:
+                zdt = zdt.minusDays(89);
+                break;
+            case LAST_FULL_DAY:
+                zdt = zdt.minusDays(1);
+                break;
+            case LAST_FULL_WEEK:
+                zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
+                //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                break;
+            case LAST_FULL_MONTH:
+                zdt = zdt.minusMonths(1).withDayOfMonth(1);
+                break;
+            case LAST_YEAR:
+                zdt = zdt.minusYears(1).withDayOfYear(1);
+                break;
+            case LAST_FULL_QUARTER:
+                // TODO: ?
+                break;
+            default:
                     /*if (rollingFilterDefinition.getStartDate() == null) {
                         return 0;
                     }*/
-                    return (LocalDate) rollingFilterDefinition.getStartDate();
-            }
-            return zdt;
+                return (LocalDate) rollingFilterDefinition.getStartDate();
+        }
+        return zdt;
             /*Instant instant = zdt.toInstant();
             return Date.from(instant).getTime();*/
         //} else {
@@ -291,7 +291,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                             break;
                         case 1:
                             zdt = zdt.plusHours(intervalAmount);
-                          break;
+                            break;
                         case 2:
                             zdt = zdt.plusDays(intervalAmount);
                             break;
@@ -613,12 +613,12 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 DateValue originalValue = (DateValue) value.getOriginalValue();
                 if (originalValue != null) {
                     if (mode == RollingFilterDefinition.AFTER) {
-                        allowed = limitDate.isBefore(originalValue.getLocalDate()) || limitDate.isEqual(originalValue.getLocalDate());
+                        allowed = limitDateTime.isBefore(originalValue.getZonedDateTime()) || limitDateTime.isEqual(originalValue.getZonedDateTime());
                     } else if (mode == RollingFilterDefinition.BEFORE) {
-                        allowed = originalValue.getLocalDate().isBefore(endDate) || originalValue.getLocalDate().isEqual(endDate);
+                        allowed = originalValue.getZonedDateTime().isBefore(endDateTime) || originalValue.getZonedDateTime().isEqual(endDateTime);
                     } else {
-                        allowed = (limitDate.isBefore(originalValue.getLocalDate()) || limitDate.isEqual(originalValue.getLocalDate())) &&
-                                (originalValue.getLocalDate().isBefore(endDate) || originalValue.getLocalDate().isEqual(endDate));
+                        allowed = (limitDateTime.isBefore(originalValue.getZonedDateTime()) || limitDateTime.isEqual(originalValue.getZonedDateTime())) &&
+                                (originalValue.getZonedDateTime().isBefore(endDateTime) || originalValue.getZonedDateTime().isEqual(endDateTime));
                     }
                 }
             }
