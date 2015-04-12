@@ -33,7 +33,10 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            var names:Array = [ "Opportunity", "Customer", "Item"];
+            var names:Array = [ "Account", "AppPackage", "Budget", "Charge", "Contact", "CouponCode", "Customer", "Employee",
+                "InventoryNumber", "Issue", "Item", "ManufacturingRouting", "Nexus",
+                "Opportunity", "Partner", "Project",
+                "ProjectTask", "ResourceALlocation", "Subsidiary", "TimeBill", "TimeEntry", "TimeSheet", "Transaction", "Vendor"];
             var options:ArrayCollection = new ArrayCollection();
             for each (var n:String in names) {
                 options.addItem(new NetsuiteTable(n));
@@ -92,7 +95,8 @@
         <mx:Label text="Netsuite Role ID:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="roleIDInput" fontWeight="normal" fontFamily="Lucida Grande" text="{roleID}" width="350"/>
     </mx:HBox>
+    <mx:Text text="Select one or more tables to pull over:"/>
     <mx:VBox>
-        <mx:List dataProvider="{tableOptions}" itemRenderer="com.easyinsight.customupload.NetsuiteTableRenderer"/>
+        <mx:List dataProvider="{tableOptions}" itemRenderer="com.easyinsight.customupload.NetsuiteTableRenderer" width="300"/>
     </mx:VBox>
 </mx:VBox>
