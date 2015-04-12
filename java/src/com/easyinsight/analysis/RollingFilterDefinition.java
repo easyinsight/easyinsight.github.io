@@ -615,10 +615,10 @@ public class RollingFilterDefinition extends FilterDefinition {
                 endString = df.format(endDate);
             }
         } else {
-            /*long startTime = MaterializedRollingFilterDefinition.findStartDate(this, now, insightRequestMetadata);
-            long endTime = MaterializedRollingFilterDefinition.findEndDate(this, now, insightRequestMetadata);
-            startString = df.format(new Date(startTime));
-            endString = df.format(new Date(endTime));*/
+            LocalDate startDate = MaterializedRollingFilterDefinition.findStartDate(this, now, insightRequestMetadata);
+            LocalDate endDate = MaterializedRollingFilterDefinition.findEndDate(this, now, insightRequestMetadata);
+            startString = df.format(startDate);
+            endString = df.format(endDate);
 
         }
 
