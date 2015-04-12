@@ -72,5 +72,9 @@ public class MultiFlatDateFilterDefinition extends FilterDefinition {
         }
         return label;
     }
+
+    override public function getSubType():String {
+        return String(level);
+    }
 }
 }
