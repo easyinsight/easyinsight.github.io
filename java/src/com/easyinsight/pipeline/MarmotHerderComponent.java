@@ -45,6 +45,7 @@ public class MarmotHerderComponent implements IComponent {
                         new ReportCalculation(line).applyAfterReport(pipelineData.getReport(), allItems, keyMap, displayMap, unqualifiedDisplayMap, row, namespaceMap,
                                 calculationMetadata);
                     } catch (ReportException re) {
+                        LogClass.error(re);
                         throw re;
                     } catch (Exception e) {
                         LogClass.error(e);
