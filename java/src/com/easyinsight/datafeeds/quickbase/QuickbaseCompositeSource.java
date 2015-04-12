@@ -415,47 +415,48 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
             }
         }
 
-        Set<String> existing = new HashSet<>();
-        for (CompositeFeedNode child : getCompositeFeedNodes()) {
-            FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            if (dataSource instanceof QuickbaseDatabaseSource) {
-                QuickbaseDatabaseSource quickbaseDatabaseSource = (QuickbaseDatabaseSource) dataSource;
-                existing.add(quickbaseDatabaseSource.getDatabaseID());
-            }
-        }
-
-        if (isRebuildFields()) {
-            try {
-                String requestBody = MessageFormat.format(GoogleDataProvider.GET_SCHEMA_XML, sessionTicket, applicationToken);
-                Document doc = executeRequest(host, applicationId, "API_GetSchema", requestBody);
-                Nodes databases = doc.query("/qdbapi/table/chdbids/chdbid");
-                for (int i = 0; i < databases.size(); i++) {
-                    Node database = databases.get(i);
-                    String databaseID = database.query("./text()").get(0).getValue();
-                    if (!existing.contains(databaseID)) {
-                        QuickbaseDatabaseSource quickbaseDatabaseSource = GoogleDataProvider.createDataSource(sessionTicket, applicationToken, database, new ArrayList<>(), host);
-                        if (quickbaseDatabaseSource != null) {
-                            quickbaseDatabaseSource.setVisible(false);
-                            quickbaseDatabaseSource.setIndexEnabled(supportIndex);
-                            quickbaseDatabaseSource.setParentSourceID(getDataFeedID());
-                            UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
-                            quickbaseDatabaseSource.setUploadPolicy(childPolicy);
-                            FeedCreationResult result = new FeedCreation().createFeed(quickbaseDatabaseSource, conn, new DataSet(), childPolicy);
-                            result.getTableDefinitionMetadata().commit();
-                            result.getTableDefinitionMetadata().closeConnection();
-                            CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0, quickbaseDatabaseSource.getFeedName(),
-                                    quickbaseDatabaseSource.getFeedType().getType(), quickbaseDatabaseSource.getDataSourceBehavior());
-                            getCompositeFeedNodes().add(node);
-                            defaultChildren.add(quickbaseDatabaseSource);
-                        }
-                    }
-
+        if ("Complex HQ".equals(getFeedName())) {
+            Set<String> existing = new HashSet<>();
+            for (CompositeFeedNode child : getCompositeFeedNodes()) {
+                FeedDefinition dataSource = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
+                if (dataSource instanceof QuickbaseDatabaseSource) {
+                    QuickbaseDatabaseSource quickbaseDatabaseSource = (QuickbaseDatabaseSource) dataSource;
+                    existing.add(quickbaseDatabaseSource.getDatabaseID());
                 }
-            } catch (Exception e) {
-                LogClass.error(e);
+            }
+
+            if (isRebuildFields()) {
+                try {
+                    String requestBody = MessageFormat.format(GoogleDataProvider.GET_SCHEMA_XML, sessionTicket, applicationToken);
+                    Document doc = executeRequest(host, applicationId, "API_GetSchema", requestBody);
+                    Nodes databases = doc.query("/qdbapi/table/chdbids/chdbid");
+                    for (int i = 0; i < databases.size(); i++) {
+                        Node database = databases.get(i);
+                        String databaseID = database.query("./text()").get(0).getValue();
+                        if (!existing.contains(databaseID)) {
+                            QuickbaseDatabaseSource quickbaseDatabaseSource = GoogleDataProvider.createDataSource(sessionTicket, applicationToken, database, new ArrayList<>(), host);
+                            if (quickbaseDatabaseSource != null) {
+                                quickbaseDatabaseSource.setVisible(false);
+                                quickbaseDatabaseSource.setIndexEnabled(supportIndex);
+                                quickbaseDatabaseSource.setParentSourceID(getDataFeedID());
+                                UploadPolicy childPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
+                                quickbaseDatabaseSource.setUploadPolicy(childPolicy);
+                                FeedCreationResult result = new FeedCreation().createFeed(quickbaseDatabaseSource, conn, new DataSet(), childPolicy);
+                                result.getTableDefinitionMetadata().commit();
+                                result.getTableDefinitionMetadata().closeConnection();
+                                CompositeFeedNode node = new CompositeFeedNode(quickbaseDatabaseSource.getDataFeedID(), 0, 0, quickbaseDatabaseSource.getFeedName(),
+                                        quickbaseDatabaseSource.getFeedType().getType(), quickbaseDatabaseSource.getDataSourceBehavior());
+                                getCompositeFeedNodes().add(node);
+                                defaultChildren.add(quickbaseDatabaseSource);
+                            }
+                        }
+
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
         }
-
 
 
         return defaultChildren;
