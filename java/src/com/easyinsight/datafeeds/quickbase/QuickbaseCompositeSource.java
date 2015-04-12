@@ -425,7 +425,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
                 }
             }
 
-            if (isRebuildFields()) {
+            //if (isRebuildFields()) {
                 try {
                     String requestBody = MessageFormat.format(GoogleDataProvider.GET_SCHEMA_XML, sessionTicket, applicationToken);
                     Document doc = executeRequest(host, applicationId, "API_GetSchema", requestBody);
@@ -455,7 +455,7 @@ public class QuickbaseCompositeSource extends CompositeServerDataSource {
                 } catch (Exception e) {
                     LogClass.error(e);
                 }
-            }
+            //}
         }
 
 
