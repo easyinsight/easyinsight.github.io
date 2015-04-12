@@ -171,7 +171,12 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case WEEK_TO_NOW:
-                zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
+                LocalDate targ = zdt.with(targetDayOfWeek);
+                if (targ.isAfter(zdt)) {
+                    zdt = targ.minusWeeks(1);
+                } else {
+                    zdt = targ;
+                }
                 //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case MONTH_TO_NOW:
@@ -311,7 +316,12 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case WEEK_TO_NOW:
-                zdt = zdt.minusWeeks(1).with(targetDayOfWeek);
+                ZonedDateTime targ = zdt.with(targetDayOfWeek);
+                if (targ.isAfter(zdt)) {
+                    zdt = targ.minusWeeks(1);
+                } else {
+                    zdt = targ;
+                }
                 zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case MONTH_TO_NOW:
