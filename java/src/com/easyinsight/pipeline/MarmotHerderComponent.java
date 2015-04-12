@@ -4,6 +4,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.calculations.CalculationMetadata;
 import com.easyinsight.calculations.NamespaceGenerator;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 
 import java.util.*;
 
@@ -33,6 +34,7 @@ public class MarmotHerderComponent implements IComponent {
             Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
             StringTokenizer toker = new StringTokenizer(pipelineData.getReport().getReportRunMarmotScript(), "\r\n");
             CalculationMetadata calculationMetadata = new CalculationMetadata();
+            calculationMetadata.setInsightRequestMetadata(pipelineData.getInsightRequestMetadata());
             calculationMetadata.setReport(pipelineData.getReport());
             calculationMetadata.setDataSourceFields(allItems);
             calculationMetadata.setDataSet(dataSet);
@@ -45,6 +47,7 @@ public class MarmotHerderComponent implements IComponent {
                     } catch (ReportException re) {
                         throw re;
                     } catch (Exception e) {
+                        LogClass.error(e);
                         throw new ReportException(new AnalysisItemFault(e.getMessage() + " in the calculation of report code " + line + ".", null));
                     }
                 }
