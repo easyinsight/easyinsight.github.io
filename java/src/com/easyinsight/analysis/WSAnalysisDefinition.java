@@ -98,6 +98,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String urlKey;
     private long analysisID;
     private long dataFeedID;
+    private int cacheOrder;
     private boolean filterDateLevels;
     private int reportType;
     private long reportStateID;
@@ -169,6 +170,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
+    public int getCacheOrder() {
+        return cacheOrder;
+    }
+
+    public void setCacheOrder(int cacheOrder) {
+        this.cacheOrder = cacheOrder;
+    }
 
     public boolean isIncludeHeaderInHTML() {
         return includeHeaderInHTML;
@@ -913,11 +922,16 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Map<String, List<AnalysisItem>> unqualifiedDisplayMap = mapper.getUnqualifiedDisplayMap();
 
         if (getReportRunMarmotScript() != null) {
-            StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
-            while (toker.hasMoreTokens()) {
-                String line = toker.nextToken();
-                List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, unqualifiedDisplayMap, analysisItems, false, true, structure);
-                populate(map, items, insightRequestMetadata);
+            try {
+                StringTokenizer toker = new StringTokenizer(getReportRunMarmotScript(), "\r\n");
+                while (toker.hasMoreTokens()) {
+                    String line = toker.nextToken();
+                    List<AnalysisItem> items = ReportCalculation.getAnalysisItems(line, allItems, keyMap, displayMap, unqualifiedDisplayMap, analysisItems, false, true, structure);
+                    populate(map, items, insightRequestMetadata);
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
             }
         }
         if (uniqueIteMap != null) {
@@ -1148,6 +1162,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         customFontFamily = findStringProperty(properties, "customFontFamily", "");
         useCustomFontFamily = findBooleanProperty(properties, "useCustomFontFamily", false);
         generalSizeLimit = (int) findNumberProperty(properties, "generalSizeLimit", 0);
+        cacheOrder = (int) findNumberProperty(properties, "cacheOrder", 0);
         fetchSize = (int) findNumberProperty(properties, "fetchSize", 0);
         noDataOnNoJoin = findBooleanProperty(properties, "noDataOnNoJoin", false);
         aggregateQueryIfPossible = findBooleanProperty(properties, "aggregateQueryIfPossible", true);
@@ -1170,6 +1185,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         properties.add(new ReportStringProperty("fontName", fontName));
         properties.add(new ReportStringProperty("customFontFamily", customFontFamily));
         properties.add(new ReportNumericProperty("fontSize", fontSize));
+        properties.add(new ReportNumericProperty("cacheOrder", cacheOrder));
         properties.add(new ReportNumericProperty("cacheMinutes", cacheMinutes));
         properties.add(new ReportNumericProperty("headerFontSize", headerFontSize));
         properties.add(new ReportNumericProperty("maxHeaderWidth", maxHeaderWidth));
