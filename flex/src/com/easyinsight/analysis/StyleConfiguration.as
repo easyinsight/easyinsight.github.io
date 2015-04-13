@@ -251,6 +251,7 @@ public class StyleConfiguration {
     public static function getCachingItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
+        items.addItem(new NumericReportFormItem("Cache Order", "cacheOrder", report.cacheOrder, report, 0, 50));
         items.addItem(new TextReportFormItem("Cache Partition Filter", "cachePartitionFilter", report.cachePartitionFilter, report));
         items.addItem(new CheckBoxReportFormItem("Cache Persistence", "persistedCache", report.persistedCache, report));
         items.addItem(new CheckBoxReportFormItem("Cache Filters", "cacheFilters", report.cacheFilters, report));
