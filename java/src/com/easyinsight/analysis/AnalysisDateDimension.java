@@ -15,9 +15,7 @@ import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.Date;
@@ -290,13 +288,20 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 //zd = zdt;
                 temporal = zdt;
             } else {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(tempDate);
-                LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                        cal.get(Calendar.MONTH) + 1,
-                        cal.get(Calendar.DAY_OF_MONTH));
-                //ld = localDate;
-                temporal = localDate;
+                if (getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                    ZonedDateTime zdt = tempDate.toInstant().atZone(ZoneId.systemDefault());
+                    //zd = zdt;
+                    temporal = zdt;
+                } else {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(tempDate);
+                    LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                            cal.get(Calendar.MONTH) + 1,
+                            cal.get(Calendar.DAY_OF_MONTH));
+                    //ld = localDate;
+                    temporal = localDate;
+                }
+
             }
 
             /*if (timezoneShift) {
@@ -407,9 +412,15 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     Instant instant = zdt.toInstant();
                     finalDate = Date.from(instant);
                 } else {
-                    LocalDate localDate = (LocalDate) temporal;
-                    Instant instant = localDate.atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
-                    finalDate = Date.from(instant);
+                    if (getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                        ZonedDateTime zdt = (ZonedDateTime) temporal;
+                        Instant instant = zdt.toInstant();
+                        finalDate = Date.from(instant);
+                    } else {
+                        LocalDate localDate = (LocalDate) temporal;
+                        Instant instant = localDate.atStartOfDay().atZone(insightRequestMetadata.createZoneID()).toInstant();
+                        finalDate = Date.from(instant);
+                    }
                 }
 
 
