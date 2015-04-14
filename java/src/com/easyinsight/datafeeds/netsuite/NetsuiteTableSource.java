@@ -173,7 +173,7 @@ public class NetsuiteTableSource extends ServerDataSourceDefinition {
                 type.getSearchValue().add("_inventoryItem");
                 type.setOperator(SearchEnumMultiSelectFieldOperator.ANY_OF);
                 itemSearchBasic.setType(type);
-                if (searchID == null) {
+                if (searchID == null || "".equals(searchID)) {
                     searchRecord = itemSearchBasic;
                 } else {
                     ItemSearchAdvanced itemSearchAdvanced = new ItemSearchAdvanced();
@@ -453,7 +453,7 @@ public class NetsuiteTableSource extends ServerDataSourceDefinition {
                 type.getSearchValue().add("_inventoryItem");
                 type.setOperator(SearchEnumMultiSelectFieldOperator.ANY_OF);
                 itemSearchBasic.setType(type);
-                if (searchID == null) {
+                if (searchID == null || "".equals(searchID)) {
                     searchRecord = itemSearchBasic;
                 } else {
                     ItemSearchAdvanced itemSearchAdvanced = new ItemSearchAdvanced();
