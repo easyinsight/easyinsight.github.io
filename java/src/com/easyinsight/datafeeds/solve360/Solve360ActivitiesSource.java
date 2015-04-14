@@ -7,6 +7,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
@@ -32,6 +33,12 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
     private static final String TYPE = "Activity Type";
     private static final String ASSIGNED_TO = "Assigned To";
     private static final String COMMENTS = "Comments";
+    private static final String DUE_DATE = "Due Date";
+    private static final String TIME_SPENT = "Time Spent";
+    private static final String TIME_SPENT_MEASURE = "Time Spent Measure";
+    private static final String TIME_REMAINS = "Time Remains";
+    private static final String TIME_REMAINS_MEASURE = "Time Remains Measure";
+    private static final String TASK_LIST = "Task List";
     private static final String DURATION = "Duration";
     private static final String LOCATION = "Location";
     private static final String DATE_OCCURRED = "Date Occurred";
@@ -63,36 +70,32 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
         return Arrays.asList(ID, TYPE, COMMENTS, DURATION, LOCATION, DATE_OCCURRED, TIME_START, TIME_END, EVENT_TYPE, REMIND_STATUS, PRIORITY, TITLE, COMPLETED, REPEAT_INTERVAL, PARENT_COMPANY, PARENT_CONTACT, DETAILS);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, Connection conn, FeedDefinition parentDefinition) {
-        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get(ID)));
-        analysisItems.add(new AnalysisDimension(keys.get(TYPE)));
-        analysisItems.add(new AnalysisDimension(keys.get(COMMENTS)));
-        analysisItems.add(new AnalysisMeasure(keys.get(DURATION), DURATION, AggregationTypes.SUM, true, FormattingConfiguration.MILLISECONDS));
-        analysisItems.add(new AnalysisDimension(keys.get(LOCATION)));
-        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_OCCURRED), true, AnalysisDateDimension.MINUTE_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(TIME_START), true, AnalysisDateDimension.MINUTE_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(TIME_END), true, AnalysisDateDimension.MINUTE_LEVEL));
-        analysisItems.add(new AnalysisDimension(keys.get(EVENT_TYPE)));
-        analysisItems.add(new AnalysisDimension(keys.get(REMIND_STATUS)));
-        analysisItems.add(new AnalysisDimension(keys.get(PRIORITY)));
-        analysisItems.add(new AnalysisDimension(keys.get(TITLE)));
-        analysisItems.add(new AnalysisDimension(keys.get(COMPLETED)));
-        analysisItems.add(new AnalysisDimension(keys.get(REPEAT_INTERVAL)));
-        analysisItems.add(new AnalysisDimension(keys.get(PARENT_COMPANY)));
-        analysisItems.add(new AnalysisDimension(keys.get(PARENT_CONTACT)));
-        analysisItems.add(new AnalysisText(keys.get(DETAILS)));
-        Key countKey = keys.get(COUNT);
-        if (countKey == null) {
-            countKey = new NamedKey(COUNT);
-        }
-        Key assignedToKey = keys.get(ASSIGNED_TO);
-        if (assignedToKey == null) {
-            assignedToKey = new NamedKey(ASSIGNED_TO);
-        }
-        analysisItems.add(new AnalysisDimension(assignedToKey));
-        analysisItems.add(new AnalysisMeasure(countKey, AggregationTypes.SUM));
-        return analysisItems;
+    @Override
+    protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
+        fieldBuilder.addField(ID, new AnalysisDimension());
+        fieldBuilder.addField(DUE_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(TIME_SPENT, new AnalysisDimension());
+        fieldBuilder.addField(TIME_SPENT_MEASURE, new AnalysisMeasure());
+        fieldBuilder.addField(TIME_REMAINS, new AnalysisDimension());
+        fieldBuilder.addField(TIME_REMAINS_MEASURE, new AnalysisMeasure());
+        fieldBuilder.addField(TYPE, new AnalysisDimension());
+        fieldBuilder.addField(COMMENTS, new AnalysisDimension());
+        fieldBuilder.addField(DURATION, new AnalysisMeasure(AggregationTypes.SUM, FormattingConfiguration.MILLISECONDS));
+        fieldBuilder.addField(LOCATION, new AnalysisDimension());
+        fieldBuilder.addField(DATE_OCCURRED, new AnalysisDateDimension(AnalysisDateDimension.MINUTE_LEVEL));
+        fieldBuilder.addField(TIME_START, new AnalysisDateDimension(AnalysisDateDimension.MINUTE_LEVEL));
+        fieldBuilder.addField(TIME_END, new AnalysisDateDimension(AnalysisDateDimension.MINUTE_LEVEL));
+        fieldBuilder.addField(EVENT_TYPE, new AnalysisDimension());
+        fieldBuilder.addField(REMIND_STATUS, new AnalysisDimension());
+        fieldBuilder.addField(PRIORITY, new AnalysisDimension());
+        fieldBuilder.addField(TITLE, new AnalysisDimension());
+        fieldBuilder.addField(COMPLETED, new AnalysisDimension());
+        fieldBuilder.addField(REPEAT_INTERVAL, new AnalysisDimension());
+        fieldBuilder.addField(PARENT_COMPANY, new AnalysisDimension());
+        fieldBuilder.addField(PARENT_CONTACT, new AnalysisDimension());
+        fieldBuilder.addField(DETAILS, new AnalysisText());
+        fieldBuilder.addField(ASSIGNED_TO, new AnalysisDimension());
+        fieldBuilder.addField(COUNT, new AnalysisMeasure());
     }
 
     @Override
@@ -172,6 +175,31 @@ public class Solve360ActivitiesSource extends Solve360BaseSource {
                 String startTime = queryField(activityNode, "fields/timestart/text()");
                 if(startTime != null)
                     row.addValue(keys.get(TIME_START), df.parse(startTime));
+
+                String dueDate = queryField(activityNode, "fields/duedate/text()");
+                if (dueDate != null) {
+                    row.addValue(keys.get(DUE_DATE), df2.parse(dueDate));
+                }
+
+                String timeSpent = queryField(activityNode, "fields/timespent/text()");
+                if (timeSpent != null) {
+                    row.addValue(keys.get(TIME_SPENT), timeSpent);
+                }
+
+                String timeSpentMeasure = queryField(activityNode, "fields/timespentmeasure/text()");
+                if (timeSpentMeasure != null) {
+                    row.addValue(keys.get(TIME_SPENT_MEASURE), timeSpentMeasure);
+                }
+
+                String timeRemains = queryField(activityNode, "fields/timeremains/text()");
+                if (timeSpent != null) {
+                    row.addValue(keys.get(TIME_REMAINS), timeRemains);
+                }
+
+                String timeRemainsMeasure = queryField(activityNode, "fields/timeremainsmeasure/text()");
+                if (timeSpentMeasure != null) {
+                    row.addValue(keys.get(TIME_REMAINS_MEASURE), timeRemainsMeasure);
+                }
 
                 String endTime = queryField(activityNode, "fields/timeend/text()");
                 if(endTime != null)
