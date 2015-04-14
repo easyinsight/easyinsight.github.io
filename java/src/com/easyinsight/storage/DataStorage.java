@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.Date;
 import java.sql.*;
@@ -2105,9 +2106,9 @@ public class DataStorage implements IDataStorage {
 
     public ActualRowSet allData(@NotNull Collection<FilterDefinition> filters, @NotNull List<AnalysisItem> fields, @Nullable Integer limit,
                                 InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        Calendar cal = Calendar.getInstance();
-        Calendar shiftedCal = Calendar.getInstance();
-        int timeOffset = insightRequestMetadata.getUtcOffset() / 60;
+        //Calendar cal = Calendar.getInstance();
+        //Calendar shiftedCal = Calendar.getInstance();
+        /*int timeOffset = insightRequestMetadata.getUtcOffset() / 60;
         String string;
         if (timeOffset > 0) {
             string = "GMT-"+Math.abs(timeOffset);
@@ -2115,9 +2116,9 @@ public class DataStorage implements IDataStorage {
             string = "GMT+"+Math.abs(timeOffset);
         } else {
             string = "GMT";
-        }
-        TimeZone timeZone = TimeZone.getTimeZone(string);
-        shiftedCal.setTimeZone(timeZone);
+        }*/
+        /*TimeZone timeZone = TimeZone.getTimeZone(string);
+        shiftedCal.setTimeZone(timeZone);*/
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ");
         List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
@@ -2180,7 +2181,7 @@ public class DataStorage implements IDataStorage {
                             value = new EmptyValue();
                         } else {
                             DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            dateValue.calculate(true, insightRequestMetadata.createZoneID());
+                            dateValue.calculate(false, ZoneId.systemDefault());
                             value = dateValue;
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
