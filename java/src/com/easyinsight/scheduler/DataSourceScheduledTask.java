@@ -119,8 +119,6 @@ public class DataSourceScheduledTask extends ScheduledTask {
 
 
             }
-
-            BenchmarkManager.measureTask(info);
         } catch (ReportException re) {
             configurationProblem(conn, re.getReportFault().toString());
         } catch (Exception e) {
