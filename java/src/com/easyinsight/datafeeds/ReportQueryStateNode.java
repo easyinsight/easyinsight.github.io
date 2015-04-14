@@ -42,7 +42,7 @@ class ReportQueryStateNode extends QueryStateNode {
         queryData = new QueryData(queryNodeKey);
         this.conn = conn;
         dataSourceName = report.getName();
-        sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID());
+        sourceFeed = FeedRegistry.instance().getFeed(report.getDataFeedID(), conn);
         this.fromFeed = fromFeed;
         allFeedItems = sourceFeed.getFields();
         this.parentItems = parentItems;
