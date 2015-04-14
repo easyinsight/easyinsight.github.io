@@ -149,6 +149,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean dataDiscoveryEnabled;
     private String reportSourceName;
 
+
     private String defaultDate;
 
     private boolean publicWithKey;
@@ -170,6 +171,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     private int fetchSize;
     private boolean noDataOnNoJoin;
+
 
     public int getCacheOrder() {
         return cacheOrder;
