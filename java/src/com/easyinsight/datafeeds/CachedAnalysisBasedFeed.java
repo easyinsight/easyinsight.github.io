@@ -53,7 +53,7 @@ public class CachedAnalysisBasedFeed extends Feed {
             rs.next();
             long dataSourceID = rs.getLong(1);
             stmt.close();
-            Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+            Feed feed = FeedRegistry.instance().getFeed(dataSourceID, conn);
 
             Map<AnalysisItem, List<AnalysisItem>> map = new HashMap<AnalysisItem, List<AnalysisItem>>();
             Map<String, List<AnalysisItem>> fieldsGroupedByOriginalDisplayName = new HashMap<String, List<AnalysisItem>>();
