@@ -3307,6 +3307,10 @@ public class ExportService {
         workbook.setSheetName(0, "Data");
 
         boolean hasData;
+
+        long accountID = SecurityUtil.getAccountID(false);
+
+
         if (listDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             hasData = listVerticalList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
@@ -3322,10 +3326,10 @@ public class ExportService {
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
             WSMultiSummaryDefinition multiSummaryDefinition = (WSMultiSummaryDefinition) listDefinition;
             return multiSummaryDefinition.toExcel(insightRequestMetadata, conn);
-        } else if (listDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||listDefinition.getReportType() == WSAnalysisDefinition.TREE) {
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
+                (accountID != 5671 && listDefinition.getReportType() == WSAnalysisDefinition.TREE)) {
             WSTreeDefinition summaryDefinition = (WSTreeDefinition) listDefinition;
             hasData = summaryDefinition.toExcel(insightRequestMetadata, conn, sheet, styleMap, workbook);
-
         } else {
             hasData = listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
         }
