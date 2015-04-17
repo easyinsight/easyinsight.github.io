@@ -240,7 +240,8 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        return super.validForQuery() && (level == AnalysisDateDimension.MONTH_FLAT || level == AnalysisDateDimension.YEAR_LEVEL || level == AnalysisDateDimension.MONTH_LEVEL);
+        return super.validForQuery() && (level == AnalysisDateDimension.MONTH_FLAT || level == AnalysisDateDimension.YEAR_LEVEL || level == AnalysisDateDimension.MONTH_LEVEL) &&
+                levels != null && levels.size() > 0;
     }
 
     @Override
