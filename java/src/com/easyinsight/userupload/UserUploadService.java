@@ -25,6 +25,7 @@ import com.easyinsight.datafeeds.infusionsoft.*;
 import com.easyinsight.datafeeds.json.JSONDataSource;
 import com.easyinsight.datafeeds.json.JSONSetup;
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.etl.LookupTableDescriptor;
 import com.easyinsight.export.QuickReportDeliveryServlet;
@@ -2342,6 +2343,15 @@ public class UserUploadService {
             throw new MalformedCredentialsException();
         c.setPassword(s.substring(0, i));
         return c;
+    }
+
+    public Collection<BasecampNextAccount> getSurveyGizmoSurveys(SurveyGizmoCompositeSource dataSource) {
+        try {
+            return dataSource.getAvailableSurveys();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public Collection<BasecampNextAccount> getBasecampAccounts(BasecampNextCompositeSource dataSource) {
