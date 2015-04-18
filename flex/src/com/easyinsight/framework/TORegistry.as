@@ -103,6 +103,7 @@ import com.easyinsight.datasources.PostgresDatabaseConnection;
 import com.easyinsight.datasources.RedboothCompositeSource;
 import com.easyinsight.datasources.SmartsheetTableSource;
 import com.easyinsight.datasources.Solve360CompositeDataSource;
+import com.easyinsight.datasources.SurveyGizmoCompositeSource;
 import com.easyinsight.datasources.TeamworkCompositeSource;
 import com.easyinsight.datasources.TrelloCompositeSource;
 import com.easyinsight.filtering.MultiFieldFilterDefinition;
@@ -330,6 +331,7 @@ public class TORegistry {
         var happyFox:HappyFoxDataSource;
         var mc:MailChimpCompositeSource;
         var teamwork:TeamworkCompositeSource;
+        var survey:SurveyGizmoCompositeSource;
     }
 }
 }
