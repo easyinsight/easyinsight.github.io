@@ -325,13 +325,13 @@ public abstract class ServerDatabaseConnection extends ServerDataSourceDefinitio
                     }
                     offset += ctr;
                     rs.close();
-                } while (ctr != 0 && (usePaging() || keyAsLimit != null));
+                } while (ctr != 0 && ((usePaging() && !query.toLowerCase().contains(" limit ")) || keyAsLimit != null));
                 IDataStorage.insertData(dataSet);
             } finally {
                 connection.close();
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            LogClass.userError(e.getMessage(), e);
         }
         return null;
     }
