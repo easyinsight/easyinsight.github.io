@@ -28,7 +28,7 @@ import java.util.List;
 public class SurveyGizmoUtils {
 
     public static JSONObject runRequest(String url, HttpClient client, SurveyGizmoCompositeSource compositeConnection, List<NameValuePair> params) {
-        String target = "https://restapi.surveygizmo.com/v2" + url;
+        String target = "https://restapi.surveygizmo.com/v4" + url;
         HttpMethod restMethod = new GetMethod(target);
         OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(SurveyGizmoCompositeSource.CONSUMER_KEY, SurveyGizmoCompositeSource.CONSUMER_SECRET);
         consumer.setMessageSigner(new HmacSha1MessageSigner());

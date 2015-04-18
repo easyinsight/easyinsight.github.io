@@ -10,12 +10,12 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.poi.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -98,7 +98,8 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    String string = restMethod.getResponseBodyAsString();
+                    byte[] bytes = IOUtils.toByteArray(new InputStreamReader(restMethod.getResponseBodyAsStream()), "UTF-8");
+                    String string = new String(bytes, Charset.forName("UTF-8"));
                     jsonObject = (JSONArray) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
                     restMethod.releaseConnection();
                     successful = true;
@@ -154,8 +155,11 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    String string = restMethod.getResponseBodyAsString();
+                    //String string = restMethod.getResponseBodyAsString();
+                    byte[] bytes = IOUtils.toByteArray(new InputStreamReader(restMethod.getResponseBodyAsStream()), "UTF-8");
+                    String string = new String(bytes, Charset.forName("UTF-8"));
                     jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
+                    //jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     successful = true;
                 }
             } catch (IOException e) {
@@ -205,8 +209,11 @@ public abstract class BasecampNextBaseSource extends ServerDataSourceDefinition 
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    String string = restMethod.getResponseBodyAsString();
+                    //String string = restMethod.getResponseBodyAsString();
+                    byte[] bytes = IOUtils.toByteArray(new InputStreamReader(restMethod.getResponseBodyAsStream()), "UTF-8");
+                    String string = new String(bytes, Charset.forName("UTF-8"));
                     jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(string);
+                    //jsonObject = (JSONObject) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
                     successful = true;
                 }
             } catch (IOException e) {
