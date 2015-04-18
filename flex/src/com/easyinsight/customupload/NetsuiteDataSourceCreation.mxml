@@ -67,7 +67,6 @@
             ds.nsPassword = passwordInput.text;
             ds.table = String(tableComboBox.selectedItem);
             ds.searchID = searchIDInput.text;
-            Alert.show("setting feed name to " + String(tableComboBox.selectedItem));
             ds.feedName = String(tableComboBox.selectedItem);
         }
 
