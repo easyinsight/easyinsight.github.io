@@ -128,19 +128,31 @@ public class TokenService {
                 // https://oauth2.constantcontact.com/oauth2/oauth/siteowner/authorize?response_type=code&redirect_uri=https%3A%2F%2Fstaging.easy-insight.com%2Fapp%2Foauth&client_id=hzt8g9gd27c7fbge3qyscwku
                 return new OAuthResponse(request.getLocationUri(), true);
             } else if (type == FeedType.GOOGLE.getType()) {
-                consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
+                /*consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
                 consumer.setMessageSigner(new HmacSha1MessageSigner());
                 String scope = "https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/";
                 provider = new CommonsHttpOAuthProvider(
                         "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
-                        "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+                        "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");*/
+                OAuthClientRequest request = OAuthClientRequest
+                        .authorizationLocation("https://accounts.google.com/o/oauth2/auth")
+                        .setClientId("196763839405.apps.googleusercontent.com")
+                        .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code").
+                                setScope("https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/").setParameter("access_type", "offline")
+                        .buildQueryMessage();
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
+                return new OAuthResponse(request.getLocationUri(), true);
             } else if (type == FeedType.GOOGLE_ANALYTICS.getType()) {
-                consumer = new CommonsHttpOAuthConsumer("www.easy-insight.com", "OG0zlkZFPIe7JdHfLB8qXXYv");
-                consumer.setMessageSigner(new HmacSha1MessageSigner());
-                String scope = "https://www.google.com/analytics/feeds/";
-                provider = new CommonsHttpOAuthProvider(
-                        "https://www.google.com/accounts/OAuthGetRequestToken?scope=" + URLEncoder.encode(scope, "utf-8"), "https://www.google.com/accounts/OAuthGetAccessToken",
-                        "https://www.google.com/accounts/OAuthAuthorizeToken?hd=default");
+                OAuthClientRequest request = OAuthClientRequest
+                        .authorizationLocation("https://accounts.google.com/o/oauth2/auth")
+                        .setClientId("196763839405.apps.googleusercontent.com")
+                        .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code").
+                                setScope("https://www.google.com/analytics/feeds/").setParameter("access_type", "offline")
+                        .buildQueryMessage();
+                session.setAttribute("redirectTarget", redirectType);
+                session.setAttribute("dataSourceID", dataSource.getApiKey());
+                return new OAuthResponse(request.getLocationUri(), true);
             } else if (type == FeedType.GOOGLE_PROVISIONING.getType()) {
                 String scope = "https://apps-apis.google.com/a/feeds/user/";
                 consumer = new CommonsHttpOAuthConsumer("119099431019.apps.googleusercontent.com", "UuuYup6nE4M2PjnOv_jEg8Ki");

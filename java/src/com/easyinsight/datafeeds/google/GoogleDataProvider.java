@@ -121,7 +121,7 @@ public class GoogleDataProvider {
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             try {
-                List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2));
+                List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2), "");
                 return new GoogleSpreadsheetResponse(spreadsheets, true);
             } catch (AuthenticationException ae) {
                 return new GoogleSpreadsheetResponse(false);
@@ -131,7 +131,7 @@ public class GoogleDataProvider {
         }
     }
 
-    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret) throws AuthenticationException {
+    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret, String accessToken) throws AuthenticationException {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -151,7 +151,7 @@ public class GoogleDataProvider {
             }
             existsStmt.close();            
             URL feedUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full");
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret, accessToken);
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 try {

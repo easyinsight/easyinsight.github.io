@@ -6,6 +6,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
 import com.easyinsight.logging.LogClass;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
 import com.google.gdata.client.authn.oauth.OAuthException;
 import com.google.gdata.client.authn.oauth.OAuthHmacSha1Signer;
@@ -14,6 +16,11 @@ import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ResourceNotFoundException;
+import org.apache.amber.oauth2.client.OAuthClient;
+import org.apache.amber.oauth2.client.URLConnectionClient;
+import org.apache.amber.oauth2.client.request.OAuthClientRequest;
+import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.amber.oauth2.common.message.types.GrantType;
 
 import java.util.Set;
 import java.util.Collection;
@@ -30,72 +37,74 @@ public class GoogleSpreadsheetFeed extends Feed {
     private String worksheetURL;
     private String tokenKey;
     private String tokenSecret;
+    private String accessToken;
+    private String refreshToken;
 
     private transient SpreadsheetService as;
 
-    public GoogleSpreadsheetFeed(String worksheetURL, String tokenKey, String tokenSecret) {
+    public GoogleSpreadsheetFeed(String worksheetURL, String tokenKey, String tokenSecret, String accessToken, String refreshToken) {
         this.worksheetURL = worksheetURL;
         this.tokenKey = tokenKey;
         this.tokenSecret = tokenSecret;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     private SpreadsheetService getService() throws OAuthException {
 
         if (as == null) {
-            as = new SpreadsheetService("easyinsight_eidocs_v1.0");
-            GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
-            oauthParameters.setOAuthConsumerKey("www.easy-insight.com");
-            oauthParameters.setOAuthConsumerSecret("OG0zlkZFPIe7JdHfLB8qXXYv");
-            oauthParameters.setOAuthToken(tokenKey);
-            oauthParameters.setOAuthTokenSecret(tokenSecret);
-            oauthParameters.setScope("https://docs.google.com/feeds/");
-            OAuthSigner signer = new OAuthHmacSha1Signer();
-            as.setOAuthCredentials(oauthParameters, signer);
+            if (accessToken != null && !"".equals(accessToken)) {
+                GoogleCredential credential = new GoogleCredential();
+                credential.setAccessToken(accessToken);
+                //credential.setRefreshToken(oauthTokenSecret);
+
+                SpreadsheetService service = new SpreadsheetService("easyinsight-eidocs-1");
+                service.useSsl();
+                service.setOAuth2Credentials(credential);
+
+                as = service;
+            } else {
+                SpreadsheetService spreadsheetService = new SpreadsheetService("easyinsight-eidocs-1");
+                spreadsheetService.useSsl();
+                GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
+                oauthParameters.setOAuthConsumerKey("www.easy-insight.com");
+                oauthParameters.setOAuthConsumerSecret("OG0zlkZFPIe7JdHfLB8qXXYv");
+                oauthParameters.setOAuthToken(tokenKey);
+                oauthParameters.setOAuthTokenSecret(tokenSecret);
+                oauthParameters.setScope("https://spreadsheets.google.com/feeds/");
+                OAuthSigner signer = new OAuthHmacSha1Signer();
+                spreadsheetService.setOAuthCredentials(oauthParameters, signer);
+                as = spreadsheetService;
+            }
         }
         return as;
     }
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
-            SpreadsheetService myService = getService();
-            URL listFeedUrl = new URL(worksheetURL);
-            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
-            DataSet dataSet = new DataSet();
-            for (ListEntry listEntry : feed.getEntries()) {
-                IRow row = dataSet.createRow();
-                for (AnalysisItem analysisItem : analysisItems) {
-                    if (analysisItem.isDerived()) {
-                        continue;
-                    }
-                    boolean matched = false;
-                    Key key = analysisItem.getKey();
-                    for (String tag : listEntry.getCustomElements().getTags()) {
-                        if (key.toKeyString().equals(tag)) {
-                            matched = true;
-                            Value value;
-                            String string = listEntry.getCustomElements().getValue(tag);
-                            if (string == null) {
-                                value = new EmptyValue();
-                            } else {
-                                string = string.trim();
-                                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                                    value = new NumericValue(NumericValue.produceDoubleValue(string));
-                                } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                                    AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
-                                    value = date.renameMeLater(new StringValue(string));
-                                } else {
-                                    value = new StringValue(string);
-                                }
-                            }
-                            row.addValue(analysisItem.createAggregateKey(), value);
-                        }
-                    }
-                    if (!matched && "Count".equals(key.toKeyString())) {
-                        row.addValue(analysisItem.createAggregateKey(), 1);
-                    }
+            return createDataSet(analysisItems);
+        } catch (GoogleService.SessionExpiredException gse) {
+            try {
+                OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
+                        setGrantType(GrantType.REFRESH_TOKEN).setClientId("196763839405.apps.googleusercontent.com").
+                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").setRefreshToken(refreshToken).setRedirectURI("https://easy-insight.com/app/oauth");
+                //tokenRequestBuilder.setParameter("type", "refresh_token");
+                OAuthClient client = new OAuthClient(new URLConnectionClient());
+                OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
+                OAuthJSONAccessTokenResponse response = client.accessToken(request);
+                accessToken = response.getAccessToken();
+                System.out.println("got new access token");
+                try {
+                    as = null;
+                    return createDataSet(analysisItems);
+                } catch (Exception e1) {
+                    as = null;
+                    throw new RuntimeException(e1);
                 }
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
             }
-            return dataSet;
         } catch (AuthenticationException ae) {
             throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (OAuthException oe) {
@@ -109,5 +118,47 @@ public class GoogleSpreadsheetFeed extends Feed {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    protected DataSet createDataSet(Set<AnalysisItem> analysisItems) throws OAuthException, java.io.IOException, com.google.gdata.util.ServiceException {
+        SpreadsheetService myService = getService();
+        URL listFeedUrl = new URL(worksheetURL);
+        ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
+        DataSet dataSet = new DataSet();
+        for (ListEntry listEntry : feed.getEntries()) {
+            IRow row = dataSet.createRow();
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (analysisItem.isDerived()) {
+                    continue;
+                }
+                boolean matched = false;
+                Key key = analysisItem.getKey();
+                for (String tag : listEntry.getCustomElements().getTags()) {
+                    if (key.toKeyString().equals(tag)) {
+                        matched = true;
+                        Value value;
+                        String string = listEntry.getCustomElements().getValue(tag);
+                        if (string == null) {
+                            value = new EmptyValue();
+                        } else {
+                            string = string.trim();
+                            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                value = new NumericValue(NumericValue.produceDoubleValue(string));
+                            } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                                AnalysisDateDimension date = (AnalysisDateDimension) analysisItem;
+                                value = date.renameMeLater(new StringValue(string));
+                            } else {
+                                value = new StringValue(string);
+                            }
+                        }
+                        row.addValue(analysisItem.createAggregateKey(), value);
+                    }
+                }
+                if (!matched && "Count".equals(key.toKeyString())) {
+                    row.addValue(analysisItem.createAggregateKey(), 1);
+                }
+            }
+        }
+        return dataSet;
     }
 }

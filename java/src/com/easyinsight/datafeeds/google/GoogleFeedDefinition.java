@@ -22,11 +22,12 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.net.URL;
 
-import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
-import flex.messaging.FlexContext;
-import oauth.signpost.OAuthConsumer;
-import oauth.signpost.OAuthProvider;
+import org.apache.amber.oauth2.client.OAuthClient;
+import org.apache.amber.oauth2.client.URLConnectionClient;
+import org.apache.amber.oauth2.client.request.OAuthClientRequest;
+import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +70,25 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     private String tokenKey;
     private String tokenSecret;
 
+    private String refreshToken;
+    private String accessToken;
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
     public String getPin() {
         return pin;
     }
@@ -95,27 +115,30 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
-        try {
-            if (externalPin != null) {
-                pin = externalPin;
+        if (request != null) {
+            String code = request.getParameter("code");
+            if (code != null) {
+                OAuthClientRequest oAuthClientRequest = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
+                        setGrantType(GrantType.AUTHORIZATION_CODE).setClientId("196763839405.apps.googleusercontent.com").
+                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").
+                        setRedirectURI("https://www.easy-insight.com/app/oauth").
+                        setParameter("access_type", "offline").
+                        setCode(code).buildBodyMessage();
+
+                OAuthClient client = new OAuthClient(new URLConnectionClient());
+                OAuthJSONAccessTokenResponse response = client.accessToken(oAuthClientRequest);
+                System.out.println("access token = " + response.getAccessToken());
+                System.out.println("refresh token = " + response.getRefreshToken());
+                accessToken = response.getAccessToken();
+                refreshToken = response.getRefreshToken();
             }
-            if (request != null && pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin.trim());
-                tokenKey = consumer.getToken();
-                tokenSecret = consumer.getTokenSecret();
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         }
     }
 
     public void customStorage(Connection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GOOGLE_FEED WHERE DATA_FEED_ID = ? ");
-        PreparedStatement insertGoogleStmt = conn.prepareStatement("INSERT INTO GOOGLE_FEED (DATA_FEED_ID, WORKSHEETURL, TOKEN_KEY, TOKEN_SECRET) " +
-                "VALUES (?, ?, ?, ?)");
+        PreparedStatement insertGoogleStmt = conn.prepareStatement("INSERT INTO GOOGLE_FEED (DATA_FEED_ID, WORKSHEETURL, TOKEN_KEY, TOKEN_SECRET, REFRESH_TOKEN, ACCESS_TOKEN) " +
+                "VALUES (?, ?, ?, ?, ?, ?)");
         try {
             clearStmt.setLong(1, getDataFeedID());
             clearStmt.executeUpdate();
@@ -124,6 +147,8 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             insertGoogleStmt.setString(2, worksheetURL);
             insertGoogleStmt.setString(3, tokenKey);
             insertGoogleStmt.setString(4, tokenSecret);
+            insertGoogleStmt.setString(5, refreshToken);
+            insertGoogleStmt.setString(6, accessToken);
             insertGoogleStmt.execute();
         } finally {
             insertGoogleStmt.close();
@@ -131,7 +156,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     public void customLoad(Connection conn) throws SQLException {
-        PreparedStatement getAnalysisStmt = conn.prepareStatement("SELECT WORKSHEETURL, TOKEN_KEY, TOKEN_SECRET FROM GOOGLE_FEED WHERE " +
+        PreparedStatement getAnalysisStmt = conn.prepareStatement("SELECT WORKSHEETURL, TOKEN_KEY, TOKEN_SECRET, REFRESH_TOKEN, ACCESS_TOKEN FROM GOOGLE_FEED WHERE " +
                 "DATA_FEED_ID = ?");
         try {
             getAnalysisStmt.setLong(1, getDataFeedID());
@@ -140,6 +165,8 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             this.worksheetURL = rs.getString(1);
             this.tokenKey = rs.getString(2);
             this.tokenSecret = rs.getString(3);
+            this.refreshToken = rs.getString(4);
+            this.accessToken = rs.getString(5);
         } finally {
             getAnalysisStmt.close();
         }
@@ -170,7 +197,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     private DataSet createDataSet(Map<String, Key> keys) throws ReportException {
         DataSet dataSet;
         try {
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret, accessToken);
             URL listFeedUrl = new URL(worksheetURL);
             ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
             dataSet = new DataSet();
@@ -266,12 +293,12 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        return new GoogleSpreadsheetFeed(worksheetURL, tokenKey, tokenSecret);
+        return new GoogleSpreadsheetFeed(worksheetURL, tokenKey, tokenSecret, accessToken, refreshToken);
     }
 
     public GoogleSpreadsheetResponse getPossibleSpreadsheets() throws OAuthException, ServiceException, IOException {
         URL feedUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full");
-        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
+        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret, accessToken);
         SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
         List<Spreadsheet> worksheets = new ArrayList<>();
         for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
