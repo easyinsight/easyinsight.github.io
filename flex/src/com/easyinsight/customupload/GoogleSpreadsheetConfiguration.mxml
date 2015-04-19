@@ -10,6 +10,11 @@
 
         private function reauthorize():void {
             ProgressAlert.alert(this, "Authorizing...", null, tokenService.getOAuthURL);
+            tokenService.getOAuthURL.send(dataSource.getFeedType(), true, null, dataSource, 2);
+        }
+
+        private function reconfigure():void {
+            ProgressAlert.alert(this, "Authorizing...", null, tokenService.getOAuthURL);
             tokenService.getOAuthURL.send(dataSource.getFeedType(), true, null, dataSource, 2, true);
         }
 
@@ -28,6 +33,7 @@
     </mx:RemoteObject>
 
     <mx:Button label="Reauthorize Access" click="reauthorize()"/>
+    <mx:Button label="Reauthorize and Reconfigure" click="reconfigure()"/>
     <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
 
 </feed:DataSourceWindow>
