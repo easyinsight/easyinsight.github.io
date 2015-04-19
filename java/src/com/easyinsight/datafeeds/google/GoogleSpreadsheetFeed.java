@@ -112,9 +112,9 @@ public class GoogleSpreadsheetFeed extends Feed {
                     System.out.println("We also need to update: ");
                     while (rs.next()) {
                         System.out.println("\t" + rs.getLong(1));
-                        updateStmt.setString(1, accessToken);
+                        /*updateStmt.setString(1, accessToken);
                         updateStmt.setLong(2, rs.getLong(1));
-                        updateStmt.executeUpdate();
+                        updateStmt.executeUpdate();*/
                     }
                     ps.close();
                     updateStmt.close();

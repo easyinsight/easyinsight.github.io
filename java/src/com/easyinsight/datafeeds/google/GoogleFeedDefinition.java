@@ -146,10 +146,10 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                     while (rs.next()) {
                         long id = rs.getLong(1);
                         System.out.println("\t" + id);
-                        updateStmt.setString(1, accessToken);
+                        /*updateStmt.setString(1, accessToken);
                         updateStmt.setString(2, refreshToken);
                         updateStmt.setLong(3, id);
-                        updateStmt.executeUpdate();
+                        updateStmt.executeUpdate();*/
                     }
                     ps.close();
                     updateStmt.close();
