@@ -137,12 +137,18 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                 PreparedStatement ps = conn.prepareStatement("SELECT GOOGLE_FEED.DATA_FEED_ID FROM GOOGLE_FEED, UPLOAD_POLICY_USERS, USER WHERE TOKEN_KEY = ? AND " +
                         "GOOGLE_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
                         "USER.ACCOUNT_ID = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE GOOGLE_FEED SET ACCESS_TOKEN = ?, REFRESH_TOKEN = ? WHERE data_feed_id = ?");
                 ps.setString(1, tokenKey);
                 ps.setLong(2, SecurityUtil.getAccountID());
                 ResultSet rs = ps.executeQuery();
                 System.out.println("We also need to update: ");
                 while (rs.next()) {
-                    System.out.println("\t" + rs.getLong(1));
+                    long id = rs.getLong(1);
+                    System.out.println("\t" + id);
+                    updateStmt.setString(1, accessToken);
+                    updateStmt.setString(2, refreshToken);
+                    updateStmt.setLong(3, id);
+                    updateStmt.executeUpdate();
                 }
             }
         }

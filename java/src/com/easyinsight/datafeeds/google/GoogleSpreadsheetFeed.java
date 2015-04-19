@@ -101,15 +101,20 @@ public class GoogleSpreadsheetFeed extends Feed {
                 try {
                     as = null;
                     DataSet dataSet = createDataSet(analysisItems);
-                    PreparedStatement ps = conn.prepareStatement("SELECT GOOGLE_FEED.DATA_FEED_ID FROM GOOGLE_FEED, UPLOAD_POLICY_USERS, USER WHERE TOKEN_KEY = ? AND " +
+                    PreparedStatement ps = conn.prepareStatement("SELECT GOOGLE_FEED.DATA_FEED_ID FROM GOOGLE_FEED, UPLOAD_POLICY_USERS, USER WHERE REFRESH_TOKEN = ? AND " +
                             "GOOGLE_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
                             "USER.ACCOUNT_ID = ?");
-                    ps.setString(1, tokenKey);
+                    PreparedStatement updateStmt = conn.prepareStatement("UPDATE GOOGLE_FEED SET ACCESS_TOKEN = ? WHERE data_feed_id = ?");
+
+                    ps.setString(1, refreshToken);
                     ps.setLong(2, SecurityUtil.getAccountID());
                     ResultSet rs = ps.executeQuery();
                     System.out.println("We also need to update: ");
                     while (rs.next()) {
                         System.out.println("\t" + rs.getLong(1));
+                        updateStmt.setString(1, accessToken);
+                        updateStmt.setLong(2, rs.getLong(1));
+                        updateStmt.executeUpdate();
                     }
                     return dataSet;
                 } catch (Exception e1) {
