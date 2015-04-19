@@ -71,7 +71,7 @@
 
         private function onGoogleEvent(event:GoogleSelectionEvent):void {
             if (newConnection) {
-                Alert.show("con = " + newConnection);
+
                 var context:GoogleSpreadsheetUploadContext = new GoogleSpreadsheetUploadContext();
                 dataSource.worksheetURL = event.worksheetURL;
                 context.feedDefinition = dataSource;
@@ -80,7 +80,7 @@
                 uploadService.analyzeUpload.send(context);
                 //dispatchEvent(new Event('closeWindow', true));
             } else {
-                Alert.show("updating " + event.worksheetURL);
+
                 dataSource.worksheetURL = event.worksheetURL;
                 feedService.updateFeedDefinition.send(dataSource);
             }
