@@ -5,6 +5,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.IDataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.core.*;
@@ -124,6 +125,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                         setRedirectURI("https://www.easy-insight.com/app/oauth").
                         setParameter("access_type", "offline").setParameter("approval_prompt", "force").
                         setCode(code).buildBodyMessage();
+
                 System.out.println("and access type of offline here too?");
                 OAuthClient client = new OAuthClient(new URLConnectionClient());
                 OAuthJSONAccessTokenResponse response = client.accessToken(oAuthClientRequest);
@@ -131,6 +133,17 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                 System.out.println("refresh token = " + response.getRefreshToken());
                 accessToken = response.getAccessToken();
                 refreshToken = response.getRefreshToken();
+
+                PreparedStatement ps = conn.prepareStatement("SELECT GOOGLE_FEED.DATA_FEED_ID FROM GOOGLE_FEED, UPLOAD_POLICY_USERS, USER WHERE TOKEN_KEY = ? AND " +
+                        "GOOGLE_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
+                        "USER.ACCOUNT_ID = ?");
+                ps.setString(1, tokenKey);
+                ps.setLong(2, SecurityUtil.getAccountID());
+                ResultSet rs = ps.executeQuery();
+                System.out.println("We also need to update: ");
+                while (rs.next()) {
+                    System.out.println("\t" + rs.getLong(1));
+                }
             }
         }
     }
