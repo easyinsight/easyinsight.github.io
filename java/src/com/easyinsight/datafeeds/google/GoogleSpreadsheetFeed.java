@@ -96,7 +96,7 @@ public class GoogleSpreadsheetFeed extends Feed {
                 OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
                 OAuthJSONAccessTokenResponse response = client.accessToken(request);
                 accessToken = response.getAccessToken();
-                System.out.println("got new access token");
+                System.out.println("got new access token = " + accessToken);
 
                 try {
                     as = null;
@@ -109,7 +109,7 @@ public class GoogleSpreadsheetFeed extends Feed {
                     ps.setString(1, refreshToken);
                     ps.setLong(2, SecurityUtil.getAccountID());
                     ResultSet rs = ps.executeQuery();
-                    System.out.println("We also need to update: ");
+                    System.out.println("We also need to update where refresh token: ");
                     while (rs.next()) {
                         System.out.println("\t" + rs.getLong(1));
                         /*updateStmt.setString(1, accessToken);
@@ -120,6 +120,7 @@ public class GoogleSpreadsheetFeed extends Feed {
                     updateStmt.close();
                     return dataSet;
                 } catch (Exception e1) {
+                    LogClass.error(e1);
                     as = null;
                     throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
                 }
