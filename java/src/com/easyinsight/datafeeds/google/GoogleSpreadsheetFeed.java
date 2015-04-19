@@ -86,7 +86,7 @@ public class GoogleSpreadsheetFeed extends Feed {
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
         try {
             return createDataSet(analysisItems);
-        } catch (GoogleService.SessionExpiredException gse) {
+        } catch (Exception gse) {
             try {
                 OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
                         setGrantType(GrantType.REFRESH_TOKEN).setClientId("196763839405.apps.googleusercontent.com").
@@ -116,27 +116,17 @@ public class GoogleSpreadsheetFeed extends Feed {
                         updateStmt.setLong(2, rs.getLong(1));
                         updateStmt.executeUpdate();
                     }
+                    ps.close();
+                    updateStmt.close();
                     return dataSet;
                 } catch (Exception e1) {
                     as = null;
-                    throw new RuntimeException(e1);
+                    throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
                 }
             } catch (Exception e) {
                 LogClass.error(e);
-                throw new RuntimeException(e);
-            }
-        } catch (AuthenticationException ae) {
-            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
-        } catch (OAuthException oe) {
-            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
-        } catch (ResourceNotFoundException re) {
-            throw new ReportException(new DataSourceConnectivityReportFault("We couldn't find the specified spreadsheet anymore--was it deleted?", getDataSource()));
-        } catch (Exception e) {
-            if (e.getCause() != null && e.getCause() instanceof OAuthException) {
                 throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
             }
-            LogClass.error(e);
-            throw new RuntimeException(e);
         }
     }
 

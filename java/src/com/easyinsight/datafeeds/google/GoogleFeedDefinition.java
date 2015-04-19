@@ -150,6 +150,8 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                     updateStmt.setLong(3, id);
                     updateStmt.executeUpdate();
                 }
+                ps.close();
+                updateStmt.close();
             }
         }
     }
