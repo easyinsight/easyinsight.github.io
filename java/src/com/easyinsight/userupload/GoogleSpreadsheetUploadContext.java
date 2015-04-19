@@ -47,7 +47,8 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
     @Override
     public List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception {
 
-        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(feedDefinition.getTokenKey(), feedDefinition.getTokenSecret());
+        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(feedDefinition.getTokenKey(), feedDefinition.getTokenSecret(),
+                feedDefinition.getAccessToken());
         URL listFeedUrl = new URL(feedDefinition.getWorksheetURL());
         ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
         DataTypeGuesser guesser = new DataTypeGuesser();
