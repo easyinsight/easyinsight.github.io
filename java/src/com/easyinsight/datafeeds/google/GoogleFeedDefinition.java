@@ -122,7 +122,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                         setGrantType(GrantType.AUTHORIZATION_CODE).setClientId("196763839405.apps.googleusercontent.com").
                         setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").
                         setRedirectURI("https://www.easy-insight.com/app/oauth").
-                        setParameter("access_type", "offline").
+                        setParameter("access_type", "offline").setParameter("approval_prompt", "force").
                         setCode(code).buildBodyMessage();
                 System.out.println("and access type of offline here too?");
                 OAuthClient client = new OAuthClient(new URLConnectionClient());
