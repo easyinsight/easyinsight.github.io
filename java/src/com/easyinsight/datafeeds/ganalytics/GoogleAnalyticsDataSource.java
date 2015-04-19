@@ -259,10 +259,8 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 OAuthJSONAccessTokenResponse response = client.accessToken(oAuthClientRequest);
                 System.out.println("access token = " + response.getAccessToken());
                 System.out.println("refresh token = " + response.getRefreshToken());
-                tokenKey = response.getAccessToken();
-                tokenSecret = response.getRefreshToken();
-                /*accessToken = response.getAccessToken();
-                refreshToken = response.getRefreshToken();*/
+                accessToken = response.getAccessToken();
+                refreshToken = response.getRefreshToken();
             }
         }
     }

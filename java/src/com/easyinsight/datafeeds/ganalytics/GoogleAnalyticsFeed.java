@@ -171,17 +171,6 @@ public class GoogleAnalyticsFeed extends Feed {
     private String refreshToken;
     private String accessToken;
 
-    private String getToken() throws ReportException {
-        if (token == null) {
-            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_ANALYTICS_TOKEN, getFeedID(), true);
-            if (tokenObject == null) {
-                throw new ReportException(new DataSourceConnectivityReportFault("You need to reset your connection to Google Analytics.", getDataSource()));
-            }
-            token = tokenObject.getTokenValue();
-        }
-        return token;
-    }
-
     private AnalyticsService getAnalyticsService() throws AuthenticationException, ReportException, OAuthException {
         if (as == null) {
             as = new AnalyticsService("easyinsight_eianalytics_v1.0");
@@ -189,8 +178,8 @@ public class GoogleAnalyticsFeed extends Feed {
             if (accessToken != null && !"".equals(accessToken)) {
                 as.useSsl();
                 GoogleCredential credential = new GoogleCredential();
-                credential.setAccessToken(oauthToken);
-                credential.setRefreshToken(oauthTokenSecret);
+                credential.setAccessToken(accessToken);
+                credential.setRefreshToken(refreshToken);
                 as.setOAuth2Credentials(credential);
             } else {
                 GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
@@ -231,12 +220,12 @@ public class GoogleAnalyticsFeed extends Feed {
             try {
                 OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
                         setGrantType(GrantType.REFRESH_TOKEN).setClientId("196763839405.apps.googleusercontent.com").
-                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").setRefreshToken(oauthTokenSecret).setRedirectURI("https://easy-insight.com/app/oauth");
+                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").setRefreshToken(refreshToken).setRedirectURI("https://easy-insight.com/app/oauth");
                 //tokenRequestBuilder.setParameter("type", "refresh_token");
                 OAuthClient client = new OAuthClient(new URLConnectionClient());
                 OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
                 OAuthJSONAccessTokenResponse response = client.accessToken(request);
-                oauthToken = response.getAccessToken();
+                accessToken = response.getAccessToken();
                 System.out.println("got new access token");
                 try {
                     as = null;
