@@ -6,6 +6,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.client.authn.oauth.GoogleOAuthParameters;
@@ -22,6 +23,8 @@ import org.apache.amber.oauth2.client.request.OAuthClientRequest;
 import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Set;
 import java.util.Collection;
 import java.util.List;
@@ -94,9 +97,21 @@ public class GoogleSpreadsheetFeed extends Feed {
                 OAuthJSONAccessTokenResponse response = client.accessToken(request);
                 accessToken = response.getAccessToken();
                 System.out.println("got new access token");
+
                 try {
                     as = null;
-                    return createDataSet(analysisItems);
+                    DataSet dataSet = createDataSet(analysisItems);
+                    PreparedStatement ps = conn.prepareStatement("SELECT GOOGLE_FEED.DATA_FEED_ID FROM GOOGLE_FEED, UPLOAD_POLICY_USERS, USER WHERE TOKEN_KEY = ? AND " +
+                            "GOOGLE_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID AND " +
+                            "USER.ACCOUNT_ID = ?");
+                    ps.setString(1, tokenKey);
+                    ps.setLong(2, SecurityUtil.getAccountID());
+                    ResultSet rs = ps.executeQuery();
+                    System.out.println("We also need to update: ");
+                    while (rs.next()) {
+                        System.out.println("\t" + rs.getLong(1));
+                    }
+                    return dataSet;
                 } catch (Exception e1) {
                     as = null;
                     throw new RuntimeException(e1);

@@ -124,7 +124,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
                         setRedirectURI("https://www.easy-insight.com/app/oauth").
                         setParameter("access_type", "offline").
                         setCode(code).buildBodyMessage();
-
+                System.out.println("and access type of offline here too?");
                 OAuthClient client = new OAuthClient(new URLConnectionClient());
                 OAuthJSONAccessTokenResponse response = client.accessToken(oAuthClientRequest);
                 System.out.println("access token = " + response.getAccessToken());

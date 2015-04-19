@@ -140,6 +140,7 @@ public class TokenService {
                         .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code").
                                 setScope("https://spreadsheets.google.com/feeds/ https://docs.google.com/feeds/").setParameter("access_type", "offline")
                         .buildQueryMessage();
+                System.out.println("we're putting access type of offline?");
                 session.setAttribute("redirectTarget", redirectType);
                 session.setAttribute("dataSourceID", dataSource.getApiKey());
                 return new OAuthResponse(request.getLocationUri(), true);
