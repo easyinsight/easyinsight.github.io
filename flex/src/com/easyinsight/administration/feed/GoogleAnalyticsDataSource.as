@@ -12,6 +12,8 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition{
     public var pin:String;
     public var tokenKey:String;
     public var tokenSecret:String;
+    public var refreshToken:String;
+    public var accessToken:String;
 
     public function GoogleAnalyticsDataSource() {
         super();

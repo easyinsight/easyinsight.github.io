@@ -14,6 +14,8 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition
     public var worksheetURL:String;
     public var tokenKey:String;
     public var tokenSecret:String;
+    public var refreshToken:String;
+    public var accessToken:String;
     public var pin:String;
 
     public function GoogleFeedDefinition()
