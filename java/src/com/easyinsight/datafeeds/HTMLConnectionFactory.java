@@ -147,6 +147,9 @@ public class HTMLConnectionFactory {
                             OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
                             servletResponse.sendRedirect(response.getRequestToken());
                         }
+                    } else {
+                        OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
+                        servletResponse.sendRedirect(response.getRequestToken());
                     }
                 } else {
                     new FeedStorage().updateDataFeedConfiguration(dataSource);
