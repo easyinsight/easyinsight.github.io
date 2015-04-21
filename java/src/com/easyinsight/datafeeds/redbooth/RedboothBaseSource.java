@@ -33,6 +33,8 @@ public abstract class RedboothBaseSource extends ServerDataSourceDefinition {
         if (value != null) {
             try {
                 long time = Long.parseLong(value) * 1000;
+                Date date = new Date(time);
+                System.out.println(date);
                 return new DateValue(new Date(time));
                 /*Date date = df.parseDateTime(value).toDate();
                 return new DateValue(date);*/
