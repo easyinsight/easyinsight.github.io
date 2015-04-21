@@ -426,7 +426,11 @@ public class FilterValueDefinition extends FilterDefinition {
             metadata = filterHTMLMetadata.getCache().get(getField().qualifiedName());
         }
 
-        if (metadata == null) {
+        if (!singleValue && metadata == null && filterHTMLMetadata.getDashboard() != null && filterHTMLMetadata.getDashboard().isLazyFilters()) {
+            AnalysisDimensionResultMetadata temp = new AnalysisDimensionResultMetadata();
+            temp.setStrings(new ArrayList<>());
+            metadata = temp;
+        } else if (metadata == null) {
             try {
                 metadata = new DataService().getAnalysisItemMetadata(filterHTMLMetadata.getDataSourceID(), getField(), 0, reportID, dashboardID, filterHTMLMetadata.getReport());
                 filterHTMLMetadata.getCache().put(getField().qualifiedName(), metadata);
@@ -473,7 +477,10 @@ public class FilterValueDefinition extends FilterDefinition {
                 stringList.remove("");
             }
             JSONObject existingChoices = new JSONObject();
-            if(stringList.size() > 500) {
+            if (filterHTMLMetadata.getDashboard() != null && filterHTMLMetadata.getDashboard().isLazyFilters()) {
+                jo.put("values", new JSONArray());
+                jo.put("error", "Loading...");
+            } else if(stringList.size() > 500) {
                 jo.put("values", new JSONArray());
                 jo.put("error", "Too many values, please refine your search.");
             } else if(getParentFilters() != null && !getParentFilters().isEmpty()) {

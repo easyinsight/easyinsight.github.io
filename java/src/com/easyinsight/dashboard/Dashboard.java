@@ -81,6 +81,15 @@ public class Dashboard implements Cloneable, Serializable {
     private int reportHeaderBackgroundColor = 0xDDDDDD;
     private int reportHeaderTextColor;
     private boolean autoCombined;
+    private boolean lazyFilters;
+
+    public boolean isLazyFilters() {
+        return lazyFilters;
+    }
+
+    public void setLazyFilters(boolean lazyFilters) {
+        this.lazyFilters = lazyFilters;
+    }
 
     public boolean isAutoCombined() {
         return autoCombined;
