@@ -47,6 +47,7 @@ public class DatabaseListener implements Runnable {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             Class.forName("oracle.jdbc.OracleDriver");
+            Class.forName("oracle.jdbc.driver.OracleDriver");
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             LogClass.error(e);
