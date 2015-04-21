@@ -236,7 +236,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             account.getBillingInfo().add(info);
                             transactions.add(t.getId());
                             String invoiceBody = info.toInvoiceText(account);
-                            if (account.isNewPricingModelInvoice()) {
+                            /*if (account.isNewPricingModelInvoice()) {
                                 for (User user : account.getUsers()) {
                                     if (user.isInvoiceRecipient()) {
                                         System.out.println("Sending out invoice email to " + user.getEmail());
@@ -249,7 +249,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                                         }
                                     }
                                 }
-                            }
+                            }*/
                         }
                     }
                 }
