@@ -29,11 +29,12 @@ public class SurveyGizmoUtils {
 
     public static JSONObject runRequest(String url, HttpClient client, SurveyGizmoCompositeSource compositeConnection, List<NameValuePair> params) {
         String target = "https://restapi.surveygizmo.com/v4" + url;
+        System.out.println(target);
         HttpMethod restMethod = new GetMethod(target);
         OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(SurveyGizmoCompositeSource.CONSUMER_KEY, SurveyGizmoCompositeSource.CONSUMER_SECRET);
         consumer.setMessageSigner(new HmacSha1MessageSigner());
         consumer.setTokenWithSecret(compositeConnection.getSgToken(), compositeConnection.getSgSecret());
-        restMethod.setQueryString(params.toArray(new NameValuePair[]{}));
+        //restMethod.setQueryString(params.toArray(new NameValuePair[]{}));
         restMethod.setRequestHeader("Accept", "application/json");
         restMethod.setRequestHeader("Content-Type", "application/json");
 

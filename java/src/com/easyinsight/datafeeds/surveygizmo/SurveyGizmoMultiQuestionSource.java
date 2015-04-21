@@ -128,17 +128,14 @@ public class SurveyGizmoMultiQuestionSource extends SurveyGizmoBaseSource {
                 for (Map.Entry<String, String> qIDEntry : qIDs.entrySet()) {
                     IRow row = ds.createRow();
                     row.addValue(keys.get(getFeedName() + " Row ID"), result.get("row_id").toString());
-                    System.out.println("entry id = " + qIDEntry.getKey() + " and entry val = " + qIDEntry.getValue());
                     row.addValue(keys.get("Category"), qIDEntry.getValue());
                     for (Map.Entry<String, Key> keyEntry : keys.entrySet()) {
                         if (tableType == 1) {
                             if (keyEntry.getKey().contains(":")) {
                                 String endKey = keyEntry.getKey().split(":")[1];
                                 String concat = qIDEntry.getKey() + ":" + endKey;
-                                System.out.println("looking for concat value " + concat);
                                 Object concatValue = result.get(concat);
                                 if (concatValue != null) {
-                                    System.out.println("\tconcat value of " + concatValue);
                                     row.addValue(keyEntry.getKey(), concatValue.toString());
                                 }
                             }
@@ -146,13 +143,10 @@ public class SurveyGizmoMultiQuestionSource extends SurveyGizmoBaseSource {
                             if (keyEntry.getKey().contains(":")) {
                                 String endKey = keyEntry.getKey().split(":")[0];
                                 //String concat = qIDEntry.getKey() + ":" + endKey;
-                                System.out.println("looking for type 2 concat value " + qIDEntry.getKey());
                                 Object concatValue = result.get(qIDEntry.getKey());
                                 if (concatValue != null) {
-                                    System.out.println("\tconcat value of " + concatValue);
                                     Key validKey = keyByName.get(concatValue.toString());
                                     if (validKey != null && validKey == keyEntry.getValue()) {
-                                        System.out.println("matched to key...");
                                         row.addValue(keyEntry.getKey(), new StringValue("1"));
                                     }
                                 }
@@ -167,7 +161,6 @@ public class SurveyGizmoMultiQuestionSource extends SurveyGizmoBaseSource {
                     Object val = result.get(keyEntry.getKey());
 
                     if (val != null) {
-                        System.out.println("\t** FOUND " + val + " for " + keyEntry.getKey());
                         row.addValue(keyEntry.getValue(), 1);
                     }
                     //row.addValue(keyEntry.getValue(), );
@@ -179,7 +172,6 @@ public class SurveyGizmoMultiQuestionSource extends SurveyGizmoBaseSource {
                     Object val = result.get(keyEntry.getKey());
 
                     if (val != null) {
-                        System.out.println("\t** FOUND " + val + " for " + keyEntry.getKey());
                         row.addValue(keyEntry.getValue(), val.toString());
                     }
                     //row.addValue(keyEntry.getValue(), );

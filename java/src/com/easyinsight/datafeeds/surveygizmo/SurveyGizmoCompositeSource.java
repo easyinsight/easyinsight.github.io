@@ -218,6 +218,8 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
             }
 
             Map<String, Map<String, String>> multiTextData = new HashMap<>();
+            Set<String> npsQuestions = new HashSet<>();
+            questionSource.setNpsQuestions(npsQuestions);
 
             for (Object o : data) {
                 JSONObject field = (JSONObject) o;
@@ -301,6 +303,7 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
 
                         if (analysisItems.size() == 0) {
                             if ("nps".equals(subType)) {
+                                npsQuestions.add(id);
                                 {
                                     AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id), title, AggregationTypes.AVERAGE);
                                     measure.setPrecision(2);
@@ -308,21 +311,15 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                                     analysisItems.add(measure);
                                 }
                                 {
-                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id), title + " Promoters", AggregationTypes.AVERAGE);
-                                    promoterMeasure.setPrecision(2);
-                                    promoterMeasure.setMinPrecision(2);
+                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Promoters"), title + " Promoters", AggregationTypes.SUM);
                                     analysisItems.add(promoterMeasure);
                                 }
                                 {
-                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id), title + " Detractors", AggregationTypes.AVERAGE);
-                                    promoterMeasure.setPrecision(2);
-                                    promoterMeasure.setMinPrecision(2);
+                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Detractors"), title + " Detractors", AggregationTypes.SUM);
                                     analysisItems.add(promoterMeasure);
                                 }
                                 {
-                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id), title + " Passives", AggregationTypes.AVERAGE);
-                                    promoterMeasure.setPrecision(2);
-                                    promoterMeasure.setMinPrecision(2);
+                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Passives"), title + " Passives", AggregationTypes.SUM);
                                     analysisItems.add(promoterMeasure);
                                 }
                             } else if ("slider".equals(subType)) {
@@ -517,13 +514,14 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
         Collection<BasecampNextAccount> availableSurveys = new ArrayList<>();
         int page = 1;
         int totalPages;
-        int ctr = 0;
+        // 760-400-6112 malonso@foundrymed.com
         do {
-            ctr++;
             JSONObject surveys = SurveyGizmoUtils.runRequest("/survey?page=" + page, new HttpClient(), this, new ArrayList<>());
+            System.out.println(surveys);
             JSONArray data = (JSONArray) surveys.get("data");
-            page = (Integer) surveys.get("page") + 1;
+            page++;
             totalPages = (Integer) surveys.get("total_pages");
+            int gotBackPage = (Integer) surveys.get("page");
             for (Object o : data) {
                 JSONObject j = (JSONObject) o;
                 BasecampNextAccount survey = new BasecampNextAccount();
@@ -531,11 +529,7 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                 survey.setName((String) j.get("title"));
                 availableSurveys.add(survey);
             }
-            if (ctr > 500) {
-                // todo: safety check
-                break;
-            }
-        } while (page < totalPages);
+        } while (page <= totalPages);
 
         return availableSurveys;
     }
