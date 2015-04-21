@@ -166,7 +166,7 @@ public abstract class APIServlet extends HttpServlet {
             try {
 
                 String string = null;
-                if (userResponse.getAccountID() == 5595 || userResponse.getAccountID() == 4913) {
+                if (userResponse.getAccountID() == 5595 || userResponse.getAccountID() == 4913 || userResponse.getAccountID() == 7139) {
                     byte[] bytes = IOUtils.toByteArray(req.getInputStream());
                     string = new String(bytes, Charset.forName("UTF-8"));
                 }
