@@ -515,15 +515,28 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
 
     public Collection<BasecampNextAccount> getAvailableSurveys() {
         Collection<BasecampNextAccount> availableSurveys = new ArrayList<>();
-        JSONObject surveys = SurveyGizmoUtils.runRequest("/survey", new HttpClient(), this, new ArrayList<NameValuePair>());
-        JSONArray data = (JSONArray) surveys.get("data");
-        for (Object o : data) {
-            JSONObject j = (JSONObject) o;
-            BasecampNextAccount survey = new BasecampNextAccount();
-            survey.setId((String) j.get("id"));
-            survey.setName((String) j.get("title"));
-            availableSurveys.add(survey);
-        }
+        int page = 1;
+        int totalPages;
+        int ctr = 0;
+        do {
+            ctr++;
+            JSONObject surveys = SurveyGizmoUtils.runRequest("/survey?page=" + page, new HttpClient(), this, new ArrayList<>());
+            JSONArray data = (JSONArray) surveys.get("data");
+            page = (Integer) surveys.get("page") + 1;
+            totalPages = (Integer) surveys.get("total_pages");
+            for (Object o : data) {
+                JSONObject j = (JSONObject) o;
+                BasecampNextAccount survey = new BasecampNextAccount();
+                survey.setId((String) j.get("id"));
+                survey.setName((String) j.get("title"));
+                availableSurveys.add(survey);
+            }
+            if (ctr > 500) {
+                // todo: safety check
+                break;
+            }
+        } while (page < totalPages);
+
         return availableSurveys;
     }
 
