@@ -236,6 +236,9 @@ public class DashboardReport extends DashboardElement {
         reportDataJSON.put("id", report.getUrlKey());
         HTMLReportMetadata md = new HTMLReportMetadata();
         md.setEmbedded(filterHTMLMetadata.isEmbedded());
+        if (filterHTMLMetadata.getDashboard() != null) {
+            md.setLazyFilter(filterHTMLMetadata.getDashboard().isLazyFilters());
+        }
         reportDataJSON.put("metadata", reportDefinition.toJSON(md, parentFilters));
         reportJSON.put("report", reportDataJSON);
         reportJSON.put("show_label", isShowLabel());

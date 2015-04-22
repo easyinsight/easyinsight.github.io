@@ -426,7 +426,11 @@ public class FilterValueDefinition extends FilterDefinition {
             metadata = filterHTMLMetadata.getCache().get(getField().qualifiedName());
         }
 
-        if (!singleValue && metadata == null && filterHTMLMetadata.getDashboard() != null && filterHTMLMetadata.getDashboard().isLazyFilters()) {
+        if (!singleValue && metadata == null &&
+                (
+                        (filterHTMLMetadata.getDashboard() != null && filterHTMLMetadata.getDashboard().isLazyFilters()) || filterHTMLMetadata.isLazy()
+                )
+                ) {
             AnalysisDimensionResultMetadata temp = new AnalysisDimensionResultMetadata();
             temp.setStrings(new ArrayList<>());
             metadata = temp;
@@ -477,7 +481,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 stringList.remove("");
             }
             JSONObject existingChoices = new JSONObject();
-            if (filterHTMLMetadata.getDashboard() != null && filterHTMLMetadata.getDashboard().isLazyFilters()) {
+            if ((filterHTMLMetadata.getDashboard() != null && filterHTMLMetadata.getDashboard().isLazyFilters()) || filterHTMLMetadata.isLazy()) {
                 jo.put("values", new JSONArray());
                 jo.put("error", "Loading...");
             } else if(stringList.size() > 500) {

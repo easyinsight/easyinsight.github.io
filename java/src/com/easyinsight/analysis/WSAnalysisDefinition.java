@@ -1439,6 +1439,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 if (fM == null) {
                     fM = new FilterHTMLMetadata(this);
                 }
+                fM.setLazy(htmlReportMetadata.isLazyFilter());
                 JSONObject j = f.toJSON(fM);
                 if (j != null) {
                     filters.put(j);
