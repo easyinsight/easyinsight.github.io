@@ -22,6 +22,7 @@ public class FilterHTMLMetadata {
     private String onChange;
     private String filterKey = "reportbase";
     private List<FilterDefinition> filters;
+    private boolean lazy;
 
     private Map<String, AnalysisItemResultMetadata> cache = new HashMap<>();
 
@@ -43,6 +44,14 @@ public class FilterHTMLMetadata {
 
     public Map<String, AnalysisItemResultMetadata> getCache() {
         return cache;
+    }
+
+    public boolean isLazy() {
+        return lazy;
+    }
+
+    public void setLazy(boolean lazy) {
+        this.lazy = lazy;
     }
 
     public String createOnChange() {

@@ -506,6 +506,16 @@
     </rule>
 
     <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/surveyGizmoSurveySelection</from>
+        <to>/html/surveyGizmoSurveySelection.jsp?dataSourceID=$1</to>
+    </rule>
+
+    <rule>
+        <from>^/html/dataSources/([A-Za-z0-9]+)/surveyGizmoSurveyChoice/([A-Za-z0-9]+)/([A-Za-z0-9]+)</from>
+        <to>/html/surveyGizmoSurveyChoice.jsp?dataSourceID=$1&amp;formID=$2&amp;formName=$3</to>
+    </rule>
+
+    <rule>
         <from>^/html/dataSources/([A-Za-z0-9]+)/smartsheetAccountSelection</from>
         <to>/html/smartsheetTableSelection.jsp?dataSourceID=$1</to>
     </rule>

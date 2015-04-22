@@ -15,6 +15,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -84,7 +85,9 @@ public class HtmlServlet extends HttpServlet {
             JSONObject filterObject;
             Object o = null;
             try {
-                o = parser.parse(is);
+                byte[] bytes = IOUtils.toByteArray(new InputStreamReader(is), "UTF-8");
+                String string = new String(bytes, Charset.forName("UTF-8"));
+                o = parser.parse(string);
 
                 filterObject = (JSONObject) o;
             } catch (Exception e) {

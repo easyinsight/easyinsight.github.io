@@ -7,11 +7,14 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
 
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -89,6 +92,13 @@ public class HealthListener implements Runnable {
                 status.setHealthInfo(new AdminService().getHealthInfo());
                 MemCachedManager.add("servers" + InetAddress.getLocalHost().getHostName(), 120, status);
                 try {
+                    List<GarbageCollectorMXBean> gcMxBeans = ManagementFactory.getGarbageCollectorMXBeans();
+                    for(GarbageCollectorMXBean gcMxBean : gcMxBeans)
+                    {
+                        System.out.println("gcMxBean: " + gcMxBean.getName() +
+                                ", collection count:" + gcMxBean.getCollectionCount() +
+                                ", Collection time:" + gcMxBean.getCollectionTime());
+                    }
                     Thread.sleep(60000);
                 } catch (InterruptedException e) {
                     // ignore

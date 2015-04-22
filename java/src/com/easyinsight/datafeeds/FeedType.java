@@ -331,6 +331,7 @@ public class FeedType implements Serializable {
     public static final FeedType INFUSIONSOFT_PRODUCT_TO_CATEGORY = new FeedType(302);
     public static final FeedType NETSUITE_COMPOSITE = new FeedType(303);
     public static final FeedType NETSUITE_TABLE = new FeedType(304);
+    public static final FeedType SURVEYGIZMO_MULTIPLE = new FeedType(305);
 
     public FeedType() {
     }

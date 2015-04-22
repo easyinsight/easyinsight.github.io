@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,17 +71,27 @@ public class DateValue extends Value implements Serializable {
     public void calculate(boolean dateTime, ZoneId zoneId) {
         if (date != null) {
             if (!dateTime) {
-                if (localDate == null) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(date);
-                    localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                            cal.get(Calendar.MONTH) + 1,
-                            cal.get(Calendar.DAY_OF_MONTH));
+                if (getDateLevel() == AnalysisDateDimension.HOUR_LEVEL || getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
+                    if (zonedDateTime == null) {
+                        zonedDateTime = date.toInstant().atZone(zoneId);
+                    }
+                    year = zonedDateTime.getYear();
+                    month = zonedDateTime.getMonthValue() - 1;
+                    day = zonedDateTime.getDayOfMonth();
+                    hour = zonedDateTime.getHour();
+                    minute = zonedDateTime.getMinute();
+                } else {
+                    if (localDate == null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(date);
+                        localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                                cal.get(Calendar.MONTH) + 1,
+                                cal.get(Calendar.DAY_OF_MONTH));
+                    }
+                    year = localDate.getYear();
+                    month = localDate.getMonthValue() - 1;
+                    day = localDate.getDayOfMonth();
                 }
-                year = localDate.getYear();
-                month = localDate.getMonthValue() - 1;
-                day = localDate.getDayOfMonth();
-                System.out.println(date + ": " + year + " - " + month + " - " + day);
             } else {
                 if (zonedDateTime == null) {
                     zonedDateTime = date.toInstant().atZone(zoneId);

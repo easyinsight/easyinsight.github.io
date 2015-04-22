@@ -346,7 +346,9 @@ public class WSLineChartDefinition extends WSTwoAxisDefinition {
                 for (FilterDefinition filterDefinition : getFilterDefinitions()) {
                     if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                        daysDuration = rollingFilterDefinition.periodTo(new Date(), insightRequestMetadata).getDays();
+                        if (rollingFilterDefinition.getInterval() != MaterializedRollingFilterDefinition.ALL) {
+                            daysDuration = rollingFilterDefinition.periodTo(new Date(), insightRequestMetadata);
+                        }
                     } else if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition filterDateRangeDefinition = (FilterDateRangeDefinition) filterDefinition;
                         daysDuration = (int) ((filterDateRangeDefinition.getEndDate().getTime() - filterDateRangeDefinition.getStartDate().getTime()) / (1000 * 60 * 60 * 24));

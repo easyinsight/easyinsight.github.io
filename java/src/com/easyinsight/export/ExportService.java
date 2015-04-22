@@ -3307,6 +3307,10 @@ public class ExportService {
         workbook.setSheetName(0, "Data");
 
         boolean hasData;
+
+        long accountID = SecurityUtil.getAccountID(false);
+
+
         if (listDefinition.getReportType() == WSAnalysisDefinition.VERTICAL_LIST) {
             hasData = listVerticalList(listDefinition, exportMetadata, styleMap, sheet, workbook, insightRequestMetadata, conn);
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.CROSSTAB) {
@@ -3322,10 +3326,10 @@ public class ExportService {
         } else if (listDefinition.getReportType() == WSAnalysisDefinition.MULTI_SUMMARY) {
             WSMultiSummaryDefinition multiSummaryDefinition = (WSMultiSummaryDefinition) listDefinition;
             return multiSummaryDefinition.toExcel(insightRequestMetadata, conn);
-        } else if (listDefinition.getReportType() == WSAnalysisDefinition.SUMMARY) {
+        } else if (listDefinition.getReportType() == WSAnalysisDefinition.SUMMARY ||
+                (accountID != 5671 && listDefinition.getReportType() == WSAnalysisDefinition.TREE)) {
             WSTreeDefinition summaryDefinition = (WSTreeDefinition) listDefinition;
             hasData = summaryDefinition.toExcel(insightRequestMetadata, conn, sheet, styleMap, workbook);
-
         } else {
             hasData = listExcel(listDefinition, workbook, sheet, insightRequestMetadata, conn, exportMetadata);
         }
@@ -3585,7 +3589,8 @@ public class ExportService {
         List<ReportDeliveryAudit> audits = new ArrayList<ReportDeliveryAudit>();
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT SUCCESSFUL, MESSAGE, SEND_DATE, TARGET_EMAIL FROM REPORT_DELIVERY_AUDIT WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT report_delivery_audit_result.SUCCESSFUL, report_delivery_audit_result.MESSAGE, SEND_DATE, TARGET_EMAIL FROM " +
+                    "REPORT_DELIVERY_AUDIT left join report_delivery_audit_result on REPORT_DELIVERY_AUDIT.REPORT_DELIVERY_AUDIT_ID = report_delivery_audit_result.REPORT_DELIVERY_AUDIT_ID WHERE SCHEDULED_ACCOUNT_ACTIVITY_ID = ?");
             queryStmt.setLong(1, activityID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {

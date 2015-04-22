@@ -42,7 +42,7 @@ import com.easyinsight.datafeeds.linkedin.LinkedInDataSource;
 import com.easyinsight.datafeeds.linkedin.LinkedInPeopleSource;
 import com.easyinsight.datafeeds.mailchimp.*;
 import com.easyinsight.datafeeds.meetup.MeetupDataSource;
-import com.easyinsight.datafeeds.netsuite.NetsuiteCompositeSource;
+
 import com.easyinsight.datafeeds.netsuite.NetsuiteQueryConnection;
 import com.easyinsight.datafeeds.netsuite.NetsuiteTableSource;
 import com.easyinsight.datafeeds.oracle.*;
@@ -63,10 +63,7 @@ import com.easyinsight.datafeeds.solve360.Solve360ContactsSource;
 import com.easyinsight.datafeeds.solve360.Solve360OpportunitiesSource;*/
 import com.easyinsight.datafeeds.smartsheet.SmartsheetTableSource;
 import com.easyinsight.datafeeds.solve360.*;
-import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
-import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoFormSource;
-import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoMetadataSource;
-import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoQuestionSource;
+import com.easyinsight.datafeeds.surveygizmo.*;
 import com.easyinsight.datafeeds.teamwork.*;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
@@ -472,8 +469,9 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.TEAMWORK_TIME, TeamworkTimeSource.class);
         registerType(FeedType.INFUSIONSOFT_PRODUCT_CATEGORY, InfusionsoftProductCategorySource.class);
         registerType(FeedType.INFUSIONSOFT_PRODUCT_TO_CATEGORY, InfusionsoftProductToCategorySource.class);
-        registerType(FeedType.NETSUITE_COMPOSITE, NetsuiteCompositeSource.class);
+        //registerType(FeedType.NETSUITE_COMPOSITE, NetsuiteCompositeSource.class);
         registerType(FeedType.NETSUITE_TABLE, NetsuiteTableSource.class);
+        registerType(FeedType.SURVEYGIZMO_MULTIPLE, SurveyGizmoMultiQuestionSource.class);
     }
 
     public Map<FeedType, Class> getDataSourceMap() {

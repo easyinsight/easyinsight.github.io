@@ -74,7 +74,8 @@ public class DataSourceType {
     public static const MAILCHIMP:int = 288;
     public static const INTERNAL:int = 294;
     public static const TEAMWORK:int = 295;
-    public static const NETSUITE_COMPOSITE:int = 303;
+    public static const NETSUITE_COMPOSITE:int = 304;
+    public static const SURVEY_GIZMO:int = 234;
 
     public function DataSourceType() {
     }

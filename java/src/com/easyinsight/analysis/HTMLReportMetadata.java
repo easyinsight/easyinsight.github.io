@@ -14,12 +14,21 @@ public class HTMLReportMetadata {
     private boolean fullScreenHeight = true;
     private boolean embedded;
     private FilterHTMLMetadata filterMetadata;
+    private boolean lazyFilter;
 
     public HTMLReportMetadata() {
     }
 
     public HTMLReportMetadata(int verticalMargin) {
         this.verticalMargin = verticalMargin;
+    }
+
+    public boolean isLazyFilter() {
+        return lazyFilter;
+    }
+
+    public void setLazyFilter(boolean lazyFilter) {
+        this.lazyFilter = lazyFilter;
     }
 
     public boolean isEmbedded() {

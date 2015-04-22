@@ -6,6 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import org.hibernate.Session;
@@ -98,49 +99,54 @@ public class OAuthServlet extends HttpServlet {
                 resp.sendRedirect(redirectURL);
             } else {
 
-                EIConnection conn = Database.instance().getConnection();
+                SecurityUtil.populateThreadLocalFromSession(req);
                 try {
-                    conn.setAutoCommit(false);
-                    PreparedStatement idStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
-                    idStmt.setString(1, dataSourceID);
-                    ResultSet rs = idStmt.executeQuery();
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        conn.setAutoCommit(false);
+                        PreparedStatement idStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM DATA_FEED WHERE API_KEY = ?");
+                        idStmt.setString(1, dataSourceID);
+                        ResultSet rs = idStmt.executeQuery();
 
-                    if(!rs.next()) {
-                        resp.sendError(404);
-                        return;
-                    }
-                    long id = rs.getLong(1);
-                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
-                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        if(!rs.next()) {
+                            resp.sendError(404);
+                            return;
+                        }
+                        long id = rs.getLong(1);
+                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(id, conn);
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
 
-                    dataSource.exchangeTokens(conn, req, verifier);
-                    //feedDefinition.setVisible(true);
-                    new FeedStorage().updateDataFeedConfiguration(feedDefinition, conn);
-                    FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
-                    String redirectURL;
-                    if (redirectType == TokenService.CONNECTION_SETUP) {
-                        if (ConfigLoader.instance().isProduction()) {
-                            redirectURL = "https://www.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
+                        dataSource.exchangeTokens(conn, req, verifier);
+                        //feedDefinition.setVisible(true);
+                        new FeedStorage().updateDataFeedConfiguration(feedDefinition, conn);
+                        FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
+                        String redirectURL;
+                        if (redirectType == TokenService.CONNECTION_SETUP) {
+                            if (ConfigLoader.instance().isProduction()) {
+                                redirectURL = "https://www.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
+                            } else {
+                                redirectURL = "https://j8staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
+                            }
+                        } else if (redirectType == TokenService.HTML_SETUP) {
+                            redirectURL = RedirectUtil.getURL(req, "/app/html/dataSources/"+ feedDefinition.getApiKey() + "/createConnection");
                         } else {
-                            redirectURL = "https://j8staging.easy-insight.com/app/#connectionConfig=" + feedDefinition.getApiKey();
+                            if (repoint != null && repoint) {
+                                redirectURL = "https://www.easy-insight.com/app/#repointConfig=" + feedDefinition.getApiKey();
+                            } else {
+                                redirectURL = "https://www.easy-insight.com/app/";
+                            }
                         }
-                    } else if (redirectType == TokenService.HTML_SETUP) {
-                        redirectURL = RedirectUtil.getURL(req, "/app/html/dataSources/"+ feedDefinition.getApiKey() + "/createConnection");
-                    } else {
-                        if (repoint) {
-                            redirectURL = "https://www.easy-insight.com/app/#repointConfig=" + feedDefinition.getApiKey();
-                        } else {
-                            redirectURL = "https://www.easy-insight.com/app/";
-                        }
+                        conn.commit();
+                        resp.sendRedirect(redirectURL);
+                    } catch (Exception e) {
+                        LogClass.error(e);
+                        conn.rollback();
+                    } finally {
+                        conn.setAutoCommit(true);
+                        Database.closeConnection(conn);
                     }
-                    conn.commit();
-                    resp.sendRedirect(redirectURL);
-                } catch (Exception e) {
-                    LogClass.error(e);
-                    conn.rollback();
                 } finally {
-                    conn.setAutoCommit(true);
-                    Database.closeConnection(conn);
+                    SecurityUtil.clearThreadLocal();
                 }
             }
         } catch (Exception e) {

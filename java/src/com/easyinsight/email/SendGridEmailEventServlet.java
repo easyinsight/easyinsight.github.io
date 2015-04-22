@@ -49,7 +49,7 @@ public class SendGridEmailEventServlet extends HttpServlet {
                     if ("ReportDelivery".equals(emailType)) {
                         EIConnection conn = Database.instance().getConnection();
                         try {
-                            PreparedStatement auditStmt = conn.prepareStatement("UPDATE REPORT_DELIVERY_AUDIT SET SUCCESSFUL = ?, MESSAGE = ? WHERE REPORT_DELIVERY_AUDIT_ID = ?");
+                            PreparedStatement auditStmt = conn.prepareStatement("INSERT INTO report_delivery_audit_result (SUCCESSFUL, MESSAGE, REPORT_DELIVERY_AUDIT_ID)  VALUES (?, ?, ?)");
                             String message = null;
                             int status = -1;
                             if ("delivered".equals(event)) {

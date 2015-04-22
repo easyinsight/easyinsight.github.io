@@ -2105,7 +2105,7 @@ public class DataStorage implements IDataStorage {
 
     public ActualRowSet allData(@NotNull Collection<FilterDefinition> filters, @NotNull List<AnalysisItem> fields, @Nullable Integer limit,
                                 InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        Calendar cal = Calendar.getInstance();
+        /*Calendar cal = Calendar.getInstance();
         Calendar shiftedCal = Calendar.getInstance();
         int timeOffset = insightRequestMetadata.getUtcOffset() / 60;
         String string;
@@ -2117,7 +2117,7 @@ public class DataStorage implements IDataStorage {
             string = "GMT";
         }
         TimeZone timeZone = TimeZone.getTimeZone(string);
-        shiftedCal.setTimeZone(timeZone);
+        shiftedCal.setTimeZone(timeZone);*/
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ");
         List<AnalysisItem> validFields = new ArrayList<AnalysisItem>();
@@ -2180,7 +2180,7 @@ public class DataStorage implements IDataStorage {
                             value = new EmptyValue();
                         } else {
                             DateValue dateValue = new DateValue(new Date(time.getTime()));
-                            dateValue.calculate(true, insightRequestMetadata.createZoneID());
+                            dateValue.calculate(false, insightRequestMetadata.createZoneID());
                             value = dateValue;
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {

@@ -126,9 +126,13 @@ import mx.utils.ObjectUtil;
             field = filter.field;
         }
 
+    public function getSubType():String {
+        return "";
+    }
+
     public function qualifiedName():String {
         if (field != null) {
-            return field.qualifiedName() + ":" + getType();
+            return field.qualifiedName() + ":" + getType() + getSubType();
         } else {
             return filterName + ":" + String(getType());
         }

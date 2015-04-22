@@ -70,6 +70,8 @@ public class Dashboard {
     public var phoneVersion:int;
     public var autoCombined:Boolean;
 
+    public var lazyFilters:Boolean;
+
     public var version:int;
 
     public function Dashboard() {

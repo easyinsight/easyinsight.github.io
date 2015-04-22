@@ -176,8 +176,8 @@ public class MultiFlatDateFilter extends HBox implements IFilter
     private function processMetadata(values:ArrayCollection):void {
 
         this.levels = values;
-        var firstValue:int = 11;
-        var lastValue:int = 0;
+        var firstValue:int = 500000;
+        var lastValue:int = -500000;
 
         for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
             firstValue = Math.min(wrapper.dateLevel, firstValue);
@@ -257,8 +257,8 @@ public class MultiFlatDateFilter extends HBox implements IFilter
 		}
 
         public function updateState():Boolean {
-            var firstValue:int = 11;
-            var lastValue:int;
+            var firstValue:int = 500000;
+            var lastValue:int = -500000;
             for each (var wrapper:DateLevelWrapper in _filterDefinition.levels) {
                 firstValue = Math.min(wrapper.dateLevel, firstValue);
                 lastValue = Math.max(wrapper.dateLevel, lastValue);

@@ -121,7 +121,7 @@ public class GoogleDataProvider {
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             try {
-                List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2));
+                List<Spreadsheet> spreadsheets = getSpreadsheets(rs.getString(1), rs.getString(2), "");
                 return new GoogleSpreadsheetResponse(spreadsheets, true);
             } catch (AuthenticationException ae) {
                 return new GoogleSpreadsheetResponse(false);
@@ -131,7 +131,7 @@ public class GoogleDataProvider {
         }
     }
 
-    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret) throws AuthenticationException {
+    private List<Spreadsheet> getSpreadsheets(String tokenKey, String tokenSecret, String accessToken) throws AuthenticationException {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -151,7 +151,7 @@ public class GoogleDataProvider {
             }
             existsStmt.close();            
             URL feedUrl = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full");
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret, accessToken);
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 try {
@@ -189,7 +189,7 @@ public class GoogleDataProvider {
     private static final String AUTHENTICATE_XML = "<username>{0}</username><password>{1}</password><hours>144</hours>";
     private static final String GET_APPLICATIONS_XML = "<ticket>{0}</ticket><withembeddedtables>0</withembeddedtables>";
     private static final String GET_DATABASES_XML = "<ticket>{0}</ticket><excludeparents>1</excludeparents>";
-    private static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
+    public static final String GET_SCHEMA_XML = "<ticket>{0}</ticket><apptoken>{1}</apptoken>";
 
     public ClearDBResponse createClearDBDataSource(String apiKey, String appID, boolean accountVisible) {
         SecurityUtil.authorizeAccountTier(Account.BASIC);
@@ -325,7 +325,7 @@ public class GoogleDataProvider {
         }
     }
 
-    public EIDescriptor createDataSource(String sessionTicket, String applicationToken, String dbid, String host, boolean accountVisible,
+    public static EIDescriptor createDataSource(String sessionTicket, String applicationToken, String dbid, String host, boolean accountVisible,
                                          String userName, String password, boolean supportIndex, boolean saveCredentials) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         EIConnection conn = Database.instance().getConnection();
@@ -450,7 +450,7 @@ public class GoogleDataProvider {
         }
     }
 
-    private QuickbaseDatabaseSource createDataSource(String sessionTicket, String applicationToken, Node database, List<Connection> connections, String host) throws IOException, ParsingException {
+    public static QuickbaseDatabaseSource createDataSource(String sessionTicket, String applicationToken, Node database, List<Connection> connections, String host) throws IOException, ParsingException {
         QuickbaseDatabaseSource quickbaseDatabaseSource = new QuickbaseDatabaseSource();
 
 

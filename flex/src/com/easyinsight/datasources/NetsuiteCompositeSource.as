@@ -12,10 +12,11 @@ import com.easyinsight.customupload.NetsuiteDataSourceCreation;
 import mx.collections.ArrayCollection;
 
 [Bindable]
-[RemoteClass(alias="com.easyinsight.datafeeds.netsuite.NetsuiteCompositeSource")]
-public class NetsuiteCompositeSource extends CompositeServerDataSource {
+[RemoteClass(alias="com.easyinsight.datafeeds.netsuite.NetsuiteTableSource")]
+public class NetsuiteCompositeSource extends ServerDataSourceDefinition {
 
-    public var tables:ArrayCollection;
+    public var table:String;
+    public var searchID:String;
     public var nsUsername:String;
     public var nsPassword:String;
     public var accountID:String;

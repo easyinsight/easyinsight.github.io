@@ -3,6 +3,7 @@ package com.easyinsight.userupload;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.*;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.google.GoogleSpreadsheetAccess;
 import com.easyinsight.security.SecurityUtil;
@@ -22,14 +23,15 @@ import java.util.*;
 * Time: 3:21:36 PM
 */
 public class GoogleSpreadsheetUploadContext extends UploadContext {
-    private String worksheetURL;
+    private GoogleFeedDefinition feedDefinition;
 
-    public String getWorksheetURL() {
-        return worksheetURL;
+
+    public GoogleFeedDefinition getFeedDefinition() {
+        return feedDefinition;
     }
 
-    public void setWorksheetURL(String worksheetURL) {
-        this.worksheetURL = worksheetURL;
+    public void setFeedDefinition(GoogleFeedDefinition feedDefinition) {
+        this.feedDefinition = feedDefinition;
     }
 
     private transient UploadFormat uploadFormat;
@@ -44,15 +46,10 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
 
     @Override
     public List<AnalysisItem> guessFields(EIConnection conn, byte[] bytes) throws Exception {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
-                "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
-        queryStmt.setLong(1, SecurityUtil.getUserID());
-        ResultSet rs = queryStmt.executeQuery();
-        rs.next();
-        String tokenKey = rs.getString(1);
-        String tokenSecret = rs.getString(2);
-        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(tokenKey, tokenSecret);
-        URL listFeedUrl = new URL(worksheetURL);
+
+        SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(feedDefinition.getTokenKey(), feedDefinition.getTokenSecret(),
+                feedDefinition.getAccessToken());
+        URL listFeedUrl = new URL(feedDefinition.getWorksheetURL());
         ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
         DataTypeGuesser guesser = new DataTypeGuesser();
         for (ListEntry listEntry : feed.getEntries()) {
@@ -73,20 +70,11 @@ public class GoogleSpreadsheetUploadContext extends UploadContext {
 
     @Override
     public long createDataSource(String name, List<AnalysisItem> analysisItems, EIConnection conn, boolean accountVisible, byte[] bytes) throws Exception {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOOGLE_DOCS_TOKEN.token_key, GOOGLE_DOCS_TOKEN.token_secret FROM " +
-                "GOOGLE_DOCS_TOKEN WHERE GOOGLE_DOCS_TOKEN.user_id = ?");
-        queryStmt.setLong(1, SecurityUtil.getUserID());
-        ResultSet rs = queryStmt.executeQuery();
-        rs.next();
-        String tokenKey = rs.getString(1);
-        String tokenSecret = rs.getString(2);
-        GoogleFeedDefinition googleFeedDefinition = new GoogleFeedDefinition();
-        googleFeedDefinition.setFeedName(name);
-        googleFeedDefinition.setAccountVisible(accountVisible);
-        googleFeedDefinition.setWorksheetURL(worksheetURL);
-        googleFeedDefinition.setTokenKey(tokenKey);
-        googleFeedDefinition.setTokenSecret(tokenSecret);
-        return googleFeedDefinition.create(conn, analysisItems, null);
+        feedDefinition.setFields(analysisItems);
+        feedDefinition.setVisible(true);
+        feedDefinition.setFeedName(name);
+        new FeedStorage().updateDataFeedConfiguration(feedDefinition, conn);
+        return feedDefinition.getDataFeedID();
     }
 
     @Override

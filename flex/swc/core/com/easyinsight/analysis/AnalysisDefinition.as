@@ -68,6 +68,7 @@ import mx.collections.ArrayCollection;
 		public var addedItems:ArrayCollection;
 		public var canSaveDirectly:Boolean;
 		public var publiclyVisible:Boolean;
+    public var cacheOrder:int;
 		public var marketplaceVisible:Boolean;
 		public var filterDateLevels:Boolean;
 		public var checkPipelineAfter:Boolean;

@@ -392,16 +392,18 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 if (analysisItem.getLinks() == null) {
                     analysisItem.setLinks(new ArrayList<Link>());
                 }
-                if (isProjectLinkable(analysisItem)) {
+                if (isProjectLinkable(analysisItem) && analysisItem.getLinks().size() == 0) {
                     removeURLLinkIfExists("/projects/[" + BaseCampTodoSource.PROJECTID + "]", analysisItem);
                     URLLink urlLink = new URLLink();
                     urlLink.setUrl(getUrl() + "/projects/[" + BaseCampTodoSource.PROJECTID + "]");
+                    urlLink.setDefaultLink(true);
                     urlLink.setLabel("View Project in Basecamp...");
                     analysisItem.getLinks().add(urlLink);
-                } else if (isTodoListLinkable(analysisItem)) {
+                } else if (isTodoListLinkable(analysisItem)  && analysisItem.getLinks().size() == 0) {
                     removeURLLinkIfExists("/projects/[" + BaseCampTodoSource.PROJECTID + "]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]", analysisItem);
                     URLLink urlLink = new URLLink();
                     urlLink.setUrl(getUrl() + "/projects/[" + BaseCampTodoSource.PROJECTID + "]/todo_lists/[" + BaseCampTodoSource.TODOLISTID + "]");
+                    urlLink.setDefaultLink(true);
                     urlLink.setLabel("View Todo List in Basecamp...");
                     analysisItem.getLinks().add(urlLink);
                 }

@@ -9,6 +9,7 @@
         import com.easyinsight.datasources.NetsuiteCompositeSource;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
 
         import mx.controls.Button;
@@ -19,6 +20,12 @@
         private var usernameText:String;
 
         private var passwordText:String;
+
+        [Bindable]
+        private var selectedTable:String;
+
+        [Bindable]
+        private var searchID:String;
 
         [Bindable]
         private var roleID:String;
@@ -33,12 +40,11 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            var names:Array = [ "Opportunity", "Customer", "Item"];
-            var options:ArrayCollection = new ArrayCollection();
-            for each (var n:String in names) {
-                options.addItem(new NetsuiteTable(n));
-            }
-            this.tableOptions = options;
+            var names:Array = [ "Account", "AppPackage", "Budget", "Charge", "Contact", "CouponCode", "Customer", "Employee",
+                "InventoryNumber", "Issue", "Item", "ManufacturingRouting", "Nexus",
+                "Opportunity", "Partner", "Project",
+                "ProjectTask", "ResourceALlocation", "Subsidiary", "TimeBill", "TimeEntry", "TimeSheet", "Transaction", "Vendor"];
+            this.tableOptions = new ArrayCollection(names);
         }
 
         [Bindable]
@@ -49,6 +55,8 @@
             accountID = ds.accountID;
             usernameText = ds.nsUsername;
             roleID = ds.netsuiteRole;
+            searchID = ds.searchID;
+            selectedTable = ds.table;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -57,23 +65,13 @@
             ds.nsUsername = userNameInput.text;
             ds.netsuiteRole = roleIDInput.text;
             ds.nsPassword = passwordInput.text;
-            var tables:ArrayCollection = new ArrayCollection();
-            for each (var o:NetsuiteTable in tableOptions) {
-                if (o.selected) {
-                    tables.addItem(o.name);
-                }
-            }
-            ds.tables = tables;
+            ds.table = String(tableComboBox.selectedItem);
+            ds.searchID = searchIDInput.text;
+            ds.feedName = String(tableComboBox.selectedItem);
         }
 
         public function validate():Boolean {
-            var tables:ArrayCollection = new ArrayCollection();
-            for each (var o:NetsuiteTable in tableOptions) {
-                if (o.selected) {
-                    tables.addItem(o.name);
-                }
-            }
-            return tables.length > 0;
+            return true;
         }
         ]]></mx:Script>
     <mx:HBox>
@@ -92,7 +90,12 @@
         <mx:Label text="Netsuite Role ID:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
         <mx:TextInput id="roleIDInput" fontWeight="normal" fontFamily="Lucida Grande" text="{roleID}" width="350"/>
     </mx:HBox>
-    <mx:VBox>
-        <mx:List dataProvider="{tableOptions}" itemRenderer="com.easyinsight.customupload.NetsuiteTableRenderer"/>
-    </mx:VBox>
+    <mx:HBox>
+        <mx:Label text="Table:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:ComboBox id="tableComboBox" dataProvider="{tableOptions}" width="350" selectedItem="{selectedTable}"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Label text="Search ID:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:TextInput id="searchIDInput" fontWeight="normal" fontFamily="Lucida Grande" text="{searchID}" width="350"/>
+    </mx:HBox>
 </mx:VBox>

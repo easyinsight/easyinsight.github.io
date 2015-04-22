@@ -261,6 +261,7 @@ public class AsyncReport {
                                 "WHERE async_report_request_id = ?");
                         query.setLong(1, requestID);
                         ResultSet detailRS = query.executeQuery();
+                        detailRS.next();
                         byte[] reportBytes = detailRS.getBytes(1);
                         query.close();
                         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
@@ -327,6 +328,7 @@ public class AsyncReport {
                                 "WHERE async_report_request_id = ?");
                         query.setLong(1, requestID);
                         ResultSet detailRS = query.executeQuery();
+                        detailRS.next();
                         byte[] reportBytes = detailRS.getBytes(1);
                         query.close();
                         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(reportBytes));
@@ -424,22 +426,26 @@ public class AsyncReport {
                                                             AsyncReport.establishAsync();
 
                                                             try {
+                                                                byte[] freportBytes;
+                                                                byte[] fmetadataBytes;
                                                                 EIConnection conn = Database.instance().getConnection();
                                                                 try {
                                                                     populateThreadLocal(fuserID, conn);
+                                                                    PreparedStatement query = conn.prepareStatement("SELECT report_bytes, metadata_bytes FROM async_report_request_details " +
+                                                                            "WHERE async_report_request_id = ?");
+                                                                    query.setLong(1, frequestID);
+                                                                    ResultSet detailRS = query.executeQuery();
+                                                                    detailRS.next();
+                                                                    freportBytes = detailRS.getBytes(1);
+                                                                    fmetadataBytes = detailRS.getBytes(2);
+                                                                    query.close();
                                                                 } catch (Exception e) {
                                                                     throw new RuntimeException(e);
                                                                 } finally {
                                                                     Database.closeConnection(conn);
                                                                 }
 
-                                                                PreparedStatement query = conn.prepareStatement("SELECT report_bytes, metadata_bytes FROM async_report_request_details " +
-                                                                        "WHERE async_report_request_id = ?");
-                                                                query.setLong(1, frequestID);
-                                                                ResultSet detailRS = query.executeQuery();
-                                                                byte[] freportBytes = detailRS.getBytes(1);
-                                                                byte[] fmetadataBytes = detailRS.getBytes(2);
-                                                                query.close();
+
                                                                 ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(freportBytes));
                                                                 WSAnalysisDefinition report = (WSAnalysisDefinition) ois.readObject();
                                                                 ois = new ObjectInputStream(new ByteArrayInputStream(fmetadataBytes));
@@ -673,9 +679,10 @@ public class AsyncReport {
             reqStmt.execute();
             requestID = Database.instance().getAutoGenKey(reqStmt);
             reqStmt.close();
-            PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes) VALUES (?, ?)");
+            PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes, create_time) VALUES (?, ?, ?)");
             detStmt.setLong(1, requestID);
             detStmt.setBytes(2, blobBytes);
+            detStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             detStmt.execute();
             detStmt.close();
         } catch (Throwable e) {
@@ -761,9 +768,10 @@ public class AsyncReport {
             reqStmt.execute();
             requestID = Database.instance().getAutoGenKey(reqStmt);
             reqStmt.close();
-            PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes) VALUES (?, ?)");
+            PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes, create_time) VALUES (?, ?, ?)");
             detStmt.setLong(1, requestID);
             detStmt.setBytes(2, blobBytes);
+            detStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             detStmt.execute();
             detStmt.close();
         } catch (Throwable e) {
@@ -954,16 +962,17 @@ public class AsyncReport {
         PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, request_created, request_type, user_id) VALUES (?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         reqStmt.setInt(1, WAITING_ASSIGN);
-        reqStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-        reqStmt.setInt(4, requestType);
-        reqStmt.setLong(5, SecurityUtil.getUserID());
+        reqStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+        reqStmt.setInt(3, requestType);
+        reqStmt.setLong(4, SecurityUtil.getUserID());
         reqStmt.execute();
         long requestID = Database.instance().getAutoGenKey(reqStmt);
         reqStmt.close();
-        PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes, metadata_bytes) VALUES (?, ?, ?)");
+        PreparedStatement detStmt = conn.prepareStatement("INSERT INTO async_report_request_details (async_report_request_id, report_bytes, metadata_bytes, create_time) VALUES (?, ?, ?, ?)");
         detStmt.setLong(1, requestID);
         detStmt.setBytes(2, reportBytes);
         detStmt.setBytes(3, metadata);
+        detStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
         detStmt.execute();
         detStmt.close();
         return requestID;

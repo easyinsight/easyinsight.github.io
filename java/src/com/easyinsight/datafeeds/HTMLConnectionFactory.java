@@ -1,15 +1,24 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
+import com.easyinsight.datafeeds.surveygizmo.SurveyGizmoCompositeSource;
 import com.easyinsight.html.RedirectUtil;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.OAuthResponse;
 import com.easyinsight.users.TokenService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -101,8 +110,47 @@ public class HTMLConnectionFactory {
             } else {
                 // launch via ajax
                 if (type == TYPE_OAUTH) {
-                    OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
-                    servletResponse.sendRedirect(response.getRequestToken());
+
+                    // any chance we already have a connection of this type?
+
+                    if (dataSource instanceof SurveyGizmoCompositeSource) {
+                        Map<String, String> existingKeys = new HashMap<>();
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            PreparedStatement queryStmt = conn.prepareStatement("SELECT survey_gizmo.token_key, survey_gizmo.secret_key FROM " +
+                                    "survey_gizmo, upload_policy_users, user, data_feed WHERE " +
+                                    "user.account_id = ? AND user.user_id = upload_policy_users.user_id AND " +
+                                    "upload_policy_users.feed_id = survey_gizmo.data_source_id AND " +
+                                    "upload_policy_users.feed_id = data_feed.data_feed_id AND " +
+                                    "data_feed.visible = ?");
+                            queryStmt.setLong(1, SecurityUtil.getAccountID());
+                            queryStmt.setBoolean(2, true);
+                            ResultSet rs = queryStmt.executeQuery();
+                            while (rs.next()) {
+                                String tokenKey = rs.getString(1);
+                                String tokenSecret = rs.getString(2);
+                                if (tokenKey != null && tokenSecret != null) {
+                                    existingKeys.put(tokenKey, tokenSecret);
+                                }
+                            }
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
+                        if (existingKeys.size() == 1) {
+                            SurveyGizmoCompositeSource surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) dataSource;
+                            String key = existingKeys.keySet().iterator().next();
+                            surveyGizmoCompositeSource.setSgToken(key);
+                            surveyGizmoCompositeSource.setSgSecret(existingKeys.get(key));
+                            new FeedStorage().updateDataFeedConfiguration(dataSource);
+                            servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/dataSources/" + dataSource.getApiKey() + "/createConnection"));
+                        } else {
+                            OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
+                            servletResponse.sendRedirect(response.getRequestToken());
+                        }
+                    } else {
+                        OAuthResponse response = new TokenService().getOAuthResponse(dataSourceType, true, dataSource, TokenService.HTML_SETUP, request.getSession());
+                        servletResponse.sendRedirect(response.getRequestToken());
+                    }
                 } else {
                     new FeedStorage().updateDataFeedConfiguration(dataSource);
                     servletResponse.sendRedirect(RedirectUtil.getURL(request, "/app/html/dataSources/" + dataSource.getApiKey() + "/createConnection"));

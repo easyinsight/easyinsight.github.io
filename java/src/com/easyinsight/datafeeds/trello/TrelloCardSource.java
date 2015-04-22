@@ -107,7 +107,9 @@ public class TrelloCardSource extends TrelloBaseSource {
                             String name = jsonObject.get("name").toString();
                             labelData.add(new LabelObject(card.get("id").toString(), name, color));
                         } catch (Exception e) {
-                            LogClass.error(e);
+                            //LogClass.error(e);
+
+                            // ignore
                         }
                     }
 
@@ -117,7 +119,8 @@ public class TrelloCardSource extends TrelloBaseSource {
                         try {
                             memberData.add(new Member(card.get("id").toString(), memberID));
                         } catch (Exception e) {
-                            LogClass.error(e);
+                            //LogClass.error(e);
+                            // ignore
                         }
                     }
                     row.addValue(CARD_CREATED, new DateValue(new Date(hexDate)));

@@ -109,6 +109,8 @@
                     event.solution.dataSourceType == DataSourceType.BASECAMP_NEXT ||
                     event.solution.dataSourceType == DataSourceType.CONSTANT_CONTACT ||
                     event.solution.dataSourceType == DataSourceType.GITHUB ||
+                    event.solution.dataSourceType == DataSourceType.GOOGLE ||
+                    event.solution.dataSourceType == DataSourceType.GOOGLE_ANALYTICS ||
                     event.solution.dataSourceType == DataSourceType.FRESHBOOKS ||
                     event.solution.dataSourceType == DataSourceType.PIVOTAL_TRACKER_V5 ||
                     event.solution.dataSourceType == DataSourceType.HARVEST_COMPOSITE ||
@@ -123,6 +125,7 @@
                     event.solution.dataSourceType == DataSourceType.SENDGRID ||
                     event.solution.dataSourceType == DataSourceType.TRELLO ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK2 ||
+                    event.solution.dataSourceType == DataSourceType.NETSUITE_COMPOSITE ||
                     event.solution.dataSourceType == DataSourceType.BATCHBOOK ||
                     event.solution.dataSourceType == DataSourceType.YOUTRACK ||
                     event.solution.dataSourceType == DataSourceType.WUFOO ||

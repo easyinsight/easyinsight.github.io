@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.XMLImportMetadata;
 import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
+import com.easyinsight.logging.LogClass;
 import nu.xom.Element;
 import nu.xom.Node;
 import nu.xom.Nodes;
@@ -13,6 +14,9 @@ import org.json.JSONObject;
 import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -176,7 +180,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
 
     @Override
     public String toQuerySQL(String tableName, Database database, InsightRequestMetadata insightRequestMetadata) {
-        if (!dateTime()) {
+        //if (!dateTime()) {
             StringBuilder sb = new StringBuilder();
             if (level == AnalysisDateDimension.MONTH_FLAT) {
                 if (database.getDialect() == Database.MYSQL) {
@@ -189,6 +193,7 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append(")");
+                System.out.println(sb.toString());
                 return sb.toString();
             } else if (level == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
 
@@ -203,24 +208,45 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append(")");
+                System.out.println(sb.toString());
                 return sb.toString();
             } else if (level == AnalysisDateDimension.WEEK_LEVEL) {
 
             } else if (level == AnalysisDateDimension.MONTH_LEVEL) {
-
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    Date earliestDate = null;
+                    Date latestDate = null;
+                    for (DateLevelWrapper wrapper : levels) {
+                        Date date = sdf.parse(wrapper.getShortDisplay());
+                        if (earliestDate == null || date.before(earliestDate)) {
+                            earliestDate = date;
+                        }
+                        if (latestDate == null || date.after(latestDate)) {
+                            latestDate = date;
+                        }
+                    }
+                    if (earliestDate != null && latestDate != null) {
+                        sb.append(getField().toKeySQL() + " >= ? AND " + getField().toKeySQL() + " <= ?");
+                    }
+                    return sb.toString();
+                } catch (ParseException e) {
+                    LogClass.error(e);
+                }
             }
-        }
+        //}
         return null;
     }
 
     @Override
     public boolean validForQuery() {
-        return !dateTime() && (level == AnalysisDateDimension.MONTH_FLAT || level == AnalysisDateDimension.YEAR_LEVEL);
+        return super.validForQuery() && (level == AnalysisDateDimension.MONTH_FLAT || level == AnalysisDateDimension.YEAR_LEVEL || level == AnalysisDateDimension.MONTH_LEVEL) &&
+                levels != null && levels.size() > 0;
     }
 
     @Override
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        if (!dateTime()) {
+        //if (!dateTime()) {
             if (level == AnalysisDateDimension.MONTH_FLAT) {
                 for (DateLevelWrapper wrapper : levels) {
                     preparedStatement.setInt(start++, wrapper.getDateLevel() + 1);
@@ -229,8 +255,36 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 for (DateLevelWrapper wrapper : levels) {
                     preparedStatement.setInt(start++, Integer.parseInt(wrapper.getShortDisplay()));
                 }
+            } else if (level == AnalysisDateDimension.MONTH_LEVEL) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    Date earliestDate = null;
+                    Date latestDate = null;
+                    for (DateLevelWrapper wrapper : levels) {
+                        Date date = sdf.parse(wrapper.getShortDisplay());
+                        if (earliestDate == null || date.before(earliestDate)) {
+                            earliestDate = date;
+                        }
+                        if (latestDate == null || date.after(latestDate)) {
+                            latestDate = date;
+                        }
+                    }
+                    if (earliestDate != null && latestDate != null) {
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(earliestDate);
+                        c.add(Calendar.MONTH, -1);
+                        Date startDate = c.getTime();
+                        c.setTime(latestDate);
+                        c.add(Calendar.MONTH, 1);
+                        Date endDate = c.getTime();
+                        preparedStatement.setTimestamp(start++, new Timestamp(startDate.getTime()));
+                        preparedStatement.setTimestamp(start++, new Timestamp(endDate.getTime()));
+                    }
+                } catch (ParseException e) {
+                    LogClass.error(e);
+                }
             }
-        }
+        //}
         /*preparedStatement.setInt(start++, value);
         return start;*/
         return start;

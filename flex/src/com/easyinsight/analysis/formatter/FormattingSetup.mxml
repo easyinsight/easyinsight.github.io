@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" selectedIndex="0" rowCount="8">
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[
-			public function set formattingConfiguration(formatType:int):void {
-				switch (formatType) {
-					case FormattingConfiguration.NUMBER:
-						selectedIndex = 0;
-						break;
-					case FormattingConfiguration.CURRENCY:
-						selectedIndex = 1;
-						break;
-					case FormattingConfiguration.PERCENTAGE:
-						selectedIndex = 2;
-						break;
-                    case FormattingConfiguration.MILLISECONDS:
-                        selectedIndex = 3;
-                        break;
-                    case FormattingConfiguration.SECONDS:
-                        selectedIndex = 4;
-                        break;
-                    case FormattingConfiguration.BYTES:
-                        selectedIndex = 5;
-                        break;
-                    case FormattingConfiguration.ROUNDED_NUMBER:
-                        selectedIndex = 6;
-                        break;
-                    case FormattingConfiguration.ROUNDED_CURRENCY:
-                        selectedIndex = 7;
-                        break;
-				}				
-			}		
-		
-			public function get formattingConfiguration():int {
-                return selectedIndex + 1;
-			}
-		]]>
+        public function set formattingConfiguration(formatType:int):void {
+            switch (formatType) {
+                case FormattingConfiguration.NUMBER:
+                    selectedIndex = 0;
+                    break;
+                case FormattingConfiguration.CURRENCY:
+                    selectedIndex = 1;
+                    break;
+                case FormattingConfiguration.PERCENTAGE:
+                    selectedIndex = 2;
+                    break;
+                case FormattingConfiguration.MILLISECONDS:
+                    selectedIndex = 3;
+                    break;
+                case FormattingConfiguration.SECONDS:
+                    selectedIndex = 4;
+                    break;
+                case FormattingConfiguration.BYTES:
+                    selectedIndex = 5;
+                    break;
+                case FormattingConfiguration.ROUNDED_NUMBER:
+                    selectedIndex = 6;
+                    break;
+                case FormattingConfiguration.ROUNDED_CURRENCY:
+                    selectedIndex = 7;
+                    break;
+            }
+        }
+
+        public function get formattingConfiguration():int {
+            return selectedIndex + 1;
+        }
+        ]]>
 	</mx:Script>
     <mx:dataProvider>
         <mx:ArrayCollection>

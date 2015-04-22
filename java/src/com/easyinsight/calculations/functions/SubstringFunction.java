@@ -24,6 +24,9 @@ public class SubstringFunction extends Function {
             int startIndex = (int) (indexValue).toDouble().doubleValue();
             if (params.size() == 2) {
                 try {
+                    if (startIndex >= substringValue.length()) {
+                        startIndex = substringValue.length();
+                    }
                     string = substringValue.substring(startIndex);
                 } catch (StringIndexOutOfBoundsException e) {
                     string = "";
@@ -31,6 +34,9 @@ public class SubstringFunction extends Function {
             } else {
                 int endIndex = (int) (params.get(2)).toDouble().doubleValue();
                 try {
+                    if (endIndex >= substringValue.length()) {
+                        endIndex = substringValue.length();
+                    }
                     string = substringValue.substring(startIndex, endIndex);
                 } catch (StringIndexOutOfBoundsException e) {
                     string = "";

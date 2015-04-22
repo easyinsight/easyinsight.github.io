@@ -54,7 +54,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             int recacheTime = delayRS.getInt(1);
             delayStmt.close();
 
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT data_source_id from cached_addon_report_source, analysis where analysis.data_feed_id = ? and " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT data_source_id, analysis.analysis_id from cached_addon_report_source, analysis where analysis.data_feed_id = ? and " +
                     "analysis.analysis_id = cached_addon_report_source.report_id");
             PreparedStatement nodeStmt = conn.prepareStatement("SELECT composite_feed.data_feed_id from composite_node, composite_feed where " +
                     "composite_node.data_feed_id = ? and composite_node.composite_feed_id = composite_feed.composite_feed_id");
@@ -62,13 +62,30 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     "WHERE FEDERATED_DATA_SOURCE_TO_DATA_SOURCE.DATA_SOURCE_ID = ? AND " +
                     "FEDERATED_DATA_SOURCE_TO_DATA_SOURCE.FEDERATED_DATA_SOURCE_ID = FEDERATED_DATA_SOURCE.FEDERATED_DATA_SOURCE_ID");
 
+            PreparedStatement propStmt = conn.prepareStatement("SELECT report_numeric_property.property_value FROM report_property, " +
+                    "report_numeric_property, report_to_report_property WHERE report_to_report_property.analysis_id = ? AND " +
+                    "report_to_report_property.report_property_id = report_property.report_property_id AND " +
+                    "report_property.property_name = ? AND " +
+                    "report_property.report_property_id = report_numeric_property.report_property_id");
+
             queryStmt.setLong(1, dataSourceID);
             ResultSet rs = queryStmt.executeQuery();
             Set<Long> ids = new HashSet<Long>();
 
+            Map<Long, Integer> orderMap = new HashMap<>();
             while (rs.next()) {
                 ids.add(rs.getLong(1));
+                long reportID = rs.getLong(2);
+                propStmt.setLong(1, reportID);
+                propStmt.setString(2, "cacheOrder");
+                ResultSet propRS = propStmt.executeQuery();
+                int cacheOrder = 0;
+                if (propRS.next()) {
+                    cacheOrder = propRS.getInt(1);
+                }
+                orderMap.put(reportID, cacheOrder);
             }
+            propStmt.close();
             nodeStmt.setLong(1, dataSourceID);
             Set<Long> nextIDs = new HashSet<Long>();
             ResultSet nodeRS = nodeStmt.executeQuery();
@@ -106,8 +123,31 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             fedStmt.close();
             queryStmt.close();
             nodeStmt.close();
+
+            List<Long> idList = new ArrayList<>(ids);
+
+            Collections.sort(idList, new Comparator<Long>() {
+
+                @Override
+                public int compare(Long o1, Long o2) {
+                    Integer pos1 = orderMap.get(o1);
+                    Integer pos2 = orderMap.get(o2);
+                    if (pos1 == null && pos2 != null) {
+                        return 1;
+                    } else if (pos1 != null && pos2 == null) {
+                        return -1;
+                    } else if (pos1 == null) {
+                        return o1.compareTo(o2);
+                    } else if (pos1 == 0 && pos2 == 0) {
+                        return o1.compareTo(o2);
+                    } else {
+                        return pos1.compareTo(pos2);
+                    }
+                }
+            });
+
             if (recacheTime == 0) {
-                for (Long id : ids) {
+                for (Long id : idList) {
                     try {
                         System.out.println("Running report " + id);
                         runReport(conn, id, true);
@@ -155,6 +195,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
         Set<Long> sources = new HashSet<Long>();
         EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM cache_to_rebuild WHERE data_source_id = ?");
 
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT data_source_id FROM cache_to_rebuild WHERE cache_time < ?");
@@ -170,8 +211,12 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
             }
             queryStmt.close();
             clearStmt.close();
-
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw e;
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
 
@@ -366,7 +411,7 @@ public class CachedAddonDataSource extends ServerDataSourceDefinition {
                     int endYear = 2015;
                     Calendar cal = Calendar.getInstance();
                     if (lastRefreshDate != null && lastRefreshDate.getTime() > 10000) {
-                        cal.add(Calendar.YEAR, -1);
+                        cal.add(Calendar.YEAR, -4);
                     } else {
                         cal.set(Calendar.YEAR, startYear);
                     }

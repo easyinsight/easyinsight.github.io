@@ -2,9 +2,9 @@ package com.easyinsight.datafeeds.surveygizmo;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.IDataStorage;
@@ -13,12 +13,8 @@ import net.minidev.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,182 +52,235 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
     public static final String CONTACT_ID = "Contact ID";
     public static final String SUBMIT_DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String DELIMITER = "|";
-    private String formID;
-
-    public void setFormID(String formID) {
-        this.formID = formID;
-    }
-
-    public String getFormID() {
-        return formID;
-    }
-
-    @NotNull
-    @Override
-    protected List<String> getKeys(FeedDefinition parentDefinition) {
-        return new ArrayList<String>();
-    }
+    public static final String COUNT = "Count";
+    public static final String ROW_ID = "Row ID";
 
     @Override
     public FeedType getFeedType() {
         return FeedType.SURVEYGIZMO_QUESTION;
     }
 
-    @Override
-    public void customStorage(Connection conn) throws SQLException {
-        super.customStorage(conn);
-        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM SURVEYGIZMO_FORM_SOURCE WHERE DATA_SOURCE_ID = ?");
-        clearStmt.setLong(1, getDataFeedID());
-        clearStmt.executeUpdate();
-        clearStmt.close();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SURVEYGIZMO_FORM_SOURCE (FORM_ID, DATA_SOURCE_ID) VALUES (?, ?)");
-        insertStmt.setString(1, formID);
-        insertStmt.setLong(2, getDataFeedID());
-        insertStmt.execute();
-        insertStmt.close();
-    }
 
-    @Override
-    public void customLoad(Connection conn) throws SQLException {
-        super.customLoad(conn);
-        PreparedStatement getStmt = conn.prepareStatement("SELECT FORM_ID FROM SURVEYGIZMO_FORM_SOURCE WHERE DATA_SOURCE_ID = ?");
-        getStmt.setLong(1, getDataFeedID());
-        ResultSet rs = getStmt.executeQuery();
-        if (rs.next()) {
-            formID = rs.getString(1);
+    private transient List<AnalysisItem> queuedFields;
+
+    public List<AnalysisItem> getQueuedFields() {
+        if (queuedFields == null) {
+            queuedFields = new ArrayList<>();
         }
-        getStmt.close();
+        return queuedFields;
     }
 
     @Override
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
-        SurveyGizmoCompositeSource surveyGizmoCompositeSource;
-        SurveyGizmoFormSource formSource = (SurveyGizmoFormSource) parentDefinition;
-        try {
-            surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) new FeedStorage().getFeedDefinitionData(parentDefinition.getParentSourceID(), conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        fieldBuilder.addField(COUNT, new AnalysisMeasure());
+        fieldBuilder.addField(DATE_SUBMITTED, new AnalysisDateDimension());
+        fieldBuilder.addField(ROW_ID, new AnalysisDimension());
+        fieldBuilder.addField(LATITUDE, new AnalysisDimension());
+        fieldBuilder.addField(LONGITUDE, new AnalysisDimension());
+        fieldBuilder.addField(CONTACT_ID, new AnalysisDimension());
+        fieldBuilder.addField(STATUS, new AnalysisDimension());
+        fieldBuilder.addField(TEST_DATA, new AnalysisDimension());
+        fieldBuilder.addField(ID, new AnalysisDimension());
+
+        List<AnalysisItem> queuedFields = getQueuedFields();
+        for (AnalysisItem item : queuedFields) {
+            NamedKey namedKey = (NamedKey) item.getKey();
+            fieldBuilder.addField(namedKey.getName(), item);
         }
-        HttpClient httpClient = new HttpClient();
-        JSONObject doc = SurveyGizmoUtils.runRequest("/survey/" + formSource.getFormID() + "/surveyquestion", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
-        JSONArray data = (JSONArray) doc.get("data");
-        for(Object o : data) {
-            JSONObject field = (JSONObject) o;
-            String title = (String) ((JSONObject) field.get("title")).get("English");
-            String id = String.valueOf(field.get("id"));
-            String subType = (String) field.get("_subtype");
-            String type = (String) field.get("_type");
+    }
 
-            System.out.println("title: " + title);
-            System.out.println("id: " + id);
-            System.out.println("type: " + type);
-            System.out.println("subtype: " + subType);
-            System.out.println("\t" + field);
+    private transient Set<String> npsQuestions;
 
-            // monday, tuesday etc are multi_textbox, containing options attribute with array of more questions
-            // this question sucks, doesn't it? = id 5, SurveyQuestion, multi_textbox
-            if (type.contains("multi")) {
-
-            } else if("SurveyQuestion".equals(type) && !"instructions".equals(subType)) {
-                if("slider".equals(subType))
-                    fieldBuilder.addField(id, title, new AnalysisMeasure());
-                else if("checkbox".equals(subType)) {
-                    AnalysisList a = new AnalysisList();
-                    a.setDelimiter("\\" + DELIMITER);
-                    fieldBuilder.addField(id, title, a);
-                }
-                else
-                    fieldBuilder.addField(id, title, new AnalysisDimension());
-            }
-        }
+    public void setNpsQuestions(Set<String> npsQuestions) {
+        this.npsQuestions = npsQuestions;
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) throws ReportException {
         Set<String> lists = allListAnalysisItems();
         DataSet ds = new DataSet();
         DateFormat df = new SimpleDateFormat(SUBMIT_DATE_FORMAT);
-        SurveyGizmoCompositeSource surveyGizmoCompositeSource;
-        SurveyGizmoFormSource formSource = (SurveyGizmoFormSource) parentDefinition;
-        try {
-            surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) new FeedStorage().getFeedDefinitionData(parentDefinition.getParentSourceID(), conn);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        SurveyGizmoCompositeSource surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) parentDefinition;
         HttpClient httpClient = new HttpClient();
-        JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + formSource.getFormID() + "/surveyresponse", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
-        JSONArray data = (JSONArray) jo.get("data");
-        Pattern p = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
+        int page = 1;
+        int totalPages;
 
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
 
-        for(Object o : data) {
-            JSONObject survey = (JSONObject) o;
-            IRow row = ds.createRow();
-            Map<Key, List<String>> listsMap = new HashMap<Key, List<String>>();
-            for(Map.Entry<String, Object> entry : survey.entrySet()) {
+        do {
+            JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + surveyGizmoCompositeSource.getFormID() + "/surveyresponse", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
 
-                // base question data
+            JSONArray data = (JSONArray) jo.get("data");
+            page++;
+            totalPages = (Integer) jo.get("total_pages");
 
-                // additional question data
+            Pattern optionPattern = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
+            Pattern p = Pattern.compile(".*option\\(([A-Za-z0-9]+)\\).*\\]");
+            Pattern b = Pattern.compile("\\[variable\\((STANDARD_[A-Za-z0-9]+)\\).*\\]");
 
-                Matcher m = p.matcher(entry.getKey());
-                if(m.matches()) {
-                    String keyString = m.replaceAll("$1");
-                    if(lists.contains(keyString)) {
-                        if(!listsMap.containsKey(keys.get(keyString)))
-                            listsMap.put(keys.get(keyString), new ArrayList<String>());
-                        List<String> stringList = listsMap.get(keys.get(keyString));
-                        if(!((String) entry.getValue()).isEmpty())
-                            stringList.add((String) entry.getValue());
+
+
+
+            int i = 0;
+            for (Object o : data) {
+                JSONObject survey = (JSONObject) o;
+                IRow row = ds.createRow();
+                row.addValue(keys.get(ROW_ID), String.valueOf(i));
+                row.addValue(keys.get(COUNT), 1);
+                Map<Key, List<String>> listsMap = new HashMap<>();
+
+                Map<String, Object> cache = new HashMap<>();
+
+                cache.put("row_id", String.valueOf(i++));
+
+                for (Map.Entry<String, Object> entry : survey.entrySet()) {
+
+                    if (!entry.getKey().contains("option")) {
+                        Matcher m = optionPattern.matcher(entry.getKey());
+                        if (m.matches()) {
+                            String keyString = m.replaceAll("$1");
+                            if (lists.contains(keyString)) {
+                                if (!listsMap.containsKey(keys.get(keyString)))
+                                    listsMap.put(keys.get(keyString), new ArrayList<>());
+                                List<String> stringList = listsMap.get(keys.get(keyString));
+                                if (!((String) entry.getValue()).isEmpty())
+                                    stringList.add((String) entry.getValue());
+                            } else {
+                                if (keys.get(keyString) == null) {
+                                    cache.put(keyString, entry.getValue());
+                                } else {
+                                    npsPopulate(row, keys.get(keyString), (String) entry.getValue(), npsQuestions, keys);
+                                    row.addValue(keys.get(keyString), (String) entry.getValue());
+                                }
+                            }
+                        }
                     } else {
-                        row.addValue(keys.get(keyString), (String) entry.getValue());
+
+                        // base question data
+
+                        // additional question data
+
+                        Matcher m = p.matcher(entry.getKey());
+                        if (m.matches()) {
+                            String keyString = m.replaceAll("$1");
+                            Matcher optionMatcher = optionPattern.matcher(entry.getKey());
+                            String optionVal = null;
+                            if (optionMatcher.matches()) {
+                                optionVal = optionMatcher.replaceAll("$1");
+                            }
+                            if (lists.contains(keyString)) {
+                                if (!listsMap.containsKey(keys.get(keyString)))
+                                    listsMap.put(keys.get(keyString), new ArrayList<String>());
+                                List<String> stringList = listsMap.get(keys.get(keyString));
+                                if (!((String) entry.getValue()).isEmpty())
+                                    stringList.add((String) entry.getValue());
+                            } else {
+                                if (keys.get(keyString) == null) {
+                                    if (optionVal == null) {
+                                        cache.put(keyString, entry.getValue());
+                                    } else {
+                                        cache.put(optionVal + ":" + keyString, entry.getValue());
+                                    }
+                                } else {
+                                    npsPopulate(row, keys.get(keyString), (String) entry.getValue(), npsQuestions, keys);
+                                    row.addValue(keys.get(keyString), (String) entry.getValue());
+                                }
+                            }
+                        }
+
+                        // metadata info
+
+                        Matcher bm = b.matcher(entry.getKey());
+                        if (bm.matches()) {
+                            String keyString = bm.replaceAll("$1");
+                            String optionVal = null;
+                            Matcher optionMatcher = optionPattern.matcher(entry.getKey());
+                            if (optionMatcher.matches()) {
+                                optionVal = optionMatcher.replaceAll("$1");
+                            }
+                            if (lists.contains(keyString)) {
+                                if (!listsMap.containsKey(keys.get(keyString)))
+                                    listsMap.put(keys.get(keyString), new ArrayList<String>());
+                                List<String> stringList = listsMap.get(keys.get(keyString));
+                                if (!((String) entry.getValue()).isEmpty())
+                                    stringList.add((String) entry.getValue());
+                            } else {
+                                if (keys.get(keyString) == null) {
+                                    if (optionVal == null) {
+                                        cache.put(keyString, entry.getValue());
+                                    } else {
+                                        cache.put(optionVal + ":" + keyString, entry.getValue());
+                                    }
+                                } else {
+                                    row.addValue(keys.get(keyString), (String) entry.getValue());
+                                }
+                            }
+                        }
                     }
+
+
                 }
 
-                // metadata info
+                Builder builder = new Builder(survey, keys, row);
+                builder.addValue(LONGITUDE, "LONG");
+                builder.addValue(LATITUDE, "LAT");
+                /*builder.addValue(CITY, "GEOCITY");
+                builder.addValue(REFERER, "REFERER");
+                builder.addValue(COMMENTS, "COMMENTS");
+                builder.addValue(RESPONSE_TIME, "RESPONSETIME");
+                builder.addValue(IP, "IP");
+                builder.addValue(REGION, "GEOREGION");
+                builder.addValue(POSTAL, "GEOPOSTAL");
+                builder.addValue(DMA, "GEODMA");
+                builder.addValue(COUNTRY, "GEOCOUNTRY");
+                builder.addValue(USER_AGENT, "USERAGENT");*/
+                builder.addRawValue(ID, "id");
+                builder.addRawValue(STATUS, "status");
+                builder.addRawValue(TEST_DATA, "is_test_data");
+                /*builder.addRawValue(RESPONSE_ID, "responseID");*/
+                builder.addRawValue(CONTACT_ID, "contact_id");
 
-                /*b.addValue(LONGITUDE, "LONG");
-                b.addValue(LATITUDE, "LAT");
-                b.addValue(CITY, "GEOCITY");
-                b.addValue(REFERER, "REFERER");
-                b.addValue(COMMENTS, "COMMENTS");
-                b.addValue(RESPONSE_TIME, "RESPONSETIME");
-                b.addValue(IP, "IP");
-                b.addValue(REGION, "GEOREGION");
-                b.addValue(POSTAL, "GEOPOSTAL");
-                b.addValue(DMA, "GEODMA");
-                b.addValue(COUNTRY, "GEOCOUNTRY");
-                b.addValue(USER_AGENT, "USERAGENT");
-                b.addRawValue(ID, "id");
-                b.addRawValue(STATUS, "status");
-                b.addRawValue(TEST_DATA, "is_test_data");
-                b.addRawValue(RESPONSE_ID, "responseID");
-                b.addRawValue(CONTACT_ID, "contact_id");
+                if (cache.size() > 0) {
+                    results.add(cache);
+                }
+
+                for (Map.Entry<Key, List<String>> entry : listsMap.entrySet()) {
+                    row.addValue(entry.getKey(), StringUtils.join(entry.getValue(), DELIMITER));
+                }
+
+                //Builder b = new Builder(survey, keys, row);
+
                 String dateSubmitted = String.valueOf(survey.get("datesubmitted"));
                 try {
                     Date d = df.parse(dateSubmitted);
                     row.addValue(keys.get(DATE_SUBMITTED), d);
                 } catch (ParseException e) {
 
-                }*/
+                }
             }
+        } while (page <= totalPages);
 
-            for(Map.Entry<Key, List<String>> entry : listsMap.entrySet()) {
-                row.addValue(entry.getKey(), StringUtils.join(entry.getValue(), DELIMITER));
-            }
+        surveyGizmoCompositeSource.setResults(results);
 
-            //Builder b = new Builder(survey, keys, row);
+        return ds;
+    }
 
-            String dateSubmitted = String.valueOf(survey.get("datesubmitted"));
-            try {
-                Date d = df.parse(dateSubmitted);
-                row.addValue(keys.get(DATE_SUBMITTED), d);
-            } catch (ParseException e) {
+    private void npsPopulate(IRow row, Key key, String value, Set<String> npsQuestions, Map<String, Key> keyMap) {
 
+
+        if (key instanceof NamedKey) {
+            NamedKey namedKey = (NamedKey) key;
+            if (npsQuestions.contains(namedKey.getName())) {
+                Integer intValue = Integer.parseInt(value);
+                if (intValue >= 0 && intValue < 7) {
+                    row.addValue(keyMap.get(namedKey.getName() + " Detractors"), 1);
+                } else if (intValue >= 7 && intValue < 9) {
+                    row.addValue(keyMap.get(namedKey.getName() + " Passives"), 1);
+                } else if (intValue >= 8 && intValue < 7) {
+                    row.addValue(keyMap.get(namedKey.getName() + " Promoters"), 1);
+                }
             }
         }
 
-        return ds;
     }
 
     private Set<String> allListAnalysisItems() {

@@ -568,6 +568,8 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                             }
                             if (value != null) {
                                 guesser.addValue(key, new StringValue(value.toString()));
+                            } else {
+                                guesser.addValue(key, new StringValue(""));
                             }
 
                         }
@@ -666,8 +668,9 @@ public class JSONDataSource extends ServerDataSourceDefinition {
                     }
                     if (value != null) {
                         guesser.addValue(key, new StringValue(value.toString()));
+                    } else {
+                        guesser.addValue(key, new StringValue(""));
                     }
-
                 }
             }
             fieldList = guesser.createFeedItems();

@@ -527,31 +527,75 @@ public class AdminService {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         EIConnection conn = Database.instance().getConnection();
         try {
-            /*
-            update task_generator set task_generator.disabled_generator = ?
-            where task_generator.task_generator_id in
-            (select data_activity_task_generator.task_generator_id from data_activity_task_generator, SCHEDULED_DATA_SOURCE_REFRESH, upload_policy_users, user, account
-            where data_activity_task_generator.scheduled_activity_id = SCHEDULED_DATA_SOURCE_REFRESH.scheduled_account_activity_id and
-            SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = upload_policy_users.feed_id and
-            upload_policy_users.user_id = user.user_id and user.account_id = account.account_id and (account.account_state = ?))
-             */
-            PreparedStatement disableStmt = conn.prepareStatement("update task_generator set task_generator.disabled_generator = ? where task_generator.task_generator_id in (select data_activity_task_generator.task_generator_id from data_activity_task_generator, SCHEDULED_DATA_SOURCE_REFRESH, upload_policy_users, user, account where data_activity_task_generator.scheduled_activity_id = SCHEDULED_DATA_SOURCE_REFRESH.scheduled_account_activity_id and SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and user.account_id = account.account_id and (account.account_state = ?))");
-            disableStmt.setBoolean(1, true);
-            disableStmt.setLong(2, Account.DELINQUENT);
-            disableStmt.executeUpdate();
-
-            disableStmt.setBoolean(1, false);
-            disableStmt.setLong(2, Account.ACTIVE);
-            disableStmt.executeUpdate();
-
-            disableStmt.setBoolean(1, false);
-            disableStmt.setLong(2, Account.TRIAL);
-            disableStmt.executeUpdate();
-            disableStmt.close();
-
+            conn.setAutoCommit(false);
+            {
+                PreparedStatement getStmt = conn.prepareStatement("SELECT data_activity_task_generator.task_generator_id FROM data_activity_task_generator");
+                PreparedStatement getAccountsStmt = conn.prepareStatement("SELECT account.account_state, account.account_id, account.name FROM data_activity_task_generator, SCHEDULED_DATA_SOURCE_REFRESH, upload_policy_users, user, account where data_activity_task_generator.task_generator_id = ? and data_activity_task_generator.scheduled_activity_id = SCHEDULED_DATA_SOURCE_REFRESH.scheduled_account_activity_id and SCHEDULED_DATA_SOURCE_REFRESH.data_source_id = upload_policy_users.feed_id and upload_policy_users.user_id = user.user_id and user.account_id = account.account_id");
+                PreparedStatement disableStmt = conn.prepareStatement("update task_generator set task_generator.disabled_generator = ? where task_generator.task_generator_id = ?");
+                ResultSet dsRS = getStmt.executeQuery();
+                while (dsRS.next()) {
+                    long taskGenID = dsRS.getLong(1);
+                    System.out.println("Task gen ID = " + taskGenID);
+                    getAccountsStmt.setLong(1, taskGenID);
+                    ResultSet rs = getAccountsStmt.executeQuery();
+                    boolean valid = false;
+                    String accountString = "";
+                    while (rs.next()) {
+                        int accountState = rs.getInt(1);
+                        long accountID = rs.getLong(2);
+                        String accountName = rs.getString(3);
+                        accountString += (accountName + ",");
+                        if (accountState == Account.ACTIVE || accountState == Account.TRIAL) {
+                            valid = true;
+                        }
+                    }
+                    if (valid) {
+                        System.out.println("Valid for " + accountString);
+                    } else {
+                        System.out.println("Disabling for " + accountString);
+                    }
+                    disableStmt.setBoolean(1, !valid);
+                    disableStmt.setLong(2, taskGenID);
+                    disableStmt.executeUpdate();
+                }
+            }
+            {
+                PreparedStatement getStmt = conn.prepareStatement("SELECT delivery_task_generator.task_generator_id FROM delivery_task_generator");
+                PreparedStatement getAccountsStmt = conn.prepareStatement("SELECT account.account_state, account.account_id, account.name FROM delivery_task_generator, scheduled_account_activity, account where delivery_task_generator.task_generator_id = ? and delivery_task_generator.scheduled_account_activity_id = scheduled_account_activity.scheduled_account_activity_id and scheduled_account_activity.account_id = account.account_id");
+                PreparedStatement disableStmt = conn.prepareStatement("update task_generator set task_generator.disabled_generator = ? where task_generator.task_generator_id = ?");
+                ResultSet dsRS = getStmt.executeQuery();
+                while (dsRS.next()) {
+                    long taskGenID = dsRS.getLong(1);
+                    System.out.println("Task gen ID = " + taskGenID);
+                    getAccountsStmt.setLong(1, taskGenID);
+                    ResultSet rs = getAccountsStmt.executeQuery();
+                    boolean valid = false;
+                    String accountString = "";
+                    while (rs.next()) {
+                        int accountState = rs.getInt(1);
+                        long accountID = rs.getLong(2);
+                        String accountName = rs.getString(3);
+                        accountString += (accountName + ",");
+                        if (accountState == Account.ACTIVE || accountState == Account.TRIAL) {
+                            valid = true;
+                        }
+                    }
+                    if (valid) {
+                        System.out.println("Valid for " + accountString);
+                    } else {
+                        System.out.println("Disabling for " + accountString);
+                    }
+                    disableStmt.setBoolean(1, !valid);
+                    disableStmt.setLong(2, taskGenID);
+                    disableStmt.executeUpdate();
+                }
+            }
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }

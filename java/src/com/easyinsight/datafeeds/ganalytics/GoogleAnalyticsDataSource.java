@@ -19,6 +19,11 @@ import java.sql.SQLException;
 
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
+import org.apache.amber.oauth2.client.OAuthClient;
+import org.apache.amber.oauth2.client.URLConnectionClient;
+import org.apache.amber.oauth2.client.request.OAuthClientRequest;
+import org.apache.amber.oauth2.client.response.OAuthJSONAccessTokenResponse;
+import org.apache.amber.oauth2.common.message.types.GrantType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
@@ -231,7 +236,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
 
     @Override
     public Feed createFeedObject(FeedDefinition parent) {
-        return new GoogleAnalyticsFeed(tokenKey, tokenSecret);
+        return new GoogleAnalyticsFeed(tokenKey, tokenSecret, refreshToken, accessToken);
     }
 
     public DataSet getDataSet(Map<String, Key> keys, Date now, FeedDefinition parentDefinition, IDataStorage IDataStorage, EIConnection conn, String callDataID, Date lastRefreshDate) {
@@ -240,21 +245,23 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
 
     @Override
     public void exchangeTokens(EIConnection conn, HttpServletRequest request, String externalPin) throws Exception {
-        try {
-            if (externalPin != null) {
-                pin = externalPin;
+        if (request != null) {
+            String code = request.getParameter("code");
+            if (code != null) {
+                OAuthClientRequest oAuthClientRequest = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
+                        setGrantType(GrantType.AUTHORIZATION_CODE).setClientId("196763839405.apps.googleusercontent.com").
+                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").
+                        setRedirectURI("https://www.easy-insight.com/app/oauth").
+                        setParameter("access_type", "offline").
+                        setCode(code).buildBodyMessage();
+
+                OAuthClient client = new OAuthClient(new URLConnectionClient());
+                OAuthJSONAccessTokenResponse response = client.accessToken(oAuthClientRequest);
+                System.out.println("access token = " + response.getAccessToken());
+                System.out.println("refresh token = " + response.getRefreshToken());
+                accessToken = response.getAccessToken();
+                refreshToken = response.getRefreshToken();
             }
-            if (pin != null && !"".equals(pin)) {
-                OAuthConsumer consumer = (OAuthConsumer) request.getSession().getAttribute("oauthConsumer");
-                OAuthProvider provider = (OAuthProvider) request.getSession().getAttribute("oauthProvider");
-                provider.retrieveAccessToken(consumer, pin.trim());
-                tokenKey = consumer.getToken();
-                tokenSecret = consumer.getTokenSecret();
-                pin = null;
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -404,6 +411,24 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     private String pin;
     private String tokenKey;
     private String tokenSecret;
+    private String accessToken;
+    private String refreshToken;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 
     public String getPin() {
         return pin;
@@ -433,20 +458,25 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GOOGLE_ANALYTICS WHERE DATA_SOURCE_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GOOGLE_ANALYTICS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET) VALUES (?, ?, ?)");
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO GOOGLE_ANALYTICS (DATA_SOURCE_ID, TOKEN_KEY, TOKEN_SECRET, ACCESS_TOKEN, REFRESH_TOKEN) " +
+                "VALUES (?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, tokenKey);
         insertStmt.setString(3, tokenSecret);
+        insertStmt.setString(4, accessToken);
+        insertStmt.setString(5, refreshToken);
         insertStmt.execute();
     }
 
     public void customLoad(Connection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN_KEY, TOKEN_SECRET FROM GOOGLE_ANALYTICS WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT TOKEN_KEY, TOKEN_SECRET, ACCESS_TOKEN, REFRESH_TOKEN FROM GOOGLE_ANALYTICS WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
             tokenKey = rs.getString(1);
             tokenSecret = rs.getString(2);
+            accessToken = rs.getString(3);
+            refreshToken = rs.getString(4);
         }
     }
 }

@@ -54,7 +54,11 @@ public class WufooFormSource extends WufooBaseSource {
             Nodes fields = doc.query("/Fields/Field");
             for (int i = 0; i < fields.size(); i++) {
                 Node fieldNode = fields.get(i);
-                String title = fieldNode.query("Title/text()").get(0).getValue();
+                Nodes titleNodes = fieldNode.query("Title/text()");
+                if (titleNodes.size() == 0) {
+                    continue;
+                }
+                String title = titleNodes.get(0).getValue();
                 String type = fieldNode.query("Type/text()").get(0).getValue();
                 String id = fieldNode.query("ID/text()").get(0).getValue();
                 Nodes subFieldNodes = fieldNode.query("SubFields/Subfield");
@@ -110,7 +114,6 @@ public class WufooFormSource extends WufooBaseSource {
                     Node entryNode = entryNodes.get(i);
                     IRow row = dataSet.createRow();
                     for (AnalysisItem analysisItem : getFields()) {
-                        System.out.println(analysisItem.getKey().toKeyString() + "/text()");
                         Nodes vals = entryNode.query(analysisItem.getKey().toKeyString() + "/text()");
                         if (vals.size() == 1) {
                             row.addValue(analysisItem.getKey(), vals.get(0).getValue());

@@ -67,6 +67,7 @@ public class StyleConfiguration {
         items.addItem(new ColorReportFormItem("Stack 2 Fill End", "stackFill2End",  dashboard.stackFill2End, dashboard));
         items.addItem(new CheckBoxReportFormItem("Absolute Height", "absoluteSizing",  dashboard.absoluteSizing, dashboard));
         items.addItem(new CheckBoxReportFormItem("Stack Fill Headers", "fillStackHeaders",  dashboard.fillStackHeaders, dashboard));
+        items.addItem(new CheckBoxReportFormItem("Lazy Filter Load", "lazyFilters",  dashboard.lazyFilters, dashboard));
         items.addItem(new ImageReportFormItem("Header Image", "headerImage", dashboard.headerImage, dashboard));
         items.addItem(new CheckBoxReportFormItem("Full-Size Header Image", "imageFullHeader", dashboard.imageFullHeader, dashboard));
         items.addItem(new CheckBoxReportFormItem("Include Header Image in HTML", "includeHeaderInHTML", dashboard.includeHeaderInHTML, dashboard));
@@ -251,6 +252,7 @@ public class StyleConfiguration {
     public static function getCachingItems(report:AnalysisDefinition):ArrayCollection {
         var items:ArrayCollection = new ArrayCollection();
         items.addItem(new NumericReportFormItem("Cache Minutes", "cacheMinutes", report.cacheMinutes, report, 0, 50000));
+        items.addItem(new NumericReportFormItem("Cache Order", "cacheOrder", report.cacheOrder, report, 0, 50));
         items.addItem(new TextReportFormItem("Cache Partition Filter", "cachePartitionFilter", report.cachePartitionFilter, report));
         items.addItem(new CheckBoxReportFormItem("Cache Persistence", "persistedCache", report.persistedCache, report));
         items.addItem(new CheckBoxReportFormItem("Cache Filters", "cacheFilters", report.cacheFilters, report));
