@@ -7,6 +7,7 @@ import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 
 import java.io.*;
+import java.util.Date;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 import java.net.URL;
@@ -21,7 +22,39 @@ public class AppWatchdog {
 
     public static final String[] SHUTDOWN_CMD = {"/opt/tomcat/bin/catalina.sh", "stop"};
     public static final String[] STARTUP_CMD = {"/opt/tomcat/bin/catalina.sh", "start"};
+    public static final String[] DUMP = {"pkill", "-f", "-3", "catalina"};
+    public static final String[] KILL = {"pkill", "-f", "-9", "catalina"};
+    public static final String[] GREP = {"pgrep", "-f", "catalina"};
 
+    public void kill() {
+        try {
+            Runtime.getRuntime().exec(DUMP);
+            Thread.sleep(2000);
+            Runtime.getRuntime().exec(KILL);
+
+            Date d = new Date();
+            boolean found = false;
+            do {
+                Process p = Runtime.getRuntime().exec(GREP);
+                BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+                found = false;
+                String line;
+                while ((line = br.readLine()) != null) {
+                    try {
+                        if (Long.parseLong(line) != 0)
+                            found = true;
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            } while(found && ((new Date()).getTime() - d.getTime()) < 60);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void restart() {
         try {

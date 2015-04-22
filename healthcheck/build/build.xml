@@ -14,7 +14,7 @@
                 <fileset dir="../lib">
                     <include name="**/*.jar"/>
                 </fileset>
-                <fileset file="../../java/lib/core/servlet-api.jar"/>
+                <fileset file="../../java/lib/servlet/servlet-api.jar"/>
             </classpath>
             <include name="**"/>
             <exclude name="tags/**"/>
@@ -24,6 +24,8 @@
             <classes dir="${out.classes.path}" />
             <fileset dir="../web" />
         </war>
-
+    </target>
+    <target name="clean">
+        <delete dir="${out.path}" />
     </target>
 </project>
