@@ -1404,6 +1404,7 @@ public class DataService {
                                                         InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters, EIConnection conn,
                                                         boolean ignoreCache) throws Exception {
 
+        handleTimezoneData(conn, insightRequestMetadata);
         EmbeddedResults embeddedResults;
         ReportRetrieval reportRetrieval = ReportRetrieval.reportView(insightRequestMetadata, analysisDefinition, conn, customFilters, drillThroughFilters);
         DataResults results = reportRetrieval.getPipeline().toList(reportRetrieval.getDataSet(), conn, reportRetrieval.aliases);
