@@ -346,7 +346,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             startDate = new Date();
         }
 
-        if (startDateYear > 0) {
+        /*if (startDateYear > 0) {
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.YEAR, startDateYear);
             cal.set(Calendar.MONTH, startDateMonth);
@@ -356,7 +356,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             cal.set(Calendar.MONTH, endDateMonth);
             cal.set(Calendar.DAY_OF_MONTH, endDateDay);
             endDate = cal.getTime();
-        }
+        }*/
 
         insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + startDate);
         insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + endDate);
