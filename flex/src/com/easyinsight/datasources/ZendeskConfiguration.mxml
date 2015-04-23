@@ -16,6 +16,8 @@
         private var url:String;
         [Bindable]
         private var includeComments:Boolean;
+        [Bindable]
+        private var limitedRetrieval:Boolean;
 
         [Bindable]
         private var usernameInputText:String;
@@ -30,6 +32,7 @@
             includeComments = ds.loadComments;
             usernameInputText = ds.zdUserName;
             apiKeyInputText = ds.zdApiKey;
+            limitedRetrieval = ds.limited;
         }
 
         private function save():void {
@@ -38,6 +41,7 @@
             ds.loadComments = includeComments;
             ds.zdUserName = userNameInput.text;
             ds.zdApiKey = passwordInput.text;
+            ds.limited = limitedCheckbox.selected;
             saveSource();
         }
 
@@ -55,6 +59,12 @@
                 <mx:CheckBox id="commentsCheckbox" selected="{includeComments}" change="inactiveCheckbox_changeHandler(event)"/>
                 <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="Check this box to enable comment synchronization."/>
             </mx:FormItem>
+    </mx:Form>
+    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+        <mx:FormItem label="Limited Retrieval:" direction="horizontal">
+            <mx:CheckBox id="limitedCheckbox" selected="{limitedRetrieval}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If selected, Easy Insight will not pull audit information about your tickets from Zendesk, dramatically speeding up synchronization times."/>
+        </mx:FormItem>
     </mx:Form>
     <mx:TextArea width="700" text="Your Zendesk URL is the browser URL you normally use to connect to Zendesk. For example, if you access Zendesk as yourcompanyname.zendesk.com, put yourcompanyname in as the Zendesk URL."
             editable="false" selectable="false" focusEnabled="false" fontSize="12"/>

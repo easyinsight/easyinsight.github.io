@@ -30,6 +30,7 @@
             usernameInputText = ds.zdUserName;
             url = ds.url;
             includeComments = ds.loadComments;
+            limitedRetrieval = ds.limited;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -38,6 +39,7 @@
             ds.zdApiKey = passwordInput.text;
             ds.url = urlInput.text;
             ds.loadComments = includeComments;
+            ds.limited = limitedCheckbox.selected;
             if (initialImportCheckbox.selected) {
                 var date:Date = startDateChooser.selectedDate;
                 ds.fixedStartDate = date;
@@ -52,6 +54,9 @@
         private function inactiveCheckbox_changeHandler(event:Event):void {
             includeComments = commentsCheckbox.selected;
         }
+
+        [Bindable]
+        private var limitedRetrieval:Boolean;
         ]]></mx:Script>
     <mx:HBox>
         <mx:Label text="Zendesk URL:" width="225" textAlign="right" fontFamily="Tahoma" fontWeight="bold"/>
@@ -64,9 +69,10 @@
         <mx:FormItem label="Start Date" enabled="{initialImportCheckbox.selected}">
             <mx:DateField id="startDateChooser"/>
         </mx:FormItem>
-    </mx:Form>
-    <mx:Text width="700" text="If you have a considerable amount of historical data, you may find it quicker to create your Easy Insight connection to FreshBooks with a subset of that data. You can always change this date to pull back older data."/>
-    <mx:Form paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10">
+        <mx:FormItem label="Limited Retrieval:" direction="horizontal">
+            <mx:CheckBox id="limitedCheckbox" selected="{limitedRetrieval}"/>
+            <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="If selected, Easy Insight will not pull audit information about your tickets from Zendesk, dramatically speeding up synchronization times."/>
+        </mx:FormItem>
         <mx:FormItem label="Include Comments:" direction="horizontal">
             <mx:CheckBox id="commentsCheckbox" selected="{includeComments}" change="inactiveCheckbox_changeHandler(event)"/>
             <mx:Label text="What is this?" fontSize="10" textDecoration="underline" toolTip="Check this box to enable comment synchronization."/>

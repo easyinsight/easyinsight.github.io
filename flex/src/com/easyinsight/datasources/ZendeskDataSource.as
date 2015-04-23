@@ -13,6 +13,7 @@ public class ZendeskDataSource extends CompositeServerDataSource {
     public var loadComments:Boolean;
     public var hackMethod:Boolean;
     public var fixedStartDate:Date;
+    public var limited:Boolean;
 
     public function ZendeskDataSource() {
         super();
