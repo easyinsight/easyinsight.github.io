@@ -242,7 +242,11 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             if (zendeskCompositeSource.getFixedStartDate() != null) {
                 cal.setTime(zendeskCompositeSource.getFixedStartDate());
             } else {
-                cal.add(Calendar.MONTH, -6);
+                if (zendeskCompositeSource.isLimited()) {
+                    cal.add(Calendar.YEAR, -6);
+                } else {
+                    cal.add(Calendar.MONTH, -6);
+                }
             }
         } else {
             cal.setTime(lastStart);
@@ -282,137 +286,139 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                         }
                     }
 
+                    if (!zendeskCompositeSource.isLimited()) {
 
-                    String status = queryField(map, "status");
-                    if (!"Deleted".equals(status)) {
-                        if (auditIDs.contains(id)) {
+                        String status = queryField(map, "status");
+                        if (!"Deleted".equals(status)) {
+                            if (auditIDs.contains(id)) {
 
-                        } else {
-                            try {
-                                boolean firstComment = true;
-                                Date createDate = ((DateValue) queryDate(map, "created_at")).getDate();
-                                ZonedDateTime createDateTime = createDate.toInstant().atZone(ZoneId.systemDefault());
-                                TicketAnalysis ticketAnalysis = new TicketAnalysis(createDateTime);
-                                Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/audits.json", zendeskCompositeSource, httpClient);
+                            } else {
+                                try {
+                                    boolean firstComment = true;
+                                    Date createDate = ((DateValue) queryDate(map, "created_at")).getDate();
+                                    ZonedDateTime createDateTime = createDate.toInstant().atZone(ZoneId.systemDefault());
+                                    TicketAnalysis ticketAnalysis = new TicketAnalysis(createDateTime);
+                                    Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/audits.json", zendeskCompositeSource, httpClient);
 
-                                List<Map> audits = (List<Map>) ticketDetail.get("audits");
-                                if (audits != null) {
-                                    //System.out.println(audits);
-                                    for (Map audit : audits) {
-                                        Date date = df2.parse(audit.get("created_at").toString());
-                                        List<Map> events = (List<Map>) audit.get("events");
+                                    List<Map> audits = (List<Map>) ticketDetail.get("audits");
+                                    if (audits != null) {
+                                        //System.out.println(audits);
+                                        for (Map audit : audits) {
+                                            Date date = df2.parse(audit.get("created_at").toString());
+                                            List<Map> events = (List<Map>) audit.get("events");
 
-                                        for (Map event : events) {
-                                            //Object authorID = event.get("author_id");
+                                            for (Map event : events) {
+                                                //Object authorID = event.get("author_id");
 
-                                            if (event.get("html_body") != null) {
-                                                String auditID = audit.get("id").toString();
-                                                String author = queryUser(audit.get("author_id").toString(), userCache).toString();
-                                                commentList.add(new Comment(Long.parseLong(auditID), event.get("html_body").toString(), author, date, id));
-                                                if (firstComment) {
-                                                    firstComment = false;
-                                                    row.addValue(DESCRIPTION, event.get("html_body").toString());
+                                                if (event.get("html_body") != null) {
+                                                    String auditID = audit.get("id").toString();
+                                                    String author = queryUser(audit.get("author_id").toString(), userCache).toString();
+                                                    commentList.add(new Comment(Long.parseLong(auditID), event.get("html_body").toString(), author, date, id));
+                                                    if (firstComment) {
+                                                        firstComment = false;
+                                                        row.addValue(DESCRIPTION, event.get("html_body").toString());
+                                                    }
                                                 }
-                                            }
-                                            if (event.get("field_name") != null) {
+                                                if (event.get("field_name") != null) {
 
-                                                String fieldName = event.get("field_name").toString();
-                                                if ("status".equals(fieldName)) {
-                                                    String type = event.get("value").toString();
-                                                    if ("new".equals(type) || "open".equals(type)) {
-                                                        ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, date);
-                                                    } else if ("solved".equals(type)) {
-                                                        ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, date);
-                                                    } else {
-                                                        ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, date);
+                                                    String fieldName = event.get("field_name").toString();
+                                                    if ("status".equals(fieldName)) {
+                                                        String type = event.get("value").toString();
+                                                        if ("new".equals(type) || "open".equals(type)) {
+                                                            ticketAnalysis.addResponsibility(TicketAnalysis.AGENT, date);
+                                                        } else if ("solved".equals(type)) {
+                                                            ticketAnalysis.addResponsibility(TicketAnalysis.SOLVED, date);
+                                                        } else {
+                                                            ticketAnalysis.addResponsibility(TicketAnalysis.CUSTOMER, date);
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
+                                    ticketAnalysis.calculate();
+                                    row.addValue(keys.get(CUSTOMER_HANDLES), ticketAnalysis.getCustomerHandles());
+                                    row.addValue(keys.get(AGENT_HANDLES), ticketAnalysis.getAgentHandles());
+                                    if (ticketAnalysis.getWaitState() == TicketAnalysis.AGENT) {
+                                        row.addValue(keys.get(CURRENT), "On Agent");
+                                    } else if (ticketAnalysis.getWaitState() == TicketAnalysis.CUSTOMER) {
+                                        row.addValue(keys.get(CURRENT), "On Customer");
+                                    } else if (ticketAnalysis.getWaitState() == TicketAnalysis.UNASSIGNED) {
+                                        row.addValue(keys.get(CURRENT), "Unassigned");
+                                    } else if (ticketAnalysis.getWaitState() == TicketAnalysis.SOLVED) {
+                                        row.addValue(keys.get(CURRENT), "Solved");
+                                    }
+                                    row.addValue(keys.get(TIME_WITH_CUSTOMER), ticketAnalysis.getElapsedCustomerTime());
+                                    row.addValue(keys.get(TIME_WITH_AGENT), ticketAnalysis.getElapsedAgentTime());
+                                } catch (Exception e) {
+                                    LogClass.error(e);
                                 }
-                                ticketAnalysis.calculate();
-                                row.addValue(keys.get(CUSTOMER_HANDLES), ticketAnalysis.getCustomerHandles());
-                                row.addValue(keys.get(AGENT_HANDLES), ticketAnalysis.getAgentHandles());
-                                if (ticketAnalysis.getWaitState() == TicketAnalysis.AGENT) {
-                                    row.addValue(keys.get(CURRENT), "On Agent");
-                                } else if (ticketAnalysis.getWaitState() == TicketAnalysis.CUSTOMER) {
-                                    row.addValue(keys.get(CURRENT), "On Customer");
-                                } else if (ticketAnalysis.getWaitState() == TicketAnalysis.UNASSIGNED) {
-                                    row.addValue(keys.get(CURRENT), "Unassigned");
-                                } else if (ticketAnalysis.getWaitState() == TicketAnalysis.SOLVED) {
-                                    row.addValue(keys.get(CURRENT), "Solved");
-                                }
-                                row.addValue(keys.get(TIME_WITH_CUSTOMER), ticketAnalysis.getElapsedCustomerTime());
-                                row.addValue(keys.get(TIME_WITH_AGENT), ticketAnalysis.getElapsedAgentTime());
-                            } catch (Exception e) {
-                                LogClass.error(e);
+                                auditIDs.add(id);
                             }
-                            auditIDs.add(id);
                         }
-                    }
-                    //}
+                        //}
 
-                    if (zendeskCompositeSource.isHackMethod()) {
-                        if (ticketIDs.contains(id)) {
+                        if (zendeskCompositeSource.isHackMethod()) {
+                            if (ticketIDs.contains(id)) {
 
-                        } else {
-                            try {
-                                Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + ".json", zendeskCompositeSource, httpClient);
+                            } else {
+                                try {
+                                    Map ticketDetail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + ".json", zendeskCompositeSource, httpClient);
 
-                                Map detailObject = (Map) ticketDetail.get("ticket");
-                                if (detailObject != null) {
-                                    List customFields = (List) detailObject.get("custom_fields");
-                                    if (customFields != null) {
-                                        for (Object cFieldObj : customFields) {
-                                            Map customFieldMap = (Map) cFieldObj;
-                                            String fieldID = customFieldMap.get("id").toString();
-                                            Key key = keys.get("zd" + fieldID);
-                                            if (row.getValueNoAdd(key).type() == Value.EMPTY || "".equals(row.getValueNoAdd(key).toString())) {
-                                                Object fieldValueObject = customFieldMap.get("value");
-                                                if (fieldValueObject != null) {
+                                    Map detailObject = (Map) ticketDetail.get("ticket");
+                                    if (detailObject != null) {
+                                        List customFields = (List) detailObject.get("custom_fields");
+                                        if (customFields != null) {
+                                            for (Object cFieldObj : customFields) {
+                                                Map customFieldMap = (Map) cFieldObj;
+                                                String fieldID = customFieldMap.get("id").toString();
+                                                Key key = keys.get("zd" + fieldID);
+                                                if (row.getValueNoAdd(key).type() == Value.EMPTY || "".equals(row.getValueNoAdd(key).toString())) {
+                                                    Object fieldValueObject = customFieldMap.get("value");
+                                                    if (fieldValueObject != null) {
 
-                                                    if (key != null) {
-                                                        row.addValue(key, fieldValueObject.toString());
+                                                        if (key != null) {
+                                                            row.addValue(key, fieldValueObject.toString());
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
+                                } catch (Exception e) {
+                                    LogClass.error(e);
                                 }
-                            } catch (Exception e) {
-                                LogClass.error(e);
+                                ticketIDs.add(id);
                             }
-                            ticketIDs.add(id);
                         }
-                    }
 
-                    /*if (zendeskCompositeSource.isLoadComments()) {
-                        if (commentIDs.contains(id)) {
+                        /*if (zendeskCompositeSource.isLoadComments()) {
+                            if (commentIDs.contains(id)) {
 
-                        } else {
-                            Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
+                            } else {
+                                Map detail = queryList(zendeskCompositeSource.getUrl() + "/api/v2/tickets/" + id + "/comments.json", zendeskCompositeSource, httpClient);
 
-                            List comments = (List) detail.get("comments");
-                            if (comments != null) {
-                                String firstComment = null;
-                                for (Object commentMapObj : comments) {
-                                    Map commentMap = (Map) commentMapObj;
-                                    String commentID = commentMap.get("id").toString();
-                                    String commentDescription = commentMap.get("body").toString();
-                                    if (firstComment == null) {
-                                        firstComment = commentDescription;
+                                List comments = (List) detail.get("comments");
+                                if (comments != null) {
+                                    String firstComment = null;
+                                    for (Object commentMapObj : comments) {
+                                        Map commentMap = (Map) commentMapObj;
+                                        String commentID = commentMap.get("id").toString();
+                                        String commentDescription = commentMap.get("body").toString();
+                                        if (firstComment == null) {
+                                            firstComment = commentDescription;
+                                        }
+                                        String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
+                                        Date createdAt = adf.parse(commentMap.get("created_at").toString());
+                                        commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, id));
                                     }
-                                    String author = queryUser(commentMap.get("author_id").toString(), userCache).toString();
-                                    Date createdAt = adf.parse(commentMap.get("created_at").toString());
-                                    commentList.add(new Comment(Long.parseLong(commentID), commentDescription, author, createdAt, id));
-                                }
 
-                                row.addValue(DESCRIPTION, firstComment);
+                                    row.addValue(DESCRIPTION, firstComment);
+                                }
+                                commentIDs.add(id);
                             }
-                            commentIDs.add(id);
-                        }
-                    }*/
+                        }*/
+                    }
                     if (lastStart != null) {
                         StringWhere userWhere = new StringWhere(noteKey, id);
                         dataStorage.updateData(dataSet, Arrays.asList((IWhere) userWhere));

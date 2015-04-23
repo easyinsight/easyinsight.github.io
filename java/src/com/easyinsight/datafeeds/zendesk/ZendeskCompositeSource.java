@@ -35,9 +35,18 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     private boolean hackMethod = false;
     private String zdApiKey;
     private Date fixedStartDate;
+    private boolean limited;
 
     public ZendeskCompositeSource() {
         setFeedName("Zendesk");
+    }
+
+    public boolean isLimited() {
+        return limited;
+    }
+
+    public void setLimited(boolean limited) {
+        this.limited = limited;
     }
 
     public boolean isHackMethod() {
@@ -144,8 +153,8 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         clearStmt.executeUpdate();
         clearStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO ZENDESK (URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, DATA_SOURCE_ID, " +
-                "LOAD_COMMENTS, HACK_METHOD, FIXED_START_DATE) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                "LOAD_COMMENTS, HACK_METHOD, FIXED_START_DATE, LIMITED_RETRIEVAL) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setString(1, url);
         insertStmt.setString(2, zdUserName);
         if (zdPassword != null && (zdApiKey == null || zdApiKey.isEmpty())) {
@@ -165,6 +174,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
         } else {
             insertStmt.setDate(8, new java.sql.Date(fixedStartDate.getTime()));
         }
+        insertStmt.setBoolean(9, limited);
         insertStmt.execute();
         insertStmt.close();
     }
@@ -191,7 +201,8 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
     @Override
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, LOAD_COMMENTS, HACK_METHOD, FIXED_START_DATE FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT URL, ZENDESK_USERNAME, ZENDESK_PASSWORD, ZENDESK_API_KEY, " +
+                "LOAD_COMMENTS, HACK_METHOD, FIXED_START_DATE, LIMITED_RETRIEVAL FROM ZENDESK WHERE DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, getDataFeedID());
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
@@ -208,6 +219,7 @@ public class ZendeskCompositeSource extends CompositeServerDataSource {
             if (fixedStartDate != null) {
                 this.fixedStartDate = new Date(fixedStartDate.getTime());
             }
+            limited = rs.getBoolean(8);
         }
     }
 
