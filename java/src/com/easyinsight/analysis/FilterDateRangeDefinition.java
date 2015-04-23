@@ -346,6 +346,18 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             startDate = new Date();
         }
 
+        if (startDateYear > 0) {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, startDateYear);
+            cal.set(Calendar.MONTH, startDateMonth);
+            cal.set(Calendar.DAY_OF_MONTH, startDateDay);
+            startDate = cal.getTime();
+            cal.set(Calendar.YEAR, endDateYear);
+            cal.set(Calendar.MONTH, endDateMonth);
+            cal.set(Calendar.DAY_OF_MONTH, endDateDay);
+            endDate = cal.getTime();
+        }
+
         insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + startDate);
         insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + endDate);
 
@@ -377,8 +389,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
             LocalDate endLocalDate = LocalDate.of(cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH) + 1,
                     cal.get(Calendar.DAY_OF_MONTH));
-            /*LocalDate startLocalDate = startDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();
-            LocalDate endLocalDate = endDate.toInstant().atZone(insightRequestMetadata.createZoneID()).toLocalDate();*/
             insightRequestMetadata.addAudit(this, "Start date on database query is " + startLocalDate);
             insightRequestMetadata.addAudit(this, "End date on database query is " + endLocalDate);
             preparedStatement.setDate(start++, new java.sql.Date(toOldJava(insightRequestMetadata, startLocalDate).getTime()));
