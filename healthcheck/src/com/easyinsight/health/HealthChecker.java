@@ -92,10 +92,10 @@ public class HealthChecker extends TimerTask {
                 }
                 boolean alert = false;
                 for(Map.Entry<String, Long> entry : fullValues.entrySet()) {
-                    if(!alert && entry.getValue() > System.currentTimeMillis() - (15 * 60 * 1000)) {
+                    if(!alert && entry.getValue() < System.currentTimeMillis() - (15 * 60 * 1000)) {
                         alert();
                         alert = true;
-                    } else if(entry.getValue() > System.currentTimeMillis() - (5 * 60 * 1000)) {
+                    } else if(entry.getValue() < System.currentTimeMillis() - (5 * 60 * 1000)) {
                         sendEmail("jboe@easy-insight.com", "SHITS BROKE", entry.getValue() + " is down.");
                     }
                 }
