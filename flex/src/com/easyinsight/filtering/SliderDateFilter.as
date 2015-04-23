@@ -288,6 +288,8 @@ import mx.rpc.events.ResultEvent;
                 highField.selectedDate = _filterDefinition.endDate;
             }
 
+            updateStartEnd();
+
             if (hslider != null) {
                 var newLowVal:int = ((lowField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
                 var newHighVal:int = ((highField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
@@ -364,7 +366,7 @@ import mx.rpc.events.ResultEvent;
                 highDate = new Date();
             }
 			this.delta = highDate.valueOf() - lowDate.valueOf();
-
+            updateStartEnd();
             createComponents();
 		}
 		
@@ -406,6 +408,19 @@ import mx.rpc.events.ResultEvent;
         public function set filterEditable(editable:Boolean):void {
             _filterEditable = editable;
         }
+        
+        private function updateStartEnd():void {
+            if (_filterDefinition != null && lowDate != null) {
+                _filterDefinition.startDateYear = lowDate.getFullYear();
+                _filterDefinition.startDateMonth = lowDate.getMonth() + 1;
+                _filterDefinition.startDateDay = lowDate.getDate();
+            }
+            if (_filterDefinition != null && highDate != null) {
+                _filterDefinition.endDateYear = highDate.getFullYear();
+                _filterDefinition.endDateMonth = highDate.getMonth() + 1;
+                _filterDefinition.endDateDay = highDate.getDate();
+            }
+        }
 		
 		private function thumbRelease(event:SliderEvent):void {
 			var lowValue:int = hslider.values[0];
@@ -421,6 +436,7 @@ import mx.rpc.events.ResultEvent;
 			_filterDefinition.endDate = newHighDate;
 			lowField.selectedDate = newLowDate;
 			highField.selectedDate = newHighDate;
+            updateStartEnd();
             try {
                 if (_retrievalState != null) {
                     _retrievalState.updateFilter(_filterDefinition, filterMetadata);
@@ -441,6 +457,7 @@ import mx.rpc.events.ResultEvent;
                 date.hours = 1;
             }
 			_filterDefinition.startDate = date;
+            updateStartEnd();
             try {
                 if (_retrievalState != null) {
                     _retrievalState.updateFilter(_filterDefinition, filterMetadata);
@@ -462,6 +479,7 @@ import mx.rpc.events.ResultEvent;
             }
 			_filterDefinition.endDate = date;
             _filterDefinition.sliding = false;
+            updateStartEnd();
             try {
                 if (_retrievalState != null) {
                     _retrievalState.updateFilter(_filterDefinition, filterMetadata);
