@@ -67,10 +67,12 @@ public class UserService {
             if ("on".equals(rememberMe)) {
                 Cookie userNameCookie = new Cookie("eiUserName", userServiceResponse.getUserName());
                 userNameCookie.setSecure(true);
+                userNameCookie.setHttpOnly(true);
                 userNameCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(userNameCookie);
                 Cookie tokenCookie = new Cookie("eiRememberMe", new InternalUserService().createCookie(userServiceResponse.getUserID()));
                 tokenCookie.setSecure(true);
+                tokenCookie.setHttpOnly(true);
                 tokenCookie.setMaxAge(60 * 60 * 24 * 30);
                 response.addCookie(tokenCookie);
             }
