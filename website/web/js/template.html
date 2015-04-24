@@ -438,7 +438,7 @@
 </script>
 
 <script type="text/template" id="multi_flat_date_filter">
-    <div class="filter filter<%= data.id %>">
+    <div class="filter <%= Filter.label(data, parent_id, type) %>">
         <%= Filter.base_filter({"data": data, "parent_id": typeof(parent_id) == "undefined" ? '' : parent_id, type: type}) %>
         <a href="#<%= Filter.label(data, parent_id, type) %>_modal" data-toggle="modal">
             <button id="<%= Filter.label(data, parent_id, type) %>" class="btn btn-default multi_flat_month"><%- data.startLabel %> to <%- data.endLabel %>

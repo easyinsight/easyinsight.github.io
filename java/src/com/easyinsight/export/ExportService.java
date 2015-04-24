@@ -64,8 +64,10 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.sql.*;
 import java.text.*;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Date;
 import java.util.List;
@@ -1681,22 +1683,39 @@ public class ExportService {
                 int quarter = DayOfQuarter.quarter(dateValue.getDate()) + 1;
                 valueString = "Q" + quarter;
             } else {
-                DateFormat sdf = getDateFormatForAccount(dateDim.getDateLevel(), dateDim.getOutputDateFormat(), dateFormat);
+                SimpleDateFormat sdf = getDateFormatForAccount(dateDim.getDateLevel(), dateDim.getOutputDateFormat(), dateFormat);
+
+
 
                 if (sdf == null) {
                     throw new RuntimeException("No date format found.");
                 }
 
+                String pattern = sdf.toPattern();
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
 
-                // todo: impl
-
-                if (dateDim.isTimeshift(null)) {
-
-                    sdf.setCalendar(cal);
+                if (!dateDim.isTimeshift()) {
+                    LocalDate localDate;
+                    if (dateValue.getLocalDate() == null) {
+                        Calendar cal2 = Calendar.getInstance();
+                        cal2.setTime(dateValue.getDate());
+                        localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                                cal.get(Calendar.MONTH) + 1,
+                                cal.get(Calendar.DAY_OF_MONTH));
+                    } else {
+                        localDate = dateValue.getLocalDate();
+                    }
+                    valueString = dtf.format(localDate);
                 } else {
-
+                    ZonedDateTime zonedDateTime;
+                    if (dateValue.getZonedDateTime() == null) {
+                        //TODO: fix
+                        zonedDateTime = dateValue.getDate().toInstant().atZone(ZoneId.systemDefault());
+                    } else {
+                        zonedDateTime = dateValue.getZonedDateTime();
+                    }
+                    valueString = dtf.format(zonedDateTime);
                 }
-                valueString = sdf.format(dateValue.getDate());
             }
 
         } else {
@@ -1776,8 +1795,8 @@ public class ExportService {
 
     public static
     @Nullable
-    DateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat, int dateFormat) {
-        DateFormat sdf = null;
+    SimpleDateFormat getDateFormatForAccount(int dateLevel, @Nullable String explicitDateFormat, int dateFormat) {
+        SimpleDateFormat sdf = null;
         if (explicitDateFormat != null && !"".equals(explicitDateFormat.trim())) {
             sdf = new SimpleDateFormat(explicitDateFormat);
         } else {
