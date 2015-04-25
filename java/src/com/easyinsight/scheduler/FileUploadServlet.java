@@ -48,10 +48,11 @@ public class FileUploadServlet extends HttpServlet {
             for (Object obj : items) {
                 FileItem fileItem = (FileItem) obj;
                 System.out.println("File item " + fileItem.getFieldName() + " - " + fileItem.getName() + " - " + fileItem.getContentType() + " - " + fileItem.getSize());
-                fileName = fileItem.getName();
+
                 if (fileItem.isFormField()) {
                 } else if (fileItem.getSize() > 0) {
                     bytes = fileItem.get();
+                    fileName = fileItem.getName();
                     System.out.println("got " + bytes.length + " bytes");
                 }
             }
