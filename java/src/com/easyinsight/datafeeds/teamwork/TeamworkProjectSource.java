@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.teamwork;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.ReportException;
@@ -26,6 +27,15 @@ public class TeamworkProjectSource extends TeamworkBaseSource {
 
     public static final String PROJECT_NAME = "Project Name";
     public static final String PROJECT_ID = "Project ID";
+    public static final String PROJECT_CATEGORY = "Project Category";
+    public static final String PROJECT_DESCRIPTION = "Project Description";
+    public static final String PROJECT_LAST_CHANGED_ON = "Project Last Changed On";
+    public static final String PROJECT_STARRED = "Project Starred";
+    public static final String PROJECT_COMPANY_NAME = "Project Company Name";
+    public static final String PROJECT_COMPANY_ID = "Project Company ID";
+    public static final String PROJECT_START_DATE = "Project Start Date";
+    public static final String PROJECT_STATUS = "Project Status";
+    public static final String PROJECT_ANNOUNCEMENT = "Project Announcement";
 
     public TeamworkProjectSource() {
         setFeedName("Projects");
@@ -35,6 +45,14 @@ public class TeamworkProjectSource extends TeamworkBaseSource {
     protected void createFields(FieldBuilder fieldBuilder, Connection conn, FeedDefinition parentDefinition) {
         fieldBuilder.addField(PROJECT_NAME, new AnalysisDimension());
         fieldBuilder.addField(PROJECT_ID, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_CATEGORY, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_DESCRIPTION, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_STARRED, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_COMPANY_NAME, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_STATUS, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_ANNOUNCEMENT, new AnalysisDimension());
+        fieldBuilder.addField(PROJECT_START_DATE, new AnalysisDateDimension());
+        fieldBuilder.addField(PROJECT_LAST_CHANGED_ON, new AnalysisDateDimension());
     }
 
     @Override
@@ -46,9 +64,14 @@ public class TeamworkProjectSource extends TeamworkBaseSource {
             Map results = runRestRequestForMap("projects.json", httpClient, teamworkCompositeSource);
             List<Map> projects = (List<Map>) results.get("projects");
             for (Map project : projects) {
+                System.out.println(project);
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(PROJECT_NAME), getValue(project, "name"));
                 row.addValue(keys.get(PROJECT_ID), getValue(project, "id"));
+                row.addValue(keys.get(PROJECT_DESCRIPTION), getValue(project, "description"));
+                row.addValue(keys.get(PROJECT_STARRED), getValue(project, "starred"));
+                row.addValue(keys.get(PROJECT_STATUS), getValue(project, "status"));
+                row.addValue(keys.get(PROJECT_ANNOUNCEMENT), getValue(project, "announcement"));
             }
             return dataSet;
         } catch (Exception e) {

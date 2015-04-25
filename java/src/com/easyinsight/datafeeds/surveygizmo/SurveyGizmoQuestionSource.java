@@ -102,6 +102,7 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
         SurveyGizmoCompositeSource surveyGizmoCompositeSource = (SurveyGizmoCompositeSource) parentDefinition;
         HttpClient httpClient = new HttpClient();
         int page = 1;
+        int i = 0;
         int totalPages;
 
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
@@ -119,8 +120,6 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
 
 
 
-
-            int i = 0;
             for (Object o : data) {
                 JSONObject survey = (JSONObject) o;
                 IRow row = ds.createRow();

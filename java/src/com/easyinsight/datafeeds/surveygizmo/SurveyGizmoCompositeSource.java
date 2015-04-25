@@ -165,7 +165,8 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                     List<Map> options = (List<Map>) field.get("options");
                     List<AnalysisItem> fields = new ArrayList<>();
                     for (Map option : options) {
-                        AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id + ":" + option.get("id").toString()), option.get("value").toString(), AggregationTypes.AVERAGE);
+                        AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id + ":" + option.get("id").toString()), sanitizeFieldName(option.get("value").toString()),
+                                AggregationTypes.AVERAGE);
                         measure.setPrecision(2);
                         measure.setMinPrecision(2);
                         fields.add(measure);
@@ -195,7 +196,8 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                     List<Map> options = (List<Map>) field.get("options");
                     List<AnalysisItem> fields = new ArrayList<>();
                     for (Map option : options) {
-                        AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id + ":" + option.get("id").toString()), option.get("value").toString(), AggregationTypes.AVERAGE);
+                        AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id + ":" + option.get("id").toString()), sanitizeFieldName(option.get("value").toString()),
+                                AggregationTypes.AVERAGE);
                         measure.setPrecision(2);
                         measure.setMinPrecision(2);
                         fields.add(measure);
@@ -245,7 +247,7 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                                 for (Map option : options) {
                                     String optionID = option.get("id").toString();
                                     String value = option.get("value").toString();
-                                    AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(tableID + ":" + optionID), value, AggregationTypes.AVERAGE);
+                                    AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(tableID + ":" + optionID), sanitizeFieldName(value), AggregationTypes.AVERAGE);
                                     measure.setPrecision(2);
                                     measure.setMinPrecision(2);
                                     analysisItems.add(measure);
@@ -258,7 +260,7 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                             for (Map option : options) {
                                 String optionID = option.get("id").toString();
                                 String value = option.get("value").toString();
-                                analysisItems.add(new AnalysisDimension(new NamedKey(id + ":" + optionID), value));
+                                analysisItems.add(new AnalysisDimension(new NamedKey(id + ":" + optionID), sanitizeFieldName(value)));
                             }
                         }
                     } else if ("radio".equals(subType)) {
@@ -273,7 +275,7 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                                 for (Map option : options) {
                                     String optionID = option.get("id").toString();
                                     String value = option.get("value").toString();
-                                    AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(tableID + ":" + optionID), value, AggregationTypes.AVERAGE);
+                                    AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(tableID + ":" + optionID), sanitizeFieldName(value), AggregationTypes.AVERAGE);
                                     measure.setPrecision(2);
                                     measure.setMinPrecision(2);
                                     analysisItems.add(measure);
@@ -282,10 +284,8 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                             }
                             qIDs.put(id, title);
                         } else {
-                            AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id), title, AggregationTypes.AVERAGE);
-                            measure.setPrecision(2);
-                            measure.setMinPrecision(2);
-                            analysisItems.add(measure);
+                            AnalysisDimension radioDimension = new AnalysisDimension(new NamedKey(id), sanitizeFieldName(title));
+                            analysisItems.add(radioDimension);
                         }
                     } else if ("checkbox".equals(subType)) {
 
@@ -297,7 +297,7 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                         if (properties.containsKey("subtype")) {
                             String dateSub = properties.get("subtype").toString();
                             if ("DATE".equals(dateSub)) {
-                                analysisItems.add(new AnalysisDateDimension(new NamedKey(id), title, AnalysisDateDimension.DAY_LEVEL));
+                                analysisItems.add(new AnalysisDateDimension(new NamedKey(id), sanitizeFieldName(title), AnalysisDateDimension.DAY_LEVEL));
                             }
                         }
 
@@ -305,30 +305,30 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
                             if ("nps".equals(subType)) {
                                 npsQuestions.add(id);
                                 {
-                                    AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id), title, AggregationTypes.AVERAGE);
+                                    AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id), sanitizeFieldName(title), AggregationTypes.AVERAGE);
                                     measure.setPrecision(2);
                                     measure.setMinPrecision(2);
                                     analysisItems.add(measure);
                                 }
                                 {
-                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Promoters"), title + " Promoters", AggregationTypes.SUM);
+                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Promoters"), sanitizeFieldName(title) + " Promoters", AggregationTypes.SUM);
                                     analysisItems.add(promoterMeasure);
                                 }
                                 {
-                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Detractors"), title + " Detractors", AggregationTypes.SUM);
+                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Detractors"), sanitizeFieldName(title) + " Detractors", AggregationTypes.SUM);
                                     analysisItems.add(promoterMeasure);
                                 }
                                 {
-                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Passives"), title + " Passives", AggregationTypes.SUM);
+                                    AnalysisMeasure promoterMeasure = new AnalysisMeasure(new NamedKey(id + " Passives"), sanitizeFieldName(title) + " Passives", AggregationTypes.SUM);
                                     analysisItems.add(promoterMeasure);
                                 }
                             } else if ("slider".equals(subType)) {
-                                AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id), title, AggregationTypes.AVERAGE);
+                                AnalysisMeasure measure = new AnalysisMeasure(new NamedKey(id), sanitizeFieldName(title), AggregationTypes.AVERAGE);
                                 measure.setPrecision(2);
                                 measure.setMinPrecision(2);
                                 analysisItems.add(measure);
                             } else {
-                                analysisItems.add(new AnalysisDimension(new NamedKey(id), title));
+                                analysisItems.add(new AnalysisDimension(new NamedKey(id), sanitizeFieldName(title)));
                             }
                         }
                     }
@@ -540,5 +540,9 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
         } else {
             return null;
         }
+    }
+
+    private String sanitizeFieldName(String name) {
+        return name.replaceAll("\\<.*?\\>", "");
     }
 }
