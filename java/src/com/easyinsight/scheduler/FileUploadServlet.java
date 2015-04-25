@@ -42,25 +42,38 @@ public class FileUploadServlet extends HttpServlet {
             List items = upload.parseRequest(req);
             String uploadKey = req.getParameter("uploadKey");
             byte[] bytes = null;
+
+            String fileName = null;
+
             for (Object obj : items) {
                 FileItem fileItem = (FileItem) obj;
                 System.out.println("File item " + fileItem.getFieldName() + " - " + fileItem.getName() + " - " + fileItem.getContentType() + " - " + fileItem.getSize());
+                fileName = fileItem.getName();
                 if (fileItem.isFormField()) {
                 } else if (fileItem.getSize() > 0) {
                     bytes = fileItem.get();
                     System.out.println("got " + bytes.length + " bytes");
                 }
             }
-            ByteArrayOutputStream dest = new ByteArrayOutputStream();
 
-            ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
-            zos.putNextEntry(new ZipEntry("data.csv"));
-            zos.write(bytes);
-            zos.closeEntry();
-            zos.close();
-            int start = bytes.length;
-            bytes = dest.toByteArray();
-            System.out.println("compressed from " + start + " to " + bytes.length);
+            if (fileName != null && fileName.endsWith("gz")) {
+                System.out.println(fileName + " was already in .gz format");
+            } if (fileName != null && fileName.endsWith("zip")) {
+                System.out.println(fileName + " was already in .zip format");
+            } else {
+                ByteArrayOutputStream dest = new ByteArrayOutputStream();
+                ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(dest));
+                zos.putNextEntry(new ZipEntry("data.csv"));
+                zos.write(bytes);
+                zos.closeEntry();
+                zos.close();
+                int start = bytes.length;
+                bytes = dest.toByteArray();
+                System.out.println("compressed from " + start + " to " + bytes.length);
+            }
+
+
+
 
             EIConnection conn = Database.instance().getConnection();
             try {
