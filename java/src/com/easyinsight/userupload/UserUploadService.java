@@ -117,12 +117,7 @@ public class UserUploadService {
                 zos.closeEntry();
                 zos.close();
                 bytes = dest.toByteArray();
-                ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                ObjectMetadata objectMetadata = new ObjectMetadata();
-                objectMetadata.setContentLength(bytes.length);
-                s3.putObject(new PutObjectRequest("archival1", uploadKey + ".zip", stream, objectMetadata));
-                stream.close();
+                new S3Hack(uploadKey, bytes).invoke();
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -1260,24 +1255,7 @@ public class UserUploadService {
     }
 
     protected byte[] bytesFromS3(FlatFileUploadContext uploadContext) throws IOException {
-        byte[] bytes;AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-        S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadContext.getUploadKey() + ".zip"));
-
-        InputStream bfis = object.getObjectContent();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        IOUtils.copy(bfis, baos);
-        byte[] resultBytes = baos.toByteArray();
-        ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-        ZipInputStream zin = new ZipInputStream(bais);
-        zin.getNextEntry();
-        ByteArrayOutputStream fout = new ByteArrayOutputStream();
-        BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-        IOUtils.copy(zin, bufOS);
-        bufOS.close();
-        fout.close();
-
-        bytes = fout.toByteArray();
-        return bytes;
+        return new S3Retrieval(uploadContext).invoke();
     }
 
     public UploadResponse analyzeUpload(UploadContext uploadContext) {
@@ -1348,41 +1326,7 @@ public class UserUploadService {
         byte[] bytes = null;
         if (uploadContext instanceof FlatFileUploadContext) {
             FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
-            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-            S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
-
-            byte retrieveBuf[];
-            retrieveBuf = new byte[1];
-            InputStream bfis = object.getObjectContent();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtils.copy(bfis, baos);
-            /*while (bfis.read(retrieveBuf) != -1) {
-                baos.write(retrieveBuf);
-            }*/
-            byte[] resultBytes = baos.toByteArray();
-            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-            ZipInputStream zin = new ZipInputStream(bais);
-            zin.getNextEntry();
-
-            byte[] buffer = new byte[8192];
-            ByteArrayOutputStream fout = new ByteArrayOutputStream();
-            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-            int nBytes;
-            IOUtils.copy(zin, bufOS);
-            /*while ((nBytes = zin.read(buffer)) != -1) {
-                bufOS.write(buffer, 0, nBytes);
-            }*/
-            /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                bufOS.write(c);
-            }*/
-            bufOS.close();
-            fout.close();
-
-            bytes = fout.toByteArray();
-
-            baos = null;
-            bufOS = null;
-            fout = null;
+            bytes = new S3Retrieval(flatFileUploadContext).invoke();
         }
         System.out.println("bytes size = " + bytes.length);
         long dataSourceID = uploadContext.createDataSource(name, analysisItems, conn, accountVisible, bytes);
@@ -1432,40 +1376,7 @@ public class UserUploadService {
             byte[] bytes = null;
             if (uploadContext instanceof FlatFileUploadContext) {
                 FlatFileUploadContext flatFileUploadContext = (FlatFileUploadContext) uploadContext;
-                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                S3Object object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
-
-                byte retrieveBuf[];
-                retrieveBuf = new byte[1];
-                InputStream bfis = object.getObjectContent();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                while (bfis.read(retrieveBuf) != -1) {
-                    baos.write(retrieveBuf);
-                }
-                byte[] resultBytes = baos.toByteArray();
-                baos.close();
-                ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-                ZipInputStream zin = new ZipInputStream(bais);
-                zin.getNextEntry();
-
-                byte[] buffer = new byte[8192];
-                ByteArrayOutputStream fout = new ByteArrayOutputStream();
-                BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-                int nBytes;
-                while ((nBytes = zin.read(buffer)) != -1) {
-                    bufOS.write(buffer, 0, nBytes);
-                }
-                /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                    bufOS.write(c);
-                }*/
-                bufOS.close();
-                fout.close();
-
-                bytes = fout.toByteArray();
-
-                baos = null;
-                bufOS = null;
-                fout = null;
+                bytes = new S3Retrieval(flatFileUploadContext).invoke();
                 System.out.println("bytes size = " + bytes.length);
             }
 
@@ -2035,31 +1946,8 @@ public class UserUploadService {
         try {
             conn.setAutoCommit(false);
             FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
-            AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-            S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
 
-
-            InputStream bfis = object.getObjectContent();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            IOUtils.copy(bfis, baos);
-            byte[] resultBytes = baos.toByteArray();
-            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-            ZipInputStream zin = new ZipInputStream(bais);
-            zin.getNextEntry();
-
-
-            ByteArrayOutputStream fout = new ByteArrayOutputStream();
-            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-            IOUtils.copy(zin, bufOS);
-
-            bufOS.close();
-            fout.close();
-
-            byte[] bytes = fout.toByteArray();
-
-            baos = null;
-            bufOS = null;
-            fout = null;
+            byte[] bytes = new S3Retrieval(uploadKey).invoke();
 
             System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
 
@@ -2151,39 +2039,7 @@ public class UserUploadService {
                 System.out.println(Runtime.getRuntime().freeMemory() + " - " + Runtime.getRuntime().totalMemory());
                 FileBasedFeedDefinition dataSource = (FileBasedFeedDefinition) feedStorage.getFeedDefinitionData(feedID, conn);
 
-                AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
-                S3Object object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
-
-                byte retrieveBuf[];
-                retrieveBuf = new byte[1];
-                InputStream bfis = object.getObjectContent();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                while (bfis.read(retrieveBuf) != -1) {
-                    baos.write(retrieveBuf);
-                }
-                byte[] resultBytes = baos.toByteArray();
-                baos = null;
-                ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
-                ZipInputStream zin = new ZipInputStream(bais);
-                zin.getNextEntry();
-
-                byte[] buffer = new byte[8192];
-                ByteArrayOutputStream fout = new ByteArrayOutputStream();
-                BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
-                int nBytes;
-                while ((nBytes = zin.read(buffer)) != -1) {
-                    bufOS.write(buffer, 0, nBytes);
-                }
-                /*for (int c = zin.read(); c != -1; c = zin.read()) {
-                    bufOS.write(c);
-                }*/
-                bufOS.close();
-                fout.close();
-
-                byte[] bytes = fout.toByteArray();
-
-                bufOS = null;
-                fout = null;
+                byte[] bytes = new S3Retrieval(uploadKey).invoke();
 
                 System.out.println(SecurityUtil.getUserID() + " uploaded " + bytes.length + " bytes with key " + uploadKey + " for update of data source " + feedID + ".");
 
@@ -2940,6 +2796,64 @@ public class UserUploadService {
                 DataSourceMutex.mutex().unlock(feedDefinition.getDataFeedID());
                 SecurityUtil.clearThreadLocal();
             }
+        }
+    }
+
+    private class S3Retrieval {
+        private FlatFileUploadContext flatFileUploadContext;
+        private String uploadKey;
+        private AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+
+        public S3Retrieval(FlatFileUploadContext flatFileUploadContext) {
+            this.flatFileUploadContext = flatFileUploadContext;
+        }
+
+        private S3Retrieval(String uploadKey) {
+            this.uploadKey = uploadKey;
+        }
+
+        public byte[] invoke() throws IOException {
+            byte[] bytes;
+            S3Object object;
+            if (uploadKey == null) {
+                object = s3.getObject(new GetObjectRequest("archival1", flatFileUploadContext.getUploadKey() + ".zip"));
+            } else {
+                object = s3.getObject(new GetObjectRequest("archival1", uploadKey + ".zip"));
+            }
+            InputStream bfis = object.getObjectContent();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            IOUtils.copy(bfis, baos);
+            byte[] resultBytes = baos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(resultBytes);
+            ZipInputStream zin = new ZipInputStream(bais);
+            zin.getNextEntry();
+            ByteArrayOutputStream fout = new ByteArrayOutputStream();
+            BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
+            IOUtils.copy(zin, bufOS);
+            bufOS.close();
+            fout.close();
+
+            bytes = fout.toByteArray();
+            return bytes;
+        }
+    }
+
+    private class S3Hack {
+        private String uploadKey;
+        private byte[] bytes;
+        private AmazonS3 s3 = new AmazonS3Client(new BasicAWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"));
+
+        public S3Hack(String uploadKey, byte... bytes) {
+            this.uploadKey = uploadKey;
+            this.bytes = bytes;
+        }
+
+        public void invoke() throws IOException {
+            ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(bytes.length);
+            s3.putObject(new PutObjectRequest("archival1", uploadKey + ".zip", stream, objectMetadata));
+            stream.close();
         }
     }
 }
