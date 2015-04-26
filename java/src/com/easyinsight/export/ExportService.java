@@ -1686,35 +1686,38 @@ public class ExportService {
                 SimpleDateFormat sdf = getDateFormatForAccount(dateDim.getDateLevel(), dateDim.getOutputDateFormat(), dateFormat);
 
 
-
-                if (sdf == null) {
-                    throw new RuntimeException("No date format found.");
-                }
-
-                String pattern = sdf.toPattern();
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
-
-                if (!dateDim.isTimeshift()) {
-                    LocalDate localDate;
-                    if (dateValue.getLocalDate() == null) {
-                        Calendar cal2 = Calendar.getInstance();
-                        cal2.setTime(dateValue.getDate());
-                        localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                                cal.get(Calendar.MONTH) + 1,
-                                cal.get(Calendar.DAY_OF_MONTH));
-                    } else {
-                        localDate = dateValue.getLocalDate();
+                try {
+                    if (sdf == null) {
+                        throw new RuntimeException("No date format found.");
                     }
-                    valueString = dtf.format(localDate);
-                } else {
-                    ZonedDateTime zonedDateTime;
-                    if (dateValue.getZonedDateTime() == null) {
-                        //TODO: fix
-                        zonedDateTime = dateValue.getDate().toInstant().atZone(ZoneId.systemDefault());
+
+                    String pattern = sdf.toPattern();
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
+
+                    if (!dateDim.isTimeshift()) {
+                        LocalDate localDate;
+                        if (dateValue.getLocalDate() == null) {
+                            Calendar cal2 = Calendar.getInstance();
+                            cal2.setTime(dateValue.getDate());
+                            localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                                    cal.get(Calendar.MONTH) + 1,
+                                    cal.get(Calendar.DAY_OF_MONTH));
+                        } else {
+                            localDate = dateValue.getLocalDate();
+                        }
+                        valueString = dtf.format(localDate);
                     } else {
-                        zonedDateTime = dateValue.getZonedDateTime();
+                        ZonedDateTime zonedDateTime;
+                        if (dateValue.getZonedDateTime() == null) {
+                            //TODO: fix
+                            zonedDateTime = dateValue.getDate().toInstant().atZone(ZoneId.systemDefault());
+                        } else {
+                            zonedDateTime = dateValue.getZonedDateTime();
+                        }
+                        valueString = dtf.format(zonedDateTime);
                     }
-                    valueString = dtf.format(zonedDateTime);
+                } catch (Exception e) {
+                    valueString = sdf.format(dateValue.getDate());
                 }
             }
 

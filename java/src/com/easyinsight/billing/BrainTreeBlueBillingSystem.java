@@ -236,7 +236,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                             account.getBillingInfo().add(info);
                             transactions.add(t.getId());
                             String invoiceBody = info.toInvoiceText(account);
-                            /*if (account.isNewPricingModelInvoice()) {
+                            if (account.isNewPricingModelInvoice()) {
                                 for (User user : account.getUsers()) {
                                     if (user.isInvoiceRecipient()) {
                                         System.out.println("Sending out invoice email to " + user.getEmail());
@@ -249,7 +249,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                                         }
                                     }
                                 }
-                            }*/
+                            }
                         }
                     }
                 }
@@ -290,7 +290,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                         transactions.add(t.getId());
                         String invoiceBody = info.toInvoiceText(account);
                         if (t.getProcessorResponseCode().equals("1000")) {
-                            /*if (account.isNewPricingModelInvoice()) {
+                            if (account.isNewPricingModelInvoice()) {
                                 account.getUsers().stream().filter(User::isInvoiceRecipient).forEach(user -> {
                                     try {
                                         byte[] bytes = new InvoiceUtil().createInvoicePDF(info, account);
@@ -300,7 +300,7 @@ public class BrainTreeBlueBillingSystem implements BillingSystem {
                                         LogClass.error(e);
                                     }
                                 });
-                            }*/
+                            }
                         }
                     });
                     account.setNextBillAmount(ss.getNextBillingPeriodAmount().doubleValue());
