@@ -138,7 +138,7 @@
             };
 
             $rootScope.isSearchEnabled = function () {
-                return $window.location.host == "localhost" || $window.location.host == "j8staging.easy-insight.com" || $scope.user.email.indexOf("@easy-insight.com") >= 0;
+                return $window.location.host == "localhost" || $window.location.host == "j8staging.easy-insight.com" || ($rootScope.user && $rootScope.user.email && $rootScope.user.email.indexOf("@easy-insight.com") >= 0);
             }
 
         }]);
