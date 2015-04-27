@@ -517,7 +517,6 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
         // 760-400-6112 malonso@foundrymed.com
         do {
             JSONObject surveys = SurveyGizmoUtils.runRequest("/survey?page=" + page, new HttpClient(), this, new ArrayList<>());
-            System.out.println(surveys);
             JSONArray data = (JSONArray) surveys.get("data");
             page++;
             totalPages = (Integer) surveys.get("total_pages");

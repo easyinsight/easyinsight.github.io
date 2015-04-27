@@ -121,12 +121,6 @@ public class SurveyGizmoMultiAnswerSource extends SurveyGizmoBaseSource {
             String subType = (String) field.get("_subtype");
             String type = (String) field.get("_type");
 
-            System.out.println("title: " + title);
-            System.out.println("id: " + id);
-            System.out.println("type: " + type);
-            System.out.println("subtype: " + subType);
-            System.out.println("\t" + field);
-
             // monday, tuesday etc are multi_textbox, containing options attribute with array of more questions
             // this question sucks, doesn't it? = id 5, SurveyQuestion, multi_textbox
             if (type.contains("multi")) {
