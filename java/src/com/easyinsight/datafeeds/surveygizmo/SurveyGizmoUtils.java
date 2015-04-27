@@ -29,7 +29,6 @@ public class SurveyGizmoUtils {
 
     public static JSONObject runRequest(String url, HttpClient client, SurveyGizmoCompositeSource compositeConnection, List<NameValuePair> params) {
         String target = "https://restapi.surveygizmo.com/v4" + url;
-        System.out.println(target);
         HttpMethod restMethod = new GetMethod(target);
         OAuthConsumer consumer = new CommonsHttp3OAuthConsumer(SurveyGizmoCompositeSource.CONSUMER_KEY, SurveyGizmoCompositeSource.CONSUMER_SECRET);
         consumer.setMessageSigner(new HmacSha1MessageSigner());
@@ -45,7 +44,6 @@ public class SurveyGizmoUtils {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", compositeConnection));
             }
             Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
-            System.out.println(o);
             return (JSONObject) o;
         } catch (ReportException re) {
             throw re;

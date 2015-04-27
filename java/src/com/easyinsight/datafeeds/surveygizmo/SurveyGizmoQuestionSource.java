@@ -1,12 +1,14 @@
 package com.easyinsight.datafeeds.surveygizmo;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.IDataStorage;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -107,14 +109,23 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
 
         List<Map<String, Object>> results = new ArrayList<Map<String, Object>>();
 
+        Set<String> dateFields = new HashSet<>();
+        for (AnalysisItem field : getFields()) {
+            if (field.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                dateFields.add(field.getKey().toKeyString());
+            }
+        }
+
         do {
             JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + surveyGizmoCompositeSource.getFormID() + "/surveyresponse", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
 
             JSONArray data = (JSONArray) jo.get("data");
             page++;
-            totalPages = (Integer) jo.get("total_pages");
+            //totalPages = (Integer) jo.get("total_pages");
+            totalPages = 1;
 
             Pattern optionPattern = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
+            //Pattern optionPattern2 = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
             Pattern p = Pattern.compile(".*option\\(([A-Za-z0-9]+)\\).*\\]");
             Pattern b = Pattern.compile("\\[variable\\((STANDARD_[A-Za-z0-9]+)\\).*\\]");
 
@@ -133,7 +144,8 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
 
                 for (Map.Entry<String, Object> entry : survey.entrySet()) {
 
-                    if (!entry.getKey().contains("option")) {
+                    boolean option = (entry.getKey().contains("option") && !entry.getKey().contains("option(0)"));
+                    if (!option) {
                         Matcher m = optionPattern.matcher(entry.getKey());
                         if (m.matches()) {
                             String keyString = m.replaceAll("$1");
@@ -148,7 +160,17 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
                                     cache.put(keyString, entry.getValue());
                                 } else {
                                     npsPopulate(row, keys.get(keyString), (String) entry.getValue(), npsQuestions, keys);
-                                    row.addValue(keys.get(keyString), (String) entry.getValue());
+                                    if (dateFields.contains(keyString)) {
+                                        try {
+                                            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                                            Date date = sdf.parse((String) entry.getValue());
+                                            row.addValue(keys.get(keyString), new DateValue(date));
+                                        } catch (ParseException e) {
+                                            LogClass.error(e);
+                                        }
+                                    } else {
+                                        row.addValue(keys.get(keyString), (String) entry.getValue());
+                                    }
                                 }
                             }
                         }
@@ -198,7 +220,7 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
                             }
                             if (lists.contains(keyString)) {
                                 if (!listsMap.containsKey(keys.get(keyString)))
-                                    listsMap.put(keys.get(keyString), new ArrayList<String>());
+                                    listsMap.put(keys.get(keyString), new ArrayList<>());
                                 List<String> stringList = listsMap.get(keys.get(keyString));
                                 if (!((String) entry.getValue()).isEmpty())
                                     stringList.add((String) entry.getValue());
@@ -269,13 +291,15 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
         if (key instanceof NamedKey) {
             NamedKey namedKey = (NamedKey) key;
             if (npsQuestions.contains(namedKey.getName())) {
-                Integer intValue = Integer.parseInt(value);
-                if (intValue >= 0 && intValue < 7) {
-                    row.addValue(keyMap.get(namedKey.getName() + " Detractors"), 1);
-                } else if (intValue >= 7 && intValue < 9) {
-                    row.addValue(keyMap.get(namedKey.getName() + " Passives"), 1);
-                } else if (intValue >= 8 && intValue < 7) {
-                    row.addValue(keyMap.get(namedKey.getName() + " Promoters"), 1);
+                if (!"".equals(value)) {
+                    Integer intValue = Integer.parseInt(value);
+                    if (intValue >= 0 && intValue < 7) {
+                        row.addValue(keyMap.get(namedKey.getName() + " Detractors"), 1);
+                    } else if (intValue >= 7 && intValue < 9) {
+                        row.addValue(keyMap.get(namedKey.getName() + " Passives"), 1);
+                    } else if (intValue >= 8 && intValue < 7) {
+                        row.addValue(keyMap.get(namedKey.getName() + " Promoters"), 1);
+                    }
                 }
             }
         }
