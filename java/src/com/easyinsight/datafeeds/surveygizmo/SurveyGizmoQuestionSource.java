@@ -121,8 +121,8 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
 
             JSONArray data = (JSONArray) jo.get("data");
             page++;
-            //totalPages = (Integer) jo.get("total_pages");
-            totalPages = 1;
+            totalPages = (Integer) jo.get("total_pages");
+            //totalPages = 1;
 
             Pattern optionPattern = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
             //Pattern optionPattern2 = Pattern.compile("\\[question\\(([A-Za-z0-9]+)\\).*\\]");
