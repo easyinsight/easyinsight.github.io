@@ -308,8 +308,14 @@ public class Crosstab {
 
         if (crosstabDefinition.getMeasures().size() == 1 && !crosstabDefinition.isNoRowSummaries()) {
             AnalysisMeasure analysisItem = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
-            AggregationFactory totalAggregationFactory = new AggregationFactory(analysisItem, false);
-            Aggregation totalAggregation = totalAggregationFactory.getAggregation();
+            Aggregation totalAggregation;
+            if (analysisItem.getAggregation() == AggregationTypes.COUNT_DISTINCT) {
+                AggregationFactory totalAggregationFactory = new AggregationFactory(analysisItem, false);
+                totalAggregation = totalAggregationFactory.getAggregation(AggregationTypes.SUM);
+            } else {
+                AggregationFactory totalAggregationFactory = new AggregationFactory(analysisItem, false);
+                totalAggregation = totalAggregationFactory.getAggregation();
+            }
             for (int j = 0; j < rowSections.size(); j++) {
                 Section rowSection = rowSections.get(j);
                 double sum = 0;
