@@ -410,7 +410,7 @@ import mx.rpc.events.ResultEvent;
         }
         
         private function updateStartEnd():void {
-            if (_filterDefinition != null && lowDate != null) {
+            /*if (_filterDefinition != null && lowDate != null) {
                 _filterDefinition.startDateYear = lowDate.getFullYear();
                 _filterDefinition.startDateMonth = lowDate.getMonth() + 1;
                 _filterDefinition.startDateDay = lowDate.getDate();
@@ -419,7 +419,7 @@ import mx.rpc.events.ResultEvent;
                 _filterDefinition.endDateYear = highDate.getFullYear();
                 _filterDefinition.endDateMonth = highDate.getMonth() + 1;
                 _filterDefinition.endDateDay = highDate.getDate();
-            }
+            }*/
         }
 		
 		private function thumbRelease(event:SliderEvent):void {
