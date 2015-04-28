@@ -30,7 +30,7 @@ public class SendGridEmail {
 
     private static final String SMTP_HOST_NAME = "smtp.sendgrid.net";
     private static final String SMTP_AUTH_USER = "jboe@easy-insight.com";
-    private static final String SMTP_AUTH_PWD  = "CrestoneisRedR0ck";
+    private static final String SMTP_AUTH_PWD  = "Crestone is Red R0ck";
 
     public static final String PERSONAL_EMAIL_WELCOME = "Hi {0},<br><br>" +
                 "Welcome to Easy Insight! I&#39;m available as your point of contact for any issues, questions, or other comments you may have in using the service. If you want to chat for a few minutes on the phone or drop me an email around what you're looking to do in Easy Insight, I&#39;d love to see how we can help you out.<br><br>" +
