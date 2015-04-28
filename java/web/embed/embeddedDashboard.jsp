@@ -42,6 +42,7 @@
             dashboard = new DashboardService().getDashboardView(dashboardID);
         }
         String noHeader = request.getParameter("noHeader");
+        boolean showExport = "1".equals(request.getParameter("showExport"));
         boolean showHeader = noHeader == null || !"1".equals(noHeader);
         String showToolbarString = request.getParameter("showToolbar");
         boolean showToolbar = showToolbarString != null && "1".equals(showToolbarString);
@@ -107,6 +108,18 @@
                 </div>
                 <div class="btn-group reportControlBtnGroup">
                     <a class="reportControl toggle-filters">Toggle Filters</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } else if (showExport) { %>
+<div class="nav nav-pills reportNav">
+    <div class="container-fluid">
+        <div class="col-md-12">
+            <div class="btn-toolbar pull-right" style="padding-top: 5px;margin-top: 0">
+                <div class="btn-group reportControlBtnGroup">
+                    <a style="color:#000000" class="export_dashboard_pdf">Export to PDF</a>
                 </div>
             </div>
         </div>
