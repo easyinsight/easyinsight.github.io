@@ -117,7 +117,7 @@ public class SurveyGizmoQuestionSource extends SurveyGizmoBaseSource {
         }
 
         do {
-            JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + surveyGizmoCompositeSource.getFormID() + "/surveyresponse", httpClient, surveyGizmoCompositeSource, new ArrayList<NameValuePair>());
+            JSONObject jo = SurveyGizmoUtils.runRequest("/survey/" + surveyGizmoCompositeSource.getFormID() + "/surveyresponse?page=" + page, httpClient, surveyGizmoCompositeSource, new ArrayList<>());
 
             JSONArray data = (JSONArray) jo.get("data");
             page++;
