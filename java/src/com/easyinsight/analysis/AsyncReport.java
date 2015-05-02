@@ -423,6 +423,7 @@ public class AsyncReport {
                                                     @Override
                                                     public void run() {
                                                         try {
+
                                                             AsyncReport.establishAsync();
 
                                                             try {
@@ -492,6 +493,7 @@ public class AsyncReport {
                                                                     ResultData rh = new ResultData();
                                                                     rh.dataResults = results;
                                                                     rh.report = report;
+                                                                    rh.insightRequestMetadata = localMetadata;
                                                                     MemCachedManager.instance().add("async" + frequestID, 100, rh);
                                                                 } else if (frequestType == REPORT_END_USER) {
                                                                     EmbeddedResults results;
@@ -515,6 +517,7 @@ public class AsyncReport {
                                                                                     insightRequestMetadata.isNoCache());
                                                                         }
                                                                         rh.results = results;
+                                                                        rh.insightRequestMetadata = localMetadata;
                                                                         rh.report = report;
                                                                     } catch (Throwable e) {
                                                                         rh.exception = e;
@@ -532,6 +535,7 @@ public class AsyncReport {
                                                                             dataSet.setAsyncSavedReport(report);
                                                                             rh.dataSet = dataSet;
                                                                             rh.report = report;
+                                                                            rh.insightRequestMetadata = localMetadata;
                                                                             MemCachedManager.instance().add("async" + frequestID, 100, rh);
                                                                         } catch (Throwable e) {
                                                                             rh.exception = e;
@@ -658,6 +662,7 @@ public class AsyncReport {
         long requestID;
         EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, request_created, request_type, user_id) " +
                             "VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
@@ -685,10 +690,13 @@ public class AsyncReport {
             detStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             detStmt.execute();
             detStmt.close();
+            conn.commit();
         } catch (Throwable e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         try {
@@ -748,6 +756,7 @@ public class AsyncReport {
         long requestID;
         EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             PreparedStatement reqStmt = conn.prepareStatement("INSERT INTO async_report_request (request_state, upload_key, request_created, request_type, user_id) " +
                             "VALUES (?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
@@ -774,10 +783,13 @@ public class AsyncReport {
             detStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
             detStmt.execute();
             detStmt.close();
+            conn.commit();
         } catch (Throwable e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         try {
@@ -935,6 +947,7 @@ public class AsyncReport {
                 return embeddedDataResults;
             }
             dataResults.dataResults.setReport(dataResults.report);
+            insightRequestMetadata.setTimeshiftState(dataResults.insightRequestMetadata.getTimeshiftState());
             return dataResults.dataResults;
         } catch (Throwable e) {
             LogClass.error(e);
@@ -991,8 +1004,14 @@ public class AsyncReport {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
             try {
+                conn.setAutoCommit(false);
                 reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_EDITOR);
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
             } finally {
+                conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
 
@@ -1012,6 +1031,7 @@ public class AsyncReport {
                 return embeddedDataResults;
             }
             dataResults.dataResults.setReport(dataResults.report);
+            insightRequestMetadata.setTimeshiftState(dataResults.insightRequestMetadata.getTimeshiftState());
             return dataResults.dataResults;
         } catch (Throwable e) {
             LogClass.error(e);
@@ -1034,8 +1054,14 @@ public class AsyncReport {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
             try {
+                conn.setAutoCommit(false);
                 reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_DATA_SET);
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
             } finally {
+                conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
 
@@ -1071,8 +1097,14 @@ public class AsyncReport {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
             try {
-                reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_END_USER);
+                conn.setAutoCommit(false);
+                reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_EDITOR);
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
             } finally {
+                conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
 

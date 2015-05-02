@@ -27,6 +27,7 @@ public class DataSet implements Serializable, Cloneable {
     private List<DataSet> additionalSets = new ArrayList<DataSet>();
 
     private WSAnalysisDefinition asyncSavedReport;
+    private Map<String, Boolean> timeshiftState = new HashMap<String, Boolean>();
 
     private long time;
 
@@ -43,6 +44,14 @@ public class DataSet implements Serializable, Cloneable {
     public DataSet(List<IRow> rows) {
         this.rows = rows;
         time = System.currentTimeMillis();
+    }
+
+    public Map<String, Boolean> getTimeshiftState() {
+        return timeshiftState;
+    }
+
+    public void setTimeshiftState(Map<String, Boolean> timeshiftState) {
+        this.timeshiftState = timeshiftState;
     }
 
     public WSAnalysisDefinition getAsyncSavedReport() {

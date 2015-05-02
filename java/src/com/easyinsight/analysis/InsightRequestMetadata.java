@@ -36,7 +36,7 @@ public class InsightRequestMetadata implements Serializable {
     private transient Map<AnalysisItem, Set<String>> pipelineAssignmentMap = new HashMap<AnalysisItem, Set<String>>();
     private transient Map<AnalysisItem, String> derivedFieldAssignmentMap = new HashMap<AnalysisItem, String>();
     private transient boolean optimizeDays;
-    private transient Map<String, Boolean> timeshiftState = new HashMap<String, Boolean>();
+    private Map<String, Boolean> timeshiftState = new HashMap<String, Boolean>();
     private transient boolean noAsync;
 
     private transient List<ReportAuditEvent> auditEvents = new ArrayList<ReportAuditEvent>();

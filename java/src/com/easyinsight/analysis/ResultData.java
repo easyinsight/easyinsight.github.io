@@ -14,6 +14,7 @@ class ResultData implements Serializable {
     public DataSet dataSet;
     public EmbeddedResults results;
     public Throwable exception;
+    public InsightRequestMetadata insightRequestMetadata;
 
     public WSAnalysisDefinition report;
 
