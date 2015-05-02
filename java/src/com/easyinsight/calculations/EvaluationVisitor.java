@@ -130,19 +130,30 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
     private DayOfYearPair createPair(DateValue dateValue) {
         if (dateValue.isDateTime()) {
-            Instant instant = dateValue.getDate().toInstant();
-            ZoneId zoneId;
-            if (calculationMetadata.getInsightRequestMetadata() == null ){
-                zoneId = ZoneId.systemDefault();
+            ZonedDateTime zdt;
+            if (dateValue.getZonedDateTime() == null) {
+                Instant instant = dateValue.getDate().toInstant();
+                ZoneId zoneId;
+                if (calculationMetadata.getInsightRequestMetadata() == null ){
+                    zoneId = ZoneId.systemDefault();
+                } else {
+                    zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+                }
+                zdt = instant.atZone(zoneId);
             } else {
-                zoneId = ZoneId.ofOffset("", ZoneOffset.ofHours(-(calculationMetadata.getInsightRequestMetadata().getUtcOffset() / 60)));
+                zdt = dateValue.getZonedDateTime();
             }
-            ZonedDateTime zdt = instant.atZone(zoneId);
             int dayOfYear = zdt.getDayOfYear();
             int year = zdt.getYear();
             return new DayOfYearPair(dayOfYear, year);
         } else {
-            LocalDate localDate = dateValue.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate localDate;
+            if (dateValue.getLocalDate() == null) {
+                localDate = dateValue.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            } else {
+                localDate = dateValue.getLocalDate();
+            }
+
             return new DayOfYearPair(localDate.getDayOfYear(), localDate.getYear());
         }
     }
@@ -154,6 +165,8 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
 
             DateValue d1 = (DateValue) compare1;
             DateValue d2 = (DateValue) compare2;
+
+
 
             // if date level is hour/minute, we can't compare day/year
 

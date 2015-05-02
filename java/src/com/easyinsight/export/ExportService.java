@@ -1694,7 +1694,7 @@ public class ExportService {
                     String pattern = sdf.toPattern();
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern(pattern);
 
-                    if (!dateDim.isTimeshift()) {
+                    if (!dateDim.isTimeshift() && (dateDim.getDateLevel() != AnalysisDateDimension.HOUR_LEVEL && dateDim.getDateLevel() != AnalysisDateDimension.MINUTE_LEVEL)) {
                         LocalDate localDate;
                         if (dateValue.getLocalDate() == null) {
                             Calendar cal2 = Calendar.getInstance();
@@ -3849,17 +3849,32 @@ public class ExportService {
                     AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
                     if (dateDim.isTimeshift(insightRequestMetadata)) {
                         if (dateDim.getDateLevel() == AnalysisDateDimension.MINUTE_LEVEL) {
-                            ZoneId zoneId = insightRequestMetadata.createZoneID();
-                            ZonedDateTime zdt = dateValue.getDate().toInstant().atZone(zoneId);
-                            cal.setTimeInMillis(dateValue.getDate().getTime());
-                            Calendar c1 = GregorianCalendar.from(zdt);
-                            cell.setCellValue(c1);
+                            if (dateValue.getZonedDateTime() != null) {
+                                Calendar c1 = GregorianCalendar.from(dateValue.getZonedDateTime());
+                                cell.setCellValue(c1);
+                            } else {
+                                ZoneId zoneId = insightRequestMetadata.createZoneID();
+                                ZonedDateTime zdt = dateValue.getDate().toInstant().atZone(zoneId);
+                                cal.setTimeInMillis(dateValue.getDate().getTime());
+                                Calendar c1 = GregorianCalendar.from(zdt);
+                                cell.setCellValue(c1);
+                            }
                         } else {
-                            cal.setTime(dateValue.getDate());
-                            cell.setCellValue(cal);
+                            if (dateValue.getZonedDateTime() != null) {
+                                Calendar c1 = GregorianCalendar.from(dateValue.getZonedDateTime());
+                                cell.setCellValue(c1);
+                            } else {
+                                cal.setTime(dateValue.getDate());
+                                cell.setCellValue(cal);
+                            }
                         }
                     } else {
-                        cell.setCellValue(dateValue.getDate());
+                        if (dateValue.getLocalDate() != null) {
+                            Date date = Date.from(dateValue.getLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                            cell.setCellValue(date);
+                        } else {
+                            cell.setCellValue(dateValue.getDate());
+                        }
                     }
                 } else {
                     cell.setCellValue(dateValue.getDate());
