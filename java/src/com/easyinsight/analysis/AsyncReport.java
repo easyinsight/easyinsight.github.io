@@ -1097,14 +1097,8 @@ public class AsyncReport {
             long reqID;
             EIConnection conn = Database.instance().getConnection();
             try {
-                conn.setAutoCommit(false);
-                reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_EDITOR);
-                conn.commit();
-            } catch (Exception e) {
-                conn.rollback();
-                throw e;
+                reqID = createAsyncRequestID(analysisDefinition, insightRequestMetadata, conn, REPORT_END_USER);
             } finally {
-                conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
 
