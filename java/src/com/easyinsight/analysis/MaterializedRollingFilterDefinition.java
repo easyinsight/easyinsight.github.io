@@ -210,7 +210,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 zdt = zdt.minusDays(1);
                 break;
             case LAST_FULL_WEEK:
-                zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
+                zdt = zdt.with(targetDayOfWeek).minusWeeks(1);
                 //zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case LAST_FULL_MONTH:
@@ -355,8 +355,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 zdt = zdt.minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case LAST_FULL_WEEK:
-                zdt = zdt.minusWeeks(2).with(targetDayOfWeek);
-                zdt = zdt.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                zdt = zdt.with(targetDayOfWeek).minusWeeks(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
                 break;
             case LAST_FULL_MONTH:
                 zdt = zdt.minusMonths(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -467,7 +466,8 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 zdt = zdt.minusDays(1);
                 break;
             case LAST_FULL_WEEK:
-                zdt = zdt.minusWeeks(1).with(targetDayOfWeek).minusDays(1);
+                zdt = zdt.with(targetDayOfWeek).minusDays(1);
+                //zdt = zdt.minusWeeks(1).with(targetDayOfWeek).minusDays(1);
                 break;
             case LAST_FULL_MONTH:
                 zdt = zdt.withDayOfMonth(1).minusDays(1);
@@ -566,7 +566,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 zdt = zdt.minusDays(1).withHour(23).withMinute(59).withSecond(59);
                 break;
             case LAST_FULL_WEEK:
-                zdt = zdt.minusWeeks(1).with(targetDayOfWeek).minusDays(1).withHour(23).withMinute(59).withSecond(59);
+                zdt = zdt.with(targetDayOfWeek).minusDays(1).withHour(23).withMinute(59).withSecond(59);
                 break;
             case LAST_FULL_MONTH:
                 zdt = zdt.withDayOfMonth(1).minusDays(1).withHour(23).withMinute(59).withSecond(59);
