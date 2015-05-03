@@ -1573,8 +1573,12 @@ $(function () {
             fullRenderPDF(obj, dashboardID, drillthroughID, pdfData);
             var postData = {dashboardID: dashboardID, configuration : c, reportImages: pdfData};
             busyIndicator.showPleaseWait();
+            var str = '/app/htmlDashboardPDF?dashboardID=' + dashboardID + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&drillThroughKey=" + drillthroughID;
+
+            if(typeof(userJSON.embedKey) != "undefined")
+                str = str + "&embedKey=" + userJSON.embedKey;
             $.ajax ( {
-                url: '/app/htmlDashboardPDF?dashboardID=' + dashboardID + "&timezoneOffset=" + new Date().getTimezoneOffset() + "&drillThroughKey=" + drillthroughID,
+                url: str,
                 data: JSON.stringify(postData),
                 success: function(data) {
                     var url = data["urlKey"];
