@@ -34,11 +34,11 @@ import java.util.*;
  */
 public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
 
-    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-1000</options></qdbapi>";
-    private static final String REQUEST_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-1000.skp-{3}</options></qdbapi>";
+    private static final String REQUEST = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-500</options></qdbapi>";
+    private static final String REQUEST_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><fmt>structured</fmt><options>num-500.skp-{3}</options></qdbapi>";
 
-    private static final String REQUESTP = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><query>{3}</query><fmt>structured</fmt><options>num-1000</options></qdbapi>";
-    private static final String REQUESTP_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><query>{4}</query><fmt>structured</fmt><options>num-1000.skp-{3}</options></qdbapi>";
+    private static final String REQUESTP = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><query>{3}</query><fmt>structured</fmt><options>num-500</options></qdbapi>";
+    private static final String REQUESTP_2 = "<qdbapi><ticket>{0}</ticket><apptoken>{1}</apptoken><clist>{2}</clist><query>{4}</query><fmt>structured</fmt><options>num-500.skp-{3}</options></qdbapi>";
 
     private String databaseID;
     private boolean indexEnabled;
@@ -361,7 +361,7 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                 }
                 IDataStorage.insertData(dataSet);
                 dataSet = new DataSet();
-            } while (count == 1000);
+            } while (count == 500);
             return null;
         } catch (HttpResponseException hre) {
             if ("Redirect".equals(hre.getMessage())) {
