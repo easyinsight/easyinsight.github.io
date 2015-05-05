@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.quickbase;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
@@ -25,6 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -351,7 +355,13 @@ public class QuickbaseDatabaseSource extends ServerDataSourceDefinition {
                                     }
                                 }
                                 if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !"".equals(value)) {
-                                    row.addValue(analysisItem.getKey(), new Date(Long.parseLong(value)));
+                                    Date date = new Date(Long.parseLong(value));
+                                    ZonedDateTime zonedDateTime = date.toInstant().atZone(ZoneId.systemDefault());
+                                    if (zonedDateTime.getYear() > 2200) {
+
+                                    } else {
+                                        row.addValue(analysisItem.getKey(), new DateValue(date));
+                                    }
                                 } else {
                                     row.addValue(analysisItem.getKey(), value);
                                 }
