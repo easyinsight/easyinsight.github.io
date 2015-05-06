@@ -59,7 +59,12 @@ public abstract class PivotalTrackerV5BaseSource extends ServerDataSourceDefinit
             } else if (restMethod.getStatusCode() == 401) {
                 throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
             }
-            return (Map) new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+            if (!(o instanceof Map)) {
+                throw new RuntimeException();
+            } else {
+                return (Map) o;
+            }
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {
@@ -76,22 +81,33 @@ public abstract class PivotalTrackerV5BaseSource extends ServerDataSourceDefinit
         restMethod.setRequestHeader("X-TrackerToken", parentDefinition.getToken());
 
         try {
-            client.executeMethod(restMethod);
-            if (restMethod.getStatusCode() == 404) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Pivotal Tracker instance at " + url, parentDefinition));
-            } else if (restMethod.getStatusCode() == 401) {
-                throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
-            }
-            Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
-            if(o instanceof JSONObject) {
-                // probably an error
-                Map map = (Map) o;
-                if (map.containsKey("error")) {
-                    String error = map.get("error").toString();
-                    throw new ReportException(new DataSourceConnectivityReportFault(error, parentDefinition));
+            int retryCount = 0;
+            do {
+                client.executeMethod(restMethod);
+                if (restMethod.getStatusCode() == 404) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("Could not locate a Pivotal Tracker instance at " + url, parentDefinition));
+                } else if (restMethod.getStatusCode() == 401) {
+                    throw new ReportException(new DataSourceConnectivityReportFault("Your API key was invalid.", parentDefinition));
+                } else if (restMethod.getStatusCode() >= 400) {
+                    System.out.println("hrm");
                 }
-            }
-            return (List) o;
+                Object o = new net.minidev.json.parser.JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(restMethod.getResponseBodyAsStream());
+                if (o instanceof JSONObject) {
+                    // probably an error
+                    Map map = (Map) o;
+                    if (map.containsKey("error")) {
+                        String error = map.get("error").toString();
+                        if ("You have exceeded the allowed request rate".equals(error)) {
+                            System.out.println("sleeping for 30 seconds...");
+                            Thread.sleep(30000);
+                            retryCount++;
+                        }
+                    }
+                } else {
+                    return (List<Map>) o;
+                }
+            } while (retryCount < 5);
+            throw new ReportException(new DataSourceConnectivityReportFault("Too many recent requests, please wait a bit before trying to refresh the data source.", parentDefinition));
         } catch (ReportException re) {
             throw re;
         } catch (Exception e) {

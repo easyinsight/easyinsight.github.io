@@ -205,8 +205,10 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             ZendeskCompositeSource zendeskCompositeSource = (ZendeskCompositeSource) parentDefinition;
             HttpClient httpClient = getHttpClient(zendeskCompositeSource);
             ZendeskUserCache zendeskUserCache = zendeskCompositeSource.getOrCreateUserCache(httpClient);
+            ZendeskOrganizationCache zendeskOrganizationCache = new ZendeskOrganizationCache();
+            zendeskOrganizationCache.populate(httpClient, zendeskCompositeSource);
             //if (lastRefreshDate == null) {
-            return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage, lastRefreshDate);
+            return getAllTickets(keys, zendeskCompositeSource, zendeskUserCache, IDataStorage, lastRefreshDate, zendeskOrganizationCache);
             /*} else {
                 getUpdatedTickets(keys, zendeskCompositeSource, lastRefreshDate, IDataStorage, zendeskUserCache);
                 return null;
@@ -229,12 +231,22 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
         }
     }
 
+    private String getOrganizationID(String userID, ZendeskUserCache zendeskUserCache) throws InterruptedException {
+        ZendeskUser zendeskUser = zendeskUserCache.getUsers().get(userID);
+        if (zendeskUser == null) {
+            return "";
+        } else {
+            return zendeskUser.getName();
+        }
+    }
+
     @Override
     protected boolean clearsData(FeedDefinition parentSource) {
         return false;
     }
 
-    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache, IDataStorage dataStorage, Date lastStart) throws Exception {
+    private DataSet getAllTickets(Map<String, Key> keys, ZendeskCompositeSource zendeskCompositeSource, ZendeskUserCache userCache,
+                                  IDataStorage dataStorage, Date lastStart, ZendeskOrganizationCache zendeskOrganizationCache) throws Exception {
         DataSet dataSet = new DataSet();
         HttpClient httpClient = getHttpClient(zendeskCompositeSource);
         Calendar cal = Calendar.getInstance();
@@ -273,7 +285,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
                 for (Object obj : results) {
                     Map map = (Map) obj;
                     IRow row = dataSet.createRow();
-                    String id = parseTicket(keys, userCache, row, map, zendeskCompositeSource);
+                    String id = parseTicket(keys, userCache, row, map, zendeskCompositeSource, zendeskOrganizationCache);
                     for (Map.Entry<String, Key> entry : keys.entrySet()) {
                         if (entry.getKey().startsWith("zd")) {
                             int customFieldID = Integer.parseInt(entry.getKey().substring(2));
@@ -466,7 +478,7 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
     }
 
     private String parseTicket(Map<String, Key> keys, ZendeskUserCache userCache, IRow row, Map ticketNode,
-                               ZendeskCompositeSource zendeskCompositeSource) throws ParseException, InterruptedException {
+                               ZendeskCompositeSource zendeskCompositeSource, ZendeskOrganizationCache zendeskOrganizationCache) throws ParseException, InterruptedException {
         try {
             row.addValue(keys.get(ASSIGNED_AT), queryDate(ticketNode, "assigned_at"));
             row.addValue(keys.get(INITIALLY_ASSIGNED_AT), queryDate(ticketNode, "initially_assigned_at"));
@@ -485,7 +497,9 @@ public class ZendeskTicketSource extends ZendeskBaseSource {
             row.addValue(keys.get(UPDATED_AT), queryDate(ticketNode, "updated_at"));
             row.addValue(keys.get(GROUP_ID), queryField(ticketNode, "group_id"));
             row.addValue(keys.get(SUBJECT), queryField(ticketNode, "subject"));
-            row.addValue(keys.get(ORGANIZATION_ID), queryField(ticketNode, "organization_id"));
+            String organizationName = queryField(ticketNode, "organization_name");
+            String orgID = zendeskOrganizationCache.getOrganizations().get(organizationName);
+            row.addValue(keys.get(ORGANIZATION_ID), orgID);
             String id = queryField(ticketNode, "id");
             row.addValue(keys.get(TICKET_ID), id);
             row.addValue(keys.get(REQUESTER), queryField(ticketNode, "req_name"));
