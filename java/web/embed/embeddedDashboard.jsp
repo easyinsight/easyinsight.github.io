@@ -130,6 +130,7 @@
 <div class="container-fluid">
     <%= showHeader ? uiData.createHeader(dashboard.getName(), dashboard.findHeaderImage()) : "" %>
     <jsp:include page="../html/refreshingDataSource.jsp"/>
+    <jsp:include page="../html/modalIndicator.jsp"/>
     <div id="base"/>
 </div>
 
