@@ -441,12 +441,12 @@ public class DeliveryScheduledTask extends ScheduledTask {
                 } else {
                     System.out.println("Running report " + deliveryInfo.getId() + " for PhantomJS PDF or PNG delivery");
                     if (deliveryInfo.getFormat() == ReportDelivery.PDF) {
-                        Element element = DashboardPDF.generatePDF(analysisDefinition, 1000, 800, conn);
+                        Element element = DashboardPDF.generatePDF(analysisDefinition, 1263, 587, conn);
                         byte[] bytes = new ExportService().toPDFBytes(analysisDefinition, conn, insightRequestMetadata, element, sendIfNoData);
                         String reportName = analysisDefinition.getName();
                         return new DeliveryResult(new AttachmentInfo(bytes, reportName + ".pdf", "application/pdf"));
                     } else {
-                        byte[] png = DashboardPDF.generatePNG(analysisDefinition, 1000, 800, conn);
+                        byte[] png = DashboardPDF.generatePNG(analysisDefinition, 1263, 587, conn);
                         String reportName = analysisDefinition.getName();
                         if (deliveryInfo.getFormat() == ReportDelivery.INLINE_IMAGE) {
                             String cid = "c" + System.currentTimeMillis();

@@ -3427,18 +3427,30 @@ public class ExportService {
 
     private boolean listCrosstab(WSAnalysisDefinition report, ExportMetadata exportMetadata, Map<StyleKey, Style> styleMap, Sheet sheet, Workbook workbook,
                                  InsightRequestMetadata insightRequestMetadata, EIConnection conn) {
-        DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
-        if (dataSet.getAsyncSavedReport() != null) {
-            report = dataSet.getAsyncSavedReport();
-        }
         WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) report;
+        DataSet dataSet = DataService.listDataSet(report, insightRequestMetadata, conn);
         Crosstab crosstab = new Crosstab();
         crosstab.crosstab(crosstabDefinition, dataSet);
         CrosstabValue[][] values = crosstab.toTable(crosstabDefinition, insightRequestMetadata, conn);
         AnalysisMeasure measure = (AnalysisMeasure) crosstabDefinition.getMeasures().get(0);
         NumericStyle measureStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata, null);
         NumericStyle summaryStyle = (NumericStyle) createStyle(measure, workbook, exportMetadata, null);
+        Map<AnalysisItem, Style> headerMap = new HashMap<>();
         Font font = workbook.createFont();
+        for (AnalysisItem row : crosstabDefinition.getRows()) {
+            Style style = createStyle(row, workbook, exportMetadata, null);
+            style.getCellStyle().setFillForegroundColor(IndexedColors.BLACK.getIndex());
+            style.getCellStyle().setFillPattern(CellStyle.SOLID_FOREGROUND);
+            style.getCellStyle().setFont(font);
+            headerMap.put(row, style);
+        }
+        for (AnalysisItem column : crosstabDefinition.getColumns()) {
+            Style style = createStyle(column, workbook, exportMetadata, null);
+            style.getCellStyle().setFillForegroundColor(IndexedColors.BLACK.getIndex());
+            style.getCellStyle().setFillPattern(CellStyle.SOLID_FOREGROUND);
+            style.getCellStyle().setFont(font);
+            headerMap.put(column, style);
+        }
         font.setColor(IndexedColors.WHITE.getIndex());
         summaryStyle.cellStyle1.setFillForegroundColor(IndexedColors.BLACK.getIndex());
         summaryStyle.cellStyle1.setFillPattern(CellStyle.SOLID_FOREGROUND);
@@ -3467,7 +3479,6 @@ public class ExportService {
                         cell.setCellStyle(crosstabHeaderStyle);
                     }
                 } else {
-                    Cell cell = row.createCell(i);
                     if (crosstabValue.getHeader() == null) {
                         if (crosstabValue.isSummaryValue()) {
                             summaryStyle.format(row, i, crosstabValue.getValue(), measure, exportMetadata.cal, insightRequestMetadata);
@@ -3475,8 +3486,8 @@ public class ExportService {
                             measureStyle.format(row, i, crosstabValue.getValue(), measure, exportMetadata.cal, insightRequestMetadata);
                         }
                     } else {
-                        cell.setCellValue(createRichTextString(crosstabValue.getValue().toString(), cell));
-                        cell.setCellStyle(crosstabHeaderStyle);
+                        Style style = headerMap.get(crosstabValue.getHeader());
+                        style.format(row, i, crosstabValue.getValue(), crosstabValue.getHeader(), exportMetadata.cal, insightRequestMetadata);
                     }
                 }
             }
@@ -3829,6 +3840,11 @@ public class ExportService {
                 }
             }
         }
+
+        @Override
+        public CellStyle getCellStyle() {
+            return cellStyle1;
+        }
     }
 
     public static class DateStyle extends Style {
@@ -3837,6 +3853,11 @@ public class ExportService {
 
         private DateStyle(CellStyle cellStyle1) {
             this.cellStyle1 = cellStyle1;
+        }
+
+        @Override
+        public CellStyle getCellStyle() {
+            return cellStyle1;
         }
 
         @Override
@@ -3910,6 +3931,11 @@ public class ExportService {
         }
 
         @Override
+        public CellStyle getCellStyle() {
+            return cellStyle1;
+        }
+
+        @Override
         public void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal, InsightRequestMetadata insightRequestMetadata) {
             Cell cell = row.createCell(cellIndex);
             cell.setCellStyle(cellStyle1);
@@ -3953,6 +3979,8 @@ public class ExportService {
     public abstract static class Style {
 
         public abstract void format(Row row, int cellIndex, Value value, AnalysisItem analysisItem, Calendar cal, InsightRequestMetadata insightRequestMetadata);
+
+        public abstract CellStyle getCellStyle();
     }
 
     private Style createStyle(AnalysisItem analysisItem, Workbook workbook, ExportMetadata exportMetadata, TextValueExtension valueExt) {
