@@ -349,6 +349,8 @@ public class FunctionFactory {
             return new Contains();
         } else if (s.equals("sum")) {
             return new Sum();
+        } else if (s.equals("accumulateyear")) {
+            return new AltAccumulate();
         } else {
             return null;
         }
