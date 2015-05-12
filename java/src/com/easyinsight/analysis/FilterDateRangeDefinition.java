@@ -5,6 +5,7 @@ import com.easyinsight.core.XMLMetadata;
 import com.easyinsight.database.Database;
 import com.easyinsight.pipeline.DateRangePluginComponent;
 import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.security.SecurityUtil;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import org.hibernate.Session;
@@ -252,19 +253,27 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         Temporal workingStartDate;
         Temporal workingEndDate;
         if (dateTime(insightRequestMetadata)) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(startDate);
-            LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                    cal.get(Calendar.MONTH) + 1,
-                    cal.get(Calendar.DAY_OF_MONTH));
-            ZonedDateTime startZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
-            cal = Calendar.getInstance();
-            cal.setTime(endDate);
-            localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                    cal.get(Calendar.MONTH) + 1,
-                    cal.get(Calendar.DAY_OF_MONTH));
-            ZonedDateTime endZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
-            endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            long accountID = SecurityUtil.getAccountID(false);
+            ZonedDateTime startZDT;
+            ZonedDateTime endZDT;
+            if (accountID == 6941) {
+                startZDT = startDate.toInstant().atZone(insightRequestMetadata.createZoneID()).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                endZDT = endDate.toInstant().atZone(insightRequestMetadata.createZoneID()).withHour(23).withMinute(59).withSecond(59);
+            } else {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(startDate);
+                LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1,
+                        cal.get(Calendar.DAY_OF_MONTH));
+                startZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+                cal = Calendar.getInstance();
+                cal.setTime(endDate);
+                localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1,
+                        cal.get(Calendar.DAY_OF_MONTH));
+                endZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+                endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            }
             insightRequestMetadata.addAudit(this, "Start date/time on in memory is " + startZDT);
             insightRequestMetadata.addAudit(this, "End date/time on in memory query is " + endZDT);
             workingStartDate = startZDT;
@@ -362,19 +371,27 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         insightRequestMetadata.addAudit(this, "Actual date/time on database query is " + endDate);
 
         if (dateTime(insightRequestMetadata)) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(startDate);
-            LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                    cal.get(Calendar.MONTH) + 1,
-                    cal.get(Calendar.DAY_OF_MONTH));
-            ZonedDateTime startZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
-            cal = Calendar.getInstance();
-            cal.setTime(endDate);
-            localDate = LocalDate.of(cal.get(Calendar.YEAR),
-                    cal.get(Calendar.MONTH) + 1,
-                    cal.get(Calendar.DAY_OF_MONTH));
-            ZonedDateTime endZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
-            endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            long accountID = SecurityUtil.getAccountID(false);
+            ZonedDateTime startZDT;
+            ZonedDateTime endZDT;
+            if (accountID == 6941) {
+                startZDT = startDate.toInstant().atZone(insightRequestMetadata.createZoneID()).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                endZDT = endDate.toInstant().atZone(insightRequestMetadata.createZoneID()).withHour(23).withMinute(59).withSecond(59);
+            } else {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(startDate);
+                LocalDate localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1,
+                        cal.get(Calendar.DAY_OF_MONTH));
+                startZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+                cal = Calendar.getInstance();
+                cal.setTime(endDate);
+                localDate = LocalDate.of(cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1,
+                        cal.get(Calendar.DAY_OF_MONTH));
+                endZDT = localDate.atStartOfDay(insightRequestMetadata.createZoneID());
+                endZDT = endZDT.withHour(23).withMinute(59).withSecond(59).withNano(999);
+            }
             insightRequestMetadata.addAudit(this, "Start date/time on database query is " + startZDT);
             insightRequestMetadata.addAudit(this, "End date/time on database query is " + endZDT);
             preparedStatement.setTimestamp(start++, new java.sql.Timestamp(toOldJava(insightRequestMetadata, startZDT).getTime()));
