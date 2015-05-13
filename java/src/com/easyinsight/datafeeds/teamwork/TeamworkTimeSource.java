@@ -78,6 +78,7 @@ public class TeamworkTimeSource extends TeamworkBaseSource {
                         resultCount++;
                     }
                 }
+                page++;
             } while (resultCount == 250);
             return dataSet;
         } catch (Exception e) {

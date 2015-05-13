@@ -100,6 +100,7 @@ public class TeamworkTaskSource extends TeamworkBaseSource {
                     row.addValue(keys.get(TASK_COMPLETED), getValue(project, "completed"));
                     resultCount++;
                 }
+                page++;
             } while (resultCount == 250);
             return dataSet;
         } catch (Exception e) {
