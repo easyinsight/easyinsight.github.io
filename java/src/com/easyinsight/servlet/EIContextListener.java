@@ -20,6 +20,7 @@ import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DatabaseManager;
+import com.easyinsight.userupload.CacheThreadPool;
 import com.easyinsight.userupload.DataSourceThreadPool;
 import com.easyinsight.userupload.ReportThreadPool;
 import com.easyinsight.util.ServiceUtil;
@@ -52,6 +53,7 @@ public class EIContextListener implements ServletContextListener {
                 SystemSettings.initialize();
                 ServiceUtil.initialize();
                 DataSourceThreadPool.initialize();
+                CacheThreadPool.initialize();
                 ReportThreadPool.initialize();
                 CurrencyRetrieval.initialize();
 
@@ -98,7 +100,7 @@ public class EIContextListener implements ServletContextListener {
                 if (ConfigLoader.instance().isReportListener()) {
                     WorkerManager.initialize();
                     ReportListener.initialize();
-                    AsyncReportPurge.initialize();;
+                    AsyncReportPurge.initialize();
                 }
                 ThreadDumpWatcher.initialize();
             }
@@ -123,6 +125,9 @@ public class EIContextListener implements ServletContextListener {
         }
         if (DataSourceThreadPool.instance() != null) {
             DataSourceThreadPool.instance().shutdown();
+        }
+        if (CacheThreadPool.instance() != null) {
+            CacheThreadPool.instance().shutdown();
         }
         if (ReportThreadPool.instance() != null) {
             ReportThreadPool.instance().shutdown();

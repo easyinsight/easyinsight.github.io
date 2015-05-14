@@ -66,8 +66,10 @@
     EIConnection conn = Database.instance().getConnection();
     boolean useHTMLVersion = false;
     long accountID = 0;
+    long fixedDashboardID = 0;
+    boolean designer = true;
     try {
-        PreparedStatement ps = conn.prepareStatement("SELECT account_state, user.account_id, account.use_html_version FROM USER, ACCOUNT WHERE user_id = ? and user.account_id = account.account_id");
+        PreparedStatement ps = conn.prepareStatement("SELECT account_state, user.account_id, account.use_html_version, user.fixed_dashboard_id, user.analyst FROM USER, ACCOUNT WHERE user_id = ? and user.account_id = account.account_id");
         ps.setLong(1, userID);
         ResultSet rs = ps.executeQuery();
         if (!rs.next()) {
@@ -77,7 +79,10 @@
         int accountState = rs.getInt(1);
         accountID = rs.getLong(2);
 
+
         useHTMLVersion = rs.getBoolean(3);
+        fixedDashboardID = rs.getLong(4);
+        designer = rs.getBoolean(5);
         ps.close();
         if (accountState == Account.CLOSED) {
             response.sendRedirect(RedirectUtil.getURL(request, "/app/billing/index.jsp"));
@@ -94,6 +99,36 @@
         }
     } finally {
         Database.closeConnection(conn);
+    }
+
+    // TODO: GET RID OF ASAP
+    boolean useThis = accountID == 7429;
+    if (request.getParameter("full") != null) {
+        useHTMLVersion = false;
+    }
+    if (useThis && useHTMLVersion && !designer) {
+        String url;
+        if (fixedDashboardID > 0) {
+            conn = Database.instance().getConnection();
+            try {
+                PreparedStatement uStmt = conn.prepareStatement("SELECT url_key FROM dashboard WHERE dashboard_id = ?");
+                uStmt.setLong(1, fixedDashboardID);
+                ResultSet dRS = uStmt.executeQuery();
+                if (dRS.next()) {
+                    String urlKey = dRS.getString(1);
+                    url = RedirectUtil.getURL(request, "/app/html/dashboard/" + urlKey);
+                } else {
+                    url = RedirectUtil.getURL(request, "/a/home");
+                }
+                uStmt.close();
+            } finally {
+                Database.closeConnection(conn);
+            }
+        } else {
+            url = RedirectUtil.getURL(request, "/a/home");
+        }
+        response.sendRedirect(url);
+        return;
     }
     /*if (useHTMLVersion) {
         if (request.getParameter("full") != null) {
