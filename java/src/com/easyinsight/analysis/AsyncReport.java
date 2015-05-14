@@ -376,7 +376,7 @@ public class AsyncReport {
     }
 
     protected void asyncCache(long fcacheID, Long frequestID) {
-        DataSourceThreadPool.instance().addActivity(() -> {
+        CacheThreadPool.instance().addActivity(() -> {
             EIConnection conn = Database.instance().getConnection();
             try {
                 CachedAddonDataSource.runReport(conn, fcacheID, true);
