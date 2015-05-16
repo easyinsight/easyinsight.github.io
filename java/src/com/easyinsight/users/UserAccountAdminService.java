@@ -736,6 +736,135 @@ public class UserAccountAdminService {
         return userCreationResponse;
     }
 
+    public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, boolean requirePasswordChange, final int source,
+                                                 boolean sendEmail, EIConnection conn) {
+        SecurityUtil.authorizeAccountAdmin();
+        long accountID = SecurityUtil.getAccountID();
+        UserCreationResponse userCreationResponse;
+        String message = null;
+        if(userTransferObject.getUserName() == null || userTransferObject.getUserName().isEmpty()) {
+            message = "Username must not be empty.";
+        }
+        if(message == null && userTransferObject.getEmail() == null || userTransferObject.getEmail().isEmpty()) {
+            message = "Email must not be empty.";
+
+        }
+        if(message == null && (userTransferObject.getFirstName() == null || userTransferObject.getFirstName().isEmpty())){
+            message = "First Name must not be empty.";
+        }
+        if(message == null && (userTransferObject.getName() == null || userTransferObject.getName().isEmpty())) {
+            message = "Last Name must not be empty.";
+        }
+        if(message == null) {
+            message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
+        }
+        if (message != null) {
+            if (source == GOOGLE_APPS) {
+                // just ignore in the case of google apps linking to an existing user
+                return null;
+            }
+            userCreationResponse = new UserCreationResponse(message);
+        } else {
+            Session session = Database.instance().createSession(conn);
+            Account account;
+            User user = null;
+            try {
+                List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+                account = (Account) results.get(0);
+                int maxUsers = account.getMaxUsers();
+                int currentUsers = account.getUsers().size();
+                int currentDesigners = 0;
+                for (User test : account.getUsers()) {
+                    if (test.isAnalyst()) {
+                        currentDesigners++;
+                    }
+                }
+                if (account.getPricingModel() == 0 && currentUsers >= maxUsers) {
+                    userCreationResponse = new UserCreationResponse("You are at the maximum number of users for your account.");
+                } else if (account.getPricingModel() == 1 && userTransferObject.isAnalyst() && (currentDesigners >= (account.getCoreDesigners() + account.getAddonDesigners()))) {
+                    userCreationResponse = new UserCreationResponse("You are at the maximum number of designers for your account.");
+                } else {
+                    User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+                    user = userTransferObject.toUser();
+                    user.setAccount(account);
+                    final String adminFirstName = admin.getFirstName();
+                    final String adminName = admin.getName();
+                    final String userEmail = user.getEmail();
+                    final String userName = user.getUserName();
+                    final String password = RandomTextGenerator.generateText(12);
+                    final String accountName = account.getName();
+                    final String loginURL;
+                    if (account.isSubdomainEnabled()) {
+                        loginURL = "https://"+account.getSubdomain()+".easy-insight.com/app";
+                    } else {
+                        loginURL = "https://www.easy-insight.com/app";
+                    }
+                    final String adminEmail = admin.getEmail();
+                    user.setPassword(PasswordService.getInstance().encrypt(password, user.getHashSalt(), "SHA-256"));
+                    user.setHashType("SHA-256");
+                    user.setInitialSetupDone(!requirePasswordChange);
+                    user.setUserKey(RandomTextGenerator.generateText(20));
+                    user.setUserSecretKey(RandomTextGenerator.generateText(20));
+                    account.addUser(user);
+                    final String sso;
+                    if (account.getExternalLogin() != null) {
+                        sso = account.getExternalLogin().toSSOMessage();
+                    } else {
+                        sso = "";
+                    }
+                    user.setAccount(account);
+                    session.update(account);
+                    session.flush();
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO USER_DLS (DLS_ID, USER_ID) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement insertFilterStmt = conn.prepareStatement("INSERT INTO USER_DLS_TO_FILTER (FILTER_ID, ORIGINAL_FILTER_ID, USER_DLS_ID) VALUES (?, ?, ?)");
+                    for (UserDLS userDLS : userDLSList) {
+                        insertStmt.setLong(1, userDLS.getDlsID());
+                        insertStmt.setLong(2, user.getUserID());
+                        insertStmt.execute();
+                        long userDLSID = Database.instance().getAutoGenKey(insertStmt);
+                        for (UserDLSFilter userDLSFilter : userDLS.getUserDLSFilterList()) {
+                            FilterDefinition filterDefinition = userDLSFilter.getFilterDefinition();
+                            filterDefinition.beforeSave(session);
+                            session.saveOrUpdate(filterDefinition);
+                            session.flush();
+                            insertFilterStmt.setLong(1, filterDefinition.getFilterID());
+                            insertFilterStmt.setLong(2, userDLSFilter.getOriginalFilterID());
+                            insertFilterStmt.setLong(3, userDLSID);
+                            insertFilterStmt.execute();
+                        }
+                    }
+                    userCreationResponse = new UserCreationResponse(user.getUserID());
+                    if (!sendEmail) {
+                        String token = RandomTextGenerator.generateText(30);
+                        PreparedStatement saveStmt = conn.prepareStatement("INSERT INTO new_user_link (user_id, date_issued, token) values (?, ?, ?)");
+                        saveStmt.setLong(1, user.getUserID());
+                        saveStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                        saveStmt.setString(3, token);
+                        saveStmt.execute();
+                        userCreationResponse.setToken(token);
+                        userCreationResponse.setUrl(loginURL + "/newUser?token=" + token);
+                    } else {
+                        new Thread(new Runnable() {
+                            public void run() {
+                                if (source == GOOGLE_APPS) {
+                                    new AccountMemberInvitation().sendGoogleAppsAccountEmail(userEmail, adminFirstName, adminName, accountName, adminEmail);
+                                } else {
+                                    new AccountMemberInvitation().sendAccountEmail(userEmail, adminFirstName, adminName, userName, password, accountName, loginURL, adminEmail, sso);
+                                }
+                            }
+                        }).start();
+                    }
+                }
+            } catch (Exception e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+            }
+        }
+        return userCreationResponse;
+    }
+
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject, List<UserDLS> userDLSList, EIConnection conn, String password) throws SQLException {
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
