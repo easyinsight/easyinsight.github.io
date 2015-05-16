@@ -1660,6 +1660,8 @@ public class AnalysisService {
                             if (filter.getField().toDisplay().equals(analysisItem.toDisplay() + " for Drillthrough")) {
                                 iter.remove();
                             }
+                        } else {
+                            filter.setShowOnReportView(drillThrough.isShowDrillThroughFilters());
                         }
                     }
                     filters.addAll(reportFilters);
@@ -2172,7 +2174,11 @@ public class AnalysisService {
                                 } else {
                                     tempFormat = "dd.MM.yyyy";
                                 }
-                                date = new SimpleDateFormat(tempFormat).parse(value.toString());
+                                try {
+                                    date = new SimpleDateFormat(tempFormat).parse(value.toString());
+                                } catch (ParseException e1) {
+                                    date = new SimpleDateFormat(dateDimension.getOutputDateFormat()).parse(value.toString());
+                                }
                             }
                             result = new SimpleDateFormat(format).format(date);
                         }
