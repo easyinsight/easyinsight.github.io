@@ -38,11 +38,13 @@ public class AddUserServlet extends JSONServlet {
 
         UserCreationResponse userCreationResponse;
         String userKey;
+        String email;
         try {
             conn.setAutoCommit(false);
             List<Persona> personas = new PreferencesService().getPersonas();
             UserTransferObject user = new UserTransferObject();
             user.setEmail(jsonObject.get("email").toString());
+            email = jsonObject.get("email").toString();
             user.setUserName(jsonObject.get("user_name").toString());
             user.setFirstName(jsonObject.get("first_name").toString());
             user.setName(jsonObject.get("last_name").toString());
@@ -142,6 +144,7 @@ public class AddUserServlet extends JSONServlet {
         if (userCreationResponse.isSuccessful()) {
             JSONObject response = new JSONObject();
             response.put("user_key", userKey);
+            response.put("email", email);
             return new ResponseInfo(200, response.toString());
         } else {
             JSONObject response = new JSONObject();
