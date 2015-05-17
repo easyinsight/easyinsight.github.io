@@ -1211,15 +1211,33 @@ public class DataStorage implements IDataStorage {
                             row.addValue(aggregateKey, new EmptyValue());
                         }
                     } else {
-                        try {
-                            String value = dataRS.getString(i++);
-                            if (dataRS.wasNull()) {
-                                row.addValue(aggregateKey, new EmptyValue());
-                            } else {
-                                row.addValue(aggregateKey, new StringValue(value));
+                        boolean count = false;
+                        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                            if (aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                                if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                                    count = true;
+                                }
                             }
-                        } catch (SQLException e) {
-                            row.addValue(aggregateKey, new EmptyValue());
+                        }
+                        if (count) {
+                            double value = dataRS.getDouble(i++);
+                            NumericValue numericValue = new NumericValue(value);
+                            CountAggregation countAggregation = new CountAggregation();
+                            countAggregation.setCount(value);
+                            numericValue.setAggregation(countAggregation);
+                            row.addValue(aggregateKey, numericValue);
+                        } else {
+                            try {
+                                String value = dataRS.getString(i++);
+                                if (dataRS.wasNull()) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    row.addValue(aggregateKey, new StringValue(value));
+                                }
+                            } catch (SQLException e) {
+                                row.addValue(aggregateKey, new EmptyValue());
+                            }
                         }
                     }
                 }
@@ -1326,8 +1344,14 @@ public class DataStorage implements IDataStorage {
                 AggregateKey testKey = new AggregateKey(analysisMeasure.createAggregateKey().toBaseKey().toBaseKey(), AnalysisItemTypes.DIMENSION, null);
                 KeyMetadata baseMetadata = this.keys.get(testKey);
                 if (baseMetadata != null && baseMetadata.getType() != Value.NUMBER) {
-                    groupByBuilder.append(columnName);
-                    groupByBuilder.append(",");
+                    if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                        columnName = "count(" + columnName + ")";
+                        //groupByBuilder.append("count(").append(columnName).append(")");
+                    } else {
+                        groupByBuilder.append(columnName);
+                        groupByBuilder.append(",");
+                    }
+
                 } else {
                     int aggregation = analysisMeasure.getQueryAggregation();
                     if (aggregation == AggregationTypes.SUM || aggregation == AggregationTypes.PERCENT_OF_TOTAL) {

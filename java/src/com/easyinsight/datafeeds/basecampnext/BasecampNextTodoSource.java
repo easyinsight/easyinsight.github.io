@@ -147,8 +147,16 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
 
             basecampNextCompositeSource.startTemp(BasecampNextCompositeSource.COMMENTS, callDataID);
 
+            Date baseRefreshDate = lastRefreshDate;
+
             for (Project project : projects) {
                 if (basecampNextCompositeSource.isUseProjectUpdatedAt()) {
+
+                    if (baseRefreshDate != null && callDataID == null) {
+                        // repull last data
+                        lastRefreshDate = new Date(baseRefreshDate.getTime() - (1000 * 60 * 60 * 24));
+                    }
+
                     if (lastRefreshDate != null && project.getUpdatedAt().before(lastRefreshDate)) {
                         continue;
                     }
@@ -283,7 +291,6 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                             JSONObject detail = runJSONRequestForObject("projects/" + projectID + "/todos/" + todoID + ".json", parentSource, httpClient);
                             JSONArray comments = (JSONArray) detail.get("comments");
 
-                            int ct = 0;
                             for (int m = 0; m < comments.size(); m++) {
                                 JSONObject comment = (JSONObject) comments.get(m);
                                 String createdAtString = getValue(comment, "created_at");
@@ -292,11 +299,7 @@ public class BasecampNextTodoSource extends BasecampNextBaseSource {
                                 String creator = ((JSONObject) comment.get("creator")).get("name").toString();
                                 Date date = parseDate(createdAtString);
                                 bComments.add(new BasecampComment(commentID, date, todoID, creator, commentCreator, projectID));
-                                //parentSource.tempPersist(BasecampNextCompositeSource.COMMENTS, );
-                                //parentSource.addComment();
-                                ct++;
                             }
-                            System.out.println("\tpicked up " + ct + " comments");
                         }
                     }
                 }
