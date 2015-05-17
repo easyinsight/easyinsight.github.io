@@ -34,7 +34,7 @@ public class DayOfWeek extends Function {
                 java.time.DayOfWeek dow = translateDayOfWeek(dayToSet);
                 java.time.DayOfWeek firstDayOfWeek = translateDayOfWeek(SecurityUtil.getFirstDayOfWeek());
 
-                System.out.println("we think first day of week = " + firstDayOfWeek);
+
 
                 WeekFields weekFields = WeekFields.of(firstDayOfWeek, 1);
                 TemporalField adjuster = weekFields.dayOfWeek();

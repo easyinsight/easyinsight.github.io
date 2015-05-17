@@ -29,7 +29,6 @@ public class DayOfMonth extends Function {
                     }
                     startDate = startDate.withDayOfMonth(day);
                     Date date = Date.from(startDate.atStartOfDay().atZone(zoneId).toInstant());
-                    System.out.println("result = " + date);
                     return new DateValue(date);
                 } else {
                     return new NumericValue(startDate.getDayOfMonth());

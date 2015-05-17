@@ -29,6 +29,9 @@ public class DayOfYear extends Function {
 
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
+                if (dayToSet < 1) {
+                    dayToSet = 1;
+                }
                 localDate = localDate.withDayOfYear(dayToSet);
                 Instant instant = localDate.atStartOfDay().atZone(zoneId).toInstant();
                 return new DateValue(Date.from(instant));

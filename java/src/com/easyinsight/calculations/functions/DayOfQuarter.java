@@ -39,6 +39,9 @@ public class DayOfQuarter extends Function {
 
             if (params.size() == 2) {
                 int dayToSet = params.get(1).toDouble().intValue();
+                if (dayToSet < 1) {
+                    dayToSet = 1;
+                }
                 localDate = localDate.with(IsoFields.DAY_OF_QUARTER, dayToSet);
                 Instant instant = localDate.atStartOfDay().atZone(zoneId).toInstant();
                 Date d = Date.from(instant);
