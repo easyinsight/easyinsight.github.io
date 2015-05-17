@@ -193,7 +193,6 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append(")");
-                System.out.println(sb.toString());
                 return sb.toString();
             } else if (level == AnalysisDateDimension.QUARTER_OF_YEAR_LEVEL) {
 
@@ -208,7 +207,6 @@ public class MultiFlatDateFilter extends FilterDefinition {
                 }
                 sb.deleteCharAt(sb.length() - 1);
                 sb.append(")");
-                System.out.println(sb.toString());
                 return sb.toString();
             } else if (level == AnalysisDateDimension.WEEK_LEVEL) {
 
