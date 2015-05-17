@@ -125,7 +125,7 @@ public class AddUserServlet extends JSONServlet {
                 }
             }
 
-            userCreationResponse = new UserAccountAdminService().addUserToAccount(user, dlsInfo, true, true);
+            userCreationResponse = new UserAccountAdminService().addUserToAccount(user, dlsInfo, true, UserAccountAdminService.DEFAULT, true, conn);
 
             PreparedStatement uStmt = conn.prepareStatement("SELECT USER.USER_KEY FROM USER WHERE USER_ID = ?");
             uStmt.setLong(1, userCreationResponse.getUserID());
