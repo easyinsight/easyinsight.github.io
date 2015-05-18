@@ -101,6 +101,7 @@ public class AddUserServlet extends HttpServlet {
                 user.setUserName(jsonObject.get("user_name").toString());
                 user.setFirstName(jsonObject.get("first_name").toString());
                 user.setName(jsonObject.get("last_name").toString());
+                user.setTestAccountVisible(Boolean.parseBoolean(jsonObject.get("can_see_all_reports_and_dashboards").toString()));
                 if (jsonObject.get("only_show_top_dashboards") != null) {
                     user.setOnlyShowTopReports(Boolean.parseBoolean(jsonObject.get("only_show_top_dashboards").toString()));
                 }
