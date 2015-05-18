@@ -400,7 +400,7 @@ Chart = {
                             .tooltipContent(function (key, x, e, graph) {
                                 return '<h3>' + key + '</h3>' +
                                     '<p><b>' + x + '</b></p>' +
-                                    '<h4><b>' + e.point.percent + '%</b> of <b>' + e.point.total + '</b></h4>';
+                                    '<h4><b>' + e.point.percent + '%</b> of <b>' + Chart.createFormat(data["yFormat"])(e.point.total) + '</b></h4>';
                             });
                         var customWidth = styleProps != null ? styleProps["preferredWidth"] : -1;
                         if (customWidth > -1) {
@@ -1280,12 +1280,14 @@ Chart = {
                             }
                         }
 
+                        var showLegend = data["showLegend"];
+
                         var chart = nv.models.stackedAreaChart()
                             //.width(width)
                             //.height(height)
                             .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                             .transitionDuration(350)  //how fast do you want the lines to transition?
-                            .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                            .showLegend(showLegend)       //Show the legend, allowing users to turn on/off line series.
                             .showYAxis(true)        //Show the y-axis
                             .showXAxis(true)        //Show the x-axis
                             .margin({top: 20, right: 40, bottom: 50, left: 76});
