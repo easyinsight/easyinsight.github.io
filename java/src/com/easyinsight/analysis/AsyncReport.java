@@ -84,7 +84,7 @@ public class AsyncReport {
                 servers.add(rs.getInt(1));
             }
             stmt.close();
-            PreparedStatement workStmt = conn.prepareStatement("SELECT async_report_request_id, assigned_server, request_state FROM async_report_request WHERE request_state = ? OR request_state = ? OR request_state = ?");
+            PreparedStatement workStmt = conn.prepareStatement("SELECT async_report_request_id, assigned_server, request_state use index (async_report_request_idx2) FROM async_report_request WHERE request_state = ? OR request_state = ? OR request_state = ?");
             workStmt.setInt(1, WAITING_ASSIGN);
             workStmt.setInt(2, ASSIGNED);
             workStmt.setInt(3, IN_PROGRESS);
