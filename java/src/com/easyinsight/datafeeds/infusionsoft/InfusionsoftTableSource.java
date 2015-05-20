@@ -88,8 +88,19 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {
                         Date dateValue = (Date) value;
+                        Calendar c = Calendar.getInstance();
+                        c.add(Calendar.DAY_OF_YEAR, -1);
+                        if (dateValue.after(c.getTime())) {
+                            System.out.println("started with dateValue");
+                        }
                         ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
+                        if (dateValue.after(c.getTime())) {
+                            System.out.println("then got " + lzdt);
+                        }
                         ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
+                        if (dateValue.after(c.getTime())) {
+                            System.out.println("ended with " + zdt);
+                        }
                         row.addValue(analysisItem.getKey(), new DateValue(Date.from(zdt.toInstant())));
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
