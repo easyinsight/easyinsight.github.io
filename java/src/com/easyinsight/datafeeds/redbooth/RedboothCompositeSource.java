@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataSourceConnectivityReportFault;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.analysis.ReportException;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
@@ -80,6 +81,11 @@ public class RedboothCompositeSource extends CompositeServerDataSource {
 
     public void setTaskIDs(Set<String> taskIDs) {
         this.taskIDs = taskIDs;
+    }
+
+    @Override
+    public boolean checkDateTime(String name, Key key) {
+        return true;
     }
 
     @Override
