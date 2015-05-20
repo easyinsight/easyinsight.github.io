@@ -13,6 +13,8 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 /**
@@ -85,7 +87,10 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                     Object value = resultMap.get(field);
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {
-                        row.addValue(analysisItem.getKey(), new DateValue((Date) value));
+                        Date dateValue = (Date) value;
+                        ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
+                        ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
+                        row.addValue(analysisItem.getKey(), new DateValue(Date.from(zdt.toInstant())));
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;

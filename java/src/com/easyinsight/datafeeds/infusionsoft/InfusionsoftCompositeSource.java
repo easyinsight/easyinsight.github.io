@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds.infusionsoft;
 
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.HTMLConnectionFactory;
@@ -9,6 +10,8 @@ import com.easyinsight.datafeeds.IJoin;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 import org.apache.xmlrpc.XmlRpcException;
 
@@ -17,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -30,11 +34,30 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
     private String url;
     private String userID;
     private boolean skipTags = true;
+    private transient ZoneId timezone;
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Infusionsoft URL", "url");
         factory.addField("Infusionsoft API Key", "infusionApiKey");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
+    @Override
+    protected void beforeRefresh(Date lastRefreshTime) {
+        super.beforeRefresh(lastRefreshTime);
+        EIConnection c2 = Database.instance().getConnection();
+        try {
+            PreparedStatement ps = c2.prepareStatement("SELECT account.timezone FROM account WHERE account.account_id = ?");
+            ps.setLong(1, SecurityUtil.getAccountID());
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            String timezone = rs.getString(1);
+            this.timezone = ZoneId.of(timezone);
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(c2);
+        }
     }
 
     public String getUserID() {
@@ -45,10 +68,18 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         this.userID = userID;
     }
 
-    /*@Override
+    public ZoneId getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(ZoneId timezone) {
+        this.timezone = timezone;
+    }
+
+    @Override
     public boolean checkDateTime(String name, Key key, EIConnection conn) {
         return false;
-    }*/
+    }
 
     private Map<String, String> userCache;
     private Map<String, String> leadStageCache;
