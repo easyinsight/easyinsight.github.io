@@ -96,6 +96,10 @@ public class InfusionsoftLeadSource extends InfusionsoftTableSource {
             InfusionsoftCompositeSource infusionsoftCompositeSource = (InfusionsoftCompositeSource) parentDefinition;
             Map<String, String> stages = infusionsoftCompositeSource.getLeadStageCache();
             Map<String, String> users = infusionsoftCompositeSource.getUserCache();
+
+            DataSet statusNodes = query("Status", Arrays.asList(new AnalysisDimension(new NamedKey("Id")), new AnalysisDimension(new NamedKey("StatusName"))), infusionsoftCompositeSource);
+            System.out.println(statusNodes);
+
             DataSet leads = query("Lead", createAnalysisItems(keys, conn, parentDefinition), (InfusionsoftCompositeSource) parentDefinition, Arrays.asList(STAGE_NAME, USER_NAME,
                     STATUS_NAME, OPPORTUNITY_COUNT, OPPORTUNITY_URL));
             for (IRow row : leads.getRows()) {
