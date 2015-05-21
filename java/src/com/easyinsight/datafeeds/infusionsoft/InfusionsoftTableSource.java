@@ -93,14 +93,14 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                         if (dateValue.after(c.getTime())) {
                             System.out.println("started with " + dateValue);
                         }
-                        ZonedDateTime lzdt = dateValue.toInstant().atZone(ZoneId.systemDefault());
+                        ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
 
                         if (dateValue.after(c.getTime())) {
                             System.out.println("then got " + lzdt);
                         }
 
                         ZonedDateTime offset = ZonedDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
-                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), infusionsoftCompositeSource.getTimezone());
+                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), ZoneId.systemDefault());
                         //ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
 
                         //ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
