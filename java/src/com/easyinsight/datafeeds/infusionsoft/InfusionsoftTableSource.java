@@ -13,7 +13,9 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -99,15 +101,15 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                             System.out.println("then got " + lzdt);
                         }
 
-                        ZonedDateTime offset = ZonedDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
-                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), ZoneId.systemDefault());
+                        LocalDateTime offset = LocalDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
+                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond());
                         //ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
 
                         //ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
                         if (dateValue.after(c.getTime())) {
                             System.out.println("ended with " + offset);
                         }
-                        row.addValue(analysisItem.getKey(), new DateValue(Date.from(offset.toInstant())));
+                        row.addValue(analysisItem.getKey(), new DateValue(Date.from(offset.toInstant(ZoneOffset.UTC))));
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;
