@@ -117,13 +117,20 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
 
                         //lzdt.withZoneSameLocal(ZoneId.systemDefault());
 
-                        ZonedDateTime zdt = lzdt.withZoneSameLocal(ZoneId.systemDefault());
+                        ZonedDateTime zdt = offset.withZoneSameLocal(ZoneId.systemDefault());
 
                         if (dateValue.after(c.getTime())) {
                             System.out.println("and back to " + zdt);
+                            ZonedDateTime zdt2 =  offset.withZoneSameInstant(ZoneId.systemDefault());
+                            System.out.println("or alt = " + zdt2);
                         }
 
-                        row.addValue(analysisItem.getKey(), new DateValue(Date.from(zdt.toInstant())));
+                        Date date = Date.from(zdt.toInstant());
+                        if (dateValue.after(c.getTime())) {
+                            System.out.println("and finally " + date);
+                        }
+
+                        row.addValue(analysisItem.getKey(), new DateValue(date));
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;
