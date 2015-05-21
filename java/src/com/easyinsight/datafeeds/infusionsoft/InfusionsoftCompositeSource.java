@@ -76,10 +76,10 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         this.timezone = timezone;
     }
 
-    @Override
+    /*@Override
     public boolean checkDateTime(String name, Key key, EIConnection conn) {
         return false;
-    }
+    }*/
 
     private Map<String, String> userCache;
     private Map<String, String> leadStageCache;
