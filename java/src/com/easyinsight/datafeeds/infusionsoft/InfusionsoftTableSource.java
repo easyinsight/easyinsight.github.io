@@ -115,7 +115,9 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                             System.out.println("ended with " + offset);
                         }
 
-                        ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
+                        //lzdt.withZoneSameLocal(ZoneId.systemDefault());
+
+                        ZonedDateTime zdt = lzdt.withZoneSameLocal(ZoneId.systemDefault());
 
                         if (dateValue.after(c.getTime())) {
                             System.out.println("and back to " + zdt);
