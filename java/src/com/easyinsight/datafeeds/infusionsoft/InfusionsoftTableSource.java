@@ -95,21 +95,33 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                         if (dateValue.after(c.getTime())) {
                             System.out.println("started with " + dateValue);
                         }
-                        ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
+                        ZonedDateTime lzdt = dateValue.toInstant().atZone(ZoneId.systemDefault());
+
+
 
                         if (dateValue.after(c.getTime())) {
                             System.out.println("then got " + lzdt);
                         }
 
-                        LocalDateTime offset = LocalDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
-                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond());
+                        ZonedDateTime offset = ZonedDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
+                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), infusionsoftCompositeSource.getTimezone());
+
+                        /*LocalDateTime offset = LocalDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
+                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond());*/
                         //ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
 
                         //ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
                         if (dateValue.after(c.getTime())) {
                             System.out.println("ended with " + offset);
                         }
-                        row.addValue(analysisItem.getKey(), new DateValue(Date.from(offset.toInstant(ZoneOffset.UTC))));
+
+                        ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
+
+                        if (dateValue.after(c.getTime())) {
+                            System.out.println("and back to " + zdt);
+                        }
+
+                        row.addValue(analysisItem.getKey(), new DateValue(Date.from(zdt.toInstant())));
                     } else if (value instanceof Number) {
                         if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                             Number number = (Number) value;
