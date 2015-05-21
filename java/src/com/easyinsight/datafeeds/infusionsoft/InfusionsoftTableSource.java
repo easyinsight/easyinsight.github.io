@@ -63,6 +63,7 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
         int page = 0;
         do {
             int count = 0;
+            ZoneId est = ZoneId.of("US/Eastern");
             List parameters = new ArrayList();
             parameters.add(infusionsoftCompositeSource.getInfusionApiKey());
             parameters.add(table);
@@ -103,8 +104,10 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                             System.out.println("then got " + lzdt);
                         }
 
+
+
                         ZonedDateTime offset = ZonedDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
-                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), infusionsoftCompositeSource.getTimezone());
+                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), est);
 
                         /*LocalDateTime offset = LocalDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
                                 lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond());*/
