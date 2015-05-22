@@ -20,6 +20,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
     public var databaseName:String;
     public var dbUserName:String;
     public var dbPassword:String;
+    public var instanceName:String;
 
     public function SQLServerDatabaseConnection() {
     }

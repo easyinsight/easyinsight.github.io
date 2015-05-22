@@ -54,6 +54,7 @@
             obj.rebuildFields = true;
             obj.timeout = timeoutInput.value;
             obj.copyingFromSource = copyingFrom;
+            obj.instanceName = instanceNameInput.text;
             return obj;
         }
 
@@ -97,16 +98,21 @@
             userName = dataSource.dbUserName;
             password = "not really";
             copyingFrom = dataSource.dataFeedID;
+            instanceName = dataSource.instanceName;
         }
 
         [Bindable]
         private var password:String;
+
+        [Bindable]
+        private var instanceName:String;
 
         private var copyingFrom:int;
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:SQLServerDatabaseConnection = feedDefinition as SQLServerDatabaseConnection;
             host = ds.host;
+            instanceName = ds.instanceName;
             port = String(ds.port);
             databaseName = ds.databaseName;
             userName = ds.dbUserName;
@@ -119,6 +125,7 @@
             obj.host = hostInput.text;
             obj.port = int(portInput.text);
             obj.databaseName = databaseNameInput.text;
+            obj.instanceName = instanceNameInput.text;
             obj.dbUserName = databaseUserNameInput.text;
             obj.dbPassword = databasePasswordInput.text;
             obj.query = queryArea.text;
@@ -161,6 +168,9 @@
             </mx:FormItem>
             <mx:FormItem label="Database Password:" labelWidth="200">
                 <mx:TextInput id="databasePasswordInput" fontWeight="normal" fontFamily="Lucida Grande" width="350" displayAsPassword="true" text="{password}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Instance Name:" labelWidth="200">
+                <mx:TextInput id="instanceNameInput" fontWeight="normal" fontFamily="Lucida Grande" width="350"/>
             </mx:FormItem>
             <mx:FormItem label="Connection Timeout (minutes):" labelWidth="200">
                 <mx:NumericStepper id="timeoutInput" fontWeight="normal" fontFamily="Lucida Grande" value="{connTimeout}" maximum="30"/>
