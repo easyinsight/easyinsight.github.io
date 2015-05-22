@@ -42,38 +42,12 @@ public class InfusionsoftCompositeSource extends CompositeServerDataSource {
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
     }
 
-    @Override
-    protected void beforeRefresh(Date lastRefreshTime) {
-        super.beforeRefresh(lastRefreshTime);
-        EIConnection c2 = Database.instance().getConnection();
-        try {
-            PreparedStatement ps = c2.prepareStatement("SELECT account.timezone FROM account WHERE account.account_id = ?");
-            ps.setLong(1, SecurityUtil.getAccountID());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            String timezone = rs.getString(1);
-            this.timezone = ZoneId.of(timezone);
-        } catch (Exception e) {
-            LogClass.error(e);
-        } finally {
-            Database.closeConnection(c2);
-        }
-    }
-
     public String getUserID() {
         return userID;
     }
 
     public void setUserID(String userID) {
         this.userID = userID;
-    }
-
-    public ZoneId getTimezone() {
-        return timezone;
-    }
-
-    public void setTimezone(ZoneId timezone) {
-        this.timezone = timezone;
     }
 
     /*@Override

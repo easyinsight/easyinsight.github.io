@@ -91,47 +91,14 @@ public abstract class InfusionsoftTableSource extends ServerDataSourceDefinition
                     AnalysisItem analysisItem = map.get(field);
                     if (value instanceof Date) {
                         Date dateValue = (Date) value;
-                        Calendar c = Calendar.getInstance();
-                        c.add(Calendar.DAY_OF_YEAR, -1);
-                        if (dateValue.after(c.getTime())) {
-                            System.out.println("started with " + dateValue);
-                        }
                         ZonedDateTime lzdt = dateValue.toInstant().atZone(ZoneId.systemDefault());
-
-
-
-                        if (dateValue.after(c.getTime())) {
-                            System.out.println("then got " + lzdt);
-                        }
-
-
 
                         ZonedDateTime offset = ZonedDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
                                 lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond(), est);
 
-                        /*LocalDateTime offset = LocalDateTime.of(lzdt.getYear(), lzdt.getMonthValue(), lzdt.getDayOfMonth(),
-                                lzdt.getHour(), lzdt.getMinute(), lzdt.getNano(), lzdt.getSecond());*/
-                        //ZonedDateTime lzdt = dateValue.toInstant().atZone(infusionsoftCompositeSource.getTimezone());
-
-                        //ZonedDateTime zdt = lzdt.withZoneSameInstant(ZoneId.systemDefault());
-                        if (dateValue.after(c.getTime())) {
-                            System.out.println("ended with " + offset);
-                        }
-
-                        //lzdt.withZoneSameLocal(ZoneId.systemDefault());
-
                         ZonedDateTime zdt = offset.withZoneSameInstant(ZoneId.systemDefault());
 
-                        if (dateValue.after(c.getTime())) {
-                            System.out.println("and back to " + zdt);
-                            /*ZonedDateTime zdt2 =  offset.withZoneSameInstant(ZoneId.systemDefault());
-                            System.out.println("or alt = " + zdt2);*/
-                        }
-
                         Date date = Date.from(zdt.toInstant());
-                        if (dateValue.after(c.getTime())) {
-                            System.out.println("and finally " + date);
-                        }
 
                         row.addValue(analysisItem.getKey(), new DateValue(date));
                     } else if (value instanceof Number) {
