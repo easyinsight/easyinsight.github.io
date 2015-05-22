@@ -26,6 +26,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
     private String databaseName;
     private String dbUserName;
     private String dbPassword;
+    private String instanceName;
 
     public void configureFactory(HTMLConnectionFactory factory) {
         factory.addField("Host", "host");
@@ -36,6 +37,14 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
         factory.addField("Query", "query", HTMLConnectionProperty.TEXT);
         factory.addFieldWithDefault("Connection Timeout (minutes)", "timeout", HTMLConnectionProperty.INTEGER, "20");
         factory.type(HTMLConnectionFactory.TYPE_BASIC_AUTH);
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public String getHost() {
@@ -197,7 +206,12 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
 
     @Override
     protected Connection createConnection() throws SQLException {
-        String url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2};loginTimeout=15;selectMode=cursor", host, String.valueOf(port), databaseName);
+        String url;
+        if (instanceName == null || "".equals(instanceName)) {
+            url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2};loginTimeout=15;selectMode=cursor", host, String.valueOf(port), databaseName);
+        } else {
+            url = MessageFormat.format("jdbc:sqlserver://{0}:{1};databaseName={2};instance={3}loginTimeout=15;selectMode=cursor", host, String.valueOf(port), databaseName, instanceName);
+        }
         return DriverManager.getConnection(url, dbUserName, dbPassword);
     }
 
@@ -242,7 +256,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
         deleteStmt.executeUpdate();
         deleteStmt.close();
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO SQL_SERVER_DATABASE_CONNECTION (data_source_id, host_name, server_port, database_name," +
-                "database_username, database_password, query_string, rebuild_fields, timeout) values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "database_username, database_password, query_string, rebuild_fields, timeout, instance_name) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, getDataFeedID());
         insertStmt.setString(2, host);
         insertStmt.setInt(3, port);
@@ -260,6 +274,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
         insertStmt.setString(7, getQuery());
         insertStmt.setBoolean(8, isRebuildFields());
         insertStmt.setLong(9, getTimeout());
+        insertStmt.setString(10, getInstanceName());
         insertStmt.execute();
         insertStmt.close();
     }
@@ -268,7 +283,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
     public void customLoad(Connection conn) throws SQLException {
         super.customLoad(conn);
         PreparedStatement loadStmt = conn.prepareStatement("SELECT host_name, server_port, database_name, database_username," +
-                "database_password, query_string, rebuild_fields, timeout FROM SQL_SERVER_DATABASE_CONNECTION WHERE data_source_id = ?");
+                "database_password, query_string, rebuild_fields, timeout, instance_name FROM SQL_SERVER_DATABASE_CONNECTION WHERE data_source_id = ?");
         loadStmt.setLong(1, getDataFeedID());
         ResultSet rs = loadStmt.executeQuery();
         if (rs.next()) {
@@ -283,6 +298,7 @@ public class SQLServerDatabaseConnection extends ServerDatabaseConnection {
             setQuery(rs.getString(6));
             setRebuildFields(rs.getBoolean(7));
             setTimeout(rs.getInt(8));
+            instanceName = rs.getString(9);
         }
         loadStmt.close();
     }
