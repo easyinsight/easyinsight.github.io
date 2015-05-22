@@ -177,7 +177,7 @@ public class AsyncReport {
             try {
                 conn.setAutoCommit(false);
                 PreparedStatement q = conn.prepareStatement("SELECT async_report_request_id, request_type, " +
-                        "user_id, data_source_id, call_id, task_id, cache_source_id, upload_key, file_name FROM async_report_request WHERE request_state = ? AND assigned_server = ?");
+                        "user_id, data_source_id, call_id, task_id, cache_source_id, upload_key, file_name FROM async_report_request use index (async_report_request_idx1) WHERE request_state = ? AND assigned_server = ?");
                 q.setInt(1, ASSIGNED);
                 q.setInt(2, serverID);
                 ResultSet rs = q.executeQuery();
@@ -207,7 +207,7 @@ public class AsyncReport {
                 Database.closeConnection(conn);
             }
             if (requestID == null) {
-                Thread.sleep(100);
+                Thread.sleep(250);
             }
         } while (requestID == null);
 
