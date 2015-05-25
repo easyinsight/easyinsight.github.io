@@ -1200,7 +1200,7 @@ public class DataStorage implements IDataStorage {
                                 if (aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
                                     if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
-                                        CountAggregation countAggregation = new CountAggregation();
+                                        NewCountAggregation countAggregation = new NewCountAggregation();
                                         countAggregation.setCount(value);
                                         numericValue.setAggregation(countAggregation);
                                     }
@@ -1213,20 +1213,27 @@ public class DataStorage implements IDataStorage {
                     } else {
                         boolean count = false;
                         if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                            if (aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                                if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
-                                    count = true;
-                                }
+                            AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                            if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                                count = true;
                             }
                         }
                         if (count) {
-                            double value = dataRS.getDouble(i++);
-                            NumericValue numericValue = new NumericValue(value);
-                            CountAggregation countAggregation = new CountAggregation();
-                            countAggregation.setCount(value);
-                            numericValue.setAggregation(countAggregation);
-                            row.addValue(aggregateKey, numericValue);
+                            if (aggregateQuery) {
+                                double value = dataRS.getDouble(i++);
+                                NumericValue numericValue = new NumericValue(value);
+                                NewCountAggregation countAggregation = new NewCountAggregation();
+                                countAggregation.setCount(value);
+                                numericValue.setAggregation(countAggregation);
+                                row.addValue(aggregateKey, numericValue);
+                            } else {
+                                String value = dataRS.getString(i++);
+                                if (dataRS.wasNull() || "".equals(value)) {
+                                    row.addValue(aggregateKey, new EmptyValue());
+                                } else {
+                                    row.addValue(aggregateKey, new NumericValue(1));
+                                }
+                            }
                         } else {
                             try {
                                 String value = dataRS.getString(i++);

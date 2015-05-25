@@ -55,7 +55,7 @@ public class AggregationFactory {
                 aggregation = new MinAggregation();
                 break;
             case AggregationTypes.COUNT:
-                aggregation = new CountAggregation();
+                aggregation = new NewCountAggregation();
                 break;
             case AggregationTypes.COUNT_DISTINCT:
                 aggregation = new CountAggregation();
