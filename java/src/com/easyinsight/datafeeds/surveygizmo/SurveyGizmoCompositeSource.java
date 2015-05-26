@@ -542,6 +542,9 @@ public class SurveyGizmoCompositeSource extends CompositeServerDataSource {
     }
 
     private String sanitizeFieldName(String name) {
+        if (name.length() > 25) {
+            name = name.substring(0, 25);
+        }
         return name.replaceAll("\\<.*?\\>", "");
     }
 }
