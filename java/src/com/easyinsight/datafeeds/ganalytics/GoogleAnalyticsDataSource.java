@@ -102,7 +102,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String EC_DAYS_TO = "ga:daysToTransaction";
     public static final String EC_CATEGORY = "ga:productCategory";
     public static final String EC_NAME = "ga:productName";
-    public static final String EC_SKU = "ga:productSku";    
+    public static final String EC_SKU = "ga:productSku";
     public static final String EC_TID = "ga:transactionId";
 
     public static final String EC_ITEM_REVENUE = "ga:itemRevenue";
@@ -140,19 +140,19 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     public static String[] generalDimensions = { BROWSER, BROWSER_VERSION, CITY, CONNECTION_SPEED, CONTINENT, CONTINENT,
-        COUNT_OF_VISITS, COUNTRY, DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LATITUDE,
-        LONGITUDE, NETWORK_DOMAIN, LANGUAGE, NETWORK_DOMAIN, NETWORK_LOCATION, PAGE_DEPTH, OPERATING_SYSTEM,
-        OPERATING_SYSTEM_VERSION, REGION, SCREEN_COLORS, SCREEN_RESOLUTION, SOURCE, SUB_CONTINENT, VISITOR_TYPE, TITLE};
+            COUNT_OF_VISITS, COUNTRY, DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LATITUDE,
+            LONGITUDE, NETWORK_DOMAIN, LANGUAGE, NETWORK_DOMAIN, NETWORK_LOCATION, PAGE_DEPTH, OPERATING_SYSTEM,
+            OPERATING_SYSTEM_VERSION, REGION, SCREEN_COLORS, SCREEN_RESOLUTION, SOURCE, SUB_CONTINENT, VISITOR_TYPE, TITLE};
 
     public static String[] generalMeasures = { VISITS };
 
     public static String[] adDimensions = { AD_CONTENT, AD_GROUP, AD_SLOT, AD_SLOT_POSITION, AD_CAMPAIGN, AD_KEYWORD,
-        AD_MEDIUM, AD_REFERRAL_PATH };
+            AD_MEDIUM, AD_REFERRAL_PATH };
 
     public static String[] adMeasures = { AD_CLICKS };
 
     public static String[] contentDimensions = { CONTENT_EXIT_PAGE_PATH, CONTENT_LANDING_PAGE_PATH, CONTENT_PAGE_PATH,
-        CONTENT_PAGE_TITLE };
+            CONTENT_PAGE_TITLE };
 
     public static String[] contentMeasures = { CONTENT_UNIQUE_VIEWS };
 
@@ -161,7 +161,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static String[] ecommerceMeasures = { EC_ITEM_QUANTITY };
 
     public static String[] searchDimensions = { SEARCH_CATEGORY, SEARCH_DESTINATION, SEARCH_KEYWORD, SEARCH_KEYWORD_REFINEMENT,
-        SEARCH_SEARCH_START, SEARCH_SEARCH_USED };
+            SEARCH_SEARCH_START, SEARCH_SEARCH_USED };
 
     public static String[] searchMeasures = { SEARCH_VISITS };
 
@@ -248,11 +248,19 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         if (request != null) {
             String code = request.getParameter("code");
             if (code != null) {
+                /*
                 OAuthClientRequest oAuthClientRequest = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
                         setGrantType(GrantType.AUTHORIZATION_CODE).setClientId("196763839405.apps.googleusercontent.com").
                         setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").
                         setRedirectURI("https://www.easy-insight.com/app/oauth").
-                        setParameter("access_type", "offline").
+                        setParameter("access_type", "offline").setParameter("approval_prompt", "force").
+                        setCode(code).buildBodyMessage();
+                 */
+                OAuthClientRequest oAuthClientRequest = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
+                        setGrantType(GrantType.AUTHORIZATION_CODE).setClientId("196763839405.apps.googleusercontent.com").
+                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").
+                        setRedirectURI("https://www.easy-insight.com/app/oauth").
+                        setParameter("access_type", "offline").setParameter("approval_prompt", "force").
                         setCode(code).buildBodyMessage();
 
                 OAuthClient client = new OAuthClient(new URLConnectionClient());

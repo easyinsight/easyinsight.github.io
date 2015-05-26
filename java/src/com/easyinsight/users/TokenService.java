@@ -150,7 +150,7 @@ public class TokenService {
                         .authorizationLocation("https://accounts.google.com/o/oauth2/auth")
                         .setClientId("196763839405.apps.googleusercontent.com")
                         .setRedirectURI("https://www.easy-insight.com/app/oauth").setResponseType("code").
-                                setScope("https://www.google.com/analytics/feeds/").setParameter("access_type", "offline")
+                                setScope("https://www.google.com/analytics/feeds/").setParameter("access_type", "offline").setParameter("approval_prompt", "force")
                         .buildQueryMessage();
                 session.setAttribute("redirectTarget", redirectType);
                 session.setAttribute("dataSourceID", dataSource.getApiKey());

@@ -101,7 +101,12 @@ public class HarvestExpenseSource extends HarvestBaseSource {
                 String projectId = queryField(curProject, "id/text()");
                 String latestRecord = queryField(curProject, "hint-latest-record-at/text()");
                 String earliestRecord = queryField(curProject, "hint-earliest-record-at/text()");
-                String reqString = "/projects/" + projectId + "/expenses?from=" + OUT_DATE.format(DATE_FORMAT.parse(earliestRecord)) + "&to=" + OUT_DATE.format(DATE_FORMAT.parse(latestRecord));
+                String reqString;
+                if (latestRecord != null && earliestRecord != null) {
+                    reqString = "/projects/" + projectId + "/expenses?from=" + OUT_DATE.format(DATE_FORMAT.parse(earliestRecord)) + "&to=" + OUT_DATE.format(DATE_FORMAT.parse(latestRecord));
+                } else {
+                    reqString = "/projects/" + projectId + "/expenses";
+                }
                 if(lastRefreshDate != null) {
                     reqString += "&updated_since=" + URLEncoder.encode(UPDATED_SINCE_FORMAT.format(lastRefreshDate), "UTF-8");
                 }

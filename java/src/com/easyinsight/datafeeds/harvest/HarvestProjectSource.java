@@ -135,8 +135,12 @@ public class HarvestProjectSource extends HarvestBaseSource {
                 row.addValue(keys.get(BUDGET_BY), budgetBy);
                 if(budget != null && budget.length() > 0)
                     row.addValue(keys.get(BUDGET), Double.parseDouble(budget));
-                row.addValue(keys.get(LAST_RECORD), DATE_FORMAT.parse(latestRecord));
-                row.addValue(keys.get(FIRST_RECORD), DATE_FORMAT.parse(earliestRecord));
+                if (latestRecord != null) {
+                    row.addValue(keys.get(LAST_RECORD), DATE_FORMAT.parse(latestRecord));
+                }
+                if (earliestRecord != null) {
+                    row.addValue(keys.get(FIRST_RECORD), DATE_FORMAT.parse(earliestRecord));
+                }
                 row.addValue(keys.get(PROJECT_COUNT), 1.0);
             }
         } catch (ParsingException e) {

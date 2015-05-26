@@ -30,9 +30,7 @@ import org.apache.amber.oauth2.common.exception.OAuthProblemException;
 import org.apache.amber.oauth2.common.exception.OAuthSystemException;
 import org.apache.amber.oauth2.common.message.types.GrantType;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -59,7 +57,7 @@ public class GoogleAnalyticsFeed extends Feed {
         this.accessToken = accessToken;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester) throws ReportException {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata, EIConnection conn, WSAnalysisDefinition report, List<FilterDefinition> otherFilters, FilterDefinition requester, List<FilterDefinition> updatedParentFilters) throws ReportException {
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         try {
             semaphore.acquire();
@@ -179,7 +177,7 @@ public class GoogleAnalyticsFeed extends Feed {
                 as.useSsl();
                 GoogleCredential credential = new GoogleCredential();
                 credential.setAccessToken(accessToken);
-                credential.setRefreshToken(refreshToken);
+                //credential.setRefreshToken(refreshToken);
                 as.setOAuth2Credentials(credential);
             } else {
                 GoogleOAuthParameters oauthParameters = new GoogleOAuthParameters();
@@ -214,29 +212,40 @@ public class GoogleAnalyticsFeed extends Feed {
     private static Semaphore semaphore = new Semaphore(1);
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, EIConnection conn) throws ReportException {
+
         try {
+            semaphore.acquire();
             return createDataSet(analysisItems, filters, insightRequestMetadata);
         } catch (GoogleService.SessionExpiredException gse) {
-            try {
-                OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
-                        setGrantType(GrantType.REFRESH_TOKEN).setClientId("196763839405.apps.googleusercontent.com").
-                        setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").setRefreshToken(refreshToken).setRedirectURI("https://easy-insight.com/app/oauth");
-                //tokenRequestBuilder.setParameter("type", "refresh_token");
-                OAuthClient client = new OAuthClient(new URLConnectionClient());
-                OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
-                OAuthJSONAccessTokenResponse response = client.accessToken(request);
-                accessToken = response.getAccessToken();
-                System.out.println("got new access token");
+            if (refreshToken == null) {
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
+            } else {
                 try {
-                    as = null;
-                    return createDataSet(analysisItems, filters, insightRequestMetadata);
-                } catch (Exception e1) {
-                    as = null;
-                    throw new RuntimeException(e1);
+                    OAuthClientRequest.TokenRequestBuilder tokenRequestBuilder = OAuthClientRequest.tokenLocation("https://www.googleapis.com/oauth2/v3/token").
+                            setGrantType(GrantType.REFRESH_TOKEN).setClientId("196763839405.apps.googleusercontent.com").
+                            setClientSecret("bRmYcsSJcp0CBehRRIcxl1hK").setRefreshToken(refreshToken).setRedirectURI("https://easy-insight.com/app/oauth");
+                    //tokenRequestBuilder.setParameter("type", "refresh_token");
+                    OAuthClient client = new OAuthClient(new URLConnectionClient());
+                    OAuthClientRequest request = tokenRequestBuilder.buildBodyMessage();
+                    OAuthJSONAccessTokenResponse response = client.accessToken(request);
+                    accessToken = response.getAccessToken();
+                    PreparedStatement update = conn.prepareStatement("UPDATE GOOGLE_ANALYTICS SET ACCESS_TOKEN = ? WHERE DATA_SOURCE_ID = ?");
+                    update.setString(1, accessToken);
+                    update.setLong(2, getFeedID());
+                    update.executeUpdate();
+                    update.close();
+                    System.out.println("got new access token");
+                    try {
+                        as = null;
+                        return createDataSet(analysisItems, filters, insightRequestMetadata);
+                    } catch (Exception e1) {
+                        as = null;
+                        throw new RuntimeException(e1);
+                    }
+                } catch (Exception e) {
+                    LogClass.error(e);
+                    throw new RuntimeException(e);
                 }
-            } catch (Exception e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
             }
         } catch (AuthenticationException ae) {
             ae.printStackTrace();
@@ -247,10 +256,16 @@ public class GoogleAnalyticsFeed extends Feed {
         } catch (ServiceException se) {
             se.printStackTrace();
             throw new ReportException(new GenericReportFault(se.getMessage()));
+        } catch (OAuthException oae) {
+            throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
         } catch (ReportException tme) {
             throw tme;
         } catch (Exception e) {
+
             as = null;
+            if (e.getCause() != null && e.getCause() instanceof OAuthException) {
+                throw new ReportException(new DataSourceConnectivityReportFault("You need to reauthorize Easy Insight to access your Google data.", getDataSource()));
+            }
             throw new RuntimeException(e);
         } finally {
             semaphore.release();
@@ -258,7 +273,6 @@ public class GoogleAnalyticsFeed extends Feed {
     }
 
     protected DataSet createDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws Exception {
-        semaphore.acquire();
         Collection<AnalysisDimension> dimensions = new HashSet<AnalysisDimension>();
         Collection<AnalysisMeasure> measures = new HashSet<AnalysisMeasure>();
         List<AnalysisItem> convertedItems = new ArrayList<AnalysisItem>();

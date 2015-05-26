@@ -102,7 +102,12 @@ public class HarvestTimeSource extends HarvestBaseSource {
                 String latestRecord = queryField(curProject, "hint-latest-record-at/text()");
                 String earliestRecord = queryField(curProject, "hint-earliest-record-at/text()");
 
-                Document entries = runRestRequest("/projects/" + projectId + "/entries?from=" + OUT_DATE.format(DATE_FORMAT.parse(earliestRecord)) + "&to=" + OUT_DATE.format(DATE_FORMAT.parse(latestRecord)), client, builder, source.getUrl(), true, source, false);
+                Document entries;
+                if (latestRecord != null && earliestRecord != null) {
+                    entries = runRestRequest("/projects/" + projectId + "/entries?from=" + OUT_DATE.format(DATE_FORMAT.parse(earliestRecord)) + "&to=" + OUT_DATE.format(DATE_FORMAT.parse(latestRecord)), client, builder, source.getUrl(), true, source, false);
+                } else {
+                    entries = runRestRequest("/projects/" + projectId + "/entries", client, builder, source.getUrl(), true, source, false);
+                }
                 Nodes entryNodes = entries.query("/day-entries/day-entry");
                 for(int j = 0;j < entryNodes.size();j++) {
                     Node timeEntry = entryNodes.get(j);
