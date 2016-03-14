@@ -1,0 +1,5 @@
+---
+title: "New UI Update, Trello Card Closed Dates, Smartsheet Row ID/Row Count"
+author: "James Boe"
+---
+We've been steadily working through fixing any remaining issues with the new version of the user interface.<!--more--> You can toggle your account over to the new interface through Account Settings if you want to give it a try!Meanwhile, we've kept the smaller tweaks coming as well. If you install a connection to Trello, you can now specify which lists are used to define when a card is completed. If you want to apply this same functionality to your existing Trello connection, let us know and we'll be happy to help you get that going. Smartsheet data sources now have Row Count and Row ID fields to make reporting easier--you can use that Row Count to easily see the number of rows meeting a certain criteria, and the Row ID field to help with functions like fill() across specific unique rows.

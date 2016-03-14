@@ -1,0 +1,5 @@
+---
+title: "New look and feel and Report Editor updates!"
+author: "Cendie Lee"
+---
+We’ve updated the full interface for a more modern look for better visibility and a more seamless transition to and from the HTML5 interface.<!--more--> <br/><br/>Full interface users will find your <b>Top Reports</b> located under the <b>Reports</b> menu item as a dropdown list. <br/><br/>The new color scheme extends to the report editor. <br/><br/>We’ve added new dropdown menus to many of the menu bar items.	<br/><br/>We’ve revamped and added functionality to report level field buttons. Clicking on a Report Field button will now offer options to: filter on the field, edit properties, remove, and move field.  Specific Report Type options are also available. <br/><br/>You can single click anywhere on data source children in the <b>Fields List</b> to expand them.

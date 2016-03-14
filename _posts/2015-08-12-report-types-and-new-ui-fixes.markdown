@@ -1,0 +1,5 @@
+---
+title: "Report Types and new UI Fixes"
+author: "James Boe"
+---
+We've kept up steady fixes and tweaks to the new user interface.<!--more--> With many of the report types, you can now click to automatically filter on values from the report editor. For example, with list reports, you can click on a cell and choose to create a filter from the context menu. We'll be adding further enhancements to this context menu to help make report creation all the easier.We've also added a few new report types for you to use! First, we've added a new version of map reports. With this new version, you can build shape maps, heat maps, and point maps, or combinations of all of the above. We've also added a dedicated Gantt report type and a Radar report type. These new reports should help you create better and better executive dashboards.

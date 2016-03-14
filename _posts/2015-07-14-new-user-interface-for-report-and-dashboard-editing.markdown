@@ -1,0 +1,5 @@
+---
+title: "New user interface for report and dashboard editing"
+author: "James Boe"
+---
+We've begun the process of gradually rolling out our new user interface for creating and modifying reports and dashboards.<!--more--> This new interface should be easier to use, offer better performance, and use the latest in web technologies to work on mobile as well as your desktop. You can check out a playlist of screencasts walking you through how to use the new interface at <a href="https://www.youtube.com/playlist?list=PLyCzsKwbjuKig0pbV328RpG8cxbjwD75t">https://www.youtube.com/playlist?list=PLyCzsKwbjuKig0pbV328RpG8cxbjwD75t</a>. If you're interested in trying out the new interface sooner than later, let us know at support@easy-insight.com or sales@easy-insight.com, and we'll help you get on your way!

@@ -1,0 +1,5 @@
+---
+title: "User Imports and Multi Page Dashboard PDFs"
+author: "James Boe"
+---
+<p>We've added an easy way to add users directly from your connection.<!--more--> From the Users page, you can now choose to import users from your connected data. We've added this for Basecamp and Highrise, with the same functionality coming (very) soon for Insightly, Trello, Infusionsoft, and Zendesk, and not long for the remaining connections beyond those.</p><p>You can now choose to send multiple plages of a dashboard in a single PDF. If you add to a dashboard to a scheduled delivery in the Scheduling page, you'll be given the option to choose which pages of the dashboard you want to send. For example, if you want to send the Overview and Deals Table from a CRM dashboard, you could easily now choose to send those together in one PDF.</p>
