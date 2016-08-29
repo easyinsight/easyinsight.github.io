@@ -6,6 +6,6 @@ When you click on "Choose a Report" while building a dashboard, you'll get a new
 
 The new report picker is shown below:
 
-<img src="/images/dashboard_report_picker.png" class="img img-responsive" alt="Dashboard Report Selection/>
+<img src="/images/dashboard_report_picker.png" class="img img-responsive" alt="Dashboard Report Selection"/>
 
 We'll be gradually rolling out the same improved picker to other screens in Easy Insight over the coming weeks.
