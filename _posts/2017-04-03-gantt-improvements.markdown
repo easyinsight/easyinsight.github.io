@@ -4,7 +4,7 @@ author: "James Boe"
 ---
 We've often had requests for more sophisticated Gantt charts, so we've made several new major improvements to them!<!--more-->
 
-<img src="/images/gantt.png" style="max-width:300px" alt="Gantt Chart" class="img img-responsive"/>
+<img src="/images/gantt.png" alt="Gantt Chart" class="img img-responsive"/>
 
 Gantt charts now support using a hierarchy instead of just a single grouping, allowing you to define rollup and drilldown views across your projects, tasks lists, and individual tasks.
 
