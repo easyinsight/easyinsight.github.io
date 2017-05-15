@@ -18,8 +18,12 @@ Save the field and add the field to the report as well. By adding these two fiel
 
 <img src="/images/sla_compliance.png" alt="SLA Compliance Field" class="img img-responsive"/>
 
+<hr>
+
 Next, we've added new functionality for helping to test the validity of a join when you're in the setup of a combined data source. After you've selected the data sources/fields in the join, you can click on the "Test Join" button as shown below to see an analysis of the join. If the results show a low value of matched records relative to unmatched records, your join may not be properly defined.
 
 <img src="/images/test_joins.png" alt="Test Joins" class="img img-responsive"/>
+
+<hr>
 
 Finally, we have a beta version of the Hubspot connection available now under the Connections page. There aren't any prebuilt reports/dashboards available at this point, but this connection should help you get started with integrating Hubspot into your other Easy Insight reporting. Enjoy!
