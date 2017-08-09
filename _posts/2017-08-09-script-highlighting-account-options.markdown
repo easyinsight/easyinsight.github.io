@@ -2,7 +2,9 @@
 title: "Better Script Highlighting and New Account Options"
 author: "James Boe"
 ---
-We've made several new improvements to the script highlighting for custom fields. The new color scheme should help you more clearly see fields, functions, text literals, and numbers, as shown below:
+We've made several new improvements to the script highlighting for custom fields and added two new account flags to help simplify the interface for your users.<!--more-->
+
+The new color scheme should help you more clearly see fields, functions, text literals, and numbers, as shown below:
 
 <img style="max-width:600px" src="/images/scripting_new.png" alt="Script Styling" class="img img-responsive"/>
 
