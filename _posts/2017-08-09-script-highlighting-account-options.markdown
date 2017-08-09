@@ -14,7 +14,7 @@ The new highlighting will also provide an error indicator when you have a typo i
 
 We've also added two new account level flags, both of which can be found under the Settings section of Account Settings:
 
-<img style="max-width:600px" src="/images/account_flags.png" alt="Account Flags" class="img img-responsive"/>
+<img style="max-width:400px" src="/images/account_flags.png" alt="Account Flags" class="img img-responsive"/>
 
 The first flag, Prevent Viewers from Using Legacy Interface, will hide the "Switch to Legacy Interface" option that comes up when you click on your user name in the upper right for the viewers on your account, helping to present them with a more simplified interface.
 
