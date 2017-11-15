@@ -10,7 +10,7 @@ You can automatically create a Persona to take advantage of these new fields. Cl
 
 Once you've automatically generated the Persona, you can go to an existing user or create a new user to see it in action. Choose the automatically generated persona name (such as Basecamp Team Member or Asana Team Member) from the Persona dropdown as shown below:
 
-<img src="/images/team_persona_configuration.png" alt="Persona Assignment for User" class="img img-responsive"/>
+<img style="max-width:600px" src="/images/team_persona_configuration.png" alt="Persona Assignment for User" class="img img-responsive"/>
 
 After you assign the user to the persona, you can choose his or her name from the list of users in the filter that appears, save, and save the changes to the user.
 
