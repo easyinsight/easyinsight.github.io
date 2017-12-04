@@ -26,4 +26,4 @@ You'll also see the "Show report descriptions if available as Help sections" as 
 
 Finally, we've implemented Custom Font Family functionality for dashboards and individual reports. You can choose from different fonts found under Dashboard Options and Report Formatting to customize the font used. For example, a dashboard customized to Lato is shown below:
 
-<img style="max-width:700px" src="/images/lato_dashboard.png" alt="Dashboard with Lato" class="img img-responsive"/>
+<img style="max-width:900px" src="/images/lato_dashboard.png" alt="Dashboard with Lato" class="img img-responsive"/>
