@@ -3,7 +3,9 @@ title: "Tweaks and Changes for May"
 author: "James Boe"
 ---
 
-As we finish up our GDPR work, we've also found time to make some further improvements as well. When you edit fields in the report editor, the edit is now through a movable window instead of a separate page. This change makes it easier to see your existing report data as you edit fields, as well as avoiding unnecessary lengthy report refreshes.
+As we finish up our GDPR work, we've also found time to make some further improvements as well.<!--more-->
+
+When you edit fields in the report editor, the edit is now through a movable window instead of a separate page. This change makes it easier to see your existing report data as you edit fields, as well as avoiding unnecessary lengthy report refreshes.
 
 <img style="max-width:300px" src="/images/edit_window_move.png" alt="Edit Window Move" class="img img-responsive"/>
 
