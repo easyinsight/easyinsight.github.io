@@ -7,7 +7,7 @@ As we finish up our GDPR work, we've also found time to make some further improv
 
 When you edit fields in the report editor, the edit is now through a movable window instead of a separate page. This change makes it easier to see your existing report data as you edit fields, as well as avoiding unnecessary lengthy report refreshes.
 
-<img style="max-width:300px" src="/images/edit_window_move.png" alt="Edit Window Move" class="img img-responsive"/>
+<img style="max-width:600px" src="/images/edit_window_move.png" alt="Edit Window Move" class="img img-responsive"/>
 
 We've also got a long list of small changes:
 
