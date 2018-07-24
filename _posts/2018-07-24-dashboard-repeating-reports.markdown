@@ -7,7 +7,7 @@ Want to show a bar chart for each sales rep, a bullet chart for each project, or
 
 You can now set up a dashboard to repeat a report for each selected value in a filter. To start, click on Choose Contents in your dashboard as usual and click on the new "Repeat Report" option at the bottom.
 
-<img style="max-width:400px;margin-top:20px;margin-bottom:20px" src="/images/selecting_repeater.png" alt="Selecting Repeat Report" class="img img-responsive"/>
+<img style="max-width:600px;margin-top:20px;margin-bottom:20px" src="/images/selecting_repeater.png" alt="Selecting Repeat Report" class="img img-responsive"/>
 
 Choose the report you want to repeat, choose the field you want to repeat the report by, and choose the number of columns you want the report to use before it wraps to a new row.
 
