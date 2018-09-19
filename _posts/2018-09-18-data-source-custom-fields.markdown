@@ -1,6 +1,5 @@
-
 ---
-title: "Navigation Sidebar"
+title: "Data Source Custom Fields"
 author: "James Boe"
 ---
 
