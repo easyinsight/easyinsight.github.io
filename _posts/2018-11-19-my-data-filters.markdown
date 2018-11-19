@@ -17,16 +17,16 @@ After clicking on 'Change to My Data', the filter will move to the opposite sect
 
 Go ahead and save your persona. Next, go to the user configuration screen for the user you wish to set up with the persona. Set the persona and populate the filter. For example, in the screenshot below, the user is being set to the Sales Rep persona, with the filter assigned to a sales rep of Jim:
 
-<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="/images/my_data_user_configuration.png" alt="My Data Configuration Step 3" class="img img-responsive"/>
+<img style="max-width:275px;margin-top:30px;margin-bottom:30px" src="/images/my_data_user_configuration.png" alt="My Data Configuration Step 3" class="img img-responsive"/>
 
 There's one last optional configuration step if you want the filter to default to My Data for users with a valid persona configured. Open up a report or dashboard with a filter on the same field as used in the persona. Edit the filter and check the 'Default to My Data If Available' option:
 
-<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="/images/my_data_filter_configuration.png" alt="My Data Configuration Step 4" class="img img-responsive"/>
+<img style="max-width:275px;margin-top:30px;margin-bottom:30px" src="/images/my_data_filter_configuration.png" alt="My Data Configuration Step 4" class="img img-responsive"/>
 
 When the user now loads the report or dashboard, the filter will default to a My Data option:
 
-<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="/images/my_data_end_filter.png" alt="My Data Configuration Step 5" class="img img-responsive"/>
+<img style="max-width:275px;margin-top:30px;margin-bottom:30px" src="/images/my_data_end_filter.png" alt="My Data Configuration Step 5" class="img img-responsive"/>
 
-With the report showing the appropriate values tied to that user's configuration:
+With the report showing the appropriate values tied to that \user's configuration:
 
-<img style="max-width:800px;margin-top:30px;margin-bottom:30px" src="/images/my_data_filtered.png" alt="My Data Configuration Step 6" class="img img-responsive"/>
+<img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="/images/my_data_filtered.png" alt="My Data Configuration Step 6" class="img img-responsive"/>
