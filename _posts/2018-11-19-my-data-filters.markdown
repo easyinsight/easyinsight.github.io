@@ -1,5 +1,5 @@
 ---
-title: "My Data Filters
+title: "My Data Filters"
 author: "James Boe"
 ---
 
