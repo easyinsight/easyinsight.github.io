@@ -7,7 +7,7 @@ For many of our connection types, you can now enable real time reporting instead
 
 You can enable real time reporting for Basecamp 3, Teamwork, Freshdesk, Clickup, Quickbase, and Highrise. To enable real time reporting, click on 'Set Up Real Time Reports' in the Getting Started section of the data source:
 
-<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="/images/two_way_setup.png" alt="Real Time Refresh Setup" class="img img-responsive"/>
+<img style="max-width:250px;margin-top:30px;margin-bottom:30px" src="/images/two_way_setup.png" alt="Real Time Refresh Setup" class="img img-responsive"/>
 
 You'll be prompted to choose a short term caching interval. The lowest interval currently allowed is five minutes. When you load a report or dashboard, it will quickly refresh the data if it's been longer than the specified interval before displaying the report.
 
