@@ -7,7 +7,7 @@ Want to quickly update data in your Highrise, Hubspot, or Trello connection? You
 
 You can easily change tags on your Highrise contacts, update properties on your Hubspot deals, or update card names across multiple Trello boards, all directly from your Easy Insight reports.
 
-<img style="max-width:260px;margin-top:30px;margin-bottom:30px" src="/images/sample_two_way_tags.png" alt="Sample Two Way Tags" class="img img-responsive"/>
+<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="/images/sample_two_way_tags.png" alt="Sample Two Way Tags" class="img img-responsive"/>
 
 With this latest set of additional connections, we now support two way functionality for Basecamp, Highrise, Hubspot, Trello, Teamwork, Freshdesk, and Quickbase. For more information, see <a href="https://www.easy-insight.com/docs/two_way/two_way_connections.html">https://www.easy-insight.com/docs/two_way/two_way_connections.html</>.
 
