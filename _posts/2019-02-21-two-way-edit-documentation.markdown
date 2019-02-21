@@ -3,7 +3,7 @@ title: "Two Way Edit Documentation"
 author: "James Boe"
 ---
 
-We've made a significant number of updates to our two way edit documentation!!<!--more-->
+We've made a significant number of updates to our two way edit documentation!<!--more-->
 
 Want to take all the tasks assigned to Jim across four different projects and reassign them to Lisa? You can use <a href="https://www.easy-insight.com/docs/two_way/two_way_bulk_update.html">two way bulk updates</a> to make changes across multiple tasks, deals, or tickets at once.
 
