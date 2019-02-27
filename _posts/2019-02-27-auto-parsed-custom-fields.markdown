@@ -3,7 +3,7 @@ title: "Auto Parsed Custom Fields"
 author: "James Boe"
 ---
 
-Easy Insight can now automatically detect custom fields that can be parsed out of your data!!--more-->
+Easy Insight can now automatically detect custom fields that can be parsed out of your data!<!--more-->
 
 Often, you'll have information embedded into a project or task name that represents something meaningful for reporting. For example, you might have a project name of:
 
