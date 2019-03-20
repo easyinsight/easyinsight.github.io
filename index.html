@@ -5,20 +5,28 @@ layout: default
 
   <h1 class="page-heading">Easy Insight Posts</h1>
 
-  <ul class="post-list">
-    {% for post in site.posts %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <ul class="post-list">
+          {% for post in site.posts %}
 
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+          <li>
+            <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-        {{ post.excerpt }} <a href="{{ post.url | prepend: site.baseurl }}">more...</a>
-      </li>
-    {% endfor %}
-  </ul>
+            <h2>
+              <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+            </h2>
+            {{ post.excerpt }} <a href="{{ post.url | prepend: site.baseurl }}">more...</a>
+          </li>
+          {% endfor %}
+        </ul>
 
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+        <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+      </div>
+    </div>
+  </div>
+
+
 
 </div>
