@@ -7,7 +7,7 @@ We've added tree maps as a new report type, improved Trello configuration, added
 
 You can now render your reports as tree maps! Choose Tree Map from the report type selector. You'll need to specify two groupings and a measure:
 
-<img style="max-width:800px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/treemap.png" alt="Tree Map class="img img-responsive"/>
+<img style="max-width:800px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/treemap.png" alt="Tree Map" class="img img-responsive"/>
 
 Tree maps make it easy to see which particular combinations stand out in your data. For example, in this chart, you can easily see that Anna has the largest pipeline, with the highest concentration of deals in the Negotiation stage:
 
