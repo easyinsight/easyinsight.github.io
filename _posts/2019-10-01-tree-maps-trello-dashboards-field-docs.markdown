@@ -1,6 +1,7 @@
 ---
 title: "Tree Maps, Trello Card Completion, Dashboard Auto Refresh, and Field Documentation"
 author: "James Boe"
+image: "https://blog.easy-insight.com/images/treemap.png"
 ---
 
 We've added tree maps as a new report type, improved Trello configuration, added the ability to display your dashboards on a TV platform, and started adding field documentation for data sources.<!--more-->
