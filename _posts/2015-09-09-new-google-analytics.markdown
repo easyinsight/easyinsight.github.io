@@ -2,7 +2,6 @@
 title: "New Google Analytics Connection, Insightly, Smartsheet, Teamwork Tweaks, Chart Improvements"
 author: "James Boe"
 categories: analytics insightly smartsheet
-tags: analytics google
 ---
 We've created an entirely fresh version of the Google Analytics connection in view of the number of changes that have been made to the Analytics API over the years. 
 <!--more-->
