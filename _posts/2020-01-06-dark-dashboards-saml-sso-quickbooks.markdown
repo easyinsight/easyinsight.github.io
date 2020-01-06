@@ -8,7 +8,7 @@ We're starting the new year with dark dashboard backgrounds, SAML single sign on
 
 We've improved our support for dashboard with black or other dark color backgrounds. You can configure the background color of reports and the background color of the dashboard itself through Account Skin:
 
-<img style="max-width:300px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/dark_db_settings.png" alt="Dark Background Dashboard Setup" class="img img-responsive"/>
+<img style="max-width:250px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/dark_db_settings.png" alt="Dark Background Dashboard Setup" class="img img-responsive"/>
 
 Reports will automatically change their other colors to provide the appropriate contrast based on the background, enabling you to create dashboards like the following:
 
