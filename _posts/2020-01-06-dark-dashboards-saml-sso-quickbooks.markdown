@@ -14,7 +14,7 @@ Reports will automatically change their other colors to provide the appropriate 
 
 <img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/dark_db.png" alt="Dark Background Dashboard" class="img img-responsive"/>
 
-Enterprise accounts can now enable SAML single sign on to simplify user management. If you're using <a href="https://www.onelogin.com/">OneLogin</a>, <a href="https://www.okta.com/">Okta</a>, <a href="https://azure.microsoft.com/Services/ActiveDirectory">Active Directory</a>, or anything else supporting SAML, you can set up Easy Insight through the SSO page in Account Settings. Once configured, users will have an 'SSO Login' option on your custom subdomain login:
+Enterprise accounts can now enable SAML single sign on to simplify user management. If you're using <a href="https://www.onelogin.com/">OneLogin</a>, <a href="https://www.okta.com/">Okta</a>, <a href="https://azure.microsoft.com/en-us/services/active-directory/">Active Directory</a>, or anything else supporting SAML, you can set up Easy Insight through the SSO page in Account Settings. Once configured, users will have an 'SSO Login' option on your custom subdomain login:
 
 <img style="max-width:600px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/sso_login.png" alt="SSO Login" class="img img-responsive"/>
  
