@@ -10,7 +10,7 @@ We've improved our support for dashboard with black or other dark color backgrou
 
 <img style="max-width:250px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/dark_db_settings.png" alt="Dark Background Dashboard Setup" class="img img-responsive"/>
 
-Reports will automatically change their other colors to provide the appropriate contrast based on the background, enabling you to create dashboards like the following:
+Reports will automatically change their other colors to provide the appropriate contrast based on the background, enabling you to create dashboards like these:
 
 <img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/dark_db.png" alt="Dark Background Dashboard" class="img img-responsive"/>
 
