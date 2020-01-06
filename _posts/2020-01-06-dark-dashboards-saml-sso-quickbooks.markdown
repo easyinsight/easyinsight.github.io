@@ -1,7 +1,7 @@
 ---
 title: "Dark Dashboard Backgrounds, SAML SSO, QuickBooks Online"
 author: "James Boe"
-image: "https://blog.easy-insight.com/images/db_editor_drag.png"
+image: "https://blog.easy-insight.com/images/dark_db.png"
 ---
 
 We're starting the new year with dark dashboard backgrounds, SAML single sign on support, and a connection to QuickBooks Online!<!--more-->
