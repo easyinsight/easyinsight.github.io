@@ -4,7 +4,7 @@ author: "James Boe"
 image: "https://blog.easy-insight.com/images/db_editor_drag.png"
 ---
 
-We're starting the new year with dark dashboard backgrounds, SAML single sign on support, and a connection to QuickBooks Online!<!--more--><!--more-->
+We're starting the new year with dark dashboard backgrounds, SAML single sign on support, and a connection to QuickBooks Online!<!--more-->
 
 We've improved our support for dashboard with black or other dark color backgrounds. You can configure the background color of reports and the background color of the dashboard itself through Account Skin:
 
