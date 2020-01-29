@@ -8,7 +8,7 @@ For this week, we have an overhauled Gantt report!<!--more-->
 
 We've made a wide range of enhancements to our Gantt charts to meet with various customer requests.
 
-<img style="max-width:800px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/gantt_help.png" alt="Gantt Example" class="img img-responsive"/> 
+<img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/gantt_help.png" alt="Gantt Example" class="img img-responsive"/> 
 
 When creating a Gantt chart, you simply add the different fields such as Project Name, Task List Name, and Task Name to the report instead of explicitly creating a hierarchy. 
 
