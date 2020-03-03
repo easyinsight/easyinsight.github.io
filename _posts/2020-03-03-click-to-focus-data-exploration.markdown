@@ -1,7 +1,7 @@
 ---
 title: "Click to Focus, Data Exploration, Date Joins, and more!"
 author: "James Boe"
-image: "https://blog.easy-insight.com/images/focus_filter_1.png"
+image: "https://www.easy-insight.com/images/focus_filter_1.png"
 ---
 
 We've got a mix of improvements to kick March off, with dashboard editor improvements, click to focus in dashboards, viewer data exploration, and easier date joins.<!--more-->
