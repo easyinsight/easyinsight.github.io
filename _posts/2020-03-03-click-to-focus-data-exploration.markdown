@@ -20,4 +20,4 @@ Need to create a report comparing tickets created versus tickets solved? Date co
 
 <img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/help/db_filters2.png" alt="Dashboard Filter Relationships" class="img img-responsive"/>
 
-The dashboard editor now displays a strikethrough on filter labels to indicate that a dashboard filter is taking precedence over a report filter. Read more about this at <a href="https://www.easy-insight.dom/docs/dashboards/dashboard_report_filters.html">https://www.easy-insight.dom/docs/dashboards/dashboard_report_filters.html</a>.
+The dashboard editor now displays a strikethrough on filter labels to indicate that a dashboard filter is taking precedence over a report filter. Read more about this at <a href="https://www.easy-insight.com/docs/dashboards/dashboard_report_filters.html">https://www.easy-insight.com/docs/dashboards/dashboard_report_filters.html</a>.
