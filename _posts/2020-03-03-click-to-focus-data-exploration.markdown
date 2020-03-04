@@ -8,7 +8,7 @@ We've got a mix of improvements to kick March off, with dashboard editor improve
 
 <img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/help/focus_filter_1.png" alt="Click to Focus" class="img img-responsive"/> 
 
-Click to focus enables your users to click on a chart bar, table cell, or other report element and adjust the rest of the dashboard to dynamically filter on that value. Learn how you can set up focus filtering at <a href="https://www.easy-insight.dom/docs/dashboards/dashboard_focus_filters.html">https://www.easy-insight.dom/docs/dashboards/dashboard_focus_filters.html</a>.
+Click to focus enables your users to click on a chart bar, table cell, or other report element and adjust the rest of the dashboard to dynamically filter on that value. Learn how you can set up focus filtering at <a href="https://www.easy-insight.com/docs/dashboards/dashboard_focus_filters.html">https://www.easy-insight.com/docs/dashboards/dashboard_focus_filters.html</a>.
 
 <img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/help/data_explore_1.png" alt="Data Exploration" class="img img-responsive"/> 
 
