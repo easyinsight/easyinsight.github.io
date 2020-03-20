@@ -6,7 +6,7 @@ image: "https://www.easy-insight.com/images/zoom1.png"
 
 We've added a new Zoom connection to provide reports and dashboards on meetings and webinars.<!--more-->
 
-<img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/images/zoom1.png" alt="Zoom Dashboard" class="img img-responsive"/> 
+<img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/zoom1.png" alt="Zoom Dashboard" class="img img-responsive"/> 
 
 The new Zoom connection pulls over your lists of meetings and webinars, and the participants who attended. The prebuilt dashboard provides you with historical trend charts, lists, and calendars. Drillthroughs enable you to click into specific list of meetings and webinars, and from those lists, drill further into the list of participants.
 
