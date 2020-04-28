@@ -19,4 +19,4 @@ We have nine new quick videos to help walk you through different aspects of Easy
 <li>Setting up a business calendar to calculate business day and business hour durations.</li>
 </ul>
 
-You can check out all of these screen at <a href="https://www.easy-insight.com/screencasts.html">https://www.easy-insight.com/screencasts.html</a>.
+You can check out all of these screencasts at <a href="https://www.easy-insight.com/screencasts.html">https://www.easy-insight.com/screencasts.html</a>.
