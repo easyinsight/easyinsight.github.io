@@ -3,7 +3,7 @@ title: "Concatenate Values and Gantt Enhancements"
 author: "James Boe"
 ---
 
-Easily combine multiple values into a single cell, color your Gantt charts, apply new styling options, and enjoy better performance<!--more-->
+Easily combine multiple values into a single cell and color your Gantt charts.<!--more-->
 
 If you have multiple assignees for a given task, multiple tags for an opportunity, or other similar scenarios, the default behavior in Easy Insight is to create a separate row for each assignee or tag. For example, the following report shows the same todo with two assignees:
 
