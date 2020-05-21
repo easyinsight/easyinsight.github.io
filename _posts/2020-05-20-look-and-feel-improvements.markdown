@@ -1,6 +1,7 @@
 ---
 title: "Dark Modes and Other Look and Feel Improvements"
 author: "James Boe"
+image: "https://blog.easy-insight.com/images/skin_selection.jpg"
 ---
 
 Create dashboards with dark backgrounds, import predefined account skins into your account, and more!<!--more-->
