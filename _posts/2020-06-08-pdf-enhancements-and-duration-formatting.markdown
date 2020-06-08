@@ -15,7 +15,7 @@ We'll swap everyone over to this new rendering style in the near future, but wan
 
 We've also added new options for formatting duration values. When you configure a measure, you'll now see that you have options under Formatting including Milliseconds, Seconds, Minutes, Hours, and Days:
 
-<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/formatting_config.png" alt="Formatting Configuration" class="img img-responsive"/>
+<img style="max-width:500px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/formatting_config.png" alt="Formatting Configuration" class="img img-responsive"/>
 
 Your selection needs to match up with whatever unit of the measure the field represents--if it's a calculation of:
 
@@ -27,7 +27,7 @@ minutesbetween([Date Created], [Solved At])
 
 You'd want to use Minutes as your formatting. With the formatting configured, the next step is to define the formatting output:
 
-<img style="max-width:400px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/formatting_duration.png" alt="Formatting Configuration" class="img img-responsive"/>
+<img style="max-width:500px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/formatting_duration.png" alt="Formatting Configuration" class="img img-responsive"/>
 
 You can use the following format options:
 
