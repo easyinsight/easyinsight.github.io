@@ -58,16 +58,18 @@
         </div>
     </div>
 </div>
+{% if page.title %}{{}}{% else %}
 <div class="container-fluid screenshotDiv">
     <div class="row">
         <div class="col-sm-12">
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
-                        <h1 class="productHeader defaultH1">{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</h1>
+                        <h1 class="productHeader defaultH1">What's New with Easy Insight</h1>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+}{% endif %}
