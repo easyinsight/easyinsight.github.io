@@ -23,4 +23,4 @@ The screen will walk you through any fields found for the various possible types
 
 <img style="max-width:700px" class="img img-responsive" src="https://www.easy-insight.com/images/help/parse_custom_field.png" alt="Custom Field Setup">
  
-Once done, your new fields will be available like any other for selection in the report editor. For more information, see <a href="https://www.easy-insight.com/docs/data_sources/parsed_custom_fields.html">https://www.easy-insight.com/docs/data_sources/parsed_custom_fields.html</a>.
+Once done, your new fields will be available like any other for selection in the report editor. For more information, see <a href="https://www.easy-insight.com/docs/data_sources/parsed-custom-fields.html">https://www.easy-insight.com/docs/data_sources/parsed-custom-fields.html</a>.

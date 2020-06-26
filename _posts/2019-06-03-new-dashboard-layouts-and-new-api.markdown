@@ -15,7 +15,7 @@ Filters can either be displayed nested into the header as shown in the image abo
 
 <img style="max-width:1000px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/help/dashboard_side_menu_filters_down.png" alt="Dashboard Layout" class="img img-responsive"/>
  
-You can customize these options through your Account Skin page, found under Account Settings. For more information, please see our documentation around dashboard layout at <a href="https://www.easy-insight.com/docs/dashboards/dashboard_layout.html">https://www.easy-insight.com/docs/dashboards/dashboard_layout.html</a>. If you have any feedback on this layout or further things you'd like to see, please let us know!
+You can customize these options through your Account Skin page, found under Account Settings. For more information, please see our documentation around dashboard layout at <a href="https://www.easy-insight.com/docs/dashboards/dashboard-layout.html">https://www.easy-insight.com/docs/dashboards/dashboard-layout.html</a>. If you have any feedback on this layout or further things you'd like to see, please let us know!
 
 We've also made some updates to our API for pushing and pulling data. We'll continue to support our XML API, but we now have a new JSON API as well. You can use this API to push data into data sources, pull back data sources, reports, and users, and pull data from reports.
 

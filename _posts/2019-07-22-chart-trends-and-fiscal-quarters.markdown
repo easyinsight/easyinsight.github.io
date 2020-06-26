@@ -9,7 +9,7 @@ Chart trend comparisons calculate the historical average of the chart measure an
 
 <img style="max-width:900px;margin-top:30px;margin-bottom:30px" src="https://www.easy-insight.com/images/help/chart_trend.png" alt="Trend Chart" class="img img-responsive"/>
 
-For more information about how to set up these comparisons, please see our documentation at <a href="https://www.easy-insight.com/docs/reports/chart_trend_comparison.html">https://www.easy-insight.com/docs/reports/chart_trend_comparison.html</a>.
+For more information about how to set up these comparisons, please see our documentation at <a href="https://www.easy-insight.com/docs/reports/chart-trend-comparison.html">https://www.easy-insight.com/docs/reports/chart-trend-comparison.html</a>.
 
 You can now add merge two dashboards together. You can perform this action through the dashboard editor. Click on Quick Actions, then Merge Another Dashboard. Choose the dashboard you want to merge in and click Merge:
 
