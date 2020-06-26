@@ -1,8 +1,0 @@
----
-title: "New Google Analytics Connection, Insightly, Smartsheet, Teamwork Tweaks, Chart Improvements"
-author: "James Boe"
-categories: analytics insightly smartsheet
----
-We've created an entirely fresh version of the Google Analytics connection in view of the number of changes that have been made to the Analytics API over the years. 
-<!--more-->
-This new version of the connection should give you access to the full range of Google Analytics fields. We've also gradually extended out the Insighly, Smartsheet, and Teamwork connections. First, the Insightly connection now includes Opportunity State History (when an opportunity changed a state and a reason for the change if logged), Emails, and Contact/Organization tags. The Smartsheet connection will now include a Display Name field for users so that you can include the full user name in addition to the email address. The Teamwork connection will now properly join the data on hours back to projects in those scenarios where the time wasn't logged against a specific task. On the charting side, we've added the ability to label points on scatter charts, as well as fixing some of the mouseovers on scatter charts. You can also now explicitly configure margins and axis titles on charts in the new interface. If you set a multi measure bar chart to variable height, it should do a better job of assigning heights to the bars. Finally, you can now configure multi measure area and pie charts in the new interface.

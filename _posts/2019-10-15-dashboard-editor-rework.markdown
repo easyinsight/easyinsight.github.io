@@ -1,5 +1,5 @@
 ---
-title: "Dashboard Editor Improvements"
+title: "Dashboard Editor Rework"
 author: "James Boe"
 image: "https://blog.easy-insight.com/images/db_editor_drag.png"
 ---
