@@ -9,7 +9,7 @@ Have one report that you want to send out with a different date range, set of as
 
 When setting up the scheduled email, you can click on Customize Filters as part of the Report and Format step:
 
-<img style="max-width:500px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/email_customize_filters.png" alt="Customize Email Formatting" class="img img-responsive"/>
+<img style="max-width:800px;margin-top:30px;margin-bottom:30px" src="https://blog.easy-insight.com/images/email_customize_filters.png" alt="Customize Email Formatting" class="img img-responsive"/>
 
 On selecting Customize Filters, the various report or dashboard filters will be loaded for you to customize. If you don't customize a particular filter, it'll remain with the report's default settings.
 
