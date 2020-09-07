@@ -1,5 +1,5 @@
 ---
-title: "New combine data sources"
+title: "Improvements to combining data sources"
 author: "James Boe"
 ---
 
