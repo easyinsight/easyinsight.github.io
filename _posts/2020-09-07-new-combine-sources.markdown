@@ -19,5 +19,5 @@ Have mismatched data that you need to join together? You can define join tables 
 
 For more information on these changes, see our updated documentation at <a href="https://www.easy-insight.com/docs/data_sources/combining-data-sources.html">https://www.easy-insight.com/docs/data_sources/combining-data-sources.html</a> and check out the new video below covering combining data sources.
 
-<iframe width="800" height="517" src="//www.youtube.com/embed/cmhcik9GRjE?modestbranding=1&rel=0&theme=light"
+<iframe width="800" height="517" src="//www.youtube.com/embed/svnw3jkHUU0?modestbranding=1&rel=0&theme=light"
                                 frameborder="0" allowfullscreen sandbox="allow-same-origin allow-scripts allow-presentation"></iframe> 
