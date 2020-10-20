@@ -9,7 +9,7 @@ For this week, we've got improvements to diagrams, new functionality for date ra
 
 You can now auto generate diagram reports instead of having to manually set up each step, helping you to easily create flow diagrams like the following:
 
-<img class="img-fit-responsive" src="https://www.easy-insight.com/images/help/diagram_styled.png" alt="Diagram Reports Sample">
+<img style="max-width:800px" class="img-fit-responsive" src="https://www.easy-insight.com/images/help/diagram_base.png" alt="Diagram Reports Sample">
 
 For more information on creating diagrams, see our <a href="https://www.easy-insight.com/docs/report_types/diagram.html">diagram documentation</a>. 
 
@@ -17,7 +17,7 @@ For more information on creating diagrams, see our <a href="https://www.easy-ins
 
 Want to quickly change an absolute date range filter to a certain time range? You can now click on the filter label to quickly change your date filter to one of the standard rolling date ranges:
 
-<img class="img-fit-responsive" src="https://blog.easy-insight.com/images/date_filter_options.png" alt="Date Range Filter Options"> 
+<img style="max-width:300px class="img-fit-responsive" src="https://blog.easy-insight.com/images/date_filter_options.png" alt="Date Range Filter Options"> 
 
 <h2 class="productHeader">Table Cell Styling</h2>
 
