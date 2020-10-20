@@ -17,7 +17,7 @@ For more information on creating diagrams, see our <a href="https://www.easy-ins
 
 Want to quickly change an absolute date range filter to a certain time range? You can now click on the filter label to quickly change your date filter to one of the standard rolling date ranges:
 
-<img style="max-width:300px" class="img-fit-responsive" src="https://blog.easy-insight.com/images/date_filter_options.png" alt="Date Range Filter Options"> 
+<img style="max-width:450px" class="img-fit-responsive" src="https://blog.easy-insight.com/images/date_filter_options.png" alt="Date Range Filter Options"> 
 
 <h2 class="productHeader">Table Cell Styling</h2>
 
