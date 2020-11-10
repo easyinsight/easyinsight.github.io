@@ -14,9 +14,15 @@ We've reorganized the <a href="https://www.easy-insight.com/screencasts.html">sc
 We've also added links to the various webinars recorded over the last few months. These include:
 
 <a href="https://www.easy-insight.com/building-reports-webinar.html">Building Reports</a>
+
 <a href="https://www.easy-insight.com/building-dashboards-webinar.html">Building Dashboards</a>
+
 <a href="https://www.easy-insight.com/combining-data-webinar.html">Combining Data Sources</a>
+
 <a href="https://www.easy-insight.com/scripting-webinar.html">Scripting</a>
+
 <a href="https://www.easy-insight.com/zoom-reports-webinar.html">Zoom</a>
+
 <a href="https://www.easy-insight.com/basecamp-reports-webinar.html">Basecamp</a>
+
 <a href="https://www.easy-insight.com/teamwork-reports-webinar.html">Teamwork</a>
