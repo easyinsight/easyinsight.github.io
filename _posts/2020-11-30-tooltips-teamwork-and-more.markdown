@@ -9,7 +9,7 @@ You can now set up tooltips to help explain what a particular field in a report 
 
 Do your users need more clarity around what a particular field is showing? You can now set up tooltips on fields to help provide inline documentation:
 
-<img style="max-width:600px" class="img-fit-responsive" src="https://blog.easy-insight.com/images/tooltip.png" alt="Tooltip on Report">
+<img style="max-width:1000px" class="img-fit-responsive" src="https://blog.easy-insight.com/images/tooltip.png" alt="Tooltip on Report">
 
 You can configure the tooltip for a field through editing the field and populating text into the Tooltip property, found near the bottom of the field editor. Tooltips work on the following report types:
 
