@@ -13,7 +13,7 @@ First, we have a new connection to Shopify, including a prebuilt dashboard to he
 
 <h2 class="productHeader">QuickBooks Online Prebuilt Dashboard</h2>
 
-Next, we have a prebuilt dashboard for QuickBooks Online, adding a variety of reports to help you track what's happening in your accounting system. This prebuilt builds on the other recent changes we've made to the QuickBooks Online connection to pull over other data such as a unified set of transactions and line items that wasn't there before.
+Next, we have a prebuilt dashboard for <a href="https://quickbooks.intuit.com/ca/accounting-software/" alt="Acounting Software">QuickBooks Online</a>, adding a variety of reports to help you track what's happening in your accounting system. This prebuilt builds on the other recent changes we've made to the QuickBooks Online connection to pull over other data such as a unified set of transactions and line items that wasn't there before.
 
 <img style="max-width:1000px" class="img-fit-responsive" src="https://www.easy-insight.com/images/qb_overview.jpg" alt="Shopify Overview">
 
