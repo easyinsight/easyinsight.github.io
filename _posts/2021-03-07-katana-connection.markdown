@@ -1,6 +1,7 @@
 ---
 title: "New Connection to Katana"
 author: "James Boe"
+image: "https://www.easy-insight.com/images/orderflow.jpg"
 ---
 
 We have a new connection to Katana, improvements to federated data sources, and performance enhancements for this week!<!--more-->
