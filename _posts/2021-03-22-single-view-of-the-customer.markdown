@@ -4,7 +4,7 @@ author: "James Boe"
 image: "https://blog.easy-insight.com/images/brief_chart_db.jpg"
 ---
 
-We have a new connection to Katana, improvements to federated data sources, and performance enhancements for this week!<!--more-->
+We have a tutorial around creating a single view of the customer or project and new dashboard options!<!--more-->
 
 <h2 class="productHeader">Dashboard Drillthroughs</h2>
 
