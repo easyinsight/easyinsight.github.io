@@ -1,7 +1,7 @@
 ---
-title: "Improvements for April"
+title: "Katana Changes, Dashboard Styles, and Sankey Diagrams"
 author: "James Boe"
-image: "https://blog.easy-insight.com/images/brief_chart_db.jpg"
+image: "https://blog.easy-insight.com/images/sankey_example.jpg"
 ---
 
 We have a variety of smaller improvements to kick off April.<!--more-->
