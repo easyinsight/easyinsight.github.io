@@ -28,4 +28,4 @@ You can now use Sankey diagrams in Easy Insight! Sankey diagrams help you to see
 
 <h2 class="productHeader">Partner Portal</h2>
 
-We've added a Partner Portal to help partners as they use Easy Insight. Interested in partnering up with Easy Insight? See https://www.easy-insight.com/become-a-partner.html for more information.
+We've added a Partner Portal to help partners as they use Easy Insight. Interested in partnering up with Easy Insight? See <a href="https://www.easy-insight.com/become-a-partner.html">https://www.easy-insight.com/become-a-partner.html</a> for more information.
