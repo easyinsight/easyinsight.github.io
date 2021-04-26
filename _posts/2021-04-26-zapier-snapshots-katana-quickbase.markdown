@@ -10,7 +10,7 @@ You can now connect Zapier to Easy Insight, track historical snapshots of your d
 
 We've added a connection to Zapier! Have data that you want to get into Easy Insight that our existing connections don't cover? You can use Zapier to add or update data within a custom Easy Insight data source. This connection is currently in beta availability, so if you want to give it a try, let us know and we'll provide you with access. For more information, see <a href="https://www.easy-insight.com/docs/data_sources/zapier.html">https://www.easy-insight.com/docs/data_sources/zapier.html</a>.
 
-<h2 class="productHeader">Snapshot Data Sources/h2>
+<h2 class="productHeader">Snapshot Data Sources</h2>
 
 You can set now set up snapshot data sources to record the contents of a given report on a daily or monthly basis, enabling you to report on that data on a historical basis. For example, you could record monthly inventory levels to identify mismatches between production and calculated inventory. For more information, see <a href="https://www.easy-insight.com/docs/data_sources/snapshots.html">https://www.easy-insight.com/docs/data_sources/snapshots.html</a>.   
 
