@@ -4,7 +4,7 @@ author: "James Boe"
 image: "https://www.easy-insight.com/images/shipstation_overview.jpg"
 ---
 
-You can now connect Easy Insight to ShipStation, NiceReply, QuickBooks Time, and Freshworks CRM! We've also added in more data from Shopify and DEAR, added real time refreshes for LOCATE sales orders, and made fixes to the Zendesk connection. 
+You can now connect Easy Insight to ShipStation, NiceReply, QuickBooks Time, and Freshworks CRM! We've also added in more data from Shopify and DEAR, added real time refreshes for LOCATE sales orders, and made fixes to the Zendesk connection.<!--more--> 
 
 <h2 class="productHeader">ShipStation</h2>
 
