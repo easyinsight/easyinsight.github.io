@@ -16,7 +16,7 @@ We've tried to simplify things down so that it's easier to quickly find what you
 
 <h2 class="productHeader">Dashboard Display on Small Screens</h2>
 
-If you're using the Side Menu style of dashboard layout, you should find that dashboards now better take advantage of the availabile space when you're using a phone, tablet, or other small screen. The navigation is now moved to the top bar so that you have the rest of the screen for displaying your reports:
+If you're using the Side Menu style of dashboard layout, you should find that dashboards now better take advantage of the available space when you're using a phone, tablet, or other small screen. The navigation is now moved to the top bar so that you have the rest of the screen for displaying your reports:
 
 <img style="max-width:500px" class="img-fit-responsive" src="https://blog.easy-insight.com/images/mobile_db_changes.jpg" alt="Mobile Dashboard Changes">
 
